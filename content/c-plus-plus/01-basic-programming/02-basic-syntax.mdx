@@ -1,0 +1,107 @@
+---
+title: "Basic Syntax"
+description: "กฎไวยากรณ์พื้นฐาน โครงสร้างประโยค และการเขียน Comment ใน C++"
+date: "2025-01-01"
+chapter: "01-basic-programming"
+chapterTitle: "Chapter 1: Basic Programming C++"
+---
+
+# Basic Syntax
+
+การเขียนโปรแกรมก็เหมือนกับการเขียนภาษาอังกฤษ มีกฎไวยากรณ์ (Syntax) ที่ต้องปฏิบัติตามอย่างเคร่งครัด คอมพิวเตอร์ถึงจะเข้าใจคำสั่งของเราครับ
+
+## 1. Statements และ Semicolon
+
+ใน C++ ทุกคำสั่งการทำงาน (Statement) จะต้องจบด้วยเครื่องหมาย Semicolon (`;`) เสมอ นี่คือกฎเหล็ก!
+
+```cpp
+int x = 5;      // ถูกต้อง
+int y = 10      // Error! ขาด ;
+```
+
+## 2. Comments
+
+Comment คือข้อความที่เขียนไว้ในโค้ดเพื่อให้มนุษย์อ่าน แต่ Compiler จะมองข้ามไป ไม่เอาไปประมวลผล มี 2 แบบคือ:
+
+### Single-line Comment
+ใช้เครื่องหมาย `//` ข้อมูลหลังเครื่องหมายนี้จนจบ **บรรทัด** จะเป็น Comment
+
+```cpp
+// นี่คือคอมเมนต์แบบบรรทัดเดียว
+int age = 20; // กำหนดค่าอายุเป็น 20
+```
+
+### Multi-line Comment
+ใช้เครื่องหมาย `/*` เปิด และ `*/` ปิด ใช้เขียนคำอธิบายยาวๆ หลายบรรทัด
+
+```cpp
+/*
+  โปรแกรมคำนวณพื้นที่วงกลม
+  สูตร: Pi * r * r
+  Created by: Gemini
+*/
+double radius = 5.0;
+```
+
+## 3. Whitespace
+
+C++ ไม่ซีเรียสเรื่องช่องว่าง (Space), Tab, หรือการขึ้นบรรทัดใหม่ (Newline) ตราบใดที่จบประโยคด้วย `;` คุณจะเขียนแบบไหนก็ได้ แต่ควรเขียนให้ **อ่านง่าย** (Readable)
+
+```cpp
+// แบบปกติ (แนะนำ)
+int a = 10;
+int b = 20;
+
+// แบบบรรทัดเดียว (ทำงานได้ แต่อ่านยาก)
+int c=30; int d=40; 
+```
+
+## 4. Blocks (Scope)
+
+ปีกกา `{ }` ใช้กำหนดขอบเขต (Block) ของโค้ด เช่น ในฟังก์ชัน หรือในเงื่อนไข if/else ตัวแปรที่ประกาศใน Block หนึ่ง จะใช้งานได้แค่ใน Block นั้น (Local Scope)
+
+```cpp
+int main() {
+    {
+        int secret = 999;
+        std::cout << secret; // ใช้งานได้
+    }
+    // std::cout << secret; // Error! secret มองไม่เห็นตรงนี้
+    return 0;
+}
+```
+
+## 5. Identifiers (การตั้งชื่อ)
+
+การตั้งชื่อตัวแปร ฟังก์ชัน หรือ Class ต้องทำตามกฎดังนี้:
+1.  ประกอบด้วยตัวอักษร (A-Z, a-z), ตัวเลข (0-9), และ Underscore `_`
+2.  **ห้าม** ขึ้นต้นด้วยตัวเลข
+3.  **ห้าม** ใช้ Keyword สงวนของภาษา (เช่น `int`, `return`, `class`, `if`)
+4.  Case-sensitive (ตัวพิมพ์เล็ก-ใหญ่ ถือเป็นคนละตัวกัน เช่น `myVar` กับ `MyVar`)
+
+**ตัวอย่าง:**
+*   ✅ `myVariable`, `score_player1`, `_sysConfig`
+*   ❌ `9lives` (ขึ้นต้นด้วยเลข), `int` (keyword), `my-var` (ห้ามใช้ขีดกลาง)
+
+## 6. Input / Output พื้นฐาน
+
+เราใช้ `std::cin` เพื่อรับค่า และ `std::cout` เพื่อแสดงผล (ต้อง `#include <iostream>`)
+
+```cpp title="io_example.cpp"
+#include <iostream>
+using namespace std; // เพื่อไม่ต้องพิมพ์ std:: นำหน้าบ่อยๆ
+
+int main() {
+    int age;
+    
+    cout << "Enter your age: ";
+    cin >> age; // รอรับค่าจาก Keyboard เก็บใส่ตัวแปร age
+    
+    cout << "You are " << age << " years old." << endl;
+    return 0;
+}
+```
+
+:::tip
+การใช้ `using namespace std;` สะดวกสำหรับโปรแกรมเล็กๆ แต่ในโปรเจกต์ใหญ่ๆ อาจทำให้ชื่อชนกัน (Name Collision) ได้ ดังนั้นการพิมพ์ `std::` นำหน้าถือเป็น Good Practice ครับ
+:::
