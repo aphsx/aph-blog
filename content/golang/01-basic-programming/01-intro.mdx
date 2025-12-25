@@ -1,0 +1,82 @@
+---
+title: "Introduction to Go"
+description: "ทำความรู้จักกับภาษา Go (Golang) จุดเด่น และการติดตั้งเครื่องมือ"
+date: "2025-01-01"
+chapter: "01-basic-programming"
+chapterTitle: "Chapter 1: Basic Programming Go"
+---
+
+# Introduction to Go (Golang)
+
+ยินดีต้อนรับสู่โลกของ **Go**! ภาษาโปรแกรมที่มาแรงที่สุดในวงการ Backend และ Cloud Native ในขณะนี้
+
+## 1. Go คืออะไร?
+
+Go (หรือ Golang) เป็นภาษาโปรแกรมแบบ Open Source ที่ถูกสร้างขึ้นโดย Google (Robert Griesemer, Rob Pike, และ Ken Thompson) และเปิดตัวในปี 2009
+
+### ปรัชญาของ Go
+Go ถูกออกแบบมาเพื่อแก้ปัญหาความซับซ้อนของ Software ขนาดใหญ่ที่ Google โดยเน้นที่:
+*   **Simplicity:** ไวยากรณ์เรียบง่าย อ่านง่าย (คล้าย C แต่ตัดส่วนที่ยุ่งยากออก)
+*   **Performance:** คอมไพล์เป็น Machine Code ทำงานได้เร็วใกล้เคียง C/C++
+*   **Concurrency:** รองรับการทำงานพร้อมกันหลายๆ งานได้ดีเยี่ยม (Goroutines)
+*   **Built-in Tools:** มีเครื่องมือจัดรูปแบบโค้ด (fmt), ทดสอบ (test), และจัดการ dependency (mod) มาให้ในตัว
+
+## 2. ทำไมต้องเรียน Go?
+
+1.  **High Salary:** เป็นหนึ่งในภาษาที่ตลาดต้องการตัวสูงมาก โดยเฉพาะสาย Backend Developer
+2.  **Cloud Native:** เครื่องมือดังๆ ในโลก Cloud เขียนด้วย Go เช่น Kubernetes, Docker, Terraform
+3.  **Fast Compile:** คอมไพล์ไวมาก ทำให้ Feedback loop ในการพัฒนาสั้นลง
+
+## 3. การติดตั้ง (Setup)
+
+1.  ไปที่ [go.dev/dl](https://go.dev/dl/) และดาวน์โหลดตัวติดตั้งตาม OS ของคุณ
+2.  ติดตั้งแบบ Next > Next > Finish
+3.  เปิด Terminal / Command Prompt แล้วเช็คเวอร์ชัน:
+    ```bash
+    go version
+    ```
+
+### แนะนำ Editor
+*   **Visual Studio Code (VS Code):** แนะนำที่สุด! ให้ลง Extension "Go" (โดย Go Team at Google)
+
+## 4. Hello World
+
+ไฟล์ Source code ของ Go จะใช้นามสกุล `.go`
+
+สร้างไฟล์ `main.go`:
+
+```go showLineNumbers title="main.go"
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, Golang!")
+}
+```
+
+### อธิบายโครงสร้าง
+1.  `package main`: บรรทัดแรกต้องระบุชื่อ package เสมอ ไฟล์ที่จะรันได้ (Executable) ต้องชื่อ `package main`
+2.  `import "fmt"`: นำเข้า package `fmt` (Format) สำหรับจัดการ Input/Output
+3.  `func main() { ... }`: ฟังก์ชันหลักที่เป็นจุดเริ่มต้นการทำงานของโปรแกรม
+
+## 5. การ Run โปรแกรม
+
+เปิด Terminal ในโฟลเดอร์เดียวกับไฟล์ แล้วพิมพ์:
+
+```bash
+go run main.go
+```
+ผลลัพธ์:
+```
+Hello, Golang!
+```
+
+หรือถ้าต้องการ Compile เป็นไฟล์ .exe (Windows) หรือ Binary (Mac/Linux):
+```bash
+go build main.go
+```
+จะได้ไฟล์ `main.exe` มา รันได้เลยโดยไม่ต้องมี Go ติดตั้งที่เครื่องปลายทาง
+
+---
+ในบทต่อไป เราจะไปดูเรื่องตัวแปรและชนิดข้อมูล ซึ่ง Go มีความเข้มงวดและปลอดภัยเรื่อง Type มากๆ ครับ
