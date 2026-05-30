@@ -52,12 +52,17 @@ export const NAV: NavCategory[] = [
     ],
   },
   {
+    label: "Technical fundamentals",
+    items: [{ slug: "fundamentals", title: "พื้นฐานที่ต้องแม่น" }],
+  },
+  {
     label: "Coding interview preparation",
     items: [
       { slug: "interview-formats", title: "Coding Interview คืออะไร" },
       { slug: "picking-language", title: "เลือกภาษาโปรแกรม" },
       { slug: "study-plan", title: "แผนฝึก (Study Plan)" },
       { slug: "best-practices", title: "เทคนิค & Cheatsheet" },
+      { slug: "practical-interview", title: "สัมภาษณ์เชิงปฏิบัติ (Take-home)" },
     ],
   },
   {
@@ -95,6 +100,7 @@ export const CODING_SLUGS = [
   "picking-language",
   "study-plan",
   "best-practices",
+  "practical-interview",
 ] as const;
 
 /** ลำดับหน้าแบบ flat สำหรับ prev/next */
