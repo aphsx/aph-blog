@@ -1,8 +1,12 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import Shell from "@/components/Shell";
 import Article from "@/components/Article";
+import DocBreadcrumbs from "@/components/DocBreadcrumbs";
+import { GitHubStar, Shoutout } from "@/components/DocContentHeader";
+import DocPaginator from "@/components/DocPaginator";
+import { TocMobile } from "@/components/Toc";
 import { ORDER, extractHeadings } from "@/lib/content";
+import { getCategoryForSlug, getCategoryHref } from "@/lib/nav-utils";
 import { PAGES } from "@/lib/pages";
 
 export function generateStaticParams() {
@@ -32,39 +36,43 @@ export default async function GuidePage({
   const prev = idx > 0 ? PAGES[ORDER[idx - 1]] : null;
   const next = idx < ORDER.length - 1 ? PAGES[ORDER[idx + 1]] : null;
   const toc = extractHeadings(page.blocks);
+  const category = getCategoryForSlug(page.slug);
 
   return (
     <Shell toc={toc}>
-      <article>
-        <h1 className="mb-4 text-[1.5em] leading-tight tracking-tight md:text-[2.25em]">
-          {page.title}
-        </h1>
-        <Article blocks={page.blocks} />
-        <nav className="mt-12 flex gap-4 border-t border-border pt-6">
-          {prev ? (
-            <Link
-              href={`/guide/${prev.slug}`}
-              className="flex flex-1 flex-col gap-1 rounded-md border border-border p-3 no-underline transition-colors hover:border-primary hover:no-underline"
-            >
-              <span className="text-xs text-muted">← Previous</span>
-              <span className="font-semibold text-primary">{prev.title}</span>
-            </Link>
-          ) : (
-            <span className="flex-1" />
+      <div className="doc-item-container">
+        <article>
+          {category && (
+            <DocBreadcrumbs
+              categoryLabel={category.label}
+              categoryHref={getCategoryHref(category)}
+              pageTitle={page.title}
+            />
           )}
-          {next ? (
-            <Link
-              href={`/guide/${next.slug}`}
-              className="flex flex-1 flex-col items-end gap-1 rounded-md border border-border p-3 text-right no-underline transition-colors hover:border-primary hover:no-underline"
-            >
-              <span className="text-xs text-muted">Next →</span>
-              <span className="font-semibold text-primary">{next.title}</span>
-            </Link>
-          ) : (
-            <span className="flex-1" />
-          )}
-        </nav>
-      </article>
+
+          <TocMobile headings={toc} />
+
+          <header className="mb-2">
+            <h1 className="m-0 text-[1.5rem] font-bold leading-tight tracking-tight text-[#1c1e21] md:text-[2.25rem]">
+              {page.title}
+            </h1>
+          </header>
+
+          <GitHubStar />
+          <Shoutout />
+
+          <p className="mb-6 text-lg italic leading-relaxed text-[#1c1e21]">
+            {page.lead}
+          </p>
+
+          <Article blocks={page.blocks} />
+        </article>
+
+        <DocPaginator
+          prev={prev ? { slug: prev.slug, title: prev.title } : null}
+          next={next ? { slug: next.slug, title: next.title } : null}
+        />
+      </div>
     </Shell>
   );
 }

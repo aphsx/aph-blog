@@ -20,6 +20,15 @@ export type Page = {
 
 export type Heading = { id: string; text: string; level: 2 | 3 };
 
+export type NavLink = { slug: string; title: string };
+
+export type NavCategory = {
+  label: string;
+  items: NavLink[];
+  /** หมวดย่อย (เช่น Algorithms > Basics) */
+  subcategories?: { label: string; items: NavLink[] }[];
+};
+
 export function extractHeadings(blocks: Block[]): Heading[] {
   const headings: Heading[] = [];
   blocks.forEach((b, i) => {
@@ -29,40 +38,58 @@ export function extractHeadings(blocks: Block[]): Heading[] {
   return headings;
 }
 
-export const NAV: { group: string; items: { slug: string; title: string }[] }[] = [
+/** Sidebar — จัดหมวดตาม Tech Interview Handbook */
+export const NAV: NavCategory[] = [
   {
-    group: "เริ่มต้น",
-    items: [
-      { slug: "overview", title: "ภาพรวม & Roadmap" },
-      { slug: "timeline", title: "แผนเตรียมตัว (Timeline)" },
-    ],
+    label: "Introduction",
+    items: [{ slug: "overview", title: "คู่มือเตรียมสัมภาษณ์ SE" }],
   },
   {
-    group: "Resume & สมัครงาน",
+    label: "Getting an interview",
     items: [
-      { slug: "resume", title: "เขียน Resume ให้ผ่าน ATS" },
+      { slug: "resume", title: "Resume" },
       { slug: "job-application", title: "หางาน & ยื่นสมัคร" },
     ],
   },
   {
-    group: "Coding Interview",
+    label: "Coding interview preparation",
     items: [
-      { slug: "interview-formats", title: "รูปแบบการสัมภาษณ์" },
+      { slug: "interview-formats", title: "Coding Interview คืออะไร" },
       { slug: "picking-language", title: "เลือกภาษาโปรแกรม" },
-      { slug: "study-plan", title: "แผนฝึก Coding (Study Plan)" },
-      { slug: "best-practices", title: "เทคนิคระหว่างสัมภาษณ์" },
-      { slug: "algorithms", title: "หัวข้อ Algorithms & DS" },
+      { slug: "study-plan", title: "แผนฝึก (Study Plan)" },
+      { slug: "best-practices", title: "เทคนิค & Cheatsheet" },
     ],
   },
   {
-    group: "รอบอื่น ๆ",
-    items: [
-      { slug: "system-design", title: "System Design" },
-      { slug: "behavioral", title: "Behavioral Interview" },
-      { slug: "negotiation", title: "ต่อรอง Offer" },
-    ],
+    label: "System design interview preparation",
+    items: [{ slug: "system-design", title: "System Design" }],
+  },
+  {
+    label: "Behavioral interview preparation",
+    items: [{ slug: "behavioral", title: "Behavioral Interview" }],
+  },
+  {
+    label: "Salary and offer negotiation",
+    items: [{ slug: "negotiation", title: "ต่อรอง Offer" }],
+  },
+  {
+    label: "Algorithms study cheatsheets",
+    items: [{ slug: "algorithms", title: "Algorithms Cheatsheet" }],
+  },
+  {
+    label: "Beyond the interview",
+    items: [{ slug: "timeline", title: "แผนเตรียมตัว (Timeline)" }],
   },
 ];
 
-// ลำดับหน้าแบบ flat สำหรับปุ่ม prev/next
-export const ORDER: string[] = NAV.flatMap((g) => g.items.map((i) => i.slug));
+/** Navbar บน — ตรงกับ TIH */
+export const NAVBAR_LINKS = [
+  { label: "เริ่มอ่าน", href: "/guide/overview" },
+  { label: "Coding", href: "/guide/interview-formats" },
+  { label: "Algorithms", href: "/guide/algorithms" },
+];
+
+/** ลำดับหน้าแบบ flat สำหรับ prev/next */
+export const ORDER: string[] = [
+  ...NAV.flatMap((c) => c.items.map((i) => i.slug)),
+];

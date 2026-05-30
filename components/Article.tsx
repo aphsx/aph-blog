@@ -1,18 +1,22 @@
 import type { Block } from "@/lib/content";
 
 const prose =
-  "text-base md:text-lg [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-1.5 [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-8 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
+  "text-base leading-[1.75] text-[#1c1e21] md:text-lg [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-1.5 [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-8 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
 
 function renderBlock(b: Block, i: number) {
   switch (b.t) {
     case "p":
-      return <p key={i}>{b.c}</p>;
+      return (
+        <p key={i} className="leading-relaxed">
+          {b.c}
+        </p>
+      );
     case "h2":
       return (
         <h2
           key={i}
           id={`h-${i}`}
-          className="mb-2 mt-8 text-[1.375em] font-bold tracking-tight md:text-[1.5em]"
+          className="mb-2 mt-8 scroll-mt-24 text-[1.375rem] font-bold tracking-tight md:mt-10 md:text-2xl"
         >
           {b.c}
         </h2>
@@ -22,7 +26,7 @@ function renderBlock(b: Block, i: number) {
         <h3
           key={i}
           id={`h-${i}`}
-          className="mb-2 mt-7 text-[1.25em] font-semibold"
+          className="mb-2 mt-7 scroll-mt-24 text-xl font-semibold md:mt-8"
         >
           {b.c}
         </h3>
@@ -56,7 +60,7 @@ function renderBlock(b: Block, i: number) {
       return (
         <div
           key={i}
-          className={`my-5 rounded-md border border-[#444950] p-3.5 text-base md:px-[18px] md:py-3.5 ${
+          className={`my-5 rounded-lg border border-[#444950] p-4 text-base ${
             b.warn
               ? "border-l-4 border-l-[#d9822b] bg-[#fff8f0]"
               : "border-l-4 border-l-primary bg-primary-soft/60"

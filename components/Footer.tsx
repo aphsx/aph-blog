@@ -1,26 +1,36 @@
 import Link from "next/link";
 
+/** Footer 4 คอลัมน์ — ตาม TIH */
 const COLS = [
   {
-    title: "เริ่มต้น",
+    title: "General",
     links: [
-      { label: "ภาพรวม & Roadmap", href: "/guide/overview" },
+      { label: "เริ่มอ่าน", href: "/guide/overview" },
       { label: "แผนเตรียมตัว", href: "/guide/timeline" },
+      { label: "Resume", href: "/guide/resume" },
     ],
   },
   {
-    title: "สัมภาษณ์",
+    title: "Interviews",
     links: [
-      { label: "Coding Interview", href: "/guide/study-plan" },
-      { label: "System Design", href: "/guide/system-design" },
+      { label: "Coding interviews", href: "/guide/interview-formats" },
+      { label: "Study plan", href: "/guide/study-plan" },
+      { label: "System design", href: "/guide/system-design" },
       { label: "Behavioral", href: "/guide/behavioral" },
     ],
   },
   {
-    title: "Resume",
+    title: "Algorithms",
     links: [
-      { label: "เขียน Resume", href: "/guide/resume" },
-      { label: "หางาน & ยื่นสมัคร", href: "/guide/job-application" },
+      { label: "Algorithms cheatsheet", href: "/guide/algorithms" },
+      { label: "เทคนิคสัมภาษณ์", href: "/guide/best-practices" },
+      { label: "เลือกภาษา", href: "/guide/picking-language" },
+    ],
+  },
+  {
+    title: "More",
+    links: [
+      { label: "หางาน & สมัคร", href: "/guide/job-application" },
       { label: "ต่อรอง Offer", href: "/guide/negotiation" },
     ],
   },
