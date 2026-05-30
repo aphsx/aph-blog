@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { Block } from "@/lib/content";
+import { pagePath } from "@/lib/paths";
 
 /* TIH: theme-doc-markdown 18px desktop, h2 mt-2em mb-0.5em */
 const prose =
@@ -65,6 +67,45 @@ function renderBlock(b: Block, i: number) {
         >
           {b.title && <div className="mb-1 font-bold">{b.title}</div>}
           <p className="m-0">{b.c}</p>
+        </div>
+      );
+    case "linklist": {
+      const items = b.c.map((link, j) => (
+        <li key={j}>
+          <Link
+            href={pagePath(link.slug)}
+            className="text-primary underline-offset-2 hover:underline"
+          >
+            {link.title}
+          </Link>
+        </li>
+      ));
+      return b.ordered === false ? (
+        <ul key={i}>{items}</ul>
+      ) : (
+        <ol key={i}>{items}</ol>
+      );
+    }
+    case "links":
+      return (
+        <div key={i} className="my-5 grid gap-3">
+          {b.c.map((link, j) => (
+            <Link
+              key={j}
+              href={pagePath(link.slug)}
+              className="group block rounded-lg border border-border bg-white p-4 no-underline transition-colors hover:border-primary hover:no-underline"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-primary">{link.title}</span>
+                <span className="text-primary transition-transform group-hover:translate-x-0.5">
+                  →
+                </span>
+              </div>
+              {link.desc && (
+                <p className="m-0 mt-1 text-[0.9em] text-muted">{link.desc}</p>
+              )}
+            </Link>
+          ))}
         </div>
       );
     case "table":

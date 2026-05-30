@@ -8,7 +8,9 @@ export type Block =
   | { t: "ol"; c: string[] }
   | { t: "code"; c: string; lang?: string }
   | { t: "callout"; title?: string; c: string; warn?: boolean }
-  | { t: "table"; head: string[]; rows: string[][] };
+  | { t: "table"; head: string[]; rows: string[][] }
+  | { t: "links"; c: { title: string; slug: string; desc?: string }[] }
+  | { t: "linklist"; c: { title: string; slug: string }[]; ordered?: boolean };
 
 export type Page = {
   slug: string;
@@ -96,6 +98,10 @@ export const NAV: NavCategory[] = [
   {
     label: "Final prep & mock interview",
     items: [{ slug: "checklist", title: "เช็กลิสต์ & Mock Interview" }],
+  },
+  {
+    label: "อยากเริ่มจากศูนย์?",
+    items: [{ slug: "learn", title: "🎓 คอร์สเรียนเขียนโปรแกรม" }],
   },
 ];
 
