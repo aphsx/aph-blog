@@ -24,8 +24,8 @@ export default function Shell({
         <Sidebar open={open} onNavigate={() => setOpen(false)} />
         {/* docMainContainer — เต็มความกว้างที่เหลือ ชิด sidebar */}
         <div className="doc-main flex min-w-0 flex-1 flex-col">
-          {/* container — w-full ไม่ center, padding แนวนอน 1rem แบบ Infima */}
-          <div className="w-full max-w-none px-4 pt-6 pb-16 md:pt-8">
+          {/* container — centered with max-width, มีขอบว่างห่างจาก sidebar */}
+          <div className="w-full max-w-6xl mx-auto px-8 pt-6 pb-16 md:pt-8">
             {/* row — flex แทน grid */}
             <div
               className={`flex w-full min-w-0 ${hasToc ? "min-[997px]:flex-row" : ""}`}
