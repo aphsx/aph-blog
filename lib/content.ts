@@ -10,7 +10,8 @@ export type Block =
   | { t: "callout"; title?: string; c: string; warn?: boolean }
   | { t: "table"; head: string[]; rows: string[][] }
   | { t: "links"; c: { title: string; slug: string; desc?: string }[] }
-  | { t: "linklist"; c: { title: string; slug: string }[]; ordered?: boolean };
+  | { t: "linklist"; c: { title: string; slug: string }[]; ordered?: boolean }
+  | { t: "details"; summary: string; c: Block[] };
 
 export type Page = {
   slug: string;

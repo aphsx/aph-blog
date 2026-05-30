@@ -69,6 +69,18 @@ function renderBlock(b: Block, i: number) {
           <p className="m-0">{b.c}</p>
         </div>
       );
+    case "details":
+      return (
+        <details
+          key={i}
+          className="my-4 rounded-md border border-border bg-surface-soft/40 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+        >
+          <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
+            {b.summary}
+          </summary>
+          <div className="mt-3">{b.c.map((bb, j) => renderBlock(bb, j))}</div>
+        </details>
+      );
     case "linklist": {
       const items = b.c.map((link, j) => (
         <li key={j}>
