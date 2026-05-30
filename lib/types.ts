@@ -14,9 +14,13 @@ export type Block =
   | { t: "code"; c: string; lang?: string }
   | { t: "callout"; title?: string; c: string; warn?: boolean }
   | { t: "table"; head: string[]; rows: string[][] }
-  | { t: "links"; c: { title: string; slug: string; desc?: string }[] }
+  | {
+      t: "links";
+      c: { title: string; slug?: string; href?: string; desc?: string }[];
+    }
   | { t: "linklist"; c: { title: string; slug: string }[]; ordered?: boolean }
-  | { t: "details"; summary: string; c: Block[] };
+  | { t: "details"; summary: string; c: Block[] }
+  | { t: "image"; src: string; alt?: string; caption?: string };
 
 /**
  * A documentation page.

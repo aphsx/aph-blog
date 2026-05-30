@@ -43,8 +43,6 @@ export const gettingInterviewPages: Record<string, Page> = {
         t: "ul",
         c: [
           "ยาวเกิน 1 หน้าโดยใส่รายละเอียดไม่จำเป็น",
-          "ไม่มีตัวเลขวัดผลในส่วน experience/projects",
-          "ใส่ skill ที่ไม่ถนัดจริง (จะโดนถามในรอบสัมภาษณ์)",
           "พิมพ์ผิด ไวยากรณ์ผิด — ให้เพื่อนช่วยอ่านทวนก่อนส่ง",
         ],
       },
@@ -58,9 +56,19 @@ export const gettingInterviewPages: Record<string, Page> = {
           "ใส่ coursework/บทบาทในกิจกรรมที่เกี่ยวข้องได้ถ้าช่วยเสริม",
         ],
       },
-      { t: "h2", c: "ตัวอย่างโครงสร้าง Resume (สำหรับ junior)" },
-      { t: "p", c: "หน้าตา resume ที่ ATS อ่านง่ายและคนอ่านเห็นจุดเด่นเร็ว — คอลัมน์เดียว เรียงตามความสำคัญ" },
-      { t: "code", lang: "text", c: "APHISIT DANGCHAN          email@mail.com · 08x-xxx-xxxx\nSoftware Engineer         github.com/you · linkedin.com/in/you\n\nSKILLS\n  Languages : Python, JavaScript, TypeScript, SQL\n  Backend   : Node.js, FastAPI, PostgreSQL, Redis\n  Tools     : Git, Docker, AWS, GitHub Actions\n\nPROJECTS\n  Realtime Chat App | React, Node.js, WebSocket | github.com/you/chat\n   - ออกแบบ REST API + WebSocket รองรับผู้ใช้พร้อมกัน 500 คน\n   - เขียน unit test ครอบ logic หลัก 85% ลด bug หลัง deploy\n\n  URL Shortener | FastAPI, PostgreSQL | demo: short.you.dev\n   - ลดขนาด query ด้วย index ทำให้ redirect เร็วขึ้น ~60%\n\nEXPERIENCE\n  Software Engineer Intern | บริษัท X (มิ.ย.-ส.ค. 2025)\n   - พัฒนาฟีเจอร์ ... ส่งงานทันทุก sprint\n\nEDUCATION\n  ปริญญาตรี วิทยาการคอมพิวเตอร์ | มหาวิทยาลัย... (2026)" },
+      { t: "h2", c: "ตัวอย่าง Resume จริง" },
+      { t: "p", c: "นี่คือ Jake's Resume — เทมเพลต resume ที่นิยมที่สุดในวงการ software engineer (ใช้กันจริงเพื่อสมัคร FAANG) สังเกตว่าเป็นคอลัมน์เดียว ATS-friendly แต่ละ bullet มีตัวเลขวัดผล ใช้เป็นแบบในการเขียนของตัวเองได้เลย" },
+      { t: "image", src: "/jakes-resume.png", alt: "ตัวอย่าง Jake's Resume สำหรับ software engineer", caption: "Jake's Resume · MIT License โดย Jake Gutierrez · github.com/jakegut/resume" },
+      { t: "h2", c: "ดาวน์โหลดเทมเพลตจริงไปใช้" },
+      { t: "p", c: "เทมเพลตและตัวอย่างจริงที่นิยมในวงการ (ฟรีและ ATS-friendly) เปิดดู/ดาวน์โหลดได้เลย" },
+      {
+        t: "links",
+        c: [
+          { title: "Jake's Resume (Overleaf · LaTeX)", href: "https://www.overleaf.com/latex/templates/jakes-resume/syzfjbzwjncs", desc: "เทมเพลตยอดนิยมที่สุดในวงการ SWE — คอลัมน์เดียว ผ่าน ATS ใช้ฟรี แก้บน Overleaf ได้เลย" },
+          { title: "Tech Interview Handbook — Resume Guide", href: "https://www.techinterviewhandbook.org/resume/", desc: "คู่มือเขียน resume ระดับ FAANG พร้อมตัวอย่างและ template" },
+          { title: "BeamJobs — ตัวอย่าง SWE Resume (2026)", href: "https://www.beamjobs.com/resumes/software-engineer-resume-examples", desc: "ตัวอย่าง resume จริงหลายสิบแบบให้ดูเป็นแนวทาง" },
+        ],
+      },
 
       { t: "h2", c: "ตัวอย่าง bullet: อ่อน → ดี" },
       { t: "p", c: "ลองเทียบและฝึกเขียนของตัวเองด้วยสูตร XYZ (ทำ X วัดผล Y ด้วยวิธี Z)" },

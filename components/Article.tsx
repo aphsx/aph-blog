@@ -98,27 +98,59 @@ function renderBlock(b: Block, i: number) {
         <ol key={i}>{items}</ol>
       );
     }
-    case "links":
+    case "links": {
+      const cardClass =
+        "group block rounded-lg border border-border bg-white p-4 no-underline transition-colors hover:border-primary hover:no-underline";
+      const inner = (title: string, arrow: string, desc?: string) => (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-bold text-primary">{title}</span>
+            <span className="text-primary transition-transform group-hover:translate-x-0.5">
+              {arrow}
+            </span>
+          </div>
+          {desc && (
+            <p className="m-0 mt-1 text-[0.9em] text-muted">{desc}</p>
+          )}
+        </>
+      );
       return (
         <div key={i} className="my-5 grid gap-3">
-          {b.c.map((link, j) => (
-            <Link
-              key={j}
-              href={pagePath(link.slug)}
-              className="group block rounded-lg border border-border bg-white p-4 no-underline transition-colors hover:border-primary hover:no-underline"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-bold text-primary">{link.title}</span>
-                <span className="text-primary transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </div>
-              {link.desc && (
-                <p className="m-0 mt-1 text-[0.9em] text-muted">{link.desc}</p>
-              )}
-            </Link>
-          ))}
+          {b.c.map((link, j) =>
+            link.href ? (
+              <a
+                key={j}
+                href={link.href}
+                target="_blank"
+                rel="noreferrer"
+                className={cardClass}
+              >
+                {inner(link.title, "↗", link.desc)}
+              </a>
+            ) : (
+              <Link key={j} href={pagePath(link.slug ?? "")} className={cardClass}>
+                {inner(link.title, "→", link.desc)}
+              </Link>
+            ),
+          )}
         </div>
+      );
+    }
+    case "image":
+      return (
+        <figure key={i} className="my-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={b.src}
+            alt={b.alt ?? ""}
+            className="mx-auto w-full max-w-2xl rounded-lg border border-border shadow-sm"
+          />
+          {b.caption && (
+            <figcaption className="mt-2 text-center text-sm text-muted">
+              {b.caption}
+            </figcaption>
+          )}
+        </figure>
       );
     case "table":
       return (
