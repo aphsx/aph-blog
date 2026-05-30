@@ -52,7 +52,7 @@ export default function Sidebar({
             <div className="cursor-default px-3 py-2 text-[0.875rem] font-bold leading-snug text-[#1c1e21]">
               {cat.label}
             </div>
-            <ul className="m-0 list-none p-0">
+            <ul className="m-0 ml-3 list-none border-l border-border p-0 pl-1.5">
               {cat.items.map((item) => (
                 <li key={item.slug}>
                   <NavLink
