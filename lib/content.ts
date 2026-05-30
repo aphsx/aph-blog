@@ -42,7 +42,10 @@ export function extractHeadings(blocks: Block[]): Heading[] {
 export const NAV: NavCategory[] = [
   {
     label: "Introduction",
-    items: [{ slug: "overview", title: "คู่มือเตรียมสัมภาษณ์ SE" }],
+    items: [
+      { slug: "overview", title: "คู่มือเตรียมสัมภาษณ์ SE" },
+      { slug: "timeline", title: "แผนเตรียมตัว (Timeline)" },
+    ],
   },
   {
     label: "Getting an interview",
@@ -51,6 +54,13 @@ export const NAV: NavCategory[] = [
       { slug: "linkedin", title: "LinkedIn" },
       { slug: "job-application", title: "หางาน & ยื่นสมัคร" },
       { slug: "thai-job-market", title: "ตลาดงานไอทีในไทย" },
+    ],
+  },
+  {
+    label: "Portfolio & projects",
+    items: [
+      { slug: "portfolio", title: "Portfolio & Projects" },
+      { slug: "ai-tools-2026", title: "AI Tools 2026" },
     ],
   },
   {
@@ -80,22 +90,12 @@ export const NAV: NavCategory[] = [
     items: [{ slug: "behavioral", title: "Behavioral Interview" }],
   },
   {
-    label: "Portfolio & projects",
-    items: [
-      { slug: "portfolio", title: "Portfolio & Projects" },
-      { slug: "ai-tools-2026", title: "AI Tools 2026" },
-    ],
-  },
-  {
     label: "Salary and offer negotiation",
     items: [{ slug: "negotiation", title: "ต่อรอง Offer" }],
   },
   {
-    label: "Beyond the interview",
-    items: [
-      { slug: "timeline", title: "แผนเตรียมตัว (Timeline)" },
-      { slug: "checklist", title: "เช็กลิสต์ & Mock Interview" },
-    ],
+    label: "Final prep & mock interview",
+    items: [{ slug: "checklist", title: "เช็กลิสต์ & Mock Interview" }],
   },
 ];
 
