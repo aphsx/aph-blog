@@ -41,7 +41,7 @@ export default async function GuidePage({
   return (
     <Shell toc={toc}>
       <div className="doc-item-container">
-        <article>
+        <article className="min-[768px]:text-[18px]">
           {category && (
             <DocBreadcrumbs
               categoryLabel={category.label}
@@ -52,8 +52,8 @@ export default async function GuidePage({
 
           <TocMobile headings={toc} />
 
-          <header className="mb-2">
-            <h1 className="m-0 text-[1.5rem] font-bold leading-tight tracking-tight text-[#1c1e21] md:text-[2.25rem]">
+          <header>
+            <h1 className="m-0 text-[1.5em] font-bold leading-[1.2] tracking-tight text-[#1c1e21] min-[768px]:text-[2.25em]">
               {page.title}
             </h1>
           </header>
@@ -61,7 +61,7 @@ export default async function GuidePage({
           <GitHubStar />
           <Shoutout />
 
-          <p className="mb-6 text-lg italic leading-relaxed text-[#1c1e21]">
+          <p className="mb-6 italic leading-relaxed text-[#1c1e21]">
             {page.lead}
           </p>
 

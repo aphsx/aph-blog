@@ -15,19 +15,35 @@ export default function Shell({
   toc?: Heading[];
 }) {
   const [open, setOpen] = useState(false);
+  const hasToc = toc.length > 0;
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header onMenu={() => setOpen((o) => !o)} />
-      <div className="flex flex-1">
+      <div className="flex min-w-0 flex-1">
         <Sidebar open={open} onNavigate={() => setOpen(false)} />
-        <div className="flex min-w-0 flex-1 justify-center">
-          <main
-            className="min-w-0 flex-1 px-4 py-6 pb-16 md:px-8 md:py-8 lg:max-w-[860px] lg:px-10"
-            onClick={() => open && setOpen(false)}
-          >
-            {children}
-          </main>
-          <TocDesktop headings={toc} />
+        {/* docMainContainer — เต็มความกว้างที่เหลือ ชิด sidebar */}
+        <div className="doc-main flex min-w-0 flex-1 flex-col">
+          {/* container — w-full ไม่ center, padding แนวนอน 1rem แบบ Infima */}
+          <div className="w-full max-w-none px-4 pt-6 pb-16 md:pt-8">
+            {/* row — flex แทน grid */}
+            <div
+              className={`flex w-full min-w-0 ${hasToc ? "min-[997px]:flex-row" : ""}`}
+            >
+              {/* col docItemCol — 75% เมื่อมี TOC, เต็มความกว้างเมื่อไม่มี */}
+              <main
+                className={`min-w-0 ${
+                  hasToc
+                    ? "w-full min-[997px]:w-[75%] min-[997px]:max-w-[75%] min-[997px]:shrink-0"
+                    : "w-full flex-1"
+                }`}
+                onClick={() => open && setOpen(false)}
+              >
+                {children}
+              </main>
+              {hasToc && <TocDesktop headings={toc} />}
+            </div>
+          </div>
         </div>
       </div>
       <Footer />

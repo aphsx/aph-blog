@@ -12,7 +12,7 @@ export default function DocBreadcrumbs({
   return (
     <nav
       aria-label="Breadcrumbs"
-      className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-muted"
+      className="mb-4 flex flex-wrap items-center gap-1 text-[0.875rem] text-muted"
     >
       <Link
         href="/guide/overview"
@@ -21,15 +21,15 @@ export default function DocBreadcrumbs({
       >
         <svg
           viewBox="0 0 24 24"
-          width="16"
-          height="16"
+          width="14"
+          height="14"
           fill="currentColor"
           aria-hidden
         >
           <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
         </svg>
       </Link>
-      <span className="text-border select-none" aria-hidden>
+      <span className="mx-1 text-muted/60 select-none" aria-hidden>
         ›
       </span>
       <Link
@@ -38,10 +38,10 @@ export default function DocBreadcrumbs({
       >
         {categoryLabel}
       </Link>
-      <span className="text-border select-none" aria-hidden>
+      <span className="mx-1 text-muted/60 select-none" aria-hidden>
         ›
       </span>
-      <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-medium text-primary-dark">
+      <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[0.75rem] font-medium text-primary-dark">
         {pageTitle}
       </span>
     </nav>

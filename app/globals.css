@@ -13,8 +13,45 @@
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Noto Sans Thai", "Sarabun", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: "SF Mono", "Fira Code", Menlo, Consolas, monospace;
+
+  --width-sidebar: 300px;
+  --height-navbar: 3.75rem;
+  --height-announcement: 2.5rem;
+  --spacing-doc-x: 3rem;
+  --spacing-container-x: 1rem;
+}
+
+:root {
+  --doc-sticky-top: calc(var(--height-navbar) + var(--height-announcement));
+  --doc-toc-top: calc(var(--doc-sticky-top) + 1rem);
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@layer utilities {
+  .doc-sticky-top {
+    top: var(--doc-sticky-top);
+  }
+
+  .doc-toc-top {
+    top: var(--doc-toc-top);
+  }
+
+  /*
+   * TIH: container (1rem) + docItemContainer (3rem ที่ md+)
+   * padding ซ้ายน้อยกว่าขวา — เนื้อหาชิด sidebar ไม่ลอยกลาง
+   */
+  .doc-item-container {
+    padding-left: 0;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .doc-item-container {
+      padding-left: 0;
+      padding-right: var(--spacing-doc-x);
+    }
+  }
 }

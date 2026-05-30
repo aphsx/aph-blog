@@ -30,11 +30,11 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-      <div className="flex h-10 items-center justify-center bg-primary px-4 text-center text-sm font-bold text-white max-[576px]:text-xs">
+      <div className="flex min-h-[2.5rem] items-center justify-center bg-primary px-4 py-2 text-center text-sm font-bold text-white">
         คู่มือเตรียมสัมภาษณ์ Software Engineer ภาษาไทย — ทำตามทีละขั้นได้เลย
       </div>
-      <header className="sticky top-0 z-50 h-[60px] border-b border-border bg-white shadow-sm">
-        <div className="flex h-full items-center gap-2 px-4">
+      <header className="sticky top-0 z-50 h-[3.75rem] border-b border-border bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="mx-auto flex h-full max-w-full items-center gap-2 px-4">
           <div className="flex min-w-0 items-center gap-2">
             <button
               type="button"
@@ -46,7 +46,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
             </button>
             <Link
               href="/guide/overview"
-              className="flex items-center gap-2.5 text-[17px] font-bold text-[#1c1e21] no-underline hover:no-underline"
+              className="flex items-center gap-2.5 text-base font-bold text-[#1c1e21] no-underline hover:no-underline"
             >
               <span className="shrink-0" aria-hidden>
                 <svg viewBox="0 0 32 32" width="28" height="28">

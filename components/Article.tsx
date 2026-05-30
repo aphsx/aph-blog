@@ -1,22 +1,19 @@
 import type { Block } from "@/lib/content";
 
+/* TIH: theme-doc-markdown 18px desktop, h2 mt-2em mb-0.5em */
 const prose =
-  "text-base leading-[1.75] text-[#1c1e21] md:text-lg [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-1.5 [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-8 [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
+  "text-base leading-[1.75] text-[#1c1e21] min-[768px]:text-[18px] [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-[0.35em] [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-[0.5rem] [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
 
 function renderBlock(b: Block, i: number) {
   switch (b.t) {
     case "p":
-      return (
-        <p key={i} className="leading-relaxed">
-          {b.c}
-        </p>
-      );
+      return <p key={i}>{b.c}</p>;
     case "h2":
       return (
         <h2
           key={i}
           id={`h-${i}`}
-          className="mb-2 mt-8 scroll-mt-24 text-[1.375rem] font-bold tracking-tight md:mt-10 md:text-2xl"
+          className="mb-2 mt-8 scroll-mt-28 text-[1.375em] font-bold tracking-tight min-[768px]:mt-[2em] min-[768px]:text-[1.5em]"
         >
           {b.c}
         </h2>
@@ -26,7 +23,7 @@ function renderBlock(b: Block, i: number) {
         <h3
           key={i}
           id={`h-${i}`}
-          className="mb-2 mt-7 scroll-mt-24 text-xl font-semibold md:mt-8"
+          className="mb-2 mt-[1.8em] scroll-mt-28 text-[1.25em] font-semibold"
         >
           {b.c}
         </h3>
@@ -51,7 +48,7 @@ function renderBlock(b: Block, i: number) {
       return (
         <pre
           key={i}
-          className="my-5 overflow-x-auto rounded-md border border-border bg-code p-4 font-mono text-sm leading-relaxed"
+          className="my-5 overflow-x-auto rounded-md border border-border bg-code p-4 font-mono text-[0.875em] leading-relaxed"
         >
           <code>{b.c}</code>
         </pre>
@@ -60,7 +57,7 @@ function renderBlock(b: Block, i: number) {
       return (
         <div
           key={i}
-          className={`my-5 rounded-lg border border-[#444950] p-4 text-base ${
+          className={`my-5 rounded-md border border-[#444950] p-[14px_18px] text-base ${
             b.warn
               ? "border-l-4 border-l-[#d9822b] bg-[#fff8f0]"
               : "border-l-4 border-l-primary bg-primary-soft/60"

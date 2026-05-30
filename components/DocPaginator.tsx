@@ -11,7 +11,7 @@ export default function DocPaginator({
 }) {
   return (
     <nav
-      className="mt-10 flex gap-4 border-t border-border pt-8"
+      className="mt-12 flex gap-4 border-t border-border pt-6"
       aria-label="Docs pages"
     >
       {prev ? (

@@ -1,6 +1,6 @@
 export function GitHubStar() {
   return (
-    <div className="mb-6">
+    <div className="mb-8">
       <iframe
         src="https://ghbtns.com/github-btn.html?user=yangshun&repo=tech-interview-handbook&type=star&count=true&size=large"
         title="GitHub Stars"
@@ -14,8 +14,8 @@ export function GitHubStar() {
 
 export function Shoutout() {
   return (
-    <div className="mb-6">
-      <div className="rounded-lg bg-primary px-4 py-3 text-sm leading-relaxed text-white md:text-base">
+    <div className="mb-8">
+      <div className="rounded-lg bg-primary p-3 text-sm leading-relaxed text-white">
         👋 คู่มือเตรียมสัมภาษณ์ Software Engineer ภาษาไทย — รวมทุกขั้นตอนตั้งแต่
         Resume, Coding, System Design, Behavioral จนถึงการต่อรอง Offer
         ทำตามทีละหน้าใน sidebar ได้เลย
