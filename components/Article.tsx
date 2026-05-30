@@ -5,9 +5,17 @@ function renderBlock(b: Block, i: number) {
     case "p":
       return <p key={i}>{b.c}</p>;
     case "h2":
-      return <h2 key={i}>{b.c}</h2>;
+      return (
+        <h2 key={i} id={`h-${i}`}>
+          {b.c}
+        </h2>
+      );
     case "h3":
-      return <h3 key={i}>{b.c}</h3>;
+      return (
+        <h3 key={i} id={`h-${i}`}>
+          {b.c}
+        </h3>
+      );
     case "ul":
       return (
         <ul key={i}>
@@ -32,9 +40,11 @@ function renderBlock(b: Block, i: number) {
       );
     case "callout":
       return (
-        <div key={i} className={`callout${b.warn ? " warn" : ""}`}>
-          {b.title && <div className="ct">{b.title}</div>}
-          <p>{b.c}</p>
+        <div key={i} className={`admonition${b.warn ? " admonition-caution" : " admonition-info"}`}>
+          {b.title && <div className="admonition-heading">{b.title}</div>}
+          <div className="admonition-content">
+            <p>{b.c}</p>
+          </div>
         </div>
       );
     case "table":
@@ -64,5 +74,5 @@ function renderBlock(b: Block, i: number) {
 }
 
 export default function Article({ blocks }: { blocks: Block[] }) {
-  return <>{blocks.map(renderBlock)}</>;
+  return <div className="markdown">{blocks.map(renderBlock)}</div>;
 }

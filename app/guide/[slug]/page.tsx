@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Shell from "@/components/Shell";
 import Article from "@/components/Article";
-import { ORDER } from "@/lib/content";
+import { ORDER, extractHeadings } from "@/lib/content";
 import { PAGES } from "@/lib/pages";
 
 export function generateStaticParams() {
@@ -31,32 +31,31 @@ export default async function GuidePage({
   const idx = ORDER.indexOf(page.slug);
   const prev = idx > 0 ? PAGES[ORDER[idx - 1]] : null;
   const next = idx < ORDER.length - 1 ? PAGES[ORDER[idx + 1]] : null;
+  const toc = extractHeadings(page.blocks);
 
   return (
-    <Shell>
+    <Shell toc={toc}>
       <article className="article">
-        <div className="breadcrumb">{page.group}</div>
         <h1>{page.title}</h1>
-        <p className="lead">{page.lead}</p>
         <Article blocks={page.blocks} />
-        <div className="pager">
+        <nav className="pager">
           {prev ? (
-            <Link href={`/guide/${prev.slug}`} className="prev">
-              <div className="dir">← ก่อนหน้า</div>
-              <div className="ttl">{prev.title}</div>
+            <Link href={`/guide/${prev.slug}`} className="pager-link prev">
+              <span className="pager-label">← Previous</span>
+              <span className="pager-title">{prev.title}</span>
             </Link>
           ) : (
-            <span style={{ flex: 1 }} />
+            <span className="pager-spacer" />
           )}
           {next ? (
-            <Link href={`/guide/${next.slug}`} className="next">
-              <div className="dir">ถัดไป →</div>
-              <div className="ttl">{next.title}</div>
+            <Link href={`/guide/${next.slug}`} className="pager-link next">
+              <span className="pager-label">Next →</span>
+              <span className="pager-title">{next.title}</span>
             </Link>
           ) : (
-            <span style={{ flex: 1 }} />
+            <span className="pager-spacer" />
           )}
-        </div>
+        </nav>
       </article>
     </Shell>
   );

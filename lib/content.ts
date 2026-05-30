@@ -18,6 +18,17 @@ export type Page = {
   blocks: Block[];
 };
 
+export type Heading = { id: string; text: string; level: 2 | 3 };
+
+export function extractHeadings(blocks: Block[]): Heading[] {
+  const headings: Heading[] = [];
+  blocks.forEach((b, i) => {
+    if (b.t === "h2") headings.push({ id: `h-${i}`, text: b.c, level: 2 });
+    if (b.t === "h3") headings.push({ id: `h-${i}`, text: b.c, level: 3 });
+  });
+  return headings;
+}
+
 export const NAV: { group: string; items: { slug: string; title: string }[] }[] = [
   {
     group: "เริ่มต้น",

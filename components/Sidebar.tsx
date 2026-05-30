@@ -4,28 +4,40 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV } from "@/lib/content";
 
-export default function Sidebar({ open }: { open?: boolean }) {
+export default function Sidebar({
+  open,
+  onNavigate,
+}: {
+  open?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   return (
     <nav className={`sidebar${open ? " open" : ""}`}>
-      {NAV.map((g) => (
-        <div className="group" key={g.group}>
-          <div className="group-title">{g.group}</div>
-          {g.items.map((it) => {
-            const href = `/guide/${it.slug}`;
-            const active = pathname === href;
-            return (
-              <Link
-                key={it.slug}
-                href={href}
-                className={`navlink${active ? " active" : ""}`}
-              >
-                {it.title}
-              </Link>
-            );
-          })}
-        </div>
-      ))}
+      <div className="menu">
+        {NAV.map((g) => (
+          <div className="menu-group" key={g.group}>
+            <div className="menu-category">{g.group}</div>
+            <ul className="menu-list">
+              {g.items.map((it) => {
+                const href = `/guide/${it.slug}`;
+                const active = pathname === href;
+                return (
+                  <li key={it.slug}>
+                    <Link
+                      href={href}
+                      className={`menu-link${active ? " active" : ""}`}
+                      onClick={onNavigate}
+                    >
+                      {it.title}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
     </nav>
   );
 }
