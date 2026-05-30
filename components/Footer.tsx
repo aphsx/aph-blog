@@ -28,23 +28,30 @@ const COLS = [
 
 export default function Footer() {
   return (
-    <footer className="footer">
-      <div className="footer-inner">
-        <div className="footer-links">
+    <footer className="bg-footer px-4 py-12 text-white/80">
+      <div className="mx-auto max-w-[1140px]">
+        <div className="mb-12 grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-8">
           {COLS.map((col) => (
-            <div className="footer-col" key={col.title}>
-              <div className="footer-col-title">{col.title}</div>
-              <ul>
+            <div key={col.title}>
+              <div className="mb-3 text-[15px] font-bold text-white">
+                {col.title}
+              </div>
+              <ul className="m-0 list-none p-0">
                 {col.links.map((l) => (
-                  <li key={l.href}>
-                    <Link href={l.href}>{l.label}</Link>
+                  <li key={l.href} className="my-1.5">
+                    <Link
+                      href={l.href}
+                      className="text-sm text-white/80 no-underline hover:text-white hover:underline"
+                    >
+                      {l.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-        <div className="footer-copyright">
+        <div className="text-sm">
           Copyright © {new Date().getFullYear()} SE Interview Roadmap
         </div>
       </div>

@@ -35,25 +35,33 @@ export default async function GuidePage({
 
   return (
     <Shell toc={toc}>
-      <article className="article">
-        <h1>{page.title}</h1>
+      <article>
+        <h1 className="mb-4 text-[1.5em] leading-tight tracking-tight md:text-[2.25em]">
+          {page.title}
+        </h1>
         <Article blocks={page.blocks} />
-        <nav className="pager">
+        <nav className="mt-12 flex gap-4 border-t border-border pt-6">
           {prev ? (
-            <Link href={`/guide/${prev.slug}`} className="pager-link prev">
-              <span className="pager-label">← Previous</span>
-              <span className="pager-title">{prev.title}</span>
+            <Link
+              href={`/guide/${prev.slug}`}
+              className="flex flex-1 flex-col gap-1 rounded-md border border-border p-3 no-underline transition-colors hover:border-primary hover:no-underline"
+            >
+              <span className="text-xs text-muted">← Previous</span>
+              <span className="font-semibold text-primary">{prev.title}</span>
             </Link>
           ) : (
-            <span className="pager-spacer" />
+            <span className="flex-1" />
           )}
           {next ? (
-            <Link href={`/guide/${next.slug}`} className="pager-link next">
-              <span className="pager-label">Next →</span>
-              <span className="pager-title">{next.title}</span>
+            <Link
+              href={`/guide/${next.slug}`}
+              className="flex flex-1 flex-col items-end gap-1 rounded-md border border-border p-3 text-right no-underline transition-colors hover:border-primary hover:no-underline"
+            >
+              <span className="text-xs text-muted">Next →</span>
+              <span className="font-semibold text-primary">{next.title}</span>
             </Link>
           ) : (
-            <span className="pager-spacer" />
+            <span className="flex-1" />
           )}
         </nav>
       </article>

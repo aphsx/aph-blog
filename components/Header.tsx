@@ -23,17 +23,24 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
 
   return (
     <>
-      <div className="announcement-bar">
+      <div className="flex h-10 items-center justify-center bg-primary px-4 text-center text-sm font-bold text-white max-[576px]:text-xs">
         คู่มือเตรียมสัมภาษณ์ Software Engineer ภาษาไทย — ทำตามทีละขั้นได้เลย
       </div>
-      <header className="navbar">
-        <div className="navbar-inner">
-          <div className="navbar-left">
-            <button className="menu-btn" onClick={onMenu} aria-label="เมนู">
+      <header className="sticky top-0 z-50 h-[60px] border-b border-border bg-white shadow-sm">
+        <div className="flex h-full items-center gap-2 px-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              className="hidden rounded p-1.5 text-xl text-[#1c1e21] hover:bg-surface-soft max-[996px]:block"
+              onClick={onMenu}
+              aria-label="เมนู"
+            >
               ☰
             </button>
-            <Link href="/" className="navbar-brand">
-              <span className="navbar-logo" aria-hidden>
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 text-[17px] font-bold text-[#1c1e21] no-underline hover:no-underline"
+            >
+              <span className="shrink-0" aria-hidden>
                 <svg viewBox="0 0 32 32" width="28" height="28">
                   <rect width="32" height="32" rx="6" fill="#6565d5" />
                   <text
@@ -49,25 +56,27 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
                   </text>
                 </svg>
               </span>
-              <span className="navbar-title">Interview Roadmap</span>
+              <span className="truncate">Interview Roadmap</span>
             </Link>
           </div>
-          <nav className="navbar-items">
+          <nav className="ml-3 flex flex-1 items-center gap-1 overflow-x-auto max-[996px]:hidden">
             {NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`navbar-link${
-                  pathname === item.href ? " active" : ""
+                className={`whitespace-nowrap rounded px-2.5 py-1.5 text-[0.9rem] no-underline hover:bg-surface-soft hover:text-primary hover:no-underline ${
+                  pathname === item.href
+                    ? "font-semibold text-primary"
+                    : "text-[#1c1e21]"
                 }`}
               >
                 {item.label}
               </Link>
             ))}
           </nav>
-          <div className="navbar-right">
+          <div className="ml-auto flex items-center">
             <a
-              className="navbar-icon"
+              className="flex size-8 items-center justify-center rounded-full text-[#1c1e21] transition-colors hover:bg-border hover:no-underline"
               href="https://github.com"
               target="_blank"
               rel="noreferrer"

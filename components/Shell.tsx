@@ -16,16 +16,16 @@ export default function Shell({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="docs-wrapper">
+    <div className="flex min-h-screen flex-col">
       <Header onMenu={() => setOpen((o) => !o)} />
-      <div className="main-wrapper">
-        <div className="shell">
+      <div className="flex-1">
+        <div className="flex max-w-full items-start">
           <Sidebar open={open} onNavigate={() => setOpen(false)} />
           <main
-            className="content"
+            className="min-w-0 flex-1 px-5 py-7 pb-16 max-[996px]:px-5 max-[996px]:py-6 max-[996px]:pb-12 md:px-8"
             onClick={() => open && setOpen(false)}
           >
-            <div className="doc-item-container">{children}</div>
+            <div className="mx-auto max-w-[820px]">{children}</div>
           </main>
           <Toc headings={toc} />
         </div>

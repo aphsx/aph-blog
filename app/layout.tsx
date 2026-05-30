@@ -21,7 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th" className={inter.variable}>
-      <body>{children}</body>
+      <body className="min-h-screen bg-white font-sans text-base leading-relaxed text-[#1c1e21] antialiased">
+        {children}
+      </body>
     </html>
   );
 }
