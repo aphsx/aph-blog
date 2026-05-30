@@ -48,7 +48,9 @@ export const NAV: NavCategory[] = [
     label: "Getting an interview",
     items: [
       { slug: "resume", title: "Resume" },
+      { slug: "linkedin", title: "LinkedIn" },
       { slug: "job-application", title: "หางาน & ยื่นสมัคร" },
+      { slug: "thai-job-market", title: "ตลาดงานไอทีในไทย" },
     ],
   },
   {
@@ -66,6 +68,10 @@ export const NAV: NavCategory[] = [
     ],
   },
   {
+    label: "Algorithms study cheatsheets",
+    items: [{ slug: "algorithms", title: "Algorithms Cheatsheet" }],
+  },
+  {
     label: "System design interview preparation",
     items: [{ slug: "system-design", title: "System Design" }],
   },
@@ -74,16 +80,22 @@ export const NAV: NavCategory[] = [
     items: [{ slug: "behavioral", title: "Behavioral Interview" }],
   },
   {
+    label: "Portfolio & projects",
+    items: [
+      { slug: "portfolio", title: "Portfolio & Projects" },
+      { slug: "ai-tools-2026", title: "AI Tools 2026" },
+    ],
+  },
+  {
     label: "Salary and offer negotiation",
     items: [{ slug: "negotiation", title: "ต่อรอง Offer" }],
   },
   {
-    label: "Algorithms study cheatsheets",
-    items: [{ slug: "algorithms", title: "Algorithms Cheatsheet" }],
-  },
-  {
     label: "Beyond the interview",
-    items: [{ slug: "timeline", title: "แผนเตรียมตัว (Timeline)" }],
+    items: [
+      { slug: "timeline", title: "แผนเตรียมตัว (Timeline)" },
+      { slug: "checklist", title: "เช็กลิสต์ & Mock Interview" },
+    ],
   },
 ];
 
