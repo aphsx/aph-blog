@@ -3,18 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV } from "@/lib/content";
+import { isPagePath, pagePath } from "@/lib/paths";
 
 function NavLink({
-  href,
+  slug,
   title,
   onNavigate,
 }: {
-  href: string;
+  slug: string;
   title: string;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const active = pathname === href;
+  const active = isPagePath(pathname, slug);
+  const href = pagePath(slug);
+
   return (
     <Link
       href={href}
@@ -53,7 +56,7 @@ export default function Sidebar({
               {cat.items.map((item) => (
                 <li key={item.slug}>
                   <NavLink
-                    href={`/guide/${item.slug}`}
+                    slug={item.slug}
                     title={item.title}
                     onNavigate={onNavigate}
                   />
@@ -68,7 +71,7 @@ export default function Sidebar({
                     {sub.items.map((item) => (
                       <li key={item.slug}>
                         <NavLink
-                          href={`/guide/${item.slug}`}
+                          slug={item.slug}
                           title={item.title}
                           onNavigate={onNavigate}
                         />

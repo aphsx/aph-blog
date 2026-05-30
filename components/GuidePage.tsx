@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import Shell from "@/components/Shell";
 import Article from "@/components/Article";
 import DocBreadcrumbs from "@/components/DocBreadcrumbs";
@@ -9,28 +8,9 @@ import { ORDER, extractHeadings } from "@/lib/content";
 import { getCategoryForSlug, getCategoryHref } from "@/lib/nav-utils";
 import { PAGES } from "@/lib/pages";
 
-export function generateStaticParams() {
-  return ORDER.map((slug) => ({ slug }));
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+export default function GuidePage({ slug }: { slug: string }) {
   const page = PAGES[slug];
-  return { title: page ? `${page.title} — SE Interview Roadmap` : "ไม่พบหน้า" };
-}
-
-export default async function GuidePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const page = PAGES[slug];
-  if (!page) notFound();
+  if (!page) return null;
 
   const idx = ORDER.indexOf(page.slug);
   const prev = idx > 0 ? PAGES[ORDER[idx - 1]] : null;

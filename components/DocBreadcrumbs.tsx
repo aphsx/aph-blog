@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { pagePath } from "@/lib/paths";
 
 export default function DocBreadcrumbs({
   categoryLabel,
@@ -15,7 +16,7 @@ export default function DocBreadcrumbs({
       className="mb-4 flex flex-wrap items-center gap-1 text-[0.875rem] text-muted"
     >
       <Link
-        href="/guide/overview"
+        href={pagePath("overview")}
         className="flex items-center text-muted no-underline hover:text-primary hover:no-underline"
         aria-label="Home"
       >

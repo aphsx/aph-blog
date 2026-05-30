@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAVBAR_LINKS } from "@/lib/content";
+import { CODING_SLUGS, NAVBAR_LINKS } from "@/lib/content";
+import { isPagePath, pagePath, slugFromPathname } from "@/lib/paths";
 
 function GitHubIcon() {
   return (
@@ -12,16 +13,12 @@ function GitHubIcon() {
   );
 }
 
-const CODING_PATHS = [
-  "/guide/interview-formats",
-  "/guide/picking-language",
-  "/guide/study-plan",
-  "/guide/best-practices",
-];
-
-function isNavActive(pathname: string, href: string, label: string) {
-  if (pathname === href) return true;
-  if (label === "Coding") return CODING_PATHS.includes(pathname);
+function isNavActive(pathname: string, slug: string, label: string) {
+  if (isPagePath(pathname, slug)) return true;
+  if (label === "Coding") {
+    const current = slugFromPathname(pathname);
+    return current !== null && (CODING_SLUGS as readonly string[]).includes(current);
+  }
   return false;
 }
 
@@ -45,7 +42,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
               ☰
             </button>
             <Link
-              href="/guide/overview"
+              href={pagePath("overview")}
               className="flex items-center gap-2.5 text-base font-bold text-[#1c1e21] no-underline hover:no-underline"
             >
               <span className="shrink-0" aria-hidden>
@@ -73,10 +70,10 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
           >
             {NAVBAR_LINKS.map((item) => (
               <Link
-                key={item.href}
-                href={item.href}
+                key={item.slug}
+                href={pagePath(item.slug)}
                 className={`whitespace-nowrap rounded px-2.5 py-1.5 text-[0.9rem] no-underline hover:bg-surface-soft hover:text-primary hover:no-underline ${
-                  isNavActive(pathname, item.href, item.label)
+                  isNavActive(pathname, item.slug, item.label)
                     ? "font-semibold text-primary"
                     : "text-[#1c1e21]"
                 }`}

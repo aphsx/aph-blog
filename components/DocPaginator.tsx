@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { pagePath } from "@/lib/paths";
 
 type PageRef = { slug: string; title: string };
 
@@ -16,12 +17,12 @@ export default function DocPaginator({
     >
       {prev ? (
         <Link
-          href={`/guide/${prev.slug}`}
+          href={pagePath(prev.slug)}
           className="flex flex-1 flex-col gap-1 no-underline hover:no-underline"
         >
           <span className="text-sm text-muted">Previous</span>
           <span className="font-semibold text-primary hover:underline">
-            {prev.title}
+            « {prev.title}
           </span>
         </Link>
       ) : (
@@ -29,12 +30,12 @@ export default function DocPaginator({
       )}
       {next ? (
         <Link
-          href={`/guide/${next.slug}`}
+          href={pagePath(next.slug)}
           className="flex flex-1 flex-col items-end gap-1 text-right no-underline hover:no-underline"
         >
           <span className="text-sm text-muted">Next</span>
           <span className="font-semibold text-primary hover:underline">
-            {next.title}
+            {next.title} »
           </span>
         </Link>
       ) : (

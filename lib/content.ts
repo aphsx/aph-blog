@@ -84,10 +84,18 @@ export const NAV: NavCategory[] = [
 
 /** Navbar บน — ตรงกับ TIH */
 export const NAVBAR_LINKS = [
-  { label: "เริ่มอ่าน", href: "/guide/overview" },
-  { label: "Coding", href: "/guide/interview-formats" },
-  { label: "Algorithms", href: "/guide/algorithms" },
-];
+  { label: "เริ่มอ่าน", slug: "overview" },
+  { label: "Coding", slug: "interview-formats" },
+  { label: "Algorithms", slug: "algorithms" },
+] as const;
+
+/** slug ที่อยู่ในหมวด Coding */
+export const CODING_SLUGS = [
+  "interview-formats",
+  "picking-language",
+  "study-plan",
+  "best-practices",
+] as const;
 
 /** ลำดับหน้าแบบ flat สำหรับ prev/next */
 export const ORDER: string[] = [

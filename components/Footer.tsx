@@ -1,37 +1,37 @@
 import Link from "next/link";
+import { pagePath } from "@/lib/paths";
 
-/** Footer 4 คอลัมน์ — ตาม TIH */
 const COLS = [
   {
     title: "General",
     links: [
-      { label: "เริ่มอ่าน", href: "/guide/overview" },
-      { label: "แผนเตรียมตัว", href: "/guide/timeline" },
-      { label: "Resume", href: "/guide/resume" },
+      { label: "เริ่มอ่าน", slug: "overview" },
+      { label: "แผนเตรียมตัว", slug: "timeline" },
+      { label: "Resume", slug: "resume" },
     ],
   },
   {
     title: "Interviews",
     links: [
-      { label: "Coding interviews", href: "/guide/interview-formats" },
-      { label: "Study plan", href: "/guide/study-plan" },
-      { label: "System design", href: "/guide/system-design" },
-      { label: "Behavioral", href: "/guide/behavioral" },
+      { label: "Coding interviews", slug: "interview-formats" },
+      { label: "Study plan", slug: "study-plan" },
+      { label: "System design", slug: "system-design" },
+      { label: "Behavioral", slug: "behavioral" },
     ],
   },
   {
     title: "Algorithms",
     links: [
-      { label: "Algorithms cheatsheet", href: "/guide/algorithms" },
-      { label: "เทคนิคสัมภาษณ์", href: "/guide/best-practices" },
-      { label: "เลือกภาษา", href: "/guide/picking-language" },
+      { label: "Algorithms cheatsheet", slug: "algorithms" },
+      { label: "เทคนิคสัมภาษณ์", slug: "best-practices" },
+      { label: "เลือกภาษา", slug: "picking-language" },
     ],
   },
   {
     title: "More",
     links: [
-      { label: "หางาน & สมัคร", href: "/guide/job-application" },
-      { label: "ต่อรอง Offer", href: "/guide/negotiation" },
+      { label: "หางาน & สมัคร", slug: "job-application" },
+      { label: "ต่อรอง Offer", slug: "negotiation" },
     ],
   },
 ];
@@ -48,9 +48,9 @@ export default function Footer() {
               </div>
               <ul className="m-0 list-none p-0">
                 {col.links.map((l) => (
-                  <li key={l.href} className="my-1.5">
+                  <li key={l.slug} className="my-1.5">
                     <Link
-                      href={l.href}
+                      href={pagePath(l.slug)}
                       className="text-sm text-white/80 no-underline hover:text-white hover:underline"
                     >
                       {l.label}
