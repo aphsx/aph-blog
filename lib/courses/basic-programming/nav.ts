@@ -8,7 +8,13 @@ export const basicProgrammingNav: NavCategory[] = [
   },
   {
     label: "บทที่ 1: พื้นฐาน Computer Science",
-    items: [{ slug: "cs-basics", title: "คอมพิวเตอร์ & โปรแกรมทำงานอย่างไร" }],
+    items: [
+      { slug: "cs-basics", title: "คอมพิวเตอร์ทำงานอย่างไร" },
+      { slug: "cs-binary", title: "เลขฐานสอง & การเก็บข้อมูล" },
+      { slug: "cs-program-runs", title: "โปรแกรมรันได้อย่างไร" },
+      { slug: "cs-os-files", title: "ระบบปฏิบัติการ, ไฟล์ & CLI" },
+      { slug: "cs-internet", title: "อินเทอร์เน็ตทำงานอย่างไร" },
+    ],
   },
   {
     label: "บทที่ 2: พื้นฐานการเขียนโปรแกรม",
