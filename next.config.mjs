@@ -3,11 +3,17 @@ const nextConfig = {
   reactStrictMode: true,
   async redirects() {
     return [
-      { source: "/guide", destination: "/", permanent: true },
-      { source: "/guide/overview", destination: "/", permanent: true },
+      // Legacy single-roadmap URLs → the SE roadmap course.
+      { source: "/guide", destination: "/course/se-roadmap", permanent: true },
+      {
+        source: "/guide/overview",
+        destination: "/course/se-roadmap",
+        permanent: true,
+      },
+      { source: "/overview", destination: "/course/se-roadmap", permanent: true },
       {
         source: "/guide/:slug",
-        destination: "/:slug",
+        destination: "/course/se-roadmap/:slug",
         permanent: true,
       },
     ];
