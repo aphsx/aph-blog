@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CODING_SLUGS, NAVBAR_LINKS } from "@/lib/content";
-import { isPagePath, pagePath, slugFromPathname } from "@/lib/paths";
+import { COURSES } from "@/lib/courses";
+import { coursePath, courseFromPathname } from "@/lib/paths";
 
 function GitHubIcon() {
   return (
@@ -13,22 +13,14 @@ function GitHubIcon() {
   );
 }
 
-function isNavActive(pathname: string, slug: string, label: string) {
-  if (isPagePath(pathname, slug)) return true;
-  if (label === "Coding") {
-    const current = slugFromPathname(pathname);
-    return current !== null && (CODING_SLUGS as readonly string[]).includes(current);
-  }
-  return false;
-}
-
 export default function Header({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
+  const activeCourse = courseFromPathname(pathname);
 
   return (
     <>
       <div className="flex min-h-[2.5rem] items-center justify-center bg-primary px-4 py-2 text-center text-sm font-bold text-white">
-        คู่มือเตรียมสัมภาษณ์ Software Engineer ภาษาไทย — ทำตามทีละขั้นได้เลย
+        Aph&apos;s Blog — บันทึกและคอร์สเรียนด้านการพัฒนาซอฟต์แวร์ ภาษาไทย
       </div>
       <header className="sticky top-0 z-50 h-[3.75rem] border-b border-border bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="mx-auto flex h-full max-w-full items-center gap-2 px-4">
@@ -42,7 +34,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
               ☰
             </button>
             <Link
-              href={pagePath("overview")}
+              href="/"
               className="flex items-center gap-2.5 text-base font-bold text-[#1c1e21] no-underline hover:no-underline"
             >
               <span className="shrink-0" aria-hidden>
@@ -53,32 +45,32 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
                     y="22"
                     textAnchor="middle"
                     fill="#fff"
-                    fontSize="14"
+                    fontSize="13"
                     fontWeight="700"
                     fontFamily="system-ui,sans-serif"
                   >
-                    SE
+                    aph
                   </text>
                 </svg>
               </span>
-              <span className="truncate">Interview Roadmap</span>
+              <span className="truncate">Aph&apos;s Blog</span>
             </Link>
           </div>
           <nav
             className="ml-3 flex flex-1 items-center gap-0.5 overflow-x-auto max-[996px]:hidden"
             aria-label="Main"
           >
-            {NAVBAR_LINKS.map((item) => (
+            {COURSES.map((course) => (
               <Link
-                key={item.slug}
-                href={pagePath(item.slug)}
+                key={course.id}
+                href={coursePath(course.id)}
                 className={`whitespace-nowrap rounded px-2.5 py-1.5 text-[0.9rem] no-underline hover:bg-surface-soft hover:text-primary hover:no-underline ${
-                  isNavActive(pathname, item.slug, item.label)
+                  activeCourse === course.id
                     ? "font-semibold text-primary"
                     : "text-[#1c1e21]"
                 }`}
               >
-                {item.label}
+                {course.title}
               </Link>
             ))}
           </nav>

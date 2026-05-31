@@ -1,4 +1,4 @@
-import type { Page } from "../types";
+import type { Page } from "@/lib/types";
 
 export const portfolioPages: Record<string, Page> = {
   portfolio: {

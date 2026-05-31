@@ -1,20 +1,25 @@
 import Shell from "@/components/Shell";
 import Article from "@/components/Article";
 import DocBreadcrumbs from "@/components/DocBreadcrumbs";
-import { GitHubStar, Shoutout } from "@/components/DocContentHeader";
+import { Shoutout } from "@/components/DocContentHeader";
 import DocPaginator from "@/components/DocPaginator";
 import { TocMobile } from "@/components/Toc";
-import { ORDER, extractHeadings } from "@/lib/content";
+import { extractHeadings } from "@/lib/content";
 import { getCategoryForSlug, getCategoryHref } from "@/lib/nav-utils";
-import { PAGES } from "@/lib/pages";
+import { courseForSlug } from "@/lib/courses";
+import { coursePath } from "@/lib/paths";
 
 export default function GuidePage({ slug }: { slug: string }) {
-  const page = PAGES[slug];
-  if (!page) return null;
+  const course = courseForSlug(slug);
+  const page = course?.pages[slug];
+  if (!course || !page) return null;
 
-  const idx = ORDER.indexOf(page.slug);
-  const prev = idx > 0 ? PAGES[ORDER[idx - 1]] : null;
-  const next = idx < ORDER.length - 1 ? PAGES[ORDER[idx + 1]] : null;
+  const idx = course.order.indexOf(page.slug);
+  const prev = idx > 0 ? course.pages[course.order[idx - 1]] : null;
+  const next =
+    idx < course.order.length - 1
+      ? course.pages[course.order[idx + 1]]
+      : null;
   const toc = extractHeadings(page.blocks);
   const category = getCategoryForSlug(page.slug);
 
@@ -22,13 +27,13 @@ export default function GuidePage({ slug }: { slug: string }) {
     <Shell toc={toc}>
       <div className="doc-item-container">
         <article className="min-[768px]:text-[18px]">
-          {category && (
-            <DocBreadcrumbs
-              categoryLabel={category.label}
-              categoryHref={getCategoryHref(category)}
-              pageTitle={page.title}
-            />
-          )}
+          <DocBreadcrumbs
+            courseTitle={course.title}
+            courseHref={coursePath(course.id)}
+            categoryLabel={category?.label}
+            categoryHref={category ? getCategoryHref(category) : undefined}
+            pageTitle={page.title}
+          />
 
           <TocMobile headings={toc} />
 
@@ -38,7 +43,6 @@ export default function GuidePage({ slug }: { slug: string }) {
             </h1>
           </header>
 
-          <GitHubStar />
           <Shoutout />
 
           <p className="mb-6 italic leading-relaxed text-[#1c1e21]">

@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SE Interview Roadmap — คู่มือเตรียมสัมภาษณ์ Software Engineer",
+  title: "Aph's Blog",
   description:
-    "คู่มือเตรียมตัวสมัครงาน Software Engineer ตั้งแต่ศูนย์จนถึงรับ offer ภาษาไทย",
+    "บันทึกและคอร์สเรียนด้านการพัฒนาซอฟต์แวร์ ภาษาไทย — ตั้งแต่เขียนโปรแกรมจากศูนย์จนถึงเตรียมสัมภาษณ์งาน",
 };
 
 export default function RootLayout({

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV } from "@/lib/content";
-import { isPagePath, pagePath } from "@/lib/paths";
+import { COURSE_MAP } from "@/lib/courses";
+import { courseFromPathname, isPagePath, pagePath } from "@/lib/paths";
 
 function NavLink({
   slug,
@@ -40,6 +40,15 @@ export default function Sidebar({
   open?: boolean;
   onNavigate?: () => void;
 }) {
+  const pathname = usePathname();
+  const courseId = courseFromPathname(pathname);
+  const course = courseId ? COURSE_MAP[courseId] : undefined;
+
+  // No sidebar on the blog home (or any non-course route).
+  if (!course) return null;
+
+  const nav = course.nav;
+
   return (
     <aside
       className={`doc-sticky-top sticky h-[calc(100vh-var(--doc-sticky-top))] w-[300px] shrink-0 overflow-y-auto border-r border-border bg-white pb-12 pt-3 max-[996px]:fixed max-[996px]:left-0 max-[996px]:top-[var(--doc-sticky-top)] max-[996px]:z-40 max-[996px]:shadow-[4px_0_24px_rgba(0,0,0,0.1)] max-[996px]:transition-transform max-[996px]:duration-200 ${
@@ -47,7 +56,17 @@ export default function Sidebar({
       }`}
     >
       <nav className="px-1.5 text-[0.875rem]" aria-label="Docs sidebar">
-        {NAV.map((cat) => (
+        <Link
+          href="/"
+          onClick={onNavigate}
+          className="mb-1 flex items-center gap-1.5 px-3 py-2 text-[0.8rem] font-medium text-muted no-underline hover:text-primary hover:no-underline"
+        >
+          ← คอร์สทั้งหมด
+        </Link>
+        <div className="mb-2 px-3 text-[0.95rem] font-bold leading-snug text-primary">
+          {course.title}
+        </div>
+        {nav.map((cat) => (
           <div key={cat.label} className="mb-0.5">
             <div className="cursor-default px-3 py-2 text-[0.875rem] font-bold leading-snug text-[#1c1e21]">
               {cat.label}

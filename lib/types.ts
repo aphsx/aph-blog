@@ -1,4 +1,4 @@
-// Type definitions for the SE Interview Roadmap content model.
+// Type definitions for the Aph's Blog content model (courses → pages → blocks).
 // Pure types only — no data, no logic.
 
 /**
@@ -25,7 +25,7 @@ export type Block =
 /**
  * A documentation page.
  * `group` is optional descriptive metadata; the actual navigation/order is
- * driven entirely by NAV in lib/nav.ts.
+ * driven by the owning course's `nav` (see lib/courses/<id>/nav.ts).
  */
 export type Page = {
   slug: string;
@@ -47,4 +47,29 @@ export type NavCategory = {
   items: NavLink[];
   /** หมวดย่อย (เช่น Algorithms > Basics) */
   subcategories?: { label: string; items: NavLink[] }[];
+};
+
+/**
+ * Descriptive metadata for a course — the unit that "Aph's Blog" hosts many of.
+ * The actual pages/nav/order live on the assembled {@link Course}.
+ */
+export type CourseMeta = {
+  /** URL segment, e.g. "se-roadmap". Lives under /course/<id>. */
+  id: string;
+  /** Display title — catalog card, navbar, breadcrumb. */
+  title: string;
+  /** Short blurb shown on the catalog card. */
+  description: string;
+  /** Emoji or initials shown as the card glyph, e.g. "💼" / "SE". */
+  badge: string;
+  /** Which page is the course landing (rendered at /course/<id>). */
+  overviewSlug: string;
+};
+
+/** A course = its metadata + the pages, sidebar nav, and reading order it owns. */
+export type Course = CourseMeta & {
+  nav: NavCategory[];
+  pages: Record<string, Page>;
+  /** Flat reading order of slugs within the course, for prev/next pagination. */
+  order: string[];
 };
