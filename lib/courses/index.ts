@@ -1,9 +1,10 @@
 import type { Course, Page } from "@/lib/types";
 import { seRoadmap } from "./se-roadmap";
 import { basicProgramming } from "./basic-programming";
+import { practiceProblems } from "./practice-problems";
 
 /** Every course "Aph's Blog" hosts, in catalog order. Add a course here. */
-export const COURSES: Course[] = [seRoadmap, basicProgramming];
+export const COURSES: Course[] = [seRoadmap, basicProgramming, practiceProblems];
 
 /** Course lookup by id. */
 export const COURSE_MAP: Record<string, Course> = Object.fromEntries(
