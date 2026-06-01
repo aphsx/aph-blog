@@ -50,6 +50,10 @@ export const dataStructuresPages: Record<string, Page> = {
       { t: "p", c: "ลิสต์แก้ไขได้ (mutable) และเมื่อกำหนด b = a ทั้งสองชื่อชี้ลิสต์เดียวกัน แก้ตัวหนึ่งกระทบอีกตัว นี่คือกับดักที่ทำให้มือใหม่งงมาก" },
       { t: "code", lang: "python", c: "a = [1, 2, 3]\nb = a               # b ชี้ลิสต์เดียวกับ a (ไม่ใช่สำเนา!)\nb.append(4)\nprint(a)            # [1, 2, 3, 4]  <- a เปลี่ยนด้วย!\n\n# ถ้าต้องการสำเนาจริง ใช้ .copy() หรือ [:]\nc = a.copy()        # หรือ a[:]\nc.append(99)\nprint(a)            # ไม่เปลี่ยน (c เป็นลิสต์คนละก้อน)" },
 
+      { t: "h2", c: "เรียงข้อมูลซับซ้อนด้วย key= (ใช้บ่อยในงาน)" },
+      { t: "p", c: "งานจริงมักเรียงลิสต์ของ dict/tuple ตามฟิลด์ใดฟิลด์หนึ่ง ใช้ sorted(key=...) บอกว่า \"เรียงตามอะไร\" — เทคนิคที่เจอแทบทุกวัน" },
+      { t: "code", lang: "python", c: "students = [\n    {\"name\": \"Aph\", \"score\": 80},\n    {\"name\": \"Bee\", \"score\": 95},\n    {\"name\": \"Cha\", \"score\": 70},\n]\n\n# เรียงตามคะแนนมากไปน้อย\nranked = sorted(students, key=lambda s: s[\"score\"], reverse=True)\nprint(ranked[0][\"name\"])   # Bee\n\n# เรียงคำตามความยาว\nwords = [\"banana\", \"kiwi\", \"apple\"]\nprint(sorted(words, key=len))   # ['kiwi', 'apple', 'banana']\n\n# เรียงหลายเงื่อนไข: ตามคะแนน แล้วชื่อ (ใส่ tuple)\nsorted(students, key=lambda s: (s[\"score\"], s[\"name\"]))" },
+
       { t: "h2", c: "สรุปหัวข้อนี้" },
       {
         t: "ul",
@@ -154,6 +158,10 @@ export const dataStructuresPages: Record<string, Page> = {
       { t: "code", lang: "python", c: "text = \"banana\"\ncount = {}\nfor ch in text:\n    count[ch] = count.get(ch, 0) + 1  # ไม่มี key ให้เริ่มที่ 0\nprint(count)   # {'b': 1, 'a': 3, 'n': 2}\n\n# มีเครื่องมือสำเร็จรูปด้วย\nfrom collections import Counter\nprint(Counter(\"banana\"))  # Counter({'a': 3, 'n': 2, 'b': 1})" },
       { t: "callout", title: "ทำไม dict สำคัญในข้อสอบ", c: "โจทย์ประเภท \"นับ\", \"จับคู่\", \"เคยเห็นค่านี้มาก่อนไหม\" มักแก้เร็วด้วย dict แทนที่จะวนหาทั้งลิสต์ (O(n) ต่อครั้ง) การเช็คใน dict เร็วระดับ O(1) ทำให้อัลกอริทึมโดยรวมเร็วขึ้นมาก (จะเห็นชัดในบท Big-O)" },
 
+      { t: "h2", c: "จัดกลุ่มข้อมูล (Grouping) — แพตเทิร์นที่เจอบ่อย" },
+      { t: "p", c: "อีกการใช้ dict ยอดฮิตคือ \"จัดกลุ่ม\" — เก็บลิสต์ของสมาชิกแยกตามกลุ่ม เช่นจัดนักเรียนตามเกรด หรือคำตามตัวอักษรแรก" },
+      { t: "code", lang: "python", c: "students = [(\"Aph\", \"A\"), (\"Bee\", \"B\"), (\"Cha\", \"A\")]\n\ngroups = {}\nfor name, grade in students:\n    if grade not in groups:\n        groups[grade] = []        # ยังไม่มีกลุ่มนี้ สร้างลิสต์ว่าง\n    groups[grade].append(name)\nprint(groups)   # {'A': ['Aph', 'Cha'], 'B': ['Bee']}\n\n# มีเครื่องมือสำเร็จที่สั้นกว่า\nfrom collections import defaultdict\ngroups = defaultdict(list)        # ค่า default ของ key ใหม่ = ลิสต์ว่าง\nfor name, grade in students:\n    groups[grade].append(name)    # ไม่ต้องเช็คว่ามี key ไหม" },
+
       { t: "h2", c: "dict ซ้อนกัน (Nested)" },
       { t: "code", lang: "python", c: "users = {\n    \"u1\": {\"name\": \"Aphisit\", \"age\": 25},\n    \"u2\": {\"name\": \"Mali\", \"age\": 22},\n}\nprint(users[\"u1\"][\"name\"])   # Aphisit\n\nfor uid, info in users.items():\n    print(f\"{uid}: {info['name']} อายุ {info['age']}\")" },
 
@@ -165,7 +173,7 @@ export const dataStructuresPages: Record<string, Page> = {
           "ค้นหา/เพิ่ม/แก้/ลบ เร็วเฉลี่ย O(1)",
           "ใช้ .get(key, default) เลี่ยง KeyError",
           "วนด้วย .items() เพื่อได้ทั้ง key และ value",
-          "ใช้งานยอดฮิต: นับความถี่ ด้วย count[x] = count.get(x, 0) + 1 หรือ Counter",
+          "ใช้งานยอดฮิต: นับความถี่ (Counter) และจัดกลุ่ม (grouping/defaultdict)",
           "dict ซ้อนกันได้ ใช้แทนข้อมูลที่มีโครงสร้างซับซ้อน (คล้าย JSON)",
         ],
       },
