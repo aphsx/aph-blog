@@ -54,6 +54,26 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "proj-env", title: "Environment Variables & Config" },
     ],
   },
-  // บทที่ 5: Git สำหรับทำงานเป็นทีม — เพิ่มใน Step 5
+  {
+    label: "บทที่ 5: Git สำหรับทำงานเป็นทีม",
+    items: [
+      { slug: "git-recap", title: "ทบทวน Git + Mental Model" },
+      { slug: "git-branch", title: "Branch & Merge" },
+      { slug: "git-remote", title: "Remote, GitHub & push/pull" },
+      { slug: "git-conflict", title: "Merge Conflict & Rebase" },
+      { slug: "git-workflow", title: "PR Workflow & commit hygiene" },
+    ],
+  },
+  {
+    label: "บทที่ 6: การเขียนเทสต์",
+    items: [
+      { slug: "test-why", title: "ทำไมต้องเทสต์ & ประเภท" },
+      { slug: "test-pytest", title: "เริ่มต้นกับ pytest" },
+      { slug: "test-fixtures", title: "Fixture & Parametrize" },
+      { slug: "test-mock", title: "Mock & แยก dependency" },
+      { slug: "test-tdd", title: "TDD & Coverage" },
+    ],
+  },
+  // บทที่ 7: Clean Code & การออกแบบ — เพิ่มใน Step 7
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];

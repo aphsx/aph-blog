@@ -5,6 +5,8 @@ import { pythonDeepPages } from "./pages/python-deep";
 import { robustCodePages } from "./pages/robust-code";
 import { debuggingPages } from "./pages/debugging";
 import { projectToolingPages } from "./pages/project-tooling";
+import { gitDeepPages } from "./pages/git-deep";
+import { testingPages } from "./pages/testing";
 // บทเรียนแต่ละบท import เพิ่มที่นี่ทีละ step (ดู docs/intermediate-programming-plan)
 
 const pages: Record<string, Page> = {
@@ -13,6 +15,8 @@ const pages: Record<string, Page> = {
   ...robustCodePages,
   ...debuggingPages,
   ...projectToolingPages,
+  ...gitDeepPages,
+  ...testingPages,
   // ...spread บทเรียนแต่ละบทที่นี่ทีละ step
 };
 

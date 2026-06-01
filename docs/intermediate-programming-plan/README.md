@@ -167,8 +167,8 @@ lib/courses/intermediate-programming/
 | 2 | Robust code (5) | ✅ | robust-code.ts ครบ 5 หัวข้อ, build ผ่าน 88 หน้า |
 | 3 | Debugging & Performance (4) 🆕 | ✅ | debugging.ts ครบ 4 หัวข้อ, build ผ่าน 92 หน้า |
 | 4 | Project & tooling (5) | ✅ | project-tooling.ts ครบ 5 หัวข้อ, build ผ่าน 97 หน้า |
-| 5 | Git ลึก (5) | ⬜ | |
-| 6 | Testing (5) | ⬜ | |
+| 5 | Git ลึก (5) | ✅ | git-deep.ts ครบ 5 หัวข้อ, build ผ่าน 102 หน้า |
+| 6 | Testing (5) | ✅ | testing.ts ครบ 5 หัวข้อ, build ผ่าน 107 หน้า |
 | 7 | Clean code (5) | ⬜ | |
 | 8 | Real data (6) | ⬜ | |
 | 9 | Databases (5) | ⬜ | |
