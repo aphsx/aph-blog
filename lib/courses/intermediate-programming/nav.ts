@@ -105,6 +105,36 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "db-orm", title: "ORM (SQLAlchemy)" },
     ],
   },
-  // บทที่ 10: สร้างเว็บแอป & API — เพิ่มใน Step 10
+  {
+    label: "บทที่ 10: สร้างเว็บแอป & API",
+    items: [
+      { slug: "web2-http", title: "HTTP เจาะลึก" },
+      { slug: "web2-framework", title: "เริ่มกับ FastAPI" },
+      { slug: "web2-request", title: "รับ Request & Validation" },
+      { slug: "web2-db", title: "เชื่อม API กับ DB (CRUD)" },
+      { slug: "web2-auth", title: "Authentication" },
+      { slug: "web2-security", title: "Security พื้นฐาน" },
+      { slug: "web2-project", title: "ประกอบ API จริง end-to-end" },
+    ],
+  },
+  {
+    label: "บทที่ 11: Data Structures & Algorithms ⭐",
+    items: [
+      { slug: "dsa-choose", title: "เลือกโครงสร้าง & Big-O" },
+      { slug: "dsa-stack-queue", title: "Stack, Queue & Deque" },
+      { slug: "dsa-linked", title: "Linked List" },
+      { slug: "dsa-tree", title: "Tree & BST" },
+      { slug: "dsa-heap", title: "Heap & Priority Queue" },
+      { slug: "dsa-hash", title: "Hash Table เจาะลึก" },
+      { slug: "dsa-sorting", title: "Sorting เชิงลึก" },
+      { slug: "dsa-binary-search", title: "Binary Search & Variations" },
+      { slug: "dsa-twopointer", title: "Two-Pointer & Sliding Window" },
+      { slug: "dsa-recursion", title: "Recursion & Backtracking" },
+      { slug: "dsa-dp", title: "Dynamic Programming" },
+      { slug: "dsa-greedy", title: "Greedy Algorithms" },
+      { slug: "dsa-graph", title: "Graph & BFS/DFS" },
+    ],
+  },
+  // บทที่ 12: Concurrency & Async — เพิ่มใน Step 12
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];
