@@ -95,6 +95,16 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "data-pandas", title: "รู้จัก pandas (เบื้องต้น)" },
     ],
   },
-  // บทที่ 9: ฐานข้อมูล & SQL — เพิ่มใน Step 9
+  {
+    label: "บทที่ 9: ฐานข้อมูล & SQL",
+    items: [
+      { slug: "db-model", title: "Relational Model & ออกแบบตาราง" },
+      { slug: "db-sql", title: "SQL เจาะลึก" },
+      { slug: "db-advanced", title: "Index, Transaction & Constraint" },
+      { slug: "db-python", title: "เชื่อม Python กับ DB (sqlite3)" },
+      { slug: "db-orm", title: "ORM (SQLAlchemy)" },
+    ],
+  },
+  // บทที่ 10: สร้างเว็บแอป & API — เพิ่มใน Step 10
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];

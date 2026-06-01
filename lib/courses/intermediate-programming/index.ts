@@ -9,6 +9,7 @@ import { gitDeepPages } from "./pages/git-deep";
 import { testingPages } from "./pages/testing";
 import { cleanCodePages } from "./pages/clean-code";
 import { realDataPages } from "./pages/real-data";
+import { databasesPages } from "./pages/databases";
 // บทเรียนแต่ละบท import เพิ่มที่นี่ทีละ step (ดู docs/intermediate-programming-plan)
 
 const pages: Record<string, Page> = {
@@ -21,6 +22,7 @@ const pages: Record<string, Page> = {
   ...testingPages,
   ...cleanCodePages,
   ...realDataPages,
+  ...databasesPages,
   // ...spread บทเรียนแต่ละบทที่นี่ทีละ step
 };
 

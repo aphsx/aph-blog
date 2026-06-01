@@ -171,7 +171,7 @@ lib/courses/intermediate-programming/
 | 6 | Testing (5) | ✅ | testing.ts ครบ 5 หัวข้อ, build ผ่าน 107 หน้า |
 | 7 | Clean code (5) | ✅ | clean-code.ts ครบ 5 หัวข้อ, build ผ่าน 112 หน้า |
 | 8 | Real data (6) | ✅ | real-data.ts ครบ 6 หัวข้อ, build ผ่าน 118 หน้า |
-| 9 | Databases (5) | ⬜ | |
+| 9 | Databases (5) | ✅ | databases.ts ครบ 5 หัวข้อ, build ผ่าน 123 หน้า |
 | 10 | Web + auth/security (7) | ⬜ | |
 | 11 | DSA mid (13) ⭐ | ⬜ | |
 | 12 | Concurrency (4) | ⬜ | |
