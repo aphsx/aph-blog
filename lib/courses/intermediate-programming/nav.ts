@@ -44,6 +44,16 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "dbg-performance", title: "เทคนิคเพิ่มประสิทธิภาพ" },
     ],
   },
-  // บทที่ 4: โครงสร้างโปรเจกต์ & เครื่องมือ — เพิ่มใน Step 4
+  {
+    label: "บทที่ 4: โครงสร้างโปรเจกต์ & เครื่องมือ",
+    items: [
+      { slug: "proj-modules", title: "Module & import" },
+      { slug: "proj-packages", title: "Package & โครงสร้างโฟลเดอร์" },
+      { slug: "proj-venv", title: "Virtual Environment & pip" },
+      { slug: "proj-cli", title: "สร้าง CLI ด้วย argparse" },
+      { slug: "proj-env", title: "Environment Variables & Config" },
+    ],
+  },
+  // บทที่ 5: Git สำหรับทำงานเป็นทีม — เพิ่มใน Step 5
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];

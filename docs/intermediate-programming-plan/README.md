@@ -166,7 +166,7 @@ lib/courses/intermediate-programming/
 | 1 | Python ระดับลึก (9) | ✅ | python-deep.ts ครบ 9 หัวข้อ, nav+index wired, build ผ่าน 83 หน้า |
 | 2 | Robust code (5) | ✅ | robust-code.ts ครบ 5 หัวข้อ, build ผ่าน 88 หน้า |
 | 3 | Debugging & Performance (4) 🆕 | ✅ | debugging.ts ครบ 4 หัวข้อ, build ผ่าน 92 หน้า |
-| 4 | Project & tooling (5) | ⬜ | |
+| 4 | Project & tooling (5) | ✅ | project-tooling.ts ครบ 5 หัวข้อ, build ผ่าน 97 หน้า |
 | 5 | Git ลึก (5) | ⬜ | |
 | 6 | Testing (5) | ⬜ | |
 | 7 | Clean code (5) | ⬜ | |
