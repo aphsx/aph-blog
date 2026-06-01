@@ -133,6 +133,11 @@ export const programmingBasicsPages: Record<string, Page> = {
       { t: "p", c: "เมื่อมีหลายตัวดำเนินการในบรรทัดเดียว Python ทำตามลำดับเหมือนคณิตศาสตร์: วงเล็บ → ยกกำลัง → คูณ/หาร → บวก/ลบ → เปรียบเทียบ → ตรรกะ ถ้าไม่แน่ใจให้ใส่วงเล็บไว้ ปลอดภัยและอ่านง่ายกว่า" },
       { t: "code", lang: "python", c: "print(2 + 3 * 4)      # 14   (คูณก่อน: 2 + 12)\nprint((2 + 3) * 4)    # 20   (วงเล็บก่อน: 5 * 4)\nprint(10 - 2 ** 2)    # 6    (ยกกำลังก่อน: 10 - 4)\nprint(True or False and False)  # True (and ก่อน or)" },
 
+      { t: "h2", c: "Membership (in) & Identity (is)" },
+      { t: "p", c: "อีกสองกลุ่มที่ใช้บ่อยมาก: in เช็คว่า \"มีอยู่ในกลุ่มไหม\" และ is เช็คว่า \"เป็น object เดียวกันไหม\" (ต่างจาก == ที่เช็คค่าเท่ากัน)" },
+      { t: "code", lang: "python", c: "# in / not in — เช็คสมาชิก (ใช้กับ list, str, dict)\nprint(\"a\" in \"cat\")           # True\nprint(3 in [1, 2, 3])         # True\nprint(\"x\" not in \"cat\")       # True\n\nfruits = [\"แอปเปิล\", \"กล้วย\"]\nif \"กล้วย\" in fruits:\n    print(\"มีกล้วย\")\n\n# is — เช็คว่าเป็น object เดียวกัน (ใช้กับ None เป็นหลัก)\nx = None\nprint(x is None)              # True  (วิธีมาตรฐานเช็ค None)\nprint(x == None)              # ได้ผลเหมือนกันแต่ไม่นิยม — ใช้ is" },
+      { t: "callout", title: "== เทียบค่า, is เทียบ object", c: "ใช้ == เกือบทุกครั้งที่เทียบค่า ส่วน is ใช้เฉพาะกับ None (x is None) ตามธรรมเนียม Python — อย่าใช้ is เทียบตัวเลข/ข้อความทั่วไป เพราะผลอาจไม่เป็นอย่างที่คิด" },
+
       { t: "h2", c: "สรุปหัวข้อนี้" },
       {
         t: "ul",
@@ -141,6 +146,7 @@ export const programmingBasicsPages: Record<string, Page> = {
           "เปรียบเทียบ: == != > < >= <= ได้ผลเป็น True/False (อย่าสับสน = กับ ==)",
           "ตรรกะ: and (จริงทั้งหมด), or (จริงอย่างน้อยหนึ่ง), not (กลับค่า)",
           "กำหนดค่าย่อ: += -= *= //= ช่วยอัปเดตค่าตัวเองสั้นลง",
+          "membership: in / not in เช็คสมาชิก; identity: is ใช้เช็ค None",
           "ลำดับความสำคัญตามคณิตศาสตร์ — ไม่แน่ใจให้ใส่วงเล็บ",
         ],
       },
@@ -179,6 +185,10 @@ export const programmingBasicsPages: Record<string, Page> = {
 
       { t: "h2", c: "ตัวอย่างรวม: โปรแกรมคำนวณ BMI" },
       { t: "code", lang: "python", c: "print(\"=== คำนวณ BMI ===\")\nweight = float(input(\"น้ำหนัก (กก.): \"))\nheight = float(input(\"ส่วนสูง (เมตร): \"))\n\nbmi = weight / (height ** 2)\nprint(f\"ค่า BMI ของคุณคือ {bmi:.1f}\")\n# ถ้าใส่ 60 และ 1.70 -> ค่า BMI ของคุณคือ 20.8" },
+
+      { t: "h2", c: "รับหลายค่าในบรรทัดเดียว (split / map)" },
+      { t: "p", c: "บ่อยครั้งผู้ใช้พิมพ์หลายค่าคั่นด้วยช่องว่างในบรรทัดเดียว — ใช้ .split() หั่นเป็นลิสต์ แล้ว map() แปลงชนิดทีเดียว เทคนิคนี้เจอบ่อยมากเวลาแก้โจทย์/รับ input หลายค่า" },
+      { t: "code", lang: "python", c: "# ผู้ใช้พิมพ์:  10 20 30\nparts = input(\"ใส่เลขคั่นด้วยช่องว่าง: \").split()   # ['10','20','30']\nnums = [int(x) for x in parts]                       # [10, 20, 30]\nprint(sum(nums))                                     # 60\n\n# รับ 2 ค่าแยกตัวแปรในบรรทัดเดียว\na, b = input(\"ใส่ 2 เลข: \").split()\na, b = int(a), int(b)\nprint(a + b)\n\n# สั้นสุดด้วย map\nx, y = map(int, input().split())   # แปลงทุกตัวเป็น int พร้อมแยกตัวแปร" },
 
       { t: "h2", c: "สรุปหัวข้อนี้" },
       {
@@ -232,6 +242,10 @@ export const programmingBasicsPages: Record<string, Page> = {
 
       { t: "h2", c: "เขียนสั้นด้วย ternary และ match" },
       { t: "code", lang: "python", c: "# ternary: เลือกค่าในบรรทัดเดียว\nage = 20\nstatus = \"ผู้ใหญ่\" if age >= 18 else \"เด็ก\"\nprint(status)   # ผู้ใหญ่\n\n# match (Python 3.10+): เทียบหลายค่าแบบสะอาด\nday = 3\nmatch day:\n    case 1: print(\"จันทร์\")\n    case 2: print(\"อังคาร\")\n    case 3: print(\"พุธ\")\n    case _: print(\"วันอื่น\")   # _ = กรณีอื่น ๆ ทั้งหมด" },
+
+      { t: "h2", c: "เกร็ดเงื่อนไขที่ใช้จริงในงาน" },
+      { t: "code", lang: "python", c: "score = 75\n\n# เทียบช่วงแบบลูกโซ่ (chained) — เขียนเหมือนคณิตศาสตร์ได้เลย\nif 0 <= score <= 100:          # = (0 <= score) and (score <= 100)\n    print(\"คะแนนอยู่ในช่วงที่ถูกต้อง\")\n\n# เช็คว่าอยู่ในกลุ่มไหม ด้วย in (สั้นกว่าเขียน or หลายอัน)\nday = \"Sat\"\nif day in (\"Sat\", \"Sun\"):       # แทน day==\"Sat\" or day==\"Sun\"\n    print(\"วันหยุด\")" },
+      { t: "callout", title: "= กับ == สับสนคือบั๊กยอดฮิต", warn: true, c: "= คือ \"กำหนดค่า\" (x = 5) ส่วน == คือ \"เปรียบเทียบ\" (if x == 5) เขียน if x = 5 จะ error ทันที โชคดีที่ Python ฟ้อง — แต่ในเงื่อนไขซับซ้อนให้ระวังเสมอ และจำว่าเช็ค None ใช้ if x is None ไม่ใช่ ==" },
 
       { t: "h2", c: "สรุปหัวข้อนี้" },
       {
@@ -297,12 +311,16 @@ export const programmingBasicsPages: Record<string, Page> = {
       { t: "h2", c: "Pattern การวนที่เจอบ่อย" },
       { t: "code", lang: "python", c: "nums = [4, 8, 15, 16, 23, 42]\n\n# 1) สะสมผลรวม\ntotal = 0\nfor n in nums:\n    total += n\nprint(total)        # 108\n\n# 2) นับจำนวนที่เข้าเงื่อนไข\ncount = 0\nfor n in nums:\n    if n > 15:\n        count += 1\nprint(count)        # 3\n\n# 3) หาค่ามากที่สุดเอง\nbiggest = nums[0]\nfor n in nums:\n    if n > biggest:\n        biggest = n\nprint(biggest)      # 42" },
 
+      { t: "h2", c: "zip — วนสองลิสต์พร้อมกัน (ใช้บ่อยในงาน)" },
+      { t: "p", c: "เมื่อมีข้อมูล 2 ชุดที่คู่กัน (เช่นชื่อกับคะแนน) ใช้ zip วนพร้อมกันทีละคู่ — สะอาดกว่าวนด้วย index มาก" },
+      { t: "code", lang: "python", c: "names = [\"Aph\", \"Bee\", \"Cha\"]\nscores = [80, 95, 70]\n\nfor name, score in zip(names, scores):\n    print(f\"{name} ได้ {score} คะแนน\")\n# Aph ได้ 80 คะแนน ...\n\n# วน dict ด้วย .items() ก็ได้ทั้ง key และ value\nprices = {\"กาแฟ\": 50, \"ชา\": 40}\nfor item, price in prices.items():\n    print(f\"{item} ราคา {price} บาท\")" },
+
       { t: "h2", c: "สรุปหัวข้อนี้" },
       {
         t: "ul",
         c: [
           "for วนตามลำดับ — ใช้กับ range() หรือวนตามลิสต์/ข้อความโดยตรง",
-          "enumerate() ให้ทั้งลำดับ (index) และค่าพร้อมกัน",
+          "enumerate() ให้ทั้งลำดับ+ค่า; zip() วนหลายลิสต์พร้อมกัน; .items() วน dict",
           "while วนจนกว่าเงื่อนไขจะเท็จ — ต้องมีจุดที่ทำให้เงื่อนไขเปลี่ยน เลี่ยง infinite loop",
           "break ออกจาก loop, continue ข้ามไปรอบถัดไป",
           "loop ซ้อน loop ใช้กับตาราง/2 มิติ แต่ระวังประสิทธิภาพ",
@@ -364,6 +382,11 @@ export const programmingBasicsPages: Record<string, Page> = {
       { t: "h2", c: "เขียน docstring อธิบายฟังก์ชัน" },
       { t: "code", lang: "python", c: "def bmi(weight, height):\n    \"\"\"คำนวณ BMI จากน้ำหนัก(กก.) และส่วนสูง(เมตร)\"\"\"\n    return weight / (height ** 2)\n\nprint(bmi.__doc__)   # แสดงคำอธิบายของฟังก์ชัน" },
 
+      { t: "h2", c: "Type Hints — บอกชนิดข้อมูล (มาตรฐานสมัยใหม่)" },
+      { t: "p", c: "เราเขียน \"ใบ้\" ชนิดข้อมูลของ parameter และค่าที่ return ได้ ไม่บังคับตอนรัน แต่ช่วยให้ editor เตือน bug และคนอ่านเข้าใจง่าย — โค้ดในงานจริงสมัยนี้นิยมใส่" },
+      { t: "code", lang: "python", c: "def bmi(weight: float, height: float) -> float:\n    return weight / (height ** 2)\n\ndef greet(name: str, times: int = 1) -> str:\n    return (f\"สวัสดี {name} \") * times\n\n# name: str = parameter ชนิด str, -> str = ฟังก์ชันคืน str" },
+      { t: "callout", title: "กับดัก: อย่าใช้ list/dict เป็นค่า default", warn: true, c: "เขียน def f(items=[]) เป็นบั๊กคลาสสิก เพราะ list ถูกสร้างครั้งเดียวตอนนิยามฟังก์ชัน แล้วใช้ร่วมกันทุกครั้งที่เรียก ค่าจะค้างข้ามการเรียก! วิธีแก้: ใช้ items=None แล้วสร้าง list ใหม่ข้างใน (if items is None: items = []) — เรื่องนี้จะเข้าใจลึกขึ้นในคอร์สเชิงลึก" },
+
       { t: "h2", c: "สรุปหัวข้อนี้" },
       {
         t: "ul",
@@ -374,6 +397,7 @@ export const programmingBasicsPages: Record<string, Page> = {
           "ค่า default ทำให้ parameter ไม่บังคับส่ง",
           "*args/**kwargs รับจำนวนอาร์กิวเมนต์ไม่จำกัด",
           "lambda คือฟังก์ชันบรรทัดเดียว เหมาะกับ sorted/filter",
+          "type hint (name: str -> int) ช่วยเตือน bug; ห้ามใช้ list/dict เป็นค่า default",
         ],
       },
       { t: "callout", title: "แบบฝึกหัด", c: "1) เขียนฟังก์ชัน is_even(n) คืน True/False  2) เขียน max_of_three(a,b,c) คืนค่ามากสุด  3) เขียน greet(name, lang=\"th\") ที่ทักทายต่างภาษาตาม lang  4) เขียนฟังก์ชันรับลิสต์ตัวเลข แล้ว return ทั้งผลรวมและค่าเฉลี่ย  5) ใช้ sorted + lambda เรียงรายชื่อตามความยาวของชื่อ" },
@@ -425,6 +449,11 @@ export const programmingBasicsPages: Record<string, Page> = {
       { t: "p", c: "บาง error เราคาดเดาได้ว่าจะเกิด (เช่นผู้ใช้พิมพ์ตัวอักษรแทนตัวเลข) ใช้ try/except ดักไว้ ไม่ให้โปรแกรมพังกลางคัน" },
       { t: "code", lang: "python", c: "try:\n    num = int(input(\"ใส่ตัวเลข: \"))\n    print(f\"100 หาร {num} = {100 / num}\")\nexcept ValueError:\n    print(\"กรุณาใส่ตัวเลขเท่านั้น\")\nexcept ZeroDivisionError:\n    print(\"หารด้วยศูนย์ไม่ได้\")\nelse:\n    print(\"คำนวณสำเร็จ\")     # ทำเมื่อไม่มี error\nfinally:\n    print(\"จบการทำงาน\")      # ทำเสมอ ไม่ว่าจะ error หรือไม่" },
       { t: "callout", title: "อย่า except เปล่า ๆ แบบกว้างเกินไป", warn: true, c: "การเขียน except: เฉย ๆ (จับทุก error) ทำให้บั๊กถูกซ่อนและหายาก ควรระบุชนิด error ที่คาดไว้ เช่น except ValueError: เพื่อให้รู้ว่ากำลังจัดการอะไรอยู่" },
+
+      { t: "h2", c: "โยน error เองด้วย raise" },
+      { t: "p", c: "นอกจากดัก error เรายัง \"โยน\" error เองได้เมื่อเจอสถานการณ์ที่ไม่ควรดำเนินต่อ — ดีกว่าคืนค่าแปลก ๆ (เช่น -1) ที่ผู้เรียกอาจลืมเช็ค ทำให้ bug ปรากฏทันทีตรงจุดเกิดเหตุ" },
+      { t: "code", lang: "python", c: "def set_age(age):\n    if age < 0:\n        raise ValueError(f\"อายุติดลบไม่ได้: {age}\")   # หยุดและบอกสาเหตุชัด\n    return age\n\n# set_age(-5)   ->  ValueError: อายุติดลบไม่ได้: -5\n\n# ใช้คู่กับ try/except ของผู้เรียกได้\ntry:\n    set_age(-5)\nexcept ValueError as e:\n    print(f\"ผิดพลาด: {e}\")" },
+      { t: "callout", title: "fail fast — พังเร็ว พังชัด", c: "การ raise ตั้งแต่เจอข้อมูลผิดที่ \"ขอบ\" ของระบบ ดีกว่าปล่อยให้ค่าผิดไหลไปพังที่อื่นซึ่งหาสาเหตุยากกว่ามาก นี่คือหลักการ defensive programming ที่จะลงลึกในคอร์สเชิงลึก" },
 
       { t: "h2", c: "เทคนิคแก้บั๊กที่ใช้จริงทุกวัน" },
       {
