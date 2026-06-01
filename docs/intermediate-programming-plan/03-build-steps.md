@@ -11,19 +11,23 @@
 
 ```
 overview: intermediate
-บท1:  py-comprehension py-iter-gen py-args py-hof-lambda py-closures py-decorators py-context
+บท1:  py-comprehension py-iter-gen py-args py-hof-lambda py-closures py-decorators py-context py-mutability py-collections
 บท2:  err-exceptions err-custom err-logging err-typing err-defensive
-บท3:  proj-modules proj-packages proj-venv proj-cli proj-env
-บท4:  git-recap git-branch git-remote git-conflict git-workflow
-บท5:  test-why test-pytest test-fixtures test-mock test-tdd
-บท6:  clean-naming clean-principles clean-solid clean-refactor clean-patterns
-บท7:  data-files data-formats data-http data-datetime data-pandas
-บท8:  db-model db-sql db-advanced db-python db-orm
-บท9:  web2-http web2-framework web2-request web2-db web2-project
-บท10: dsa-choose dsa-stack-queue dsa-linked dsa-tree dsa-hash dsa-recursion dsa-dp dsa-graph
-บท11: async-why async-threads async-process async-asyncio
-บท12: cap-plan cap-build cap-quality cap-deploy
+บท3:  dbg-debugger dbg-traceback dbg-profiling dbg-performance        ← 🆕 บทใหม่
+บท4:  proj-modules proj-packages proj-venv proj-cli proj-env
+บท5:  git-recap git-branch git-remote git-conflict git-workflow
+บท6:  test-why test-pytest test-fixtures test-mock test-tdd
+บท7:  clean-naming clean-principles clean-solid clean-refactor clean-patterns
+บท8:  data-files data-formats data-regex data-http data-datetime data-pandas
+บท9:  db-model db-sql db-advanced db-python db-orm
+บท10: web2-http web2-framework web2-request web2-db web2-project web2-auth web2-security
+บท11: dsa-choose dsa-stack-queue dsa-linked dsa-tree dsa-hash dsa-sorting dsa-binary-search dsa-twopointer dsa-recursion dsa-dp dsa-greedy dsa-graph
+บท12: async-why async-threads async-process async-asyncio
+บท13: cap-plan cap-build cap-quality cap-deploy
 ```
+
+> 🆕 หัวข้อที่เพิ่มจากการ audit (ดู `04-content-review.md`): `py-mutability` `py-collections` · บท 3 ทั้งบท (`dbg-*`) · `data-regex` · `web2-auth` `web2-security` · `dsa-sorting` `dsa-binary-search` `dsa-twopointer` `dsa-greedy`
+> ตรวจแล้ว: `dsa-binary-search` ≠ `topic-binary-search` (ของ se-roadmap) — ไม่ซ้ำ
 
 > ⚠️ `web-` (คอร์สพื้นฐาน) มีอยู่แล้ว → คอร์สนี้ใช้ `web2-` กันชน
 > ⚠️ `learn` และ `overview` ถูกใช้แล้ว → overview ของคอร์สนี้ใช้ `intermediate`
@@ -48,7 +52,7 @@ export const overviewPages: Record<string, Page> = {
     group: "เขียนโปรแกรมระดับกลาง",
     blocks: [
       // Step 0: ใส่เกริ่น + ตาราง curriculum + setup + links ไปบท 1
-      // Step 12: กลับมาเติมให้ครบทุกบท
+      // Step 13: กลับมาเติมให้ครบทุกบท
     ],
   },
 };
@@ -114,7 +118,7 @@ export const COURSES: Course[] = [
 
 ---
 
-## Step 1–12 — เขียนเนื้อหาทีละบท
+## Step 1–13 — เขียนเนื้อหาทีละบท
 
 ทุก step เนื้อหาทำ **4 อย่างเดียวกัน**:
 
@@ -137,6 +141,8 @@ export const COURSES: Course[] = [
     { slug: "py-closures", title: "Scope & Closure" },
     { slug: "py-decorators", title: "Decorator" },
     { slug: "py-context", title: "Context Manager (with)" },
+    { slug: "py-mutability", title: "Mutability, Reference & Copy" },
+    { slug: "py-collections", title: "collections & itertools" },
   ],
 },
 ```
@@ -160,20 +166,21 @@ const pages = { ...overviewPages, ...pythonDeepPages /* , ...บทถัดไ�
 |------|-----------|-------------|-------------------|
 | 1 | `python-deep.ts` | `pythonDeepPages` | บทที่ 1: Python ระดับลึก |
 | 2 | `robust-code.ts` | `robustCodePages` | บทที่ 2: Error handling & โค้ดที่แข็งแรง |
-| 3 | `project-tooling.ts` | `projectToolingPages` | บทที่ 3: โครงสร้างโปรเจกต์ & เครื่องมือ |
-| 4 | `git-deep.ts` | `gitDeepPages` | บทที่ 4: Git สำหรับทำงานเป็นทีม |
-| 5 | `testing.ts` | `testingPages` | บทที่ 5: การเขียนเทสต์ |
-| 6 | `clean-code.ts` | `cleanCodePages` | บทที่ 6: Clean Code & การออกแบบ |
-| 7 | `real-data.ts` | `realDataPages` | บทที่ 7: ทำงานกับข้อมูลจริง |
-| 8 | `databases.ts` | `databasesPages` | บทที่ 8: ฐานข้อมูล & SQL |
-| 9 | `web-apps.ts` | `webAppsPages` | บทที่ 9: สร้างเว็บแอป & API |
-| 10 | `dsa-mid.ts` | `dsaMidPages` | บทที่ 10: Data Structures & Algorithms ⭐ |
-| 11 | `concurrency.ts` | `concurrencyPages` | บทที่ 11: Concurrency & Async |
-| 12 | `capstone.ts` | `capstonePages` | บทที่ 12: Capstone Project |
+| 3 🆕 | `debugging.ts` | `debuggingPages` | บทที่ 3: Debugging, Profiling & Performance |
+| 4 | `project-tooling.ts` | `projectToolingPages` | บทที่ 4: โครงสร้างโปรเจกต์ & เครื่องมือ |
+| 5 | `git-deep.ts` | `gitDeepPages` | บทที่ 5: Git สำหรับทำงานเป็นทีม |
+| 6 | `testing.ts` | `testingPages` | บทที่ 6: การเขียนเทสต์ |
+| 7 | `clean-code.ts` | `cleanCodePages` | บทที่ 7: Clean Code & การออกแบบ |
+| 8 | `real-data.ts` | `realDataPages` | บทที่ 8: ทำงานกับข้อมูลจริง |
+| 9 | `databases.ts` | `databasesPages` | บทที่ 9: ฐานข้อมูล & SQL |
+| 10 | `web-apps.ts` | `webAppsPages` | บทที่ 10: สร้างเว็บแอป & API |
+| 11 | `dsa-mid.ts` | `dsaMidPages` | บทที่ 11: Data Structures & Algorithms ⭐ |
+| 12 | `concurrency.ts` | `concurrencyPages` | บทที่ 12: Concurrency & Async |
+| 13 | `capstone.ts` | `capstonePages` | บทที่ 13: Capstone Project |
 
 ---
 
-## Step 12 — งานปิดคอร์ส (เพิ่มเติมจากการเขียนบท 12)
+## Step 13 — งานปิดคอร์ส (เพิ่มเติมจากการเขียนบท 13)
 
 - [ ] กลับไปเติม `overview.ts` ให้มีตาราง curriculum ครบ 12 บท + `links` ไปทุกบท (เหมือน `learn` ของคอร์สพื้นฐาน)
 - [ ] ใส่ลิงก์เชื่อม: ท้ายบท 10 และบท 12 → `pp-basics` (practice-problems) และ se-roadmap

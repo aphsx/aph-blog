@@ -14,7 +14,8 @@
 | `README.md` (ไฟล์นี้) | ภาพรวม, เป้าหมาย, สถาปัตยกรรมคอร์ส, ตารางความคืบหน้า | อ่านก่อนเสมอ |
 | `01-conventions.md` | กติกาการเขียนเนื้อหา, block types, สไตล์โค้ด, คุณภาพ | ก่อนเขียนทุกบท |
 | `02-curriculum.md` | หลักสูตรเต็ม — ทุกบท ทุกหัวข้อย่อย พร้อมรายละเอียดที่ต้องสอน | ตอนเขียนแต่ละบท |
-| `03-build-steps.md` | คู่มือลงมือทำทีละ step (Step 0 → Step 12) ไฟล์ไหนต้องสร้าง/แก้ | ตอนลงมือทำจริง |
+| `03-build-steps.md` | คู่มือลงมือทำทีละ step (Step 0 → Step 13) ไฟล์ไหนต้องสร้าง/แก้ | ตอนลงมือทำจริง |
+| `04-content-review.md` | ตรวจความครบถ้วน — checklist ทักษะ mid, gap analysis, coverage matrix (พิสูจน์ว่าครบ) | ก่อนเพิ่ม/ลดบท |
 
 ---
 
@@ -107,20 +108,22 @@ lib/courses/intermediate-programming/
 | บท | ไฟล์ | prefix slug | หัวข้อย่อย | สาระ |
 |----|------|-------------|-----------|------|
 | 0 | `overview.ts` | `intermediate` | 1 | ภาพรวม + สะพานจากคอร์สพื้นฐาน |
-| 1 | `python-deep.ts` | `py-` | 7 | Python ระดับลึก: comprehension, generator, *args, lambda/HOF, closure, decorator, context manager |
+| 1 | `python-deep.ts` | `py-` | 9 | Python ระดับลึก: comprehension, generator, *args, lambda/HOF, closure, decorator, context manager, **mutability/copy** 🆕, **collections/itertools** 🆕 |
 | 2 | `robust-code.ts` | `err-` | 5 | Error handling, custom exception, logging, type hints, defensive programming |
-| 3 | `project-tooling.ts` | `proj-` | 5 | module/package, venv/pip, argparse CLI, env vars/config |
-| 4 | `git-deep.ts` | `git-` | 5 | branch, remote/GitHub, conflict/rebase, PR workflow |
-| 5 | `testing.ts` | `test-` | 5 | ทำไมต้องเทสต์, pytest, fixture, mock, TDD/coverage |
-| 6 | `clean-code.ts` | `clean-` | 5 | naming, DRY/KISS, SOLID, refactoring, design patterns |
-| 7 | `real-data.ts` | `data-` | 5 | ไฟล์/pathlib, CSV/JSON, requests/REST, datetime, pandas intro |
-| 8 | `databases.ts` | `db-` | 5 | relational model, SQL ลึก, index/transaction, sqlite3, ORM |
-| 9 | `web-apps.ts` | `web2-` | 5 | HTTP ลึก, framework, request handling, เชื่อม DB, API จริง |
-| 10 | `dsa-mid.ts` | `dsa-` | 8 | ⭐ บทเด่น: เลือกโครงสร้าง, stack/queue, linked list, tree/BST, hash, recursion+backtracking, DP เบื้องต้น, graph + BFS/DFS |
-| 11 | `concurrency.ts` | `async-` | 4 | concurrency vs parallelism, threading/GIL, multiprocessing, asyncio |
-| 12 | `capstone.ts` | `cap-` | 4 | วางแผน, สร้าง, คุณภาพ/CI, deploy + ไปต่อ |
+| 3 | `debugging.ts` 🆕 | `dbg-` | 4 | **debugger/pdb, อ่าน traceback+กลยุทธ์, profiling (timeit/cProfile), performance** |
+| 4 | `project-tooling.ts` | `proj-` | 5 | module/package, venv/pip, argparse CLI, env vars/config |
+| 5 | `git-deep.ts` | `git-` | 5 | branch, remote/GitHub, conflict/rebase, PR workflow |
+| 6 | `testing.ts` | `test-` | 5 | ทำไมต้องเทสต์, pytest, fixture, mock, TDD/coverage |
+| 7 | `clean-code.ts` | `clean-` | 5 | naming/docstring, DRY/KISS, SOLID, refactoring, design patterns |
+| 8 | `real-data.ts` | `data-` | 6 | ไฟล์/pathlib, CSV/JSON, **regex** 🆕, requests/REST, datetime, pandas intro |
+| 9 | `databases.ts` | `db-` | 5 | relational model, SQL ลึก, index/transaction, sqlite3, ORM |
+| 10 | `web-apps.ts` | `web2-` | 7 | HTTP, framework, request/validation, เชื่อม DB, API จริง, **auth** 🆕, **security** 🆕 |
+| 11 | `dsa-mid.ts` | `dsa-` | 13 | ⭐ บทเด่น: เลือกโครงสร้าง, stack/queue, linked list, tree/BST, hash, **sorting ลึก** 🆕, **binary search** 🆕, **two-pointer/sliding window** 🆕, recursion, DP, **greedy** 🆕, graph |
+| 12 | `concurrency.ts` | `async-` | 4 | concurrency vs parallelism, threading/GIL, multiprocessing, asyncio |
+| 13 | `capstone.ts` | `cap-` | 4 | วางแผน, สร้าง, คุณภาพ/CI, deploy + ไปต่อ |
 
-รวม ~**63 หัวข้อย่อย** ใน 12 บท (ไม่นับ overview) — ลึกกว่าคอร์สพื้นฐานที่มี ~31 หัวข้อ
+รวม ~**77 หัวข้อย่อย** ใน 13 บท (ไม่นับ overview) — ลึกกว่าคอร์สพื้นฐานที่มี ~31 หัวข้อ
+(🆕 = หัวข้อที่เพิ่มจากการ audit ความครบถ้วน ดู `04-content-review.md`)
 
 ---
 
@@ -131,18 +134,19 @@ lib/courses/intermediate-programming/
 | Step | ทำอะไร | ผลลัพธ์ |
 |------|--------|---------|
 | **0** | Scaffold คอร์ส: สร้างโฟลเดอร์, `nav.ts`, `index.ts`, `overview.ts`, ลงทะเบียนใน `courses/index.ts` | คอร์สโผล่ใน catalog, เปิดหน้า overview ได้, build ผ่าน |
-| **1** | เขียนบทที่ 1 (`python-deep.ts`) | 7 หัวข้อ Python ลึก |
+| **1** | เขียนบทที่ 1 (`python-deep.ts`) | 9 หัวข้อ Python ลึก |
 | **2** | เขียนบทที่ 2 (`robust-code.ts`) | 5 หัวข้อ |
-| **3** | เขียนบทที่ 3 (`project-tooling.ts`) | 5 หัวข้อ |
-| **4** | เขียนบทที่ 4 (`git-deep.ts`) | 5 หัวข้อ |
-| **5** | เขียนบทที่ 5 (`testing.ts`) | 5 หัวข้อ |
-| **6** | เขียนบทที่ 6 (`clean-code.ts`) | 5 หัวข้อ |
-| **7** | เขียนบทที่ 7 (`real-data.ts`) | 5 หัวข้อ |
-| **8** | เขียนบทที่ 8 (`databases.ts`) | 5 หัวข้อ |
-| **9** | เขียนบทที่ 9 (`web-apps.ts`) | 5 หัวข้อ |
-| **10** | เขียนบทที่ 10 (`dsa-mid.ts`) | 7 หัวข้อ |
-| **11** | เขียนบทที่ 11 (`concurrency.ts`) | 4 หัวข้อ |
-| **12** | เขียนบทที่ 12 (`capstone.ts`) + อัปเดต overview ให้ครบ + ลิงก์ไป se-roadmap | คอร์สสมบูรณ์ |
+| **3** | เขียนบทที่ 3 (`debugging.ts`) 🆕 | 4 หัวข้อ debugging & performance |
+| **4** | เขียนบทที่ 4 (`project-tooling.ts`) | 5 หัวข้อ |
+| **5** | เขียนบทที่ 5 (`git-deep.ts`) | 5 หัวข้อ |
+| **6** | เขียนบทที่ 6 (`testing.ts`) | 5 หัวข้อ |
+| **7** | เขียนบทที่ 7 (`clean-code.ts`) | 5 หัวข้อ |
+| **8** | เขียนบทที่ 8 (`real-data.ts`) | 6 หัวข้อ |
+| **9** | เขียนบทที่ 9 (`databases.ts`) | 5 หัวข้อ |
+| **10** | เขียนบทที่ 10 (`web-apps.ts`) | 7 หัวข้อ |
+| **11** | เขียนบทที่ 11 (`dsa-mid.ts`) ⭐ | 13 หัวข้อ |
+| **12** | เขียนบทที่ 12 (`concurrency.ts`) | 4 หัวข้อ |
+| **13** | เขียนบทที่ 13 (`capstone.ts`) + อัปเดต overview ให้ครบ + ลิงก์ไป se-roadmap | คอร์สสมบูรณ์ |
 
 **กฎการทำแต่ละ step:**
 1. เขียนเนื้อหาตาม `02-curriculum.md` + กติกาใน `01-conventions.md`
@@ -158,19 +162,20 @@ lib/courses/intermediate-programming/
 
 | Step | บท | สถานะ | หมายเหตุ |
 |------|-----|-------|----------|
-| 0 | Scaffold | ⬜ | |
-| 1 | Python ระดับลึก | ⬜ | |
-| 2 | Robust code | ⬜ | |
-| 3 | Project & tooling | ⬜ | |
-| 4 | Git ลึก | ⬜ | |
-| 5 | Testing | ⬜ | |
-| 6 | Clean code | ⬜ | |
-| 7 | Real data | ⬜ | |
-| 8 | Databases | ⬜ | |
-| 9 | Web apps | ⬜ | |
-| 10 | DSA mid | ⬜ | |
-| 11 | Concurrency | ⬜ | |
-| 12 | Capstone + ปิดคอร์ส | ⬜ | |
+| 0 | Scaffold | ✅ | สร้างโฟลเดอร์+overview+nav+index, ลงทะเบียน catalog, build ผ่าน 74 หน้า |
+| 1 | Python ระดับลึก (9) | ⬜ | |
+| 2 | Robust code (5) | ⬜ | |
+| 3 | Debugging & Performance (4) 🆕 | ⬜ | |
+| 4 | Project & tooling (5) | ⬜ | |
+| 5 | Git ลึก (5) | ⬜ | |
+| 6 | Testing (5) | ⬜ | |
+| 7 | Clean code (5) | ⬜ | |
+| 8 | Real data (6) | ⬜ | |
+| 9 | Databases (5) | ⬜ | |
+| 10 | Web + auth/security (7) | ⬜ | |
+| 11 | DSA mid (13) ⭐ | ⬜ | |
+| 12 | Concurrency (4) | ⬜ | |
+| 13 | Capstone + ปิดคอร์ส (4) | ⬜ | |
 
 ---
 
