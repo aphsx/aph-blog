@@ -84,6 +84,17 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "clean-patterns", title: "Design Patterns พื้นฐาน" },
     ],
   },
-  // บทที่ 8: ทำงานกับข้อมูลจริง — เพิ่มใน Step 8
+  {
+    label: "บทที่ 8: ทำงานกับข้อมูลจริง",
+    items: [
+      { slug: "data-files", title: "อ่าน/เขียนไฟล์ & pathlib" },
+      { slug: "data-formats", title: "CSV & JSON" },
+      { slug: "data-regex", title: "Regular Expressions (regex)" },
+      { slug: "data-http", title: "เรียก API จริงด้วย requests" },
+      { slug: "data-datetime", title: "วันเวลา (datetime)" },
+      { slug: "data-pandas", title: "รู้จัก pandas (เบื้องต้น)" },
+    ],
+  },
+  // บทที่ 9: ฐานข้อมูล & SQL — เพิ่มใน Step 9
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];
