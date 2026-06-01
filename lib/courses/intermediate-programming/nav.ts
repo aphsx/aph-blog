@@ -74,6 +74,16 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "test-tdd", title: "TDD & Coverage" },
     ],
   },
-  // บทที่ 7: Clean Code & การออกแบบ — เพิ่มใน Step 7
+  {
+    label: "บทที่ 7: Clean Code & การออกแบบ",
+    items: [
+      { slug: "clean-naming", title: "Naming, ฟังก์ชัน & Docstring" },
+      { slug: "clean-principles", title: "DRY, KISS, YAGNI & Code Smells" },
+      { slug: "clean-solid", title: "SOLID 5 ข้อ" },
+      { slug: "clean-refactor", title: "Refactoring" },
+      { slug: "clean-patterns", title: "Design Patterns พื้นฐาน" },
+    ],
+  },
+  // บทที่ 8: ทำงานกับข้อมูลจริง — เพิ่มใน Step 8
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];

@@ -169,7 +169,7 @@ lib/courses/intermediate-programming/
 | 4 | Project & tooling (5) | ✅ | project-tooling.ts ครบ 5 หัวข้อ, build ผ่าน 97 หน้า |
 | 5 | Git ลึก (5) | ✅ | git-deep.ts ครบ 5 หัวข้อ, build ผ่าน 102 หน้า |
 | 6 | Testing (5) | ✅ | testing.ts ครบ 5 หัวข้อ, build ผ่าน 107 หน้า |
-| 7 | Clean code (5) | ⬜ | |
+| 7 | Clean code (5) | ✅ | clean-code.ts ครบ 5 หัวข้อ, build ผ่าน 112 หน้า |
 | 8 | Real data (6) | ⬜ | |
 | 9 | Databases (5) | ⬜ | |
 | 10 | Web + auth/security (7) | ⬜ | |
