@@ -25,6 +25,16 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "py-collections", title: "collections & itertools" },
     ],
   },
-  // บทที่ 2: Error handling & โค้ดที่แข็งแรง — เพิ่มใน Step 2
+  {
+    label: "บทที่ 2: Error handling & โค้ดที่แข็งแรง",
+    items: [
+      { slug: "err-exceptions", title: "Exception เจาะลึก" },
+      { slug: "err-custom", title: "สร้าง Exception เอง & raise" },
+      { slug: "err-logging", title: "Logging (เลิก print debug)" },
+      { slug: "err-typing", title: "Type Hints & mypy" },
+      { slug: "err-defensive", title: "Defensive Programming" },
+    ],
+  },
+  // บทที่ 3: Debugging, Profiling & Performance — เพิ่มใน Step 3
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];

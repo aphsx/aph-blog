@@ -163,8 +163,8 @@ lib/courses/intermediate-programming/
 | Step | บท | สถานะ | หมายเหตุ |
 |------|-----|-------|----------|
 | 0 | Scaffold | ✅ | สร้างโฟลเดอร์+overview+nav+index, ลงทะเบียน catalog, build ผ่าน 74 หน้า |
-| 1 | Python ระดับลึก (9) | ⬜ | |
-| 2 | Robust code (5) | ⬜ | |
+| 1 | Python ระดับลึก (9) | ✅ | python-deep.ts ครบ 9 หัวข้อ, nav+index wired, build ผ่าน 83 หน้า |
+| 2 | Robust code (5) | ✅ | robust-code.ts ครบ 5 หัวข้อ, build ผ่าน 88 หน้า |
 | 3 | Debugging & Performance (4) 🆕 | ⬜ | |
 | 4 | Project & tooling (5) | ⬜ | |
 | 5 | Git ลึก (5) | ⬜ | |

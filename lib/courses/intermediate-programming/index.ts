@@ -2,11 +2,13 @@ import type { Course, Page } from "@/lib/types";
 import { intermediateProgrammingNav } from "./nav";
 import { overviewPages } from "./pages/overview";
 import { pythonDeepPages } from "./pages/python-deep";
+import { robustCodePages } from "./pages/robust-code";
 // บทเรียนแต่ละบท import เพิ่มที่นี่ทีละ step (ดู docs/intermediate-programming-plan)
 
 const pages: Record<string, Page> = {
   ...overviewPages,
   ...pythonDeepPages,
+  ...robustCodePages,
   // ...spread บทเรียนแต่ละบทที่นี่ทีละ step
 };
 
