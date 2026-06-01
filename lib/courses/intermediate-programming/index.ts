@@ -34,9 +34,9 @@ const pages: Record<string, Page> = {
 
 export const intermediateProgramming: Course = {
   id: "intermediate-programming",
-  title: "เขียนโปรแกรมระดับกลาง",
+  title: "เขียนโปรแกรมเชิงลึก",
   description:
-    "ต่อยอดจากพื้นฐานสู่ระดับ mid-level — Python ลึก, testing, git, clean code, ฐานข้อมูล, web API และ Data Structures & Algorithms ที่ใช้ทำงานและสัมภาษณ์จริง",
+    "คอร์สเขียนโปรแกรมแบบลงลึก ต่อยอดจากคอร์สพื้นฐาน — เจาะลึกทุกหัวข้อให้ละเอียดกว่าเดิม: Python เชิงลึก, debugging, testing, git, clean code, ฐานข้อมูล, web API และ Data Structures & Algorithms",
   badge: "🚀",
   overviewSlug: "intermediate",
   nav: intermediateProgrammingNav,

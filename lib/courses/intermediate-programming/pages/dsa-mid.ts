@@ -26,6 +26,15 @@ export const dsaMidPages: Record<string, Page> = {
         ],
       },
 
+      { t: "h2", c: "วิเคราะห์ Big-O ของโค้ดจริง (ลึกกว่าพื้นฐาน)" },
+      { t: "p", c: "คอร์สพื้นฐานสอนให้รู้จัก Big-O แต่ละระดับ — ระดับนี้ต้อง \"อ่านโค้ดแล้วบอก Big-O ได้เอง\" หลักคือ: loop เดี่ยว = O(n), loop ซ้อน = คูณกัน, ตัวที่ไม่ขึ้นกับ n = ตัดทิ้ง เก็บเฉพาะพจน์ที่โตเร็วสุด" },
+      { t: "code", lang: "python", c: "# O(n) — loop เดียว\nfor x in arr:\n    print(x)\n\n# O(n²) — loop ซ้อน (n * n)\nfor i in arr:\n    for j in arr:\n        print(i, j)\n\n# O(n) ไม่ใช่ O(2n) — ค่าคงที่ตัดทิ้ง\nfor x in arr: ...   # n\nfor x in arr: ...   # + n = 2n -> O(n)\n\n# O(n + m) — คนละ input ห้ามยุบเป็น n\nfor x in arr_a: ...   # n\nfor y in arr_b: ...   # m" },
+      { t: "h3", c: "best / average / worst case" },
+      { t: "p", c: "อัลกอริทึมเดียวอาจมีหลายกรณี — มักสนใจ worst case (รับประกันแย่สุด) แต่บางทีดู average ด้วย เช่น hash table เฉลี่ย O(1) แต่ worst O(n) เมื่อ collision เยอะ" },
+      { t: "h3", c: "amortized — เฉลี่ยระยะยาว" },
+      { t: "p", c: "บาง operation บางครั้งแพง บางครั้งถูก แต่เฉลี่ยแล้วถูก เช่น list.append() ปกติ O(1) แต่บางครั้งต้องขยายหน่วยความจำ (แพง) เฉลี่ยทั้งหมดยังเป็น O(1) เรียกว่า amortized O(1) — เข้าใจจุดนี้ช่วยไม่ตื่นตระหนกกับ worst case ที่นาน ๆ เกิดที" },
+      { t: "callout", title: "space complexity ก็สำคัญ", c: "นอกจากเวลา ต้องดูหน่วยความจำด้วย เช่น สร้าง list ใหม่ขนาด n = O(n) space; recursion ลึก n ชั้น = O(n) space จาก call stack (เจอในหัวข้อ recursion) — บางครั้งแลกเวลาเร็วขึ้นด้วย memory ที่มากขึ้น (time-space tradeoff)" },
+
       { t: "h2", c: "ตารางเทียบ: operation ↔ structure" },
       { t: "p", c: "นี่คือตารางที่ควรเข้าใจ — ไม่ต้องท่อง แต่ให้รู้ว่า \"งานแบบไหนใช้อะไรเร็ว\"" },
       {
@@ -49,10 +58,10 @@ export const dsaMidPages: Record<string, Page> = {
       {
         t: "ul",
         c: [
-          "Big-O ดูอัตราการโตเมื่อข้อมูลใหญ่ขึ้น ไม่ใช่เวลาจริง",
-          "ค้นหาบ่อย → set/dict (O(1)); index → list (O(1))",
-          "เพิ่ม/ลบหัวบ่อย → deque (O(1)) ไม่ใช่ list (O(n))",
-          "เลือก DS ถูกตั้งแต่ต้นสำคัญกว่าการ optimize ทีหลัง",
+          "อ่านโค้ดแล้วบอก Big-O เองได้: loop ซ้อน = คูณ, คงที่ตัดทิ้ง, เก็บพจน์โตเร็วสุด",
+          "best/average/worst case + amortized (list.append O(1) เฉลี่ย)",
+          "ค้นหาบ่อย → set/dict (O(1)); เพิ่ม/ลบหัว → deque (O(1)) ไม่ใช่ list",
+          "เลือก DS ถูกตั้งแต่ต้นสำคัญกว่าการ optimize ทีหลัง; ดู space ด้วย",
         ],
       },
       { t: "callout", title: "แบบฝึกหัด", c: "1) มีงานต้องเช็คว่า user_id ซ้ำไหมในข้อมูลล้านแถว — เลือก DS ไหน เพราะอะไร  2) ต้องทำคิวงานเข้าก่อนออกก่อน — ใช้อะไร  3) บอก Big-O ของการค้น in list กับ in set  4) ลอง bit ops: เช็คคู่/คี่ด้วย & 1" },
@@ -446,6 +455,24 @@ export const dsaMidPages: Record<string, Page> = {
       { t: "code", lang: "python", c: "def factorial(n):\n    if n <= 1:           # base case (หยุด)\n        return 1\n    return n * factorial(n - 1)   # recursive case\n\nprint(factorial(5))   # 120  (5*4*3*2*1)" },
       { t: "callout", title: "ลืม base case = RecursionError", warn: true, c: "ถ้าไม่มี base case หรือไม่เข้าใกล้มัน recursion จะเรียกตัวเองไม่จบจน stack ล้น (RecursionError) — Python จำกัด recursion ลึกประมาณ 1000 ชั้น เสมอตรวจว่า base case ถูกและปัญหาเล็กลงทุกครั้ง" },
 
+      { t: "h2", c: "ความซับซ้อนของ recursion & call stack (ลึกกว่าพื้นฐาน)" },
+      { t: "p", c: "ทุกครั้งที่ฟังก์ชันเรียกตัวเอง Python ดันเฟรมใหม่เข้า call stack — recursion ลึก n ชั้นจึงใช้ O(n) memory เสมอ แม้โค้ดดูสั้น นี่คือต้นทุนที่ loop ไม่มี และเป็นเหตุผลที่ Python จำกัดความลึกไว้กัน stack ล้น" },
+      { t: "code", lang: "python", c: "import sys\nprint(sys.getrecursionlimit())   # ~1000 (ปรับได้ด้วย setrecursionlimit แต่ระวัง)\n\n# วิเคราะห์ความซับซ้อน:\n# factorial(n): เรียก n ครั้ง -> เวลา O(n), call stack O(n)\n# fib แบบ naive: แตกเป็น 2 กิ่งทุกชั้น -> O(2^n) ช้าระเบิด!\ndef fib(n):\n    return n if n < 2 else fib(n-1) + fib(n-2)   # O(2^n) — ดูดีแต่ช้ามาก" },
+      { t: "callout", title: "นับ Big-O ของ recursion ยังไง", c: "ดู (1) จำนวนกิ่งที่แตกต่อชั้น และ (2) ความลึก — factorial แตก 1 กิ่ง ลึก n = O(n); fib แตก 2 กิ่ง ลึก n = O(2^n) การเห็นว่า fib naive เป็น O(2^n) คือเหตุผลที่ต้องมี memoization (บท DP) เชื่อมกับ @lru_cache (บท 3)" },
+
+      { t: "h2", c: "Recursion vs Iteration — เลือกอะไรเมื่อไร" },
+      { t: "p", c: "recursion เขียนสวยกับปัญหาที่แตกย่อยตามธรรมชาติ (tree, divide & conquer) แต่ loop เร็วกว่าและไม่เปลือง call stack ทุก recursion แปลงเป็น loop ได้ (บางทีต้องใช้ stack ของเราเอง)" },
+      { t: "code", lang: "python", c: "# recursion (สวยแต่เปลือง stack)\ndef sum_rec(arr):\n    if not arr:\n        return 0\n    return arr[0] + sum_rec(arr[1:])\n\n# iteration (เร็วกว่า ไม่เปลือง stack)\ndef sum_iter(arr):\n    total = 0\n    for x in arr:\n        total += x\n    return total" },
+      {
+        t: "table",
+        head: ["", "recursion", "iteration (loop)"],
+        rows: [
+          ["เหมาะกับ", "tree, แตกย่อย, backtracking", "งานเชิงเส้นทั่วไป"],
+          ["memory", "O(ความลึก) จาก call stack", "O(1) มักไม่เปลือง"],
+          ["ความเสี่ยง", "stack overflow ถ้าลึกมาก", "ไม่มี"],
+        ],
+      },
+
       { t: "h2", c: "Backtracking — ลองแล้วถอย" },
       { t: "p", c: "backtracking คือลองทุกความเป็นไปได้ ถ้าทางไหนไม่เวิร์กก็ \"ถอย\" กลับมาลองทางอื่น เหมาะกับโจทย์หาทุกคำตอบ (permutation, subset, แก้ปริศนา)" },
       { t: "code", lang: "python", c: "# สร้าง subset ทั้งหมด\ndef subsets(nums):\n    result = []\n    def backtrack(start, path):\n        result.append(path[:])         # เก็บ subset ปัจจุบัน\n        for i in range(start, len(nums)):\n            path.append(nums[i])       # เลือก\n            backtrack(i + 1, path)     # ลงลึก\n            path.pop()                 # ถอย (backtrack)\n    backtrack(0, [])\n    return result\n\nprint(subsets([1, 2, 3]))\n# [[], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]]" },
@@ -455,10 +482,10 @@ export const dsaMidPages: Record<string, Page> = {
       {
         t: "ul",
         c: [
-          "recursion = base case (หยุด) + recursive case (เรียกตัวเองกับปัญหาเล็กลง)",
-          "ลืม base case → RecursionError; Python จำกัด ~1000 ชั้น",
-          "backtracking = ลองทุกทาง ถ้าไม่เวิร์กก็ถอย (เลือก→ลงลึก→ถอย)",
-          "ใช้กับ subset, permutation, แก้ปริศนา",
+          "recursion = base case (หยุด) + recursive case; ลืม base case → RecursionError",
+          "ความซับซ้อน: นับกิ่ง×ความลึก (factorial O(n), fib naive O(2^n)); call stack = O(ความลึก) space",
+          "recursion vs iteration: loop เร็ว/ประหยัด stack กว่า — recursion เหมาะ tree/แตกย่อย/backtracking",
+          "backtracking = ลองทุกทางแล้วถอย (subset, permutation, ปริศนา)",
         ],
       },
       { t: "callout", title: "แบบฝึกหัด", c: "1) เขียน factorial และ fibonacci ด้วย recursion  2) สร้าง subset ทั้งหมดของ list  3) สร้าง permutation ทั้งหมด  4) อธิบายว่า 'ถอย' (backtrack) คืออะไรด้วยตัวอย่าง" },
