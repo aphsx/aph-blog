@@ -12,7 +12,8 @@ import { realDataPages } from "./pages/real-data";
 import { databasesPages } from "./pages/databases";
 import { webAppsPages } from "./pages/web-apps";
 import { dsaMidPages } from "./pages/dsa-mid";
-// บทเรียนแต่ละบท import เพิ่มที่นี่ทีละ step (ดู docs/intermediate-programming-plan)
+import { concurrencyPages } from "./pages/concurrency";
+import { capstonePages } from "./pages/capstone";
 
 const pages: Record<string, Page> = {
   ...overviewPages,
@@ -27,7 +28,8 @@ const pages: Record<string, Page> = {
   ...databasesPages,
   ...webAppsPages,
   ...dsaMidPages,
-  // ...spread บทเรียนแต่ละบทที่นี่ทีละ step
+  ...concurrencyPages,
+  ...capstonePages,
 };
 
 export const intermediateProgramming: Course = {

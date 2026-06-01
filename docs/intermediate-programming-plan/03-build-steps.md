@@ -21,7 +21,7 @@ overview: intermediate
 บท8:  data-files data-formats data-regex data-http data-datetime data-pandas
 บท9:  db-model db-sql db-advanced db-python db-orm
 บท10: web2-http web2-framework web2-request web2-db web2-project web2-auth web2-security
-บท11: dsa-choose dsa-stack-queue dsa-linked dsa-tree dsa-hash dsa-sorting dsa-binary-search dsa-twopointer dsa-recursion dsa-dp dsa-greedy dsa-graph
+บท11: dsa-choose dsa-stack-queue dsa-linked dsa-tree dsa-heap dsa-hash dsa-sorting dsa-binary-search dsa-twopointer dsa-recursion dsa-dp dsa-greedy dsa-graph
 บท12: async-why async-threads async-process async-asyncio
 บท13: cap-plan cap-build cap-quality cap-deploy
 ```

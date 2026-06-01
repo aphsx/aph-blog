@@ -135,6 +135,22 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "dsa-graph", title: "Graph & BFS/DFS" },
     ],
   },
-  // บทที่ 12: Concurrency & Async — เพิ่มใน Step 12
-  // ... (บทถัดไปทยอยเพิ่มทีละ step)
+  {
+    label: "บทที่ 12: Concurrency & Async",
+    items: [
+      { slug: "async-why", title: "Concurrency vs Parallelism" },
+      { slug: "async-threads", title: "Threading & GIL" },
+      { slug: "async-process", title: "Multiprocessing" },
+      { slug: "async-asyncio", title: "async/await & asyncio" },
+    ],
+  },
+  {
+    label: "บทที่ 13: Capstone Project",
+    items: [
+      { slug: "cap-plan", title: "วางแผน & ออกแบบโปรเจกต์" },
+      { slug: "cap-build", title: "สร้างทีละส่วน" },
+      { slug: "cap-quality", title: "คุณภาพ, เอกสาร & CI" },
+      { slug: "cap-deploy", title: "Deploy & ไปต่อ" },
+    ],
+  },
 ];

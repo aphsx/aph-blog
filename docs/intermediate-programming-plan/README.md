@@ -174,8 +174,8 @@ lib/courses/intermediate-programming/
 | 9 | Databases (5) | ✅ | databases.ts ครบ 5 หัวข้อ, build ผ่าน 123 หน้า |
 | 10 | Web + auth/security (7) | ✅ | web-apps.ts ครบ 7 หัวข้อ, build ผ่าน 130 หน้า |
 | 11 | DSA mid (13) ⭐ | ✅ | dsa-mid.ts ครบ 13 หัวข้อ (ใส่ dsa-heap ที่ตกหล่นกลับ), build ผ่าน 143 หน้า |
-| 12 | Concurrency (4) | ⬜ | |
-| 13 | Capstone + ปิดคอร์ส (4) | ⬜ | |
+| 12 | Concurrency (4) | ✅ | concurrency.ts ครบ 4 หัวข้อ, build ผ่าน 147 หน้า |
+| 13 | Capstone + ปิดคอร์ส (4) | ✅ | capstone.ts ครบ 4 หัวข้อ + ลิงก์ไป practice-problems/se-roadmap, build ผ่าน 151 หน้า — คอร์สครบ 13 บท! |
 
 ---
 
