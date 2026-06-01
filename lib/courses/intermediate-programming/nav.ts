@@ -35,6 +35,15 @@ export const intermediateProgrammingNav: NavCategory[] = [
       { slug: "err-defensive", title: "Defensive Programming" },
     ],
   },
-  // บทที่ 3: Debugging, Profiling & Performance — เพิ่มใน Step 3
+  {
+    label: "บทที่ 3: Debugging, Profiling & Performance",
+    items: [
+      { slug: "dbg-debugger", title: "ใช้ Debugger จริง (pdb / VS Code)" },
+      { slug: "dbg-traceback", title: "อ่าน Traceback & กลยุทธ์ Debug" },
+      { slug: "dbg-profiling", title: "Profiling — วัดว่าช้าตรงไหน" },
+      { slug: "dbg-performance", title: "เทคนิคเพิ่มประสิทธิภาพ" },
+    ],
+  },
+  // บทที่ 4: โครงสร้างโปรเจกต์ & เครื่องมือ — เพิ่มใน Step 4
   // ... (บทถัดไปทยอยเพิ่มทีละ step)
 ];
