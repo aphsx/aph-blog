@@ -1,10 +1,12 @@
 import type { Course, Page } from "@/lib/types";
 import { intermediateProgrammingNav } from "./nav";
 import { overviewPages } from "./pages/overview";
+import { pythonDeepPages } from "./pages/python-deep";
 // บทเรียนแต่ละบท import เพิ่มที่นี่ทีละ step (ดู docs/intermediate-programming-plan)
 
 const pages: Record<string, Page> = {
   ...overviewPages,
+  ...pythonDeepPages,
   // ...spread บทเรียนแต่ละบทที่นี่ทีละ step
 };
 
