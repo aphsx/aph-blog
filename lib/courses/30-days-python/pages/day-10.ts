@@ -76,19 +76,32 @@ export const day10Page: Record<string, Page> = {
       { t: "ol", c: [
         "วน loop ตั้งแต่ 0 ถึง 10 ด้วย for loop แล้วทำซ้ำด้วย while loop",
         "วน loop ตั้งแต่ 10 ถึง 0 ด้วย for loop แล้วทำซ้ำด้วย while loop",
-        "เขียน loop ที่เรียก print() 7 ครั้งเพื่อให้ได้รูปสามเหลี่ยม:\n  #\n  ##\n  ###\n  ####\n  #####\n  ######\n  #######",
-        "ใช้ nested loops สร้าง pattern ต่อไปนี้:\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #",
-        "Print pattern ต่อไปนี้:\n0 x 0 = 0\n1 x 1 = 1\n2 x 2 = 4\n3 x 3 = 9\n4 x 4 = 16\n5 x 5 = 25\n6 x 6 = 36\n7 x 7 = 49\n8 x 8 = 64\n9 x 9 = 81\n10 x 10 = 100",
+        "เขียน loop ที่เรียก print() 7 ครั้งเพื่อให้ได้รูปสามเหลี่ยม:",
+      ]},
+      { t: "code", lang: "sh", c: "  #\n  ##\n  ###\n  ####\n  #####\n  ######\n  #######" },
+      { t: "ol", c: [
+        "ใช้ nested loops สร้าง pattern ต่อไปนี้:",
+      ], start: 4 },
+      { t: "code", lang: "sh", c: "# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #\n# # # # # # # #" },
+      { t: "ol", c: [
+        "Print pattern ต่อไปนี้:",
+      ], start: 5 },
+      { t: "code", lang: "sh", c: "0 x 0 = 0\n1 x 1 = 1\n2 x 2 = 4\n3 x 3 = 9\n4 x 4 = 16\n5 x 5 = 25\n6 x 6 = 36\n7 x 7 = 49\n8 x 8 = 64\n9 x 9 = 81\n10 x 10 = 100" },
+      { t: "ol", c: [
         "วน loop ผ่าน list ['Python', 'Numpy','Pandas','Django', 'Flask'] ด้วย for loop แล้ว print แต่ละ item",
         "ใช้ for loop วนจาก 0 ถึง 100 แล้ว print เฉพาะเลขคู่",
         "ใช้ for loop วนจาก 0 ถึง 100 แล้ว print เฉพาะเลขคี่",
-      ]},
+      ], start: 6 },
 
       { t: "h3", c: "ระดับ 2" },
       { t: "ol", c: [
-        "ใช้ for loop วนจาก 0 ถึง 100 แล้ว print ผลรวมของตัวเลขทั้งหมด\nThe sum of all numbers is 5050.",
-        "ใช้ for loop วนจาก 0 ถึง 100 แล้ว print ผลรวมของเลขคู่ทั้งหมดและผลรวมของเลขคี่ทั้งหมด\nThe sum of all evens is 2550. And the sum of all odds is 2500.",
+        "ใช้ for loop วนจาก 0 ถึง 100 แล้ว print ผลรวมของตัวเลขทั้งหมด",
       ]},
+      { t: "code", lang: "sh", c: "The sum of all numbers is 5050." },
+      { t: "ol", c: [
+        "ใช้ for loop วนจาก 0 ถึง 100 แล้ว print ผลรวมของเลขคู่ทั้งหมดและผลรวมของเลขคี่ทั้งหมด",
+      ], start: 2 },
+      { t: "code", lang: "sh", c: "The sum of all evens is 2550. And the sum of all odds is 2500." },
 
       { t: "h3", c: "ระดับ 3" },
       { t: "ol", c: [

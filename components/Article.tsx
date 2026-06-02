@@ -1,6 +1,18 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
+
+function renderText(text: string) {
+  const lines = text.split("\n");
+  if (lines.length === 1) return text;
+  return lines.map((line, k) => (
+    <Fragment key={k}>
+      {k > 0 && <br />}
+      {line}
+    </Fragment>
+  ));
+}
 
 /* TIH: theme-doc-markdown 18px desktop, h2 mt-2em mb-0.5em */
 const prose =
@@ -34,15 +46,15 @@ function renderBlock(b: Block, i: number) {
       return (
         <ul key={i}>
           {b.c.map((x, j) => (
-            <li key={j}>{x}</li>
+            <li key={j}>{renderText(x)}</li>
           ))}
         </ul>
       );
     case "ol":
       return (
-        <ol key={i}>
+        <ol key={i} start={b.start}>
           {b.c.map((x, j) => (
-            <li key={j}>{x}</li>
+            <li key={j}>{renderText(x)}</li>
           ))}
         </ol>
       );

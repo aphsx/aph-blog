@@ -76,8 +76,9 @@ export const day06Page: Record<string, Page> = {
         "Slice out สมาชิกตรงกลางจาก food_stuff_tp tuple หรือ food_stuff_lt list",
         "Slice out สามตัวแรกและสามตัวท้ายจาก food_stuff_lt list",
         "ลบ food_stuff_tp tuple ทิ้งทั้งหมด",
-        "เช็คว่าสมาชิกมีอยู่ใน tuple หรือไม่:\n- เช็คว่า 'Estonia' เป็นประเทศ nordic หรือไม่\n- เช็คว่า 'Iceland' เป็นประเทศ nordic หรือไม่\nnordic_countries = ('Denmark', 'Finland','Iceland', 'Norway', 'Sweden')",
+        "เช็คว่าสมาชิกมีอยู่ใน tuple หรือไม่:\n- เช็คว่า 'Estonia' เป็นประเทศ nordic หรือไม่\n- เช็คว่า 'Iceland' เป็นประเทศ nordic หรือไม่",
       ]},
+      { t: "code", lang: "python", c: "nordic_countries = ('Denmark', 'Finland','Iceland', 'Norway', 'Sweden')" },
     ],
   },
 };
