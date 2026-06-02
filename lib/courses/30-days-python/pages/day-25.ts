@@ -1,0 +1,17 @@
+import type { Page } from "@/lib/types";
+
+export const day25Page: Record<string, Page> = {
+  "py30-day25": {
+    slug: "py30-day25",
+    title: "วันที่ 25 — Pandas",
+    lead: "เนื้อหาวันที่ 25 จาก 30 Days of Python — กำลังแปลและเรียบเรียงเป็นภาษาไทย",
+    group: "สัปดาห์ที่ 5: OOP & ข้อมูล",
+    blocks: [
+      {
+        t: "callout",
+        title: "กำลังแปล",
+        c: "เนื้อหาของบทนี้อยู่ระหว่างการแปลจากภาษาอังกฤษ — ต้นฉบับ: github.com/Asabeneh/30-Days-Of-Python/blob/master/25_Day_Pandas/25_pandas.md",
+      },
+    ],
+  },
+};

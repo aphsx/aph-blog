@@ -1,0 +1,117 @@
+import type { Page } from "@/lib/types";
+
+export const day02Page: Record<string, Page> = {
+  "py30-day02": {
+    slug: "py30-day02",
+    title: "วันที่ 2 — ตัวแปร & ฟังก์ชันพื้นฐาน (Variables & Built-in Functions)",
+    lead: "เรียนรู้การสร้างตัวแปร, ชนิดข้อมูล และฟังก์ชันในตัวที่ Python มีให้ใช้งานทันที",
+    group: "สัปดาห์ที่ 1: พื้นฐาน Python",
+    blocks: [
+      { t: "h2", c: "ฟังก์ชันพื้นฐาน (Built-in Functions)" },
+      { t: "p", c: "Python มีฟังก์ชันพื้นฐานจำนวนมากที่ใช้ได้ทันทีโดยไม่ต้อง import ใด ๆ — เรียกว่า globally available ฟังก์ชันที่พบบ่อยที่สุดได้แก่: print(), len(), type(), int(), float(), str(), input(), list(), dict(), min(), max(), sum(), sorted(), open(), file(), help() และ dir()" },
+      { t: "table", head: ["ฟังก์ชัน", "คำอธิบาย"], rows: [
+        ["print()", "แสดงผลออกทางหน้าจอ"],
+        ["len()", "นับจำนวนสมาชิก (ความยาว)"],
+        ["type()", "บอกชนิดข้อมูล"],
+        ["int()", "แปลงเป็นจำนวนเต็ม"],
+        ["float()", "แปลงเป็นทศนิยม"],
+        ["str()", "แปลงเป็นสตริง"],
+        ["input()", "รับข้อมูลจากผู้ใช้ (คืนค่าเป็น str เสมอ)"],
+        ["list()", "แปลงเป็นลิสต์"],
+        ["dict()", "สร้างดิกชันนารี"],
+        ["min()", "หาค่าต่ำสุด"],
+        ["max()", "หาค่าสูงสุด"],
+        ["sum()", "รวมค่าทั้งหมด"],
+        ["sorted()", "เรียงลำดับ (คืนลิสต์ใหม่)"],
+        ["open()", "เปิดไฟล์"],
+        ["help()", "แสดงเอกสารช่วยเหลือ"],
+        ["dir()", "แสดง attributes และ methods ทั้งหมด"],
+      ]},
+      { t: "p", c: "ลองใช้ฟังก์ชันพื้นฐานใน Python Shell:" },
+      { t: "code", lang: "python", c: "print(2 + 3)           # 5\nprint(len('hello'))    # 5\nprint(type(10))        # <class 'int'>\nprint(min(4, 2, 7))    # 2\nprint(max(4, 2, 7))    # 7\nprint(sum([1, 2, 3]))  # 6" },
+      { t: "code", lang: "python", c: "# help() และ dir() ช่วยสำรวจ Python\nhelp('keywords')  # แสดงคำสงวนทั้งหมด\ndir(str)          # แสดง methods ของ str" },
+
+      { t: "h2", c: "ตัวแปร (Variables)" },
+      { t: "p", c: "ตัวแปรเก็บข้อมูลในหน่วยความจำของคอมพิวเตอร์ ควรตั้งชื่อตัวแปรให้สื่อความหมาย (mnemonic variable) เพื่อให้โค้ดอ่านง่าย ตัวแปรอ้างอิงถึงตำแหน่งในหน่วยความจำที่เก็บข้อมูลนั้น" },
+
+      { t: "h3", c: "กฎการตั้งชื่อตัวแปร Python" },
+      { t: "ul", c: [
+        "ต้องขึ้นต้นด้วยตัวอักษรหรือ underscore (_)",
+        "ห้ามขึ้นต้นด้วยตัวเลข",
+        "ประกอบด้วยตัวอักษร, ตัวเลข และ underscore เท่านั้น (A-z, 0-9, _)",
+        "case-sensitive — firstname, Firstname, FirstName และ FIRSTNAME คือตัวแปรคนละตัว",
+      ]},
+      { t: "p", c: "ชื่อที่ถูกต้อง:" },
+      { t: "code", lang: "shell", c: "firstname\nlastname\nage\ncountry\ncity\nfirst_name\nlast_name\ncapital_city\n_if          # ถ้าต้องการใช้คำสงวนเป็นชื่อตัวแปร\nyear_2021\nyear2021\ncurrent_year_2021\nbirth_year\nnum1\nnum2" },
+      { t: "p", c: "ชื่อที่ผิด:" },
+      { t: "code", lang: "shell", c: "first-name\nfirst@name\nfirst$name\nnum-1\n1num" },
+      { t: "p", c: "นักพัฒนา Python ใช้รูปแบบ snake_case — ใช้ underscore คั่นระหว่างคำ เช่น first_name, last_name, engine_rotation_speed เมื่อกำหนดค่าให้ตัวแปร (variable declaration) เครื่องหมาย = คือ assignment operator ไม่ใช่เครื่องหมายเท่ากับในคณิตศาสตร์ แต่หมายถึง \"กำหนดค่าให้\"" },
+      { t: "code", lang: "python", c: "# Variables in Python\nfirst_name  = 'Asabeneh'\nlast_name   = 'Yetayeh'\ncountry     = 'Finland'\ncity        = 'Helsinki'\nage         = 250\nis_married  = True\nskills      = ['HTML', 'CSS', 'JS', 'React', 'Python']\nperson_info = {\n    'firstname': 'Asabeneh',\n    'lastname':  'Yetayeh',\n    'country':   'Finland',\n    'city':      'Helsinki'\n}" },
+      { t: "p", c: "ใช้ print() และ len() กับตัวแปรที่ประกาศไว้:" },
+      { t: "code", lang: "python", c: "print('Hello, World!')                 # Hello, World!\nprint('Hello', ',', 'World', '!')      # Hello , World !\nprint(len('Hello, World!'))            # 13\n\nprint('First name:', first_name)\nprint('First name length:', len(first_name))\nprint('Last name: ', last_name)\nprint('Last name length: ', len(last_name))\nprint('Country: ', country)\nprint('City: ', city)\nprint('Age: ', age)\nprint('Married: ', is_married)\nprint('Skills: ', skills)\nprint('Person information: ', person_info)" },
+
+      { t: "h3", c: "กำหนดตัวแปรหลายตัวพร้อมกัน" },
+      { t: "code", lang: "python", c: "first_name, last_name, country, age, is_married = 'Asabeneh', 'Yetayeh', 'Helsinki', 250, True\n\nprint(first_name, last_name, country, age, is_married)\nprint('First name:', first_name)\nprint('Last name: ', last_name)\nprint('Country: ', country)\nprint('Age: ', age)\nprint('Married: ', is_married)" },
+      { t: "p", c: "รับข้อมูลจากผู้ใช้ด้วย input():" },
+      { t: "code", lang: "python", c: "first_name = input('What is your name: ')\nage        = input('How old are you? ')\n\nprint(first_name)\nprint(age)" },
+
+      { t: "h2", c: "ชนิดข้อมูล (Data Types)" },
+      { t: "p", c: "Python มีชนิดข้อมูลหลายประเภท เมื่อพูดถึงการเขียนโปรแกรม ทุกอย่างล้วนเกี่ยวข้องกับชนิดข้อมูลทั้งสิ้น ชนิดข้อมูลจะถูกเจาะลึกในบทของตัวเองแต่ละบท" },
+
+      { t: "h2", c: "เช็คชนิดข้อมูลและการแปลง (Checking Data types and Casting)" },
+
+      { t: "h3", c: "เช็คชนิดข้อมูลด้วย type()" },
+      { t: "code", lang: "python", c: "# Different python data types\nfirst_name = 'Asabeneh'   # str\nlast_name  = 'Yetayeh'    # str\ncountry    = 'Finland'    # str\ncity       = 'Helsinki'   # str\nage        = 250          # int\n\n# Printing out types\nprint(type('Asabeneh'))           # <class 'str'>\nprint(type(first_name))           # <class 'str'>\nprint(type(10))                   # <class 'int'>\nprint(type(3.14))                 # <class 'float'>\nprint(type(1 + 1j))               # <class 'complex'>\nprint(type(True))                 # <class 'bool'>\nprint(type([1, 2, 3, 4]))         # <class 'list'>\nprint(type({'name': 'Asabeneh'})) # <class 'dict'>\nprint(type((1, 2)))               # <class 'tuple'>\nprint(type(zip([1,2],[3,4])))     # <class 'zip'>" },
+
+      { t: "h3", c: "การแปลงชนิดข้อมูล (Casting)" },
+      { t: "p", c: "การแปลงชนิดข้อมูลคือการเปลี่ยนชนิดข้อมูลหนึ่งไปเป็นอีกชนิด ใช้ int(), float(), str(), list(), set() เมื่อทำการคำนวณ สตริงตัวเลขต้องถูกแปลงเป็น int หรือ float ก่อน ถ้าต้องการต่อตัวเลขกับสตริงต้องแปลงตัวเลขเป็นสตริงก่อน" },
+      { t: "code", lang: "python", c: "# int to float\nnum_int   = 10\nprint('num_int', num_int)         # 10\nnum_float = float(num_int)\nprint('num_float:', num_float)    # 10.0\n\n# float to int\ngravity = 9.81\nprint(int(gravity))               # 9\n\n# int to str\nnum_int = 10\nprint(num_int)                    # 10\nnum_str = str(num_int)\nprint(num_str)                    # '10'\n\n# str to int or float\nnum_str   = '10.6'\nnum_float = float(num_str)        # Convert the string to a float first\nnum_int   = int(num_float)        # Then convert the float to an integer\nprint('num_int',   int(num_str))      # 10\nprint('num_float', float(num_str))    # 10.6\nnum_int = int(num_float)\nprint('num_int', int(num_int))        # 10\n\n# str to list\nfirst_name      = 'Asabeneh'\nprint(first_name)                     # 'Asabeneh'\nfirst_name_list = list(first_name)\nprint(first_name_list)                # ['A', 's', 'a', 'b', 'e', 'n', 'e', 'h']" },
+      { t: "callout", warn: true, title: "ข้อควรระวัง", c: "input() คืนค่าเป็น str เสมอ ถ้าต้องการนำไปคำนวณต้องแปลงก่อน เช่น a = int(input()) มิฉะนั้นการ \"บวก\" สองตัวเลขที่รับมาจาก input จะได้ผลเป็นการต่อสตริงแทน (เช่น '2' + '3' = '23' ไม่ใช่ 5)" },
+
+      { t: "h2", c: "ตัวเลข (Numbers)" },
+      { t: "p", c: "ชนิดตัวเลขใน Python มี 3 ประเภท:" },
+      { t: "ol", c: [
+        "Integers: จำนวนเต็ม (บวก ลบ และศูนย์) — ตัวอย่าง: ..., -3, -2, -1, 0, 1, 2, 3, ...",
+        "Floating Point Numbers: ตัวเลขทศนิยม — ตัวอย่าง: ..., -3.5, -2.25, -1.0, 0.0, 1.1, 2.2, 3.5, ...",
+        "Complex Numbers: จำนวนเชิงซ้อน — ตัวอย่าง: 1 + j, 2 + 4j, 1 - 1j",
+      ]},
+
+      { t: "h2", c: "แบบฝึกหัด — วันที่ 2" },
+
+      { t: "h3", c: "ระดับ 1" },
+      { t: "ol", c: [
+        "สร้างโฟลเดอร์ day_2 ใน 30DaysOfPython แล้วสร้างไฟล์ variables.py",
+        "เขียน comment ว่า 'Day 2: 30 Days of python programming'",
+        "ประกาศตัวแปร first_name และกำหนดค่า",
+        "ประกาศตัวแปร last_name และกำหนดค่า",
+        "ประกาศตัวแปร full_name และกำหนดค่า",
+        "ประกาศตัวแปร country และกำหนดค่า",
+        "ประกาศตัวแปร city และกำหนดค่า",
+        "ประกาศตัวแปร age และกำหนดค่า",
+        "ประกาศตัวแปร year และกำหนดค่า",
+        "ประกาศตัวแปร is_married และกำหนดค่า",
+        "ประกาศตัวแปร is_true และกำหนดค่า",
+        "ประกาศตัวแปร is_light_on และกำหนดค่า",
+        "ประกาศตัวแปรหลายตัวในบรรทัดเดียว",
+      ]},
+
+      { t: "h3", c: "ระดับ 2" },
+      { t: "ol", c: [
+        "เช็คชนิดข้อมูลของตัวแปรทั้งหมดด้วย type()",
+        "หาความยาวของ first_name ด้วย len()",
+        "เปรียบเทียบความยาวของ first_name กับ last_name",
+        "กำหนด 5 เป็น num_one และ 4 เป็น num_two",
+        "บวก num_one กับ num_two เก็บในตัวแปร total",
+        "ลบ num_two จาก num_one เก็บในตัวแปร diff",
+        "คูณ num_two กับ num_one เก็บในตัวแปร product",
+        "หาร num_one ด้วย num_two เก็บในตัวแปร division",
+        "หาเศษของ num_two หาร num_one เก็บในตัวแปร remainder",
+        "คำนวณ num_one ยกกำลัง num_two เก็บในตัวแปร exp",
+        "หาผลการหารทิ้งเศษของ num_one ด้วย num_two เก็บในตัวแปร floor_division",
+        "วงกลมมีรัศมี 30 เมตร: (1) คำนวณพื้นที่วงกลม (area_of_circle), (2) คำนวณเส้นรอบวง (circum_of_circle), (3) รับรัศมีจาก input แล้วคำนวณพื้นที่",
+        "ใช้ input() รับ first_name, last_name, country, age จากผู้ใช้แล้วเก็บในตัวแปร",
+        "รัน help('keywords') ใน Python Shell หรือในไฟล์เพื่อดูคำสงวน Python",
+      ]},
+    ],
+  },
+};
