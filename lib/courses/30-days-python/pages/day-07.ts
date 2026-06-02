@@ -96,7 +96,7 @@ export const day07Page: Record<string, Page> = {
       { t: "code", lang: "python", c: "# syntax\nst1 = {'item1', 'item2', 'item3', 'item4'}\nst2 = {'item2', 'item3'}\n# it means (A\\B)∪(B\\A)\nst2.symmetric_difference(st1) # {'item1', 'item4'} : st2 ^ st1" },
       { t: "code", lang: "python", c: "whole_numbers = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}\nsome_numbers  = {1, 2, 3, 4, 5}\nwhole_numbers.symmetric_difference(some_numbers) # {0, 6, 7, 8, 9, 10}\n\npython = {'p', 'y', 't', 'h', 'o','n'}\ndragon = {'d', 'r', 'a', 'g', 'o','n'}\npython.symmetric_difference(dragon)  # {'r', 't', 'p', 'y', 'g', 'a', 'd', 'h'}\n# python ^ dragon" },
 
-      { t: "h3", c: "Disjoint Sets" },
+      { t: "h3", c: "Joining Sets" },
       { t: "p", c: "ถ้า set สองตัวไม่มีสมาชิกร่วมกันเลยเรียกว่า disjoint sets ใช้ isdisjoint() ตรวจสอบ:" },
       { t: "code", lang: "python", c: "# syntax\nst1 = {'item1', 'item2', 'item3', 'item4'}\nst2 = {'item2', 'item3'}\nst2.isdisjoint(st1) # False" },
       { t: "code", lang: "python", c: "even_numbers = {0, 2, 4 ,6, 8}\nodd_numbers  = {1, 3, 5, 7, 9}\neven_numbers.isdisjoint(odd_numbers) # True, because no common item\n\npython = {'p', 'y', 't', 'h', 'o','n'}\ndragon = {'d', 'r', 'a', 'g', 'o','n'}\npython.isdisjoint(dragon)  # False, there are common items {'o', 'n'}" },
