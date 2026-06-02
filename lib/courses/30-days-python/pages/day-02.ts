@@ -16,7 +16,8 @@ export const day02Page: Record<string, Page> = {
       { t: "image", src: `${IMG}/builtin-functions_practice.png`, alt: "ฝึกใช้ฟังก์ชันพื้นฐาน", caption: "ฝึกใช้ฟังก์ชันพื้นฐานใน Python Shell" },
       { t: "p", c: "ลองใช้ help() และ dir() เพื่อสำรวจ Python เพิ่มเติม:" },
       { t: "image", src: `${IMG}/help_and_dir_builtin.png`, alt: "help() และ dir()", caption: "การใช้ help() และ dir() ใน Python Shell" },
-      { t: "image", src: `${IMG}/builtin-functional-final.png`, alt: "ผลลัพธ์ฟังก์ชันพื้นฐาน", caption: "ตัวอย่างผลลัพธ์จากฟังก์ชันพื้นฐาน" },
+      { t: "p", c: "ตัวอย่างเพิ่มเติมของการใช้ฟังก์ชัน min(), max() และ sum():" },
+      { t: "image", src: `${IMG}/builtin-functional-final.png`, alt: "min, max, sum functions", caption: "ตัวอย่างการใช้ min(), max(), sum() ใน Python Shell" },
 
       { t: "h2", c: "ตัวแปร (Variables)" },
       { t: "p", c: "ตัวแปร (Variables) คือที่เก็บข้อมูลในหน่วยความจำของคอมพิวเตอร์ ตัวแปรที่ตั้งชื่อเพื่อช่วยจำ (mnemonic variables) แนะนำให้ใช้ เนื่องจากจะทำให้โค้ดอ่านง่ายขึ้น ตัวแปรคืออ้างอิงไปยังตำแหน่งที่เก็บข้อมูลในหน่วยความจำ ห้ามใช้เลขนำหน้าชื่อตัวแปร ห้ามใช้อักขระพิเศษ และห้ามใช้ยัติภังค์ในชื่อตัวแปร ตัวแปรมีชื่อสั้นเช่น x, y, z แต่ควรตั้งชื่อที่สื่อความหมายมากกว่าเสมอ เช่น firstname, lastname, age, country" },
