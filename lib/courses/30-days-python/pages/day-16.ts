@@ -79,13 +79,6 @@ export const day16Page: Record<string, Page> = {
         c: "from datetime import timedelta\nt1 = timedelta(weeks=12, days=10, hours=4, seconds=20)\nt2 = timedelta(days=7, hours=5, minutes=3, seconds=30)\nt3 = t1 - t2\nprint(\"t3 =\", t3)  # 88 days, 22:56:50",
       },
 
-      { t: "h2", c: "การวัดเวลาด้วย time.time" },
-      {
-        t: "code",
-        lang: "python",
-        c: "import time\n\ndef sum_of_n(n):\n    start = time.time()\n    sum = 0\n    for i in range(n+1):\n        sum = sum + i\n    end = time.time()\n    return sum, end-start\n\nprint('Sum:', sum_of_n(100))",
-      },
-
       { t: "h2", c: "💻 แบบฝึกหัด — วันที่ 16" },
       {
         t: "ol",

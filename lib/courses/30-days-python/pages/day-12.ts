@@ -57,7 +57,9 @@ export const day12Page: Record<string, Page> = {
       { t: "code", lang: "python", c: "from math import pi\nprint(pi)" },
       { t: "p", c: "นำเข้าหลาย functions พร้อมกัน:" },
       { t: "code", lang: "python", c: "from math import pi, sqrt, pow, floor, ceil, log10\nprint(pi)                 # 3.141592653589793\nprint(sqrt(2))            # 1.4142135623730951\nprint(pow(2, 3))          # 8.0\nprint(floor(9.81))        # 9\nprint(ceil(9.81))         # 10\nprint(log10(100))         # 2" },
-      { t: "p", c: "นำเข้าทุก function ด้วย * หรือเปลี่ยนชื่อได้:" },
+      { t: "p", c: "นำเข้าทุก function ด้วย *:" },
+      { t: "code", lang: "python", c: "from math import *\nprint(pi)            # 3.141592653589793, pi constant\nprint(sqrt(2))       # 1.4142135623730951, square root\nprint(pow(2, 3))     # 8.0, exponential function\nprint(floor(9.81))   # 9, rounding to the lowest\nprint(ceil(9.81))    # 10, rounding to the highest\nprint(log10(100))    # 2, logarithm with 10 as base" },
+      { t: "p", c: "หรือเปลี่ยนชื่อเมื่อ import:" },
       { t: "code", lang: "python", c: "from math import pi as PI\nprint(PI) # 3.141592653589793" },
 
       { t: "h3", c: "String Module" },

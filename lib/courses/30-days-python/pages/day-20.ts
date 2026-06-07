@@ -57,6 +57,17 @@ export const day20Page: Record<string, Page> = {
         c: "import pandas\nprint(pandas.__version__)",
       },
 
+      { t: "h3", c: "webbrowser Module" },
+      {
+        t: "p",
+        c: "ลองนำเข้า web browser module ซึ่งช่วยให้เราเปิดเว็บไซต์ได้ เราไม่จำเป็นต้อง install module นี้ เพราะมันถูกติดตั้งมาพร้อมกับ Python 3 แล้ว ตัวอย่างเช่น ถ้าต้องการเปิดเว็บไซต์จำนวนมากในเวลาเดียวกัน หรือต้องการ schedule บางอย่าง สามารถใช้ webbrowser module นี้ได้",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "import webbrowser # web browser module to open websites\n\n# list of urls: python\nurl_lists = [\n    'http://www.python.org',\n    'https://www.linkedin.com/in/asabeneh/',\n    'https://github.com/Asabeneh',\n    'https://twitter.com/Asabeneh',\n]\n\n# opens the above list of websites in a different tab\nfor url in url_lists:\n    webbrowser.open_new_tab(url)",
+      },
+
       { t: "h3", c: "การ Uninstall Packages" },
       { t: "code", lang: "shell", c: "pip uninstall packagename" },
 
@@ -155,10 +166,10 @@ export const day20Page: Record<string, Page> = {
       {
         t: "ol",
         c: [
-          "อ่านข้อมูลจาก countries API และหา 10 ประเทศที่มีประชากรมากที่สุด",
-          "อ่านข้อมูลจาก universities of the world API และหา 10 มหาวิทยาลัยในประเทศไทย",
-          "อ่านข้อมูล population ของโลกจาก API และหา 10 ประเทศที่มีประชากรมากที่สุด",
-          "ลอง install packages ที่น่าสนใจจากแต่ละหมวดข้างต้น",
+          "อ่านข้อมูลจาก URL นี้แล้วหา 10 คำที่พบบ่อยที่สุด: romeo_and_juliet = 'http://www.gutenberg.org/files/1112/1112.txt'",
+          "อ่านข้อมูลจาก cats API (cats_api = 'https://api.thecatapi.com/v1/breeds') แล้วหา: (1) ค่า min, max, mean, median, standard deviation ของน้ำหนักแมวในหน่วยเมตริก (2) ค่า min, max, mean, median, standard deviation ของอายุขัยแมวในปี (3) สร้าง frequency table ของประเทศและสายพันธุ์แมว",
+          "อ่านข้อมูลจาก countries API แล้วหา: (1) 10 ประเทศที่มีพื้นที่ใหญ่ที่สุด (2) 10 ภาษาที่มีคนพูดมากที่สุด (3) จำนวนภาษาทั้งหมดใน countries API",
+          "UCI เป็นแหล่งข้อมูล dataset สำหรับ data science และ machine learning อ่านเนื้อหาจาก UCL (https://archive.ics.uci.edu/ml/datasets.php) การทำโดยไม่ใช้ library เพิ่มเติมอาจยาก ดังนั้นลองใช้ BeautifulSoup4",
         ],
       },
     ],

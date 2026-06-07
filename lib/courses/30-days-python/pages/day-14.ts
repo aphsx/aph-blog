@@ -64,7 +64,7 @@ export const day14Page: Record<string, Page> = {
 
       { t: "h3", c: "Python — Reduce Function" },
       { t: "p", c: "reduce() function ถูก define ใน functools module ต้อง import จาก module นี้ รับ function และ iterable เป็น parameters แต่ return ค่าเดียวแทน iterable:" },
-      { t: "code", lang: "python", c: "numbers_str = ['1', '2', '3', '4', '5']  # iterable\ndef add_two_nums(x, y):\n    return int(x) + int(y)\n\ntotal = reduce(add_two_nums, numbers_str)\nprint(total)    # 15" },
+      { t: "code", lang: "python", c: "from functools import reduce\n\nnumbers_str = ['1', '2', '3', '4', '5']  # iterable\ndef add_two_nums(x, y):\n    return int(x) + int(y)\n\ntotal = reduce(add_two_nums, numbers_str)\nprint(total)    # 15" },
 
       { t: "h2", c: "💻 แบบฝึกหัด — วันที่ 14" },
       { t: "code", lang: "python", c: "countries = ['Estonia', 'Finland', 'Sweden', 'Denmark', 'Norway', 'Iceland']\nnames = ['Asabeneh', 'Lidiya', 'Ermias', 'Abraham']\nnumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" },

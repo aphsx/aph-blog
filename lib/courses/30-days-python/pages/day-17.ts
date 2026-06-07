@@ -80,6 +80,11 @@ export const day17Page: Record<string, Page> = {
       {
         t: "code",
         lang: "python",
+        c: "first, second, third, *rest, tenth = [1,2,3,4,5,6,7,8,9,10]\nprint(first)          # 1\nprint(second)         # 2\nprint(third)          # 3\nprint(rest)           # [4,5,6,7,8,9]\nprint(tenth)          # 10",
+      },
+      {
+        t: "code",
+        lang: "python",
         c: "from math import sqrt\n\nnumbers = (36, 49, 81, 100, 144)\nprint(list(map(sqrt, numbers)))",
       },
       {

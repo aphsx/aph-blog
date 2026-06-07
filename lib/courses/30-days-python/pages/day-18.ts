@@ -99,28 +99,92 @@ export const day18Page: Record<string, Page> = {
         alt: "Regular Expression cheat sheet",
         caption: "Regular Expression meta-characters cheat sheet",
       },
+      { t: "h3", c: "Square Bracket" },
       {
-        t: "ul",
-        c: [
-          "[]:  กลุ่มตัวอักษร\n  [a-c] หมายถึง a หรือ b หรือ c\n  [a-z] หมายถึงตัวอักษรใดก็ได้จาก a ถึง z\n  [A-Z] หมายถึงตัวอักษรใดก็ได้จาก A ถึง Z\n  [0-3] หมายถึง 0 หรือ 1 หรือ 2 หรือ 3\n  [0-9] หมายถึงตัวเลขใดก็ได้จาก 0 ถึง 9\n  [a-zA-Z0-9] หมายถึงตัวอักษรหรือตัวเลขใดก็ได้",
-          "\\:  ใช้ escape ตัวอักษรพิเศษ\n  \\d หมายถึง: string ที่มีตัวเลข (0-9)\n  \\D หมายถึง: string ที่ไม่มีตัวเลข",
-          ".:  ตัวอักษรใดก็ได้ยกเว้น newline (\\n)",
-          "^:  ขึ้นต้นด้วย\n  r'^substring' เช่น r'^love' หมายถึงประโยคที่ขึ้นต้นด้วย love\n  r'[^abc]' หมายถึงไม่ใช่ a ไม่ใช่ b ไม่ใช่ c",
-          "$:  ลงท้ายด้วย\n  r'substring$' เช่น r'love$' หมายถึงประโยคที่ลงท้ายด้วย love",
-          "*:  ศูนย์ครั้งหรือมากกว่า\n  r'[a]*' หมายถึง a มีหรือไม่มีก็ได้หรือซ้ำหลายครั้ง",
-          "+:  หนึ่งครั้งหรือมากกว่า\n  r'[a]+' หมายถึง a อย่างน้อยหนึ่งครั้ง",
-          "?:  ศูนย์หรือหนึ่งครั้ง\n  r'[a]?' หมายถึง a ไม่มีหรือมีหนึ่งครั้ง",
-          "{n}:  ระบุจำนวนครั้ง\n  r'[a]{3}' หมายถึง a พอดี 3 ครั้ง\n  r'[a]{3,}' หมายถึง a อย่างน้อย 3 ครั้ง",
-          "|:  either or\n  r'apple|banana' หมายถึง apple หรือ banana",
-          "():  group และ capture\n  r'(\\d+)' หมายถึงตัวเลขหนึ่งตัวหรือมากกว่า",
-        ],
+        t: "p",
+        c: "ใช้ square bracket เพื่อระบุกลุ่มตัวอักษร เช่น [Aa] หมายถึง A หรือ a:",
       },
-
-      { t: "h3", c: "ตัวอย่างการใช้ Pattern" },
       {
         t: "code",
         lang: "python",
-        c: "import re\n\ntxt = 'I am 19 years old and I live in Finland. My phone number is 0944135287.'\nprint(re.findall('\\d+', txt))  # digits\nprint(re.findall('[aeiou]', txt))  # vowels\nprint(re.findall(r'\\b[A-Z][a-z]*\\b', txt))  # words starting with capital letter",
+        c: "regex_pattern = r'[Aa]pple' # this square bracket mean either A or a\ntxt = 'Apple and banana are fruits. An old cliche says an apple a day a doctor way has been replaced by a banana a day keeps the doctor far far away.'\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['Apple', 'apple']\n\nregex_pattern = r'[Aa]pple|[Bb]anana' # this square bracket means either A or a\ntxt = 'Apple and banana are fruits. An old cliche says an apple a day a doctor way has been replaced by a banana a day keeps the doctor far far away.'\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['Apple', 'banana', 'apple', 'banana']",
+      },
+
+      { t: "h3", c: "Escape character(\\) in RegEx" },
+      {
+        t: "p",
+        c: "ใช้ backslash เพื่อระบุตัวอักษรพิเศษ เช่น \\d หมายถึงตัวเลข:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "regex_pattern = r'\\d'  # d is a special character which means digits\ntxt = 'This regular expression example was made on December 6,  2019 and revised on July 8, 2021'\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['6', '2', '0', '1', '9', '8', '2', '0', '2', '1'], this is not what we want",
+      },
+
+      { t: "h3", c: "One or more times(+)" },
+      {
+        t: "p",
+        c: "+ หมายถึงหนึ่งครั้งหรือมากกว่า ใช้ร่วมกับ pattern เพื่อจับกลุ่มตัวอักษรที่ปรากฏต่อเนื่องกัน:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "regex_pattern = r'\\d+'  # d is a special character which means digits, + mean one or more times\ntxt = 'This regular expression example was made on December 6,  2019 and revised on July 8, 2021'\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['6', '2019', '8', '2021'] - now, this is better!",
+      },
+
+      { t: "h3", c: "Period(.)" },
+      {
+        t: "p",
+        c: ". หมายถึงตัวอักษรใดก็ได้ยกเว้น newline:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "regex_pattern = r'[a].'  # this square bracket means a and . means any character except new line\ntxt = '''Apple and banana are fruits'''\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['an', 'an', 'an', 'a ', 'ar']\n\nregex_pattern = r'[a].+'  # . any character, + any character one or more times\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['and banana are fruits']",
+      },
+
+      { t: "h3", c: "Zero or more times(*)" },
+      {
+        t: "p",
+        c: "* หมายถึงศูนย์ครั้งหรือมากกว่า pattern อาจไม่ปรากฏเลยหรือปรากฏกี่ครั้งก็ได้:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "regex_pattern = r'[a].*'  # . any character, * any character zero or more times\ntxt = '''Apple and banana are fruits'''\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['and banana are fruits']",
+      },
+
+      { t: "h3", c: "Zero or one time(?)" },
+      {
+        t: "p",
+        c: "? หมายถึงศูนย์หรือหนึ่งครั้ง pattern อาจไม่ปรากฏหรือปรากฏเพียงครั้งเดียว:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "txt = '''I am not sure if there is a convention how to write the word e-mail.\nSome people write it as email others may write it as Email or E-mail.'''\nregex_pattern = r'[Ee]-?mail'  # ? means here that '-' is optional\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['e-mail', 'email', 'Email', 'E-mail']",
+      },
+
+      { t: "h3", c: "Quantifier in RegEx" },
+      {
+        t: "p",
+        c: "ใช้ curly bracket เพื่อระบุความยาวของ substring ที่ต้องการค้นหา:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "txt = 'This regular expression example was made on December 6,  2019 and revised on July 8, 2021'\nregex_pattern = r'\\d{4}'  # exactly four times\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['2019', '2021']\n\ntxt = 'This regular expression example was made on December 6,  2019 and revised on July 8, 2021'\nregex_pattern = r'\\d{1,4}'\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['6', '2019', '8', '2021']",
+      },
+
+      { t: "h3", c: "Cart ^" },
+      {
+        t: "p",
+        c: "^ ใช้สองแบบ: ขึ้นต้นด้วย (starts with) และการปฏิเสธ (negation) ใน set:",
+      },
+      {
+        t: "code",
+        lang: "python",
+        c: "txt = 'This regular expression example was made on December 6,  2019 and revised on July 8, 2021'\nregex_pattern = r'^This'  # ^ means starts with\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['This']\n\ntxt = 'This regular expression example was made on December 6,  2019 and revised on July 8, 2021'\nregex_pattern = r'[^A-Za-z ]+'  # ^ in set character means negation, not A to Z, not a to z, no space\nmatches = re.findall(regex_pattern, txt)\nprint(matches)  # ['6,', '2019', '8', '2021']",
       },
 
       { t: "h2", c: "💻 แบบฝึกหัด — วันที่ 18" },
