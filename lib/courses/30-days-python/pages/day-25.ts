@@ -609,11 +609,8 @@ export const day25Page: Record<string, Page> = {
           "ดึงคอลัมน์ title เป็น pandas series",
           "นับจำนวนแถวและคอลัมน์",
           "กรอง title ที่มีคำว่า python",
-          "กรอง title ที่มีคำว่า JavaScript",
-          "สำรวจข้อมูลและทำความเข้าใจ",
         ],
       },
-      { t: "callout", title: "ขอแสดงความยินดี!", c: "คุณทำ Day 25 สำเร็จแล้ว! ต่อไป Day 26 — Python สำหรับเว็บ" },
     ],
   },
 };

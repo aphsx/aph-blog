@@ -229,7 +229,6 @@ export const day26Page: Record<string, Page> = {
           "คุณจะสร้าง application นี้ https://thirtydaysofpython-v1-final.herokuapp.com/ ส่วนที่เหลือคือ text analyser เท่านั้น",
         ],
       },
-      { t: "callout", title: "ขอแสดงความยินดี!", c: "คุณทำ Day 26 สำเร็จแล้ว! ต่อไป Day 27 — Python กับ MongoDB" },
     ],
   },
 };
