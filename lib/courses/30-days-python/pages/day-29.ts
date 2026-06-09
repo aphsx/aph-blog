@@ -13,7 +13,7 @@ export const day29Page: Record<string, Page> = {
 
       { t: "h2", c: "สร้าง API (Building API)" },
 
-      { t: "p", c: "ในบทนี้เราจะครอบคลุม RESTful API ที่ใช้ HTTP request methods ในการ GET, PUT, POST และ DELETE ข้อมูล" },
+      { t: "p", c: "ในส่วนนี้ เราจะครอบคลุม RESTful API ที่ใช้ HTTP request methods ในการ GET, PUT, POST และ DELETE ข้อมูล" },
       { t: "p", c: "RESTful API คือ application program interface (API) ที่ใช้ HTTP requests เพื่อ GET, PUT, POST และ DELETE ข้อมูล ในบทก่อนหน้านี้เราได้เรียนเรื่อง Python, Flask และ MongoDB แล้ว เราจะนำความรู้เหล่านั้นมาพัฒนา RESTful API โดยใช้ Python Flask และ MongoDB แอปพลิเคชันทุกตัวที่มีการทำงานแบบ CRUD (Create, Read, Update, Delete) จะมี API สำหรับสร้างข้อมูล ดึงข้อมูล อัปเดตข้อมูล หรือลบข้อมูลออกจากฐานข้อมูล" },
       { t: "p", c: "เบราว์เซอร์สามารถจัดการได้เฉพาะ GET request เท่านั้น ดังนั้นเราจึงต้องมีเครื่องมือที่ช่วยจัดการ request methods ทั้งหมด ได้แก่ GET, POST, PUT, DELETE" },
       { t: "p", c: "ตัวอย่าง API:" },
