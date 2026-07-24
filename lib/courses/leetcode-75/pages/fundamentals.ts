@@ -93,7 +93,7 @@ for x in nums:          # + n  ->  ตัดทิ้ง เหลือ O(n^2)
       {
         t: "links",
         c: [
-          { title: "เริ่มหัวข้อแรก: Array / String →", slug: "lc75-array-string", desc: "9 ข้อแรก — วอร์มอัพด้วยการจัดการลิสต์และข้อความ" },
+          { title: "เริ่มหัวข้อแรก: Array / String →", slug: "lc75-intro-array-string", desc: "9 ข้อแรก — วอร์มอัพด้วยการจัดการลิสต์และข้อความ" },
           { title: "← กลับไปภาพรวมคอร์ส", slug: "lc75" },
         ],
       },
