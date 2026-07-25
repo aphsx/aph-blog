@@ -20,7 +20,29 @@ export type Block =
     }
   | { t: "linklist"; c: { title: string; slug: string }[]; ordered?: boolean }
   | { t: "details"; summary: string; c: Block[] }
-  | { t: "image"; src: string; alt?: string; caption?: string };
+  | { t: "image"; src: string; alt?: string; caption?: string }
+  /**
+   * LeetCode-style worked examples: Input / Output / Explanation.
+   * Rendered as numbered example cards with monospace input/output.
+   */
+  | {
+      t: "example";
+      c: { input: string; output: string; explain?: string }[];
+    }
+  /** Constraints / ข้อจำกัด box (monospace bullets). */
+  | { t: "constraints"; c: string[] }
+  /**
+   * Progressive hint ladder. Each rung is collapsed by default so the reader
+   * can peel one layer at a time instead of jumping straight to the answer.
+   */
+  | { t: "hints"; c: { title: string; c: Block[] }[] }
+  /** A code block paired with the output it prints (separate panel). */
+  | { t: "codeout"; code: string; out: string; lang?: string; label?: string }
+  /**
+   * The final answer reveal — visually distinct from `details` so the reader
+   * knows this is the "no turning back" box.
+   */
+  | { t: "solution"; summary?: string; c: Block[] };
 
 /**
  * A documentation page.

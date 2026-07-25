@@ -81,6 +81,100 @@ function renderBlock(b: Block, i: number) {
           <p className="m-0">{b.c}</p>
         </div>
       );
+    case "example":
+      return (
+        <div key={i} className="my-5 grid gap-3">
+          {b.c.map((ex, j) => (
+            <div
+              key={j}
+              className="rounded-md border border-border bg-surface-soft/40 px-4 py-3"
+            >
+              <div className="mb-2 text-[0.8em] font-bold uppercase tracking-wide text-muted">
+                Example {j + 1}
+              </div>
+              <dl className="m-0 grid gap-1.5">
+                <div className="flex flex-wrap gap-x-2">
+                  <dt className="font-bold">Input:</dt>
+                  <dd className="m-0 font-mono text-[0.9em]">{ex.input}</dd>
+                </div>
+                <div className="flex flex-wrap gap-x-2">
+                  <dt className="font-bold">Output:</dt>
+                  <dd className="m-0 font-mono text-[0.9em]">{ex.output}</dd>
+                </div>
+                {ex.explain && (
+                  <div className="flex flex-wrap gap-x-2">
+                    <dt className="font-bold">Explanation:</dt>
+                    <dd className="m-0">{renderText(ex.explain)}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          ))}
+        </div>
+      );
+    case "constraints":
+      return (
+        <div
+          key={i}
+          className="my-5 rounded-md border border-border border-l-4 border-l-[#8a8f98] bg-surface-soft/30 px-4 py-3"
+        >
+          <div className="mb-1 font-bold">Constraints (ข้อจำกัด)</div>
+          <ul className="m-0 list-disc pl-5 font-mono text-[0.85em] [&_li]:my-1">
+            {b.c.map((x, j) => (
+              <li key={j}>{x}</li>
+            ))}
+          </ul>
+        </div>
+      );
+    case "hints":
+      return (
+        <div key={i} className="my-5 grid gap-2">
+          {b.c.map((h, j) => (
+            <details
+              key={j}
+              className="rounded-md border border-dashed border-primary/60 bg-primary-soft/25 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+            >
+              <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
+                {h.title}
+              </summary>
+              <div className="mt-3">{h.c.map((bb, k) => renderBlock(bb, k))}</div>
+            </details>
+          ))}
+        </div>
+      );
+    case "codeout":
+      return (
+        <div key={i} className="my-5">
+          {b.label && (
+            <div className="mb-1 text-[0.8em] font-bold uppercase tracking-wide text-muted">
+              {b.label}
+            </div>
+          )}
+          <pre className="overflow-x-auto rounded-t-md border border-border bg-code p-4 font-mono text-[0.875em] leading-relaxed">
+            <code>{b.code}</code>
+          </pre>
+          <div className="rounded-b-md border border-t-0 border-border bg-surface-soft/50 px-4 py-3">
+            <div className="mb-1 text-[0.75em] font-bold uppercase tracking-wide text-muted">
+              Output
+            </div>
+            <pre className="m-0 overflow-x-auto whitespace-pre-wrap font-mono text-[0.85em] leading-relaxed">
+              <code>{b.out}</code>
+            </pre>
+          </div>
+        </div>
+      );
+    case "solution":
+      return (
+        <details
+          key={i}
+          className="my-6 rounded-md border-2 border-primary/70 bg-white px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+        >
+          <summary className="cursor-pointer text-[1.05em] font-bold text-primary marker:text-primary">
+            {b.summary ?? "🔓 เปิดเฉลยเต็ม (ลองเองก่อนนะ)"}
+          </summary>
+          <div className="mt-3">{b.c.map((bb, j) => renderBlock(bb, j))}</div>
+        </details>
+      );
     case "details":
       return (
         <details
