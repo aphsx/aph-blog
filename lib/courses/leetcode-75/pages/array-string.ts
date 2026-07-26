@@ -1831,7 +1831,21 @@ print(product_except_self([2, 3]))`,
             t: "codeout",
             lang: "python",
             label: "สลับลำดับแล้วเกิดอะไรขึ้น",
-            code: `def wrong_order(nums):
+            code: `def right_order(nums):
+    n = len(nums)
+    answer = [1] * n
+    prefix = 1
+    for i in range(n):
+        answer[i] = prefix         # ใส่ก่อน
+        prefix *= nums[i]          # แล้วค่อยรับตัวเองเข้าก้อน
+    suffix = 1
+    for i in range(n - 1, -1, -1):
+        answer[i] *= suffix
+        suffix *= nums[i]
+    return answer
+
+
+def wrong_order(nums):
     n = len(nums)
     answer = [1] * n
     prefix = 1
@@ -1845,7 +1859,7 @@ print(product_except_self([2, 3]))`,
     return answer
 
 
-print("ถูก :", product_except_self([1, 2, 3, 4]))
+print("ถูก :", right_order([1, 2, 3, 4]))
 print("ผิด :", wrong_order([1, 2, 3, 4]))`,
             out: `ถูก : [24, 12, 8, 6]
 ผิด : [24, 24, 24, 24]`,
