@@ -11,7 +11,7 @@ export type Block =
   | { t: "h3"; c: string }
   | { t: "ul"; c: string[] }
   | { t: "ol"; c: string[]; start?: number }
-  | { t: "code"; c: string; lang?: string }
+  | { t: "code"; c: string; lang?: string; label?: string }
   | { t: "callout"; title?: string; c: string; warn?: boolean }
   | { t: "table"; head: string[]; rows: string[][] }
   | {
