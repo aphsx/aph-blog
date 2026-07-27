@@ -30,6 +30,22 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * Shiki-highlighted code panels (components/Article.tsx `code` / `codeout`).
+ * Shiki emits its own inline background/color on <pre class="shiki">; the
+ * !important below is what lets it lose to the site's card background so
+ * highlighted blocks still match the surrounding doc chrome.
+ */
+.shiki {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  line-height: 1.7;
+  background-color: var(--color-code) !important;
+}
+
 @layer utilities {
   .doc-sticky-top {
     top: var(--doc-sticky-top);
