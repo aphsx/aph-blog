@@ -1,7 +1,8 @@
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
+import { highlightCode } from "@/lib/highlight";
 
 function renderText(text: string) {
   const lines = text.split("\n");
@@ -18,7 +19,59 @@ function renderText(text: string) {
 const prose =
   "text-base leading-[1.75] text-[#1c1e21] min-[768px]:text-[18px] [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-[0.35em] [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-[0.5rem] [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
 
-function renderBlock(b: Block, i: number) {
+/**
+ * Header strip for a highlighted code panel: window dots + optional label on
+ * the left, language badge on the right. Purely decorative "this is code"
+ * framing — the actual syntax colors come from `highlightCode`.
+ */
+function CodeChrome({ label, lang }: { label?: string; lang?: string }) {
+  const showLang = lang && lang !== "text";
+  return (
+    <div className="flex items-center gap-2.5 rounded-t-md border border-b-0 border-border bg-surface-soft px-4 py-2">
+      <div className="flex shrink-0 gap-1.5">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f56]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#ffbd2e]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#27c93f]" />
+      </div>
+      {label && (
+        <span className="truncate text-[0.8em] font-semibold text-subtle">
+          {label}
+        </span>
+      )}
+      {showLang && (
+        <span className="ml-auto shrink-0 rounded border border-border bg-white px-2 py-0.5 text-[0.7em] font-bold uppercase tracking-wide text-muted">
+          {lang}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/** A Shiki-highlighted panel: chrome header + the highlighted `<pre>` below it. */
+async function CodePanel({
+  code,
+  lang,
+  label,
+  roundBottom = true,
+}: {
+  code: string;
+  lang?: string;
+  label?: string;
+  roundBottom?: boolean;
+}) {
+  const html = await highlightCode(code, lang);
+  return (
+    <>
+      <CodeChrome label={label} lang={lang} />
+      <div
+        className={`overflow-hidden border border-border ${roundBottom ? "rounded-b-md" : ""}`}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </>
+  );
+}
+
+async function renderBlock(b: Block, i: number): Promise<ReactNode> {
   switch (b.t) {
     case "p":
       return <p key={i}>{b.c}</p>;
@@ -61,14 +114,7 @@ function renderBlock(b: Block, i: number) {
     case "code":
       return (
         <div key={i} className="my-5">
-          {b.label && (
-            <div className="mb-1 text-[0.8em] font-bold uppercase tracking-wide text-muted">
-              {b.label}
-            </div>
-          )}
-          <pre className="overflow-x-auto rounded-md border border-border bg-code p-4 font-mono text-[0.875em] leading-relaxed">
-            <code>{b.c}</code>
-          </pre>
+          <CodePanel code={b.c} lang={b.lang} label={b.label} />
         </div>
       );
     case "callout":
@@ -133,30 +179,27 @@ function renderBlock(b: Block, i: number) {
     case "hints":
       return (
         <div key={i} className="my-5 grid gap-2">
-          {b.c.map((h, j) => (
-            <details
-              key={j}
-              className="rounded-md border border-dashed border-primary/60 bg-primary-soft/25 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
-            >
-              <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
-                {h.title}
-              </summary>
-              <div className="mt-3">{h.c.map((bb, k) => renderBlock(bb, k))}</div>
-            </details>
-          ))}
+          {await Promise.all(
+            b.c.map(async (h, j) => (
+              <details
+                key={j}
+                className="rounded-md border border-dashed border-primary/60 bg-primary-soft/25 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+              >
+                <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
+                  {h.title}
+                </summary>
+                <div className="mt-3">
+                  {await Promise.all(h.c.map((bb, k) => renderBlock(bb, k)))}
+                </div>
+              </details>
+            )),
+          )}
         </div>
       );
     case "codeout":
       return (
         <div key={i} className="my-5">
-          {b.label && (
-            <div className="mb-1 text-[0.8em] font-bold uppercase tracking-wide text-muted">
-              {b.label}
-            </div>
-          )}
-          <pre className="overflow-x-auto rounded-t-md border border-border bg-code p-4 font-mono text-[0.875em] leading-relaxed">
-            <code>{b.code}</code>
-          </pre>
+          <CodePanel code={b.code} lang={b.lang} label={b.label} roundBottom={false} />
           <div className="rounded-b-md border border-t-0 border-border bg-surface-soft/50 px-4 py-3">
             <div className="mb-1 text-[0.75em] font-bold uppercase tracking-wide text-muted">
               Output
@@ -176,7 +219,9 @@ function renderBlock(b: Block, i: number) {
           <summary className="cursor-pointer text-[1.05em] font-bold text-primary marker:text-primary">
             {b.summary ?? "🔓 เปิดเฉลยเต็ม (ลองเองก่อนนะ)"}
           </summary>
-          <div className="mt-3">{b.c.map((bb, j) => renderBlock(bb, j))}</div>
+          <div className="mt-3">
+            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j)))}
+          </div>
         </details>
       );
     case "details":
@@ -188,7 +233,9 @@ function renderBlock(b: Block, i: number) {
           <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
             {b.summary}
           </summary>
-          <div className="mt-3">{b.c.map((bb, j) => renderBlock(bb, j))}</div>
+          <div className="mt-3">
+            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j)))}
+          </div>
         </details>
       );
     case "linklist": {
@@ -309,6 +356,7 @@ function renderBlock(b: Block, i: number) {
   }
 }
 
-export default function Article({ blocks }: { blocks: Block[] }) {
-  return <div className={prose}>{blocks.map(renderBlock)}</div>;
+export default async function Article({ blocks }: { blocks: Block[] }) {
+  const rendered = await Promise.all(blocks.map((b, i) => renderBlock(b, i)));
+  return <div className={prose}>{rendered}</div>;
 }
