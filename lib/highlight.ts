@@ -33,5 +33,9 @@ export async function highlightCode(code: string, lang?: string): Promise<string
   const finalLang = highlighter.getLoadedLanguages().includes(resolved)
     ? resolved
     : "text";
-  return highlighter.codeToHtml(code, { lang: finalLang, theme: THEME });
+  // A trailing newline in the source string would render as one extra empty
+  // line at the bottom — harmless for the tokens themselves, but it throws
+  // off the CSS line-number gutter by one, so strip a single trailing "\n".
+  const trimmed = code.replace(/\n$/, "");
+  return highlighter.codeToHtml(trimmed, { lang: finalLang, theme: THEME });
 }

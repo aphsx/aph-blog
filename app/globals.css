@@ -46,6 +46,33 @@ html {
   background-color: var(--color-code) !important;
 }
 
+/*
+ * Line-number gutter for real source code (.shiki-numbered, set in
+ * components/Article.tsx only when `lang` is an actual language — plain
+ * ASCII diagrams stay gutter-free). Pure CSS counters against Shiki's
+ * existing per-line <span class="line">, no extra markup needed.
+ */
+.shiki-numbered .shiki code {
+  counter-reset: line;
+}
+
+.shiki-numbered .shiki .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  /* fixed (not content-based min-width): keeps every row's gutter the exact
+     same pixel width, so a line reaching a 2-digit number can't nudge that
+     one line's code a few px to the right of the rest */
+  width: 1.75em;
+  margin-right: 1em;
+  padding-right: 1em;
+  border-right: 1px solid var(--color-border);
+  text-align: right;
+  color: var(--color-muted);
+  opacity: 0.7;
+  user-select: none;
+}
+
 @layer utilities {
   .doc-sticky-top {
     top: var(--doc-sticky-top);
