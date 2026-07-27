@@ -60,11 +60,17 @@ async function CodePanel({
   roundBottom?: boolean;
 }) {
   const html = await highlightCode(code, lang);
+  // Line numbers only make sense for real source (python/bash/...) — an
+  // ASCII diagram authored as `t: "code"` with no `lang` isn't a numbered
+  // sequence of statements, so it stays gutter-free.
+  const numbered = Boolean(lang && lang !== "text");
   return (
     <>
       <CodeChrome label={label} lang={lang} />
       <div
-        className={`overflow-hidden border border-border ${roundBottom ? "rounded-b-md" : ""}`}
+        className={`overflow-hidden border border-border ${roundBottom ? "rounded-b-md" : ""} ${
+          numbered ? "shiki-numbered" : ""
+        }`}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </>
