@@ -60,12 +60,16 @@ function renderBlock(b: Block, i: number) {
       );
     case "code":
       return (
-        <pre
-          key={i}
-          className="my-5 overflow-x-auto rounded-md border border-border bg-code p-4 font-mono text-[0.875em] leading-relaxed"
-        >
-          <code>{b.c}</code>
-        </pre>
+        <div key={i} className="my-5">
+          {b.label && (
+            <div className="mb-1 text-[0.8em] font-bold uppercase tracking-wide text-muted">
+              {b.label}
+            </div>
+          )}
+          <pre className="overflow-x-auto rounded-md border border-border bg-code p-4 font-mono text-[0.875em] leading-relaxed">
+            <code>{b.c}</code>
+          </pre>
+        </div>
       );
     case "callout":
       return (
@@ -258,16 +262,17 @@ function renderBlock(b: Block, i: number) {
           )}
         </figure>
       );
-    case "table":
+    case "table": {
+      const isPlaceholder = (cell: string) => cell === "—" || cell === "-";
       return (
-        <div key={i} className="my-5 overflow-x-auto">
-          <table className="w-full border-collapse text-[0.9em]">
+        <div key={i} className="my-5 overflow-x-auto rounded-md border border-border">
+          <table className="w-full min-w-full border-collapse text-[0.9em]">
             <thead>
-              <tr>
+              <tr className="border-b-2 border-border bg-surface-soft">
                 {b.head.map((h, j) => (
                   <th
                     key={j}
-                    className="border border-border bg-surface-soft px-3.5 py-2.5 text-left font-bold"
+                    className="whitespace-nowrap px-3.5 py-2.5 text-left font-bold"
                   >
                     {h}
                   </th>
@@ -276,13 +281,20 @@ function renderBlock(b: Block, i: number) {
             </thead>
             <tbody>
               {b.rows.map((row, r) => (
-                <tr key={r}>
+                <tr
+                  key={r}
+                  className={`border-b border-border last:border-b-0 ${
+                    r % 2 === 1 ? "bg-surface-soft/40" : ""
+                  }`}
+                >
                   {row.map((cell, c) => (
                     <td
                       key={c}
-                      className="border border-border px-3.5 py-2.5 text-left"
+                      className={`px-3.5 py-2.5 align-top text-left leading-relaxed ${
+                        isPlaceholder(cell) ? "text-center text-muted" : ""
+                      }`}
                     >
-                      {cell}
+                      {renderText(cell)}
                     </td>
                   ))}
                 </tr>
@@ -291,6 +303,7 @@ function renderBlock(b: Block, i: number) {
           </table>
         </div>
       );
+    }
     default:
       return null;
   }
