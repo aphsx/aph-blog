@@ -165,7 +165,7 @@ print(maxDepth(None))     # ต้นว่าง ลึก 0 ชั้น`, out
         t: "constraints",
         c: [
         "จำนวน node ของแต่ละต้นอยู่ระหว่าง 1 ถึง 200",
-        "1 <= Node.val <= 200",
+        "0 <= Node.val <= 200",
         ],
       },
 

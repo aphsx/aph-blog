@@ -154,6 +154,8 @@ True` },
         t: "constraints",
         c: [
         "1 <= products.length <= 1000",
+        "1 <= products[i].length <= 3000",
+        "ข้อความใน products ไม่ซ้ำกัน",
         "1 <= searchWord.length <= 1000",
         "ผลรวมความยาวของ products ทั้งหมดไม่เกิน 2 × 10^4",
         ],
