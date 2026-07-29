@@ -63,6 +63,14 @@ def insert(root, word):
         "startsWith('app') → True (มี apple ขึ้นต้นด้วย app)",
         "insert('app') แล้ว search('app') → True",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= word.length, prefix.length <= 2000",
+        "ตัวอักษรอังกฤษพิมพ์เล็กเท่านั้น",
+        "เรียก insert, search, startsWith รวมกันได้มากสุด 3 × 10^4 ครั้ง",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ข้อนี้คือการนำ trie มา wrap เป็น class ใช้ TrieNode (โหนด) ที่มี children (hash map ตัวอักษร -> node) และ is_end (flag บอกว่ามีคำจบที่นี่) หัวใจคือแยกความต่างระหว่างมีคำนี้จริงกับมีคำที่ขึ้นต้นด้วยสิ่งนี้ให้ออก" },
@@ -76,7 +84,7 @@ def insert(root, word):
       { t: "callout", title: "จุดพลาดที่พบบ่อย", warn: true, c: "ลืมเช็ค is_end ใน search ทำให้ search('app') ตอบ True ทั้งที่ยังไม่เคย insert คำว่า app อีกจุดคือต้องเริ่ม traverse จาก self.root ใหม่ทุกครั้ง อย่าใช้ node ค้างจากการเรียกก่อนหน้า" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `class TrieNode:
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `class TrieNode:
     def __init__(self):
         self.children = {}     # ตัวอักษร -> TrieNode
         self.is_end = False
@@ -117,7 +125,10 @@ print(trie.search("apple"))      # True
 print(trie.search("app"))        # False
 print(trie.startsWith("app"))    # True
 trie.insert("app")
-print(trie.search("app"))        # True` },
+print(trie.search("app"))        # True`, out: `True
+False
+True
+True` },
         { t: "p", c: "หัวใจของข้อนี้คือแยกความต่างระหว่างมีคำนี้จริงกับมีคำที่ขึ้นต้นด้วยสิ่งนี้ให้ออก เราจึงดึงส่วนที่ซ้ำกัน (การ traverse ตามตัวอักษรจนสุด prefix) ออกมาเป็น function _find ที่ return node ปลายทางหรือ None แล้ว search เพิ่มเงื่อนไขเช็ค is_end ส่วน startsWith แค่ดูว่าไม่ None" },
         { t: "p", c: "ถ้าไม่แยก _find ก็เขียนได้เหมือนกันแต่โค้ดจะซ้ำสองรอบ การดึงออกมาช่วยให้ search กับ startsWith ต่างกันแค่บรรทัดสุดท้าย อ่านง่ายและลดโอกาสพลาด" },
         { t: "p", c: "Time O(L) ต่อการเรียกหนึ่งครั้ง เมื่อ L คือความยาวคำหรือ prefix · Space O(จำนวนตัวอักษรทั้งหมดที่เก็บ) กรณีแย่สุดคือทุกคำไม่ share prefix กันเลย" },
@@ -139,6 +150,14 @@ print(trie.search("app"))        # True` },
         "พิมพ์ m, mo, mou → แนะนำ ['mobile','moneypot','monitor'] (3 ตัวแรกตามพจนานุกรม)",
         "พิมพ์ mous, mouse → แนะนำ ['mouse','mousepad']",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= products.length <= 1000",
+        "1 <= searchWord.length <= 1000",
+        "ผลรวมความยาวของ products ทั้งหมดไม่เกิน 2 × 10^4",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ข้อนี้ใช้ trie ผสมกับการ sort (เรียง) ล่วงหน้า idea คือถ้า sort products ก่อนหนึ่งครั้ง แล้วค่อย insert ลง trie คำที่ผ่านแต่ละ node จะมาตาม lexicographic order อยู่แล้ว เราจึงเก็บแค่ 3 ตัวแรกที่แต่ละ node พอ" },
@@ -152,7 +171,7 @@ print(trie.search("app"))        # True` },
       { t: "callout", title: "จุดพลาดที่พบบ่อย", warn: true, c: "พอพิมพ์ตัวอักษรที่ทำให้หลุดเส้นทางใน trie แล้ว ตัวอักษรที่เหลือหลังจากนั้นต้องแนะนำเป็นลิสต์ว่างทั้งหมด อย่าหยุดเติมผลลัพธ์ ต้องเติม [] ต่อไปให้ครบความยาว searchWord" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `class TrieNode:
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `class TrieNode:
     def __init__(self):
         self.children = {}
         self.suggestions = []   # สินค้าไม่เกิน 3 ตัวแรก (เรียงแล้ว) ที่ผ่าน node นี้
@@ -187,7 +206,7 @@ def suggested_products(products, searchWord):
 print(suggested_products(
     ["mobile", "mouse", "moneypot", "monitor", "mousepad"], "mouse"))
 # [['mobile','moneypot','monitor'], ['mobile','moneypot','monitor'],
-#  ['mouse','mousepad'], ['mouse','mousepad'], ['mouse','mousepad']]` },
+#  ['mouse','mousepad'], ['mouse','mousepad'], ['mouse','mousepad']]`, out: `[['mobile', 'moneypot', 'monitor'], ['mobile', 'moneypot', 'monitor'], ['mouse', 'mousepad'], ['mouse', 'mousepad'], ['mouse', 'mousepad']]` },
         { t: "p", c: "ไอเดียคือ sort products ก่อนหนึ่งครั้ง ทำให้เวลาไล่ insert คำเข้า trie ตามลำดับ ทุก node จะได้รับสินค้าตาม lexicographic order อยู่แล้ว เราจึงเก็บแค่ 3 ตัวแรกที่ผ่าน node นั้นไว้ใน suggestions เมื่อผู้ใช้พิมพ์ prefix มาเรื่อย ๆ ก็แค่ traverse ตามตัวอักษรแล้วหยิบ suggestions ที่ node ปลายทางออกมาได้ทันที ไม่ต้อง search ใหม่ทุกครั้ง" },
         { t: "p", c: "จุดสำคัญคือเมื่อพิมพ์ตัวอักษรที่ทำให้หลุดเส้นทางใน trie (ไม่มีสินค้าไหนขึ้นต้นแบบนั้นแล้ว) ตัวอักษรที่เหลือหลังจากนั้นต้องแนะนำเป็น empty list (ลิสต์ว่าง) ทั้งหมด โค้ดจึงตั้ง node = None แล้ว append [] ต่อไปเรื่อย ๆ" },
         { t: "p", c: "Time O(N log N + total) โดย N คือจำนวนสินค้า มาจากการ sort (N log N) บวกกับการสร้าง trie ตามจำนวนตัวอักษรรวมของทุกคำ ส่วนการตอบ searchWord ใช้ O(ความยาว searchWord) · Space O(total) เก็บตัวอักษรทั้งหมดใน trie (แต่ละ node เก็บ suggestions ไม่เกิน 3)" },

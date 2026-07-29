@@ -82,6 +82,13 @@ while cur:
         "input: 1 → 2 → 3 → 4 (มี 4 ตัว, กลางคือ index 2 = ค่า 3) → output: 1 → 2 → 4",
         "edge case: 1 (มี node เดียว, ลบแล้วเหลือลิสต์ว่าง) → output: None",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 1 ถึง 10^5",
+        "1 <= Node.val <= 10^5",
+        ],
+      },
       { t: "callout", title: "เงื่อนไข", c: "โจทย์การันตีว่า head ไม่เป็น None ตั้งแต่แรก (มีอย่างน้อย 1 node) จึงเข้าถึง head.next ได้อย่างปลอดภัยโดยไม่ต้องเช็ค head ก่อน" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -107,7 +114,14 @@ while cur:
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `# นิยาม node มาตรฐานของ LeetCode (โจทย์ให้มาแล้ว ไม่ต้องเขียนเอง)
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+# นิยาม node มาตรฐานของ LeetCode (โจทย์ให้มาแล้ว ไม่ต้องเขียนเอง)
 # class ListNode:
 #     def __init__(self, val=0, next=None):
 #         self.val = val        # ค่าที่ node นี้เก็บ
@@ -139,7 +153,7 @@ out = []
 while head:
     out.append(head.val)
     head = head.next
-print(out)   # [1, 3, 4, 1, 2, 6]` },
+print(out)   # [1, 3, 4, 1, 2, 6]`, out: `[1, 3, 4, 1, 2, 6]` },
         { t: "p", c: "เคล็ดลับ fast & slow คือ fast เดินเร็วเป็นสองเท่าของ slow เสมอ ดังนั้นตอน fast วิ่งไปสุด list slow จะเดินได้แค่ครึ่งทางพอดี ก็คือ middle node เงื่อนไข while fast and fast.next ทำให้ loop หยุดถูกจังหวะทั้งกรณีจำนวน node เป็นเลขคู่และเลขคี่ ถ้าเขียนแค่ while fast จะพัง เพราะบรรทัด fast.next.next จะไปอ้าง .next ของ None เมื่อ fast วิ่งเลยขอบ" },
         { t: "p", c: "แต่แค่รู้ตัวกลางยัง delete ไม่ได้ เพราะ linked list การลบ node ต้อง update pointer ของ 'ตัวก่อนหน้า' ให้กระโดดข้ามไปหาตัวถัดจากกลาง เราจึง track prev ไว้ทุกก้าว (บรรทัด prev = slow ต้องมาก่อนขยับ slow) แล้วสั่ง prev.next = slow.next เพื่อข้ามตัวกลางทิ้ง เมื่อไม่มีใครชี้มาที่ตัวกลางแล้ว มันก็หลุดออกจาก list ไปเอง" },
         { t: "p", c: "edge case สำคัญคือ list มี node เดียว ถ้าไม่ดักไว้ prev จะยังเป็น None แล้วโค้ด prev.next จะพัง เราจึงเช็ค head.next is None ตั้งแต่ต้นแล้ว return None ทันที (โจทย์การันตีว่า head ไม่เป็น None ตั้งแต่แรก จึง access head.next ได้อย่างปลอดภัย)" },
@@ -162,6 +176,13 @@ print(out)   # [1, 3, 4, 1, 2, 6]` },
         "input: 2 → 1 → 3 → 5 → 6 → 4 → 7 → None → output: 2 → 3 → 6 → 7 → 1 → 5 → 4 → None",
         "edge case: ลิสต์ว่าง None หรือมี node เดียว → คืนเหมือนเดิม ไม่ต้องทำอะไร",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 0 ถึง 10^4",
+        "-10^6 <= Node.val <= 10^6",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โครงสร้าง/เทคนิคที่ต้องใช้: two pointers (ตัวชี้สองตัว) odd กับ even สานสลับกันไป โดยไม่สร้าง node ใหม่เลย แค่ 'เย็บ' pointer (ตัวชี้) ใหม่จาก node เดิม เหตุผลที่ต้องทำแบบนี้เพราะโจทย์บังคับ Space O(1) เราจึง copy ค่าไปใส่ list ใหม่ไม่ได้" },
@@ -185,7 +206,14 @@ print(out)   # [1, 3, 4, 1, 2, 6]` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def odd_even_list(head):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def odd_even_list(head):
     if head is None or head.next is None:
         return head             # 0 หรือ 1 node ไม่ต้องทำอะไร
 
@@ -211,7 +239,7 @@ out = []
 while head:
     out.append(head.val)
     head = head.next
-print(out)   # [1, 3, 5, 2, 4]` },
+print(out)   # [1, 3, 5, 2, 4]`, out: `[1, 3, 5, 2, 4]` },
         { t: "p", c: "ไอเดียคือเราไม่สร้าง node ใหม่ แต่ 'ร้อยสายใหม่' จาก node เดิมสองสาย สาย odd เก็บตัว index 1,3,5 สาย even เก็บตัว 2,4,6 ในหนึ่งก้าวของ loop เราเชื่อม odd ให้ข้ามตัวคู่ที่คั่นอยู่ไปเกาะตัวคี่ถัดไป แล้วเชื่อม even ให้ข้ามตัวคี่ไปเกาะตัวคู่ถัดไป สลับกันแบบนี้จนหมด" },
         { t: "p", c: "จุดฉลาดที่ต้องสังเกตคือบรรทัด even.next = odd.next ใช้ค่า odd ที่ 'เพิ่งขยับใหม่' ในบรรทัดก่อนหน้า ทำให้ even รู้ว่าตัวคู่ถัดไปอยู่ตรงไหน order (ลำดับ) สี่บรรทัดใน loop จึงสลับกันไม่ได้ ต้องขยับ odd ให้เสร็จก่อนถึงจะใช้ odd.next มาหาตัวคู่ถัดไปได้ถูก ถ้าสลับลำดับจะได้ pointer ผิดตัวทันที" },
         { t: "p", c: "จุดพลาดบ่อยคือลืม track even_head ไว้ตั้งแต่ต้น เพราะระหว่าง loop pointer ของสายคู่ถูก update ไปเรื่อย ๆ ถ้าไม่จำหัวไว้ก่อนจะหาไม่เจอว่าจะเอาปลายสายคี่ไป append กับตัวไหน อีกจุดคือเงื่อนไข while even and even.next ต้องเช็คทั้งคู่ เพื่อกันกรณีจำนวน node คี่/คู่ไม่ให้อ้าง .next ของ None และต้องดัก 0 หรือ 1 node ตั้งแต่ต้นด้วย" },
@@ -234,6 +262,13 @@ print(out)   # [1, 3, 5, 2, 4]` },
         "input: 1 → 2 → None → output: 2 → 1 → None",
         "edge case: ลิสต์ว่าง None → output: None (โค้ดคืนค่าถูกโดยอัตโนมัติ ไม่ต้องดักพิเศษ)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 0 ถึง 5000",
+        "-5000 <= Node.val <= 5000",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โครงสร้าง/เทคนิคที่ต้องใช้: two pointers (ตัวชี้สองตัว) prev กับ cur traverse (เดินไล่) ทีละ node แล้ว reverse pointer ของ cur ให้ชี้ย้อนกลับไปหา prev แทนที่จะชี้ไปข้างหน้า เหตุผลที่เลือกวิธีนี้เพราะมันใช้ Space O(1) (ไม่ต้องสร้าง list ใหม่ ไม่ต้องใช้ stack หรือ recursion (การเรียกตัวเอง) ที่กิน memory เพิ่ม)" },
@@ -259,7 +294,14 @@ print(out)   # [1, 3, 5, 2, 4]` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def reverse_list(head):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def reverse_list(head):
     prev = None                 # ข้างหลัง cur (ตอนแรกยังไม่มีอะไร)
     cur = head                  # node ที่กำลังพิจารณา
     while cur:
@@ -278,7 +320,7 @@ out = []
 while r:
     out.append(r.val)
     r = r.next
-print(out)   # [3, 2, 1]` },
+print(out)   # [3, 2, 1]`, out: `[3, 2, 1]` },
         { t: "p", c: "ไอเดียคือ traverse ไปทีละ node แล้ว reverse ลูกศรของแต่ละตัวให้ชี้ย้อนหลังแทน จุดที่คนใหม่พลาดบ่อยคือลืม track cur.next ไว้ก่อน พอเราสั่ง cur.next = prev ปุ๊บ pointer เดิมที่ชี้ไปข้างหน้าจะหายไปทันที เราจึงจะ traverse ต่อไม่ได้ ดังนั้นบรรทัด nxt = cur.next ต้องมาก่อนเสมอ ลองนึกภาพว่าเรากำลังเดินข้ามสะพานแล้วพับสะพานข้างหลังทิ้ง ต้องมองว่าก้าวต่อไปเหยียบตรงไหนให้เรียบร้อยก่อนพับ" },
         { t: "p", c: "order (ลำดับ) สี่บรรทัดใน loop (track next → reverse → ขยับ prev → ขยับ cur) สลับกันไม่ได้ ท่องให้ขึ้นใจแล้วจะใช้ซ้ำได้ในหลายโจทย์ เมื่อ cur เดินตกขอบเป็น None แล้ว prev จะค้างอยู่ที่ node สุดท้ายที่ reverse ไป ซึ่งก็คือ head ตัวใหม่พอดี ถ้าเผลอ return cur จะได้ None เพราะ cur ตกขอบไปแล้ว" },
         { t: "p", c: "Time O(n) traverse ผ่านทุก node หนึ่งรอบ · Space O(1) ใช้ pointer ไม่กี่ตัว ไม่สร้าง list ใหม่" },
@@ -300,6 +342,13 @@ print(out)   # [3, 2, 1]` },
         "input: 4 → 2 → 2 → 3 → คู่แฝดคือ (4+3)=7 และ (2+2)=4 → output: 7",
         "input: 1 → 100000 → คู่แฝดเดียว (1+100000)=100001 → output: 100001",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node เป็นเลขคู่เสมอ อยู่ระหว่าง 2 ถึง 10^5",
+        "1 <= Node.val <= 10^5",
+        ],
+      },
       { t: "callout", title: "เงื่อนไข", c: "โจทย์การันตีว่าจำนวน node เป็นเลขคู่เสมอ (มีอย่างน้อย 2 ตัว) เราจึงไม่ต้องกังวลเรื่อง node กลางที่ไม่มีคู่ และครึ่งหน้ากับครึ่งหลังจะยาวเท่ากันพอดี" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -324,7 +373,14 @@ print(out)   # [3, 2, 1]` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def pair_sum(head):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def pair_sum(head):
     # 1) หาตัวกลางด้วย fast & slow
     slow = head
     fast = head
@@ -357,7 +413,7 @@ print(out)   # [3, 2, 1]` },
 head = None
 for v in reversed([5, 4, 2, 1]):
     head = ListNode(v, head)
-print(pair_sum(head))   # 6` },
+print(pair_sum(head))   # 6`, out: `6` },
         { t: "p", c: "โจทย์นี้ท้าทายตรงที่ linked list เดินย้อนกลับไม่ได้ เราจึง access 'ตัวหลัง' ของแต่ละคู่ยาก ทริกคือแบ่งงานเป็นสามขั้น ขั้นแรกใช้ fast/slow หาจุดกึ่งกลาง เพราะ n เป็นเลขคู่ พอ fast เดินตกขอบ slow จะมาหยุดที่ node แรกของครึ่งหลังพอดี ขั้นสอง reverse เฉพาะครึ่งหลัง (ใช้เทคนิคเป๊ะจากข้อ 31) พอ reverse แล้ว 'ตัวสุดท้ายของ list เดิม' จะกลายมาเป็นหัวของครึ่งหลัง ทำให้เรา traverse จากหัว (first) กับจากกลางที่ reverse (second) ควบคู่กันได้ ซึ่ง first.val กับ second.val ในแต่ละก้าวก็คือ twin กันพอดี" },
         { t: "p", c: "ขั้นสามแค่บวกทีละคู่แล้ว track ค่าที่มากที่สุดด้วย max เนื่องจากครึ่งหน้ากับครึ่งหลังยาวเท่ากัน (n เป็นเลขคู่) เราใช้เงื่อนไข while second เดินจนครึ่งหลังหมดได้เลย จุดที่คนใหม่งงบ่อยคือหลัง reverse ครึ่งหลังแล้ว pointer ตรงรอยต่อกลาง list จะไขว้กันนิดหน่อย แต่ไม่กระทบการนับคู่ เพราะเราเดินแค่ n/2 ก้าวจากสองปลายแล้วหยุดเมื่อ second หมดพอดี" },
         { t: "p", c: "Time O(n) หากลาง + reverse ครึ่งหลัง + traverse บวก ล้วนเป็นเชิงเส้น · Space O(1) update pointer ในที่เดิม (in-place) ไม่ได้ copy ค่าไปเก็บใน list ใหม่" },

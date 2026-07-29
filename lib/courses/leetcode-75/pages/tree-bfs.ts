@@ -57,6 +57,13 @@ def level_order(root):
         "Input: [1,2,3,null,5,null,4] → Output: [1,3,4] (เห็น 1 ชั้น 1, 3 ชั้น 2, 4 ชั้น 3)",
         "Input: [1,2,3,4] → Output: [1,3,4] (ชั้น 3 ฝั่งขวาว่าง เห็น 4 ที่อยู่ซ้าย)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 0 ถึง 100",
+        "-100 <= Node.val <= 100",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ BFS loop ทีละ level ตาม template แล้วเก็บเฉพาะ node ตัวสุดท้ายที่ pop ออกในแต่ละ level (ตำแหน่ง size - 1) ซึ่งคือ node ขวาสุดของ level นั้นพอดี" },
@@ -80,7 +87,15 @@ def level_order(root):
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import deque
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+from collections import deque
 
 # class TreeNode:
 #     def __init__(self, val=0, left=None, right=None):
@@ -103,7 +118,11 @@ def rightSideView(root):
                 queue.append(node.left)  # ต้องใส่ซ้ายก่อนขวา
             if node.right:
                 queue.append(node.right) # เพื่อให้ขวาสุดออกท้ายสุด
-    return result` },
+    return result
+
+# ต้นไม้ [1, 2, 3, null, 5, null, 4]
+root = TreeNode(1, TreeNode(2, None, TreeNode(5)), TreeNode(3, None, TreeNode(4)))
+print(rightSideView(root))`, out: `[1, 3, 4]` },
         { t: "p", c: "หัวใจคือใช้ template วนทีละชั้น แล้วเช็คว่า i == size - 1 ไหม ถ้าใช่แปลว่าเป็นตัวสุดท้ายที่ออกจากชั้นนี้ = ขวาสุด เก็บค่าเข้า result ที่ต้อง append ลูกซ้ายก่อนลูกขวาเสมอ เพื่อรับประกันว่าภายในชั้นถัดไป node จะเรียงซ้ายไปขวา ตัวที่ออกท้ายสุดจึงเป็นตัวขวาสุดจริง ๆ" },
         { t: "p", c: "จุดพลาดที่พบบ่อยคือเผลอคิดว่าคำตอบคือลูกขวาของทุก node หรือเก็บแต่ node.right ซึ่งจะพลาดกรณีที่ชั้นนั้นฝั่งขวาว่างแต่ฝั่งซ้ายมี node การยึดตำแหน่ง \"ตัวสุดท้ายในชั้น\" แก้ปัญหานี้ได้หมด อย่าลืมเช็ค root เป็น None ตั้งแต่ต้นด้วย" },
         { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว · Space O(w) โดย w คือความกว้างมากสุดของต้นไม้ = จำนวน node มากสุดในคิวพร้อมกันในหนึ่งชั้น กรณีแย่สุด w ราว ๆ n/2" },
@@ -124,6 +143,13 @@ def rightSideView(root):
         "Input: [1,7,0,7,-8,null,null] → Output: 2 (ชั้น1=1, ชั้น2=7+0=7, ชั้น3=7+(-8)=-1 มากสุดคือชั้น 2)",
         "Input: [989,null,10250,98693,-89388,null,null,null,-32127] → Output: 2",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 1 ถึง 10^4",
+        "-10^5 <= Node.val <= 10^5",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ BFS loop ทีละ level ตาม template เพิ่ม counter level ที่บวก 1 ทุกครั้งที่ขึ้น level ใหม่ และ track ผลรวมค่าทุก node ใน level เป็น total เมื่อจบ level ก็ compare กับผลรวมมากสุดที่เคยเจอ" },
@@ -147,7 +173,15 @@ def rightSideView(root):
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import deque
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+from collections import deque
 
 def maxLevelSum(root):
     best_sum = float('-inf')   # ผลรวมมากสุดที่เจอ (เริ่ม -inf กันค่าติดลบ)
@@ -168,7 +202,11 @@ def maxLevelSum(root):
         if total > best_sum:          # เจอชั้นที่รวมมากกว่าเดิม
             best_sum = total
             best_level = level
-    return best_level` },
+    return best_level
+
+# ต้นไม้ [1, 7, 0, 7, -8, null, null]
+root = TreeNode(1, TreeNode(7, TreeNode(7), TreeNode(-8)), TreeNode(0))
+print(maxLevelSum(root))`, out: `2` },
         { t: "p", c: "โครงเดียวกับข้อก่อน เพิ่มตัวนับ level ที่บวก 1 ทุกครั้งที่เริ่มชั้นใหม่ และตัวแปร total บวกค่าทุก node ในชั้น เมื่อจบชั้นก็เทียบ total กับ best_sum ถ้ามากกว่าจึงอัปเดต ใช้ > (มากกว่าเท่านั้น ไม่ใช่ >=) เพื่อให้เมื่อผลรวมเสมอกัน เราเก็บชั้นแรก (เลขน้อยกว่า) ไว้ตามที่โจทย์ต้องการ" },
         { t: "p", c: "จุดพลาดที่พบบ่อยคือเริ่ม best_sum ด้วย 0 ซึ่งพังทันทีถ้าทุกชั้นมีผลรวมติดลบ ต้องเริ่มด้วย float('-inf') และอย่าลืมว่าโจทย์นับชั้นเริ่มที่ 1 ไม่ใช่ 0 โจทย์นี้ทำด้วย DFS ก็ได้ แต่ BFS เข้ากับโจทย์ \"เป็นชั้น\" อย่างเป็นธรรมชาติกว่า" },
         { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว · Space O(w) โดย w คือความกว้างมากสุดของต้นไม้ (จำนวน node มากสุดในคิวพร้อมกัน)" },

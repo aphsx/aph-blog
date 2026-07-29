@@ -48,6 +48,13 @@ export const backtrackingPages: Record<string, Page> = {
         "digits = \"2\" → ['a','b','c']",
         "digits = \"\" (สตริงว่าง) → [] (ไม่มีอะไรให้กดเลย)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "0 <= digits.length <= 4",
+        "digits[i] เป็นตัวเลข 2 ถึง 9",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โจทย์นี้คือ backtracking แบบตรงแบบ เพราะเราต้อง build คำตอบทีละตัวอักษร และแต่ละ digit มีหลาย choice (2-4 ตัว) จึงเข้ารูป choose → explore → unchoose ที่เรียนในหน้า intro พอดี สิ่งที่ต้องมีคือ mapping (hash map) จาก digit ไปตัวอักษรบนปุ่มนั้น" },
@@ -72,7 +79,7 @@ export const backtrackingPages: Record<string, Page> = {
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def letter_combinations(digits):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def letter_combinations(digits):
     if not digits:
         return []                     # ไม่มีเลขก็ไม่มีชุดตัวอักษร
     mapping = {
@@ -96,7 +103,8 @@ export const backtrackingPages: Record<string, Page> = {
 
 print(letter_combinations("23"))
 # ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
-print(letter_combinations(""))   # []` },
+print(letter_combinations(""))   # []`, out: `['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
+[]` },
         { t: "p", c: "เราเดินตาม digit ของ digits ทีละตัวด้วย pointer (ตัวชี้) i ที่ digit ตำแหน่ง i เราดูว่าปุ่มนั้นมีตัวอักษรอะไรบ้าง (mapping[digits[i]]) แล้ว iterate ลองทุกตัว แต่ละตัวคือหนึ่ง branch ของ tree เมื่อ i เดินไปถึง length ของ digits แปลว่าเรา choose ครบทุก digit แล้ว จึง join path เป็น string เก็บลง result" },
         { t: "p", c: "ถ้าลองเอา path.pop() ออก จะเกิดอะไรขึ้น? path จะยาวขึ้นเรื่อย ๆ ไม่มีวันสั้นลง ทำให้เงื่อนไข i == len(digits) กับ length ของ path ไม่ตรงกัน และตัวอักษรจาก branch เก่าจะค้างมาปน branch ใหม่ คำตอบเพี้ยนทันที การ pop() คือการ restore (คืนสภาพ) path ให้เท่าเดิมก่อน branch นี้" },
         { t: "p", c: "Time O(4^n · n) เมื่อ n คือจำนวน digit แต่ละ digit แตกได้มากสุด 4 branch (ปุ่ม 7 กับ 9 มี 4 ตัว) จึงมีคำตอบได้ถึง 4^n ชุด และการ join string แต่ละชุดใช้เวลา O(n) · Space O(n) จาก depth ของ recursion และขนาด path (ไม่นับพื้นที่เก็บ result)" },
@@ -118,6 +126,13 @@ print(letter_combinations(""))   # []` },
         "k = 3, n = 9 → [[1,2,6],[1,3,5],[2,3,4]] (แต่ละชุดเรียงน้อยไปมาก ไม่ซ้ำกัน)",
         "k = 4, n = 1 → [] (เลือก 4 ตัวจาก 1-9 ให้รวมได้ 1 เป็นไปไม่ได้)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "2 <= k <= 9",
+        "1 <= n <= 60",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ยังเป็น backtracking แต่โจทย์นี้เพิ่มเงื่อนไขสองอย่างที่ต้องคุมพร้อมกัน: count (จำนวน) ตัวต้องเป็น k พอดี และ sum ต้องเป็น n พอดี เราจึงพก remaining (ค่าที่เหลือต้องเติมให้ครบ n) และ compare (เทียบ) length ของ path กับ k" },
@@ -143,7 +158,7 @@ print(letter_combinations(""))   # []` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def combination_sum3(k, n):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def combination_sum3(k, n):
     result = []
     path = []
 
@@ -164,7 +179,9 @@ print(letter_combinations(""))   # []` },
 
 print(combination_sum3(3, 7))  # [[1, 2, 4]]
 print(combination_sum3(3, 9))  # [[1, 2, 6], [1, 3, 5], [2, 3, 4]]
-print(combination_sum3(4, 1))  # []` },
+print(combination_sum3(4, 1))  # []`, out: `[[1, 2, 4]]
+[[1, 2, 6], [1, 3, 5], [2, 3, 4]]
+[]` },
         { t: "p", c: "เรา build combination ทีละตัว โดย parameter (พารามิเตอร์) start คุมไม่ให้ย้อนไป choose เลขที่เล็กกว่าตัวล่าสุด ทำให้ combination ที่ได้ sorted จากน้อยไปมากเสมอ จึงไม่มีทาง choose เลขซ้ำและไม่ได้ชุดที่เป็นเพียงการ permute ของกันและกัน ส่วน remaining คือค่าที่ยังต้องเติมให้ครบ n เมื่อ choose เลข num เราก็ subtract (ลบ) มันออกจาก remaining แล้ว explore ต่อ" },
         { t: "p", c: "จุดที่ทำให้เร็วขึ้นคือ pruning เมื่อ num > remaining เราหยุดทั้ง loop ด้วย break ได้เลย เพราะ range sorted จากน้อยไปมาก ถ้าตัวนี้ใหญ่เกินไปแล้ว ตัวถัด ๆ ยิ่งใหญ่กว่า จึงไม่มีทางเป็นคำตอบ ถ้าเปลี่ยน break เป็น continue ก็ยังได้คำตอบถูกแต่จะช้าลงเพราะเสียเวลา iterate ตัวที่ไม่มีทางเวิร์ก" },
         { t: "p", c: "Time O(C(9,k) · k) จำนวน combination ที่เป็นไปได้มากสุดคือการ choose k ตัวจาก 9 (มีเพดานตายตัวเพราะ choose ได้แค่ 1-9) และการ copy แต่ละชุดใช้ O(k) · Space O(k) จาก depth ของ recursion และขนาด path" },

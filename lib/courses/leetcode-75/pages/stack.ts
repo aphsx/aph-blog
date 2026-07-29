@@ -73,6 +73,14 @@ while stack:         # วนจนกองว่าง
         "s = \"erase*****\"  ->  \"\"  (ลบจนหมด กลายเป็นสตริงว่าง)",
         "s = \"ab*c\"  ->  \"ac\"  (ดาวลบ b ทิ้ง)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= s.length <= 10^5",
+        "s มีตัวอักษรพิมพ์เล็กและเครื่องหมาย *",
+        "โจทย์รับประกันว่าการลบทำได้เสมอ (ไม่มี * เกินจำนวนตัวอักษร)",
+        ],
+      },
       { t: "callout", c: "constraint (ข้อจำกัด): s ยาวได้ถึง 10^5 ตัว จึงต้องการวิธี O(n) — ห้ามลบ character ด้วยการสร้าง string ใหม่ทุกครั้ง เพราะจะช้าเป็น O(n^2)" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -102,7 +110,7 @@ while stack:         # วนจนกองว่าง
       },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def remove_stars(s):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def remove_stars(s):
     stack = []                 # กองเก็บตัวอักษรที่ยังเหลืออยู่
     for ch in s:               # ไล่อ่านทีละตัวจากซ้ายไปขวา
         if ch == '*':
@@ -112,7 +120,7 @@ while stack:         # วนจนกองว่าง
     return ''.join(stack)      # ที่เหลือในกองคือคำตอบ (เรียงซ้ายไปขวาอยู่แล้ว)
 
 print(remove_stars("leet**cod*e"))  # lecoe
-print(remove_stars("erase*****"))   # (สตริงว่าง)` },
+print(remove_stars("erase*****"))   # (สตริงว่าง)`, out: `lecoe` },
         { t: "p", c: "หัวใจของข้อนี้คือมองว่า \"character ขวาสุดที่ยังอยู่\" ก็คือ \"ตัวบนสุด (top) ของ stack\" นั่นเอง เพราะเรา push character เข้า stack ตามลำดับซ้ายไปขวา ตัวที่เพิ่ง push ล่าสุด (บนสุด) จึงเป็นตัวขวาสุดที่ยังเหลือ พอเจอ * เราแค่ pop ตัวบนสุดทิ้ง ก็เท่ากับลบตัวที่ * ต้องลบพอดี ไม่ต้องไปไล่ค้นใน string เลย" },
         { t: "p", c: "ถ้าเปลี่ยน stack.pop() เป็นการ slice string result = result[:-1] ผลลัพธ์จะถูกต้องเหมือนกัน แต่ช้าลงมากเพราะแต่ละครั้งสร้าง string ใหม่ทั้งก้อน ส่วน ''.join(stack) ตอนท้ายจะ merge (รวม) list ของ character เป็น string เดียวในทีเดียว ซึ่งเร็วกว่าการ append string ทีละตัวใน loop" },
         { t: "p", c: "Time O(n) iterate ทุก character รอบเดียว แต่ละตัว push หรือ pop เป็น O(1) · Space O(n) stack อาจเก็บ character ได้มากสุดเกือบทั้ง string" },
@@ -134,6 +142,14 @@ print(remove_stars("erase*****"))   # (สตริงว่าง)` },
         "[8, -8]  ->  []  (ขนาดเท่ากัน แตกทั้งคู่)",
         "[10, 2, -5]  ->  [10]  (-5 ชน 2 ก่อน 2 แตก, แล้ว -5 ชน 10 แต่ 10 ใหญ่กว่า -5 จึงแตก)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "2 <= asteroids.length <= 10^4",
+        "-1000 <= asteroids[i] <= 1000",
+        "asteroids[i] != 0 (เครื่องหมายบอกทิศ ค่าบอกขนาด)",
+        ],
+      },
       { t: "callout", c: "การชนเกิดได้กรณีเดียวเท่านั้น: ดวงบวก (วิ่งขวา) อยู่ก่อน แล้วมีดวงลบ (วิ่งซ้าย) ตามมา — คู่บวก-บวก, ลบ-ลบ, และลบ-บวก จะไม่มีวันชนกัน" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -165,7 +181,7 @@ print(remove_stars("erase*****"))   # (สตริงว่าง)` },
       },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def asteroid_collision(asteroids):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def asteroid_collision(asteroids):
     stack = []
     for a in asteroids:
         alive = True                       # สมมติว่า a รอด จนกว่าจะพิสูจน์ว่าแตก
@@ -183,7 +199,9 @@ print(remove_stars("erase*****"))   # (สตริงว่าง)` },
 
 print(asteroid_collision([5, 10, -5]))   # [5, 10]
 print(asteroid_collision([8, -8]))       # []
-print(asteroid_collision([10, 2, -5]))   # [10]` },
+print(asteroid_collision([10, 2, -5]))   # [10]`, out: `[5, 10]
+[]
+[10]` },
         { t: "p", c: "ไอเดียคือ: การชนจะเกิดเฉพาะกรณีเดียว — ดวงใน stack วิ่งขวา (บวก) แล้วมีดวงวิ่งซ้าย (ลบ) วิ่งเข้ามาหา ถ้า a เป็นบวก มันวิ่งขวาเหมือนกัน ไม่มีทางชนของใน stack เงื่อนไข while จึงเป็นเท็จทันที และเราก็แค่ push a เข้าไป แต่ถ้า a เป็นลบ เราต้องเอามันไปไล่ชนตัวบนสุดของ stack ไปเรื่อย ๆ ด้วย while loop ตราบใดที่ตัวบนสุดยังเป็นบวก" },
         { t: "p", c: "ในแต่ละการชนมีสามผลลัพธ์: (1) ตัวใน stack เล็กกว่า a ก็ pop ตัวใน stack ทิ้งแล้ว continue เพื่อให้ a ไปชนตัวถัดไปต่อ (2) ขนาดเท่ากัน pop ตัวใน stack ทิ้งและ a ก็แตกด้วย (3) ตัวใน stack ใหญ่กว่า a แตกดวงเดียว ทั้งกรณี (2) และ (3) เราตั้ง alive = False เพื่อบอกว่า a ไม่รอดแล้ว จะได้ไม่ push มันเข้า stack ถ้าลืม continue ในกรณี (1) โค้ดจะไหลไปที่ alive = False ทำให้ a หยุดชนทั้งที่ควรไปชนต่อ" },
         { t: "p", c: "Time O(n) แม้จะมี while ซ้อน แต่ดาวแต่ละดวงถูก push และ pop อย่างละครั้งเดียวตลอดทั้งโปรแกรม รวมงานทั้งหมดจึงเป็นเชิงเส้น · Space O(n) stack อาจเก็บดาวได้เกือบทุกดวงถ้าไม่มีการชนเลย" },
@@ -205,6 +223,14 @@ print(asteroid_collision([10, 2, -5]))   # [10]` },
         "\"3[a2[c]]\"  ->  \"accaccacc\"  (ชั้นในสุด 2[c]=cc, แล้ว a+cc=acc ซ้ำ 3)",
         "\"2[abc]3[cd]ef\"  ->  \"abcabccdcdcdef\"",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= s.length <= 30",
+        "s มีตัวอักษรพิมพ์เล็ก ตัวเลข และวงเล็บเหลี่ยม",
+        "1 <= k <= 300 (ตัวเลขที่ใช้คูณ)",
+        ],
+      },
       { t: "callout", c: "k อาจมีหลายหลัก (multi-digit) เช่น 12[a] และ character ธรรมดา (นอกวงเล็บ) ก็มีปนได้ เช่น ...ef ตอนท้าย ต้องรองรับทั้งสองอย่าง" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -239,7 +265,7 @@ print(asteroid_collision([10, 2, -5]))   # [10]` },
       },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def decode_string(s):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def decode_string(s):
     num_stack = []      # เก็บ k ของแต่ละชั้นที่พักไว้
     str_stack = []      # เก็บสตริงที่ทำค้างไว้ก่อนเข้าชั้นใน
     cur = ""            # สตริงของชั้นปัจจุบันที่กำลังสร้าง
@@ -264,7 +290,9 @@ print(asteroid_collision([10, 2, -5]))   # [10]` },
 
 print(decode_string("3[a]2[bc]"))      # aaabcbc
 print(decode_string("3[a2[c]]"))       # accaccacc
-print(decode_string("2[abc]3[cd]ef"))  # abcabccdcdcdef` },
+print(decode_string("2[abc]3[cd]ef"))  # abcabccdcdcdef`, out: `aaabcbc
+accaccacc
+abcabccdcdcdef` },
         { t: "p", c: "เรา iterate อ่านทีละ character และแยกเป็น 4 กรณี ถ้าเป็น digit ให้สะสมเป็น num (คูณสิบบวกหลักใหม่ เผื่อ k เป็น multi-digit เช่น 12) ถ้าเป็น character ธรรมดา ก็ append เข้า cur ที่กำลังสร้างอยู่ กรณีสำคัญคือวงเล็บ: พอเจอ [ แปลว่ากำลังจะเข้าชั้นในที่ลึกกว่า เราต้อง push ทั้ง k และ string ชั้นนอก (cur) เก็บไว้ใน stack แล้ว reset num กับ cur เพื่อเริ่มสร้าง string ชั้นในสด ๆ" },
         { t: "p", c: "พอเจอ ] แปลว่าชั้นในจบแล้ว เรา pop k และ string ชั้นนอก (prev) กลับมาจาก stack แล้วประกอบใหม่เป็น prev + cur * k คือเอา string ชั้นในที่เพิ่งสร้างเสร็จมาซ้ำ k ครั้ง append ต่อท้าย string ชั้นนอกที่พักไว้ การใช้ stack ทำให้จัดการ nested หลายชั้นได้อัตโนมัติ เพราะแต่ละ [ จับคู่กับ ] ตามหลัง LIFO พอดี" },
         { t: "p", c: "Time O(N) เมื่อ N คือความยาวของ string ผลลัพธ์ (เพราะเราต้องสร้าง character ทุกตัวของผลลัพธ์) · Space O(N) จาก stack และ string ที่สร้างขึ้น" },

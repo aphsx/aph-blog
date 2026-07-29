@@ -43,6 +43,14 @@ print(prefix[j + 1] - prefix[i])  # 6` },
         "gain = [-5, 1, 5, 0, -7] → altitude ตามจุดคือ 0, -5, -4, 1, 1, -6 highest คือ 1",
         "gain = [-4, -3, -2, -1, 4, 3, 2] → altitude คือ 0, -4, -7, -9, -10, -6, -3, -1 highest คือ 0 (จุดเริ่มต้น)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "n == gain.length",
+        "1 <= n <= 100",
+        "-100 <= gain[i] <= 100",
+        ],
+      },
       { t: "callout", c: "จุดเริ่มต้น altitude 0 นับด้วยเสมอ ถ้า gain ทำให้ altitude ติดลบตลอด คำตอบก็ยังเป็น 0" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -70,7 +78,7 @@ print(prefix[j + 1] - prefix[i])  # 6` },
       { t: "p", c: "จบ loop highest = 1 ตรงกับคำตอบ" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def largest_altitude(gain):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def largest_altitude(gain):
     altitude = 0        # ระดับความสูงปัจจุบัน (เริ่มที่จุด 0)
     highest = 0         # ค่าสูงสุดที่เคยไปถึง (จุดเริ่มก็ 0)
     for g in gain:      # ไล่ค่าต่างระดับทีละก้อน
@@ -79,7 +87,8 @@ print(prefix[j + 1] - prefix[i])  # 6` },
     return highest      # คืนจุดสูงสุด
 
 print(largest_altitude([-5, 1, 5, 0, -7]))          # 1
-print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0` },
+print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0`, out: `1
+0` },
         { t: "p", c: "หัวใจอยู่ที่บรรทัด altitude += g ซึ่งก็คือการสร้าง prefix sum ทีละสเต็ป ตัว altitude ณ รอบใด ๆ คือ altitude จริงของจุดนั้น ถ้าเราอยากได้ทุก altitude ก็เก็บลง array ได้ แต่โจทย์ถามแค่ max จึงเก็บแค่ highest พอ" },
         { t: "p", c: "ถ้าลองเปลี่ยนบรรทัด highest = 0 เป็น highest = altitude แล้ว update ใน loop เฉย ๆ โดยไม่ max กับ 0 จะพังทันทีเมื่อ gain ติดลบทั้งหมด เพราะจะไม่มีรอบไหนกลับมาแตะ 0 อีกเลย การ initialize 0 ไว้ก่อนจึงการันตีว่าจุดเริ่มต้นถูกนับ" },
         { t: "p", c: "Time O(n) iterate array รอบเดียว · Space O(1) ใช้ตัวแปรสะสมแค่สองตัว ไม่สร้าง array ใหม่" },
@@ -101,6 +110,13 @@ print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0` },
         "nums = [1, 2, 3] → ตอบ -1 เพราะไม่มี index ไหนสมดุล",
         "nums = [2, 1, -1] → ตอบ 0 เพราะฝั่งซ้ายว่าง (ผลรวม 0) เท่ากับฝั่งขวา 1+(-1) = 0",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= nums.length <= 10^4",
+        "-1000 <= nums[i] <= 1000",
+        ],
+      },
       { t: "callout", c: "ต้อง return index ซ้ายสุดที่สมดุล และฝั่งที่ว่าง (ก่อนตัวแรกหรือหลังตัวสุดท้าย) ถือว่ามีผลรวมเป็น 0" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -126,7 +142,7 @@ print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def pivot_index(nums):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def pivot_index(nums):
     total = sum(nums)   # ผลรวมทั้งหมด (จ่าย O(n) ครั้งเดียว)
     left_sum = 0        # ผลรวมของตัวที่อยู่ทางซ้ายของ i
     for i, n in enumerate(nums):
@@ -139,7 +155,9 @@ print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0` },
 
 print(pivot_index([1, 7, 3, 6, 5, 6]))  # 3
 print(pivot_index([1, 2, 3]))           # -1
-print(pivot_index([2, 1, -1]))          # 0` },
+print(pivot_index([2, 1, -1]))          # 0`, out: `3
+-1
+0` },
         { t: "p", c: "หัวใจคือเราไม่อยากคำนวณผลรวมซ้าย-ขวาใหม่ทุก index (จะกลายเป็น O(n^2)) จึงเก็บ left_sum ที่ accumulate (สะสม) มาจากซ้าย ส่วนผลรวมขวาคำนวณได้จาก total ที่รู้ล่วงหน้า ลบด้วยฝั่งซ้ายและตัวปัจจุบันออก จึงเหลือแค่การ iterate รอบเดียว" },
         { t: "p", c: "edge case (กรณีขอบ) ที่ต้องระวังคือ pivot อยู่ที่หัวหรือท้าย array เช่น [2, 1, -1] ตอบ 0 เพราะฝั่งซ้ายว่าง (ผลรวม 0) เท่ากับฝั่งขวา 1+(-1) = 0 โค้ดนี้รองรับเพราะ left_sum เริ่มที่ 0 อยู่แล้ว ถ้าเผลอสลับไปบวก n ก่อนเช็ค index 0 จะไม่มีทางถูกตรวจในสภาพฝั่งซ้ายว่าง" },
         { t: "p", c: "Time O(n) หา total หนึ่งรอบ แล้ว iterate อีกหนึ่งรอบ · Space O(1) ใช้ตัวแปรสะสมเท่านั้น" },

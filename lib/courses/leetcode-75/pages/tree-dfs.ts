@@ -84,6 +84,13 @@ def dfs(node):
         "Input: [3,9,20,null,null,15,7] → Output: 3 (เส้นทางยาวสุดคือ 3 → 20 → 15 หรือ 3 → 20 → 7)",
         "Input: [] (ต้นว่าง) → Output: 0",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 0 ถึง 10^4",
+        "-100 <= Node.val <= 100",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS recursion แบบ postorder เพราะ depth ของต้นหนึ่งขึ้นกับ depth ของ child ทั้งสองฝั่ง เราจึงต้องรอให้ child compute (คำนวณ) เสร็จก่อนแล้วค่อยสรุปตัวเอง" },
@@ -107,7 +114,15 @@ def dfs(node):
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `# นิยาม node ที่ LeetCode ใช้ (โจทย์ tree ทุกข้ออิงหน้าตานี้)
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+# นิยาม node ที่ LeetCode ใช้ (โจทย์ tree ทุกข้ออิงหน้าตานี้)
 # class TreeNode:
 #     def __init__(self, val=0, left=None, right=None):
 #         self.val = val
@@ -119,7 +134,13 @@ def maxDepth(root):
         return 0
     left = maxDepth(root.left)    # ความลึกของต้นย่อยซ้าย
     right = maxDepth(root.right)  # ความลึกของต้นย่อยขวา
-    return 1 + max(left, right)   # บวก 1 นับตัวเอง เลือกฝั่งที่ลึกกว่า` },
+    return 1 + max(left, right)   # บวก 1 นับตัวเอง เลือกฝั่งที่ลึกกว่า
+
+# ประกอบต้นไม้ [3, 9, 20, null, null, 15, 7] ด้วยมือ
+root = TreeNode(3, TreeNode(9), TreeNode(20, TreeNode(15), TreeNode(7)))
+print(maxDepth(root))     # ต้นไม้นี้ลึก 3 ชั้น
+print(maxDepth(None))     # ต้นว่าง ลึก 0 ชั้น`, out: `3
+0` },
         { t: "p", c: "คิดแบบ postorder: เราไม่รู้ความลึกของต้นตอนนี้จนกว่าจะรู้ความลึกของลูกสองฝั่งก่อน จึงเรียก recursion ลงลูกซ้ายและลูกขวาให้บอกความลึกกลับมา แล้วต้นปัจจุบันแค่หยิบฝั่งที่ลึกกว่ามาบวก 1 (บวกสำหรับนับตัว root เองในเส้นทางนั้น)" },
         { t: "p", c: "base case สำคัญมาก: ถ้า node เป็น None แปลว่าตกขอบไปแล้ว คืน 0 ถ้าลืมข้อนี้จะเรียกทะลุ None แล้ว error ทันที" },
         { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว (n = จำนวน node) · Space O(h) จากความลึกของ call stack ที่เรียกซ้อนกันตามความสูง h ของต้นไม้ กรณีแย่สุด (ต้นเอียงเป็นเส้นตรง) h เท่ากับ n" },
@@ -140,6 +161,13 @@ def maxDepth(root):
         "ต้นแรกอ่านใบซ้ายไปขวาได้ [6,7,4,9,8], ต้นที่สองก็ได้ [6,7,4,9,8] → True",
         "ต้นแรกใบ [6,7,4], ต้นที่สองใบ [6,7,3] → False (ต่างกันแม้ตัวเดียวก็ False)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node ของแต่ละต้นอยู่ระหว่าง 1 ถึง 200",
+        "1 <= Node.val <= 200",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS collect (เก็บ) ค่าเฉพาะ node ที่เป็น leaf ออกมาเป็น array (ลิสต์) ของแต่ละต้น แล้ว compare (เทียบ) สอง array ว่าเท่ากันไหม" },
@@ -154,7 +182,15 @@ def maxDepth(root):
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมเช็คว่าเป็น leaf จริง ๆ (ไม่มีลูกทั้งสองฝั่ง) แล้วเผลอเก็บค่า node ภายในด้วย หรือสลับลำดับซ้ายขวาทำให้ลำดับใบผิด" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def leafSimilar(root1, root2):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def leafSimilar(root1, root2):
     def leaves(node):
         if node is None:
             return []
@@ -164,7 +200,14 @@ def maxDepth(root):
         # ต่อใบฝั่งซ้ายก่อน แล้วตามด้วยฝั่งขวา -> ได้ลำดับซ้ายไปขวา
         return leaves(node.left) + leaves(node.right)
 
-    return leaves(root1) == leaves(root2)` },
+    return leaves(root1) == leaves(root2)
+
+t1 = TreeNode(1, TreeNode(2), TreeNode(3))    # ใบเรียงจากซ้ายไปขวา: 2, 3
+t2 = TreeNode(9, TreeNode(2), TreeNode(3))    # ใบเหมือนกัน แม้ค่าในรากต่างกัน
+t3 = TreeNode(1, TreeNode(3), TreeNode(2))    # ใบชุดเดียวกันแต่ลำดับสลับ
+print(leafSimilar(t1, t2))
+print(leafSimilar(t1, t3))`, out: `True
+False` },
         { t: "p", c: "ฟังก์ชันย่อย leaves เดินแบบ DFS เก็บค่าเฉพาะ node ที่เป็นใบ (ไม่มีลูกทั้งซ้ายและขวา) เคล็ดของการได้ลำดับ \"ซ้ายไปขวา\" คือเราต่อผลของฝั่งซ้ายก่อนฝั่งขวาเสมอ" },
         { t: "p", c: "ถ้าเปลี่ยนไปต่อฝั่งขวาก่อน ลำดับใบจะกลับด้าน ทำให้เทียบผิดทันที และถ้าลืมเงื่อนไข leaf จะไปเก็บค่า node ภายในปนมาด้วย" },
         { t: "p", c: "Time O(n1 + n2) แตะทุก node ของทั้งสองต้น · Space O(n1 + n2) จากลิสต์ใบที่เก็บไว้ บวกความลึก call stack ตามความสูงต้นไม้" },
@@ -185,6 +228,13 @@ def maxDepth(root):
         "Input: [3,1,4,3,null,1,5] → Output: 4",
         "Input: [1] (มีแค่ root) → Output: 1 (root ดีเสมอ)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 1 ถึง 10^5",
+        "-10^4 <= Node.val <= 10^4",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS แบบ preorder ที่ \"ส่งข้อมูลลงล่าง\" (top-down): ระหว่าง traverse ลงจาก root ให้ track (ติดตามค่า) \"max ที่เจอมาตลอดเส้นทาง\" ติดตัวไปด้วย" },
@@ -211,7 +261,15 @@ def maxDepth(root):
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def goodNodes(root):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def goodNodes(root):
     def dfs(node, max_so_far):
         if node is None:
             return 0
@@ -222,7 +280,11 @@ def maxDepth(root):
         return good + dfs(node.left, new_max) + dfs(node.right, new_max)
 
     # เริ่มด้วย -inf เพื่อให้ root ถูกนับเป็น good เสมอ
-    return dfs(root, float('-inf'))` },
+    return dfs(root, float('-inf'))
+
+# ต้นไม้ [3, 1, 4, 3, null, 1, 5]
+root = TreeNode(3, TreeNode(1, TreeNode(3)), TreeNode(4, TreeNode(1), TreeNode(5)))
+print(goodNodes(root))`, out: `4` },
         { t: "p", c: "นี่คือ DFS แบบ preorder ที่ \"ส่งข้อมูลลงล่าง\" (top-down): เราพกค่ามากสุดบนเส้นทางลงไปเรื่อย ๆ ตัดสินที่ node ปัจจุบันก่อน แล้วค่อยลงลูก ต่างจากข้อก่อน ๆ ที่รอผลจากลูกขึ้นมา" },
         { t: "p", c: "จุดสำคัญคือต้องอัปเดต new_max ก่อนเรียกลูก และแต่ละกิ่งมีสำเนา max_so_far ของตัวเอง (ส่งเป็นพารามิเตอร์ ไม่ใช่ตัวแปรร่วม) เพื่อไม่ให้เส้นทางฝั่งซ้ายไปกวนฝั่งขวา การเริ่มด้วย float('-inf') ทำให้ root ผ่านเงื่อนไข >= เสมอ" },
         { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว · Space O(h) จากความลึก call stack ตามความสูงต้นไม้" },
@@ -243,6 +305,14 @@ def maxDepth(root):
         "Input: [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8 → Output: 3",
         "Input: [1,2,3], targetSum = 3 → Output: 2 (เส้น 1→2 และ node 3 เดี่ยว ๆ)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 0 ถึง 1000",
+        "-10^9 <= Node.val <= 10^9",
+        "-1000 <= targetSum <= 1000",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ prefix sum (ผลรวมสะสมจาก root ลงมาถึง node ปัจจุบัน) เก็บความถี่ไว้ใน hash map ระหว่าง traverse DFS — เป็นเทคนิคเดียวกับ prefix sum บน array แต่ทำบน path ของต้นไม้" },
@@ -258,7 +328,15 @@ def maxDepth(root):
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมบรรทัด backtrack prefix[curr] -= 1 ก่อนกลับขึ้น — จะทำให้ผลรวมของกิ่งหนึ่งไปปนกับกิ่งพี่น้องที่ไม่ได้อยู่บนเส้นทางเดียวกัน นับเกินทันที และเพราะมีค่าติดลบจึงใช้วิธี early-stop แบบ two-sum ตรง ๆ ไม่ได้ ต้องนับความถี่ด้วย hash map" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import defaultdict
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+from collections import defaultdict
 
 def pathSum(root, targetSum):
     prefix = defaultdict(int)   # นับว่าผลรวมสะสมค่าหนึ่ง ๆ เคยเจอมากี่ครั้ง
@@ -276,7 +354,13 @@ def pathSum(root, targetSum):
         prefix[curr] -= 1                   # ถอยออก (backtrack) ก่อนกลับขึ้น
         return count
 
-    return dfs(root, 0)` },
+    return dfs(root, 0)
+
+# ต้นไม้ [10, 5, -3, 3, 2, null, 11] กับเป้า 8
+root = TreeNode(10,
+                TreeNode(5, TreeNode(3), TreeNode(2)),
+                TreeNode(-3, None, TreeNode(11)))
+print(pathSum(root, 8))`, out: `2` },
         { t: "p", c: "หลักการ prefix sum: ถ้าผลรวมสะสมจาก root ถึง node ปัจจุบันคือ curr และเราอยากได้ช่วงที่รวมเป็น targetSum ก็แค่ถามว่า \"เคยมีผลรวมสะสม curr - targetSum อยู่ก่อนหน้ากี่ครั้งบนเส้นทางนี้\" ทุกครั้งที่เคยเจอ = หนึ่งเส้นทางที่ใช้ได้ ที่ต้อง prefix[0] = 1 เพราะครอบกรณีเส้นทางที่เริ่มตั้งแต่ root พอดี" },
         { t: "p", c: "จุดพลาดสำคัญที่สุดคือบรรทัด backtrack (prefix[curr] -= 1) เมื่อเดินลูกของ node นี้เสร็จหมดแล้วกำลังจะถอยขึ้น เราต้องลบผลรวมสะสมนี้ออก ไม่งั้นมันจะไปปนกับเส้นทางฝั่งพี่น้องอีกกิ่งที่ไม่ได้อยู่บนเส้นทางเดียวกัน ทำให้นับเกิน อีกจุดคือค่าติดลบทำให้ใช้วิธี early-stop แบบ two-sum ตรง ๆ ไม่ได้ ต้องพึ่ง hash map นับความถี่แบบนี้" },
         { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว การค้น/อัปเดต hash map เป็น O(1) เฉลี่ย · Space O(n) จากขนาด hash map และความลึก call stack" },
@@ -297,6 +381,13 @@ def pathSum(root, targetSum):
         "Input: [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1] → Output: 3",
         "Input: [1] (มีแค่ root) → Output: 0 (เดินไม่ได้เลย)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 1 ถึง 5 × 10^4",
+        "1 <= Node.val <= 100",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS ที่แต่ละ node track (ติดตามค่า) 2 อย่าง: ทิศที่กำลังจะไปต่อ (go_left) กับ length สะสมมาถึงตอนนี้ ถ้าเดินตามทิศที่ควรไปก็ +1 ต่อ length ถ้าเดินอีกทางก็ถือว่า reset (รีเซ็ต) เริ่มซิกแซกเส้นใหม่ที่ length 1" },
@@ -311,7 +402,15 @@ def pathSum(root, targetSum):
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "สับสนว่านับ node หรือนับ edge — โจทย์นับ edge (ก้าว) จึงเริ่มที่ length 0 ที่ root และต้อง update ans ที่ทุก node ที่แวะ (ไม่ใช่เฉพาะตอนจบ) เพราะเส้นซิกแซกที่ดีสุดอาจจบกลางต้นไม้ก็ได้" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def longestZigZag(root):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def longestZigZag(root):
     ans = 0
 
     def dfs(node, go_left, length):
@@ -329,7 +428,13 @@ def pathSum(root, targetSum):
     # เริ่มจาก root ได้ทั้งเริ่มด้วยการไปซ้าย และเริ่มด้วยการไปขวา
     dfs(root, True, 0)
     dfs(root, False, 0)
-    return ans` },
+    return ans
+
+# ต้นไม้ที่มีเส้นซิกแซก ขวา -> ซ้าย -> ขวา
+root = TreeNode(1, None, TreeNode(1, TreeNode(1, None, TreeNode(1))))
+print(longestZigZag(root))
+print(longestZigZag(TreeNode(1)))   # มี node เดียว ยาว 0`, out: `3
+0` },
         { t: "p", c: "พารามิเตอร์ go_left บอกว่า \"ก้าวต่อไปที่จะทำให้ซิกแซกยังต่อเนื่องคือไปทางซ้าย\" ถ้าเราไปตามทางนั้นจริงก็ต่อความยาว (length + 1) แล้วสลับความคาดหวังเป็นไปขวา (False) ในก้าวถัดไป แต่ถ้าดันไปอีกทาง เส้นซิกแซกเก่าขาด กลายเป็นเริ่มต้นเส้นใหม่ที่ยาว 1 เราเรียก dfs จาก root สองครั้งเพราะเส้นซิกแซกที่ดีที่สุดอาจเริ่มด้วยการก้าวไปซ้ายหรือขวาก็ได้" },
         { t: "p", c: "จุดพลาดที่พบบ่อยคือสับสนว่านับ node หรือนับเส้นเชื่อม โจทย์นับเส้นเชื่อม (ก้าว) ดังนั้นเริ่มที่ length 0 ที่ root และอัปเดต ans ที่ทุก node ที่แวะ (ไม่ใช่เฉพาะตอนจบ) เพราะเส้นซิกแซกที่ดีสุดอาจจบกลางต้นไม้ก็ได้" },
         { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว · Space O(h) จากความลึก call stack ตามความสูงต้นไม้" },
@@ -350,6 +455,15 @@ def pathSum(root, targetSum):
         "Input: root=[3,5,1,6,2,0,8,null,null,7,4], p=5, q=1 → Output: 3",
         "Input: root=[3,5,1,6,2,0,8,null,null,7,4], p=5, q=4 → Output: 5 (p เป็นบรรพบุรุษของ q)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "จำนวน node อยู่ระหว่าง 2 ถึง 10^5",
+        "-10^9 <= Node.val <= 10^9",
+        "ค่าใน node ไม่ซ้ำกัน",
+        "p != q และทั้งคู่มีอยู่ในต้นไม้จริง",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS แบบ postorder: traverse ค้นหา p และ q ถ้า node ปัจจุบันเจอ p (หรือ q) ให้ return ตัวเองขึ้นไป จากนั้นถ้า node ไหนได้รับรายงานว่า \"เจอของอยู่ทั้ง left subtree และ right subtree\" node นั้นแหละคือจุดที่สองคนมาบรรจบกัน = LCA" },
@@ -363,7 +477,15 @@ def pathSum(root, targetSum):
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าเทียบด้วยค่า (val) ให้เทียบด้วย identity (root is p) เพราะโจทย์ให้ node object มา และกรณีที่ p เป็นบรรพบุรุษของ q ต้องคืนถูก — โค้ดนี้คืนถูกเพราะเจอ p ก่อนแล้วคืนขึ้นไปเลย ไม่เดินลึกต่อ" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def lowestCommonAncestor(root, p, q):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def lowestCommonAncestor(root, p, q):
     # base case: ต้นว่าง หรือเจอ p/q พอดี ให้รายงาน node นี้ขึ้นไป
     if root is None or root is p or root is q:
         return root
@@ -375,7 +497,15 @@ def pathSum(root, targetSum):
     if left and right:
         return root
     # เจอฝั่งเดียว -> ส่งฝั่งที่เจอต่อขึ้นไป (อีกฝั่งเป็น None)
-    return left if left else right` },
+    return left if left else right
+
+# ต้นไม้ [3, 5, 1, 6, 2, 0, 8]
+n5 = TreeNode(5, TreeNode(6), TreeNode(2))
+n1 = TreeNode(1, TreeNode(0), TreeNode(8))
+root = TreeNode(3, n5, n1)
+print(lowestCommonAncestor(root, n5, n1).val)          # 5 กับ 1 อยู่คนละฝั่ง
+print(lowestCommonAncestor(root, n5, n5.left).val)     # 6 อยู่ใต้ 5`, out: `3
+5` },
         { t: "p", c: "คิดแบบ postorder: ให้ลูกสองฝั่งรายงานก่อนว่าเจอ p หรือ q ไหม base case คือถ้า node ปัจจุบันคือ p หรือ q เอง (หรือเป็น None) ก็คืน node นั้นขึ้นไปเป็นสัญญาณว่า \"เจอที่นี่\" เมื่อ node หนึ่งได้ผลว่าฝั่งซ้ายเจอหนึ่งตัวและฝั่งขวาเจออีกหนึ่งตัว แสดงว่า p กับ q แยกกันอยู่คนละฝั่งของ node นี้พอดี node นี้จึงเป็นบรรพบุรุษร่วมที่ต่ำสุด" },
         { t: "p", c: "ถ้าเจอแค่ฝั่งเดียว (อีกฝั่ง None) แปลว่าทั้ง p และ q อยู่ในฝั่งนั้นทั้งคู่ (หรือเจอแค่ตัวเดียว) เราแค่ส่งผลฝั่งที่เจอต่อขึ้นไปให้บรรพบุรุษที่สูงกว่าตัดสิน กรณีที่ p เป็นบรรพบุรุษของ q อยู่แล้ว จะได้ผลถูกเพราะเราเจอ p ก่อนแล้วคืนขึ้นไปเลย ไม่เดินลึกต่อ" },
         { t: "p", c: "Time O(n) กรณีแย่สุดแตะทุก node ครั้งเดียว · Space O(h) จากความลึก call stack ตามความสูงต้นไม้" },

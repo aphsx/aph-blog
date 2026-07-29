@@ -72,6 +72,15 @@ dfs(0, graph, visited)             # เริ่มจาก node 0` },
         "rooms = [[1],[2],[3],[]] → True (0 ให้กุญแจ 1, 1 ให้ 2, 2 ให้ 3 ครบทุกห้อง)",
         "rooms = [[1,3],[3,0,1],[2],[0]] → False เพราะไม่มีกุญแจห้อง 2 อยู่ในห้องที่เราเข้าถึงได้เลย",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "n == rooms.length",
+        "2 <= n <= 1000",
+        "0 <= rooms[i].length <= 1000",
+        "ผลรวมความยาวของ rooms[i] ทั้งหมดไม่เกิน 3000",
+        ],
+      },
       { t: "callout", c: "rooms เป็น adjacency list (ลิสต์เพื่อนบ้าน) ของ directed graph (กราฟมีทิศ) อยู่แล้ว ไม่ต้องแปลงอะไร" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -87,7 +96,7 @@ dfs(0, graph, visited)             # เริ่มจาก node 0` },
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมเช็ค if key not in visited ก่อนเรียก dfs ทำให้ recursion (การเรียกตัวเอง) วนไม่จบเมื่อกุญแจชี้วนกลับกัน (บางห้องมีกุญแจชี้กลับไปห้องเดิม)" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def can_visit_all_rooms(rooms):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def can_visit_all_rooms(rooms):
     visited = set()
 
     def dfs(room):
@@ -100,7 +109,8 @@ dfs(0, graph, visited)             # เริ่มจาก node 0` },
     return len(visited) == len(rooms)  # เข้าครบทุกห้องไหม
 
 print(can_visit_all_rooms([[1], [2], [3], []]))          # True
-print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False` },
+print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False`, out: `True
+False` },
         { t: "p", c: "โจทย์นี้จริง ๆ คือการถามว่า graph เชื่อมถึงกันหมดจากจุดเริ่มไหม (reachability) เรามองห้องเป็น node และกุญแจในห้องเป็น edge แบบ directed ที่ชี้ไปยังห้องที่มันเปิดได้ rooms เองก็เป็น adjacency list อยู่แล้ว ไม่ต้องแปลงอะไร ทำ DFS จากห้อง 0 เก็บทุกห้องที่ไปถึงลง visited แล้วสุดท้าย compare จำนวนห้องที่ visited กับจำนวนห้องทั้งหมด" },
         { t: "p", c: "set visited ทำสองหน้าที่พร้อมกัน ทั้งกันเดินวนซ้ำ และใช้ count (นับ) จำนวนห้องที่เข้าได้ ถ้าไม่มีการเช็ค visited โปรแกรมจะ error จาก recursion ลึกไม่จบเมื่อกุญแจชี้วนกัน" },
         { t: "p", c: "Time O(V + E) traverse ทุก node หนึ่งครั้งและไล่ทุก edge หนึ่งครั้ง V คือจำนวนห้อง E คือจำนวนกุญแจทั้งหมด · Space O(V) จาก visited และความลึกของ call stack" },
@@ -121,6 +131,15 @@ print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False` },
         "isConnected = [[1,1,0],[1,1,0],[0,0,1]] → 2 (เมือง 0 กับ 1 เป็นแคว้นเดียว เมือง 2 อยู่คนเดียวอีกแคว้น)",
         "isConnected = [[1,0,0],[0,1,0],[0,0,1]] → 3 (ไม่มีเมืองไหนเชื่อมกันเลย ต่างคนต่างแคว้น)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= n <= 200",
+        "n == isConnected.length == isConnected[i].length",
+        "isConnected[i][j] เป็น 0 หรือ 1",
+        "isConnected[i][i] == 1 และ isConnected[i][j] == isConnected[j][i]",
+        ],
+      },
       { t: "callout", c: "graph ให้มาในรูป adjacency matrix (ตาราง) ไม่ใช่ list เพื่อนบ้าน (neighbor) ของเมือง i คือช่องที่เป็น 1 ในแถว i" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -145,7 +164,7 @@ print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def find_circle_num(is_connected):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_circle_num(is_connected):
     n = len(is_connected)
     visited = set()
 
@@ -164,7 +183,8 @@ print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False` },
     return provinces
 
 print(find_circle_num([[1, 1, 0], [1, 1, 0], [0, 0, 1]]))  # 2
-print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3` },
+print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3`, out: `2
+3` },
         { t: "p", c: "connected components คือ กลุ่มก้อน ของ node ที่เชื่อมถึงกันได้ใน undirected graph โจทย์นี้ให้ graph มาในรูปตาราง (adjacency matrix) แทน list โดย is_connected[i][j] บอกว่าเมือง i กับ j เชื่อมกันไหม เราจึงหาเพื่อนบ้านของเมืองด้วยการไล่ทั้งแถวดูว่าช่องไหนเป็น 1" },
         { t: "p", c: "เทคนิคนับกลุ่มคือ iterate node ทุกตัวจากนอก ถ้าเจอตัวที่ยังไม่ visited แสดงว่าเราเพิ่งสะดุดเข้าแคว้นใหม่ที่ยังไม่เคยแตะ บวกตัวนับหนึ่ง แล้วยิง DFS เข้าไปกวาดทุกเมืองในแคว้นนั้นให้ visited จนหมด พอ loop นอกเดินต่อ เมืองที่อยู่แคว้นเดิมจะถูก visited แล้วจึงไม่ถูก count ซ้ำ" },
         { t: "p", c: "Time O(n^2) เพราะต้อง iterate ตาราง n x n · Space O(n) จาก visited และ call stack" },
@@ -185,6 +205,13 @@ print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3` },
         "n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]] → 3 (ต้องกลับทิศถนน 0→1, 1→3, 4→5)",
         "n = 5, connections = [[1,0],[1,2],[3,2],[3,4]] → 2",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "2 <= n <= 5 × 10^4",
+        "connections.length == n - 1 (เป็นต้นไม้ ไม่มีวงรอบ)",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS บน graph ที่เก็บทั้งสองทิศแต่ติดป้าย cost (น้ำหนัก) กุญแจของข้อนี้คือ มองกลับด้าน เราอยากให้ทุกเมืองไปถึงเมือง 0 แต่คิดแบบนั้นตรง ๆ ยาก จึงกลับมุมเป็น ถ้าเราออกเดินจากเมือง 0 ไปหาทุกเมือง ถนนเส้นไหนที่เราเดินสวนทิศของมัน เส้นนั้นแหละที่ต้องกลับทิศ เพราะในสภาพจริงเมืองปลายทางจะเดินย้อนกลับมาหาเมือง 0 ไม่ได้" },
@@ -200,7 +227,7 @@ print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3` },
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมใส่ edge ย้อนกลับ (cost 0) ทำให้ DFS เดินไปไม่ทั่วเพราะ graph มีทิศ อีกจุดคือสับสนว่าจะ count (นับ) cost ของ edge ไหน จำง่าย ๆ ว่านับเฉพาะ edge ที่ชี้ ออกจาก ต้นทาง (ทิศเดียวกับที่เราเดินออกจากเมือง 0)" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import defaultdict
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import defaultdict
 
 def min_reorder(n, connections):
     graph = defaultdict(list)
@@ -223,7 +250,8 @@ def min_reorder(n, connections):
     return changes
 
 print(min_reorder(6, [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]]))  # 3
-print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2` },
+print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2`, out: `3
+2` },
         { t: "p", c: "กุญแจของข้อนี้คือ มองกลับด้าน เราอยากให้ทุกเมืองไปถึงเมือง 0 แต่คิดแบบนั้นตรง ๆ ยาก จึงกลับมุมเป็น ถ้าเราออกเดินจากเมือง 0 ไปหาทุกเมือง ถนนเส้นไหนที่เราเดินสวนทิศของมัน เส้นนั้นแหละที่ต้องกลับทิศ เพราะในสภาพจริงเมืองปลายทางจะเดินย้อนกลับมาหาเมือง 0 ไม่ได้" },
         { t: "p", c: "ทริกในการเก็บ graph คือ ใส่ทั้งสอง edge แบบ undirected เพื่อให้ DFS traverse ได้ทั่ว tree แต่ติดป้าย cost ไว้ด้วย edge ทิศจริง (a->b ตามที่โจทย์ให้) ติด cost 1 ส่วน edge ปลอมที่เราเติมเพื่อเดินย้อน (b->a) ติด cost 0 พอ DFS ออกจากเมือง 0 ถ้าเราวิ่งไปตาม edge cost 1 แปลว่ากำลังเดินตามทิศที่ชี้ออกจากเมือง 0 ซึ่งจริง ๆ เมืองนั้นควรชี้เข้าหา 0 จึงต้องกลับทิศ บวก changes" },
         { t: "p", c: "Time O(n) traverse ทุกเมืองและ edge หนึ่งครั้ง (edge มี n-1 เส้น) · Space O(n) จาก graph visited และ call stack" },
@@ -244,6 +272,14 @@ print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2` },
         "จาก a/b = 2.0, b/c = 3.0 ถาม a/c → 6.0 (เพราะ a/c = a/b × b/c = 2 × 3)",
         "ถาม a/e → -1.0 (ไม่มี e), ถาม x/x → -1.0 (ไม่รู้จัก x), ถาม a/a → 1.0 (a รู้จักและหารตัวเองได้ 1)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= equations.length <= 20",
+        "0.0 < values[i] <= 20.0",
+        "1 <= queries.length <= 20",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "ใช้ DFS บน weighted graph (กราฟถ่วงน้ำหนัก) คือ edge (เส้นเชื่อม) มีตัวเลขกำกับ ไอเดียคือแต่ละตัวแปรเป็น node (โหนด) สมการ a/b = 2.0 บอกว่าจาก a เดินไป b คูณ 2.0 และเพราะ b/a เท่ากับ 1/(a/b) เราจึงเพิ่ม edge ย้อนกลับจาก b ไป a คูณ 1/2.0 ด้วย ทำให้เดินได้สองทาง" },
@@ -259,7 +295,7 @@ print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2` },
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมเช็คว่าตัวแปรรู้จักก่อนเช็ค src == dst ทำให้ x/x ตอบ 1.0 ทั้งที่ x ไม่มีในสมการ (ต้องตอบ -1.0) โค้ดจึงเช็ค src not in graph ก่อนแล้วค่อยเช็ค src == dst" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import defaultdict
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import defaultdict
 
 def calc_equation(equations, values, queries):
     graph = defaultdict(dict)
@@ -288,7 +324,7 @@ def calc_equation(equations, values, queries):
 eq = [["a", "b"], ["b", "c"]]
 vals = [2.0, 3.0]
 q = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]
-print(calc_equation(eq, vals, q))  # [6.0, 0.5, -1.0, 1.0, -1.0]` },
+print(calc_equation(eq, vals, q))  # [6.0, 0.5, -1.0, 1.0, -1.0]`, out: `[6.0, 0.5, -1.0, 1.0, -1.0]` },
         { t: "p", c: "ข้อนี้สอน weighted graph (กราฟถ่วงน้ำหนัก) คือ edge มีตัวเลขกำกับ ไอเดียคือแต่ละตัวแปรเป็น node สมการ a/b = 2.0 บอกว่าจาก a เดินไป b คูณ 2.0 และเพราะ b/a = 1/(a/b) เราจึงเพิ่ม edge ย้อนกลับจาก b ไป a คูณ 1/2.0 ด้วย ทำให้เดินได้สองทาง การหาคำตอบ x/y คือ traverse จาก x ไป y แล้วคูณ weight ของ edge ที่ผ่านทั้งหมดสะสมกันไป" },
         { t: "p", c: "DFS ที่นี่ต่างจากข้อก่อน ๆ ตรงที่มันต้อง return ผลคูณสะสมกลับขึ้นมา ไม่ใช่แค่ mark เมื่อเดินไปเจอ dst เราคืน 1.0 แล้วระหว่างถอย recursion กลับ แต่ละชั้นคูณ weight ของ edge ตัวเองเข้าไป ผลลัพธ์ที่โผล่กลับมาถึงจุดเริ่มจึงเป็นผลคูณตลอดเส้นทางพอดี ถ้าลองทุกเพื่อนบ้านแล้วไม่มีทางไหนถึง dst ก็คืน -1.0" },
         { t: "p", c: "edge case ที่ต้องระวังคือ ตัวแปรที่ไม่มีในสมการเลย (เช็ค src not in graph หรือ dst not in graph คืน -1.0) และกรณี a/a ที่ต้องคืน 1.0 เฉพาะเมื่อ a รู้จัก · Time O(Q × (V + E)) แต่ละ query ทำ DFS หนึ่งครั้ง Q คือจำนวน query · Space O(V + E) จาก graph และ visited" },

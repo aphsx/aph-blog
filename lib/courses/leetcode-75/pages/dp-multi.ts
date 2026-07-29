@@ -44,6 +44,12 @@ answer = dp[m][n]   # มุมขวาล่างมักเป็นคำ�
         "m = 3, n = 2 → 3 (grid 3 rows 2 columns มี 3 ทาง)",
         "m = 1, n = 1 → 1 (อยู่ที่เป้าหมายแล้ว มีหนึ่งทางคือไม่เดิน)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= m, n <= 100",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "เป็น 2D DP แบบ grid define (นิยาม) dp[i][j] = จำนวน path จากมุมเริ่มมาถึงช่อง (i, j) การจะมาถึงช่องนี้ได้ ก้าวสุดท้ายต้องมาจากช่องบน (i-1, j) หรือช่องซ้าย (i, j-1) เท่านั้น จำนวน path จึงเท่ากับผลบวกของสองช่องนั้น" },
@@ -65,7 +71,7 @@ answer = dp[m][n]   # มุมขวาล่างมักเป็นคำ�
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def unique_paths(m, n):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def unique_paths(m, n):
     # dp[i][j] = จำนวนทางเดินมาถึงช่อง (i, j)
     dp = [[1] * n for _ in range(m)]   # แถวบนสุด/คอลัมน์ซ้ายสุด = 1 ทาง
     for i in range(1, m):
@@ -74,7 +80,8 @@ answer = dp[m][n]   # มุมขวาล่างมักเป็นคำ�
     return dp[m - 1][n - 1]
 
 print(unique_paths(3, 7))  # 28
-print(unique_paths(3, 2))  # 3` },
+print(unique_paths(3, 2))  # 3`, out: `28
+3` },
         { t: "p", c: "transition คือ dp[i][j] = dp[i-1][j] + dp[i][j-1] เพราะทุก path ที่มาถึงช่อง (i, j) ก้าวสุดท้ายต้องเป็นการเดินลงมาจากช่องบน หรือเดินขวามาจากช่องซ้าย จำนวน path ทั้งหมดจึงเป็นผลบวกของทั้งสองแหล่ง เรา initialize ทั้ง table เป็น 1 ซึ่งจัดการ base case ให้เลย: row บนสุด (i=0) และ column ซ้ายสุด (j=0) มีทางเดียวเสมอเพราะเดินได้ทิศเดียว" },
         { t: "p", c: "จุดที่ต้องระวังคือลำดับการ iterate ต้องเริ่ม i และ j จาก 1 เพื่อไม่ไปทับค่า base case ที่ขอบ และเพราะเราเติมจากบนลงล่าง ซ้ายไปขวา ตอนคำนวณ dp[i][j] ช่องบนและช่องซ้ายจึงถูกเติมเรียบร้อยแล้ว" },
         { t: "p", c: "Time O(m·n) เติมทุกช่องใน table · Space O(m·n) จาก table dp (ลดเหลือ O(n) ได้ด้วยการเก็บแค่ row เดียว)" },
@@ -96,6 +103,13 @@ print(unique_paths(3, 2))  # 3` },
         "text1 = \"abc\", text2 = \"abc\" → 3 (เหมือนกันทั้งเส้น)",
         "text1 = \"abc\", text2 = \"def\" → 0 (ไม่มีตัวร่วมเลย)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= text1.length, text2.length <= 1000",
+        "text1 และ text2 เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "เป็น 2D DP แบบ two strings define dp[i][j] = ความยาว LCS ของ text1 ตัวแรก i ตัว กับ text2 ตัวแรก j ตัว เราเผื่อขอบ index 0 ไว้แทน empty string (สตริงว่าง) (LCS กับ empty string = 0) transition แบ่งสองกรณีตามว่าตัวอักษรท้ายสุดตรงกันหรือไม่" },
@@ -119,7 +133,7 @@ print(unique_paths(3, 2))  # 3` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def longest_common_subsequence(text1, text2):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def longest_common_subsequence(text1, text2):
     m, n = len(text1), len(text2)
     # dp[i][j] = LCS ของ text1[:i] กับ text2[:j] ; ขอบ = 0 (สตริงว่าง)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
@@ -132,7 +146,8 @@ print(unique_paths(3, 2))  # 3` },
     return dp[m][n]
 
 print(longest_common_subsequence("abcde", "ace"))  # 3
-print(longest_common_subsequence("abc", "def"))    # 0` },
+print(longest_common_subsequence("abc", "def"))    # 0`, out: `3
+0` },
         { t: "p", c: "หัวใจของ LCS คือการเทียบตัวอักษรทีละคู่ ที่ช่อง dp[i][j] เราพิจารณาตัวอักษร text1[i-1] กับ text2[j-1] (ต้องลบ 1 เพราะ dp เผื่อขอบ index 0 ไว้แทน empty string) ถ้าสองตัวนี้ตรงกัน เราได้ตัวร่วมเพิ่มหนึ่งตัว จึงต่อยอดจาก dp[i-1][j-1] (คำตอบก่อนรวมสองตัวนี้) แล้ว +1 ถ้าไม่ตรง แปลว่าอย่างน้อยหนึ่งในสองตัวนี้ไม่ได้อยู่ใน LCS จึงลองตัดทิ้งทีละตัวแล้วเลือกผลที่ดีกว่าระหว่าง dp[i-1][j] กับ dp[i][j-1]" },
         { t: "p", c: "การเผื่อ row/column ที่ 0 เป็น 0 คือ base case ที่ถูกต้อง เพราะ LCS กับ empty string ย่อมมีความยาว 0 ถ้าไม่เผื่อขอบ เราต้องเขียนเงื่อนไขพิเศษดักตอน i=0 หรือ j=0 ทำให้โค้ดยุ่งขึ้นโดยไม่จำเป็น" },
         { t: "p", c: "Time O(m·n) เติมทุกช่อง · Space O(m·n) จาก table (ลดเหลือ O(n) ได้ด้วยการเก็บสอง row)" },
@@ -153,6 +168,14 @@ print(longest_common_subsequence("abc", "def"))    # 0` },
         "prices = [1,3,2,8,4,9], fee = 2 → 8 (ซื้อที่ 1 ขายที่ 8 กำไร 8-1-2 = 5 แล้วซื้อที่ 4 ขายที่ 9 กำไร 9-4-2 = 3 รวม 8)",
         "prices = [1,3,7,5,10,3], fee = 3 → 6",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= prices.length <= 5 × 10^4",
+        "1 <= prices[i] < 5 × 10^4",
+        "0 <= fee < 5 × 10^4",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "state (สถานะ) มีสองมิติ: วันที่ i และ state ว่าตอนนี้ถือหุ้นอยู่หรือไม่ (dp[i][ถือ/ไม่ถือ]) เพราะแต่ละวันใช้แค่คำตอบของวันก่อนหน้า เราจึงยุบมิติวันให้เหลือค่าปัจจุบัน ใช้สองตัวแปร: cash (กำไรมากสุดเมื่อวันนี้ไม่ถือหุ้น) กับ hold (กำไรมากสุดเมื่อวันนี้ถือหุ้นอยู่)" },
@@ -176,7 +199,7 @@ print(longest_common_subsequence("abc", "def"))    # 0` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def max_profit(prices, fee):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def max_profit(prices, fee):
     cash = 0             # กำไรมากสุดเมื่อ "ไม่ถือ" หุ้น (เริ่มวันแรก)
     hold = -prices[0]    # กำไรมากสุดเมื่อ "ถือ" หุ้น (ซื้อวันแรก จ่ายไปแล้ว)
     for price in prices[1:]:
@@ -187,7 +210,8 @@ print(longest_common_subsequence("abc", "def"))    # 0` },
     return cash          # จบเกมต้องไม่ถือหุ้น กำไรจึงอยู่ที่ cash
 
 print(max_profit([1, 3, 2, 8, 4, 9], 2))  # 8
-print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6` },
+print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6`, out: `8
+6` },
         { t: "p", c: "แม้เขียนด้วยตัวแปรสองตัว แต่แท้จริงนี่คือ 2D DP dp[i][ถือ/ไม่ถือ] แค่ยุบมิติวัน (i) ให้เหลือค่าปัจจุบัน เพราะแต่ละวันใช้แค่คำตอบของวันก่อนหน้า transition ของ cash คือ วันนี้ไม่ถือ ได้จากเมื่อวานก็ไม่ถือ (อยู่เฉย) หรือเมื่อวานถือแล้ววันนี้ขาย (บวก price ลบ fee) ส่วน hold คือ วันนี้ถือ ได้จากเมื่อวานก็ถือ หรือวันนี้เพิ่งซื้อ (เอา cash เมื่อวานมาลบ price)" },
         { t: "p", c: "ข้อสังเกตเล็ก ๆ: บรรทัด hold ใช้ cash ที่เพิ่ง update ในบรรทัดบน แต่ก็ยังถูกต้อง เพราะการซื้อในวันเดียวกับที่เพิ่งขายไม่ได้ให้กำไรเพิ่ม (การขายแล้วซื้อทันทีที่ราคาเดิมไม่เปลี่ยนอะไร) จึงไม่กระทบคำตอบ เราหัก fee ตอนขายเพียงครั้งเดียวต่อรอบ" },
         { t: "p", c: "Time O(n) iterate ราคาครั้งเดียว · Space O(1) ใช้สองตัวแปรแทน table เต็ม" },
@@ -209,6 +233,13 @@ print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6` },
         "word1 = \"intention\", word2 = \"execution\" → 5",
         "word1 = \"\", word2 = \"abc\" → 3 (insert 3 ตัว)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "0 <= word1.length, word2.length <= 500",
+        "word1 และ word2 เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "นี่คือ 2D DP ต้นแบบเลย define dp[i][j] = จำนวน edit น้อยสุดเพื่อเปลี่ยน word1 ตัวแรก i ตัว ให้เป็น word2 ตัวแรก j ตัว transition แบ่งสองกรณี: ถ้าตัวอักษรท้ายสุดตรงกันไม่ต้องแก้ (ลอกทแยง) ถ้าไม่ตรงเลือก 1 + min ของสามทาง" },
@@ -233,7 +264,7 @@ print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def min_distance(word1, word2):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def min_distance(word1, word2):
     m, n = len(word1), len(word2)
     dp = [[0] * (n + 1) for _ in range(m + 1)]
     # base case: เทียบกับสตริงว่าง
@@ -254,7 +285,8 @@ print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6` },
     return dp[m][n]
 
 print(min_distance("horse", "ros"))            # 3
-print(min_distance("intention", "execution"))  # 5` },
+print(min_distance("intention", "execution"))  # 5`, out: `3
+5` },
         { t: "p", c: "ที่ช่อง dp[i][j] ถ้าตัวอักษรท้ายสุดของทั้งสองส่วนตรงกัน (word1[i-1] == word2[j-1]) เราไม่ต้องเสีย edit ที่ตำแหน่งนี้ จึงลอกค่าทแยง dp[i-1][j-1] มาตรง ๆ ถ้าไม่ตรง เราต้อง edit หนึ่งครั้ง แล้วเลือกทางที่ถูกที่สุดจากสามแบบ: delete ตัวท้ายของ word1 (มาจาก dp[i-1][j]), insert ตัวให้ตรง (มาจาก dp[i][j-1]), หรือ replace ตัวท้าย (มาจาก dp[i-1][j-1]) แล้ว +1 สำหรับ edit ครั้งนั้น" },
         { t: "p", c: "base case สำคัญมาก: dp[i][0] = i หมายถึงเปลี่ยน string ยาว i ให้เป็น empty string ต้อง delete i ครั้ง และ dp[0][j] = j หมายถึงสร้าง string ยาว j จาก empty string ต้อง insert j ครั้ง การจับคู่ทิศทางกับความหมาย (บน=delete, ซ้าย=insert, ทแยง=replace) ช่วยให้ไม่งงเวลาเขียนสูตร" },
         { t: "p", c: "Time O(m·n) เติมทุกช่องใน table · Space O(m·n) จาก table dp (ลดเหลือ O(n) ได้ด้วยการเก็บสอง row)" },

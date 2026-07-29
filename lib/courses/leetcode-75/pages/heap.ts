@@ -82,6 +82,13 @@ print(heapq.nlargest(1, words, key=len))  # ['banana']` },
         "nums = [3,2,1,5,6,4], k = 2 → 5 (อันดับ 1 คือ 6, อันดับ 2 คือ 5)",
         "nums = [3,2,3,1,2,4,5,5,6], k = 4 → 4",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= k <= nums.length <= 10^5",
+        "-10^4 <= nums[i] <= 10^4",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โครงสร้างที่ใช้: min-heap (จาก heapq) เราต้องการ maintain (รักษา) k ตัวที่มากที่สุดไว้ แล้วในบรรดา k ตัวนั้น ตัว minimum ก็คือคำตอบ (ตัวมากอันดับ k) พอดี" },
@@ -107,7 +114,7 @@ print(heapq.nlargest(1, words, key=len))  # ['banana']` },
       { t: "p", c: "จบ loop heap[0] = 5 คือคำตอบ" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `import heapq
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import heapq
 
 def find_kth_largest(nums, k):
     heap = []
@@ -119,7 +126,8 @@ def find_kth_largest(nums, k):
     return heap[0]
 
 print(find_kth_largest([3, 2, 1, 5, 6, 4], 2))          # 5
-print(find_kth_largest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)) # 4` },
+print(find_kth_largest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)) # 4`, out: `5
+4` },
         { t: "p", c: "ไอเดียคือเราต้องการ maintain k ตัวที่มากที่สุด แล้วในบรรดา k ตัวนั้น ตัว minimum ก็คือคำตอบ (ตัวมากอันดับ k) เราใช้ min-heap ขนาด k เป็นกรอบเก็บ เมื่อ push ตัวใหม่แล้ว heap ยาวเกิน k เราก็ pop ตัว minimum ทิ้งไป (เพราะมันเล็กเกินกว่าจะติด top-k) ตัวที่รอดอยู่จึงเป็น k ตัวใหญ่สุดเสมอ" },
         { t: "p", c: "ถ้าเปลี่ยนไปใช้ max-heap แทน จะกลายเป็นต้อง pop ออก n-k ครั้งเพื่อ access (เข้าถึง) อันดับ k ซึ่งวุ่นกว่า การใช้ min-heap ขนาด k ทำให้ตัวที่เล็กเกินไปหลุดออกเองอัตโนมัติ เหลือแต่ผู้ท้าชิง top-k เท่านั้น" },
         { t: "p", c: "Time O(n log k) iterate ทุกตัว n ครั้ง แต่ละครั้ง push/pop บน heap ขนาด k เป็น O(log k) · Space O(k) heap เก็บอย่างมาก k ตัว" },
@@ -140,6 +148,13 @@ print(find_kth_largest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)) # 4` },
         "popSmallest ครั้งแรก ๆ คืน 1, 2, 3 ตามลำดับ",
         "จากนั้น addBack(2) แล้ว popSmallest คืน 2 (กลับมาแล้ว) ต่อด้วย 4, 5",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "เรียก popSmallest และ addBack รวมกันได้มากสุด 1000 ครั้ง",
+        "1 <= num <= 1000",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โครงสร้างที่ใช้: counter (ตัวนับ) current หนึ่งตัว + min-heap หนึ่งอัน + set กันเลขซ้ำ เราไม่ต้อง store เลข infinity จริง ๆ เพราะเลขในช่วง current, current+1, ... ยัง sorted (เรียงเป็นระเบียบ) อยู่แล้ว แค่ track (จำ) ว่าถึงไหนก็พอ" },
@@ -165,7 +180,7 @@ print(find_kth_largest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)) # 4` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `import heapq
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import heapq
 
 class SmallestInfiniteSet:
     def __init__(self):
@@ -197,7 +212,12 @@ print(s.popSmallest())  # 3
 s.addBack(2)
 print(s.popSmallest())  # 2
 print(s.popSmallest())  # 4
-print(s.popSmallest())  # 5` },
+print(s.popSmallest())  # 5`, out: `1
+2
+3
+2
+4
+5` },
         { t: "p", c: "กุญแจของโจทย์คือ เราไม่จำเป็นต้อง store เลข infinity จริง เพราะเลขในช่วง current เป็นต้นไปยัง sorted อยู่แล้ว แค่ track ว่าถึงไหนก็พอ ปัญหาเดียวคือเลขที่ถูก addBack กลับมา ซึ่งอาจเล็กกว่า current เราจึง store มันแยกใน min-heap เพื่อให้ pop ตัว minimum ออกก่อนได้เสมอ" },
         { t: "p", c: "เวลา popSmallest เราจึง compare (เทียบ) ง่าย ๆ: ถ้ามีของใน heap (ซึ่งการันตีว่าเล็กกว่า current) pop จาก heap ก่อน ไม่งั้นค่อยเดินสาย infinity ต่อ ถ้าตัด set in_heap ออก โค้ดจะยอมให้ addBack เลขเดิมซ้ำได้ ทำให้ heap มีค่าซ้ำและ popSmallest return ค่าเดียวกันสองครั้ง ผิดนิยามของ set" },
         { t: "p", c: "Time popSmallest O(log n) และ addBack O(log n) โดย n คือจำนวนเลขใน heap · Space O(n) store เฉพาะเลขที่ถูก addBack กลับมา ไม่ใช่เลข infinity ทั้งหมด" },
@@ -218,6 +238,15 @@ print(s.popSmallest())  # 5` },
         "nums1 = [1,3,3,2], nums2 = [2,1,3,4], k = 3 → 12 (เลือก index 0,2,3: ผลรวม nums1 = 1+3+2 = 6, min ของ nums2 = min(2,3,4) = 2, คะแนน = 6*2 = 12)",
         "nums1 = [4,2,3,1,1], nums2 = [7,5,10,9,6], k = 1 → 30",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "n == nums1.length == nums2.length",
+        "1 <= n <= 10^5",
+        "0 <= nums1[i], nums2[j] <= 10^5",
+        "1 <= k <= n",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โครงสร้างที่ใช้: sort (เรียง) + min-heap ความยากของโจทย์คือ score ขึ้นกับสองอย่างพร้อมกัน: sum nums1 (ยิ่งมากยิ่งดี) กับ min ของ nums2 (ยิ่งมากยิ่งดี) การ handle สองตัวแปรพร้อมกันยาก เทคนิคคือ ตรึง (fix) ตัวหนึ่งไว้ก่อน" },
@@ -241,7 +270,7 @@ print(s.popSmallest())  # 5` },
       { t: "p", c: "best = max(12, 8) = 12" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `import heapq
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import heapq
 
 def max_score(nums1, nums2, k):
     # จับคู่แล้วเรียงตาม nums2 จากมากไปน้อย
@@ -262,7 +291,8 @@ def max_score(nums1, nums2, k):
     return best
 
 print(max_score([1, 3, 3, 2], [2, 1, 3, 4], 3))  # 12
-print(max_score([4, 2, 3, 1, 1], [7, 5, 10, 9, 6], 1))  # 30` },
+print(max_score([4, 2, 3, 1, 1], [7, 5, 10, 9, 6], 1))  # 30`, out: `12
+30` },
         { t: "p", c: "เมื่อเรา sort ตาม nums2 จากมากไปน้อย แล้ว iterate ไปทีละตัว ณ คู่ปัจจุบัน b คือ nums2 ที่เล็กที่สุดในบรรดาคู่ที่เห็นมาแล้ว (เพราะที่มาก่อนหน้าล้วนมี nums2 มากกว่าหรือเท่ากับ b) ดังนั้นถ้าเราเลือก k ตัวจากกลุ่มที่เห็นมาแล้วโดยรวม b ด้วย min ของ nums2 ในกลุ่มจะเป็น b พอดี" },
         { t: "p", c: "เมื่อ b ถูก fix เป็น min แล้ว เราแค่อยากให้ sum nums1 ของ k ตัวมากที่สุด จึงใช้ min-heap ขนาด k เก็บค่า nums1 พร้อมตัวแปร total ตาม sum ไว้ เมื่อ heap เกิน k ก็ evict nums1 ตัวเล็กสุดออก (พร้อมลบออกจาก total) ถ้าไม่ลบออกจาก total score จะเพี้ยนสูงเกินจริงทันที" },
         { t: "p", c: "Time O(n log n) จากการ sort บวกการ iterate push/pop heap อีก O(n log k) · Space O(n) สำหรับ array คู่ที่ sort แล้ว และ heap ขนาด k" },
@@ -283,6 +313,14 @@ print(max_score([4, 2, 3, 1, 1], [7, 5, 10, 9, 6], 1))  # 30` },
         "costs = [17,12,10,2,7,2,11,20,8], k = 3, candidates = 4 → 11",
         "costs = [1,2,4,1], k = 3, candidates = 3 → 4",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= costs.length <= 10^5",
+        "1 <= costs[i] <= 10^5",
+        "1 <= k, candidates <= costs.length",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โครงสร้างที่ใช้: min-heap สองอัน อันหนึ่งคุมฝั่งหัวแถว อีกอันคุมฝั่งท้ายแถว การหาตัวถูกสุด (minimum) ของแต่ละฝั่งซ้ำ ๆ คือหน้าที่ของ min-heap พอดี" },
@@ -305,7 +343,7 @@ print(max_score([4, 2, 3, 1, 1], [7, 5, 10, 9, 6], 1))  # 30` },
       { t: "p", c: "total = 11" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `import heapq
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import heapq
 
 def total_cost(costs, k, candidates):
     n = len(costs)
@@ -334,7 +372,8 @@ def total_cost(costs, k, candidates):
     return total
 
 print(total_cost([17, 12, 10, 2, 7, 2, 11, 20, 8], 3, 4))  # 11
-print(total_cost([1, 2, 4, 1], 3, 3))  # 4` },
+print(total_cost([1, 2, 4, 1], 3, 3))  # 4`, out: `11
+4` },
         { t: "p", c: "ไอเดียคือ ในแต่ละรอบเราต้อง select คนถูกสุดจากสองฝั่งของแถว (หัว candidates คน และท้าย candidates คน) การหาตัว minimum ของแต่ละฝั่งซ้ำ ๆ คือหน้าที่ของ min-heap พอดี เราจึงสร้าง heap สองอันคุมสองฝั่ง แต่ละรอบ compare head[0] กับ tail[0] เลือกตัวที่น้อยกว่า (เท่ากันเลือกหัวเพื่อให้ index น้อยกว่าตามกติกา) แล้วบวกเข้า total cost" },
         { t: "p", c: "จุดที่ต้องระวังที่สุดคือการ push คนใหม่จากตรงกลาง และการไม่ให้สองฝั่งนับคนซ้ำ ตอนสร้าง tail เราใช้ max(candidates, n - candidates) เป็นจุดเริ่ม เพื่อกันไม่ให้ช่วงหัวกับท้าย overlap (ทับกัน) เมื่อ 2*candidates มากกว่า n ส่วน pointer left และ right จะเดินเข้าหากันตรงกลาง เรา push คนใหม่ก็ต่อเมื่อ left <= right เท่านั้น" },
         { t: "p", c: "Time O((candidates + k) log candidates) สร้าง heap สองอันเป็น O(candidates) และ iterate k รอบ แต่ละรอบ push/pop เป็น O(log candidates) · Space O(candidates) สำหรับ heap สองอันรวมกัน" },

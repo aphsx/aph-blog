@@ -62,6 +62,13 @@ print(count)                  # {'a': 3, 'b': 2, 'c': 1}` },
         "nums1 = [1, 2, 3], nums2 = [2, 4, 6] → [[1, 3], [4, 6]] (1, 3 อยู่ใน nums1 อย่างเดียว, 4, 6 อยู่ใน nums2 อย่างเดียว)",
         "nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2] → [[3], []] (มีแต่ 3 ที่ต่าง และผลลัพธ์ตัดตัวซ้ำแล้ว)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= nums1.length, nums2.length <= 1000",
+        "-1000 <= nums1[i], nums2[i] <= 1000",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โจทย์นี้พูดถึง ค่าไม่ซ้ำ และ อยู่ในกองนี้แต่ไม่อยู่ในอีกกอง ซึ่งตรงกับนิยามของ set เป๊ะ ๆ เพราะ set ตัด duplicate (ตัวซ้ำ) ให้อัตโนมัติและมี operator (ตัวดำเนินการ) difference ในตัว" },
@@ -75,14 +82,15 @@ print(count)                  # {'a': 3, 'b': 2, 'c': 1}` },
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าลืมว่าต้องทำ difference ทั้ง สองทิศทาง (s1-s2 และ s2-s1) คนละค่ากัน และเพราะโจทย์บอกว่าลำดับไม่สำคัญ จึงไม่ต้องกังวลว่า list(set) จะเรียงยังไง" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `def find_difference(nums1, nums2):
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_difference(nums1, nums2):
     s1, s2 = set(nums1), set(nums2)  # ตัดตัวซ้ำของแต่ละกอง
     # s1 - s2 = อยู่ใน s1 แต่ไม่อยู่ใน s2
     # s2 - s1 = อยู่ใน s2 แต่ไม่อยู่ใน s1
     return [list(s1 - s2), list(s2 - s1)]
 
 print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
-print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]` },
+print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3], [4, 6]]
+[[3], []]` },
         { t: "p", c: "เมื่อ convert เป็น set ปัญหาเรื่องค่าไม่ซ้ำถูกจัดการให้อัตโนมัติ ที่เหลือคือใช้ operator difference (เครื่องหมายลบระหว่าง set) ซึ่งคืน element (สมาชิก) ที่อยู่ในฝั่งซ้ายแต่ไม่อยู่ฝั่งขวา ทำสองทิศทางก็ได้คำตอบครบ" },
         { t: "p", c: "ถ้าลองเปลี่ยนไปทำบน list โดยไม่ convert เป็น set ก่อน นอกจากจะช้าเป็น O(n^2) แล้ว ยังต้องเขียนโค้ดตัด duplicate เองอีก ซึ่ง set จัดการให้หมดในบรรทัดเดียว" },
         { t: "p", c: "Time O(n + m) convert สอง array เป็น set และทำ difference · Space O(n + m) เก็บสอง set" },
@@ -104,6 +112,13 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]` },
         "arr = [1, 2] → ต่างก็ปรากฏ 1 ครั้งเท่ากัน จำนวนครั้งซ้ำกัน → False",
         "arr = [3, 5, 7, 7, 5, 5] → 3→1, 5→3, 7→2 จำนวนครั้ง {1, 3, 2} ไม่ซ้ำ → True",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= arr.length <= 1000",
+        "-1000 <= arr[i] <= 1000",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "โจทย์แบ่งเป็นสองชั้น ชั้นแรกต้อง count frequency (นับความถี่) ของแต่ละค่า (ใช้ dict/Counter) ชั้นสองต้องเช็คว่า occurrences (ค่าจำนวนครั้ง) เหล่านั้นมี duplicate (ตัวซ้ำ) กันไหม" },
@@ -117,7 +132,7 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]` },
       { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าเผลอเอา key (ตัวค่า) ไปเช็คแทน occurrences ต้องใช้ .values() ซึ่งเป็น occurrences ไม่ใช่ .keys() เพราะ key ย่อมไม่ซ้ำกันอยู่แล้วโดยธรรมชาติของ dict" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import Counter
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
 def unique_occurrences(arr):
     counts = Counter(arr).values()   # จำนวนครั้งของแต่ละค่า เช่น [3, 2, 1]
@@ -126,7 +141,9 @@ def unique_occurrences(arr):
 
 print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
 print(unique_occurrences([1, 2]))              # False
-print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)` },
+print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)`, out: `True
+False
+True` },
         { t: "p", c: "ชั้นแรก Counter(arr) นับให้อัตโนมัติ แล้ว .values() คืน occurrences ทั้งหมดออกมาเป็นลำดับหนึ่งชุด ชั้นสอง convert ชุดนั้นเป็น set แล้วเทียบขนาด ถ้ามี occurrences ที่ซ้ำกัน set จะยุบตัวลง ขนาดจึงไม่เท่ากับต้นฉบับ" },
         { t: "p", c: "ถ้าลองเขียนเองแบบไล่เช็คคู่ทุกคู่ของ occurrences จะเป็น O(k^2) แต่ทริก len เทียบ set ทำให้เหลือ O(k) และอ่านง่ายกว่ามาก" },
         { t: "p", c: "Time O(n) count frequency หนึ่งรอบ สร้าง set หนึ่งรอบ · Space O(n) เก็บ Counter และ set ของ frequency" },
@@ -149,6 +166,13 @@ print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)` },
         "word1 = cabbba, word2 = abbccc → True (character set เดียวกัน กอง frequency ตรงกัน)",
         "word1 = cabbba, word2 = aabbss → False (frequency เรียงเท่ากัน แต่ character คนละชุด)",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "1 <= word1.length, word2.length <= 10^5",
+        "word1 และ word2 เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
+        ],
+      },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
       { t: "p", c: "กุญแจคือแปลความหมายของ operation ทั้งสองให้เป็นเงื่อนไขที่เช็คได้ operation 1 (swap ตำแหน่ง) บอกว่าลำดับไม่มีผล เหลือแค่ ตัวอะไรมีกี่ตัว operation 2 (สลับ frequency) บอกว่าเราจับคู่ character กับจำนวนได้อิสระ ตราบใดที่ character นั้นมีอยู่แล้ว" },
@@ -171,7 +195,7 @@ print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)` },
       ] },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import Counter
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
 def close_strings(word1, word2):
     c1, c2 = Counter(word1), Counter(word2)
@@ -183,7 +207,10 @@ def close_strings(word1, word2):
 print(close_strings("abc", "bca"))        # True
 print(close_strings("a", "aa"))           # False
 print(close_strings("cabbba", "abbccc"))  # True
-print(close_strings("cabbba", "aabbss"))  # False` },
+print(close_strings("cabbba", "aabbss"))  # False`, out: `True
+False
+True
+False` },
         { t: "p", c: "set(c1) เอาเฉพาะ key (ตัวอักษรที่ปรากฏ) มาเทียบกัน ส่วน c1.values() คือ frequency ของแต่ละตัว การ sort (เรียง) ก่อนเทียบทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกันไหม ซึ่งตรงกับอิสระของ operation 2 พอดี" },
         { t: "p", c: "ทำไมต้องมีทั้งสองเงื่อนไขคู่กัน? เงื่อนไข 2 อย่างเดียวยอมให้ character คนละชุดผ่านได้ (เช่น s แทน c) ส่วนเงื่อนไข 1 อย่างเดียวก็ไม่พอเพราะ frequency แต่ละตัวอาจไม่จับคู่กันได้ ต้องครบทั้งสองข้อ" },
         { t: "p", c: "Time O(n + k log k) count frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter ของ character (คงที่ 26 ตัว)" },
@@ -204,6 +231,14 @@ print(close_strings("cabbba", "aabbss"))  # False` },
         "grid = [[3,2,1],[1,7,6],[2,7,7]] → 1 คู่ (แถว 2 กับคอลัมน์ 1 ต่างก็เป็น [2,7,7])",
         "grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]] → 3 คู่",
       ] },
+      {
+        t: "constraints",
+        c: [
+        "n == grid.length == grid[i].length",
+        "1 <= n <= 200",
+        "1 <= grid[i][j] <= 10^5",
+        ],
+      },
       { t: "callout", c: "ลำดับของค่าใน row/column สำคัญ [2,7,7] ตรงกับ [2,7,7] เท่านั้น ไม่ตรงกับ [7,2,7] และ row ที่หน้าตาซ้ำกันหลายแถวก็นับเป็นหลาย pair" },
 
       { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
@@ -228,7 +263,7 @@ print(close_strings("cabbba", "aabbss"))  # False` },
       { t: "p", c: "จบ loop pairs = 1 ตรงกับคำตอบ" },
 
       { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-        { t: "code", lang: "python", c: `from collections import Counter
+        { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
 def equal_pairs(grid):
     n = len(grid)
@@ -245,7 +280,8 @@ def equal_pairs(grid):
 
 print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
 print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
-                   [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3` },
+                   [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`, out: `1
+3` },
         { t: "p", c: "ขั้นแรก convert แต่ละ row เป็น tuple แล้วนับด้วย Counter ว่าหน้าตาแบบไหนมีกี่แถว การใช้ tuple สำคัญเพราะ list mutable (เปลี่ยนแปลงได้) จึงเป็น key ของ dict ไม่ได้ แต่ tuple immutable (คงที่) จึง hash ได้" },
         { t: "p", c: "ขั้นสอง iterate ทีละ column ประกอบเป็น tuple แล้วถามจาก row_count ว่ามี row หน้าตาเดียวกันกี่แถว เพราะ row ที่เหมือนกันหลายแถวจับคู่กับ column นี้ได้ทุกแถว จึงบวกจำนวนที่ได้ ในตัวอย่างที่สอง column หนึ่งไปตรงกับ row ที่หน้าตาซ้ำกันสองแถว ก็บวก 2 ทีเดียว" },
         { t: "p", c: "Time O(n^2) แต่ละ row และแต่ละ column มี n ช่อง รวม n row/column เป็น O(n^2) · Space O(n^2) เก็บ tuple ของ row ทั้งหมดใน Counter" },
