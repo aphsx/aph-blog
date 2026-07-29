@@ -18,7 +18,6 @@ export const leetcode75Nav: NavCategory[] = [
   {
     label: "1. Array / String",
     items: [
-      { slug: "lc75-intro-array-string", title: "แนวคิด & พื้นฐาน" },
       { slug: "lc75-p01", title: "1 · Merge Strings Alternately" },
       { slug: "lc75-p02", title: "2 · Greatest Common Divisor of Strings" },
       { slug: "lc75-p03", title: "3 · Kids With the Greatest Candies" },
