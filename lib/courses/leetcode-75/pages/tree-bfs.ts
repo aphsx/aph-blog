@@ -11,7 +11,7 @@ export const treeBfsPages: Record<string, Page> = {
 
       { t: "h2", c: "BFS / level-order คืออะไร" },
       { t: "p", c: "BFS ย่อมาจาก Breadth-First Search แปลว่า \"ค้นแบบกวาดกว้างก่อน\" บนต้นไม้เรามักเรียกอีกชื่อว่า level-order traversal คือ traverse ครบทั้ง level หนึ่งก่อน แล้วค่อยลง level ถัดไป ลองนึกภาพต้นไม้นี้: เราจะแตะ 3 ก่อน (level 1) แล้วแตะ 9, 20 (level 2) แล้วค่อย 15, 7 (level 3)" },
-      { t: "code", lang: "python", c: `          3          <- ชั้น 1: [3]
+      { t: "code", c: `          3          <- ชั้น 1: [3]
          / \\
         9   20         <- ชั้น 2: [9, 20]
            /  \\

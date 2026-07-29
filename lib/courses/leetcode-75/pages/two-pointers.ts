@@ -124,7 +124,7 @@ for nums, target in [([1, 3, 4, 6, 8, 11], 14), ([1, 1, 3, 3], 4)]:
 nums = [1, 1, 3, 3] target = 4
   brute force  เจอ 4 คู่: [(1, 3), (1, 3), (1, 3), (1, 3)]
   two pointers เจอ 2 คู่: [(1, 3), (1, 3)]
-  ตรงกันไหม: False` ,
+  ตรงกันไหม: False`,
       },
       { t: "p", c: "หายไปครึ่งหนึ่งแบบเงียบ ๆ ไม่มี error ไม่มีสัญญาณเตือนอะไรเลย สาเหตุอยู่ที่บรรทัด left += 1 กับ right -= 1 ที่ทำพร้อมกันตอนเจอคู่: มันทิ้งทั้งตัวซ้ายและตัวขวาไปในก้าวเดียว ทั้งที่ตัวซ้ายตัวนั้นยังจับกับตัวขวาอีกตัวได้อยู่ (1 ตัวแรกยังจับกับ 3 ตัวแรกได้) การขยับแบบนี้ตัดคู่ทิ้งเป็นชุด ไม่ได้ไล่ดูทีละคู่" },
       { t: "callout", title: "ขอบเขตที่แท้จริงของ two pointers", warn: true, c: "two pointers ตอบคำถามแบบ \"มีคู่แบบนั้นอยู่ไหม\" หรือ \"คู่ที่ดีที่สุดให้ค่าเท่าไหร่\" ได้อย่างถูกต้อง เพราะสองคำถามนี้ต้องการแค่คำตอบสุดท้ายคำตอบเดียว แต่มันตอบคำถามแบบ \"มีทั้งหมดกี่คู่\" หรือ \"ขอรายชื่อทุกคู่\" ไม่ได้ เพราะมันไม่เคยเห็นทุกคู่ตั้งแต่แรก ถ้าเจอโจทย์ที่ให้นับหรือให้ลิสต์ออกมาทั้งหมด ต้องเปลี่ยนท่า (ปกติคือ hash map นับความถี่ หรือคิดสูตรนับแทนการไล่)" },
@@ -491,7 +491,15 @@ print(a)`,
             t: "codeout",
             lang: "python",
             label: "ทดสอบ edge cases (กรณีขอบ ๆ ที่มักลืมเช็ค)",
-            code: `cases = [
+            code: `def move_zeroes(nums: list[int]) -> None:
+    insert = 0
+    for i in range(len(nums)):
+        if nums[i] != 0:
+            nums[insert], nums[i] = nums[i], nums[insert]
+            insert += 1
+
+
+cases = [
     ([0, 1, 0, 3, 12], [1, 3, 12, 0, 0]),
     ([0], [0]),
     ([1, 2, 3], [1, 2, 3]),
@@ -930,6 +938,19 @@ print(max_area([0, 0]))`,
                 code: `import random
 
 
+def max_area(height: list[int]) -> int:
+    left, right = 0, len(height) - 1
+    best = 0
+    while left < right:
+        h = min(height[left], height[right])
+        best = max(best, h * (right - left))
+        if height[left] < height[right]:
+            left += 1
+        else:
+            right -= 1
+    return best
+
+
 def brute(height):
     best = 0
     for i in range(len(height)):
@@ -1167,7 +1188,25 @@ print(max_operations([1, 1, 1, 1], 2))`,
             t: "codeout",
             lang: "python",
             label: "เฉลยที่ 2 (Python) — นับด้วย dict ธรรมดา",
-            code: `def max_operations_hash(nums: list[int], k: int) -> int:
+            code: `def max_operations(nums: list[int], k: int) -> int:
+    """เฉลยที่ 1 (two pointers) — ยกมาซ้ำเพื่อให้บล็อกนี้รันได้เองทั้งก้อน"""
+    nums.sort()
+    left, right = 0, len(nums) - 1
+    ops = 0
+    while left < right:
+        total = nums[left] + nums[right]
+        if total == k:
+            ops += 1
+            left += 1
+            right -= 1
+        elif total < k:
+            left += 1
+        else:
+            right -= 1
+    return ops
+
+
+def max_operations_hash(nums: list[int], k: int) -> int:
     need = {}                      # ค่าที่ยัง "รอคู่" -> เหลือกี่ตัว
     ops = 0
     for x in nums:

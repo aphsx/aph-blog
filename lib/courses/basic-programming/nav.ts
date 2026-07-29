@@ -24,6 +24,7 @@ export const basicProgrammingNav: NavCategory[] = [
       { slug: "pb-io", title: "รับข้อมูล & แสดงผล" },
       { slug: "pb-conditionals", title: "เงื่อนไข (if/elif/else)" },
       { slug: "pb-loops", title: "การวนซ้ำ (Loops)" },
+      { slug: "pb-loop-choose", title: "เลือก for หรือ while ให้ถูก" },
       { slug: "pb-functions", title: "ฟังก์ชัน (Functions)" },
       { slug: "pb-errors", title: "ข้อผิดพลาด & การแก้บั๊ก" },
     ],

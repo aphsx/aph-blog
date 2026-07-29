@@ -20,7 +20,7 @@ export const treeDfsPages: Record<string, Page> = {
         "height (ความสูง) = จำนวนชั้นจาก root ลงไปถึง leaf ที่ลึกสุด",
       ] },
       { t: "p", c: "ลองดูรูปนี้ ต้นไม้กลับหัว — root อยู่บน leaf อยู่ล่าง เส้น / กับ \\ คือลิงก์จาก parent ลงไปหา left child และ right child" },
-      { t: "code", lang: "python", c: `          3          <- root (ชั้น 1)
+      { t: "code", c: `          3          <- root (ชั้น 1)
          / \\
         9   20         <- ชั้น 2
            /  \\

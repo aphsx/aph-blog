@@ -11,7 +11,7 @@ export const triePages: Record<string, Page> = {
 
       { t: "h2", c: "Trie หน้าตาเป็นยังไง" },
       { t: "p", c: "ลองนึกภาพว่าเราเก็บคำว่า cat, car, card ถ้าเก็บเป็น array (ลิสต์) ธรรมดา การ search ว่ามีคำที่ขึ้นต้นด้วย ca ไหมต้อง iterate (วน) ดูทุกคำ แต่ใน trie เราแตกคำออกเป็นตัวอักษรทีละตัว แล้วให้ตัวอักษรที่เหมือนกันตอนต้น share node (โหนด) ร่วมกัน หน้าตาจะเป็นแบบนี้" },
-      { t: "code", lang: "python", c: `(root)
+      { t: "code", c: `(root)
    |
    c
    |

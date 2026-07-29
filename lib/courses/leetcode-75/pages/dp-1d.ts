@@ -16,7 +16,7 @@ export const dp1dPages: Record<string, Page> = {
         return n
     return fib(n - 1) + fib(n - 2)   # ช้า! O(2^n)` },
       { t: "p", c: "ทำไมช้า? เพราะเรา compute ค่าเดิมซ้ำนับครั้งไม่ถ้วน ลองวาด recursion tree (ต้นไม้การเรียกฟังก์ชัน) ของ fib(5):" },
-      { t: "code", lang: "python", c: `                fib(5)
+      { t: "code", c: `                fib(5)
               /        \\
           fib(4)       fib(3)
           /    \\        /    \\

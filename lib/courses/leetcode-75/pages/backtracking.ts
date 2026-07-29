@@ -12,7 +12,7 @@ export const backtrackingPages: Record<string, Page> = {
       { t: "h2", c: "recursion tree — ภาพในหัวของ backtracking" },
       { t: "p", c: "ลองนึกภาพว่าเรากำลังเดินอยู่ในเขาวงกตที่แตกเป็นทางแยกเยอะมาก ทุกครั้งที่เจอทางแยก เรา choose เดินทางหนึ่งไปก่อน ถ้าสุดทางแล้วไม่เจอทางออก เราก็ backtrack ย้อนกลับมาที่ทางแยกเดิมแล้วลองอีกทาง Backtracking ทำแบบเดียวกันเป๊ะ ๆ แต่ทำด้วย recursion (การเรียกตัวเอง)" },
       { t: "p", c: "เราวาดการทำงานเป็น recursion tree (ต้นไม้การเรียกตัวเอง) ได้ แต่ละ node (โหนด) คือ state (สถานะ) ปัจจุบัน คือคำตอบที่สร้างไปแล้วบางส่วน และแต่ละ branch (กิ่ง) ที่แตกออกไปคือ choice หนึ่งที่เราลอง สมมติต้อง build string (สตริง) ยาว 2 ตัวจากตัวอักษร a และ b ต้นไม้จะเป็นแบบนี้:" },
-      { t: "code", lang: "python", c: `                   ""            <- ยังไม่เลือกอะไร
+      { t: "code", c: `                   ""            <- ยังไม่เลือกอะไร
                  /    \\
               "a"      "b"        <- เลือกตัวแรก
              /   \\    /   \\
@@ -22,7 +22,7 @@ export const backtrackingPages: Record<string, Page> = {
       { t: "h2", c: "template สามจังหวะ: choose → explore → unchoose" },
       { t: "p", c: "หัวใจของ backtracking ทุกข้อจะมี structure (โครง) เดียวกัน จำ template (แม่แบบ) สามจังหวะนี้ไว้: choose (เลือก) → explore (ลงลึก) → unchoose (ถอย) ทุกโจทย์ในหมวดนี้จะเข้ารูปนี้หมด แค่เปลี่ยนว่า choices คืออะไร และเงื่อนไข คำตอบครบ คืออะไร" },
       { t: "code", lang: "python", c: `def backtrack(path, choices):
-    if เงื่อนไขว่าคำตอบครบแล้ว:
+    if is_complete(path):        # <- แทนที่ด้วยเงื่อนไข "คำตอบครบแล้ว" ของโจทย์
         result.append(path[:])   # เก็บสำเนาคำตอบ (สำคัญ! ต้อง copy)
         return
     for choice in choices:       # ลองทุกทางเลือกที่ทำได้

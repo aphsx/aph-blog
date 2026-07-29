@@ -28,7 +28,7 @@ for i in range(k, len(nums)):
 best = 0
 for right in range(len(nums)):
     # 1) รับ nums[right] เข้าหน้าต่าง (อัปเดตตัวนับ/ผลรวม)
-    while window_ผิดเงื่อนไข:
+    while is_invalid(window):    # <- แทนที่ด้วยเงื่อนไข "หน้าต่างผิดกติกา" ของโจทย์
         # 2) หดซ้าย: ถอด nums[left] ออกจนหน้าต่างถูกต้องอีกครั้ง
         left += 1
     best = max(best, right - left + 1)   # ความยาวหน้าต่างตอนนี้` },

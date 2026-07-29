@@ -14,7 +14,6 @@ export const stackPages: Record<string, Page> = {
       { t: "p", c: "หน้าตาของ stack วาดเป็นข้อความได้แบบนี้ ของเข้า-ออกทางด้านบน (top) ทางเดียวเท่านั้น:" },
       {
         t: "code",
-        lang: "python",
         c: `push 10, 20, 30 ตามลำดับ  ->  ได้กองแบบนี้:
 
     | 30 |  <- top (หยิบออกก่อน)

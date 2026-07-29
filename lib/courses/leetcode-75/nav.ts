@@ -12,6 +12,7 @@ export const leetcode75Nav: NavCategory[] = [
     items: [
       { slug: "lc75", title: "ภาพรวม & วิธีเรียน" },
       { slug: "lc75-bigo", title: "Big-O คืออะไร" },
+      { slug: "lc75-pick", title: "เลือกหมวดไหนดี (แผนที่ตัดสินใจ)" },
     ],
   },
   {
