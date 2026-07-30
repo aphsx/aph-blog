@@ -42,7 +42,6 @@ export const leetcode75Nav: NavCategory[] = [
   {
     label: "3. Sliding Window",
     items: [
-      { slug: "lc75-intro-sliding-window", title: "แนวคิด & พื้นฐาน" },
       { slug: "lc75-p14", title: "14 · Maximum Average Subarray I" },
       { slug: "lc75-p15", title: "15 · Max Vowels in a Substring" },
       { slug: "lc75-p16", title: "16 · Max Consecutive Ones III" },

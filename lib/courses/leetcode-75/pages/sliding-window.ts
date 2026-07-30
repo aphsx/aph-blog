@@ -1,42 +1,6 @@
 import type { Page } from "@/lib/types";
 
 export const slidingWindowPages: Record<string, Page> = {
-  "lc75-intro-sliding-window": {
-    slug: "lc75-intro-sliding-window",
-    title: "Sliding Window — พื้นฐาน & แนวคิด",
-    lead: "เทคนิคเลื่อน window (หน้าต่าง) ช่วงต่อเนื่องเพื่อหาช่วงที่ดีที่สุด โดยไม่ต้องคำนวณซ้ำ ลดเวลาจาก O(n^2) เหลือ O(n)",
-    group: "LeetCode 75",
-    blocks: [
-      { t: "p", c: "Sliding Window (หน้าต่างเลื่อน) คือเทคนิคสำหรับโจทย์ที่ถามถึง \"ช่วงต่อเนื่อง\" (subarray หรือ substring) เช่น ผลรวมมากสุดของช่วงยาว k หรือช่วงที่ยาวที่สุดที่ตรง condition (เงื่อนไข) แทนที่จะคำนวณทุกช่วงใหม่หมด เราเลื่อน window ทีละก้าวและปรับค่าเฉพาะส่วนที่เปลี่ยน จึงเหลือ O(n)" },
-
-      { t: "h2", c: "Sliding Window คืออะไร" },
-      { t: "p", c: "ลองนึกภาพ window (หน้าต่าง) สี่เหลี่ยมที่ครอบข้อมูลอยู่ช่วงหนึ่งของ array (ลิสต์) เรากำหนดขอบ window ด้วย two pointers (ตัวชี้สองตัว) คือ left (ขอบซ้าย) กับ right (ขอบขวา) การ \"เลื่อน window\" คือการขยับขอบทีละก้าว จุดสำคัญคือ เมื่อขยับ เราไม่ต้องคำนวณค่าทั้ง window ใหม่ แค่บวกค่าตัวที่เพิ่งเข้ามาทางขวา และลบค่าตัวที่เพิ่งหลุดออกทางซ้าย นี่คือเหตุผลที่มันเร็ว" },
-      { t: "p", c: "Sliding Window มีสองแบบที่ต้องแยกให้ออก" },
-      { t: "ul", c: [
-        "window ขนาดคงที่ (fixed size): โจทย์บอกความยาว k มาชัด ๆ เราเลื่อน window ยาว k ไปเรื่อย ๆ ทุกครั้งที่เลื่อน insert (เพิ่ม) ตัวใหม่หนึ่งตัวและถอดตัวเก่าหนึ่งตัว เหมาะกับ \"หาค่าดีที่สุดของช่วงยาว k\"",
-        "window ขนาดยืดหยุ่น (variable size): ไม่มีความยาวตายตัว เราขยายขอบขวาไปเรื่อย ๆ เพื่อรับของเข้ามา และหดขอบซ้ายเมื่อ window เริ่มผิด condition เหมาะกับ \"หาช่วงที่ยาวที่สุด/สั้นที่สุดที่ยังตรง condition\"",
-      ] },
-      { t: "p", c: "template (เทมเพลต) window ขนาดคงที่ยาว k เริ่มด้วยการสร้าง window แรก แล้วเลื่อนทีละก้าว" },
-      { t: "code", lang: "python", c: `window = sum(nums[:k])          # สร้างหน้าต่างแรก [0, k)
-best = window
-for i in range(k, len(nums)):
-    window += nums[i]           # ตัวใหม่เข้าทางขวา
-    window -= nums[i - k]       # ตัวเก่าหลุดออกทางซ้าย
-    best = max(best, window)` },
-      { t: "p", c: "template window ขนาดยืดหยุ่น ขยายขวาเสมอ แล้วหดซ้ายเมื่อผิด condition" },
-      { t: "code", lang: "python", c: `left = 0
-best = 0
-for right in range(len(nums)):
-    # 1) รับ nums[right] เข้าหน้าต่าง (อัปเดตตัวนับ/ผลรวม)
-    while is_invalid(window):    # <- แทนที่ด้วยเงื่อนไข "หน้าต่างผิดกติกา" ของโจทย์
-        # 2) หดซ้าย: ถอด nums[left] ออกจนหน้าต่างถูกต้องอีกครั้ง
-        left += 1
-    best = max(best, right - left + 1)   # ความยาวหน้าต่างตอนนี้` },
-      { t: "callout", title: "ใช้ตอนไหน", c: "เห็นคำว่า \"ช่วงต่อเนื่อง (contiguous / subarray / substring)\" คู่กับ \"ยาว k\", \"ยาวที่สุด\", \"สั้นที่สุด\", หรือ \"ผลรวม/จำนวนมากสุด\" ให้นึกถึง Sliding Window ต่างจาก Two Pointers ตรงที่ window สนใจ \"ทั้งช่วงที่อยู่ระหว่าง pointers\" ไม่ใช่แค่ค่าที่ปลายสองข้าง" },
-      { t: "callout", title: "พร้อมแล้วไปต่อ", c: "หมวดนี้มี 4 ข้อ เริ่มจาก window ขนาดคงที่ไปหา window ขนาดยืดหยุ่น กดถัดไปเพื่อเริ่มข้อแรก (Maximum Average Subarray I — ค่าเฉลี่ย subarray มากสุด) ได้เลย" },
-    ],
-  },
-
   "lc75-p14": {
     slug: "lc75-p14",
     title: "ข้อ 14 · LC643 Maximum Average Subarray I (ค่าเฉลี่ย subarray มากสุด) 🟢",
