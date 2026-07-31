@@ -38,12 +38,26 @@ answer = dp[m][n]   # มุมขวาล่างมักเป็นคำ�
     lead: "นับจำนวน path (เส้นทาง) ของ robot บน grid ที่เดินได้แค่ลงหรือขวา ด้วย 2D DP",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "Unique Paths: robot (หุ่นยนต์) อยู่มุมบนซ้ายของ grid (กริด) ขนาด m x n ต้องเดินไปมุมล่างขวา โดยแต่ละก้าวเดินได้แค่ลงหรือขวาเท่านั้น ให้นับว่ามี path (เส้นทาง) ต่างกันทั้งหมดกี่แบบ" },
-      { t: "ul", c: [
-        "m = 3, n = 7 → 28",
-        "m = 3, n = 2 → 3 (grid 3 rows 2 columns มี 3 ทาง)",
-        "m = 1, n = 1 → 1 (อยู่ที่เป้าหมายแล้ว มีหนึ่งทางคือไม่เดิน)",
-      ] },
+      { t: "p", c: "โจทย์ (LC62): robot (หุ่นยนต์) อยู่ที่มุมบนซ้ายของ grid (กริด) ขนาด m x n พยายามเดินไปให้ถึงมุมล่างขวาของ grid โดยแต่ละก้าวเดินได้แค่ลงหนึ่งช่องหรือขวาหนึ่งช่องเท่านั้น ให้หาว่ามี unique path (เส้นทางที่ต่างกัน) ทั้งหมดกี่แบบ" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "m = 3, n = 7",
+            output: "28",
+          },
+          {
+            input: "m = 3, n = 2",
+            output: "3",
+            explain: "grid 3 rows 2 columns มีทางที่ต่างกัน 3 แบบ: ลง→ลง→ขวา, ลง→ขวา→ลง, ขวา→ลง→ลง",
+          },
+          {
+            input: "m = 1, n = 1",
+            output: "1",
+            explain: "อยู่ที่เป้าหมายแล้ว มีหนึ่งทางคือไม่ต้องเดิน",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -98,12 +112,27 @@ print(unique_paths(3, 2))  # 3`, out: `28
     lead: "หาความยาว LCS ของ two strings ด้วย 2D DP เทียบตัวอักษรทีละคู่",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "Longest Common Subsequence: ให้ two strings (สองสตริง) text1 กับ text2 หา subsequence (ลำดับย่อยที่ได้จากการลบตัวอักษรบางตัวออกโดยไม่สลับลำดับที่เหลือ) ที่ปรากฏในทั้งสอง string และยาวที่สุด แล้วตอบความยาวของมัน" },
-      { t: "ul", c: [
-        "text1 = \"abcde\", text2 = \"ace\" → 3 (subsequence ร่วมที่ยาวสุดคือ \"ace\")",
-        "text1 = \"abc\", text2 = \"abc\" → 3 (เหมือนกันทั้งเส้น)",
-        "text1 = \"abc\", text2 = \"def\" → 0 (ไม่มีตัวร่วมเลย)",
-      ] },
+      { t: "p", c: "โจทย์ (LC1143): กำหนด string (สตริง) สองตัวคือ text1 และ text2 มา ให้หาความยาวของ longest common subsequence ของทั้งคู่ ถ้าไม่มี common subsequence เลยให้ return 0 (subsequence คือ string ใหม่ที่เกิดจากการลบตัวอักษรบางตัว หรือไม่ลบเลย ออกจาก string เดิม โดยไม่เปลี่ยนลำดับตัวอักษรที่เหลือ)" },
+      {
+        t: "example",
+        c: [
+          {
+            input: 'text1 = "abcde", text2 = "ace"',
+            output: "3",
+            explain: 'longest common subsequence คือ "ace" ความยาว 3',
+          },
+          {
+            input: 'text1 = "abc", text2 = "abc"',
+            output: "3",
+            explain: 'longest common subsequence คือ "abc" ความยาว 3',
+          },
+          {
+            input: 'text1 = "abc", text2 = "def"',
+            output: "0",
+            explain: "ไม่มี common subsequence เลย จึงตอบ 0",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -164,11 +193,21 @@ print(longest_common_subsequence("abc", "def"))    # 0`, out: `3
     lead: "หากำไรสูงสุดจากการซื้อขายหุ้นไม่จำกัดครั้งแต่มี transaction fee ด้วย DP สอง state ถือ/ไม่ถือ",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "Best Time to Buy and Sell Stock with Transaction Fee: ให้ array (ลิสต์) ราคาหุ้นรายวัน prices และ fee (ค่าธรรมเนียม) ต่อการซื้อขายหนึ่งรอบ เราซื้อขายได้ไม่จำกัดจำนวนครั้ง แต่ต้องถือได้ทีละหุ้นเดียว (ขายก่อนถึงจะซื้อใหม่ได้) และเสีย fee ทุกครั้งที่ทำครบหนึ่งรอบซื้อ-ขาย ให้หากำไรสูงสุด" },
-      { t: "ul", c: [
-        "prices = [1,3,2,8,4,9], fee = 2 → 8 (ซื้อที่ 1 ขายที่ 8 กำไร 8-1-2 = 5 แล้วซื้อที่ 4 ขายที่ 9 กำไร 9-4-2 = 3 รวม 8)",
-        "prices = [1,3,7,5,10,3], fee = 3 → 6",
-      ] },
+      { t: "p", c: "โจทย์ (LC714): กำหนด array (ลิสต์) จำนวนเต็ม prices โดย prices[i] คือราคาหุ้นในวันที่ i และจำนวนเต็ม fee ที่แทนค่าธรรมเนียมการทำธุรกรรมมา ให้หากำไร maximum ที่ทำได้ ทำธุรกรรมได้ไม่จำกัดจำนวนครั้ง แต่ต้องขายหุ้นที่ถืออยู่ก่อนจึงจะซื้อใหม่ได้อีกครั้ง (ห้ามถือหุ้นหลายรอบซ้อนกันพร้อมกัน) และเสีย fee เพียงครั้งเดียวต่อหนึ่งรอบการซื้อขาย" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "prices = [1, 3, 2, 8, 4, 9], fee = 2",
+            output: "8",
+            explain: "ซื้อที่ prices[0]=1 ขายที่ prices[3]=8 กำไร (8-1)-2 = 5 แล้วซื้อที่ prices[4]=4 ขายที่ prices[5]=9 กำไร (9-4)-2 = 3 รวม 5+3 = 8",
+          },
+          {
+            input: "prices = [1, 3, 7, 5, 10, 3], fee = 3",
+            output: "6",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -228,12 +267,26 @@ print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6`, out: `8
     lead: "หาจำนวน edit น้อยสุดเพื่อเปลี่ยน string หนึ่งเป็นอีก string ด้วย 2D DP ต้นแบบ",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "Edit Distance: ให้ two strings (สองสตริง) word1 กับ word2 หาจำนวน edit (การแก้ไข) น้อยที่สุดที่จะเปลี่ยน word1 ให้กลายเป็น word2 โดย edit หนึ่งครั้งทำได้สามแบบ: insert (แทรก) ตัวอักษร, delete (ลบ) ตัวอักษร, หรือ replace (แทนที่) ตัวอักษร" },
-      { t: "ul", c: [
-        "word1 = \"horse\", word2 = \"ros\" → 3 (horse→rorse แทน h เป็น r, →rose ลบ r, →ros ลบ e)",
-        "word1 = \"intention\", word2 = \"execution\" → 5",
-        "word1 = \"\", word2 = \"abc\" → 3 (insert 3 ตัว)",
-      ] },
+      { t: "p", c: "โจทย์ (LC72): กำหนด string (สตริง) สองตัวคือ word1 และ word2 มา ให้หาจำนวน operation (การกระทำ) น้อยที่สุดที่ต้องใช้เพื่อแปลง word1 ให้กลายเป็น word2 โดย operation ที่ทำได้บน word1 มีสามแบบ ได้แก่ insert ตัวอักษรหนึ่งตัว, delete ตัวอักษรหนึ่งตัว หรือ replace ตัวอักษรหนึ่งตัว" },
+      {
+        t: "example",
+        c: [
+          {
+            input: 'word1 = "horse", word2 = "ros"',
+            output: "3",
+            explain: 'horse → rorse (replace \'h\' เป็น \'r\') → rose (delete \'r\') → ros (delete \'e\')',
+          },
+          {
+            input: 'word1 = "intention", word2 = "execution"',
+            output: "5",
+          },
+          {
+            input: 'word1 = "", word2 = "abc"',
+            output: "3",
+            explain: "word1 เป็น string ว่าง ต้อง insert ทั้ง 3 ตัวเพื่อให้กลายเป็น \"abc\"",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [

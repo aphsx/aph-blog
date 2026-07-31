@@ -58,11 +58,22 @@ def search(root, target):
     lead: "ใช้กฎ left < node < right เดินลงต้นไม้ ตัดครึ่งที่ไม่เกี่ยวทิ้งทุกก้าว หาเจอใน O(h)",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ (Search in a Binary Search Tree) ให้ root (ราก) ของ BST มา และค่า val หนึ่งค่า ให้หา node (โหนด) ที่มีค่าเท่ากับ val แล้วคืน subtree (ต้นไม้ย่อย) ที่มี node นั้นเป็น root (คือคืนตัว node นั้นทั้งก้อน รวม child (ลูก) ทั้งหลายของมัน) ถ้าไม่มีให้คืน None" },
-      { t: "ul", c: [
-        "root = [4,2,7,1,3], val = 2 → คืน subtree ที่ root คือ node 2 (มี child 1 กับ 3)",
-        "root = [4,2,7,1,3], val = 5 → คืน None เพราะไม่มีค่า 5 ในต้นไม้",
-      ] },
+      { t: "p", c: "โจทย์ (LC700): กำหนด root ของ binary search tree (BST) และเลขจำนวนเต็ม val ให้หา node ใน BST ที่มีค่าเท่ากับ val แล้ว return subtree ที่มี node นั้นเป็น root (คืนตัว node นั้นทั้งก้อน รวม child ทั้งหลายของมัน) ถ้าไม่มี node แบบนั้นให้ return null" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "root = [4,2,7,1,3], val = 2",
+            output: "[2,1,3]",
+            explain: "คืน subtree ที่ root คือ node 2 ซึ่งมี child ซ้าย 1 และ child ขวา 3",
+          },
+          {
+            input: "root = [4,2,7,1,3], val = 5",
+            output: "[]",
+            explain: "ไม่มีค่า 5 อยู่ใน BST นี้เลย จึง return null",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -130,11 +141,22 @@ None` },
     lead: "delete node แล้วยังคงกฎ BST แยกจัดการ 3 กรณี ไม่มี child มี child ตัวเดียว และมี child สองตัว",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ (Delete Node in a BST) ให้ root (ราก) ของ BST และค่า key ให้ delete (ลบ) node (โหนด) ที่มีค่าเท่ากับ key ออกจาก tree (ต้นไม้) โดยยังต้องคงกฎ BST ไว้ (left < node < right) แล้วคืน root ของ tree หลัง delete ถ้าไม่มี key ใน tree ก็คืน tree เดิม" },
-      { t: "ul", c: [
-        "root = [5,3,6,2,4,null,7], key = 3 → หลัง delete ต้องได้ tree ที่ยังเป็น BST ถูกต้อง เช่นเอา 4 ขึ้นมาแทนที่ 3",
-        "root = [5,3,6,2,4,null,7], key = 0 → ไม่มีค่า 0 คืน tree เดิมทั้งต้น",
-      ] },
+      { t: "p", c: "โจทย์ (LC450): กำหนด root ของ binary search tree (BST) และค่า key ให้ delete node ที่มีค่าเท่ากับ key ออกจาก BST โดยต้องคง property ของ BST ไว้ (left < node < right) แล้ว return root reference ของต้นไม้หลัง delete ถ้าไม่พบ key ใน tree ให้ return root ของ tree เดิม" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "root = [5,3,6,2,4,null,7], key = 3",
+            output: "[5,4,6,2,null,null,7]",
+            explain: "node 3 มี child สองตัว จึงเอา successor (ค่าน้อยสุดฝั่งขวาของ 3 คือ 4) ขึ้นมาแทน ได้ tree ที่ยังเป็น BST ถูกต้อง (คำตอบอื่นที่ยังตรงกฎ BST ก็ยอมรับได้)",
+          },
+          {
+            input: "root = [5,3,6,2,4,null,7], key = 0",
+            output: "[5,3,6,2,4,null,7]",
+            explain: "ไม่มีค่า 0 อยู่ใน tree เลย จึง return tree เดิมโดยไม่เปลี่ยนแปลง",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [

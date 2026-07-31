@@ -76,12 +76,15 @@ while cur:
     lead: "หา middle node ด้วย fast & slow pointer ในรอบเดียว แล้ว update pointer ของตัวก่อนหน้าให้กระโดดข้ามมันทิ้ง",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ (Delete the Middle Node of a Linked List): ให้ head ของ linked list มา ให้ delete (ลบ) node (โหนด) ตัวกลางออกแล้ว return (คืน) head โดยตำแหน่งกลางนิยามว่า floor(n/2) เมื่อ n คือจำนวน node ทั้งหมด นับ index (ตำแหน่ง) จาก 0 พูดง่าย ๆ คือถ้าเรียง index 0,1,2,...,n-1 ตัวกลางคือตัวที่อยู่ index กึ่งกลางค่อนไปทางขวานิดนึงเมื่อ n เป็นเลขคี่" },
-      { t: "ul", c: [
-        "input: 1 → 3 → 4 → 7 → 1 → 2 → 6 (มี 7 ตัว, กลางคือ index 3 = ค่า 7) → output: 1 → 3 → 4 → 1 → 2 → 6",
-        "input: 1 → 2 → 3 → 4 (มี 4 ตัว, กลางคือ index 2 = ค่า 3) → output: 1 → 2 → 4",
-        "edge case: 1 (มี node เดียว, ลบแล้วเหลือลิสต์ว่าง) → output: None",
-      ] },
+      { t: "p", c: "โจทย์ (LC2095): กำหนด head ของ linked list มาให้ ให้ลบ (delete) node ตัวกลางออกจาก list แล้ว return head ของ list ที่แก้ไขแล้ว โดยนิยามตัวกลางของ list ขนาด n คือ node ลำดับที่ ⌊n/2⌋ นับ index จาก 0 (เช่น n = 1, 2, 3, 4, 5 ตัวกลางคือ index 0, 1, 1, 2, 2 ตามลำดับ)" },
+      {
+        t: "example",
+        c: [
+          { input: "head = [1,3,4,7,1,2,6]", output: "[1,3,4,1,2,6]", explain: "list นี้มี n = 7 ตัว ตัวกลางอยู่ที่ index ⌊7/2⌋ = 3 ซึ่งคือ node ค่า 7 ลบออกแล้วเหลือ [1,3,4,1,2,6]" },
+          { input: "head = [1,2,3,4]", output: "[1,2,4]", explain: "list นี้มี n = 4 ตัว ตัวกลางอยู่ที่ index ⌊4/2⌋ = 2 ซึ่งคือ node ค่า 3 ลบออกแล้วเหลือ [1,2,4]" },
+          { input: "head = [1]", output: "[]", explain: "list มี node เดียว (n = 1) ตัวกลางคือ index ⌊1/2⌋ = 0 ซึ่งคือตัวมันเอง ลบออกแล้วเหลือ list ว่าง" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -170,12 +173,14 @@ print(out)   # [1, 3, 4, 1, 2, 6]`, out: `[1, 3, 4, 1, 2, 6]` },
     lead: "ร้อยสายใหม่จาก node เดิมสองสาย (index คี่กับ index คู่) แล้ว append หางสายคี่เข้ากับหัวสายคู่ ด้วย Space O(1)",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ (Odd Even Linked List): ให้ head ของ linked list มา ให้ group (จัดกลุ่ม) node (โหนด) ที่อยู่ index (ตำแหน่ง) เลขคี่ (index ที่ 1, 3, 5 ... นับจาก 1) มาไว้ข้างหน้า ตามด้วย node index เลขคู่ (2, 4, 6 ...) ต่อท้าย โดยคง order (ลำดับ) เดิมภายในแต่ละกลุ่ม สำคัญมากคือดูจาก 'index' ของ node ไม่ใช่ 'value (ค่า)' ของมัน และต้องทำด้วย Space O(1) (ห้าม copy ค่าไปเก็บใน list ใหม่)" },
-      { t: "ul", c: [
-        "input: 1 → 2 → 3 → 4 → 5 → None → output: 1 → 3 → 5 → 2 → 4 → None (ตำแหน่งคี่ 1,3,5 มาก่อน ตามด้วยตำแหน่งคู่ 2,4)",
-        "input: 2 → 1 → 3 → 5 → 6 → 4 → 7 → None → output: 2 → 3 → 6 → 7 → 1 → 5 → 4 → None",
-        "edge case: ลิสต์ว่าง None หรือมี node เดียว → คืนเหมือนเดิม ไม่ต้องทำอะไร",
-      ] },
+      { t: "p", c: "โจทย์ (LC328): กำหนด head ของ singly linked list มาให้ ให้ group node ที่มี index เป็นเลขคี่มาไว้ด้วยกัน ตามด้วย node ที่มี index เป็นเลขคู่ แล้ว return list ที่จัดลำดับใหม่แล้ว โดยนิยามให้ node ตัวแรกเป็นคี่ (index 1) ตัวที่สองเป็นคู่ (index 2) ไล่ไปเรื่อย ๆ ลำดับสัมพัทธ์ภายในกลุ่มคี่และกลุ่มคู่ต้องคงเดิมเหมือนใน input ต้องแก้ปัญหาด้วย space complexity O(1) และ time complexity O(n)" },
+      {
+        t: "example",
+        c: [
+          { input: "head = [1,2,3,4,5]", output: "[1,3,5,2,4]", explain: "ตำแหน่งคี่ (index 1,3,5) คือค่า 1,3,5 มาก่อน ตามด้วยตำแหน่งคู่ (index 2,4) คือค่า 2,4" },
+          { input: "head = [2,1,3,5,6,4,7]", output: "[2,3,6,7,1,5,4]", explain: "ตำแหน่งคี่ (index 1,3,5,7) คือค่า 2,3,6,7 มาก่อน ตามด้วยตำแหน่งคู่ (index 2,4,6) คือค่า 1,5,4" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -256,12 +261,15 @@ print(out)   # [1, 3, 5, 2, 4]`, out: `[1, 3, 5, 2, 4]` },
     lead: "พื้นฐานที่สุดของหมวด traverse ทีละ node แล้ว reverse pointer ให้ชี้ย้อนกลับ ด้วย two pointers prev/cur — โจทย์ข้ออื่นต่อยอดจากท่านี้",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ (Reverse Linked List): ให้ head ของ linked list มา ให้ reverse (กลับทิศ) ทั้ง list แล้ว return (คืน) head ตัวใหม่ พูดง่าย ๆ คือตัวสุดท้ายกลายเป็นตัวแรก ตัวแรกกลายเป็นตัวสุดท้าย ข้อนี้เป็นพื้นฐานที่สุดของหัวข้อ ต้องทำให้คล่องก่อน เพราะโจทย์ข้ออื่น (เช่นข้อ 32) ต่อยอดจากการ reverse pointer (ตัวชี้) แบบนี้ตรง ๆ" },
-      { t: "ul", c: [
-        "input: 1 → 2 → 3 → 4 → 5 → None → output: 5 → 4 → 3 → 2 → 1 → None",
-        "input: 1 → 2 → None → output: 2 → 1 → None",
-        "edge case: ลิสต์ว่าง None → output: None (โค้ดคืนค่าถูกโดยอัตโนมัติ ไม่ต้องดักพิเศษ)",
-      ] },
+      { t: "p", c: "โจทย์ (LC206): กำหนด head ของ singly linked list มาให้ ให้ reverse (กลับทิศ) ทั้ง list แล้ว return head ตัวใหม่ของ list ที่ reverse แล้ว" },
+      {
+        t: "example",
+        c: [
+          { input: "head = [1,2,3,4,5]", output: "[5,4,3,2,1]" },
+          { input: "head = [1,2]", output: "[2,1]" },
+          { input: "head = []", output: "[]", explain: "list ว่าง reverse แล้วยังว่างเหมือนเดิม โค้ดคืนค่าถูกต้องโดยอัตโนมัติโดยไม่ต้องดัก edge case พิเศษ" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -336,12 +344,15 @@ print(out)   # [3, 2, 1]`, out: `[3, 2, 1]` },
     lead: "รวมสามเทคนิค: หา middle node ด้วย fast/slow, reverse ครึ่งหลัง (ท่าจากข้อ 31), แล้ว traverse สองสายบวกทีละคู่",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ (Maximum Twin Sum of a Linked List): ให้ linked list ที่มีจำนวน node (โหนด) เป็นเลขคู่ (n ตัว) นิยาม twin (คู่แฝด) ของ node index (ตำแหน่ง) i คือ node index n-1-i (นับจาก 0) เช่นตัวแรกจับคู่ตัวสุดท้าย ตัวที่สองจับคู่ตัวรองสุดท้าย ไปเรื่อย ๆ จะได้ทั้งหมด n/2 คู่ ให้หา sum (ผลรวม) ของ twin ที่มากที่สุด" },
-      { t: "ul", c: [
-        "input: 5 → 4 → 2 → 1 → คู่แฝดคือ (5+1)=6 และ (4+2)=6 → output: 6",
-        "input: 4 → 2 → 2 → 3 → คู่แฝดคือ (4+3)=7 และ (2+2)=4 → output: 7",
-        "input: 1 → 100000 → คู่แฝดเดียว (1+100000)=100001 → output: 100001",
-      ] },
+      { t: "p", c: "โจทย์ (LC2130): ใน linked list ขนาด n ที่ n เป็นเลขคู่ นิยามว่า node ลำดับที่ i (นับจาก 0) คือ twin ของ node ลำดับที่ n-1-i เมื่อ 0 <= i <= (n/2)-1 นิยาม twin sum คือผลรวมของค่า node หนึ่งกับ twin ของมัน กำหนด head ของ linked list ที่มีความยาวเป็นเลขคู่มาให้ ให้ return ค่า twin sum ที่มากที่สุด" },
+      {
+        t: "example",
+        c: [
+          { input: "head = [5,4,2,1]", output: "6", explain: "node 0 กับ node 3 เป็น twin กัน (5+1=6) และ node 1 กับ node 2 เป็น twin กัน (4+2=6) ทั้งคู่ได้ twin sum เท่ากันคือ 6" },
+          { input: "head = [4,2,2,3]", output: "7", explain: "node 0 (val=4) กับ node 3 (val=3) เป็น twin กัน ได้ twin sum = 7 ส่วน node 1 กับ node 2 ได้ twin sum = 4 ดังนั้นค่ามากสุดคือ max(7,4) = 7" },
+          { input: "head = [1,100000]", output: "100001", explain: "list มีแค่คู่ twin เดียวคือ node 0 กับ node 1 ผลรวม 1 + 100000 = 100001" },
+        ],
+      },
       {
         t: "constraints",
         c: [

@@ -57,11 +57,22 @@ print(count)                  # {'a': 3, 'b': 2, 'c': 1}` },
     lead: "หาค่าที่อยู่ใน array หนึ่งแต่ไม่อยู่ในอีก array ด้วย set difference (การลบ set)",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Find the Difference of Two Arrays: มี array (ลิสต์) nums1 และ nums2 ให้ return คำตอบเป็น array สองชั้น answer โดย answer[0] คือค่าที่ distinct (ไม่ซ้ำกัน) ที่อยู่ใน nums1 แต่ไม่อยู่ใน nums2 และ answer[1] คือค่าที่ distinct ที่อยู่ใน nums2 แต่ไม่อยู่ใน nums1 ลำดับในผลลัพธ์ไม่สำคัญ" },
-      { t: "ul", c: [
-        "nums1 = [1, 2, 3], nums2 = [2, 4, 6] → [[1, 3], [4, 6]] (1, 3 อยู่ใน nums1 อย่างเดียว, 4, 6 อยู่ใน nums2 อย่างเดียว)",
-        "nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2] → [[3], []] (มีแต่ 3 ที่ต่าง และผลลัพธ์ตัดตัวซ้ำแล้ว)",
-      ] },
+      { t: "p", c: "โจทย์ (LC2215): กำหนด array จำนวนเต็มแบบ 0-indexed สองตัวคือ nums1 และ nums2 ให้ return ผลลัพธ์เป็น array ขนาด 2 ชื่อ answer โดย answer[0] คือ list ของค่าจำนวนเต็มที่ distinct (ไม่ซ้ำกัน) ทั้งหมดใน nums1 ที่ไม่ปรากฏใน nums2 และ answer[1] คือ list ของค่าจำนวนเต็มที่ distinct ทั้งหมดใน nums2 ที่ไม่ปรากฏใน nums1 ลำดับของค่าใน list แต่ละอันไม่มีผลต่อความถูกต้องของคำตอบ" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "nums1 = [1, 2, 3], nums2 = [2, 4, 6]",
+            output: "[[1, 3], [4, 6]]",
+            explain: "1 และ 3 อยู่ใน nums1 แต่ไม่อยู่ใน nums2 ส่วน 4 และ 6 อยู่ใน nums2 แต่ไม่อยู่ใน nums1",
+          },
+          {
+            input: "nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]",
+            output: "[[3], []]",
+            explain: "มีแค่ 3 ที่อยู่ใน nums1 แต่ไม่อยู่ใน nums2 (นับครั้งเดียวเพราะต้อง distinct) ส่วนทุกค่าใน nums2 มีอยู่ใน nums1 ครบแล้ว answer[1] จึงว่าง",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -106,12 +117,27 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3],
     lead: "นับ frequency (ความถี่) ของแต่ละค่า แล้วเช็คว่า occurrences (จำนวนครั้ง) ทั้งหมดไม่ซ้ำกัน",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Unique Number of Occurrences: มี array (ลิสต์) ตัวเลข arr ให้เช็คว่า occurrences (จำนวนครั้งที่ปรากฏ) ของแต่ละค่าไม่ซ้ำกันเลยหรือไม่ (return True/False)" },
-      { t: "ul", c: [
-        "arr = [1, 2, 2, 1, 1, 3] → 1 ปรากฏ 3 ครั้ง, 2 ปรากฏ 2 ครั้ง, 3 ปรากฏ 1 ครั้ง จำนวนครั้ง {3, 2, 1} ไม่ซ้ำกัน → True",
-        "arr = [1, 2] → ต่างก็ปรากฏ 1 ครั้งเท่ากัน จำนวนครั้งซ้ำกัน → False",
-        "arr = [3, 5, 7, 7, 5, 5] → 3→1, 5→3, 7→2 จำนวนครั้ง {1, 3, 2} ไม่ซ้ำ → True",
-      ] },
+      { t: "p", c: "โจทย์ (LC1207): กำหนด array จำนวนเต็ม arr ให้ return true ถ้าจำนวนครั้ง (occurrences) ที่แต่ละค่าปรากฏใน array นี้ไม่ซ้ำกันเลยสักคู่ มิเช่นนั้น return false" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "arr = [1, 2, 2, 1, 1, 3]",
+            output: "true",
+            explain: "1 ปรากฏ 3 ครั้ง, 2 ปรากฏ 2 ครั้ง, 3 ปรากฏ 1 ครั้ง — จำนวนครั้ง {3, 2, 1} ไม่มีตัวไหนซ้ำกันเลย",
+          },
+          {
+            input: "arr = [1, 2]",
+            output: "false",
+            explain: "ทั้ง 1 และ 2 ต่างปรากฏ 1 ครั้งเท่ากัน จำนวนครั้งจึงซ้ำกัน",
+          },
+          {
+            input: "arr = [3, 5, 7, 7, 5, 5]",
+            output: "true",
+            explain: "3 ปรากฏ 1 ครั้ง, 5 ปรากฏ 3 ครั้ง, 7 ปรากฏ 2 ครั้ง — จำนวนครั้งไม่ซ้ำกันเลย",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -159,13 +185,32 @@ True` },
     lead: "แปล operation (ปฏิบัติการ) สองแบบให้เป็นเงื่อนไขบน character set (ชุดตัวอักษร) และกอง frequency (ความถี่)",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Determine if Two Strings Are Close: มีสอง string (สตริง) word1 และ word2 เรียกว่า close (ใกล้กัน) ถ้าเปลี่ยนจาก string หนึ่งไปอีก string ได้ด้วยการทำสอง operation (ปฏิบัติการ) นี้กี่ครั้งก็ได้ 1) swap (สลับ) character (ตัวอักษร) สองตำแหน่งใด ๆ (เช่น abcde กลายเป็น aecdb) 2) สลับ frequency (ความถี่) ระหว่าง character สองตัวที่มีอยู่ใน string เช่น เปลี่ยน a ทุกตัวเป็น b และ b ทุกตัวเป็น a พร้อมกัน (aacabb กลายเป็น bbcbaa) ให้ return True/False" },
-      { t: "ul", c: [
-        "word1 = abc, word2 = bca → True (แค่ swap ตำแหน่ง)",
-        "word1 = a, word2 = aa → False (ความยาวและ character set ต่างกัน)",
-        "word1 = cabbba, word2 = abbccc → True (character set เดียวกัน กอง frequency ตรงกัน)",
-        "word1 = cabbba, word2 = aabbss → False (frequency เรียงเท่ากัน แต่ character คนละชุด)",
-      ] },
+      { t: "p", c: 'โจทย์ (LC1657): กำหนด string สองตัวคือ word1 และ word2 ให้ return true ถ้า word1 และ word2 เป็น close (ใกล้กัน) มิเช่นนั้น return false ทั้งสอง string จะ close กันได้ก็ต่อเมื่อเปลี่ยนจาก string หนึ่งไปเป็นอีก string ได้ด้วย operation สองแบบนี้ (ทำกี่ครั้งก็ได้ กับ string ฝั่งไหนก็ได้): (1) swap ตำแหน่งของ character สองตัวที่มีอยู่จริงใน string (เช่น "abcde" → "aecdb") (2) เปลี่ยนทุกตำแหน่งของ character ตัวหนึ่งที่มีอยู่จริงให้กลายเป็น character อีกตัวที่มีอยู่จริง พร้อมกับสลับกลับพร้อมกัน (เช่น "aacabb" → "bbcbaa" คือเปลี่ยน a ทั้งหมดเป็น b และ b ทั้งหมดเป็น a พร้อมกัน)' },
+      {
+        t: "example",
+        c: [
+          {
+            input: 'word1 = "abc", word2 = "bca"',
+            output: "true",
+            explain: 'เปลี่ยน "abc" เป็น "bca" ได้ด้วยการ swap ตำแหน่ง character เท่านั้น',
+          },
+          {
+            input: 'word1 = "a", word2 = "aa"',
+            output: "false",
+            explain: "ความยาวไม่เท่ากัน character set และกอง frequency จึงต่างกันไปด้วย เป็น close กันไม่ได้",
+          },
+          {
+            input: 'word1 = "cabbba", word2 = "abbccc"',
+            output: "true",
+            explain: "ทั้งสอง string ใช้ character set {a, b, c} เดียวกัน และกอง frequency ตรงกัน (สลับ frequency ระหว่าง a กับ c ได้)",
+          },
+          {
+            input: 'word1 = "cabbba", word2 = "aabbss"',
+            output: "false",
+            explain: "แม้กอง frequency จะเรียงเท่ากัน แต่ character set ต่างกัน ({a, b, c} กับ {a, b, s}) จึงไม่ close",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -226,11 +271,22 @@ False` },
     lead: "นับ frequency (ความถี่) ของ row (แถว) ด้วย tuple แล้วยิงถามทีละ column (คอลัมน์)",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Equal Row and Column Pairs: มี grid (ตาราง) สี่เหลี่ยมจัตุรัสขนาด n x n ให้นับจำนวน pair (คู่) (row i, column j) ที่ row i และ column j มีค่าเหมือนกันเป๊ะทุกตำแหน่งตามลำดับ" },
-      { t: "ul", c: [
-        "grid = [[3,2,1],[1,7,6],[2,7,7]] → 1 คู่ (แถว 2 กับคอลัมน์ 1 ต่างก็เป็น [2,7,7])",
-        "grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]] → 3 คู่",
-      ] },
+      { t: "p", c: "โจทย์ (LC2352): กำหนด integer matrix (เมทริกซ์) grid ขนาด n x n แบบ 0-indexed ให้ return จำนวนคู่ (ri, cj) ที่ row ri และ column cj เท่ากัน คู่ row-column จะถือว่าเท่ากันก็ต่อเมื่อมีสมาชิกเหมือนกันทุกตำแหน่งเรียงตามลำดับเดียวกัน" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "grid = [[3, 2, 1], [1, 7, 6], [2, 7, 7]]",
+            output: "1",
+            explain: "มีคู่ที่เท่ากันหนึ่งคู่คือ (row 2, column 1) ซึ่งทั้งคู่เป็น [2, 7, 7]",
+          },
+          {
+            input: "grid = [[3, 1, 2, 2], [1, 4, 4, 5], [2, 4, 2, 2], [2, 4, 2, 2]]",
+            output: "3",
+            explain: "มี 3 คู่ที่เท่ากัน: (row 0, column 0) = [3,1,2,2], (row 2, column 2) = [2,4,2,2], (row 3, column 2) = [2,4,2,2]",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [

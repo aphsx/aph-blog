@@ -77,11 +77,22 @@ print(heapq.nlargest(1, words, key=len))  # ['banana']` },
     lead: "หาค่าที่มากเป็นอันดับที่ k โดยไม่ต้อง sort (เรียง) ทั้ง array ใช้ min-heap ขนาด k เป็นกรอบเก็บ top-k",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Kth Largest Element in an Array: ให้ array (ลิสต์) ของตัวเลข nums และเลข k ให้หาค่าที่มากเป็นอันดับที่ k เมื่อ sort (เรียง) จากมากไปน้อย (นับค่าซ้ำด้วย ไม่ใช่ค่าที่ไม่ซ้ำอันดับ k)" },
-      { t: "ul", c: [
-        "nums = [3,2,1,5,6,4], k = 2 → 5 (อันดับ 1 คือ 6, อันดับ 2 คือ 5)",
-        "nums = [3,2,3,1,2,4,5,5,6], k = 4 → 4",
-      ] },
+      { t: "p", c: "โจทย์ (LC215): กำหนด array จำนวนเต็ม nums และเลขจำนวนเต็ม k ให้ return ค่าที่มากเป็นอันดับที่ k ของ array เมื่อเรียงลำดับจากมากไปน้อย (นับตามลำดับการเรียง ไม่ใช่อันดับที่ k ของค่าที่ไม่ซ้ำกัน)" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "nums = [3, 2, 1, 5, 6, 4], k = 2",
+            output: "5",
+            explain: "เรียงจากมากไปน้อยได้ [6, 5, 4, 3, 2, 1] อันดับ 1 คือ 6 อันดับ 2 คือ 5",
+          },
+          {
+            input: "nums = [3, 2, 3, 1, 2, 4, 5, 5, 6], k = 4",
+            output: "4",
+            explain: "เรียงจากมากไปน้อยได้ [6, 5, 5, 4, 3, 3, 2, 2, 1] อันดับ 4 (นับค่าซ้ำด้วย) คือ 4",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -143,11 +154,17 @@ print(find_kth_largest([3, 2, 3, 1, 2, 4, 5, 5, 6], 4)) # 4`, out: `5
     lead: "design (ออกแบบ) class จัดการ set (เซ็ต) ของ positive integer (จำนวนเต็มบวก) ทั้งหมด ด้วย counter (ตัวนับ) current + min-heap สำหรับเลขที่ addBack กลับมา",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Smallest Number in Infinite Set: design (ออกแบบ) class SmallestInfiniteSet ที่ตอนเริ่มต้นบรรจุ positive integer (จำนวนเต็มบวก) ทุกตัว 1, 2, 3, ... ไปจนถึง infinity (อนันต์) ต้อง support (รองรับ) สอง operation: popSmallest() return เลขที่น้อยที่สุดที่ยังอยู่ใน set แล้ว remove มันออก และ addBack(num) เพิ่มเลข num กลับเข้า set (ถ้ามันเคยถูก remove ออกไปแล้ว)" },
-      { t: "ul", c: [
-        "popSmallest ครั้งแรก ๆ คืน 1, 2, 3 ตามลำดับ",
-        "จากนั้น addBack(2) แล้ว popSmallest คืน 2 (กลับมาแล้ว) ต่อด้วย 4, 5",
-      ] },
+      { t: "p", c: "โจทย์ (LC2336): ให้ออกแบบ class ชื่อ SmallestInfiniteSet ที่แทนเซ็ตซึ่งบรรจุ positive integer (จำนวนเต็มบวก) ทุกตัวตั้งแต่ 1, 2, 3, ... ไปจนถึงอนันต์ตั้งแต่เริ่มต้น โดยต้อง support (รองรับ) สอง method คือ popSmallest() ซึ่ง remove และ return ค่าที่น้อยที่สุดที่ยังอยู่ในเซ็ต และ addBack(num) ซึ่งเพิ่มจำนวนเต็มบวก num กลับเข้าเซ็ต ถ้ามันยังไม่อยู่ในเซ็ตอยู่แล้ว" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "new SmallestInfiniteSet(); addBack(2); popSmallest(); popSmallest(); popSmallest(); addBack(1); popSmallest(); popSmallest(); popSmallest()",
+            output: "null, null, 1, 2, 3, null, 1, 4, 5",
+            explain: "addBack(2) ไม่มีผลเพราะ 2 ยังอยู่ในเซ็ตอยู่แล้ว popSmallest สามครั้งแรกคืน 1, 2, 3 ตามลำดับ จากนั้น addBack(1) เพิ่ม 1 กลับเข้าไป popSmallest ครั้งถัดไปจึงคืน 1 (ตัวที่เพิ่งเพิ่มกลับ เพราะเล็กกว่า 4) แล้วค่อยเดินหน้าต่อที่ 4 และ 5",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -233,11 +250,22 @@ print(s.popSmallest())  # 5`, out: `1
     lead: "score (คะแนน) = sum (ผลรวม) nums1 คูณ min ของ nums2 ตรึง min ไว้ด้วยการ sort แล้วใช้ min-heap maintain sum nums1 ให้มากสุด",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Maximum Subsequence Score: ให้ array nums1 และ nums2 ยาวเท่ากัน และเลข k ให้เลือก index (ตำแหน่ง) มา k ตัว (จากตำแหน่งเดียวกันของทั้งสอง array) โดย score (คะแนน) = (sum ของ nums1 ที่เลือก) คูณ (ค่า minimum ของ nums2 ที่เลือก) ต้องการ score มากที่สุด" },
-      { t: "ul", c: [
-        "nums1 = [1,3,3,2], nums2 = [2,1,3,4], k = 3 → 12 (เลือก index 0,2,3: ผลรวม nums1 = 1+3+2 = 6, min ของ nums2 = min(2,3,4) = 2, คะแนน = 6*2 = 12)",
-        "nums1 = [4,2,3,1,1], nums2 = [7,5,10,9,6], k = 1 → 30",
-      ] },
+      { t: "p", c: "โจทย์ (LC2542): กำหนด array จำนวนเต็ม nums1 และ nums2 ที่ยาวเท่ากัน n ตัว พร้อมจำนวนเต็มบวก k ให้เลือก index มา k ตำแหน่งจาก nums1 (แบบ subsequence) โดยนิยาม score (คะแนน) ของชุดที่เลือกคือ ผลรวมของค่า nums1 ที่ตำแหน่งที่เลือก คูณด้วยค่า minimum ของ nums2 ที่ตำแหน่งเดียวกันที่เลือก ให้ return score ที่มากที่สุดที่เป็นไปได้" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "nums1 = [1, 3, 3, 2], nums2 = [2, 1, 3, 4], k = 3",
+            output: "12",
+            explain: "เลือก index 0, 2, 3: ผลรวม nums1 = 1+3+2 = 6, min ของ nums2 ที่เลือก = min(2,3,4) = 2, คะแนน = 6*2 = 12 (ถ้าเลือก index 0,1,2 แทนจะได้แค่ (1+3+3)*min(2,1,3) = 7 ซึ่งน้อยกว่า)",
+          },
+          {
+            input: "nums1 = [4, 2, 3, 1, 1], nums2 = [7, 5, 10, 9, 6], k = 1",
+            output: "30",
+            explain: "k = 1 เลือกได้ตัวเดียว การเลือก index 2 ให้คะแนนดีที่สุด: nums1[2] * nums2[2] = 3 * 10 = 30",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -308,11 +336,22 @@ print(max_score([4, 2, 3, 1, 1], [7, 5, 10, 9, 6], 1))  # 30`, out: `12
     lead: "แต่ละรอบ hire (จ้าง) คนถูกสุดจากหัวหรือท้ายแถว ใช้ min-heap สองอันคุมสองฝั่ง เติมคนจากตรงกลางเข้ามาแทน",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Total Cost to Hire K Workers: มี worker (คนงาน) เรียงเป็นแถว costs[i] คือ cost (ค่าจ้าง) ของคนที่ i ต้อง hire (จ้าง) k รอบ แต่ละรอบ select คนที่ถูกที่สุดจาก candidates คนแรกสุดของแถว หรือ candidates คนท้ายสุดของแถว (ถ้าค่าเท่ากันให้เลือก index น้อยกว่า) เมื่อ hire คนไปแล้ว คนที่อยู่ถัดเข้ามาจะเลื่อนมาเป็น candidate แทน ต้องการ total cost (ต้นทุนรวม) น้อยสุด" },
-      { t: "ul", c: [
-        "costs = [17,12,10,2,7,2,11,20,8], k = 3, candidates = 4 → 11",
-        "costs = [1,2,4,1], k = 3, candidates = 3 → 4",
-      ] },
+      { t: "p", c: "โจทย์ (LC2462): กำหนด array จำนวนเต็ม costs โดย costs[i] คือค่าจ้างของคนงานคนที่ i พร้อมจำนวนเต็ม k และ candidates ให้ทำการ hire (จ้างงาน) ทั้งหมด k รอบ รอบละหนึ่งคน แต่ละรอบให้เลือกคนที่ค่าจ้างถูกที่สุดจาก candidates คนแรกสุดของแถวที่เหลือ หรือ candidates คนท้ายสุดของแถวที่เหลือ (ถ้าเท่ากันให้เลือก index น้อยกว่า) ถ้าคนที่เหลือมีน้อยกว่า candidates คน ให้เลือกจากคนที่เหลือทั้งหมด คนแต่ละคนถูกจ้างได้ครั้งเดียว ให้ return ผลรวมต้นทุนการจ้างทั้งหมด" },
+      {
+        t: "example",
+        c: [
+          {
+            input: "costs = [17, 12, 10, 2, 7, 2, 11, 20, 8], k = 3, candidates = 4",
+            output: "11",
+            explain: "รอบแรกเลือกจาก candidates 4 คนแรก [17,12,10,2] หรือ 4 คนท้าย [7,2,11,20,8] คนถูกสุดคือ 2 ที่ index 3 (ตัดสินด้วย index น้อยกว่าเมื่อเสมอกับ index 5) จ่าย 2 วนไปจนครบ 3 รอบได้ต้นทุนรวม 11",
+          },
+          {
+            input: "costs = [1, 2, 4, 1], k = 3, candidates = 3",
+            output: "4",
+            explain: "candidates = 3 เกือบเท่าจำนวนคนทั้งหมด (n = 4) ทำให้เห็นคนเกือบทั้งหมดตั้งแต่ต้น จ้าง 3 คนที่ถูกที่สุดคือ 1, 1, 2 รวมเป็น 4",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [

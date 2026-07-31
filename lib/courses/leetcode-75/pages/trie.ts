@@ -56,13 +56,17 @@ def insert(root, word):
     lead: "implement class Trie ที่มี insert, search, startsWith โดยแยกคำจริงออกจาก prefix ด้วย is_end",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Implement Trie (Prefix Tree) ให้สร้าง class Trie ที่มีสาม method: insert(word) เพิ่มคำเข้า trie, search(word) return True ถ้าคำนี้ถูกเพิ่มไว้แล้ว, startsWith(prefix) return True ถ้ามีคำที่ขึ้นต้นด้วย prefix นี้" },
-      { t: "ul", c: [
-        "insert('apple') แล้ว search('apple') → True",
-        "search('app') → False (เพราะยังไม่เคย insert คำว่า app)",
-        "startsWith('app') → True (มี apple ขึ้นต้นด้วย app)",
-        "insert('app') แล้ว search('app') → True",
-      ] },
+      { t: "p", c: "โจทย์ (LC208): ให้ implement class Trie ที่จำลอง data structure Prefix Tree ประกอบด้วย constructor Trie() และสาม method คือ insert(word) เพิ่ม string word เข้า trie, search(word) return true ถ้า word เคยถูก insert ไว้ (ตรงกันทั้งคำ) และ startsWith(prefix) return true ถ้ามีคำที่เคย insert ไว้ขึ้นต้นด้วย prefix นี้" },
+      {
+        t: "example",
+        c: [
+          {
+            input: 'Trie(); insert("apple"); search("apple"); search("app"); startsWith("app"); insert("app"); search("app")',
+            output: "null, null, true, false, true, null, true",
+            explain: 'หลัง insert("apple") ตัว search("apple") ตรงทั้งคำจึงได้ true แต่ search("app") ได้ false เพราะยังไม่เคย insert คำว่า app ทั้งคำ ส่วน startsWith("app") ได้ true เพราะ apple ขึ้นต้นด้วย app พอ insert("app") เพิ่มเข้าไป search("app") จึงกลายเป็น true',
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -144,12 +148,22 @@ True` },
     lead: "แนะนำสินค้าไม่เกิน 3 ชื่อตาม lexicographic order ทุกครั้งที่พิมพ์เพิ่มทีละตัว โดย sort (เรียง) ก่อนแล้วเก็บ suggestions ที่แต่ละ node",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Search Suggestions System ให้ array (ลิสต์) สินค้า products และคำที่ผู้ใช้พิมพ์ searchWord ทุกครั้งที่ผู้ใช้พิมพ์ตัวอักษรเพิ่มทีละตัว ให้แนะนำสินค้าที่ขึ้นต้นด้วยสิ่งที่พิมพ์มาแล้ว โดยเลือกมาไม่เกิน 3 ชื่อที่เรียงตาม lexicographic order (พจนานุกรม เล็กสุดก่อน) ผลลัพธ์เป็น list of list ทีละตัวอักษรที่พิมพ์" },
-      { t: "ul", c: [
-        "products = ['mobile','mouse','moneypot','monitor','mousepad'], searchWord = 'mouse'",
-        "พิมพ์ m, mo, mou → แนะนำ ['mobile','moneypot','monitor'] (3 ตัวแรกตามพจนานุกรม)",
-        "พิมพ์ mous, mouse → แนะนำ ['mouse','mousepad']",
-      ] },
+      { t: "p", c: "โจทย์ (LC1268): กำหนด array of string ชื่อ products และ string ชื่อ searchWord ให้ออกแบบระบบที่แนะนำชื่อสินค้าไม่เกิน 3 ชื่อจาก products หลังจากผู้ใช้พิมพ์ตัวอักษรแต่ละตัวของ searchWord สินค้าที่แนะนำต้องมี common prefix (คำนำหน้าร่วม) กับสิ่งที่พิมพ์มาแล้ว ถ้ามีมากกว่า 3 ชื่อที่ตรงเงื่อนไข ให้เลือก 3 ชื่อที่เรียงตาม lexicographical order (พจนานุกรม) น้อยที่สุด แล้ว return เป็น list of list ของคำแนะนำหลังพิมพ์ตัวอักษรแต่ละตัว" },
+      {
+        t: "example",
+        c: [
+          {
+            input: 'products = ["mobile", "mouse", "moneypot", "monitor", "mousepad"], searchWord = "mouse"',
+            output: '[["mobile","moneypot","monitor"], ["mobile","moneypot","monitor"], ["mouse","mousepad"], ["mouse","mousepad"], ["mouse","mousepad"]]',
+            explain: "พิมพ์ m, mo, mou ได้ 3 ชื่อแรกตามพจนานุกรมที่ขึ้นต้นด้วยสิ่งที่พิมพ์คือ mobile, moneypot, monitor พอพิมพ์ mous, mouse เหลือแค่ mouse กับ mousepad ที่ยังตรง prefix",
+          },
+          {
+            input: 'products = ["havana"], searchWord = "havana"',
+            output: '[["havana"], ["havana"], ["havana"], ["havana"], ["havana"], ["havana"]]',
+            explain: "มีสินค้าตัวเดียวในระบบและตรง prefix ทุกตัวอักษรที่พิมพ์ จึงถูกแนะนำซ้ำทุกครั้งจนพิมพ์ครบคำ",
+          },
+        ],
+      },
       {
         t: "constraints",
         c: [

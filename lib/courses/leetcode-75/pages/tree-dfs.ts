@@ -79,11 +79,15 @@ def dfs(node):
     lead: "หาความลึกมากสุดของ binary tree ด้วย recursion แบบ postorder — โจทย์เปิดตัวของ DFS บนต้นไม้",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Maximum Depth of Binary Tree: ให้ root ของ binary tree มา ให้หา maximum depth (ความลึกมากสุด) = จำนวน node บนเส้นทางที่ยาวสุดจาก root ลงไปถึง leaf (ใบ)" },
-      { t: "ul", c: [
-        "Input: [3,9,20,null,null,15,7] → Output: 3 (เส้นทางยาวสุดคือ 3 → 20 → 15 หรือ 3 → 20 → 7)",
-        "Input: [] (ต้นว่าง) → Output: 0",
-      ] },
+      { t: "p", c: "โจทย์ (LC104): กำหนด root ของ binary tree มาให้ ให้ return maximum depth (ความลึกมากสุด) ของต้นไม้นั้น โดยนิยาม maximum depth คือจำนวน node บนเส้นทางที่ยาวที่สุดจาก root node ลงไปจนถึง leaf node ที่ไกลที่สุด" },
+      {
+        t: "example",
+        c: [
+          { input: "root = [3,9,20,null,null,15,7]", output: "3", explain: "เส้นทางยาวสุดคือ 3 → 20 → 15 หรือ 3 → 20 → 7 นับ node ได้ 3 ตัว" },
+          { input: "root = [1,null,2]", output: "2", explain: "เส้นทางยาวสุดคือ 1 → 2 นับ node ได้ 2 ตัว" },
+          { input: "root = []", output: "0", explain: "ต้นไม้ว่าง ไม่มี node เลย ความลึกจึงเป็น 0" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -156,11 +160,14 @@ print(maxDepth(None))     # ต้นว่าง ลึก 0 ชั้น`, out
     lead: "เทียบว่าลำดับ leaf จากซ้ายไปขวาของต้นไม้สองต้นเหมือนกันไหม ด้วย DFS เก็บใบ",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Leaf-Similar Trees: ให้ root ของต้นไม้สองต้น ให้ตอบว่าลำดับของ \"ค่าที่ leaf (ใบ) จากซ้ายไปขวา\" ของสองต้นเหมือนกันหรือไม่ (สนแค่ leaf ไม่สนโครงหรือ node ภายใน)" },
-      { t: "ul", c: [
-        "ต้นแรกอ่านใบซ้ายไปขวาได้ [6,7,4,9,8], ต้นที่สองก็ได้ [6,7,4,9,8] → True",
-        "ต้นแรกใบ [6,7,4], ต้นที่สองใบ [6,7,3] → False (ต่างกันแม้ตัวเดียวก็ False)",
-      ] },
+      { t: "p", c: "โจทย์ (LC872): พิจารณา leaf (ใบ) ทั้งหมดของ binary tree เรียงจากซ้ายไปขวา ค่าของ leaf เหล่านั้นเรียงกันเรียกว่า leaf value sequence (ลำดับค่าใบ) ของต้นไม้นั้น ต้นไม้สองต้นจะถือว่าเป็น leaf-similar ก็ต่อเมื่อ leaf value sequence ของทั้งคู่เหมือนกันทุกประการ กำหนด root ของต้นไม้สองต้นคือ root1 และ root2 มาให้ ให้ return true ก็ต่อเมื่อทั้งสองต้นเป็น leaf-similar" },
+      {
+        t: "example",
+        c: [
+          { input: "root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]", output: "true", explain: "ใบของทั้งสองต้นเรียงจากซ้ายไปขวาได้ลำดับเดียวกันคือ [6,7,4,9,8] แม้โครงต้นไม้จะไม่เหมือนกันก็ตาม" },
+          { input: "root1 = [1,2,3], root2 = [1,3,2]", output: "false", explain: "ต้นแรกมีใบเรียง [2,3] ส่วนต้นที่สองมีใบเรียง [3,2] ลำดับต่างกันจึงไม่ leaf-similar" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -223,11 +230,15 @@ False` },
     lead: "นับ node ที่ไม่มีใครบนเส้นทางจาก root ค่ามากกว่ามัน ด้วย DFS แบบ top-down พกค่ามากสุดลงไป",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Count Good Nodes in Binary Tree: node หนึ่งถือว่า \"ดี\" (good) ถ้าบนเส้นทางจาก root ลงมาถึง node นั้น ไม่มี node ไหนที่ค่ามากกว่ามันเลย (พูดอีกแบบคือค่าของมันมากกว่าหรือเท่ากับทุก node ที่ผ่านมาก่อนหน้าบนเส้นทางนั้น) ให้ count (นับ) ว่ามี good node กี่ตัว หมายเหตุ: root เป็น good เสมอ เพราะไม่มีใครอยู่ก่อนหน้ามัน" },
-      { t: "ul", c: [
-        "Input: [3,1,4,3,null,1,5] → Output: 4",
-        "Input: [1] (มีแค่ root) → Output: 1 (root ดีเสมอ)",
-      ] },
+      { t: "p", c: "โจทย์ (LC1448): กำหนด root ของ binary tree มาให้ node X ตัวหนึ่งจะถูกเรียกว่า good ถ้าบนเส้นทางจาก root ไปถึง X ไม่มี node ใดเลยที่มีค่ามากกว่า X ให้ return จำนวน good node ทั้งหมดในต้นไม้" },
+      {
+        t: "example",
+        c: [
+          { input: "root = [3,1,4,3,null,1,5]", output: "4", explain: "good node คือ 3 (root), 3 (ใต้ 1), 4, และ 5 — ส่วน 1 (ลูกซ้ายของ root) และ 1 (ใต้ 4) ไม่ดีเพราะมี node ค่ามากกว่าอยู่ก่อนหน้าบนเส้นทาง" },
+          { input: "root = [3,3,null,4,2]", output: "3", explain: "node 2 ไม่ดี เพราะเส้นทาง (3,3,2) มี 3 ที่มากกว่ามันอยู่ก่อนหน้า" },
+          { input: "root = [1]", output: "1", explain: "มีแค่ root ตัวเดียว ถือเป็น good เสมอเพราะไม่มีใครอยู่ก่อนหน้ามัน" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -300,11 +311,14 @@ print(goodNodes(root))`, out: `4` },
     lead: "นับเส้นทางลงล่างที่ผลรวมเท่า targetSum ด้วยเทคนิค prefix sum + hash map ระหว่างเดิน DFS",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Path Sum III: ให้ต้นไม้และเลข targetSum ให้ count (นับ) จำนวน path (เส้นทาง) ที่ผลรวมของค่าบน path เท่ากับ targetSum โดย path ต้องเดินลงล่างเท่านั้น (จาก parent ไปหา child) และต่อเนื่องกัน แต่ไม่จำเป็นต้องเริ่มที่ root หรือจบที่ leaf (ค่าติดลบก็มีได้)" },
-      { t: "ul", c: [
-        "Input: [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8 → Output: 3",
-        "Input: [1,2,3], targetSum = 3 → Output: 2 (เส้น 1→2 และ node 3 เดี่ยว ๆ)",
-      ] },
+      { t: "p", c: "โจทย์ (LC437): กำหนด root ของ binary tree และเลขจำนวนเต็ม targetSum มาให้ ให้ return จำนวน path ที่ผลรวมของค่าตลอด path เท่ากับ targetSum โดย path ไม่จำเป็นต้องเริ่มต้นที่ root หรือจบที่ leaf แต่ต้องเดินลงล่างเท่านั้น (จาก parent node ไปยัง child node)" },
+      {
+        t: "example",
+        c: [
+          { input: "root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8", output: "3", explain: "path ที่รวมได้ 8 มีสามเส้น: 5→3, 5→2→1, และ -3→11" },
+          { input: "root = [1,2,3], targetSum = 3", output: "2", explain: "path ที่รวมได้ 3 มีสองเส้น: 1→2 และ node 3 เดี่ยว ๆ" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -376,11 +390,15 @@ print(pathSum(root, 8))`, out: `2` },
     lead: "หาความยาวเส้นทางที่สลับซ้าย-ขวาทุกก้าว ด้วย DFS ที่พกทิศและความยาวสะสม",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Longest ZigZag Path in a Binary Tree: path ซิกแซก (ZigZag) คือเดินจาก node หนึ่ง โดยสลับทิศทุกก้าว: ถ้าก้าวนี้ไป left child ก้าวหน้าต้องไป right child แล้วซ้าย สลับไปเรื่อย ๆ ให้หาความยาว (นับเป็นจำนวนก้าว/edge เส้นเชื่อม ไม่ใช่จำนวน node) ของ path ซิกแซกที่ยาวสุดในต้นไม้" },
-      { t: "ul", c: [
-        "Input: [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1] → Output: 3",
-        "Input: [1] (มีแค่ root) → Output: 0 (เดินไม่ได้เลย)",
-      ] },
+      { t: "p", c: "โจทย์ (LC1372): กำหนด root ของ binary tree มาให้ นิยาม ZigZag path ว่าคือการเลือก node หนึ่งใด ๆ ในต้นไม้พร้อมทิศทางเริ่มต้น (ซ้ายหรือขวา) จากนั้นถ้าทิศปัจจุบันคือขวา ให้ก้าวไป right child ถ้าเป็นซ้ายให้ก้าวไป left child แล้วสลับทิศ ทำซ้ำแบบนี้ไปเรื่อย ๆ จนกว่าจะก้าวต่อไม่ได้ ความยาวของ ZigZag path คือจำนวน node ที่ผ่านทั้งหมดลบหนึ่ง (node เดี่ยว ๆ มีความยาว 0) ให้ return ความยาวของ ZigZag path ที่ยาวที่สุดในต้นไม้" },
+      {
+        t: "example",
+        c: [
+          { input: "root = [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1]", output: "3", explain: "เส้นทางซิกแซกที่ยาวสุดสลับทิศ ขวา → ซ้าย → ขวา รวม 3 ก้าว (edge)" },
+          { input: "root = [1,1,1,null,1,null,null,1,1,null,1]", output: "4", explain: "เส้นทางซิกแซกที่ยาวสุดสลับทิศ ซ้าย → ขวา → ซ้าย → ขวา รวม 4 ก้าว" },
+          { input: "root = [1]", output: "0", explain: "มีแค่ root ตัวเดียว ก้าวต่อไม่ได้เลย ความยาวจึงเป็น 0" },
+        ],
+      },
       {
         t: "constraints",
         c: [
@@ -450,11 +468,14 @@ print(longestZigZag(TreeNode(1)))   # มี node เดียว ยาว 0`, 
     lead: "หา lowest common ancestor ของสอง node ด้วย DFS แบบ postorder ที่ให้ลูกรายงานขึ้นมา",
     group: "LeetCode 75",
     blocks: [
-      { t: "p", c: "โจทย์ Lowest Common Ancestor of a Binary Tree: ให้ root และ node สองตัว p, q (รับประกันว่าอยู่ในต้นไม้ทั้งคู่) ให้หา lowest common ancestor (LCA, บรรพบุรุษร่วมต่ำสุด) = node ที่เป็น ancestor (บรรพบุรุษ) ร่วมของทั้ง p และ q ที่อยู่ต่ำสุด (ลึกสุด) โดยนิยามให้ node หนึ่งเป็น ancestor ของตัวเองได้ ค่าใน node ทุกตัวไม่ซ้ำกัน" },
-      { t: "ul", c: [
-        "Input: root=[3,5,1,6,2,0,8,null,null,7,4], p=5, q=1 → Output: 3",
-        "Input: root=[3,5,1,6,2,0,8,null,null,7,4], p=5, q=4 → Output: 5 (p เป็นบรรพบุรุษของ q)",
-      ] },
+      { t: "p", c: "โจทย์ (LC236): กำหนด binary tree มาให้ ให้หา lowest common ancestor (LCA, บรรพบุรุษร่วมต่ำสุด) ของ node สองตัวคือ p และ q ในต้นไม้นั้น โดยนิยามว่า LCA ของ node p และ q คือ node ที่อยู่ต่ำสุดใน tree ซึ่งมีทั้ง p และ q เป็น descendant (ลูกหลาน) ของมัน (โดยอนุญาตให้ node หนึ่งเป็น descendant ของตัวเองได้ด้วย)" },
+      {
+        t: "example",
+        c: [
+          { input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1", output: "3", explain: "LCA ของ node 5 และ node 1 คือ node 3 เพราะทั้งสองแยกอยู่คนละฝั่งของ root" },
+          { input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4", output: "5", explain: "node 5 เป็นบรรพบุรุษของ node 4 อยู่แล้ว (4 อยู่ใต้ต้นย่อยของ 5) ตามนิยาม node จึงเป็น ancestor ของตัวเองได้ คำตอบคือ 5" },
+        ],
+      },
       {
         t: "constraints",
         c: [
