@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -33,7 +34,9 @@ function readCookieLocale(): Locale | null {
     .map((c) => c.trim())
     .find((c) => c.startsWith(`${LOCALE_STORAGE_KEY}=`));
   if (!match) return null;
-  return parseLocale(decodeURIComponent(match.slice(LOCALE_STORAGE_KEY.length + 1)));
+  return parseLocale(
+    decodeURIComponent(match.slice(LOCALE_STORAGE_KEY.length + 1)),
+  );
 }
 
 function readStoredLocale(): Locale | null {
@@ -60,11 +63,13 @@ function persistLocale(locale: Locale) {
 }
 
 /**
- * Resolve the user's preferred locale.
- * Cookie (sent to the server) wins; localStorage backs it up if the cookie was lost.
+ * User preference, sticky across pages:
+ * 1) cookie (what the server reads on the next navigation)
+ * 2) localStorage (backup if cookie was cleared)
+ * 3) default EN
  */
-function preferredLocale(serverLocale: Locale): Locale {
-  return readCookieLocale() ?? readStoredLocale() ?? serverLocale ?? DEFAULT_LOCALE;
+function resolvePreferredLocale(): Locale {
+  return readCookieLocale() ?? readStoredLocale() ?? DEFAULT_LOCALE;
 }
 
 export function LocaleProvider({
@@ -78,26 +83,30 @@ export function LocaleProvider({
   const router = useRouter();
   const pathname = usePathname();
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+  const didSync = useRef(false);
 
-  // Hydrate / re-sync after SSR and when the server locale prop changes.
+  // On mount (and when the server locale changes): keep cookie + UI in sync
+  // with the saved preference, and refresh once if SSR used a different lang.
   useEffect(() => {
-    const preferred = preferredLocale(initialLocale);
+    const preferred = resolvePreferredLocale();
     persistLocale(preferred);
     setLocaleState(preferred);
-    // Server rendered a different language than the user's saved choice —
-    // refresh so GuidePage / BlogHome pick up the cookie.
-    if (preferred !== initialLocale) {
+
+    if (preferred !== initialLocale && !didSync.current) {
+      didSync.current = true;
       router.refresh();
     }
   }, [initialLocale, router]);
 
-  // Re-assert the cookie on every navigation so the next RSC request stays correct.
+  // Every client navigation: re-write cookie so the next RSC request stays on
+  // the language the user picked (TH stays TH, EN stays EN).
   useEffect(() => {
     persistLocale(locale);
   }, [pathname, locale]);
 
   const setLocale = useCallback(
     (next: Locale) => {
+      didSync.current = false;
       setLocaleState(next);
       persistLocale(next);
       router.refresh();
