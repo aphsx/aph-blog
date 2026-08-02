@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -32,28 +33,51 @@ function readStoredLocale(): Locale {
   return DEFAULT_LOCALE;
 }
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
-  const [ready, setReady] = useState(false);
+function writeLocaleCookie(locale: Locale) {
+  // 1 year — readable by Server Components via cookies()
+  document.cookie = `${LOCALE_STORAGE_KEY}=${locale};path=/;max-age=31536000;samesite=lax`;
+}
+
+export function LocaleProvider({
+  children,
+  initialLocale = DEFAULT_LOCALE,
+}: {
+  children: ReactNode;
+  /** Locale from the request cookie (avoids SSR/client mismatch). */
+  initialLocale?: Locale;
+}) {
+  const router = useRouter();
+  const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
-    setLocaleState(readStoredLocale());
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    document.documentElement.lang = locale;
-    try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-    } catch {
-      /* ignore */
+    // Prefer cookie/server value; fall back to any older localStorage choice once.
+    const stored = readStoredLocale();
+    if (stored !== initialLocale) {
+      // Keep localStorage in sync with whatever the server rendered.
+      try {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, initialLocale);
+      } catch {
+        /* ignore */
+      }
     }
-  }, [locale, ready]);
+    document.documentElement.lang = locale;
+  }, [initialLocale, locale]);
 
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next);
-  }, []);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      setLocaleState(next);
+      writeLocaleCookie(next);
+      try {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      } catch {
+        /* ignore */
+      }
+      document.documentElement.lang = next;
+      // Re-render Server Components (GuidePage / Article) for the new locale.
+      router.refresh();
+    },
+    [router],
+  );
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
