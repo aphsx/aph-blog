@@ -30,6 +30,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide scrollbars everywhere — scrolling still works (wheel / trackpad / touch). */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Chromium Edge */
+}
+
 /*
  * Shiki-highlighted code panels (components/Article.tsx `code` / `codeout`).
  * Shiki emits its own inline background/color on <pre class="shiki">; the
