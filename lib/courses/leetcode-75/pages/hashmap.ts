@@ -1,10 +1,23 @@
 import type { Page } from "@/lib/types";
+import {
+  introHashMapEn,
+  p20En,
+  p21En,
+  p22En,
+  p23En,
+} from "./hashmap-en";
 
 export const hashMapPages: Record<string, Page> = {
   "lc75-intro-hashmap": {
     slug: "lc75-intro-hashmap",
-    title: { th: "Hash Map / Set — พื้นฐาน & แนวคิด", en: "" },
-    lead: { th: "โครงสร้างข้อมูลที่ \"คำนวณตำแหน่งจากตัวค่าเอง\" จึงหาของเจอโดยไม่ต้องไล่ดูทีละตัว — ใน Python คือ set, dict, Counter, defaultdict หน้านี้แบ่งเป็น 7 ส่วน: กลไกเบื้องหลัง, กฎเรื่อง key, เครื่องมือ 4 ชิ้น, 6 แบบการใช้งานที่ต้องแยกให้ออก, และเมื่อไหร่ที่ห้ามใช้", en: "" },
+    title: {
+      th: "Hash Map / Set — พื้นฐาน & แนวคิด",
+      en: "Hash Map / Set — Fundamentals & Mental Models",
+    },
+    lead: {
+      th: "โครงสร้างข้อมูลที่ \"คำนวณตำแหน่งจากตัวค่าเอง\" จึงหาของเจอโดยไม่ต้องไล่ดูทีละตัว — ใน Python คือ set, dict, Counter, defaultdict หน้านี้แบ่งเป็น 7 ส่วน: กลไกเบื้องหลัง, กฎเรื่อง key, เครื่องมือ 4 ชิ้น, 6 แบบการใช้งานที่ต้องแยกให้ออก, และเมื่อไหร่ที่ห้ามใช้",
+      en: 'A structure that "computes position from the value itself," so lookups skip scanning — in Python: set, dict, Counter, defaultdict. Seven parts: the mechanism, the key rule, four tools, six usage patterns, and when not to use it.',
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
@@ -723,14 +736,14 @@ export const hashMapPages: Record<string, Page> = {
                 c: "หมวดนี้มี 4 ข้อ และแต่ละข้อแมปกับแบบในส่วนที่ 5 ตรง ๆ: 20 · Difference of Two Arrays = แบบที่ 1 → 21 · Unique Number of Occurrences = แบบที่ 3 → 22 · Two Strings Are Close = แบบที่ 3 สองชั้น → 23 · Equal Row and Column Pairs = แบบที่ 4 กดถัดไปเริ่มข้อแรกได้เลย",
               },
       ],
-      en: [],
+      en: introHashMapEn,
     },
   },
 
   "lc75-p20": {
     slug: "lc75-p20",
     title: { th: "ข้อ 20 · LC2215 Find the Difference of Two Arrays (ผลต่างสองอาเรย์) 🟢", en: "2215. Find the Difference of Two Arrays" },
-    lead: { th: "หาค่าที่อยู่ใน array หนึ่งแต่ไม่อยู่ในอีก array ด้วย set difference (การลบ set)", en: "Easy · LeetCode 75 — Hash Map / Set" },
+    lead: { th: "หาค่าที่อยู่ใน array หนึ่งแต่ไม่อยู่ในอีก array ด้วย set difference (การลบ set)", en: "Find values in one array but not the other with set difference." },
     group: "LeetCode 75",
     blocks: {
       th: [
@@ -786,41 +799,14 @@ export const hashMapPages: Record<string, Page> = {
 
               { t: "callout", title: "💡 สรุป pattern", c: "เจอโจทย์ที่พูดถึง อยู่ในกองนี้แต่ไม่อยู่ในกองนั้น หรือ ค่าที่ต่างกัน ให้นึกถึง set difference ทันที และ operator & | - ของ set ช่วยเขียน set logic (ตรรกะเซต) ให้สั้นและเร็ว" },
       ],
-      en: [
-        {
-          t: "p",
-          c: "Given two 0-indexed integer arrays nums1 and nums2, return a list answer of size 2 where:\n\n• answer[0] is a list of all distinct integers in nums1 which are not present in nums2.\n• answer[1] is a list of all distinct integers in nums2 which are not present in nums1.\n\nNote that the integers in the lists may be returned in any order.",
-        },
-        {
-          t: "example",
-          c: [
-            {
-              input: "nums1 = [1,2,3], nums2 = [2,4,6]",
-              output: "[[1,3],[4,6]]",
-              explain: "For nums1, nums1[1] = 2 is present at index 0 of nums2, whereas nums1[0] = 1 and nums1[2] = 3 are not present in nums2. Therefore, answer[0] = [1,3]. For nums2, nums2[0] = 2 is present at index 1 of nums1, whereas nums2[1] = 4 and nums2[2] = 6 are not present in nums1. Therefore, answer[1] = [4,6].",
-            },
-            {
-              input: "nums1 = [1,2,3,3], nums2 = [1,1,2,2]",
-              output: "[[3],[]]",
-              explain: "For nums1, nums1[2] and nums1[3] are not present in nums2. Since nums1[2] == nums1[3], their value is only included once and answer[0] = [3]. Every integer in nums2 is present in nums1. Therefore, answer[1] = [].",
-            },
-          ],
-        },
-        {
-          t: "constraints",
-          c: [
-            "1 <= nums1.length, nums2.length <= 1000",
-            "-1000 <= nums1[i], nums2[i] <= 1000",
-          ],
-        },
-      ],
+      en: p20En,
     },
   },
 
   "lc75-p21": {
     slug: "lc75-p21",
     title: { th: "ข้อ 21 · LC1207 Unique Number of Occurrences (จำนวนครั้งไม่ซ้ำ) 🟢", en: "1207. Unique Number of Occurrences" },
-    lead: { th: "นับ frequency (ความถี่) ของแต่ละค่า แล้วเช็คว่า occurrences (จำนวนครั้ง) ทั้งหมดไม่ซ้ำกัน", en: "Easy · LeetCode 75 — Hash Map / Set" },
+    lead: { th: "นับ frequency (ความถี่) ของแต่ละค่า แล้วเช็คว่า occurrences (จำนวนครั้ง) ทั้งหมดไม่ซ้ำกัน", en: "Count frequencies, then check that all occurrence counts are unique." },
     group: "LeetCode 75",
     blocks: {
       th: [
@@ -884,44 +870,14 @@ export const hashMapPages: Record<string, Page> = {
 
               { t: "callout", title: "💡 สรุป pattern", c: "pattern สองชั้น นับก่อนด้วย Counter แล้วค่อยประมวลผลบน frequency (ค่าความถี่) พบบ่อยมาก และทริก len(x) == len(set(x)) คือวิธีเช็ค duplicate (มีตัวซ้ำไหม) ที่สั้นที่สุด" },
       ],
-      en: [
-        {
-          t: "p",
-          c: "Given an array of integers arr, return true if the number of occurrences of each value in the array is unique or false otherwise.",
-        },
-        {
-          t: "example",
-          c: [
-            {
-              input: "arr = [1,2,2,1,1,3]",
-              output: "true",
-              explain: "The value 1 has 3 occurrences, 2 has 2 and 3 has 1. No two values have the same number of occurrences.",
-            },
-            {
-              input: "arr = [1,2]",
-              output: "false",
-            },
-            {
-              input: "arr = [-3,0,1,-3,1,1,1,-3,10,0]",
-              output: "true",
-            },
-          ],
-        },
-        {
-          t: "constraints",
-          c: [
-            "1 <= arr.length <= 1000",
-            "-1000 <= arr[i] <= 1000",
-          ],
-        },
-      ],
+      en: p21En,
     },
   },
 
   "lc75-p22": {
     slug: "lc75-p22",
     title: { th: "ข้อ 22 · LC1657 Determine if Two Strings Are Close (สองสตริงใกล้กัน) 🟡", en: "1657. Determine if Two Strings Are Close" },
-    lead: { th: "แปล operation (ปฏิบัติการ) สองแบบให้เป็นเงื่อนไขบน character set (ชุดตัวอักษร) และกอง frequency (ความถี่)", en: "Medium · LeetCode 75 — Hash Map / Set" },
+    lead: { th: "แปล operation (ปฏิบัติการ) สองแบบให้เป็นเงื่อนไขบน character set (ชุดตัวอักษร) และกอง frequency (ความถี่)", en: "Turn the two allowed operations into conditions on character set and frequency multiset." },
     group: "LeetCode 75",
     blocks: {
       th: [
@@ -1003,46 +959,14 @@ export const hashMapPages: Record<string, Page> = {
 
               { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate (จำลอง) จริง ที่นี่ invariant คือ character set กับ กอง frequency" },
       ],
-      en: [
-        {
-          t: "p",
-          c: "Two strings are considered close if you can attain one from the other using the following operations:\n\nOperation 1: Swap any two existing characters.\n• For example, abcde -> aecdb\n\nOperation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.\n• For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)\n\nYou can use the operations on either string as many times as necessary.\n\nGiven two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise.",
-        },
-        {
-          t: "example",
-          c: [
-            {
-              input: 'word1 = "abc", word2 = "bca"',
-              output: "true",
-              explain: 'You can attain word2 from word1 in 2 operations. Apply Operation 1: "abc" -> "acb". Apply Operation 1: "acb" -> "bca".',
-            },
-            {
-              input: 'word1 = "a", word2 = "aa"',
-              output: "false",
-              explain: "It is impossible to attain word2 from word1, or vice versa, in any number of operations.",
-            },
-            {
-              input: 'word1 = "cabbba", word2 = "abbccc"',
-              output: "true",
-              explain: 'You can attain word2 from word1 in 3 operations. Apply Operation 1: "cabbba" -> "caabbb". Apply Operation 2: "caabbb" -> "baaccc". Apply Operation 2: "baaccc" -> "abbccc".',
-            },
-          ],
-        },
-        {
-          t: "constraints",
-          c: [
-            "1 <= word1.length, word2.length <= 10^5",
-            "word1 and word2 contain only lowercase English letters.",
-          ],
-        },
-      ],
+      en: p22En,
     },
   },
 
   "lc75-p23": {
     slug: "lc75-p23",
     title: { th: "ข้อ 23 · LC2352 Equal Row and Column Pairs (คู่แถว-คอลัมน์) 🟡", en: "2352. Equal Row and Column Pairs" },
-    lead: { th: "นับ frequency (ความถี่) ของ row (แถว) ด้วย tuple แล้วยิงถามทีละ column (คอลัมน์)", en: "Medium · LeetCode 75 — Hash Map / Set" },
+    lead: { th: "นับ frequency (ความถี่) ของ row (แถว) ด้วย tuple แล้วยิงถามทีละ column (คอลัมน์)", en: "Count row frequencies with tuple keys, then query each column against that map." },
     group: "LeetCode 75",
     blocks: {
       th: [
@@ -1120,35 +1044,7 @@ export const hashMapPages: Record<string, Page> = {
 
               { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้อง จับคู่ของที่เหมือนกัน จากสองกอง อย่าเทียบทุก pair (O(n^2) คู่) ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว และจำไว้ว่าจะเอา list/row เป็น key ต้อง convert เป็น tuple ก่อน" },
       ],
-      en: [
-        {
-          t: "p",
-          c: "Given a 0-indexed n x n integer matrix grid, return the number of pairs (ri, cj) such that row ri and column cj are equal.\n\nA row and column pair is considered equal if they contain the same elements in the same order (i.e., an equal array).",
-        },
-        {
-          t: "example",
-          c: [
-            {
-              input: "grid = [[3,2,1],[1,7,6],[2,7,7]]",
-              output: "1",
-              explain: "There is 1 equal row and column pair: (Row 2, Column 1): [2,7,7].",
-            },
-            {
-              input: "grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]",
-              output: "3",
-              explain: "There are 3 equal row and column pairs: (Row 0, Column 0): [3,1,2,2]; (Row 2, Column 2): [2,4,2,2]; (Row 3, Column 2): [2,4,2,2].",
-            },
-          ],
-        },
-        {
-          t: "constraints",
-          c: [
-            "n == grid.length == grid[i].length",
-            "1 <= n <= 200",
-            "1 <= grid[i][j] <= 10^5",
-          ],
-        },
-      ],
+      en: p23En,
     },
   },
 };
