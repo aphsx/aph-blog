@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import LastPathTracker from "@/components/LastPathTracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="th" className={inter.variable}>
       <body className="min-h-screen bg-white font-sans text-base leading-relaxed text-[#1c1e21] antialiased">
+        <LastPathTracker />
         {children}
       </body>
     </html>
