@@ -1,4 +1,5 @@
 import type { Page } from "@/lib/types";
+import { hashMapEn } from "./hashmap.en";
 
 export const hashMapPages: Record<string, Page> = {
   "lc75-intro-hashmap": {
@@ -782,6 +783,7 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3],
 
       { t: "callout", title: "💡 สรุป pattern", c: "เจอโจทย์ที่พูดถึง อยู่ในกองนี้แต่ไม่อยู่ในกองนั้น หรือ ค่าที่ต่างกัน ให้นึกถึง set difference ทันที และ operator & | - ของ set ช่วยเขียน set logic (ตรรกะเซต) ให้สั้นและเร็ว" },
     ],
+    en: hashMapEn["lc75-p20"],
   },
 
   "lc75-p21": {
@@ -850,6 +852,7 @@ True` },
 
       { t: "callout", title: "💡 สรุป pattern", c: "pattern สองชั้น นับก่อนด้วย Counter แล้วค่อยประมวลผลบน frequency (ค่าความถี่) พบบ่อยมาก และทริก len(x) == len(set(x)) คือวิธีเช็ค duplicate (มีตัวซ้ำไหม) ที่สั้นที่สุด" },
     ],
+    en: hashMapEn["lc75-p21"],
   },
 
   "lc75-p22": {
@@ -936,6 +939,7 @@ False` },
 
       { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate (จำลอง) จริง ที่นี่ invariant คือ character set กับ กอง frequency" },
     ],
+    en: hashMapEn["lc75-p22"],
   },
 
   "lc75-p23": {
@@ -1018,5 +1022,6 @@ print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
 
       { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้อง จับคู่ของที่เหมือนกัน จากสองกอง อย่าเทียบทุก pair (O(n^2) คู่) ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว และจำไว้ว่าจะเอา list/row เป็น key ต้อง convert เป็น tuple ก่อน" },
     ],
+    en: hashMapEn["lc75-p23"],
   },
 };
