@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import GuidePage from "@/components/GuidePage";
 import { COURSE_MAP } from "@/lib/courses";
+import { DEFAULT_LOCALE, pickLocalized } from "@/lib/locale";
 import { COURSE_PAGE_PARAMS } from "@/lib/paths";
 
 export function generateStaticParams() {
@@ -15,7 +16,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { course, slug } = await params;
   const page = COURSE_MAP[course]?.pages[slug];
-  return { title: page ? `${page.title} — Aph's Blog` : "ไม่พบหน้า" };
+  if (!page) return { title: "ไม่พบหน้า" };
+  const title = pickLocalized(page.title, DEFAULT_LOCALE);
+  return { title: `${title} — Aph's Blog` };
 }
 
 export default async function CoursePage({

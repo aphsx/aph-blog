@@ -12,33 +12,30 @@ import { resolvePage } from "@/lib/locale";
 import type { Course, Page } from "@/lib/types";
 import { coursePath } from "@/lib/paths";
 
-type NavRef = { slug: string; title: string } | null;
-
 export default function LocalizedGuide({
   course,
   page,
   categoryLabel,
   categoryHref,
-  prev,
-  next,
+  prevSlug,
+  nextSlug,
 }: {
   course: Course;
   page: Page;
   categoryLabel?: string;
   categoryHref?: string;
-  prev: NavRef;
-  next: NavRef;
+  prevSlug: string | null;
+  nextSlug: string | null;
 }) {
   const { locale } = useLocale();
   const resolved = resolvePage(page, locale);
   const toc = extractHeadings(resolved.blocks);
 
-  // Prev/next titles follow locale when those pages have translations.
-  const prevResolved = prev
-    ? resolvePage(course.pages[prev.slug], locale)
+  const prevResolved = prevSlug
+    ? resolvePage(course.pages[prevSlug], locale)
     : null;
-  const nextResolved = next
-    ? resolvePage(course.pages[next.slug], locale)
+  const nextResolved = nextSlug
+    ? resolvePage(course.pages[nextSlug], locale)
     : null;
 
   return (
@@ -72,13 +69,13 @@ export default function LocalizedGuide({
 
         <DocPaginator
           prev={
-            prevResolved
-              ? { slug: prev!.slug, title: prevResolved.title }
+            prevSlug && prevResolved
+              ? { slug: prevSlug, title: prevResolved.title }
               : null
           }
           next={
-            nextResolved
-              ? { slug: next!.slug, title: nextResolved.title }
+            nextSlug && nextResolved
+              ? { slug: nextSlug, title: nextResolved.title }
               : null
           }
         />

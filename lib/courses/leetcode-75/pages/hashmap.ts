@@ -1,13 +1,14 @@
 import type { Page } from "@/lib/types";
-import { hashMapEn } from "./hashmap.en";
 
 export const hashMapPages: Record<string, Page> = {
   "lc75-intro-hashmap": {
     slug: "lc75-intro-hashmap",
-    title: "Hash Map / Set — พื้นฐาน & แนวคิด",
-    lead: "โครงสร้างข้อมูลที่ \"คำนวณตำแหน่งจากตัวค่าเอง\" จึงหาของเจอโดยไม่ต้องไล่ดูทีละตัว — ใน Python คือ set, dict, Counter, defaultdict หน้านี้แบ่งเป็น 7 ส่วน: กลไกเบื้องหลัง, กฎเรื่อง key, เครื่องมือ 4 ชิ้น, 6 แบบการใช้งานที่ต้องแยกให้ออก, และเมื่อไหร่ที่ห้ามใช้",
+    title: { en: "", th: "Hash Map / Set — พื้นฐาน & แนวคิด" },
+    lead: { en: "", th: "โครงสร้างข้อมูลที่ \"คำนวณตำแหน่งจากตัวค่าเอง\" จึงหาของเจอโดยไม่ต้องไล่ดูทีละตัว — ใน Python คือ set, dict, Counter, defaultdict หน้านี้แบ่งเป็น 7 ส่วน: กลไกเบื้องหลัง, กฎเรื่อง key, เครื่องมือ 4 ชิ้น, 6 แบบการใช้งานที่ต้องแยกให้ออก, และเมื่อไหร่ที่ห้ามใช้" },
     group: "LeetCode 75",
-    blocks: [
+    blocks: {
+      en: [],
+      th: [
       {
         t: "p",
         c: 'โจทย์ในหมวดนี้ถามคำถามหน้าตาต่างกัน แต่แก่นเหมือนกันหมด: "ตัวนี้เคยเจอมาก่อนไหม", "ตัวนี้โผล่มากี่ครั้ง", "สองกองนี้มีอะไรซ้ำกันบ้าง" — สามคำถามนี้ถ้าทำแบบตรงไปตรงมาคือไล่ดูทั้งกองทุกครั้งที่ถาม แต่ hash map ตอบได้ในเวลาเกือบคงที่ ไม่ว่ากองข้อมูลจะใหญ่แค่ไหน',
@@ -722,15 +723,45 @@ dict.fromkeys     : 36960 bytes`,
         title: "พร้อมแล้วไปต่อ",
         c: "หมวดนี้มี 4 ข้อ และแต่ละข้อแมปกับแบบในส่วนที่ 5 ตรง ๆ: 20 · Difference of Two Arrays = แบบที่ 1 → 21 · Unique Number of Occurrences = แบบที่ 3 → 22 · Two Strings Are Close = แบบที่ 3 สองชั้น → 23 · Equal Row and Column Pairs = แบบที่ 4 กดถัดไปเริ่มข้อแรกได้เลย",
       },
-    ],
+      ],
+    },
   },
 
   "lc75-p20": {
     slug: "lc75-p20",
-    title: "ข้อ 20 · LC2215 Find the Difference of Two Arrays (ผลต่างสองอาเรย์) 🟢",
-    lead: "หาค่าที่อยู่ใน array หนึ่งแต่ไม่อยู่ในอีก array ด้วย set difference (การลบ set)",
+    title: { en: "2215. Find the Difference of Two Arrays", th: "ข้อ 20 · LC2215 Find the Difference of Two Arrays (ผลต่างสองอาเรย์) 🟢" },
+    lead: { en: "Easy · LeetCode 75 — Hash Map / Set", th: "หาค่าที่อยู่ใน array หนึ่งแต่ไม่อยู่ในอีก array ด้วย set difference (การลบ set)" },
     group: "LeetCode 75",
-    blocks: [
+    blocks: {
+      en: [
+      {
+        t: "p",
+        c: "Given two 0-indexed integer arrays nums1 and nums2, return a list answer of size 2 where:\n\n• answer[0] is a list of all distinct integers in nums1 which are not present in nums2.\n• answer[1] is a list of all distinct integers in nums2 which are not present in nums1.\n\nNote that the integers in the lists may be returned in any order.",
+      },
+      {
+        t: "example",
+        c: [
+          {
+            input: "nums1 = [1,2,3], nums2 = [2,4,6]",
+            output: "[[1,3],[4,6]]",
+            explain: "For nums1, nums1[1] = 2 is present at index 0 of nums2, whereas nums1[0] = 1 and nums1[2] = 3 are not present in nums2. Therefore, answer[0] = [1,3]. For nums2, nums2[0] = 2 is present at index 1 of nums1, whereas nums2[1] = 4 and nums2[2] = 6 are not present in nums1. Therefore, answer[1] = [4,6].",
+          },
+          {
+            input: "nums1 = [1,2,3,3], nums2 = [1,1,2,2]",
+            output: "[[3],[]]",
+            explain: "For nums1, nums1[2] and nums1[3] are not present in nums2. Since nums1[2] == nums1[3], their value is only included once and answer[0] = [3]. Every integer in nums2 is present in nums1. Therefore, answer[1] = [].",
+          },
+        ],
+      },
+      {
+        t: "constraints",
+        c: [
+          "1 <= nums1.length, nums2.length <= 1000",
+          "-1000 <= nums1[i], nums2[i] <= 1000",
+        ],
+      },
+    ],
+      th: [
       { t: "p", c: "โจทย์ (LC2215): กำหนด array จำนวนเต็มแบบ 0-indexed สองตัวคือ nums1 และ nums2 ให้ return ผลลัพธ์เป็น array ขนาด 2 ชื่อ answer โดย answer[0] คือ list ของค่าจำนวนเต็มที่ distinct (ไม่ซ้ำกัน) ทั้งหมดใน nums1 ที่ไม่ปรากฏใน nums2 และ answer[1] คือ list ของค่าจำนวนเต็มที่ distinct ทั้งหมดใน nums2 ที่ไม่ปรากฏใน nums1 ลำดับของค่าใน list แต่ละอันไม่มีผลต่อความถูกต้องของคำตอบ" },
       {
         t: "example",
@@ -782,16 +813,48 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3],
       ] },
 
       { t: "callout", title: "💡 สรุป pattern", c: "เจอโจทย์ที่พูดถึง อยู่ในกองนี้แต่ไม่อยู่ในกองนั้น หรือ ค่าที่ต่างกัน ให้นึกถึง set difference ทันที และ operator & | - ของ set ช่วยเขียน set logic (ตรรกะเซต) ให้สั้นและเร็ว" },
-    ],
-    en: hashMapEn["lc75-p20"],
+      ],
+    },
   },
 
   "lc75-p21": {
     slug: "lc75-p21",
-    title: "ข้อ 21 · LC1207 Unique Number of Occurrences (จำนวนครั้งไม่ซ้ำ) 🟢",
-    lead: "นับ frequency (ความถี่) ของแต่ละค่า แล้วเช็คว่า occurrences (จำนวนครั้ง) ทั้งหมดไม่ซ้ำกัน",
+    title: { en: "1207. Unique Number of Occurrences", th: "ข้อ 21 · LC1207 Unique Number of Occurrences (จำนวนครั้งไม่ซ้ำ) 🟢" },
+    lead: { en: "Easy · LeetCode 75 — Hash Map / Set", th: "นับ frequency (ความถี่) ของแต่ละค่า แล้วเช็คว่า occurrences (จำนวนครั้ง) ทั้งหมดไม่ซ้ำกัน" },
     group: "LeetCode 75",
-    blocks: [
+    blocks: {
+      en: [
+      {
+        t: "p",
+        c: "Given an array of integers arr, return true if the number of occurrences of each value in the array is unique or false otherwise.",
+      },
+      {
+        t: "example",
+        c: [
+          {
+            input: "arr = [1,2,2,1,1,3]",
+            output: "true",
+            explain: "The value 1 has 3 occurrences, 2 has 2 and 3 has 1. No two values have the same number of occurrences.",
+          },
+          {
+            input: "arr = [1,2]",
+            output: "false",
+          },
+          {
+            input: "arr = [-3,0,1,-3,1,1,1,-3,10,0]",
+            output: "true",
+          },
+        ],
+      },
+      {
+        t: "constraints",
+        c: [
+          "1 <= arr.length <= 1000",
+          "-1000 <= arr[i] <= 1000",
+        ],
+      },
+    ],
+      th: [
       { t: "p", c: "โจทย์ (LC1207): กำหนด array จำนวนเต็ม arr ให้ return true ถ้าจำนวนครั้ง (occurrences) ที่แต่ละค่าปรากฏใน array นี้ไม่ซ้ำกันเลยสักคู่ มิเช่นนั้น return false" },
       {
         t: "example",
@@ -851,16 +914,50 @@ True` },
       ] },
 
       { t: "callout", title: "💡 สรุป pattern", c: "pattern สองชั้น นับก่อนด้วย Counter แล้วค่อยประมวลผลบน frequency (ค่าความถี่) พบบ่อยมาก และทริก len(x) == len(set(x)) คือวิธีเช็ค duplicate (มีตัวซ้ำไหม) ที่สั้นที่สุด" },
-    ],
-    en: hashMapEn["lc75-p21"],
+      ],
+    },
   },
 
   "lc75-p22": {
     slug: "lc75-p22",
-    title: "ข้อ 22 · LC1657 Determine if Two Strings Are Close (สองสตริงใกล้กัน) 🟡",
-    lead: "แปล operation (ปฏิบัติการ) สองแบบให้เป็นเงื่อนไขบน character set (ชุดตัวอักษร) และกอง frequency (ความถี่)",
+    title: { en: "1657. Determine if Two Strings Are Close", th: "ข้อ 22 · LC1657 Determine if Two Strings Are Close (สองสตริงใกล้กัน) 🟡" },
+    lead: { en: "Medium · LeetCode 75 — Hash Map / Set", th: "แปล operation (ปฏิบัติการ) สองแบบให้เป็นเงื่อนไขบน character set (ชุดตัวอักษร) และกอง frequency (ความถี่)" },
     group: "LeetCode 75",
-    blocks: [
+    blocks: {
+      en: [
+      {
+        t: "p",
+        c: "Two strings are considered close if you can attain one from the other using the following operations:\n\nOperation 1: Swap any two existing characters.\n• For example, abcde -> aecdb\n\nOperation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.\n• For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)\n\nYou can use the operations on either string as many times as necessary.\n\nGiven two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise.",
+      },
+      {
+        t: "example",
+        c: [
+          {
+            input: 'word1 = "abc", word2 = "bca"',
+            output: "true",
+            explain: 'You can attain word2 from word1 in 2 operations. Apply Operation 1: "abc" -> "acb". Apply Operation 1: "acb" -> "bca".',
+          },
+          {
+            input: 'word1 = "a", word2 = "aa"',
+            output: "false",
+            explain: "It is impossible to attain word2 from word1, or vice versa, in any number of operations.",
+          },
+          {
+            input: 'word1 = "cabbba", word2 = "abbccc"',
+            output: "true",
+            explain: 'You can attain word2 from word1 in 3 operations. Apply Operation 1: "cabbba" -> "caabbb". Apply Operation 2: "caabbb" -> "baaccc". Apply Operation 2: "baaccc" -> "abbccc".',
+          },
+        ],
+      },
+      {
+        t: "constraints",
+        c: [
+          "1 <= word1.length, word2.length <= 10^5",
+          "word1 and word2 contain only lowercase English letters.",
+        ],
+      },
+    ],
+      th: [
       { t: "p", c: 'โจทย์ (LC1657): กำหนด string สองตัวคือ word1 และ word2 ให้ return true ถ้า word1 และ word2 เป็น close (ใกล้กัน) มิเช่นนั้น return false ทั้งสอง string จะ close กันได้ก็ต่อเมื่อเปลี่ยนจาก string หนึ่งไปเป็นอีก string ได้ด้วย operation สองแบบนี้ (ทำกี่ครั้งก็ได้ กับ string ฝั่งไหนก็ได้): (1) swap ตำแหน่งของ character สองตัวที่มีอยู่จริงใน string (เช่น "abcde" → "aecdb") (2) เปลี่ยนทุกตำแหน่งของ character ตัวหนึ่งที่มีอยู่จริงให้กลายเป็น character อีกตัวที่มีอยู่จริง พร้อมกับสลับกลับพร้อมกัน (เช่น "aacabb" → "bbcbaa" คือเปลี่ยน a ทั้งหมดเป็น b และ b ทั้งหมดเป็น a พร้อมกัน)' },
       {
         t: "example",
@@ -938,16 +1035,46 @@ False` },
       ] },
 
       { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate (จำลอง) จริง ที่นี่ invariant คือ character set กับ กอง frequency" },
-    ],
-    en: hashMapEn["lc75-p22"],
+      ],
+    },
   },
 
   "lc75-p23": {
     slug: "lc75-p23",
-    title: "ข้อ 23 · LC2352 Equal Row and Column Pairs (คู่แถว-คอลัมน์) 🟡",
-    lead: "นับ frequency (ความถี่) ของ row (แถว) ด้วย tuple แล้วยิงถามทีละ column (คอลัมน์)",
+    title: { en: "2352. Equal Row and Column Pairs", th: "ข้อ 23 · LC2352 Equal Row and Column Pairs (คู่แถว-คอลัมน์) 🟡" },
+    lead: { en: "Medium · LeetCode 75 — Hash Map / Set", th: "นับ frequency (ความถี่) ของ row (แถว) ด้วย tuple แล้วยิงถามทีละ column (คอลัมน์)" },
     group: "LeetCode 75",
-    blocks: [
+    blocks: {
+      en: [
+      {
+        t: "p",
+        c: "Given a 0-indexed n x n integer matrix grid, return the number of pairs (ri, cj) such that row ri and column cj are equal.\n\nA row and column pair is considered equal if they contain the same elements in the same order (i.e., an equal array).",
+      },
+      {
+        t: "example",
+        c: [
+          {
+            input: "grid = [[3,2,1],[1,7,6],[2,7,7]]",
+            output: "1",
+            explain: "There is 1 equal row and column pair: (Row 2, Column 1): [2,7,7].",
+          },
+          {
+            input: "grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]",
+            output: "3",
+            explain: "There are 3 equal row and column pairs: (Row 0, Column 0): [3,1,2,2]; (Row 2, Column 2): [2,4,2,2]; (Row 3, Column 2): [2,4,2,2].",
+          },
+        ],
+      },
+      {
+        t: "constraints",
+        c: [
+          "n == grid.length == grid[i].length",
+          "1 <= n <= 200",
+          "1 <= grid[i][j] <= 10^5",
+        ],
+      },
+    ],
+      th: [
       { t: "p", c: "โจทย์ (LC2352): กำหนด integer matrix (เมทริกซ์) grid ขนาด n x n แบบ 0-indexed ให้ return จำนวนคู่ (ri, cj) ที่ row ri และ column cj เท่ากัน คู่ row-column จะถือว่าเท่ากันก็ต่อเมื่อมีสมาชิกเหมือนกันทุกตำแหน่งเรียงตามลำดับเดียวกัน" },
       {
         t: "example",
@@ -1021,7 +1148,7 @@ print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
       ] },
 
       { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้อง จับคู่ของที่เหมือนกัน จากสองกอง อย่าเทียบทุก pair (O(n^2) คู่) ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว และจำไว้ว่าจะเอา list/row เป็น key ต้อง convert เป็น tuple ก่อน" },
-    ],
-    en: hashMapEn["lc75-p23"],
+      ],
+    },
   },
 };

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { COURSES } from "@/lib/courses";
+import { DEFAULT_LOCALE, pickLocalized } from "@/lib/locale";
 import { coursePath, pagePath } from "@/lib/paths";
 
 export default function Footer() {
@@ -12,7 +13,10 @@ export default function Footer() {
             const links = course.order
               .filter((slug) => slug !== course.overviewSlug)
               .slice(0, 4)
-              .map((slug) => ({ slug, title: course.pages[slug].title }));
+              .map((slug) => ({
+                slug,
+                title: pickLocalized(course.pages[slug].title, DEFAULT_LOCALE),
+              }));
             return (
               <div key={course.id}>
                 <Link

@@ -1,4 +1,5 @@
-import type { Page } from "./types";
+import type { Localized, Page } from "./types";
+import type { Block } from "./types";
 
 export type Locale = "en" | "th";
 
@@ -14,26 +15,48 @@ export const LOCALE_LABEL: Record<Locale, string> = {
   th: "TH",
 };
 
+function isLocalized<T>(value: T | Localized<T>): value is Localized<T> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    "en" in value &&
+    "th" in value
+  );
+}
+
+function isEmptyLocalizedValue(value: unknown): boolean {
+  if (typeof value === "string") return value.trim().length === 0;
+  if (Array.isArray(value)) return value.length === 0;
+  return value == null;
+}
+
 /**
- * Resolve which title/lead/blocks to show for a locale.
- * Base page fields are Thai (existing content). English lives on `page.en`.
- * Missing translation → fall back to Thai so untranslated pages still render.
+ * Pick a locale field from a `{ en, th }` map (or a plain Thai-only value).
+ * Empty English → fall back to Thai so untranslated pages still render.
  */
-export function resolvePage(
-  page: Page,
+export function pickLocalized<T>(
+  value: T | Localized<T>,
   locale: Locale,
-): Pick<Page, "title" | "lead" | "blocks"> {
-  if (locale === "en" && page.en) {
-    return {
-      title: page.en.title,
-      lead: page.en.lead,
-      blocks: page.en.blocks,
-    };
-  }
+): T {
+  if (!isLocalized(value)) return value;
+  const chosen = value[locale];
+  if (locale === "en" && isEmptyLocalizedValue(chosen)) return value.th;
+  return chosen;
+}
+
+/** Resolved view-model for rendering a page. */
+export type ResolvedPage = {
+  title: string;
+  lead: string;
+  blocks: Block[];
+};
+
+export function resolvePage(page: Page, locale: Locale): ResolvedPage {
   return {
-    title: page.title,
-    lead: page.lead,
-    blocks: page.blocks,
+    title: pickLocalized(page.title, locale),
+    lead: pickLocalized(page.lead, locale),
+    blocks: pickLocalized(page.blocks, locale),
   };
 }
 

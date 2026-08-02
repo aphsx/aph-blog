@@ -21,8 +21,8 @@ export default function GuidePage({ slug }: { slug: string }) {
       page={page}
       categoryLabel={category?.label}
       categoryHref={category ? getCategoryHref(category) : undefined}
-      prev={prevPage ? { slug: prevPage.slug, title: prevPage.title } : null}
-      next={nextPage ? { slug: nextPage.slug, title: nextPage.title } : null}
+      prevSlug={prevPage?.slug ?? null}
+      nextSlug={nextPage?.slug ?? null}
     />
   );
 }

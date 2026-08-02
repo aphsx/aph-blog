@@ -44,27 +44,24 @@ export type Block =
    */
   | { t: "solution"; summary?: string; c: Block[] };
 
-/** Optional English body for a page (base fields stay Thai until fully migrated). */
-export type PageTranslation = {
-  title: string;
-  lead: string;
-  blocks: Block[];
+/** Per-locale map. Prefer this shape for new / bilingual pages. */
+export type Localized<T> = {
+  en: T;
+  th: T;
 };
 
 /**
  * A documentation page.
- * `group` is optional descriptive metadata; the actual navigation/order is
- * driven by the owning course's `nav` (see lib/courses/<id>/nav.ts).
- * Base `title`/`lead`/`blocks` are Thai. Put English on `en` when available.
+ * Prefer `title`/`lead`/`blocks` as `{ en, th }` maps.
+ * Plain string / Block[] is still accepted and treated as Thai-only
+ * (English falls back to Thai until filled).
  */
 export type Page = {
   slug: string;
-  title: string;
-  lead: string;
+  title: string | Localized<string>;
+  lead: string | Localized<string>;
   group?: string;
-  blocks: Block[];
-  /** English translation — used when locale is `en`. */
-  en?: PageTranslation;
+  blocks: Block[] | Localized<Block[]>;
 };
 
 /** A heading extracted from a page's blocks, used to build the table of contents. */

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Shell from "@/components/Shell";
 import { COURSES } from "@/lib/courses";
+import { DEFAULT_LOCALE, pickLocalized } from "@/lib/locale";
 import { coursePath, pagePath } from "@/lib/paths";
 
 // A handful of real pages surfaced as "recommended reading" — the first
@@ -11,8 +12,8 @@ const FEATURED_POSTS = COURSES.map((course) => {
   const page = course.pages[slug];
   return {
     slug,
-    title: page.title,
-    lead: page.lead,
+    title: pickLocalized(page.title, DEFAULT_LOCALE),
+    lead: pickLocalized(page.lead, DEFAULT_LOCALE),
     courseTitle: course.title,
     badge: course.badge,
   };
