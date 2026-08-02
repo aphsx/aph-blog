@@ -22,20 +22,16 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function readStoredLocale(): Locale {
-  if (typeof window === "undefined") return DEFAULT_LOCALE;
-  try {
-    const raw = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (raw === "en" || raw === "th") return raw;
-  } catch {
-    /* ignore */
-  }
-  return DEFAULT_LOCALE;
-}
-
 function writeLocaleCookie(locale: Locale) {
   // 1 year — readable by Server Components via cookies()
   document.cookie = `${LOCALE_STORAGE_KEY}=${locale};path=/;max-age=31536000;samesite=lax`;
+}
+
+function hasLocaleCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie
+    .split(";")
+    .some((c) => c.trim().startsWith(`${LOCALE_STORAGE_KEY}=`));
 }
 
 export function LocaleProvider({
@@ -50,18 +46,18 @@ export function LocaleProvider({
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
-    // Prefer cookie/server value; fall back to any older localStorage choice once.
-    const stored = readStoredLocale();
-    if (stored !== initialLocale) {
-      // Keep localStorage in sync with whatever the server rendered.
-      try {
-        window.localStorage.setItem(LOCALE_STORAGE_KEY, initialLocale);
-      } catch {
-        /* ignore */
-      }
+    // First visit: persist default English so SSR stays on EN next request.
+    if (!hasLocaleCookie()) {
+      writeLocaleCookie(DEFAULT_LOCALE);
     }
-    document.documentElement.lang = locale;
-  }, [initialLocale, locale]);
+    setLocaleState(initialLocale);
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, initialLocale);
+    } catch {
+      /* ignore */
+    }
+    document.documentElement.lang = initialLocale;
+  }, [initialLocale]);
 
   const setLocale = useCallback(
     (next: Locale) => {

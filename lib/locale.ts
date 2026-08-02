@@ -56,6 +56,11 @@ export const UI: Record<
     topics: (n: number) => string;
     openSidebar: string;
     langAria: string;
+    coursesHeading: string;
+    coursesBlurb: string;
+    startCourse: string;
+    featuredHeading: string;
+    featuredBlurb: string;
   }
 > = {
   en: {
@@ -65,6 +70,11 @@ export const UI: Record<
     topics: (n) => `${n} topics`,
     openSidebar: "Open sidebar menu",
     langAria: "Language",
+    coursesHeading: "Courses",
+    coursesBlurb: "Pick a path and start whenever you’re ready.",
+    startCourse: "Start course",
+    featuredHeading: "Start reading here",
+    featuredBlurb: "Recommended pages from each course",
   },
   th: {
     banner: "บันทึกและคอร์สเรียนพัฒนาซอฟต์แวร์ · ภาษาไทย · เรียนฟรี",
@@ -73,5 +83,10 @@ export const UI: Record<
     topics: (n) => `${n} หัวข้อ`,
     openSidebar: "เปิดเมนู sidebar",
     langAria: "ภาษา",
+    coursesHeading: "คอร์สเรียน",
+    coursesBlurb: "เลือกเส้นทางที่อยากเริ่มได้เลย",
+    startCourse: "เริ่มคอร์ส",
+    featuredHeading: "เริ่มอ่านจากตรงนี้",
+    featuredBlurb: "บทความแนะนำจากแต่ละคอร์ส",
   },
 };
