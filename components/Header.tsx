@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { COURSES } from "@/lib/courses";
 import { coursePath, courseFromPathname } from "@/lib/paths";
+import { UI } from "@/lib/locale";
+import LanguageToggle from "./LanguageToggle";
+import { useLocale } from "./LocaleProvider";
 
 function GitHubIcon() {
   return (
@@ -18,11 +21,13 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
   const pathname = usePathname();
   const activeCourse = courseFromPathname(pathname);
   const [coursesOpen, setCoursesOpen] = useState(false);
+  const { locale } = useLocale();
+  const ui = UI[locale];
 
   return (
     <>
       <div className="flex min-h-[2.5rem] items-center justify-center bg-primary px-4 py-2 text-center text-sm font-medium text-white">
-        บันทึกและคอร์สเรียนพัฒนาซอฟต์แวร์ · ภาษาไทย · เรียนฟรี
+        {ui.banner}
       </div>
       <header className="sticky top-0 z-50 h-[3.75rem] border-b border-border bg-white/90 backdrop-blur shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="mx-auto flex h-full max-w-full items-center gap-2 px-4">
@@ -31,7 +36,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
             type="button"
             className="hidden rounded p-1.5 text-xl text-[#1c1e21] hover:bg-surface-soft max-[996px]:block"
             onClick={onMenu}
-            aria-label="เปิดเมนู sidebar"
+            aria-label={ui.openSidebar}
           >
             ☰
           </button>
@@ -71,7 +76,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
                   : "text-[#1c1e21]"
               }`}
             >
-              หน้าแรก
+              {ui.home}
             </Link>
 
             <div className="relative">
@@ -84,7 +89,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
                 aria-expanded={coursesOpen}
                 aria-haspopup="true"
               >
-                คอร์ส
+                {ui.courses}
                 <span
                   className={`text-xs transition-transform ${coursesOpen ? "rotate-180" : ""}`}
                   aria-hidden
@@ -125,7 +130,7 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
                             {course.title}
                           </span>
                           <span className="line-clamp-1 text-xs text-muted">
-                            {course.order.length} หัวข้อ
+                            {ui.topics(course.order.length)}
                           </span>
                         </span>
                       </Link>
@@ -136,8 +141,9 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
             </div>
           </nav>
 
-          {/* ขวา: GitHub */}
-          <div className="ml-auto flex items-center">
+          {/* ขวา: ภาษา + GitHub */}
+          <div className="ml-auto flex items-center gap-2">
+            <LanguageToggle />
             <a
               className="flex size-8 items-center justify-center rounded-full text-[#1c1e21] transition-colors hover:bg-surface-soft hover:no-underline"
               href="https://github.com"
