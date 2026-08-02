@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -22,16 +22,49 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
+function parseLocale(raw: string | null | undefined): Locale | null {
+  return raw === "en" || raw === "th" ? raw : null;
+}
+
+function readCookieLocale(): Locale | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${LOCALE_STORAGE_KEY}=`));
+  if (!match) return null;
+  return parseLocale(decodeURIComponent(match.slice(LOCALE_STORAGE_KEY.length + 1)));
+}
+
+function readStoredLocale(): Locale | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return parseLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY));
+  } catch {
+    return null;
+  }
+}
+
 function writeLocaleCookie(locale: Locale) {
-  // 1 year — readable by Server Components via cookies()
   document.cookie = `${LOCALE_STORAGE_KEY}=${locale};path=/;max-age=31536000;samesite=lax`;
 }
 
-function hasLocaleCookie(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie
-    .split(";")
-    .some((c) => c.trim().startsWith(`${LOCALE_STORAGE_KEY}=`));
+function persistLocale(locale: Locale) {
+  writeLocaleCookie(locale);
+  try {
+    window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  } catch {
+    /* ignore */
+  }
+  document.documentElement.lang = locale;
+}
+
+/**
+ * Resolve the user's preferred locale.
+ * Cookie (sent to the server) wins; localStorage backs it up if the cookie was lost.
+ */
+function preferredLocale(serverLocale: Locale): Locale {
+  return readCookieLocale() ?? readStoredLocale() ?? serverLocale ?? DEFAULT_LOCALE;
 }
 
 export function LocaleProvider({
@@ -43,33 +76,30 @@ export function LocaleProvider({
   initialLocale?: Locale;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
+  // Hydrate / re-sync after SSR and when the server locale prop changes.
   useEffect(() => {
-    // First visit: persist default English so SSR stays on EN next request.
-    if (!hasLocaleCookie()) {
-      writeLocaleCookie(DEFAULT_LOCALE);
+    const preferred = preferredLocale(initialLocale);
+    persistLocale(preferred);
+    setLocaleState(preferred);
+    // Server rendered a different language than the user's saved choice —
+    // refresh so GuidePage / BlogHome pick up the cookie.
+    if (preferred !== initialLocale) {
+      router.refresh();
     }
-    setLocaleState(initialLocale);
-    try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, initialLocale);
-    } catch {
-      /* ignore */
-    }
-    document.documentElement.lang = initialLocale;
-  }, [initialLocale]);
+  }, [initialLocale, router]);
+
+  // Re-assert the cookie on every navigation so the next RSC request stays correct.
+  useEffect(() => {
+    persistLocale(locale);
+  }, [pathname, locale]);
 
   const setLocale = useCallback(
     (next: Locale) => {
       setLocaleState(next);
-      writeLocaleCookie(next);
-      try {
-        window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
-      } catch {
-        /* ignore */
-      }
-      document.documentElement.lang = next;
-      // Re-render Server Components (GuidePage / Article) for the new locale.
+      persistLocale(next);
       router.refresh();
     },
     [router],
