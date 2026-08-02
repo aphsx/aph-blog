@@ -37,28 +37,28 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "เทียบสองวิธี พร้อมนับจำนวนครั้งที่ต้อง compare",
                 code: `a = [4, 9, 5, 2, 7]
-        b = [9, 4, 9, 8, 4, 3]
+b = [9, 4, 9, 8, 4, 3]
 
-        # วิธีที่ 1 — เช็คด้วย list (กางไส้ในของ x in a ออกมาให้เห็น)
-        steps = 0
-        res = []
-        for x in b:
-            found = False
-            for y in a:                # ต้องไล่ทุกตัวใน a จนเจอ หรือจนหมดกอง
-                steps += 1
-                if x == y:
-                    found = True
-                    break
-            if not found:
-                res.append(x)
-        print("list :", res, "| เทียบ", steps, "ครั้ง")
+# วิธีที่ 1 — เช็คด้วย list (กางไส้ในของ x in a ออกมาให้เห็น)
+steps = 0
+res = []
+for x in b:
+    found = False
+    for y in a:                # ต้องไล่ทุกตัวใน a จนเจอ หรือจนหมดกอง
+        steps += 1
+        if x == y:
+            found = True
+            break
+    if not found:
+        res.append(x)
+print("list :", res, "| เทียบ", steps, "ครั้ง")
 
-        # วิธีที่ 2 — เช็คด้วย set
-        a_set = set(a)                 # แปลงครั้งเดียว จ่าย memory เพิ่มหนึ่งก้อน
-        res2 = [x for x in b if x not in a_set]
-        print("set  :", res2, "| เทียบ", len(b), "ครั้ง")`,
+# วิธีที่ 2 — เช็คด้วย set
+a_set = set(a)                 # แปลงครั้งเดียว จ่าย memory เพิ่มหนึ่งก้อน
+res2 = [x for x in b if x not in a_set]
+print("set  :", res2, "| เทียบ", len(b), "ครั้ง")`,
                 out: `list : [8, 3] | เทียบ 16 ครั้ง
-        set  : [8, 3] | เทียบ 6 ครั้ง`,
+set  : [8, 3] | เทียบ 6 ครั้ง`,
               },
               {
                 t: "p",
@@ -84,12 +84,12 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "จาก key → ตัวเลข → หมายเลขช่อง (สมมติมี 8 ช่อง)",
                 code: `for k in [7, 15, 23, 42, 100]:
-            print(f"key {k:<4} hash = {hash(k):<4} -> ช่องที่ {hash(k) % 8}")`,
+    print(f"key {k:<4} hash = {hash(k):<4} -> ช่องที่ {hash(k) % 8}")`,
                 out: `key 7    hash = 7    -> ช่องที่ 7
-        key 15   hash = 15   -> ช่องที่ 7
-        key 23   hash = 23   -> ช่องที่ 7
-        key 42   hash = 42   -> ช่องที่ 2
-        key 100  hash = 100  -> ช่องที่ 4`,
+key 15   hash = 15   -> ช่องที่ 7
+key 23   hash = 23   -> ช่องที่ 7
+key 42   hash = 42   -> ช่องที่ 2
+key 100  hash = 100  -> ช่องที่ 4`,
               },
               {
                 t: "image",
@@ -126,32 +126,32 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "หลักฐานว่า collision ทำให้ O(1) พังจริง",
                 code: `class Key:
-            calls = 0                          # ตัวนับกลาง ว่าถูกเทียบ == ไปกี่ครั้ง
+    calls = 0                          # ตัวนับกลาง ว่าถูกเทียบ == ไปกี่ครั้ง
 
-            def __init__(self, v, h):
-                self.v, self.h = v, h
+    def __init__(self, v, h):
+        self.v, self.h = v, h
 
-            def __hash__(self):
-                return self.h                  # กำหนดค่า hash เองได้ตามใจ
+    def __hash__(self):
+        return self.h                  # กำหนดค่า hash เองได้ตามใจ
 
-            def __eq__(self, other):
-                Key.calls += 1
-                return self.v == other.v
+    def __eq__(self, other):
+        Key.calls += 1
+        return self.v == other.v
 
 
-        # กรณีปกติ — hash ต่างกัน ของกระจายไปคนละช่อง
-        s_good = {Key(i, i) for i in range(1000)}
-        Key.calls = 0                          # รีเซ็ตหลังสร้างเสร็จ นับแค่ตอนค้น
-        Key(999, 999) in s_good
-        print("hash กระจายดี  : เทียบ ==", Key.calls, "ครั้ง")
+# กรณีปกติ — hash ต่างกัน ของกระจายไปคนละช่อง
+s_good = {Key(i, i) for i in range(1000)}
+Key.calls = 0                          # รีเซ็ตหลังสร้างเสร็จ นับแค่ตอนค้น
+Key(999, 999) in s_good
+print("hash กระจายดี  : เทียบ ==", Key.calls, "ครั้ง")
 
-        # กรณีแย่สุด — hash เป็น 0 ทุกตัว ของไปกองที่เดียว
-        s_bad = {Key(i, 0) for i in range(1000)}
-        Key.calls = 0
-        Key(999, 0) in s_bad
-        print("hash ชนกันหมด : เทียบ ==", Key.calls, "ครั้ง")`,
+# กรณีแย่สุด — hash เป็น 0 ทุกตัว ของไปกองที่เดียว
+s_bad = {Key(i, 0) for i in range(1000)}
+Key.calls = 0
+Key(999, 0) in s_bad
+print("hash ชนกันหมด : เทียบ ==", Key.calls, "ครั้ง")`,
                 out: `hash กระจายดี  : เทียบ == 1 ครั้ง
-        hash ชนกันหมด : เทียบ == 1345 ครั้ง`,
+hash ชนกันหมด : เทียบ == 1345 ครั้ง`,
               },
               {
                 t: "callout",
@@ -169,27 +169,48 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "ของที่ใช้เป็น key ได้ กับที่ไม่ได้",
                 code: `d = {}
-        d[3] = "int ได้"
-        d["abc"] = "str ได้"
-        d[(1, 2)] = "tuple ได้"        # tuple แก้ไม่ได้ -> ใช้ได้
-        print(d)
+d[3] = "int ได้"
+d["abc"] = "str ได้"
+d[(1, 2)] = "tuple ได้"        # tuple แก้ไม่ได้ -> ใช้ได้
+print(d)
 
-        try:
-            d[[1, 2]] = "list?"        # list แก้ได้ -> ใช้ไม่ได้
-        except TypeError as e:
-            print("list  ->", type(e).__name__ + ":", e)
+try:
+    d[[1, 2]] = "list?"        # list แก้ได้ -> ใช้ไม่ได้
+except TypeError as e:
+    print("list  ->", type(e).__name__ + ":", e)
 
-        try:
-            d[{1, 2}] = "set?"         # set ก็แก้ได้ -> ใช้ไม่ได้ (แต่ frozenset ได้)
-        except TypeError as e:
-            print("set   ->", type(e).__name__ + ":", e)`,
+try:
+    d[{1, 2}] = "set?"         # set ก็แก้ได้ -> ใช้ไม่ได้ (แต่ frozenset ได้)
+except TypeError as e:
+    print("set   ->", type(e).__name__ + ":", e)`,
                 out: `{3: 'int ได้', 'abc': 'str ได้', (1, 2): 'tuple ได้'}
-        list  -> TypeError: unhashable type: 'list'
-        set   -> TypeError: unhashable type: 'set'`,
+list  -> TypeError: unhashable type: 'list'
+set   -> TypeError: unhashable type: 'set'`,
               },
               {
                 t: "p",
-                c: "คำว่า unhashable type: 'list' คือ error ที่จะเจอบ่อยมากในหมวดนี้ และทางแก้เกือบทุกครั้งคือประโยคเดียว: แปลง list เป็น tuple ก่อนใช้เป็น key ท่านี้ใช้แทนกันได้ตรง ๆ เพราะ tuple ที่มีค่าเหมือนกันจะมี hash เท่ากันเสมอ (เรื่องนี้จะกลายเป็นแบบที่ 4 ในส่วนถัดไป)",
+                c: "คำว่า unhashable type: 'list' คือ error ที่จะเจอบ่อยมากในหมวดนี้ และทางแก้เกือบทุกครั้งคือประโยคเดียว: แปลง list เป็น tuple ก่อนใช้เป็น key เพราะ tuple สองตัวที่มีค่าเหมือนกันจะมี hash เท่ากัน จึงใช้เทียบกันได้ (เรื่องนี้จะกลายเป็นแบบที่ 4 ในส่วนถัดไป) — แต่มีข้อแม้ที่ต้องรู้: tuple ไม่ได้ hashable โดยอัตโนมัติ มันจะ hashable เฉพาะเมื่อ ของทุกชิ้นข้างในเป็น hashable ด้วย ดังนั้น tuple([1, 2]) ใช้ได้ แต่ tuple ที่มี list ซ้อนอยู่ข้างใน เช่น (1, [2]) ยังขึ้น unhashable type: 'list' เหมือนเดิม ถ้าเจอ list ซ้อนหลายชั้นต้องแปลงให้เป็น tuple ทุกชั้น",
+              },
+              {
+                t: "codeout",
+                lang: "python",
+                label: "ข้อแม้ของ tuple — hashable เฉพาะเมื่อของข้างในทุกชิ้น hashable",
+                code: `rows = [[1, 2], [3, 4], [1, 2]]
+print("tuple ธรรมดา ใช้ได้      :", {tuple(r) for r in rows})
+
+nested = [[1, [2]], [3, [4]]]
+try:
+    {tuple(r) for r in nested}
+except TypeError as e:
+    print("tuple ที่มี list ซ้อน    ->", type(e).__name__ + ":", e)
+
+def deep(x):
+    return tuple(deep(i) for i in x) if isinstance(x, list) else x
+
+print("แปลงเป็น tuple ทุกชั้น    :", {deep(r) for r in nested})`,
+                out: `tuple ธรรมดา ใช้ได้      : {(1, 2), (3, 4)}
+tuple ที่มี list ซ้อน    -> TypeError: unhashable type: 'list'
+แปลงเป็น tuple ทุกชั้น    : {(1, (2,)), (3, (4,))}`,
               },
 
               { t: "h3", c: "กับดักที่ไม่มีใครบอก: 1, True และ 1.0 คือ key เดียวกัน" },
@@ -201,15 +222,15 @@ export const hashMapPages: Record<string, Page> = {
                 t: "codeout",
                 lang: "python",
                 code: `d = {}
-        d[1] = "หนึ่ง"
-        d[True] = "จริง"
-        d[1.0] = "หนึ่งจุดศูนย์"
-        print(d)                                        # เหลือ key เดียว!
-        print("1 == True == 1.0 :", 1 == True == 1.0)
-        print("hash เท่ากันหมด  :", hash(1) == hash(True) == hash(1.0))`,
+d[1] = "หนึ่ง"
+d[True] = "จริง"
+d[1.0] = "หนึ่งจุดศูนย์"
+print(d)                                        # เหลือ key เดียว!
+print("1 == True == 1.0 :", 1 == True == 1.0)
+print("hash เท่ากันหมด  :", hash(1) == hash(True) == hash(1.0))`,
                 out: `{1: 'หนึ่งจุดศูนย์'}
-        1 == True == 1.0 : True
-        hash เท่ากันหมด  : True`,
+1 == True == 1.0 : True
+hash เท่ากันหมด  : True`,
               },
               {
                 t: "p",
@@ -257,34 +278,34 @@ export const hashMapPages: Record<string, Page> = {
                 label: "การนับความถี่ทำได้ 4 ท่า ผลเหมือนกันหมด",
                 code: `from collections import defaultdict, Counter
 
-        words = ["a", "b", "a", "c", "a", "b"]
+words = ["a", "b", "a", "c", "a", "b"]
 
-        c1 = {}                          # 1) เช็คก่อนว่ามี key ไหม
-        for w in words:
-            if w not in c1:
-                c1[w] = 0
-            c1[w] += 1
+c1 = {}                          # 1) เช็คก่อนว่ามี key ไหม
+for w in words:
+    if w not in c1:
+        c1[w] = 0
+    c1[w] += 1
 
-        c2 = {}                          # 2) .get(key, ค่าเริ่มต้น) — สั้นกว่า ไม่ต้อง if
-        for w in words:
-            c2[w] = c2.get(w, 0) + 1
+c2 = {}                          # 2) .get(key, ค่าเริ่มต้น) — สั้นกว่า ไม่ต้อง if
+for w in words:
+    c2[w] = c2.get(w, 0) + 1
 
-        c3 = defaultdict(int)            # 3) key ที่ไม่มี ให้เริ่มที่ int() = 0 ให้เอง
-        for w in words:
-            c3[w] += 1
+c3 = defaultdict(int)            # 3) key ที่ไม่มี ให้เริ่มที่ int() = 0 ให้เอง
+for w in words:
+    c3[w] += 1
 
-        c4 = Counter(words)              # 4) นับให้เสร็จในบรรทัดเดียว
+c4 = Counter(words)              # 4) นับให้เสร็จในบรรทัดเดียว
 
-        print("1) if/else       :", c1)
-        print("2) .get(w, 0)    :", c2)
-        print("3) defaultdict   :", dict(c3))
-        print("4) Counter       :", c4)
-        print("ผลเหมือนกันหมด    :", c1 == c2 == dict(c3) == dict(c4))`,
+print("1) if/else       :", c1)
+print("2) .get(w, 0)    :", c2)
+print("3) defaultdict   :", dict(c3))
+print("4) Counter       :", c4)
+print("ผลเหมือนกันหมด    :", c1 == c2 == dict(c3) == dict(c4))`,
                 out: `1) if/else       : {'a': 3, 'b': 2, 'c': 1}
-        2) .get(w, 0)    : {'a': 3, 'b': 2, 'c': 1}
-        3) defaultdict   : {'a': 3, 'b': 2, 'c': 1}
-        4) Counter       : Counter({'a': 3, 'b': 2, 'c': 1})
-        ผลเหมือนกันหมด    : True`,
+2) .get(w, 0)    : {'a': 3, 'b': 2, 'c': 1}
+3) defaultdict   : {'a': 3, 'b': 2, 'c': 1}
+4) Counter       : Counter({'a': 3, 'b': 2, 'c': 1})
+ผลเหมือนกันหมด    : True`,
               },
               {
                 t: "callout",
@@ -299,16 +320,16 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 code: `from collections import Counter
 
-        count = {"a": 3}
-        print('count.get("z", 0)     :', count.get("z", 0))      # ปลอดภัย คืนค่า default
-        print('Counter("aaa")["z"]   :', Counter("aaa")["z"])     # Counter คืน 0 ให้เอง
-        try:
-            print(count["z"])                                     # dict ธรรมดา -> พัง
-        except KeyError as e:
-            print('count["z"]            : KeyError', e)`,
+count = {"a": 3}
+print('count.get("z", 0)     :', count.get("z", 0))      # ปลอดภัย คืนค่า default
+print('Counter("aaa")["z"]   :', Counter("aaa")["z"])     # Counter คืน 0 ให้เอง
+try:
+    print(count["z"])                                     # dict ธรรมดา -> พัง
+except KeyError as e:
+    print('count["z"]            : KeyError', e)`,
                 out: `count.get("z", 0)     : 0
-        Counter("aaa")["z"]   : 0
-        count["z"]            : KeyError 'z'`,
+Counter("aaa")["z"]   : 0
+count["z"]            : KeyError 'z'`,
               },
               {
                 t: "codeout",
@@ -316,14 +337,14 @@ export const hashMapPages: Record<string, Page> = {
                 label: "แต่ defaultdict สร้าง key ขึ้นมาเองแค่จากการ \"อ่าน\"",
                 code: `from collections import defaultdict
 
-        d = defaultdict(int)
-        print('"z" in d ก่อนอ่าน :', "z" in d)
-        _ = d["z"]                          # แค่อ่านค่า ไม่ได้ assign อะไรเลย
-        print('"z" in d หลังอ่าน :', "z" in d, "<- แค่อ่านก็โดนสร้างแล้ว")
-        print("d =", dict(d), "| len(d) =", len(d))`,
+d = defaultdict(int)
+print('"z" in d ก่อนอ่าน :', "z" in d)
+_ = d["z"]                          # แค่อ่านค่า ไม่ได้ assign อะไรเลย
+print('"z" in d หลังอ่าน :', "z" in d, "<- แค่อ่านก็โดนสร้างแล้ว")
+print("d =", dict(d), "| len(d) =", len(d))`,
                 out: `"z" in d ก่อนอ่าน : False
-        "z" in d หลังอ่าน : True <- แค่อ่านก็โดนสร้างแล้ว
-        d = {'z': 0} | len(d) = 1`,
+"z" in d หลังอ่าน : True <- แค่อ่านก็โดนสร้างแล้ว
+d = {'z': 0} | len(d) = 1`,
               },
               {
                 t: "p",
@@ -350,9 +371,9 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "โครงของแบบที่ 1",
                 c: `pool = set(กองที่จะเอาไว้เทียบ)      # สร้างครั้งเดียว ก่อนเข้าลูป
-        for x in data:
-            if x in pool:                    # O(1) ทุกครั้งที่ถาม
-                ...`,
+for x in data:
+    if x in pool:                    # O(1) ทุกครั้งที่ถาม
+        ...`,
               },
               {
                 t: "codeout",
@@ -360,13 +381,13 @@ export const hashMapPages: Record<string, Page> = {
                 label: "ของจริง — หาตัวที่มีในกองหนึ่งแต่ไม่มีในอีกกอง",
                 code: `a, b = [4, 9, 5], [9, 8, 4, 3]
 
-        seen = set(a)
-        print("ตัวใน b ที่ไม่มีใน a  :", [x for x in b if x not in seen])
+seen = set(a)
+print("ตัวใน b ที่ไม่มีใน a  :", [x for x in b if x not in seen])
 
-        # ถ้าโจทย์ไม่ต้องการตัวซ้ำในคำตอบ ใช้ operator ของ set ได้เลย สั้นกว่า
-        print("แบบตัดซ้ำด้วย set    :", set(b) - set(a))`,
+# ถ้าโจทย์ไม่ต้องการตัวซ้ำในคำตอบ ใช้ operator ของ set ได้เลย สั้นกว่า
+print("แบบตัดซ้ำด้วย set    :", set(b) - set(a))`,
                 out: `ตัวใน b ที่ไม่มีใน a  : [8, 3]
-        แบบตัดซ้ำด้วย set    : {8, 3}`,
+แบบตัดซ้ำด้วย set    : {8, 3}`,
               },
               {
                 t: "callout",
@@ -385,8 +406,8 @@ export const hashMapPages: Record<string, Page> = {
                 label: "โครงของแบบที่ 2",
                 c: `from collections import Counter
 
-        count = Counter(data)      # นับทั้งกองให้เสร็จในบรรทัดเดียว
-        count[x]                   # x โผล่กี่ครั้ง — ถ้าไม่มีจะได้ 0 ไม่ error`,
+count = Counter(data)      # นับทั้งกองให้เสร็จในบรรทัดเดียว
+count[x]                   # x โผล่กี่ครั้ง — ถ้าไม่มีจะได้ 0 ไม่ error`,
               },
               {
                 t: "codeout",
@@ -394,13 +415,13 @@ export const hashMapPages: Record<string, Page> = {
                 label: "ของจริง — นับตัวอักษร",
                 code: `from collections import Counter
 
-        c = Counter("abracadabra")
-        print("Counter         :", c)              # เรียงจากบ่อยสุดให้เลย
-        print('c["a"] / c["z"]  :', c["a"], "/", c["z"])
-        print("บ่อยสุด 2 ตัว     :", c.most_common(2))`,
+c = Counter("abracadabra")
+print("Counter         :", c)              # เรียงจากบ่อยสุดให้เลย
+print('c["a"] / c["z"]  :', c["a"], "/", c["z"])
+print("บ่อยสุด 2 ตัว     :", c.most_common(2))`,
                 out: `Counter         : Counter({'a': 5, 'b': 2, 'r': 2, 'c': 1, 'd': 1})
-        c["a"] / c["z"]  : 5 / 0
-        บ่อยสุด 2 ตัว     : [('a', 5), ('b', 2)]`,
+c["a"] / c["z"]  : 5 / 0
+บ่อยสุด 2 ตัว     : [('a', 5), ('b', 2)]`,
               },
               {
                 t: "callout",
@@ -419,12 +440,12 @@ export const hashMapPages: Record<string, Page> = {
                 label: "โครงของแบบที่ 3",
                 c: `from collections import Counter
 
-        count = Counter(data)
-        vals = list(count.values())      # ทิ้ง key ทั้งหมด เหลือแต่ "จำนวนครั้ง"
+count = Counter(data)
+vals = list(count.values())      # ทิ้ง key ทั้งหมด เหลือแต่ "จำนวนครั้ง"
 
-        # แล้วค่อยถามคำถามชั้นที่สองกับ vals เช่น
-        len(set(vals)) == len(vals)      # จำนวนครั้งของทุกตัว ไม่ซ้ำกันเลย ใช่ไหม
-        sorted(vals) == sorted(other)    # รูปแบบความถี่ของสองกอง ตรงกันไหม`,
+# แล้วค่อยถามคำถามชั้นที่สองกับ vals เช่น
+len(set(vals)) == len(vals)      # จำนวนครั้งของทุกตัว ไม่ซ้ำกันเลย ใช่ไหม
+sorted(vals) == sorted(other)    # รูปแบบความถี่ของสองกอง ตรงกันไหม`,
               },
               {
                 t: "codeout",
@@ -432,15 +453,15 @@ export const hashMapPages: Record<string, Page> = {
                 label: "ของจริง — จำนวนครั้งของทุกตัวไม่ซ้ำกันเลยใช่ไหม",
                 code: `from collections import Counter
 
-        for s in ["aabbbc", "aabbc"]:
-            c = Counter(s)
-            v = list(c.values())
-            print(f"{s:<8} -> {dict(c)}")
-            print(f"{'':8}    จำนวนครั้ง = {sorted(v)} | ไม่ซ้ำกันเลยไหม: {len(set(v)) == len(v)}")`,
+for s in ["aabbbc", "aabbc"]:
+    c = Counter(s)
+    v = list(c.values())
+    print(f"{s:<8} -> {dict(c)}")
+    print(f"{'':8}    จำนวนครั้ง = {sorted(v)} | ไม่ซ้ำกันเลยไหม: {len(set(v)) == len(v)}")`,
                 out: `aabbbc   -> {'a': 2, 'b': 3, 'c': 1}
-                    จำนวนครั้ง = [1, 2, 3] | ไม่ซ้ำกันเลยไหม: True
-        aabbc    -> {'a': 2, 'b': 2, 'c': 1}
-                    จำนวนครั้ง = [1, 2, 2] | ไม่ซ้ำกันเลยไหม: False`,
+            จำนวนครั้ง = [1, 2, 3] | ไม่ซ้ำกันเลยไหม: True
+aabbc    -> {'a': 2, 'b': 2, 'c': 1}
+            จำนวนครั้ง = [1, 2, 2] | ไม่ซ้ำกันเลยไหม: False`,
               },
               {
                 t: "p",
@@ -463,8 +484,8 @@ export const hashMapPages: Record<string, Page> = {
                 label: "โครงของแบบที่ 4",
                 c: `from collections import Counter
 
-        count = Counter(tuple(item) for item in data)   # list -> tuple ก่อนใช้เป็น key
-        count[tuple(อีกก้อนที่อยากเทียบ)]                 # เทียบทั้งก้อนใน O(1) ครั้งเดียว`,
+count = Counter(tuple(item) for item in data)   # list -> tuple ก่อนใช้เป็น key
+count[tuple(อีกก้อนที่อยากเทียบ)]                 # เทียบทั้งก้อนใน O(1) ครั้งเดียว`,
               },
               {
                 t: "codeout",
@@ -472,26 +493,26 @@ export const hashMapPages: Record<string, Page> = {
                 label: "ของจริง — นับว่ามีคู่ (แถว, หลัก) ที่หน้าตาเหมือนกันกี่คู่",
                 code: `from collections import Counter
 
-        grid = [[3, 2, 1],
-                [1, 7, 6],
-                [2, 7, 7]]
+grid = [[3, 2, 1],
+        [1, 7, 6],
+        [2, 7, 7]]
 
-        rowc = Counter(tuple(r) for r in grid)     # นับแถว โดยใช้ทั้งแถวเป็น key
-        print("นับแต่ละแถว :", rowc)
+rowc = Counter(tuple(r) for r in grid)     # นับแถว โดยใช้ทั้งแถวเป็น key
+print("นับแต่ละแถว :", rowc)
 
-        cols = list(zip(*grid))                    # zip(*grid) = พลิกตาราง ได้หลักออกมา
-        print("หลักทั้งหมด :", cols)
+cols = list(zip(*grid))                    # zip(*grid) = พลิกตาราง ได้หลักออกมา
+print("หลักทั้งหมด :", cols)
 
-        for col in cols:
-            print(f"   หลัก {col} -> มีแถวหน้าตาเดียวกัน {rowc[col]} แถว")
+for col in cols:
+    print(f"   หลัก {col} -> มีแถวหน้าตาเดียวกัน {rowc[col]} แถว")
 
-        print("คำตอบ =", sum(rowc[col] for col in cols))`,
+print("คำตอบ =", sum(rowc[col] for col in cols))`,
                 out: `นับแต่ละแถว : Counter({(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1})
-        หลักทั้งหมด : [(3, 1, 2), (2, 7, 7), (1, 6, 7)]
-           หลัก (3, 1, 2) -> มีแถวหน้าตาเดียวกัน 0 แถว
-           หลัก (2, 7, 7) -> มีแถวหน้าตาเดียวกัน 1 แถว
-           หลัก (1, 6, 7) -> มีแถวหน้าตาเดียวกัน 0 แถว
-        คำตอบ = 1`,
+หลักทั้งหมด : [(3, 1, 2), (2, 7, 7), (1, 6, 7)]
+   หลัก (3, 1, 2) -> มีแถวหน้าตาเดียวกัน 0 แถว
+   หลัก (2, 7, 7) -> มีแถวหน้าตาเดียวกัน 1 แถว
+   หลัก (1, 6, 7) -> มีแถวหน้าตาเดียวกัน 0 แถว
+คำตอบ = 1`,
               },
               {
                 t: "p",
@@ -513,10 +534,10 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "โครงของแบบที่ 5",
                 c: `seen = {}                       # หรือ set() ถ้าไม่ต้องจำ index
-        for i, x in enumerate(data):
-            if สิ่งที่ต้องการ in seen:        # 1) ถามก่อน
-                ...                         #    เจอแล้ว จบได้เลย
-            seen[x] = i                     # 2) แล้วค่อยจดตัวเอง — สลับสองบรรทัดนี้ไม่ได้`,
+for i, x in enumerate(data):
+    if สิ่งที่ต้องการ in seen:        # 1) ถามก่อน
+        ...                         #    เจอแล้ว จบได้เลย
+    seen[x] = i                     # 2) แล้วค่อยจดตัวเอง — สลับสองบรรทัดนี้ไม่ได้`,
               },
               {
                 t: "p",
@@ -527,19 +548,19 @@ export const hashMapPages: Record<string, Page> = {
                 lang: "python",
                 label: "ของจริง — LC1 Two Sum วนรอบเดียว ไม่ sort จึงไม่เสีย index",
                 code: `nums = [3, 9, 4, 1]
-        target = 12
-        seen = {}                       # ค่า -> index ที่เคยเจอ
+target = 12
+seen = {}                       # ค่า -> index ที่เคยเจอ
 
-        for i, x in enumerate(nums):
-            need = target - x           # ถ้าจะครบ target ต้องมีเพื่อนหน้าตาแบบนี้
-            print(f"i={i} x={x} | ต้องการคู่ {need} | seen={seen} -> เคยเจอไหม {need in seen}")
-            if need in seen:
-                print("คำตอบ index:", (seen[need], i))
-                break
-            seen[x] = i                 # ยังไม่เจอ -> จดตัวเองไว้ให้คนหลังมาเจอ`,
+for i, x in enumerate(nums):
+    need = target - x           # ถ้าจะครบ target ต้องมีเพื่อนหน้าตาแบบนี้
+    print(f"i={i} x={x} | ต้องการคู่ {need} | seen={seen} -> เคยเจอไหม {need in seen}")
+    if need in seen:
+        print("คำตอบ index:", (seen[need], i))
+        break
+    seen[x] = i                 # ยังไม่เจอ -> จดตัวเองไว้ให้คนหลังมาเจอ`,
                 out: `i=0 x=3 | ต้องการคู่ 9 | seen={} -> เคยเจอไหม False
-        i=1 x=9 | ต้องการคู่ 3 | seen={3: 0} -> เคยเจอไหม True
-        คำตอบ index: (0, 1)`,
+i=1 x=9 | ต้องการคู่ 3 | seen={3: 0} -> เคยเจอไหม True
+คำตอบ index: (0, 1)`,
               },
               {
                 t: "callout",
@@ -559,10 +580,10 @@ export const hashMapPages: Record<string, Page> = {
                 label: "โครงของแบบที่ 6",
                 c: `from collections import defaultdict
 
-        groups = defaultdict(list)          # key ที่ยังไม่มี จะเริ่มที่ [] ให้เอง
-        for item in data:
-            key = คำนวณ key จาก item        # นี่คือส่วนที่ต้องคิดของแต่ละโจทย์
-            groups[key].append(item)        # ของ key เดียวกันไปกองรวมกันเอง`,
+groups = defaultdict(list)          # key ที่ยังไม่มี จะเริ่มที่ [] ให้เอง
+for item in data:
+    key = คำนวณ key จาก item        # นี่คือส่วนที่ต้องคิดของแต่ละโจทย์
+    groups[key].append(item)        # ของ key เดียวกันไปกองรวมกันเอง`,
               },
               {
                 t: "codeout",
@@ -570,22 +591,22 @@ export const hashMapPages: Record<string, Page> = {
                 label: "ของจริง — จัดกลุ่มคำที่สลับตัวอักษรกันได้ (anagram)",
                 code: `from collections import defaultdict
 
-        words = ["eat", "tea", "tan", "ate", "nat", "bat"]
-        groups = defaultdict(list)
+words = ["eat", "tea", "tan", "ate", "nat", "bat"]
+groups = defaultdict(list)
 
-        for w in words:
-            key = "".join(sorted(w))        # เรียงตัวอักษร -> คำที่สลับกันได้จะได้ key เดียวกัน
-            groups[key].append(w)
-            print(f"{w} -> key '{key}'")
+for w in words:
+    key = "".join(sorted(w))        # เรียงตัวอักษร -> คำที่สลับกันได้จะได้ key เดียวกัน
+    groups[key].append(w)
+    print(f"{w} -> key '{key}'")
 
-        print("ผลลัพธ์:", list(groups.values()))`,
+print("ผลลัพธ์:", list(groups.values()))`,
                 out: `eat -> key 'aet'
-        tea -> key 'aet'
-        tan -> key 'ant'
-        ate -> key 'aet'
-        nat -> key 'ant'
-        bat -> key 'abt'
-        ผลลัพธ์: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]`,
+tea -> key 'aet'
+tan -> key 'ant'
+ate -> key 'aet'
+nat -> key 'ant'
+bat -> key 'abt'
+ผลลัพธ์: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]`,
               },
               {
                 t: "p",
@@ -694,13 +715,13 @@ export const hashMapPages: Record<string, Page> = {
                 label: "ราคาของ memory ที่จ่ายไป (CPython 3.10)",
                 code: `import sys
 
-        n = 1000
-        print("list(range(1000)) :", sys.getsizeof(list(range(n))), "bytes")
-        print("set(range(1000))  :", sys.getsizeof(set(range(n))), "bytes")
-        print("dict.fromkeys     :", sys.getsizeof(dict.fromkeys(range(n))), "bytes")`,
+n = 1000
+print("list(range(1000)) :", sys.getsizeof(list(range(n))), "bytes")
+print("set(range(1000))  :", sys.getsizeof(set(range(n))), "bytes")
+print("dict.fromkeys     :", sys.getsizeof(dict.fromkeys(range(n))), "bytes")`,
                 out: `list(range(1000)) : 8056 bytes
-        set(range(1000))  : 32984 bytes
-        dict.fromkeys     : 36960 bytes`,
+set(range(1000))  : 32984 bytes
+dict.fromkeys     : 36960 bytes`,
               },
               {
                 t: "p",
@@ -753,28 +774,28 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "Compare two approaches and count comparisons",
       code: `a = [4, 9, 5, 2, 7]
-  b = [9, 4, 9, 8, 4, 3]
+b = [9, 4, 9, 8, 4, 3]
 
-  # Approach 1 — check with a list (expand what \`x in a\` does)
-  steps = 0
-  res = []
-  for x in b:
-      found = False
-      for y in a:                # scan every item in a until found or exhausted
-          steps += 1
-          if x == y:
-              found = True
-              break
-      if not found:
-          res.append(x)
-  print("list :", res, "| compared", steps, "times")
+# Approach 1 — check with a list (expand what \`x in a\` does)
+steps = 0
+res = []
+for x in b:
+    found = False
+    for y in a:                # scan every item in a until found or exhausted
+        steps += 1
+        if x == y:
+            found = True
+            break
+    if not found:
+        res.append(x)
+print("list :", res, "| compared", steps, "times")
 
-  # Approach 2 — check with a set
-  a_set = set(a)                 # convert once; pay one chunk of extra memory
-  res2 = [x for x in b if x not in a_set]
-  print("set  :", res2, "| compared", len(b), "times")`,
+# Approach 2 — check with a set
+a_set = set(a)                 # convert once; pay one chunk of extra memory
+res2 = [x for x in b if x not in a_set]
+print("set  :", res2, "| compared", len(b), "times")`,
       out: `list : [8, 3] | compared 16 times
-  set  : [8, 3] | compared 6 times`,
+set  : [8, 3] | compared 6 times`,
     },
     {
       t: "p",
@@ -800,12 +821,12 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "From key → number → slot (assume 8 slots)",
       code: `for k in [7, 15, 23, 42, 100]:
-      print(f"key {k:<4} hash = {hash(k):<4} -> slot {hash(k) % 8}")`,
+    print(f"key {k:<4} hash = {hash(k):<4} -> slot {hash(k) % 8}")`,
       out: `key 7    hash = 7    -> slot 7
-  key 15   hash = 15   -> slot 7
-  key 23   hash = 23   -> slot 7
-  key 42   hash = 42   -> slot 2
-  key 100  hash = 100  -> slot 4`,
+key 15   hash = 15   -> slot 7
+key 23   hash = 23   -> slot 7
+key 42   hash = 42   -> slot 2
+key 100  hash = 100  -> slot 4`,
     },
     {
       t: "image",
@@ -842,32 +863,32 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "Proof that collisions can destroy O(1)",
       code: `class Key:
-      calls = 0                          # shared counter for == calls
+    calls = 0                          # shared counter for == calls
 
-      def __init__(self, v, h):
-          self.v, self.h = v, h
+    def __init__(self, v, h):
+        self.v, self.h = v, h
 
-      def __hash__(self):
-          return self.h                  # you control the hash
+    def __hash__(self):
+        return self.h                  # you control the hash
 
-      def __eq__(self, other):
-          Key.calls += 1
-          return self.v == other.v
+    def __eq__(self, other):
+        Key.calls += 1
+        return self.v == other.v
 
 
-  # Normal case — different hashes, items spread out
-  s_good = {Key(i, i) for i in range(1000)}
-  Key.calls = 0                          # reset after build; count only lookup
-  Key(999, 999) in s_good
-  print("well distributed : == called", Key.calls, "times")
+# Normal case — different hashes, items spread out
+s_good = {Key(i, i) for i in range(1000)}
+Key.calls = 0                          # reset after build; count only lookup
+Key(999, 999) in s_good
+print("well distributed : == called", Key.calls, "times")
 
-  # Worst case — every hash is 0, everything piles up
-  s_bad = {Key(i, 0) for i in range(1000)}
-  Key.calls = 0
-  Key(999, 0) in s_bad
-  print("all collide      : == called", Key.calls, "times")`,
+# Worst case — every hash is 0, everything piles up
+s_bad = {Key(i, 0) for i in range(1000)}
+Key.calls = 0
+Key(999, 0) in s_bad
+print("all collide      : == called", Key.calls, "times")`,
       out: `well distributed : == called 1 times
-  all collide      : == called 1345 times`,
+all collide      : == called 1345 times`,
     },
     {
       t: "callout",
@@ -885,27 +906,48 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "What can be a key vs what cannot",
       code: `d = {}
-  d[3] = "int ok"
-  d["abc"] = "str ok"
-  d[(1, 2)] = "tuple ok"        # immutable -> ok
-  print(d)
+d[3] = "int ok"
+d["abc"] = "str ok"
+d[(1, 2)] = "tuple ok"        # immutable -> ok
+print(d)
 
-  try:
-      d[[1, 2]] = "list?"        # mutable -> not ok
-  except TypeError as e:
-      print("list  ->", type(e).__name__ + ":", e)
+try:
+    d[[1, 2]] = "list?"        # mutable -> not ok
+except TypeError as e:
+    print("list  ->", type(e).__name__ + ":", e)
 
-  try:
-      d[{1, 2}] = "set?"         # mutable -> not ok (frozenset is ok)
-  except TypeError as e:
-      print("set   ->", type(e).__name__ + ":", e)`,
+try:
+    d[{1, 2}] = "set?"         # mutable -> not ok (frozenset is ok)
+except TypeError as e:
+    print("set   ->", type(e).__name__ + ":", e)`,
       out: `{3: 'int ok', 'abc': 'str ok', (1, 2): 'tuple ok'}
-  list  -> TypeError: unhashable type: 'list'
-  set   -> TypeError: unhashable type: 'set'`,
+list  -> TypeError: unhashable type: 'list'
+set   -> TypeError: unhashable type: 'set'`,
     },
     {
       t: "p",
-      c: "unhashable type: 'list' is the error you will see often here. The fix is almost always one line: convert the list to a tuple before using it as a key. Equal tuples always share the same hash (this becomes pattern 4 next).",
+      c: "unhashable type: 'list' is the error you will see often here. The fix is almost always one line: convert the list to a tuple before using it as a key — equal tuples share the same hash, so they compare correctly (this becomes pattern 4 next). But there is a catch worth knowing: a tuple is not automatically hashable. It is hashable only if every element inside it is hashable too. So tuple([1, 2]) works, but a tuple with a nested list such as (1, [2]) still raises unhashable type: 'list'. With nested lists you must convert every level to tuples.",
+    },
+    {
+      t: "codeout",
+      lang: "python",
+      label: "The tuple caveat — hashable only if every element inside is hashable",
+      code: `rows = [[1, 2], [3, 4], [1, 2]]
+print("plain tuple works    :", {tuple(r) for r in rows})
+
+nested = [[1, [2]], [3, [4]]]
+try:
+    {tuple(r) for r in nested}
+except TypeError as e:
+    print("tuple with a list    ->", type(e).__name__ + ":", e)
+
+def deep(x):
+    return tuple(deep(i) for i in x) if isinstance(x, list) else x
+
+print("convert every level  :", {deep(r) for r in nested})`,
+      out: `plain tuple works    : {(1, 2), (3, 4)}
+tuple with a list    -> TypeError: unhashable type: 'list'
+convert every level  : {(1, (2,)), (3, (4,))}`,
     },
 
     { t: "h3", c: "The trap nobody warns you about: 1, True, and 1.0 are the same key" },
@@ -917,15 +959,15 @@ export const hashMapPages: Record<string, Page> = {
       t: "codeout",
       lang: "python",
       code: `d = {}
-  d[1] = "one"
-  d[True] = "true"
-  d[1.0] = "one-point-zero"
-  print(d)                                        # only one key left!
-  print("1 == True == 1.0 :", 1 == True == 1.0)
-  print("same hashes      :", hash(1) == hash(True) == hash(1.0))`,
+d[1] = "one"
+d[True] = "true"
+d[1.0] = "one-point-zero"
+print(d)                                        # only one key left!
+print("1 == True == 1.0 :", 1 == True == 1.0)
+print("same hashes      :", hash(1) == hash(True) == hash(1.0))`,
       out: `{1: 'one-point-zero'}
-  1 == True == 1.0 : True
-  same hashes      : True`,
+1 == True == 1.0 : True
+same hashes      : True`,
     },
     {
       t: "p",
@@ -973,34 +1015,34 @@ export const hashMapPages: Record<string, Page> = {
       label: "Four equivalent ways to count frequencies",
       code: `from collections import defaultdict, Counter
 
-  words = ["a", "b", "a", "c", "a", "b"]
+words = ["a", "b", "a", "c", "a", "b"]
 
-  c1 = {}                          # 1) check if key exists first
-  for w in words:
-      if w not in c1:
-          c1[w] = 0
-      c1[w] += 1
+c1 = {}                          # 1) check if key exists first
+for w in words:
+    if w not in c1:
+        c1[w] = 0
+    c1[w] += 1
 
-  c2 = {}                          # 2) .get(key, default) — shorter, no if
-  for w in words:
-      c2[w] = c2.get(w, 0) + 1
+c2 = {}                          # 2) .get(key, default) — shorter, no if
+for w in words:
+    c2[w] = c2.get(w, 0) + 1
 
-  c3 = defaultdict(int)            # 3) missing key starts at int() = 0
-  for w in words:
-      c3[w] += 1
+c3 = defaultdict(int)            # 3) missing key starts at int() = 0
+for w in words:
+    c3[w] += 1
 
-  c4 = Counter(words)              # 4) count in one line
+c4 = Counter(words)              # 4) count in one line
 
-  print("1) if/else       :", c1)
-  print("2) .get(w, 0)    :", c2)
-  print("3) defaultdict   :", dict(c3))
-  print("4) Counter       :", c4)
-  print("all equal        :", c1 == c2 == dict(c3) == dict(c4))`,
+print("1) if/else       :", c1)
+print("2) .get(w, 0)    :", c2)
+print("3) defaultdict   :", dict(c3))
+print("4) Counter       :", c4)
+print("all equal        :", c1 == c2 == dict(c3) == dict(c4))`,
       out: `1) if/else       : {'a': 3, 'b': 2, 'c': 1}
-  2) .get(w, 0)    : {'a': 3, 'b': 2, 'c': 1}
-  3) defaultdict   : {'a': 3, 'b': 2, 'c': 1}
-  4) Counter       : Counter({'a': 3, 'b': 2, 'c': 1})
-  all equal        : True`,
+2) .get(w, 0)    : {'a': 3, 'b': 2, 'c': 1}
+3) defaultdict   : {'a': 3, 'b': 2, 'c': 1}
+4) Counter       : Counter({'a': 3, 'b': 2, 'c': 1})
+all equal        : True`,
     },
     {
       t: "callout",
@@ -1015,16 +1057,16 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       code: `from collections import Counter
 
-  count = {"a": 3}
-  print('count.get("z", 0)     :', count.get("z", 0))      # safe default
-  print('Counter("aaa")["z"]   :', Counter("aaa")["z"])     # Counter returns 0
-  try:
-      print(count["z"])                                     # plain dict -> boom
-  except KeyError as e:
-      print('count["z"]            : KeyError', e)`,
+count = {"a": 3}
+print('count.get("z", 0)     :', count.get("z", 0))      # safe default
+print('Counter("aaa")["z"]   :', Counter("aaa")["z"])     # Counter returns 0
+try:
+    print(count["z"])                                     # plain dict -> boom
+except KeyError as e:
+    print('count["z"]            : KeyError', e)`,
       out: `count.get("z", 0)     : 0
-  Counter("aaa")["z"]   : 0
-  count["z"]            : KeyError 'z'`,
+Counter("aaa")["z"]   : 0
+count["z"]            : KeyError 'z'`,
     },
     {
       t: "codeout",
@@ -1032,14 +1074,14 @@ export const hashMapPages: Record<string, Page> = {
       label: 'defaultdict creates a key just from a "read"',
       code: `from collections import defaultdict
 
-  d = defaultdict(int)
-  print('"z" in d before read :', "z" in d)
-  _ = d["z"]                          # read only — no assignment
-  print('"z" in d after read  :', "z" in d, "<- created by reading")
-  print("d =", dict(d), "| len(d) =", len(d))`,
+d = defaultdict(int)
+print('"z" in d before read :', "z" in d)
+_ = d["z"]                          # read only — no assignment
+print('"z" in d after read  :', "z" in d, "<- created by reading")
+print("d =", dict(d), "| len(d) =", len(d))`,
       out: `"z" in d before read : False
-  "z" in d after read  : True <- created by reading
-  d = {'z': 0} | len(d) = 1`,
+"z" in d after read  : True <- created by reading
+d = {'z': 0} | len(d) = 1`,
     },
     {
       t: "p",
@@ -1066,9 +1108,9 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "Skeleton for pattern 1",
       c: `pool = set(the_collection_to_check)   # once, before the loop
-  for x in data:
-      if x in pool:                     # O(1) each query
-          ...`,
+for x in data:
+    if x in pool:                     # O(1) each query
+        ...`,
     },
     {
       t: "codeout",
@@ -1076,13 +1118,13 @@ export const hashMapPages: Record<string, Page> = {
       label: "Live — values in one pile but not the other",
       code: `a, b = [4, 9, 5], [9, 8, 4, 3]
 
-  seen = set(a)
-  print("in b but not a :", [x for x in b if x not in seen])
+seen = set(a)
+print("in b but not a :", [x for x in b if x not in seen])
 
-  # if duplicates in the answer do not matter, set ops are shorter
-  print("set difference :", set(b) - set(a))`,
+# if duplicates in the answer do not matter, set ops are shorter
+print("set difference :", set(b) - set(a))`,
       out: `in b but not a : [8, 3]
-  set difference : {8, 3}`,
+set difference : {8, 3}`,
     },
     {
       t: "callout",
@@ -1101,8 +1143,8 @@ export const hashMapPages: Record<string, Page> = {
       label: "Skeleton for pattern 2",
       c: `from collections import Counter
 
-  count = Counter(data)      # count the whole collection
-  count[x]                   # how many times x appears — 0 if missing, no error`,
+count = Counter(data)      # count the whole collection
+count[x]                   # how many times x appears — 0 if missing, no error`,
     },
     {
       t: "codeout",
@@ -1110,13 +1152,13 @@ export const hashMapPages: Record<string, Page> = {
       label: "Live — count characters",
       code: `from collections import Counter
 
-  c = Counter("abracadabra")
-  print("Counter         :", c)              # ordered by frequency
-  print('c["a"] / c["z"]  :', c["a"], "/", c["z"])
-  print("top 2           :", c.most_common(2))`,
+c = Counter("abracadabra")
+print("Counter         :", c)              # ordered by frequency
+print('c["a"] / c["z"]  :', c["a"], "/", c["z"])
+print("top 2           :", c.most_common(2))`,
       out: `Counter         : Counter({'a': 5, 'b': 2, 'r': 2, 'c': 1, 'd': 1})
-  c["a"] / c["z"]  : 5 / 0
-  top 2           : [('a', 5), ('b', 2)]`,
+c["a"] / c["z"]  : 5 / 0
+top 2           : [('a', 5), ('b', 2)]`,
     },
     {
       t: "callout",
@@ -1135,12 +1177,12 @@ export const hashMapPages: Record<string, Page> = {
       label: "Skeleton for pattern 3",
       c: `from collections import Counter
 
-  count = Counter(data)
-  vals = list(count.values())      # drop keys; keep only "how many times"
+count = Counter(data)
+vals = list(count.values())      # drop keys; keep only "how many times"
 
-  # second-layer questions, e.g.
-  len(set(vals)) == len(vals)      # are all frequencies unique?
-  sorted(vals) == sorted(other)    # do two piles share the same frequency bag?`,
+# second-layer questions, e.g.
+len(set(vals)) == len(vals)      # are all frequencies unique?
+sorted(vals) == sorted(other)    # do two piles share the same frequency bag?`,
     },
     {
       t: "codeout",
@@ -1148,15 +1190,15 @@ export const hashMapPages: Record<string, Page> = {
       label: "Live — are all frequencies unique?",
       code: `from collections import Counter
 
-  for s in ["aabbbc", "aabbc"]:
-      c = Counter(s)
-      v = list(c.values())
-      print(f"{s:<8} -> {dict(c)}")
-      print(f"{'':8}    freqs = {sorted(v)} | all unique? {len(set(v)) == len(v)}")`,
+for s in ["aabbbc", "aabbc"]:
+    c = Counter(s)
+    v = list(c.values())
+    print(f"{s:<8} -> {dict(c)}")
+    print(f"{'':8}    freqs = {sorted(v)} | all unique? {len(set(v)) == len(v)}")`,
       out: `aabbbc   -> {'a': 2, 'b': 3, 'c': 1}
-              freqs = [1, 2, 3] | all unique? True
-  aabbc    -> {'a': 2, 'b': 2, 'c': 1}
-              freqs = [1, 2, 2] | all unique? False`,
+            freqs = [1, 2, 3] | all unique? True
+aabbc    -> {'a': 2, 'b': 2, 'c': 1}
+            freqs = [1, 2, 2] | all unique? False`,
     },
     {
       t: "p",
@@ -1179,8 +1221,8 @@ export const hashMapPages: Record<string, Page> = {
       label: "Skeleton for pattern 4",
       c: `from collections import Counter
 
-  count = Counter(tuple(item) for item in data)   # list -> tuple first
-  count[tuple(another_bundle)]                    # whole-bundle compare in O(1)`,
+count = Counter(tuple(item) for item in data)   # list -> tuple first
+count[tuple(another_bundle)]                    # whole-bundle compare in O(1)`,
     },
     {
       t: "codeout",
@@ -1188,26 +1230,26 @@ export const hashMapPages: Record<string, Page> = {
       label: "Live — how many (row, column) pairs look the same",
       code: `from collections import Counter
 
-  grid = [[3, 2, 1],
-          [1, 7, 6],
-          [2, 7, 7]]
+grid = [[3, 2, 1],
+        [1, 7, 6],
+        [2, 7, 7]]
 
-  rowc = Counter(tuple(r) for r in grid)     # count rows; whole row is the key
-  print("row counts :", rowc)
+rowc = Counter(tuple(r) for r in grid)     # count rows; whole row is the key
+print("row counts :", rowc)
 
-  cols = list(zip(*grid))                    # zip(*grid) = transpose → columns
-  print("columns    :", cols)
+cols = list(zip(*grid))                    # zip(*grid) = transpose → columns
+print("columns    :", cols)
 
-  for col in cols:
-      print(f"   col {col} -> matching rows: {rowc[col]}")
+for col in cols:
+    print(f"   col {col} -> matching rows: {rowc[col]}")
 
-  print("answer =", sum(rowc[col] for col in cols))`,
+print("answer =", sum(rowc[col] for col in cols))`,
       out: `row counts : Counter({(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1})
-  columns    : [(3, 1, 2), (2, 7, 7), (1, 6, 7)]
-     col (3, 1, 2) -> matching rows: 0
-     col (2, 7, 7) -> matching rows: 1
-     col (1, 6, 7) -> matching rows: 0
-  answer = 1`,
+columns    : [(3, 1, 2), (2, 7, 7), (1, 6, 7)]
+   col (3, 1, 2) -> matching rows: 0
+   col (2, 7, 7) -> matching rows: 1
+   col (1, 6, 7) -> matching rows: 0
+answer = 1`,
     },
     {
       t: "p",
@@ -1229,10 +1271,10 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "Skeleton for pattern 5",
       c: `seen = {}                       # or set() if you do not need the index
-  for i, x in enumerate(data):
-      if needed_value in seen:        # 1) ask first
-          ...                         #    found — done
-      seen[x] = i                     # 2) then record yourself — order matters`,
+for i, x in enumerate(data):
+    if needed_value in seen:        # 1) ask first
+        ...                         #    found — done
+    seen[x] = i                     # 2) then record yourself — order matters`,
     },
     {
       t: "p",
@@ -1243,19 +1285,19 @@ export const hashMapPages: Record<string, Page> = {
       lang: "python",
       label: "Live — LC1 Two Sum in one pass, no sort, indices intact",
       code: `nums = [3, 9, 4, 1]
-  target = 12
-  seen = {}                       # value -> index seen so far
+target = 12
+seen = {}                       # value -> index seen so far
 
-  for i, x in enumerate(nums):
-      need = target - x           # the partner that would complete target
-      print(f"i={i} x={x} | need {need} | seen={seen} -> seen? {need in seen}")
-      if need in seen:
-          print("answer indices:", (seen[need], i))
-          break
-      seen[x] = i                 # not found yet -> leave yourself for later`,
+for i, x in enumerate(nums):
+    need = target - x           # the partner that would complete target
+    print(f"i={i} x={x} | need {need} | seen={seen} -> seen? {need in seen}")
+    if need in seen:
+        print("answer indices:", (seen[need], i))
+        break
+    seen[x] = i                 # not found yet -> leave yourself for later`,
       out: `i=0 x=3 | need 9 | seen={} -> seen? False
-  i=1 x=9 | need 3 | seen={3: 0} -> seen? True
-  answer indices: (0, 1)`,
+i=1 x=9 | need 3 | seen={3: 0} -> seen? True
+answer indices: (0, 1)`,
     },
     {
       t: "callout",
@@ -1275,10 +1317,10 @@ export const hashMapPages: Record<string, Page> = {
       label: "Skeleton for pattern 6",
       c: `from collections import defaultdict
 
-  groups = defaultdict(list)          # missing key starts as []
-  for item in data:
-      key = compute_key(item)         # the part you design per problem
-      groups[key].append(item)        # same key → same bucket`,
+groups = defaultdict(list)          # missing key starts as []
+for item in data:
+    key = compute_key(item)         # the part you design per problem
+    groups[key].append(item)        # same key → same bucket`,
     },
     {
       t: "codeout",
@@ -1286,22 +1328,22 @@ export const hashMapPages: Record<string, Page> = {
       label: "Live — group anagrams",
       code: `from collections import defaultdict
 
-  words = ["eat", "tea", "tan", "ate", "nat", "bat"]
-  groups = defaultdict(list)
+words = ["eat", "tea", "tan", "ate", "nat", "bat"]
+groups = defaultdict(list)
 
-  for w in words:
-      key = "".join(sorted(w))        # sorted letters → anagrams share a key
-      groups[key].append(w)
-      print(f"{w} -> key '{key}'")
+for w in words:
+    key = "".join(sorted(w))        # sorted letters → anagrams share a key
+    groups[key].append(w)
+    print(f"{w} -> key '{key}'")
 
-  print("result:", list(groups.values()))`,
+print("result:", list(groups.values()))`,
       out: `eat -> key 'aet'
-  tea -> key 'aet'
-  tan -> key 'ant'
-  ate -> key 'aet'
-  nat -> key 'ant'
-  bat -> key 'abt'
-  result: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]`,
+tea -> key 'aet'
+tan -> key 'ant'
+ate -> key 'aet'
+nat -> key 'ant'
+bat -> key 'abt'
+result: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]`,
     },
     {
       t: "p",
@@ -1374,13 +1416,13 @@ export const hashMapPages: Record<string, Page> = {
       label: "Memory cost (CPython 3.10)",
       code: `import sys
 
-  n = 1000
-  print("list(range(1000)) :", sys.getsizeof(list(range(n))), "bytes")
-  print("set(range(1000))  :", sys.getsizeof(set(range(n))), "bytes")
-  print("dict.fromkeys     :", sys.getsizeof(dict.fromkeys(range(n))), "bytes")`,
+n = 1000
+print("list(range(1000)) :", sys.getsizeof(list(range(n))), "bytes")
+print("set(range(1000))  :", sys.getsizeof(set(range(n))), "bytes")
+print("dict.fromkeys     :", sys.getsizeof(dict.fromkeys(range(n))), "bytes")`,
       out: `list(range(1000)) : 8056 bytes
-  set(range(1000))  : 32984 bytes
-  dict.fromkeys     : 36960 bytes`,
+set(range(1000))  : 32984 bytes
+dict.fromkeys     : 36960 bytes`,
     },
     {
       t: "p",
@@ -1455,14 +1497,14 @@ export const hashMapPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_difference(nums1, nums2):
-            s1, s2 = set(nums1), set(nums2)  # ตัดตัวซ้ำของแต่ละกอง
-            # s1 - s2 = อยู่ใน s1 แต่ไม่อยู่ใน s2
-            # s2 - s1 = อยู่ใน s2 แต่ไม่อยู่ใน s1
-            return [list(s1 - s2), list(s2 - s1)]
+    s1, s2 = set(nums1), set(nums2)  # ตัดตัวซ้ำของแต่ละกอง
+    # s1 - s2 = อยู่ใน s1 แต่ไม่อยู่ใน s2
+    # s2 - s1 = อยู่ใน s2 แต่ไม่อยู่ใน s1
+    return [list(s1 - s2), list(s2 - s1)]
 
-        print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
-        print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3], [4, 6]]
-        [[3], []]` },
+print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
+print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3], [4, 6]]
+[[3], []]` },
                 { t: "p", c: "เมื่อ convert เป็น set ปัญหาเรื่องค่าไม่ซ้ำถูกจัดการให้อัตโนมัติ ที่เหลือคือใช้ operator difference (เครื่องหมายลบระหว่าง set) ซึ่งคืน element (สมาชิก) ที่อยู่ในฝั่งซ้ายแต่ไม่อยู่ฝั่งขวา ทำสองทิศทางก็ได้คำตอบครบ" },
                 { t: "p", c: "ถ้าลองเปลี่ยนไปทำบน list โดยไม่ convert เป็น set ก่อน นอกจากจะช้าเป็น O(n^2) แล้ว ยังต้องเขียนโค้ดตัด duplicate เองอีก ซึ่ง set จัดการให้หมดในบรรทัดเดียว" },
                 { t: "p", c: "Time O(n + m) convert สอง array เป็น set และทำ difference · Space O(n + m) เก็บสอง set" },
@@ -1533,15 +1575,15 @@ export const hashMapPages: Record<string, Page> = {
           lang: "python",
           label: "Solution (Python) — runnable",
           code: `def find_difference(nums1, nums2):
-      s1, s2 = set(nums1), set(nums2)  # dedupe each array
-      # s1 - s2 = in s1 but not in s2
-      # s2 - s1 = in s2 but not in s1
-      return [list(s1 - s2), list(s2 - s1)]
+    s1, s2 = set(nums1), set(nums2)  # dedupe each array
+    # s1 - s2 = in s1 but not in s2
+    # s2 - s1 = in s2 but not in s1
+    return [list(s1 - s2), list(s2 - s1)]
 
-  print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
-  print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
+print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
+print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
           out: `[[1, 3], [4, 6]]
-  [[3], []]`,
+[[3], []]`,
         },
         {
           t: "p",
@@ -1617,16 +1659,16 @@ export const hashMapPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
-        def unique_occurrences(arr):
-            counts = Counter(arr).values()   # จำนวนครั้งของแต่ละค่า เช่น [3, 2, 1]
-            # ถ้าเอา values ใส่ set แล้วขนาดยังเท่าเดิม แปลว่าไม่มีตัวซ้ำ
-            return len(counts) == len(set(counts))
+def unique_occurrences(arr):
+    counts = Counter(arr).values()   # จำนวนครั้งของแต่ละค่า เช่น [3, 2, 1]
+    # ถ้าเอา values ใส่ set แล้วขนาดยังเท่าเดิม แปลว่าไม่มีตัวซ้ำ
+    return len(counts) == len(set(counts))
 
-        print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
-        print(unique_occurrences([1, 2]))              # False
-        print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)`, out: `True
-        False
-        True` },
+print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
+print(unique_occurrences([1, 2]))              # False
+print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)`, out: `True
+False
+True` },
                 { t: "p", c: "ชั้นแรก Counter(arr) นับให้อัตโนมัติ แล้ว .values() คืน occurrences ทั้งหมดออกมาเป็นลำดับหนึ่งชุด ชั้นสอง convert ชุดนั้นเป็น set แล้วเทียบขนาด ถ้ามี occurrences ที่ซ้ำกัน set จะยุบตัวลง ขนาดจึงไม่เท่ากับต้นฉบับ" },
                 { t: "p", c: "ถ้าลองเขียนเองแบบไล่เช็คคู่ทุกคู่ของ occurrences จะเป็น O(k^2) แต่ทริก len เทียบ set ทำให้เหลือ O(k) และอ่านง่ายกว่ามาก" },
                 { t: "p", c: "Time O(n) count frequency หนึ่งรอบ สร้าง set หนึ่งรอบ · Space O(n) เก็บ Counter และ set ของ frequency" },
@@ -1697,17 +1739,17 @@ export const hashMapPages: Record<string, Page> = {
           label: "Solution (Python) — runnable",
           code: `from collections import Counter
 
-  def unique_occurrences(arr):
-      counts = Counter(arr).values()   # occurrence counts, e.g. [3, 2, 1]
-      # if putting values into a set keeps the same length, there were no duplicates
-      return len(counts) == len(set(counts))
+def unique_occurrences(arr):
+    counts = Counter(arr).values()   # occurrence counts, e.g. [3, 2, 1]
+    # if putting values into a set keeps the same length, there were no duplicates
+    return len(counts) == len(set(counts))
 
-  print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
-  print(unique_occurrences([1, 2]))              # False
-  print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True`,
+print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
+print(unique_occurrences([1, 2]))              # False
+print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True`,
           out: `True
-  False
-  True`,
+False
+True`,
         },
         {
           t: "p",
@@ -1797,20 +1839,20 @@ export const hashMapPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
-        def close_strings(word1, word2):
-            c1, c2 = Counter(word1), Counter(word2)
-            # เงื่อนไข 1: ต้องใช้ชุดตัวอักษรเดียวกัน (set ของคีย์เท่ากัน)
-            # เงื่อนไข 2: กองของจำนวนความถี่ต้องตรงกัน (เรียงแล้วเท่ากัน)
-            return (set(c1) == set(c2)
-                    and sorted(c1.values()) == sorted(c2.values()))
+def close_strings(word1, word2):
+    c1, c2 = Counter(word1), Counter(word2)
+    # เงื่อนไข 1: ต้องใช้ชุดตัวอักษรเดียวกัน (set ของคีย์เท่ากัน)
+    # เงื่อนไข 2: กองของจำนวนความถี่ต้องตรงกัน (เรียงแล้วเท่ากัน)
+    return (set(c1) == set(c2)
+            and sorted(c1.values()) == sorted(c2.values()))
 
-        print(close_strings("abc", "bca"))        # True
-        print(close_strings("a", "aa"))           # False
-        print(close_strings("cabbba", "abbccc"))  # True
-        print(close_strings("cabbba", "aabbss"))  # False`, out: `True
-        False
-        True
-        False` },
+print(close_strings("abc", "bca"))        # True
+print(close_strings("a", "aa"))           # False
+print(close_strings("cabbba", "abbccc"))  # True
+print(close_strings("cabbba", "aabbss"))  # False`, out: `True
+False
+True
+False` },
                 { t: "p", c: "set(c1) เอาเฉพาะ key (ตัวอักษรที่ปรากฏ) มาเทียบกัน ส่วน c1.values() คือ frequency ของแต่ละตัว การ sort (เรียง) ก่อนเทียบทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกันไหม ซึ่งตรงกับอิสระของ operation 2 พอดี" },
                 { t: "p", c: "ทำไมต้องมีทั้งสองเงื่อนไขคู่กัน? เงื่อนไข 2 อย่างเดียวยอมให้ character คนละชุดผ่านได้ (เช่น s แทน c) ส่วนเงื่อนไข 1 อย่างเดียวก็ไม่พอเพราะ frequency แต่ละตัวอาจไม่จับคู่กันได้ ต้องครบทั้งสองข้อ" },
                 { t: "p", c: "Time O(n + k log k) count frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter ของ character (คงที่ 26 ตัว)" },
@@ -1905,21 +1947,21 @@ export const hashMapPages: Record<string, Page> = {
           label: "Solution (Python) — runnable",
           code: `from collections import Counter
 
-  def close_strings(word1, word2):
-      c1, c2 = Counter(word1), Counter(word2)
-      # Condition 1: same set of characters (keys)
-      # Condition 2: same multiset of frequencies (sort then compare)
-      return (set(c1) == set(c2)
-              and sorted(c1.values()) == sorted(c2.values()))
+def close_strings(word1, word2):
+    c1, c2 = Counter(word1), Counter(word2)
+    # Condition 1: same set of characters (keys)
+    # Condition 2: same multiset of frequencies (sort then compare)
+    return (set(c1) == set(c2)
+            and sorted(c1.values()) == sorted(c2.values()))
 
-  print(close_strings("abc", "bca"))        # True
-  print(close_strings("a", "aa"))           # False
-  print(close_strings("cabbba", "abbccc"))  # True
-  print(close_strings("cabbba", "aabbss"))  # False`,
+print(close_strings("abc", "bca"))        # True
+print(close_strings("a", "aa"))           # False
+print(close_strings("cabbba", "abbccc"))  # True
+print(close_strings("cabbba", "aabbss"))  # False`,
           out: `True
-  False
-  True
-  False`,
+False
+True
+False`,
         },
         {
           t: "p",
@@ -2002,23 +2044,23 @@ export const hashMapPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
-        def equal_pairs(grid):
-            n = len(grid)
-            # นับว่าแต่ละ "หน้าตาแถว" (แปลงเป็น tuple) ปรากฏกี่ครั้ง
-            row_count = Counter(tuple(row) for row in grid)
+def equal_pairs(grid):
+    n = len(grid)
+    # นับว่าแต่ละ "หน้าตาแถว" (แปลงเป็น tuple) ปรากฏกี่ครั้ง
+    row_count = Counter(tuple(row) for row in grid)
 
-            pairs = 0
-            for j in range(n):
-                # ประกอบคอลัมน์ที่ j เป็น tuple
-                col = tuple(grid[i][j] for i in range(n))
-                # มีแถวหน้าตาตรงกับคอลัมน์นี้กี่แถว บวกเข้าไปทั้งหมด
-                pairs += row_count[col]
-            return pairs
+    pairs = 0
+    for j in range(n):
+        # ประกอบคอลัมน์ที่ j เป็น tuple
+        col = tuple(grid[i][j] for i in range(n))
+        # มีแถวหน้าตาตรงกับคอลัมน์นี้กี่แถว บวกเข้าไปทั้งหมด
+        pairs += row_count[col]
+    return pairs
 
-        print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
-        print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
-                           [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`, out: `1
-        3` },
+print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
+print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
+                   [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`, out: `1
+3` },
                 { t: "p", c: "ขั้นแรก convert แต่ละ row เป็น tuple แล้วนับด้วย Counter ว่าหน้าตาแบบไหนมีกี่แถว การใช้ tuple สำคัญเพราะ list mutable (เปลี่ยนแปลงได้) จึงเป็น key ของ dict ไม่ได้ แต่ tuple immutable (คงที่) จึง hash ได้" },
                 { t: "p", c: "ขั้นสอง iterate ทีละ column ประกอบเป็น tuple แล้วถามจาก row_count ว่ามี row หน้าตาเดียวกันกี่แถว เพราะ row ที่เหมือนกันหลายแถวจับคู่กับ column นี้ได้ทุกแถว จึงบวกจำนวนที่ได้ ในตัวอย่างที่สอง column หนึ่งไปตรงกับ row ที่หน้าตาซ้ำกันสองแถว ก็บวก 2 ทีเดียว" },
                 { t: "p", c: "Time O(n^2) แต่ละ row และแต่ละ column มี n ช่อง รวม n row/column เป็น O(n^2) · Space O(n^2) เก็บ tuple ของ row ทั้งหมดใน Counter" },
@@ -2113,24 +2155,24 @@ export const hashMapPages: Record<string, Page> = {
           label: "Solution (Python) — runnable",
           code: `from collections import Counter
 
-  def equal_pairs(grid):
-      n = len(grid)
-      # count how often each row shape (as a tuple) appears
-      row_count = Counter(tuple(row) for row in grid)
+def equal_pairs(grid):
+    n = len(grid)
+    # count how often each row shape (as a tuple) appears
+    row_count = Counter(tuple(row) for row in grid)
 
-      pairs = 0
-      for j in range(n):
-          # build column j as a tuple
-          col = tuple(grid[i][j] for i in range(n))
-          # how many rows match this column — add them all
-          pairs += row_count[col]
-      return pairs
+    pairs = 0
+    for j in range(n):
+        # build column j as a tuple
+        col = tuple(grid[i][j] for i in range(n))
+        # how many rows match this column — add them all
+        pairs += row_count[col]
+    return pairs
 
-  print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
-  print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
-                     [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`,
+print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
+print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
+                   [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`,
           out: `1
-  3`,
+3`,
         },
         {
           t: "p",
