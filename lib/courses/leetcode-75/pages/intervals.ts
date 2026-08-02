@@ -16,19 +16,19 @@ export const intervalsPages: Record<string, Page> = {
               { t: "h2", c: "sort แล้ว greedy" },
               { t: "p", c: "เทคนิคหลักคือ sort interval ทั้งหมดก่อน จะ sort ตาม start หรือ end ขึ้นกับโจทย์ จากนั้น iterate ทีละ interval แบบ greedy คือตัดสินใจโดยดูแค่ interval ล่าสุดที่เก็บไว้เทียบกับ interval ปัจจุบัน ไม่ต้องมองย้อนกลับไปไกล" },
               { t: "code", lang: "python", c: `# โครงทั่วไปของโจทย์ intervals
-        intervals = [[1, 3], [2, 4], [3, 5]]
+intervals = [[1, 3], [2, 4], [3, 5]]
 
-        # sort ตามจุดจบ (บางโจทย์ sort ตามจุดเริ่ม)
-        intervals.sort(key=lambda x: x[1])
+# sort ตามจุดจบ (บางโจทย์ sort ตามจุดเริ่ม)
+intervals.sort(key=lambda x: x[1])
 
-        prev_end = float("-inf")   # จุดจบของช่วงล่าสุดที่เลือกไว้
-        for start, end in intervals:
-            if start >= prev_end:
-                # ไม่ทับกับช่วงก่อนหน้า เลือกช่วงนี้ได้
-                prev_end = end
-            else:
-                # ทับกัน ต้องตัดสินใจ (ข้าม/ลบ ช่วงนี้ ฯลฯ)
-                pass` },
+prev_end = float("-inf")   # จุดจบของช่วงล่าสุดที่เลือกไว้
+for start, end in intervals:
+    if start >= prev_end:
+        # ไม่ทับกับช่วงก่อนหน้า เลือกช่วงนี้ได้
+        prev_end = end
+    else:
+        # ทับกัน ต้องตัดสินใจ (ข้าม/ลบ ช่วงนี้ ฯลฯ)
+        pass` },
               { t: "p", c: "ทำไม sort ถึงช่วย เพราะเมื่อ sort ตาม end แล้ว การเลือก interval ที่จบเร็วที่สุดก่อนเสมอ จะเหลือที่ว่างให้ interval ถัด ๆ ไปมากที่สุด นี่คือหลักการ greedy คลาสสิกที่พิสูจน์ได้ว่าให้คำตอบที่ดีที่สุด" },
               { t: "callout", title: "sort ตาม start หรือ end", c: "ถ้าโจทย์ให้เลือก interval ให้ได้มากที่สุดโดยไม่ทับกัน (activity selection) นิยม sort ตาม end แต่ถ้าโจทย์ให้ merge interval ที่ซ้อนกัน นิยม sort ตาม start ลองคิดว่าตัวไหนทำให้ greedy ตัดสินใจได้ง่ายกว่า" },
 
@@ -86,24 +86,24 @@ export const intervalsPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def erase_overlap_intervals(intervals):
-            # sort ตามจุดจบ เพื่อ greedy เก็บช่วงที่จบเร็วที่สุดก่อน
-            intervals.sort(key=lambda x: x[1])
+    # sort ตามจุดจบ เพื่อ greedy เก็บช่วงที่จบเร็วที่สุดก่อน
+    intervals.sort(key=lambda x: x[1])
 
-            kept = 0                    # จำนวนช่วงที่เก็บไว้ได้โดยไม่ทับ
-            prev_end = float("-inf")    # จุดจบของช่วงที่เก็บล่าสุด
-            for start, end in intervals:
-                if start >= prev_end:
-                    # เริ่มหลัง (หรือชนพอดี) ช่วงก่อนหน้า เก็บได้
-                    kept += 1
-                    prev_end = end
-                # ถ้าทับ ก็ข้ามช่วงนี้ (เท่ากับลบทิ้ง)
-            return len(intervals) - kept
+    kept = 0                    # จำนวนช่วงที่เก็บไว้ได้โดยไม่ทับ
+    prev_end = float("-inf")    # จุดจบของช่วงที่เก็บล่าสุด
+    for start, end in intervals:
+        if start >= prev_end:
+            # เริ่มหลัง (หรือชนพอดี) ช่วงก่อนหน้า เก็บได้
+            kept += 1
+            prev_end = end
+        # ถ้าทับ ก็ข้ามช่วงนี้ (เท่ากับลบทิ้ง)
+    return len(intervals) - kept
 
-        print(erase_overlap_intervals([[1,2],[2,3],[3,4],[1,3]]))  # 1
-        print(erase_overlap_intervals([[1,2],[1,2],[1,2]]))        # 2
-        print(erase_overlap_intervals([[1,2],[2,3]]))              # 0`, out: `1
-        2
-        0` },
+print(erase_overlap_intervals([[1,2],[2,3],[3,4],[1,3]]))  # 1
+print(erase_overlap_intervals([[1,2],[1,2],[1,2]]))        # 2
+print(erase_overlap_intervals([[1,2],[2,3]]))              # 0`, out: `1
+2
+0` },
                 { t: "p", c: "วิธีคิดคือแปลงโจทย์ลบให้น้อยสุดเป็นเก็บให้มากสุด เพราะจำนวน interval คงที่ ถ้าเก็บได้มากสุดก็แปลว่าลบน้อยสุด การเก็บ interval ให้ได้มากที่สุดโดยไม่ overlap คือปัญหา activity selection คลาสสิก ซึ่ง greedy ที่ถูกต้องคือ sort ตาม end แล้วเลือก interval ที่จบเร็วที่สุดก่อนเสมอ เพราะมันเปิดพื้นที่ว่างให้ interval ต่อไปมากที่สุด" },
                 { t: "p", c: "เงื่อนไข start >= prev_end ใช้ >= เพราะโจทย์นี้ปลายชนกันไม่ถือว่าทับ ถ้าลืมและใช้ > จะลบเกินจำเป็น จุดพลาดอีกอย่างคือเผลอ sort ตาม start ซึ่งจะทำให้ greedy เลือกผิดในบางเคส (interval ยาวที่เริ่มก่อนอาจกินพื้นที่ interval สั้นหลายอัน)" },
                 { t: "p", c: "Time O(n log n) หลัก ๆ มาจากการ sort ส่วนการ iterate เก็บเป็น O(n) · Space O(1) ถ้าไม่นับพื้นที่ที่ sort ใช้ ใช้ตัวแปรนับไม่กี่ตัว" },
@@ -163,26 +163,26 @@ export const intervalsPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_min_arrows(points):
-            if not points:
-                return 0
-            # sort ตามจุดจบ แล้วยิงลูกศรที่ปลายของลูกแรกในแต่ละกลุ่ม
-            points.sort(key=lambda x: x[1])
+    if not points:
+        return 0
+    # sort ตามจุดจบ แล้วยิงลูกศรที่ปลายของลูกแรกในแต่ละกลุ่ม
+    points.sort(key=lambda x: x[1])
 
-            arrows = 1
-            arrow_x = points[0][1]   # ยิงลูกแรกที่จุดจบของลูกโป่งลูกแรก
-            for start, end in points[1:]:
-                if start > arrow_x:
-                    # ลูกนี้เริ่มหลังลูกศรที่ยิงไป ต้องยิงลูกใหม่
-                    arrows += 1
-                    arrow_x = end
-                # ถ้า start <= arrow_x ลูกนี้ก็แตกด้วยลูกศรเดิม
-            return arrows
+    arrows = 1
+    arrow_x = points[0][1]   # ยิงลูกแรกที่จุดจบของลูกโป่งลูกแรก
+    for start, end in points[1:]:
+        if start > arrow_x:
+            # ลูกนี้เริ่มหลังลูกศรที่ยิงไป ต้องยิงลูกใหม่
+            arrows += 1
+            arrow_x = end
+        # ถ้า start <= arrow_x ลูกนี้ก็แตกด้วยลูกศรเดิม
+    return arrows
 
-        print(find_min_arrows([[10,16],[2,8],[1,6],[7,12]]))  # 2
-        print(find_min_arrows([[1,2],[3,4],[5,6],[7,8]]))     # 4
-        print(find_min_arrows([[1,2],[2,3],[3,4],[4,5]]))     # 2`, out: `2
-        4
-        2` },
+print(find_min_arrows([[10,16],[2,8],[1,6],[7,12]]))  # 2
+print(find_min_arrows([[1,2],[3,4],[5,6],[7,8]]))     # 4
+print(find_min_arrows([[1,2],[2,3],[3,4],[4,5]]))     # 2`, out: `2
+4
+2` },
                 { t: "p", c: "แนวคิดคล้ายข้อก่อน คือ sort ตามจุดจบแล้ว greedy การยิงลูกศรที่จุดจบของลูกโป่งที่จบเร็วที่สุด เป็นการยิงที่ครอบคลุมลูกโป่งที่ทับกับมันได้มากที่สุด เพราะจุดจบเป็นตำแหน่งขวาสุดที่ยังโดนลูกโป่งลูกนั้นอยู่ ลูกโป่งลูกถัดไปที่ยังมีจุดเริ่มไม่เกินตำแหน่งลูกศร ก็โดนลูกศรเดียวกันแตกไปด้วยฟรี ๆ" },
                 { t: "p", c: "จุดที่ต้องระวังคือเงื่อนไข start > arrow_x ใช้ > (ไม่ใช่ >=) เพราะโจทย์นี้ถ้าปลายชนกันพอดี เช่น ลูกหนึ่งจบที่ 2 อีกลูกเริ่มที่ 2 ยังยิงลูกศรที่ x=2 ทะลุได้ทั้งคู่ จึงถือว่ายังแตกด้วยลูกศรเดิม อีก edge case คือลิสต์ว่างต้องคืน 0 (โค้ดเช็คไว้ต้นฟังก์ชัน)" },
                 { t: "p", c: "Time O(n log n) มาจากการ sort ส่วนไล่ยิงเป็น O(n) · Space O(1) ใช้ตัวแปรนับลูกศรกับตำแหน่งลูกศรเท่านั้น" },

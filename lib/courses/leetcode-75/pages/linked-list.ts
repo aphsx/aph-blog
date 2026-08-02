@@ -17,30 +17,30 @@ export const linkedListPages: Record<string, Page> = {
               { t: "p", c: "linked list ต่างออกไป มันไม่ได้วางข้อมูลติดกัน แต่เป็นก้อนข้อมูลเล็ก ๆ เรียกว่า node (โหนด) ที่กระจายอยู่คนละที่ในหน่วยความจำ แต่ละ node เก็บสองอย่าง คือ (1) value (ค่า) ของตัวมันเอง และ (2) pointer (ตัวชี้) หนึ่งตัวที่ชี้ไปยัง node ตัวถัดไป พูดง่าย ๆ คือมันเหมือนการล่าสมบัติ แต่ละจุดจะบอกใบ้ว่าจุดต่อไปอยู่ตรงไหน เราต้องเดินตามลูกศรไปทีละก้าว จะกระโดดข้ามไปกลาง ๆ เลยไม่ได้" },
               { t: "p", c: "หน้าตาของ linked list ที่มีค่า 1 → 2 → 3 วาดเป็นภาพได้ประมาณนี้ ช่องซ้ายของแต่ละ node คือ value ช่องขวาคือ pointer ที่ชี้ไป node ถัดไป ตัวสุดท้ายชี้ไป None แปลว่าจบ list แล้ว" },
               { t: "code", lang: "text", c: `[1|•]───▶[2|•]───▶[3|•]───▶ None
-         ▲
-        head (จุดเริ่มต้น เก็บไว้ที่ node ตัวแรก)` },
+ ▲
+head (จุดเริ่มต้น เก็บไว้ที่ node ตัวแรก)` },
 
               { t: "h3", c: "node หน้าตายังไงใน Python" },
               { t: "p", c: "เราสร้าง node ด้วย class (คลาส) เล็ก ๆ ชื่อ ListNode (นี่คือชื่อมาตรฐานที่ LeetCode ใช้) แต่ละตัวเก็บ field ชื่อ val (ค่า) กับ next (pointer ชี้ node ถัดไป ถ้าไม่มีตัวถัดไปก็เป็น None)" },
               { t: "code", lang: "python", c: `class ListNode:
-            def __init__(self, val=0, next=None):
-                self.val = val        # ค่าที่ node นี้เก็บ
-                self.next = next      # pointer ชี้ node ถัดไป (None ถ้าเป็นตัวสุดท้าย)
+    def __init__(self, val=0, next=None):
+        self.val = val        # ค่าที่ node นี้เก็บ
+        self.next = next      # pointer ชี้ node ถัดไป (None ถ้าเป็นตัวสุดท้าย)
 
-        # สร้างลิสต์ 1 -> 2 -> 3 ด้วยมือ
-        a = ListNode(1)
-        b = ListNode(2)
-        c = ListNode(3)
-        a.next = b      # ให้ node 1 ชี้ไป node 2
-        b.next = c      # ให้ node 2 ชี้ไป node 3
-        # a คือ head ของลิสต์นี้ (c.next เป็น None อยู่แล้ว)` },
+# สร้างลิสต์ 1 -> 2 -> 3 ด้วยมือ
+a = ListNode(1)
+b = ListNode(2)
+c = ListNode(3)
+a.next = b      # ให้ node 1 ชี้ไป node 2
+b.next = c      # ให้ node 2 ชี้ไป node 3
+# a คือ head ของลิสต์นี้ (c.next เป็น None อยู่แล้ว)` },
 
               { t: "h3", c: "การเดินบน linked list (traverse)" },
               { t: "p", c: "เพราะ node กระจายอยู่คนละที่ เราจึง access ตำแหน่งตรง ๆ แบบ nums[5] ไม่ได้ วิธีเดียวที่จะไปถึง node กลาง ๆ คือเริ่มจาก head (หัว) แล้ว traverse ตาม pointer next ไปเรื่อย ๆ ทีละก้าวจนกว่าจะเจอ None pattern (แพตเทิร์น) การเดินที่ต้องจำให้ขึ้นใจคือใช้ pointer ชื่อ cur (current) เริ่มที่ head แล้ว loop (วน) จนกว่า cur จะเป็น None" },
               { t: "code", lang: "python", c: `cur = head
-        while cur:                 # วนจนกว่าจะเดินตกขอบ (เจอ None)
-            print(cur.val)        # ทำอะไรกับ node ตัวปัจจุบัน
-            cur = cur.next        # ก้าวไป node ถัดไป — หัวใจของการเดิน` },
+while cur:                 # วนจนกว่าจะเดินตกขอบ (เจอ None)
+    print(cur.val)        # ทำอะไรกับ node ตัวปัจจุบัน
+    cur = cur.next        # ก้าวไป node ถัดไป — หัวใจของการเดิน` },
               { t: "callout", title: "ทำไม access ด้วย index ตรง ๆ ไม่ได้", c: "เพราะ node ไม่ได้เรียงติดกันในหน่วยความจำ คอมพิวเตอร์เลยคำนวณ 'ที่อยู่ของ node ที่ index 5' ไม่ได้เหมือน array มันรู้แค่ที่อยู่ของ node ตัวแรก (head) และแต่ละ node รู้แค่ว่าตัวถัดไปอยู่ที่ไหน การจะไปถึง node ที่ index 5 จึงต้อง traverse ผ่านตัวที่ 0,1,2,3,4 ก่อนเสมอ เป็น O(n)" },
 
               { t: "h2", c: "เทคนิคที่ใช้บ่อยกับ linked list" },
@@ -51,13 +51,13 @@ export const linkedListPages: Record<string, Page> = {
               ] },
               { t: "p", c: "โครงเดินพื้นฐานที่เจอซ้ำแทบทุกข้อในหมวดนี้คือ while loop ที่ขยับ pointer ไปข้างหน้าทีละก้าว จำโครงนี้ให้ขึ้นใจแล้วต่อยอดได้ทุกข้อ" },
               { t: "code", lang: "python", c: `# โครงร่วมของหมวดนี้: เดินด้วยตัวชี้คู่ / fast-slow
-        prev = None
-        cur = head
-        while cur:
-            nxt = cur.next     # จำตัวถัดไปไว้ก่อนเสมอ (กันหลุดลิสต์เวลาแก้ pointer)
-            # ... แก้ pointer หรืออ่านค่าตรงนี้ ...
-            prev = cur         # ขยับ prev ตาม
-            cur = nxt          # ขยับ cur ไปตัวที่จำไว้` },
+prev = None
+cur = head
+while cur:
+    nxt = cur.next     # จำตัวถัดไปไว้ก่อนเสมอ (กันหลุดลิสต์เวลาแก้ pointer)
+    # ... แก้ pointer หรืออ่านค่าตรงนี้ ...
+    prev = cur         # ขยับ prev ตาม
+    cur = nxt          # ขยับ cur ไปตัวที่จำไว้` },
 
               { t: "h2", c: "Big-O เทียบ array กับ linked list" },
               { t: "table", head: ["operation (การทำงาน)", "array / Python list", "linked list"], rows: [
@@ -122,45 +122,45 @@ export const linkedListPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class ListNode:
-            def __init__(self, val=0, next=None):
-                self.val = val
-                self.next = next
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
 
-        # นิยาม node มาตรฐานของ LeetCode (โจทย์ให้มาแล้ว ไม่ต้องเขียนเอง)
-        # class ListNode:
-        #     def __init__(self, val=0, next=None):
-        #         self.val = val        # ค่าที่ node นี้เก็บ
-        #         self.next = next      # pointer ชี้ node ถัดไป (None ถ้าเป็นตัวสุดท้าย)
+# นิยาม node มาตรฐานของ LeetCode (โจทย์ให้มาแล้ว ไม่ต้องเขียนเอง)
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val        # ค่าที่ node นี้เก็บ
+#         self.next = next      # pointer ชี้ node ถัดไป (None ถ้าเป็นตัวสุดท้าย)
 
-        def delete_middle(head):
-            # ถ้ามี node เดียว ลบแล้วเหลือว่าง
-            if head.next is None:
-                return None
+def delete_middle(head):
+    # ถ้ามี node เดียว ลบแล้วเหลือว่าง
+    if head.next is None:
+        return None
 
-            prev = None                 # จะให้ชี้ node ก่อนตัวกลาง
-            slow = head                 # เดินทีละ 1 ก้าว -> จบที่ตัวกลาง
-            fast = head                 # เดินทีละ 2 ก้าว
-            while fast and fast.next:
-                prev = slow
-                slow = slow.next        # slow ขยับ 1
-                fast = fast.next.next   # fast ขยับ 2
-            # ตอนนี้ slow คือตัวกลาง, prev คือตัวก่อนหน้า
-            prev.next = slow.next       # ข้ามตัวกลางทิ้งไป
-            return head
+    prev = None                 # จะให้ชี้ node ก่อนตัวกลาง
+    slow = head                 # เดินทีละ 1 ก้าว -> จบที่ตัวกลาง
+    fast = head                 # เดินทีละ 2 ก้าว
+    while fast and fast.next:
+        prev = slow
+        slow = slow.next        # slow ขยับ 1
+        fast = fast.next.next   # fast ขยับ 2
+    # ตอนนี้ slow คือตัวกลาง, prev คือตัวก่อนหน้า
+    prev.next = slow.next       # ข้ามตัวกลางทิ้งไป
+    return head
 
-        # ทดสอบ 1->3->4->7->1->2->6 (ลบ 7)
-        vals = [1, 3, 4, 7, 1, 2, 6]
-        head = None
-        for v in reversed(vals):
-            head = ListNode(v, head)
-        head = delete_middle(head)
-        out = []
-        while head:
-            out.append(head.val)
-            head = head.next
-        print(out)   # [1, 3, 4, 1, 2, 6]`, out: `[1, 3, 4, 1, 2, 6]` },
+# ทดสอบ 1->3->4->7->1->2->6 (ลบ 7)
+vals = [1, 3, 4, 7, 1, 2, 6]
+head = None
+for v in reversed(vals):
+    head = ListNode(v, head)
+head = delete_middle(head)
+out = []
+while head:
+    out.append(head.val)
+    head = head.next
+print(out)   # [1, 3, 4, 1, 2, 6]`, out: `[1, 3, 4, 1, 2, 6]` },
                 { t: "p", c: "เคล็ดลับ fast & slow คือ fast เดินเร็วเป็นสองเท่าของ slow เสมอ ดังนั้นตอน fast วิ่งไปสุด list slow จะเดินได้แค่ครึ่งทางพอดี ก็คือ middle node เงื่อนไข while fast and fast.next ทำให้ loop หยุดถูกจังหวะทั้งกรณีจำนวน node เป็นเลขคู่และเลขคี่ ถ้าเขียนแค่ while fast จะพัง เพราะบรรทัด fast.next.next จะไปอ้าง .next ของ None เมื่อ fast วิ่งเลยขอบ" },
                 { t: "p", c: "แต่แค่รู้ตัวกลางยัง delete ไม่ได้ เพราะ linked list การลบ node ต้อง update pointer ของ 'ตัวก่อนหน้า' ให้กระโดดข้ามไปหาตัวถัดจากกลาง เราจึง track prev ไว้ทุกก้าว (บรรทัด prev = slow ต้องมาก่อนขยับ slow) แล้วสั่ง prev.next = slow.next เพื่อข้ามตัวกลางทิ้ง เมื่อไม่มีใครชี้มาที่ตัวกลางแล้ว มันก็หลุดออกจาก list ไปเอง" },
                 { t: "p", c: "edge case สำคัญคือ list มี node เดียว ถ้าไม่ดักไว้ prev จะยังเป็น None แล้วโค้ด prev.next จะพัง เราจึงเช็ค head.next is None ตั้งแต่ต้นแล้ว return None ทันที (โจทย์การันตีว่า head ไม่เป็น None ตั้งแต่แรก จึง access head.next ได้อย่างปลอดภัย)" },
@@ -219,39 +219,39 @@ export const linkedListPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class ListNode:
-            def __init__(self, val=0, next=None):
-                self.val = val
-                self.next = next
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
 
-        def odd_even_list(head):
-            if head is None or head.next is None:
-                return head             # 0 หรือ 1 node ไม่ต้องทำอะไร
+def odd_even_list(head):
+    if head is None or head.next is None:
+        return head             # 0 หรือ 1 node ไม่ต้องทำอะไร
 
-            odd = head                  # ตัวชี้สายตำแหน่งคี่ (เริ่มที่ตัวที่ 1)
-            even = head.next            # ตัวชี้สายตำแหน่งคู่ (เริ่มที่ตัวที่ 2)
-            even_head = even            # จำหัวสายคู่ไว้ เพื่อเอาไปต่อทีหลัง
+    odd = head                  # ตัวชี้สายตำแหน่งคี่ (เริ่มที่ตัวที่ 1)
+    even = head.next            # ตัวชี้สายตำแหน่งคู่ (เริ่มที่ตัวที่ 2)
+    even_head = even            # จำหัวสายคู่ไว้ เพื่อเอาไปต่อทีหลัง
 
-            while even and even.next:
-                odd.next = even.next    # คี่ข้ามไปเกาะตัวคี่ถัดไป
-                odd = odd.next          # ขยับตัวชี้คี่
-                even.next = odd.next    # คู่ข้ามไปเกาะตัวคู่ถัดไป
-                even = even.next        # ขยับตัวชี้คู่
+    while even and even.next:
+        odd.next = even.next    # คี่ข้ามไปเกาะตัวคี่ถัดไป
+        odd = odd.next          # ขยับตัวชี้คี่
+        even.next = odd.next    # คู่ข้ามไปเกาะตัวคู่ถัดไป
+        even = even.next        # ขยับตัวชี้คู่
 
-            odd.next = even_head        # ต่อหางสายคี่เข้ากับหัวสายคู่
-            return head
+    odd.next = even_head        # ต่อหางสายคี่เข้ากับหัวสายคู่
+    return head
 
-        # ทดสอบ 1->2->3->4->5
-        head = None
-        for v in reversed([1, 2, 3, 4, 5]):
-            head = ListNode(v, head)
-        head = odd_even_list(head)
-        out = []
-        while head:
-            out.append(head.val)
-            head = head.next
-        print(out)   # [1, 3, 5, 2, 4]`, out: `[1, 3, 5, 2, 4]` },
+# ทดสอบ 1->2->3->4->5
+head = None
+for v in reversed([1, 2, 3, 4, 5]):
+    head = ListNode(v, head)
+head = odd_even_list(head)
+out = []
+while head:
+    out.append(head.val)
+    head = head.next
+print(out)   # [1, 3, 5, 2, 4]`, out: `[1, 3, 5, 2, 4]` },
                 { t: "p", c: "ไอเดียคือเราไม่สร้าง node ใหม่ แต่ 'ร้อยสายใหม่' จาก node เดิมสองสาย สาย odd เก็บตัว index 1,3,5 สาย even เก็บตัว 2,4,6 ในหนึ่งก้าวของ loop เราเชื่อม odd ให้ข้ามตัวคู่ที่คั่นอยู่ไปเกาะตัวคี่ถัดไป แล้วเชื่อม even ให้ข้ามตัวคี่ไปเกาะตัวคู่ถัดไป สลับกันแบบนี้จนหมด" },
                 { t: "p", c: "จุดฉลาดที่ต้องสังเกตคือบรรทัด even.next = odd.next ใช้ค่า odd ที่ 'เพิ่งขยับใหม่' ในบรรทัดก่อนหน้า ทำให้ even รู้ว่าตัวคู่ถัดไปอยู่ตรงไหน order (ลำดับ) สี่บรรทัดใน loop จึงสลับกันไม่ได้ ต้องขยับ odd ให้เสร็จก่อนถึงจะใช้ odd.next มาหาตัวคู่ถัดไปได้ถูก ถ้าสลับลำดับจะได้ pointer ผิดตัวทันที" },
                 { t: "p", c: "จุดพลาดบ่อยคือลืม track even_head ไว้ตั้งแต่ต้น เพราะระหว่าง loop pointer ของสายคู่ถูก update ไปเรื่อย ๆ ถ้าไม่จำหัวไว้ก่อนจะหาไม่เจอว่าจะเอาปลายสายคี่ไป append กับตัวไหน อีกจุดคือเงื่อนไข while even and even.next ต้องเช็คทั้งคู่ เพื่อกันกรณีจำนวน node คี่/คู่ไม่ให้อ้าง .next ของ None และต้องดัก 0 หรือ 1 node ตั้งแต่ต้นด้วย" },
@@ -313,32 +313,32 @@ export const linkedListPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class ListNode:
-            def __init__(self, val=0, next=None):
-                self.val = val
-                self.next = next
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
 
-        def reverse_list(head):
-            prev = None                 # ข้างหลัง cur (ตอนแรกยังไม่มีอะไร)
-            cur = head                  # node ที่กำลังพิจารณา
-            while cur:
-                nxt = cur.next          # 1) จำ node ถัดไปไว้ก่อน (กันหลุดลิสต์)
-                cur.next = prev         # 2) พลิก pointer ให้ชี้ย้อนกลับ
-                prev = cur              # 3) ขยับ prev ตามมา
-                cur = nxt               # 4) ขยับ cur ไปตัวที่จำไว้
-            return prev                 # จบ loop prev คือ head ตัวใหม่
+def reverse_list(head):
+    prev = None                 # ข้างหลัง cur (ตอนแรกยังไม่มีอะไร)
+    cur = head                  # node ที่กำลังพิจารณา
+    while cur:
+        nxt = cur.next          # 1) จำ node ถัดไปไว้ก่อน (กันหลุดลิสต์)
+        cur.next = prev         # 2) พลิก pointer ให้ชี้ย้อนกลับ
+        prev = cur              # 3) ขยับ prev ตามมา
+        cur = nxt               # 4) ขยับ cur ไปตัวที่จำไว้
+    return prev                 # จบ loop prev คือ head ตัวใหม่
 
-        # ทดสอบ: สร้าง 1->2->3 แล้วกลับทิศ
-        n3 = ListNode(3)
-        n2 = ListNode(2, n3)
-        n1 = ListNode(1, n2)
-        r = reverse_list(n1)
-        out = []
-        while r:
-            out.append(r.val)
-            r = r.next
-        print(out)   # [3, 2, 1]`, out: `[3, 2, 1]` },
+# ทดสอบ: สร้าง 1->2->3 แล้วกลับทิศ
+n3 = ListNode(3)
+n2 = ListNode(2, n3)
+n1 = ListNode(1, n2)
+r = reverse_list(n1)
+out = []
+while r:
+    out.append(r.val)
+    r = r.next
+print(out)   # [3, 2, 1]`, out: `[3, 2, 1]` },
                 { t: "p", c: "ไอเดียคือ traverse ไปทีละ node แล้ว reverse ลูกศรของแต่ละตัวให้ชี้ย้อนหลังแทน จุดที่คนใหม่พลาดบ่อยคือลืม track cur.next ไว้ก่อน พอเราสั่ง cur.next = prev ปุ๊บ pointer เดิมที่ชี้ไปข้างหน้าจะหายไปทันที เราจึงจะ traverse ต่อไม่ได้ ดังนั้นบรรทัด nxt = cur.next ต้องมาก่อนเสมอ ลองนึกภาพว่าเรากำลังเดินข้ามสะพานแล้วพับสะพานข้างหลังทิ้ง ต้องมองว่าก้าวต่อไปเหยียบตรงไหนให้เรียบร้อยก่อนพับ" },
                 { t: "p", c: "order (ลำดับ) สี่บรรทัดใน loop (track next → reverse → ขยับ prev → ขยับ cur) สลับกันไม่ได้ ท่องให้ขึ้นใจแล้วจะใช้ซ้ำได้ในหลายโจทย์ เมื่อ cur เดินตกขอบเป็น None แล้ว prev จะค้างอยู่ที่ node สุดท้ายที่ reverse ไป ซึ่งก็คือ head ตัวใหม่พอดี ถ้าเผลอ return cur จะได้ None เพราะ cur ตกขอบไปแล้ว" },
                 { t: "p", c: "Time O(n) traverse ผ่านทุก node หนึ่งรอบ · Space O(1) ใช้ pointer ไม่กี่ตัว ไม่สร้าง list ใหม่" },
@@ -398,46 +398,46 @@ export const linkedListPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class ListNode:
-            def __init__(self, val=0, next=None):
-                self.val = val
-                self.next = next
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
 
 
-        def pair_sum(head):
-            # 1) หาตัวกลางด้วย fast & slow
-            slow = head
-            fast = head
-            while fast and fast.next:
-                slow = slow.next
-                fast = fast.next.next
-            # ตอนนี้ slow อยู่ที่หัวของครึ่งหลังพอดี (n เป็นเลขคู่เสมอ)
+def pair_sum(head):
+    # 1) หาตัวกลางด้วย fast & slow
+    slow = head
+    fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    # ตอนนี้ slow อยู่ที่หัวของครึ่งหลังพอดี (n เป็นเลขคู่เสมอ)
 
-            # 2) กลับทิศครึ่งหลัง (เหมือนข้อ 31)
-            prev = None
-            cur = slow
-            while cur:
-                nxt = cur.next
-                cur.next = prev
-                prev = cur
-                cur = nxt
-            # prev คือ head ของครึ่งหลังที่กลับทิศแล้ว
+    # 2) กลับทิศครึ่งหลัง (เหมือนข้อ 31)
+    prev = None
+    cur = slow
+    while cur:
+        nxt = cur.next
+        cur.next = prev
+        prev = cur
+        cur = nxt
+    # prev คือ head ของครึ่งหลังที่กลับทิศแล้ว
 
-            # 3) เดินสองสายพร้อมกัน บวกทีละคู่ เก็บค่ามากสุด
-            best = 0
-            first = head
-            second = prev
-            while second:               # ครึ่งหลังสั้นเท่ากับครึ่งหน้าพอดี
-                best = max(best, first.val + second.val)
-                first = first.next
-                second = second.next
-            return best
+    # 3) เดินสองสายพร้อมกัน บวกทีละคู่ เก็บค่ามากสุด
+    best = 0
+    first = head
+    second = prev
+    while second:               # ครึ่งหลังสั้นเท่ากับครึ่งหน้าพอดี
+        best = max(best, first.val + second.val)
+        first = first.next
+        second = second.next
+    return best
 
-        # ทดสอบ 5->4->2->1
-        head = None
-        for v in reversed([5, 4, 2, 1]):
-            head = ListNode(v, head)
-        print(pair_sum(head))   # 6`, out: `6` },
+# ทดสอบ 5->4->2->1
+head = None
+for v in reversed([5, 4, 2, 1]):
+    head = ListNode(v, head)
+print(pair_sum(head))   # 6`, out: `6` },
                 { t: "p", c: "โจทย์นี้ท้าทายตรงที่ linked list เดินย้อนกลับไม่ได้ เราจึง access 'ตัวหลัง' ของแต่ละคู่ยาก ทริกคือแบ่งงานเป็นสามขั้น ขั้นแรกใช้ fast/slow หาจุดกึ่งกลาง เพราะ n เป็นเลขคู่ พอ fast เดินตกขอบ slow จะมาหยุดที่ node แรกของครึ่งหลังพอดี ขั้นสอง reverse เฉพาะครึ่งหลัง (ใช้เทคนิคเป๊ะจากข้อ 31) พอ reverse แล้ว 'ตัวสุดท้ายของ list เดิม' จะกลายมาเป็นหัวของครึ่งหลัง ทำให้เรา traverse จากหัว (first) กับจากกลางที่ reverse (second) ควบคู่กันได้ ซึ่ง first.val กับ second.val ในแต่ละก้าวก็คือ twin กันพอดี" },
                 { t: "p", c: "ขั้นสามแค่บวกทีละคู่แล้ว track ค่าที่มากที่สุดด้วย max เนื่องจากครึ่งหน้ากับครึ่งหลังยาวเท่ากัน (n เป็นเลขคู่) เราใช้เงื่อนไข while second เดินจนครึ่งหลังหมดได้เลย จุดที่คนใหม่งงบ่อยคือหลัง reverse ครึ่งหลังแล้ว pointer ตรงรอยต่อกลาง list จะไขว้กันนิดหน่อย แต่ไม่กระทบการนับคู่ เพราะเราเดินแค่ n/2 ก้าวจากสองปลายแล้วหยุดเมื่อ second หมดพอดี" },
                 { t: "p", c: "Time O(n) หากลาง + reverse ครึ่งหลัง + traverse บวก ล้วนเป็นเชิงเส้น · Space O(1) update pointer ในที่เดิม (in-place) ไม่ได้ copy ค่าไปเก็บใน list ใหม่" },

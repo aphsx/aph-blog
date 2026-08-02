@@ -14,10 +14,10 @@ export const backtrackingPages: Record<string, Page> = {
           { t: "p", c: "ลองนึกภาพว่าเรากำลังเดินอยู่ในเขาวงกตที่แตกเป็นทางแยกเยอะมาก ทุกครั้งที่เจอทางแยก เรา choose เดินทางหนึ่งไปก่อน ถ้าสุดทางแล้วไม่เจอทางออก เราก็ backtrack ย้อนกลับมาที่ทางแยกเดิมแล้วลองอีกทาง Backtracking ทำแบบเดียวกันเป๊ะ ๆ แต่ทำด้วย recursion (การเรียกตัวเอง)" },
           { t: "p", c: "เราวาดการทำงานเป็น recursion tree (ต้นไม้การเรียกตัวเอง) ได้ แต่ละ node (โหนด) คือ state (สถานะ) ปัจจุบัน คือคำตอบที่สร้างไปแล้วบางส่วน และแต่ละ branch (กิ่ง) ที่แตกออกไปคือ choice หนึ่งที่เราลอง สมมติต้อง build string (สตริง) ยาว 2 ตัวจากตัวอักษร a และ b ต้นไม้จะเป็นแบบนี้:" },
           { t: "code", c: `                   ""            <- ยังไม่เลือกอะไร
-                     /    \\
-                  "a"      "b"        <- เลือกตัวแรก
-                 /   \\    /   \\
-              "aa" "ab" "ba" "bb"     <- เลือกตัวที่สอง (คำตอบครบ)` },
+             /    \\
+          "a"      "b"        <- เลือกตัวแรก
+         /   \\    /   \\
+      "aa" "ab" "ba" "bb"     <- เลือกตัวที่สอง (คำตอบครบ)` },
           { t: "p", c: "แต่ละ leaf (ใบ) ของ tree คือคำตอบที่สมบูรณ์หนึ่งชุด การเดินลงจาก root (ราก) ไปหา leaf คือการ explore (ลงลึก) และเมื่อกลับขึ้นมาเพื่อไป branch ข้าง ๆ คือการ backtrack (ถอยกลับ)" },
 
           { t: "h2", c: "template สามจังหวะ: choose → explore → unchoose" },
@@ -98,31 +98,31 @@ export const backtrackingPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def letter_combinations(digits):
-            if not digits:
-                return []                     # ไม่มีเลขก็ไม่มีชุดตัวอักษร
-            mapping = {
-                "2": "abc", "3": "def", "4": "ghi", "5": "jkl",
-                "6": "mno", "7": "pqrs", "8": "tuv", "9": "wxyz",
-            }
-            result = []
-            path = []                         # ตัวอักษรที่เลือกไว้แล้วในเส้นทางนี้
+    if not digits:
+        return []                     # ไม่มีเลขก็ไม่มีชุดตัวอักษร
+    mapping = {
+        "2": "abc", "3": "def", "4": "ghi", "5": "jkl",
+        "6": "mno", "7": "pqrs", "8": "tuv", "9": "wxyz",
+    }
+    result = []
+    path = []                         # ตัวอักษรที่เลือกไว้แล้วในเส้นทางนี้
 
-            def backtrack(i):
-                if i == len(digits):          # เลือกครบทุกหลักแล้ว
-                    result.append("".join(path))  # ต่อ path เป็นสตริงเก็บคำตอบ
-                    return
-                for ch in mapping[digits[i]]: # ลองทุกตัวอักษรบนปุ่มนี้
-                    path.append(ch)           # choose
-                    backtrack(i + 1)          # explore หลักถัดไป
-                    path.pop()                # unchoose ถอยไปลองตัวอื่น
+    def backtrack(i):
+        if i == len(digits):          # เลือกครบทุกหลักแล้ว
+            result.append("".join(path))  # ต่อ path เป็นสตริงเก็บคำตอบ
+            return
+        for ch in mapping[digits[i]]: # ลองทุกตัวอักษรบนปุ่มนี้
+            path.append(ch)           # choose
+            backtrack(i + 1)          # explore หลักถัดไป
+            path.pop()                # unchoose ถอยไปลองตัวอื่น
 
-            backtrack(0)
-            return result
+    backtrack(0)
+    return result
 
-        print(letter_combinations("23"))
-        # ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
-        print(letter_combinations(""))   # []`, out: `['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
-        []` },
+print(letter_combinations("23"))
+# ['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
+print(letter_combinations(""))   # []`, out: `['ad', 'ae', 'af', 'bd', 'be', 'bf', 'cd', 'ce', 'cf']
+[]` },
                 { t: "p", c: "เราเดินตาม digit ของ digits ทีละตัวด้วย pointer (ตัวชี้) i ที่ digit ตำแหน่ง i เราดูว่าปุ่มนั้นมีตัวอักษรอะไรบ้าง (mapping[digits[i]]) แล้ว iterate ลองทุกตัว แต่ละตัวคือหนึ่ง branch ของ tree เมื่อ i เดินไปถึง length ของ digits แปลว่าเรา choose ครบทุก digit แล้ว จึง join path เป็น string เก็บลง result" },
                 { t: "p", c: "ถ้าลองเอา path.pop() ออก จะเกิดอะไรขึ้น? path จะยาวขึ้นเรื่อย ๆ ไม่มีวันสั้นลง ทำให้เงื่อนไข i == len(digits) กับ length ของ path ไม่ตรงกัน และตัวอักษรจาก branch เก่าจะค้างมาปน branch ใหม่ คำตอบเพี้ยนทันที การ pop() คือการ restore (คืนสภาพ) path ให้เท่าเดิมก่อน branch นี้" },
                 { t: "p", c: "Time O(4^n · n) เมื่อ n คือจำนวน digit แต่ละ digit แตกได้มากสุด 4 branch (ปุ่ม 7 กับ 9 มี 4 ตัว) จึงมีคำตอบได้ถึง 4^n ชุด และการ join string แต่ละชุดใช้เวลา O(n) · Space O(n) จาก depth ของ recursion และขนาด path (ไม่นับพื้นที่เก็บ result)" },
@@ -195,29 +195,29 @@ export const backtrackingPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def combination_sum3(k, n):
-            result = []
-            path = []
+    result = []
+    path = []
 
-            def backtrack(start, remaining):
-                if len(path) == k:            # เลือกครบ k ตัวแล้ว
-                    if remaining == 0:        # ผลรวมพอดี = คำตอบที่ใช้ได้
-                        result.append(path[:])
-                    return                    # ครบ k แล้วไม่ว่ายังไงก็หยุด
-                for num in range(start, 10):  # เลือกเลขจาก start ถึง 9
-                    if num > remaining:       # ตัดกิ่ง: ตัวนี้และตัวถัด ๆ ใหญ่เกิน
-                        break
-                    path.append(num)                     # choose
-                    backtrack(num + 1, remaining - num)  # explore: ตัวถัดไปเริ่มที่ num+1
-                    path.pop()                           # unchoose
+    def backtrack(start, remaining):
+        if len(path) == k:            # เลือกครบ k ตัวแล้ว
+            if remaining == 0:        # ผลรวมพอดี = คำตอบที่ใช้ได้
+                result.append(path[:])
+            return                    # ครบ k แล้วไม่ว่ายังไงก็หยุด
+        for num in range(start, 10):  # เลือกเลขจาก start ถึง 9
+            if num > remaining:       # ตัดกิ่ง: ตัวนี้และตัวถัด ๆ ใหญ่เกิน
+                break
+            path.append(num)                     # choose
+            backtrack(num + 1, remaining - num)  # explore: ตัวถัดไปเริ่มที่ num+1
+            path.pop()                           # unchoose
 
-            backtrack(1, n)
-            return result
+    backtrack(1, n)
+    return result
 
-        print(combination_sum3(3, 7))  # [[1, 2, 4]]
-        print(combination_sum3(3, 9))  # [[1, 2, 6], [1, 3, 5], [2, 3, 4]]
-        print(combination_sum3(4, 1))  # []`, out: `[[1, 2, 4]]
-        [[1, 2, 6], [1, 3, 5], [2, 3, 4]]
-        []` },
+print(combination_sum3(3, 7))  # [[1, 2, 4]]
+print(combination_sum3(3, 9))  # [[1, 2, 6], [1, 3, 5], [2, 3, 4]]
+print(combination_sum3(4, 1))  # []`, out: `[[1, 2, 4]]
+[[1, 2, 6], [1, 3, 5], [2, 3, 4]]
+[]` },
                 { t: "p", c: "เรา build combination ทีละตัว โดย parameter (พารามิเตอร์) start คุมไม่ให้ย้อนไป choose เลขที่เล็กกว่าตัวล่าสุด ทำให้ combination ที่ได้ sorted จากน้อยไปมากเสมอ จึงไม่มีทาง choose เลขซ้ำและไม่ได้ชุดที่เป็นเพียงการ permute ของกันและกัน ส่วน remaining คือค่าที่ยังต้องเติมให้ครบ n เมื่อ choose เลข num เราก็ subtract (ลบ) มันออกจาก remaining แล้ว explore ต่อ" },
                 { t: "p", c: "จุดที่ทำให้เร็วขึ้นคือ pruning เมื่อ num > remaining เราหยุดทั้ง loop ด้วย break ได้เลย เพราะ range sorted จากน้อยไปมาก ถ้าตัวนี้ใหญ่เกินไปแล้ว ตัวถัด ๆ ยิ่งใหญ่กว่า จึงไม่มีทางเป็นคำตอบ ถ้าเปลี่ยน break เป็น continue ก็ยังได้คำตอบถูกแต่จะช้าลงเพราะเสียเวลา iterate ตัวที่ไม่มีทางเวิร์ก" },
                 { t: "p", c: "Time O(C(9,k) · k) จำนวน combination ที่เป็นไปได้มากสุดคือการ choose k ตัวจาก 9 (มีเพดานตายตัวเพราะ choose ได้แค่ 1-9) และการ copy แต่ละชุดใช้ O(k) · Space O(k) จาก depth ของ recursion และขนาด path" },

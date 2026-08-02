@@ -27,27 +27,27 @@ export const bstPages: Record<string, Page> = {
 
               { t: "h2", c: "นิยาม node และ Big-O" },
               { t: "code", lang: "python", c: `# นิยาม node ของต้นไม้ (LeetCode ให้มาแบบนี้)
-        class TreeNode:
-            def __init__(self, val=0, left=None, right=None):
-                self.val = val
-                self.left = left
-                self.right = right` },
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right` },
               { t: "table", head: ["operation", "เฉลี่ย (สมดุล)", "แย่สุด (เอียง)"], rows: [
                 ["search (ค้นหา)", "O(log n)", "O(n)"],
                 ["insert (แทรก)", "O(log n)", "O(n)"],
                 ["delete (ลบ)", "O(log n)", "O(n)"],
               ] },
               { t: "code", lang: "python", c: `# template ค้นหาค่า target ใน BST แบบวนลูป — จำโครงนี้ไว้ใช้ได้
-        def search(root, target):
-            node = root
-            while node:
-                if target == node.val:
-                    return node          # เจอแล้ว
-                elif target < node.val:
-                    node = node.left     # ค่าเล็กกว่า ไปซ้าย
-                else:
-                    node = node.right    # ค่าใหญ่กว่า ไปขวา
-            return None                  # หาไม่เจอ` },
+def search(root, target):
+    node = root
+    while node:
+        if target == node.val:
+            return node          # เจอแล้ว
+        elif target < node.val:
+            node = node.left     # ค่าเล็กกว่า ไปซ้าย
+        else:
+            node = node.right    # ค่าใหญ่กว่า ไปขวา
+    return None                  # หาไม่เจอ` },
               { t: "callout", title: "ทำไม O(h) ไม่ใช่ O(n)", c: "h คือ height ของ tree (จำนวนชั้น) แต่ละก้าวเราลงลึกไปหนึ่งชั้นเสมอ ไม่เคยย้อนกลับ ถ้า tree สมดุลดี h ประมาณ log n การ search จึงเร็วมาก แต่ถ้า tree เอียงเป็นเส้นตรง (เช่น insert ค่าเรียงจากน้อยไปมาก) h จะกลายเป็น n และช้าลงเท่ากับ array ธรรมดา" },
               { t: "callout", c: "หมวดนี้มี 2 ข้อ search ใน BST และ delete node ใน BST พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
       ],
@@ -103,33 +103,33 @@ export const bstPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class TreeNode:
-            def __init__(self, val=0, left=None, right=None):
-                self.val = val
-                self.left = left
-                self.right = right
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
-        # class TreeNode:
-        #     def __init__(self, val=0, left=None, right=None): ...
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None): ...
 
-        def search_bst(root, val):
-            node = root                  # เริ่มที่ราก
-            while node:                  # ยังไม่หลุดขอบต้นไม้
-                if val == node.val:
-                    return node          # เจอ node ที่ต้องการ คืนทั้ง subtree
-                elif val < node.val:
-                    node = node.left     # ค่าที่หาเล็กกว่า ต้องอยู่ทางซ้าย
-                else:
-                    node = node.right    # ค่าที่หาใหญ่กว่า ต้องอยู่ทางขวา
-            return None                  # เดินจนตกขอบต้นไม้ แปลว่าไม่มี
+def search_bst(root, val):
+    node = root                  # เริ่มที่ราก
+    while node:                  # ยังไม่หลุดขอบต้นไม้
+        if val == node.val:
+            return node          # เจอ node ที่ต้องการ คืนทั้ง subtree
+        elif val < node.val:
+            node = node.left     # ค่าที่หาเล็กกว่า ต้องอยู่ทางซ้าย
+        else:
+            node = node.right    # ค่าที่หาใหญ่กว่า ต้องอยู่ทางขวา
+    return None                  # เดินจนตกขอบต้นไม้ แปลว่าไม่มี
 
-        # BST [4, 2, 7, 1, 3]
-        root = TreeNode(4, TreeNode(2, TreeNode(1), TreeNode(3)), TreeNode(7))
-        found = search_bst(root, 2)
-        print(found.val, found.left.val, found.right.val)   # ได้ subtree ที่มีราก 2
-        print(search_bst(root, 5))                          # ไม่มีค่า 5 ใน BST นี้`, out: `2 1 3
-        None` },
+# BST [4, 2, 7, 1, 3]
+root = TreeNode(4, TreeNode(2, TreeNode(1), TreeNode(3)), TreeNode(7))
+found = search_bst(root, 2)
+print(found.val, found.left.val, found.right.val)   # ได้ subtree ที่มีราก 2
+print(search_bst(root, 5))                          # ไม่มีค่า 5 ใน BST นี้`, out: `2 1 3
+None` },
                 { t: "p", c: "ข้อนี้คือการนำกฎ BST มาใช้ตรง ๆ แทนที่จะ iterate ดูทุก node แบบ tree ทั่วไป (ซึ่งจะเป็น O(n)) เราใช้ความจริงที่ว่าค่าถูก sort ไว้แล้ว ทุกครั้งที่ compare เราตัดทิ้งครึ่งหนึ่งของ tree ที่เป็นไปไม่ได้ทันที เช่นถ้า val น้อยกว่า node ปัจจุบัน เราไม่มีทางเจอมันในฝั่งขวา (ฝั่งขวาใหญ่กว่าหมด) จึงไปซ้ายอย่างเดียว" },
                 { t: "p", c: "จะเขียนแบบ recursion (การเรียกตัวเอง) ก็ได้ ผลเหมือนกัน แต่แบบ loop (วน) ประหยัด memory กว่าเพราะไม่ต้องใช้ call stack ถ้าเปลี่ยนเป็น recursion โค้ดจะสั้นลงแต่กิน memory เพิ่มตาม height (ความสูง)" },
                 { t: "p", c: "Time O(h) traverse ลงจาก root ถึง leaf (ใบ) มากสุดเท่า height h · Space O(1) แบบ loop ใช้ตัวแปรเดียว (ถ้าเขียน recursion จะเป็น O(h) จาก call stack)" },
@@ -203,54 +203,54 @@ export const bstPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class TreeNode:
-            def __init__(self, val=0, left=None, right=None):
-                self.val = val
-                self.left = left
-                self.right = right
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
-        # class TreeNode:
-        #     def __init__(self, val=0, left=None, right=None): ...
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None): ...
 
-        def delete_node(root, key):
-            if not root:
-                return None                      # ต้นไม้ว่าง ไม่มีอะไรให้ลบ
+def delete_node(root, key):
+    if not root:
+        return None                      # ต้นไม้ว่าง ไม่มีอะไรให้ลบ
 
-            if key < root.val:
-                root.left = delete_node(root.left, key)   # key อยู่ฝั่งซ้าย
-            elif key > root.val:
-                root.right = delete_node(root.right, key) # key อยู่ฝั่งขวา
-            else:
-                # เจอ node ที่จะลบแล้ว แยก 3 กรณี
-                if not root.left:
-                    return root.right            # ไม่มีลูกซ้าย ยกลูกขวาขึ้นมาแทน
-                if not root.right:
-                    return root.left             # ไม่มีลูกขวา ยกลูกซ้ายขึ้นมาแทน
+    if key < root.val:
+        root.left = delete_node(root.left, key)   # key อยู่ฝั่งซ้าย
+    elif key > root.val:
+        root.right = delete_node(root.right, key) # key อยู่ฝั่งขวา
+    else:
+        # เจอ node ที่จะลบแล้ว แยก 3 กรณี
+        if not root.left:
+            return root.right            # ไม่มีลูกซ้าย ยกลูกขวาขึ้นมาแทน
+        if not root.right:
+            return root.left             # ไม่มีลูกขวา ยกลูกซ้ายขึ้นมาแทน
 
-                # กรณีมีลูกสองตัว หาตัวที่น้อยสุดในฝั่งขวา (successor)
-                succ = root.right
-                while succ.left:
-                    succ = succ.left
-                root.val = succ.val              # เอาค่า successor มาแทนค่าปัจจุบัน
-                # แล้วลบ successor ออกจาก subtree ขวา
-                root.right = delete_node(root.right, succ.val)
+        # กรณีมีลูกสองตัว หาตัวที่น้อยสุดในฝั่งขวา (successor)
+        succ = root.right
+        while succ.left:
+            succ = succ.left
+        root.val = succ.val              # เอาค่า successor มาแทนค่าปัจจุบัน
+        # แล้วลบ successor ออกจาก subtree ขวา
+        root.right = delete_node(root.right, succ.val)
 
-            return root
+    return root
 
-        def inorder(node):
-            """ไล่อ่าน BST แบบ in-order จะได้ค่าเรียงจากน้อยไปมากเสมอ"""
-            if node is None:
-                return []
-            return inorder(node.left) + [node.val] + inorder(node.right)
+def inorder(node):
+    """ไล่อ่าน BST แบบ in-order จะได้ค่าเรียงจากน้อยไปมากเสมอ"""
+    if node is None:
+        return []
+    return inorder(node.left) + [node.val] + inorder(node.right)
 
 
-        # BST [5, 3, 6, 2, 4, null, 7]
-        root = TreeNode(5, TreeNode(3, TreeNode(2), TreeNode(4)), TreeNode(6, None, TreeNode(7)))
-        print(inorder(root))
-        root = delete_node(root, 3)          # ลบ 3 ซึ่งมีลูกสองข้าง
-        print(inorder(root))`, out: `[2, 3, 4, 5, 6, 7]
-        [2, 4, 5, 6, 7]` },
+# BST [5, 3, 6, 2, 4, null, 7]
+root = TreeNode(5, TreeNode(3, TreeNode(2), TreeNode(4)), TreeNode(6, None, TreeNode(7)))
+print(inorder(root))
+root = delete_node(root, 3)          # ลบ 3 ซึ่งมีลูกสองข้าง
+print(inorder(root))`, out: `[2, 3, 4, 5, 6, 7]
+[2, 4, 5, 6, 7]` },
                 { t: "p", c: "ขั้นแรกเราต้อง traverse ไปหา node ที่จะ delete ก่อน โดยใช้กฎ BST เหมือน search ถ้า key น้อยกว่า root ปัจจุบันก็เข้าไป delete ในฝั่งซ้าย (แล้วรับผลลัพธ์กลับมาต่อกับ root.left) ถ้ามากกว่าก็ทำกับฝั่งขวา เทคนิคการเขียน root.left = delete_node(root.left, key) ช่วยให้การเชื่อม node ใหม่หลัง delete เกิดขึ้นเองอัตโนมัติ ไม่ต้องเก็บ pointer ตัวพ่อไว้เอง" },
                 { t: "p", c: "พอเจอ node ที่จะ delete (key == root.val) แยกเป็น 3 กรณี กรณีไม่มี child หรือมี child ตัวเดียว จัดการง่าย แค่คืน child อีกฝั่งขึ้นไปแทนตำแหน่งของมัน (ถ้าไม่มี child เลย ฝั่งที่คืนก็เป็น None พอดี เท่ากับ delete ทิ้ง) กรณียากคือมี child สองตัว เรา delete ตรง ๆ ไม่ได้เพราะจะเหลือ child กำพร้าสองก้อน วิธีแก้คือหา successor คือค่าที่น้อยที่สุดในฝั่งขวา (เดินขวาหนึ่งก้าวแล้วเดินซ้ายจนสุด) ค่านี้มากกว่าทุกตัวในฝั่งซ้าย และน้อยกว่าทุกตัวที่เหลือในฝั่งขวา จึงเอามาแทนที่แล้ว tree ยังเป็น BST อยู่ จากนั้น delete successor ตัวเดิมออก (ซึ่งจะเข้ากรณีง่ายเพราะ successor ไม่มี child ซ้ายแน่นอน)" },
                 { t: "p", c: "Time O(h) traverse หา node แล้วเดินหา successor รวมแล้วไม่เกิน height (ความสูง) · Space O(h) จาก call stack ของ recursion เท่า height" },

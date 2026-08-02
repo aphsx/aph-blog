@@ -17,11 +17,11 @@ export const queuePages: Record<string, Page> = {
                 t: "code",
                 c: `enqueue 10, 20, 30 ตามลำดับ  ->  ได้แถวแบบนี้:
 
-          ออก <-  [ 10 | 20 | 30 ]  <- เข้า
-                 front            rear
+  ออก <-  [ 10 | 20 | 30 ]  <- เข้า
+         front            rear
 
-        dequeue() คืน 10 (ตัวหน้าสุด ที่เข้ามาก่อนใคร)
-        แล้วแถวเหลือ [20, 30]`,
+dequeue() คืน 10 (ตัวหน้าสุด ที่เข้ามาก่อนใคร)
+แล้วแถวเหลือ [20, 30]`,
               },
 
               { t: "h3", c: "operation หลักของ queue + Big-O" },
@@ -43,19 +43,19 @@ export const queuePages: Record<string, Page> = {
                 lang: "python",
                 c: `from collections import deque
 
-        q = deque()          # แถวว่าง
+q = deque()          # แถวว่าง
 
-        q.append(10)         # enqueue  ->  [10]
-        q.append(20)         # enqueue  ->  [10, 20]
-        q.append(30)         # enqueue  ->  [10, 20, 30]
+q.append(10)         # enqueue  ->  [10]
+q.append(20)         # enqueue  ->  [10, 20]
+q.append(30)         # enqueue  ->  [10, 20, 30]
 
-        print(q[0])          # peek หน้าแถว  ->  10 (ยังอยู่ในแถว)
+print(q[0])          # peek หน้าแถว  ->  10 (ยังอยู่ในแถว)
 
-        first = q.popleft()  # dequeue  ->  first = 10, แถวเหลือ [20, 30]
-        print(first)         # 10
+first = q.popleft()  # dequeue  ->  first = 10, แถวเหลือ [20, 30]
+print(first)         # 10
 
-        while q:             # วนจนแถวว่าง
-            print(q.popleft())   # 20 แล้วก็ 30 (ออกตามลำดับที่เข้ามา)`,
+while q:             # วนจนแถวว่าง
+    print(q.popleft())   # 20 แล้วก็ 30 (ออกตามลำดับที่เข้ามา)`,
               },
 
               { t: "callout", title: "ทำไมไม่ใช้ list.pop(0)", warn: true, c: "list ธรรมดาทำ queue ได้ แต่การเอาของหน้าแถวออกด้วย list.pop(0) เป็น O(n) เพราะ Python ต้องเลื่อน element (สมาชิก) ทุกตัวที่เหลือขยับมาข้างหน้าทีละช่อง ถ้าอยู่ใน loop (วน) ใหญ่ ๆ จะกลายเป็น O(n^2) ทันที ส่วน deque.popleft() เป็น O(1) จริง เพราะออกแบบมาให้แก้ปลายทั้งสองข้างได้เร็ว เวลาทำโจทย์ queue ให้ใช้ deque เสมอ" },
@@ -119,25 +119,25 @@ export const queuePages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import deque
 
-        class RecentCounter:
-            def __init__(self):
-                self.q = deque()          # เก็บเวลาของ ping ที่ยังอยู่ในช่วง
+class RecentCounter:
+    def __init__(self):
+        self.q = deque()          # เก็บเวลาของ ping ที่ยังอยู่ในช่วง
 
-            def ping(self, t):
-                self.q.append(t)          # ต่อ ping ปัจจุบันเข้าท้ายแถว
-                # เอาเวลาที่เก่าเกินไป (หลุดช่วง 3000 ms) ออกจากหน้าแถว
-                while self.q[0] < t - 3000:
-                    self.q.popleft()
-                return len(self.q)        # ที่เหลือคือ ping ในช่วง [t-3000, t]
+    def ping(self, t):
+        self.q.append(t)          # ต่อ ping ปัจจุบันเข้าท้ายแถว
+        # เอาเวลาที่เก่าเกินไป (หลุดช่วง 3000 ms) ออกจากหน้าแถว
+        while self.q[0] < t - 3000:
+            self.q.popleft()
+        return len(self.q)        # ที่เหลือคือ ping ในช่วง [t-3000, t]
 
-        rc = RecentCounter()
-        print(rc.ping(1))      # 1
-        print(rc.ping(100))    # 2
-        print(rc.ping(3001))   # 3
-        print(rc.ping(3002))   # 3`, out: `1
-        2
-        3
-        3` },
+rc = RecentCounter()
+print(rc.ping(1))      # 1
+print(rc.ping(100))    # 2
+print(rc.ping(3001))   # 3
+print(rc.ping(3002))   # 3`, out: `1
+2
+3
+3` },
                 { t: "p", c: "เพราะเวลา t ที่ส่งเข้ามาเพิ่มขึ้นเรื่อย ๆ เสมอ ping ที่เก่าที่สุดจึงอยู่หน้าแถว (front) เสมอ วิธีคิดคือ: ทุกครั้งที่มี ping ใหม่ เรา append มันเข้าท้ายแถวก่อน จากนั้นดูหน้าแถว ถ้าเวลาตรงหน้าแถวเก่าเกินไป (น้อยกว่า t - 3000 คือหลุดออกนอก window 3000 ms) ก็ popleft ทิ้งไปเรื่อย ๆ จนหน้าแถวเป็นเวลาที่ยังอยู่ในช่วง สุดท้ายจำนวน element (สมาชิก) ที่เหลือใน queue คือคำตอบพอดี" },
                 { t: "p", c: "สังเกตว่า while self.q[0] ปลอดภัยเสมอ ไม่ต้อง check (เช็ค) ว่าแถวว่าง เพราะเราเพิ่ง append(t) เข้าไปก่อน แถวจึงมีอย่างน้อยหนึ่งตัว (คือ t เอง) และ t ไม่มีทางน้อยกว่า t - 3000 loop จึงหยุดก่อนแถวจะว่างเสมอ" },
                 { t: "p", c: "Time O(1) ต่อการเรียก ping หนึ่งครั้งแบบ amortized (เฉลี่ย) เพราะเวลาแต่ละอันถูก append และ popleft อย่างละครั้งเดียวตลอดอายุการใช้งาน · Space O(w) เมื่อ w คือจำนวน ping มากสุดที่อยู่ในช่วง 3000 ms พร้อมกัน" },
@@ -203,29 +203,29 @@ export const queuePages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import deque
 
-        def predict_party_victory(senate):
-            n = len(senate)
-            radiant = deque()          # เก็บ index ของฝ่าย R
-            dire = deque()             # เก็บ index ของฝ่าย D
-            for i, c in enumerate(senate):
-                if c == 'R':
-                    radiant.append(i)
-                else:
-                    dire.append(i)
+def predict_party_victory(senate):
+    n = len(senate)
+    radiant = deque()          # เก็บ index ของฝ่าย R
+    dire = deque()             # เก็บ index ของฝ่าย D
+    for i, c in enumerate(senate):
+        if c == 'R':
+            radiant.append(i)
+        else:
+            dire.append(i)
 
-            while radiant and dire:
-                r = radiant.popleft()  # ตัวหน้าสุดของแต่ละฝ่ายได้สิทธิ์
-                d = dire.popleft()
-                # ใคร index น้อยกว่า = มาถึงตาก่อน = ได้แบนอีกฝ่าย
-                if r < d:
-                    radiant.append(r + n)   # r รอด วนไปต่อท้าย (รอบหน้า)
-                else:
-                    dire.append(d + n)      # d รอด วนไปต่อท้าย
-            return "Radiant" if radiant else "Dire"
+    while radiant and dire:
+        r = radiant.popleft()  # ตัวหน้าสุดของแต่ละฝ่ายได้สิทธิ์
+        d = dire.popleft()
+        # ใคร index น้อยกว่า = มาถึงตาก่อน = ได้แบนอีกฝ่าย
+        if r < d:
+            radiant.append(r + n)   # r รอด วนไปต่อท้าย (รอบหน้า)
+        else:
+            dire.append(d + n)      # d รอด วนไปต่อท้าย
+    return "Radiant" if radiant else "Dire"
 
-        print(predict_party_victory("RD"))   # Radiant
-        print(predict_party_victory("RDD"))  # Dire`, out: `Radiant
-        Dire` },
+print(predict_party_victory("RD"))   # Radiant
+print(predict_party_victory("RDD"))  # Dire`, out: `Radiant
+Dire` },
                 { t: "p", c: "หัวใจของข้อนี้คือ: ในแต่ละตา วุฒิสมาชิกที่มาถึงคิวก่อน (index น้อยกว่า) ย่อมได้แบนฝ่ายตรงข้าม และคนที่ฉลาดที่สุดคือแบนคู่แข่งที่ใกล้จะได้สิทธิ์ที่สุดของฝ่ายตรงข้าม เราจึงเก็บ index ของแต่ละฝ่ายไว้ใน queue สองอัน ในแต่ละรอบ เอาตัวหน้าสุด (front) ของทั้งสองฝ่ายมา compare index กัน ใครน้อยกว่าคนนั้นได้แบนอีกฝ่าย (อีกฝ่ายถูก popleft ทิ้งไปเลย ไม่ต่อกลับ)" },
                 { t: "p", c: "ส่วนคนที่รอด (ผู้แบน) เราไม่ทิ้ง แต่ให้วนกลับไป enqueue รอบถัดไป โดย append(index + n) เกมวนไปจน queue ฝ่ายใดฝ่ายหนึ่งว่าง อีกฝ่ายที่ยังเหลือคือผู้ชนะ ถ้าลองไม่บวก n ดู index ของผู้รอดจะกลายเป็นเล็กเกินจริงและถูก compare ผิดในรอบถัดไป ทำให้ผลลัพธ์เพี้ยน" },
                 { t: "p", c: "Time O(n) วุฒิสมาชิก n คน แต่ละคนถูกแบน (หายไป) ในที่สุด และการ compare แต่ละครั้งกำจัดคนไป 1 คน จำนวนรอบทั้งหมดจึงเป็นเชิงเส้นกับ n · Space O(n) เก็บ index ของทุกคนไว้ในสอง queue" },

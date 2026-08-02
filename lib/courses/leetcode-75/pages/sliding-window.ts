@@ -27,24 +27,24 @@ export const slidingWindowPages: Record<string, Page> = {
                 lang: "python",
                 label: "วิธีที่ 1: brute force — บวกใหม่ทุกช่วง",
                 code: `nums = [2, 1, 5, 1, 3, 2]
-        k = 3
-        best = float("-inf")
-        adds = 0                                   # นับว่าบวกเลขกี่ครั้ง
+k = 3
+best = float("-inf")
+adds = 0                                   # นับว่าบวกเลขกี่ครั้ง
 
-        for i in range(len(nums) - k + 1):         # ทุกจุดเริ่มต้นที่เป็นไปได้
-            total = 0
-            for j in range(i, i + k):              # บวก k ตัวใหม่ทุกครั้ง
-                total += nums[j]
-                adds += 1
-            best = max(best, total)
-            print(f"ช่วง [{i}:{i+k}] = {nums[i:i+k]} รวม = {total}")
+for i in range(len(nums) - k + 1):         # ทุกจุดเริ่มต้นที่เป็นไปได้
+    total = 0
+    for j in range(i, i + k):              # บวก k ตัวใหม่ทุกครั้ง
+        total += nums[j]
+        adds += 1
+    best = max(best, total)
+    print(f"ช่วง [{i}:{i+k}] = {nums[i:i+k]} รวม = {total}")
 
-        print("best =", best, "| บวกไปทั้งหมด", adds, "ครั้ง")`,
+print("best =", best, "| บวกไปทั้งหมด", adds, "ครั้ง")`,
                 out: `ช่วง [0:3] = [2, 1, 5] รวม = 8
-        ช่วง [1:4] = [1, 5, 1] รวม = 7
-        ช่วง [2:5] = [5, 1, 3] รวม = 9
-        ช่วง [3:6] = [1, 3, 2] รวม = 6
-        best = 9 | บวกไปทั้งหมด 12 ครั้ง`,
+ช่วง [1:4] = [1, 5, 1] รวม = 7
+ช่วง [2:5] = [5, 1, 3] รวม = 9
+ช่วง [3:6] = [1, 3, 2] รวม = 6
+best = 9 | บวกไปทั้งหมด 12 ครั้ง`,
               },
               {
                 t: "p",
@@ -55,27 +55,27 @@ export const slidingWindowPages: Record<string, Page> = {
                 lang: "python",
                 label: "วิธีที่ 2: sliding window — บวกเข้า ลบออก",
                 code: `nums = [2, 1, 5, 1, 3, 2]
-        k = 3
-        window = sum(nums[:k])                     # สร้างหน้าต่างแรกครั้งเดียว
-        best = window
-        ops = k                                    # นับการบวก/ลบ
+k = 3
+window = sum(nums[:k])                     # สร้างหน้าต่างแรกครั้งเดียว
+best = window
+ops = k                                    # นับการบวก/ลบ
 
-        print(f"เริ่ม   window = {nums[:k]} รวม = {window}")
+print(f"เริ่ม   window = {nums[:k]} รวม = {window}")
 
-        for i in range(k, len(nums)):
-            entering = nums[i]                     # ตัวใหม่เข้าทางขวา
-            leaving = nums[i - k]                  # ตัวเก่าหลุดออกทางซ้าย
-            window += entering - leaving
-            ops += 2
-            best = max(best, window)
-            print(f"เลื่อน  เข้า {entering}, ออก {leaving} -> รวม = {window}")
+for i in range(k, len(nums)):
+    entering = nums[i]                     # ตัวใหม่เข้าทางขวา
+    leaving = nums[i - k]                  # ตัวเก่าหลุดออกทางซ้าย
+    window += entering - leaving
+    ops += 2
+    best = max(best, window)
+    print(f"เลื่อน  เข้า {entering}, ออก {leaving} -> รวม = {window}")
 
-        print("best =", best, "| บวก/ลบไปทั้งหมด", ops, "ครั้ง")`,
+print("best =", best, "| บวก/ลบไปทั้งหมด", ops, "ครั้ง")`,
                 out: `เริ่ม   window = [2, 1, 5] รวม = 8
-        เลื่อน  เข้า 1, ออก 2 -> รวม = 7
-        เลื่อน  เข้า 3, ออก 1 -> รวม = 9
-        เลื่อน  เข้า 2, ออก 5 -> รวม = 6
-        best = 9 | บวก/ลบไปทั้งหมด 9 ครั้ง`,
+เลื่อน  เข้า 1, ออก 2 -> รวม = 7
+เลื่อน  เข้า 3, ออก 1 -> รวม = 9
+เลื่อน  เข้า 2, ออก 5 -> รวม = 6
+best = 9 | บวก/ลบไปทั้งหมด 9 ครั้ง`,
               },
               {
                 t: "p",
@@ -197,28 +197,28 @@ export const slidingWindowPages: Record<string, Page> = {
                 lang: "python",
                 label: "variable window — longest substring without repeating",
                 code: `s = "abcabcbb"
-        seen = set()
-        left = 0
-        best = 0
+seen = set()
+left = 0
+best = 0
 
-        for right, ch in enumerate(s):
-            while ch in seen:                      # ซ้ำแล้ว → หดซ้าย
-                seen.remove(s[left])
-                left += 1
-            seen.add(ch)                           # รับตัวใหม่เข้า
-            best = max(best, right - left + 1)
-            print(f"right={right} ch={ch!r} window={s[left:right+1]!r} best={best}")
+for right, ch in enumerate(s):
+    while ch in seen:                      # ซ้ำแล้ว → หดซ้าย
+        seen.remove(s[left])
+        left += 1
+    seen.add(ch)                           # รับตัวใหม่เข้า
+    best = max(best, right - left + 1)
+    print(f"right={right} ch={ch!r} window={s[left:right+1]!r} best={best}")
 
-        print("คำตอบ:", best)`,
+print("คำตอบ:", best)`,
                 out: `right=0 ch='a' window='a' best=1
-        right=1 ch='b' window='ab' best=2
-        right=2 ch='c' window='abc' best=3
-        right=3 ch='a' window='bca' best=3
-        right=4 ch='b' window='cab' best=3
-        right=5 ch='c' window='abc' best=3
-        right=6 ch='b' window='cb' best=3
-        right=7 ch='b' window='b' best=3
-        คำตอบ: 3`,
+right=1 ch='b' window='ab' best=2
+right=2 ch='c' window='abc' best=3
+right=3 ch='a' window='bca' best=3
+right=4 ch='b' window='cab' best=3
+right=5 ch='c' window='abc' best=3
+right=6 ch='b' window='cb' best=3
+right=7 ch='b' window='b' best=3
+คำตอบ: 3`,
               },
               {
                 t: "p",
@@ -356,15 +356,15 @@ export const slidingWindowPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_max_average(nums, k):
-            window = sum(nums[:k])         # ผลรวมหน้าต่างแรก [0, k)
-            best = window
-            for i in range(k, len(nums)):
-                window += nums[i]          # ตัวใหม่เข้าทางขวา
-                window -= nums[i - k]      # ตัวเก่าหลุดออกทางซ้าย
-                best = max(best, window)
-            return best / k                # แปลงผลรวมมากสุดเป็นค่าเฉลี่ย
+    window = sum(nums[:k])         # ผลรวมหน้าต่างแรก [0, k)
+    best = window
+    for i in range(k, len(nums)):
+        window += nums[i]          # ตัวใหม่เข้าทางขวา
+        window -= nums[i - k]      # ตัวเก่าหลุดออกทางซ้าย
+        best = max(best, window)
+    return best / k                # แปลงผลรวมมากสุดเป็นค่าเฉลี่ย
 
-        print(find_max_average([1, 12, -5, -6, 50, 3], 4))  # 12.75`, out: `12.75` },
+print(find_max_average([1, 12, -5, -6, 50, 3], 4))  # 12.75`, out: `12.75` },
                 { t: "p", c: "กุญแจคือค่าเฉลี่ยมากสุดเกิดที่ช่วงที่ผลรวมมากสุด เพราะทุกช่วงยาว k เท่ากันหมด จึงเปลี่ยนโจทย์เป็นหาผลรวมมากสุดของช่วงยาว k ซึ่งง่ายกว่า แล้วค่อยหารด้วย k ตอนท้ายทีเดียว" },
                 { t: "p", c: "หัวใจของความเร็วคือเลื่อน window แทนบวก k ตัวใหม่ทุกครั้ง (ซึ่งจะกลายเป็น O(nk)) แค่บวกตัวที่เพิ่งเข้าและลบตัวที่เพิ่งออก ต้อง initialize best = window แรกเสมอ ไม่งั้นกรณีค่าติดลบล้วนจะตอบผิด" },
                 { t: "p", c: "Time O(n) สร้าง window แรก O(k) แล้วเลื่อนอีก O(n) รวมยังเป็น O(n) · Space O(1) เก็บแค่ผลรวมกับค่าดีสุด" },
@@ -440,22 +440,22 @@ export const slidingWindowPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def max_vowels(s, k):
-            vowels = set("aeiou")
-            count = sum(1 for c in s[:k] if c in vowels)   # นับสระในหน้าต่างแรก
-            best = count
-            for i in range(k, len(s)):
-                if s[i] in vowels:        # ตัวใหม่เข้าทางขวา
-                    count += 1
-                if s[i - k] in vowels:    # ตัวเก่าหลุดออกทางซ้าย
-                    count -= 1
-                best = max(best, count)
-                if best == k:             # เต็มหน้าต่างแล้ว ไม่มีทางมากกว่านี้
-                    break
-            return best
+    vowels = set("aeiou")
+    count = sum(1 for c in s[:k] if c in vowels)   # นับสระในหน้าต่างแรก
+    best = count
+    for i in range(k, len(s)):
+        if s[i] in vowels:        # ตัวใหม่เข้าทางขวา
+            count += 1
+        if s[i - k] in vowels:    # ตัวเก่าหลุดออกทางซ้าย
+            count -= 1
+        best = max(best, count)
+        if best == k:             # เต็มหน้าต่างแล้ว ไม่มีทางมากกว่านี้
+            break
+    return best
 
-        print(max_vowels("abciiidef", 3))  # 3
-        print(max_vowels("leetcode", 3))   # 2`, out: `3
-        2` },
+print(max_vowels("abciiidef", 3))  # 3
+print(max_vowels("leetcode", 3))   # 2`, out: `3
+2` },
                 { t: "p", c: "แทนที่จะนับสระใหม่ทุก window (ช้า O(nk)) เรา track count แล้วปรับทีละหนึ่งตอนเลื่อน: ตัวใหม่เข้าเป็นสระ +1, ตัวเก่าที่หลุดออก (s[i - k]) เป็นสระ -1 ใช้ set(\"aeiou\") เช็คว่าเป็นสระ O(1)" },
                 { t: "p", c: "if best == k แล้ว break เป็นการปรับให้เร็วขึ้น เพราะสระมากสุดใน window ยาว k คือ k อยู่แล้ว เจอครบก็ไม่ต้องดูต่อ เอาออกก็ยังถูก เพียงแต่ iterate ครบทุกตัว" },
                 { t: "p", c: "Time O(n) iterate string รอบเดียว · Space O(1) hash set ของสระมีแค่ 5 ตัว ถือเป็นค่าคงที่" },
@@ -524,20 +524,20 @@ export const slidingWindowPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def longest_ones(nums, k):
-            left = 0
-            zeros = 0            # จำนวน 0 ในหน้าต่างตอนนี้
-            best = 0
-            for right in range(len(nums)):
-                if nums[right] == 0:
-                    zeros += 1                 # รับตัวใหม่ทางขวา
-                while zeros > k:               # 0 เกินโควตาพลิก
-                    if nums[left] == 0:
-                        zeros -= 1             # หดซ้าย ถอด 0 ออก
-                    left += 1
-                best = max(best, right - left + 1)   # หน้าต่างตอนนี้ถูกต้อง
-            return best
+    left = 0
+    zeros = 0            # จำนวน 0 ในหน้าต่างตอนนี้
+    best = 0
+    for right in range(len(nums)):
+        if nums[right] == 0:
+            zeros += 1                 # รับตัวใหม่ทางขวา
+        while zeros > k:               # 0 เกินโควตาพลิก
+            if nums[left] == 0:
+                zeros -= 1             # หดซ้าย ถอด 0 ออก
+            left += 1
+        best = max(best, right - left + 1)   # หน้าต่างตอนนี้ถูกต้อง
+    return best
 
-        print(longest_ones([1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2))  # 6`, out: `6` },
+print(longest_ones([1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2))  # 6`, out: `6` },
                 { t: "p", c: "กุญแจคือเปลี่ยนมุมมอง: แทนที่จะคิดว่า \"พลิก 0 กี่ตัว\" ให้คิดว่า \"window ที่ยาวที่สุดที่มี 0 ไม่เกิน k ตัว\" มีค่าเท่ากัน เพราะ 0 ทุกตัวใน window พลิกเป็น 1 ได้ตราบใดที่ไม่เกิน k เราจึงขยายขวารับของเข้าเรื่อย ๆ และ track จำนวน 0 ไว้" },
                 { t: "p", c: "เมื่อ 0 ใน window เกิน k เราหดซ้าย (ขยับ left) จนจำนวน 0 กลับมาไม่เกิน k left ขยับรวมกันไม่เกิน n ครั้งตลอด loop จึงยังเป็น O(n) ไม่ใช่ O(n²) ถ้าเผลอใช้ if แทน while จะหด 0 ไม่พอเมื่อ k ลดหลายตัว" },
                 { t: "p", c: "Time O(n) แต่ละตัวเข้าและออก window อย่างละครั้ง · Space O(1) track แค่ตัวนับกับ pointer (ตัวชี้)" },
@@ -609,23 +609,23 @@ export const slidingWindowPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def longest_subarray(nums):
-            left = 0
-            zeros = 0            # จำนวน 0 ในหน้าต่าง (ยอมได้ไม่เกิน 1)
-            best = 0
-            for right in range(len(nums)):
-                if nums[right] == 0:
-                    zeros += 1
-                while zeros > 1:              # ยอม 0 ได้แค่ตัวเดียว
-                    if nums[left] == 0:
-                        zeros -= 1
-                    left += 1
-                # ลบ 1 ตัวเสมอ -> ความยาวหน้าต่าง - 1 = (right - left + 1) - 1
-                best = max(best, right - left)
-            return best
+    left = 0
+    zeros = 0            # จำนวน 0 ในหน้าต่าง (ยอมได้ไม่เกิน 1)
+    best = 0
+    for right in range(len(nums)):
+        if nums[right] == 0:
+            zeros += 1
+        while zeros > 1:              # ยอม 0 ได้แค่ตัวเดียว
+            if nums[left] == 0:
+                zeros -= 1
+            left += 1
+        # ลบ 1 ตัวเสมอ -> ความยาวหน้าต่าง - 1 = (right - left + 1) - 1
+        best = max(best, right - left)
+    return best
 
-        print(longest_subarray([1, 1, 0, 1]))  # 3
-        print(longest_subarray([1, 1, 1]))     # 2`, out: `3
-        2` },
+print(longest_subarray([1, 1, 0, 1]))  # 3
+print(longest_subarray([1, 1, 1]))     # 2`, out: `3
+2` },
                 { t: "p", c: "โจทย์นี้เป็นน้องของ LC1004 โดยตรง: มองว่า \"ต้องลบหนึ่งตัว\" คือ \"อนุญาตให้ window มี 0 ได้หนึ่งตัว (ตัวที่จะถูกลบ)\" ก็ได้ variable size window แบบ k = 1 ทันที ขยายขวารับของเข้า ถ้ามี 0 เกินหนึ่งก็หดซ้ายจนเหลือไม่เกินหนึ่ง" },
                 { t: "p", c: "ความต่างสำคัญคือการนับความยาว: โจทย์บังคับลบหนึ่งตัวเสมอ (แม้ไม่มี 0 เลย) คำตอบจึงเป็นความยาว window ลบหนึ่ง เขียน best = max(best, right - left) แทน right - left + 1 กรณี [1, 1, 1] (ไม่มี 0 เลย) เป็น edge case สำคัญ — ยังถูกบังคับลบ 1 ตัว คำตอบจึงเป็น 2 ไม่ใช่ 3 สูตรนี้จัดการให้อัตโนมัติ" },
                 { t: "p", c: "Time O(n) แต่ละตัวเข้าออก window อย่างละครั้ง · Space O(1) ใช้ตัวแปรไม่กี่ตัว" },

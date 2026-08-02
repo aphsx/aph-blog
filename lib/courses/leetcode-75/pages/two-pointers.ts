@@ -29,10 +29,10 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `left = 0
-        right = len(nums) - 1
+right = len(nums) - 1
 
-        # เขียนย่อรวมกันเป็นบรรทัดเดียวได้ ความหมายเหมือนกันทุกประการ:
-        left, right = 0, len(nums) - 1`,
+# เขียนย่อรวมกันเป็นบรรทัดเดียวได้ ความหมายเหมือนกันทุกประการ:
+left, right = 0, len(nums) - 1`,
               },
               {
                 t: "callout",
@@ -50,19 +50,19 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "วิธีที่ 1: brute force (ลองทุกคู่แบบตรง ๆ)",
                 code: `nums = [1, 3, 4, 6, 8, 11]
-        target = 14
-        count = 0                              # นับว่า compare (เทียบ) ไปกี่ครั้งแล้ว
+target = 14
+count = 0                              # นับว่า compare (เทียบ) ไปกี่ครั้งแล้ว
 
-        for i in range(len(nums)):             # loop ชั้นนอก: เลือกตัวที่ 1
-            for j in range(i + 1, len(nums)):  # loop ชั้นใน: เลือกตัวที่ 2 (อยู่หลัง i เสมอ)
-                count += 1                     # นี่คือการ compare หนึ่งครั้ง
-                if nums[i] + nums[j] == target:
-                    print("เจอคู่:", nums[i], nums[j])
+for i in range(len(nums)):             # loop ชั้นนอก: เลือกตัวที่ 1
+    for j in range(i + 1, len(nums)):  # loop ชั้นใน: เลือกตัวที่ 2 (อยู่หลัง i เสมอ)
+        count += 1                     # นี่คือการ compare หนึ่งครั้ง
+        if nums[i] + nums[j] == target:
+            print("เจอคู่:", nums[i], nums[j])
 
-        print("compare ทั้งหมด", count, "ครั้ง")`,
+print("compare ทั้งหมด", count, "ครั้ง")`,
                 out: `เจอคู่: 3 11
-        เจอคู่: 6 8
-        compare ทั้งหมด 15 ครั้ง`,
+เจอคู่: 6 8
+compare ทั้งหมด 15 ครั้ง`,
               },
               {
                 t: "p",
@@ -73,26 +73,26 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "วิธีที่ 2: two pointers (ตัวแปรสองตัวไล่เข้าหากัน)",
                 code: `nums = [1, 3, 4, 6, 8, 11]
-        target = 14
-        left, right = 0, len(nums) - 1         # left = ตัวชี้หัวแถว, right = ตัวชี้ท้ายแถว
-        count = 0
+target = 14
+left, right = 0, len(nums) - 1         # left = ตัวชี้หัวแถว, right = ตัวชี้ท้ายแถว
+count = 0
 
-        while left < right:                    # วนจนกว่าสองตัวจะเดินมาชนกัน
-            count += 1
-            total = nums[left] + nums[right]
-            if total == target:
-                print("เจอคู่:", nums[left], nums[right])
-                left += 1                      # ขยับทั้งคู่ เพื่อไปหาคู่ถัดไป
-                right -= 1
-            elif total < target:
-                left += 1                      # ผลรวมน้อยไป -> ลองขยับซ้ายให้ค่าใหญ่ขึ้น
-            else:
-                right -= 1                     # ผลรวมมากไป -> ลองขยับขวาให้ค่าเล็กลง
+while left < right:                    # วนจนกว่าสองตัวจะเดินมาชนกัน
+    count += 1
+    total = nums[left] + nums[right]
+    if total == target:
+        print("เจอคู่:", nums[left], nums[right])
+        left += 1                      # ขยับทั้งคู่ เพื่อไปหาคู่ถัดไป
+        right -= 1
+    elif total < target:
+        left += 1                      # ผลรวมน้อยไป -> ลองขยับซ้ายให้ค่าใหญ่ขึ้น
+    else:
+        right -= 1                     # ผลรวมมากไป -> ลองขยับขวาให้ค่าเล็กลง
 
-        print("compare ทั้งหมด", count, "ครั้ง")`,
+print("compare ทั้งหมด", count, "ครั้ง")`,
                 out: `เจอคู่: 3 11
-        เจอคู่: 6 8
-        compare ทั้งหมด 4 ครั้ง`,
+เจอคู่: 6 8
+compare ทั้งหมด 4 ครั้ง`,
               },
               {
                 t: "p",
@@ -128,45 +128,45 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "เลขซ้ำทำให้สองวิธีให้คำตอบต่างกัน",
                 code: `def brute(nums, target):
-            found = []
-            for i in range(len(nums)):
-                for j in range(i + 1, len(nums)):
-                    if nums[i] + nums[j] == target:
-                        found.append((nums[i], nums[j]))
-            return found
+    found = []
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                found.append((nums[i], nums[j]))
+    return found
 
 
-        def two_pointers(nums, target):
-            found = []
-            left, right = 0, len(nums) - 1
-            while left < right:
-                total = nums[left] + nums[right]
-                if total == target:
-                    found.append((nums[left], nums[right]))
-                    left += 1
-                    right -= 1
-                elif total < target:
-                    left += 1
-                else:
-                    right -= 1
-            return found
+def two_pointers(nums, target):
+    found = []
+    left, right = 0, len(nums) - 1
+    while left < right:
+        total = nums[left] + nums[right]
+        if total == target:
+            found.append((nums[left], nums[right]))
+            left += 1
+            right -= 1
+        elif total < target:
+            left += 1
+        else:
+            right -= 1
+    return found
 
 
-        for nums, target in [([1, 3, 4, 6, 8, 11], 14), ([1, 1, 3, 3], 4)]:
-            bf = brute(nums, target)
-            tp = two_pointers(nums, target)
-            print("nums =", nums, "target =", target)
-            print("  brute force  เจอ", len(bf), "คู่:", bf)
-            print("  two pointers เจอ", len(tp), "คู่:", tp)
-            print("  ตรงกันไหม:", bf == tp)`,
+for nums, target in [([1, 3, 4, 6, 8, 11], 14), ([1, 1, 3, 3], 4)]:
+    bf = brute(nums, target)
+    tp = two_pointers(nums, target)
+    print("nums =", nums, "target =", target)
+    print("  brute force  เจอ", len(bf), "คู่:", bf)
+    print("  two pointers เจอ", len(tp), "คู่:", tp)
+    print("  ตรงกันไหม:", bf == tp)`,
                 out: `nums = [1, 3, 4, 6, 8, 11] target = 14
-          brute force  เจอ 2 คู่: [(3, 11), (6, 8)]
-          two pointers เจอ 2 คู่: [(3, 11), (6, 8)]
-          ตรงกันไหม: True
-        nums = [1, 1, 3, 3] target = 4
-          brute force  เจอ 4 คู่: [(1, 3), (1, 3), (1, 3), (1, 3)]
-          two pointers เจอ 2 คู่: [(1, 3), (1, 3)]
-          ตรงกันไหม: False`,
+  brute force  เจอ 2 คู่: [(3, 11), (6, 8)]
+  two pointers เจอ 2 คู่: [(3, 11), (6, 8)]
+  ตรงกันไหม: True
+nums = [1, 1, 3, 3] target = 4
+  brute force  เจอ 4 คู่: [(1, 3), (1, 3), (1, 3), (1, 3)]
+  two pointers เจอ 2 คู่: [(1, 3), (1, 3)]
+  ตรงกันไหม: False`,
               },
               {
                 t: "p",
@@ -192,11 +192,11 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `left, right = 0, len(nums) - 1
-        while left < right:
-            if condition:      # ตัดสินใจจากค่าที่ทั้งสองตัวชี้อยู่ตอนนี้
-                left += 1      # อยากได้ค่าฝั่งซ้ายที่ใหญ่ขึ้น
-            else:
-                right -= 1     # อยากได้ค่าฝั่งขวาที่เล็กลง`,
+while left < right:
+    if condition:      # ตัดสินใจจากค่าที่ทั้งสองตัวชี้อยู่ตอนนี้
+        left += 1      # อยากได้ค่าฝั่งซ้ายที่ใหญ่ขึ้น
+    else:
+        right -= 1     # อยากได้ค่าฝั่งขวาที่เล็กลง`,
               },
               {
                 t: "p",
@@ -206,11 +206,11 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `slow = 0
-        for fast in range(len(nums)):
-            if keep(nums[fast]):          # ตัวนี้ควรเก็บไว้ไหม
-                nums[slow] = nums[fast]   # ถ้าใช่ เขียนมันลงตำแหน่ง slow
-                slow += 1
-        # nums[:slow] คือผลลัพธ์ที่กรองแล้ว (0 ถึงก่อนตำแหน่ง slow)`,
+for fast in range(len(nums)):
+    if keep(nums[fast]):          # ตัวนี้ควรเก็บไว้ไหม
+        nums[slow] = nums[fast]   # ถ้าใช่ เขียนมันลงตำแหน่ง slow
+        slow += 1
+# nums[:slow] คือผลลัพธ์ที่กรองแล้ว (0 ถึงก่อนตำแหน่ง slow)`,
               },
               {
                 t: "p",
@@ -221,25 +221,25 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "slow/fast ของจริง — กรองเก็บเฉพาะเลขคู่ในแถวเดิม",
                 code: `nums = [4, 7, 2, 9, 6]          # อยากเก็บไว้เฉพาะเลขคู่
-        slow = 0
+slow = 0
 
-        for fast in range(len(nums)):
-            if nums[fast] % 2 == 0:
-                print(f"เก็บ {nums[fast]}: เขียนลงช่อง slow={slow} (ตอนนี้ fast={fast}) -> slow <= fast ? {slow <= fast}")
-                nums[slow] = nums[fast]
-                slow += 1
-            else:
-                print(f"ทิ้ง {nums[fast]}: slow ค้างอยู่ที่ {slow} ไม่ขยับ (ตอนนี้ fast={fast})")
+for fast in range(len(nums)):
+    if nums[fast] % 2 == 0:
+        print(f"เก็บ {nums[fast]}: เขียนลงช่อง slow={slow} (ตอนนี้ fast={fast}) -> slow <= fast ? {slow <= fast}")
+        nums[slow] = nums[fast]
+        slow += 1
+    else:
+        print(f"ทิ้ง {nums[fast]}: slow ค้างอยู่ที่ {slow} ไม่ขยับ (ตอนนี้ fast={fast})")
 
-        print("nums ทั้งแถว =", nums)
-        print("ผลลัพธ์      =", nums[:slow], "| ขยะท้ายแถว =", nums[slow:])`,
+print("nums ทั้งแถว =", nums)
+print("ผลลัพธ์      =", nums[:slow], "| ขยะท้ายแถว =", nums[slow:])`,
                 out: `เก็บ 4: เขียนลงช่อง slow=0 (ตอนนี้ fast=0) -> slow <= fast ? True
-        ทิ้ง 7: slow ค้างอยู่ที่ 1 ไม่ขยับ (ตอนนี้ fast=1)
-        เก็บ 2: เขียนลงช่อง slow=1 (ตอนนี้ fast=2) -> slow <= fast ? True
-        ทิ้ง 9: slow ค้างอยู่ที่ 2 ไม่ขยับ (ตอนนี้ fast=3)
-        เก็บ 6: เขียนลงช่อง slow=2 (ตอนนี้ fast=4) -> slow <= fast ? True
-        nums ทั้งแถว = [4, 2, 6, 9, 6]
-        ผลลัพธ์      = [4, 2, 6] | ขยะท้ายแถว = [9, 6]`,
+ทิ้ง 7: slow ค้างอยู่ที่ 1 ไม่ขยับ (ตอนนี้ fast=1)
+เก็บ 2: เขียนลงช่อง slow=1 (ตอนนี้ fast=2) -> slow <= fast ? True
+ทิ้ง 9: slow ค้างอยู่ที่ 2 ไม่ขยับ (ตอนนี้ fast=3)
+เก็บ 6: เขียนลงช่อง slow=2 (ตอนนี้ fast=4) -> slow <= fast ? True
+nums ทั้งแถว = [4, 2, 6, 9, 6]
+ผลลัพธ์      = [4, 2, 6] | ขยะท้ายแถว = [9, 6]`,
               },
               {
                 t: "p",
@@ -263,28 +263,28 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "แบบที่ 3 — รวมสองแถวที่เรียงแล้วให้เป็นแถวเดียว",
                 code: `a = [1, 4, 7]
-        b = [2, 3, 9]
-        i = j = 0
-        merged = []
+b = [2, 3, 9]
+i = j = 0
+merged = []
 
-        while i < len(a) and j < len(b):     # ต้องเช็คขอบเขตของ ทั้งสองตัว ก่อนอ่านค่า
-            if a[i] <= b[j]:
-                merged.append(a[i])
-                i += 1                       # ขยับแค่ตัวที่ถูกใช้ไป
-            else:
-                merged.append(b[j])
-                j += 1
-            print(f"i={i} j={j} merged={merged}")
+while i < len(a) and j < len(b):     # ต้องเช็คขอบเขตของ ทั้งสองตัว ก่อนอ่านค่า
+    if a[i] <= b[j]:
+        merged.append(a[i])
+        i += 1                       # ขยับแค่ตัวที่ถูกใช้ไป
+    else:
+        merged.append(b[j])
+        j += 1
+    print(f"i={i} j={j} merged={merged}")
 
-        merged += a[i:]                      # ฝั่งที่ยังเหลือ ต่อท้ายได้เลย
-        merged += b[j:]
-        print("ผลลัพธ์:", merged)`,
+merged += a[i:]                      # ฝั่งที่ยังเหลือ ต่อท้ายได้เลย
+merged += b[j:]
+print("ผลลัพธ์:", merged)`,
                 out: `i=1 j=0 merged=[1]
-        i=1 j=1 merged=[1, 2]
-        i=1 j=2 merged=[1, 2, 3]
-        i=2 j=2 merged=[1, 2, 3, 4]
-        i=3 j=2 merged=[1, 2, 3, 4, 7]
-        ผลลัพธ์: [1, 2, 3, 4, 7, 9]`,
+i=1 j=1 merged=[1, 2]
+i=1 j=2 merged=[1, 2, 3]
+i=2 j=2 merged=[1, 2, 3, 4]
+i=3 j=2 merged=[1, 2, 3, 4, 7]
+ผลลัพธ์: [1, 2, 3, 4, 7, 9]`,
               },
               {
                 t: "p",
@@ -337,26 +337,26 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "หลักฐานว่า sort ทำลายคำตอบ (นี่คือ LC1 Two Sum ที่ขอ index)",
                 code: `nums = [3, 9, 4, 1]
-        target = 12                          # อยากได้ index ของคู่ที่บวกกันได้ 12
+target = 12                          # อยากได้ index ของคู่ที่บวกกันได้ 12
 
-        print("nums เดิม :", nums, "-> คำตอบที่ถูกคือ 3 กับ 9 = index (0, 1)")
-        s = sorted(nums)
-        print("หลัง sort :", s, "-> index เดิมของแต่ละตัวหายไปหมดแล้ว")
+print("nums เดิม :", nums, "-> คำตอบที่ถูกคือ 3 กับ 9 = index (0, 1)")
+s = sorted(nums)
+print("หลัง sort :", s, "-> index เดิมของแต่ละตัวหายไปหมดแล้ว")
 
-        left, right = 0, len(s) - 1
-        while left < right:
-            total = s[left] + s[right]
-            if total == target:
-                break
-            elif total < target:
-                left += 1
-            else:
-                right -= 1
+left, right = 0, len(s) - 1
+while left < right:
+    total = s[left] + s[right]
+    if total == target:
+        break
+    elif total < target:
+        left += 1
+    else:
+        right -= 1
 
-        print("two pointers ตอบ index:", (left, right), "<- ผิด เพราะเป็น index ของแถวที่ sort แล้ว")`,
+print("two pointers ตอบ index:", (left, right), "<- ผิด เพราะเป็น index ของแถวที่ sort แล้ว")`,
                 out: `nums เดิม : [3, 9, 4, 1] -> คำตอบที่ถูกคือ 3 กับ 9 = index (0, 1)
-        หลัง sort : [1, 3, 4, 9] -> index เดิมของแต่ละตัวหายไปหมดแล้ว
-        two pointers ตอบ index: (1, 3) <- ผิด เพราะเป็น index ของแถวที่ sort แล้ว`,
+หลัง sort : [1, 3, 4, 9] -> index เดิมของแต่ละตัวหายไปหมดแล้ว
+two pointers ตอบ index: (1, 3) <- ผิด เพราะเป็น index ของแถวที่ sort แล้ว`,
               },
               {
                 t: "p",
@@ -450,23 +450,23 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "nums = ... กับ nums[:] = ... ต่างกันคนละเรื่อง",
                 code: `def wrong(nums):
-            nums = [x for x in nums if x != 0] + [0] * nums.count(0)   # สร้างลิสต์ใหม่แล้วตั้งชื่อทับ
+    nums = [x for x in nums if x != 0] + [0] * nums.count(0)   # สร้างลิสต์ใหม่แล้วตั้งชื่อทับ
 
 
-        def right(nums):
-            kept = [x for x in nums if x != 0]
-            nums[:] = kept + [0] * (len(nums) - len(kept))             # เขียนทับ "ข้างใน" ลิสต์เดิม
+def right(nums):
+    kept = [x for x in nums if x != 0]
+    nums[:] = kept + [0] * (len(nums) - len(kept))             # เขียนทับ "ข้างใน" ลิสต์เดิม
 
 
-        a = [0, 1, 0, 3, 12]
-        wrong(a)
-        print("หลังเรียก wrong :", a, "<- ไม่มีอะไรเปลี่ยนเลย")
+a = [0, 1, 0, 3, 12]
+wrong(a)
+print("หลังเรียก wrong :", a, "<- ไม่มีอะไรเปลี่ยนเลย")
 
-        b = [0, 1, 0, 3, 12]
-        right(b)
-        print("หลังเรียก right :", b, "<- เปลี่ยนจริง")`,
+b = [0, 1, 0, 3, 12]
+right(b)
+print("หลังเรียก right :", b, "<- เปลี่ยนจริง")`,
                 out: `หลังเรียก wrong : [0, 1, 0, 3, 12] <- ไม่มีอะไรเปลี่ยนเลย
-        หลังเรียก right : [1, 3, 12, 0, 0] <- เปลี่ยนจริง`,
+หลังเรียก right : [1, 3, 12, 0, 0] <- เปลี่ยนจริง`,
               },
               { t: "p", c: "เหตุผล: บรรทัด nums = ... ไม่ได้แก้ลิสต์ มันแค่เอาชื่อ nums ไปแปะกับลิสต์ก้อนใหม่ ส่วนลิสต์เดิมของคนที่เรียกฟังก์ชันยังอยู่เหมือนเดิมไม่ถูกแตะเลย ตรงข้ามกับ nums[:] = ... ที่สั่งว่า \"เอาของชุดนี้ไปเขียนทับทุกช่องของลิสต์เดิม\" ซึ่งแก้ก้อนเดิมจริง" },
               { t: "callout", title: "แต่ nums[:] = ... ก็ยังผิดกติกาข้อนี้", warn: true, c: "โค้ดฝั่ง right ข้างบนตอบถูกและผ่านระบบตรวจของ LeetCode ได้ แต่มันสร้างลิสต์ kept ขึ้นมาก่อน ซึ่งใหญ่ตามความยาวข้อมูล จึงไม่ใช่ O(1) space ตามที่โจทย์ต้องการ ยกมาให้ดูเพื่อสอนความต่างของ nums = กับ nums[:] = เท่านั้น ของจริงที่เราจะเขียนคือแก้ทีละช่องด้วย nums[i] = ..." },
@@ -478,27 +478,27 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "ต้นทุนที่ซ่อนอยู่ของการลบของออกจากลิสต์",
                 code: `nums = [10, 20, 30, 40, 50]
-        print("ก่อน :", nums)
-        nums.pop(0)                      # เอาช่องแรกออก
-        print("หลัง pop(0) :", nums, "<- ทุกตัวเลื่อนซ้าย 1 ช่อง และลิสต์สั้นลง")
+print("ก่อน :", nums)
+nums.pop(0)                      # เอาช่องแรกออก
+print("หลัง pop(0) :", nums, "<- ทุกตัวเลื่อนซ้าย 1 ช่อง และลิสต์สั้นลง")
 
-        # นับว่าการเลื่อนเกิดขึ้นกี่ครั้งจริง ๆ ถ้าลบ 0 ทีละตัวแบบนี้
-        def count_shifts(n_zeros, n_total):
-            shifts = 0
-            length = n_total
-            for _ in range(n_zeros):
-                shifts += length - 1     # ลบหนึ่งตัว = เลื่อนของที่เหลือทั้งหมด
-                length -= 1
-            return shifts
+# นับว่าการเลื่อนเกิดขึ้นกี่ครั้งจริง ๆ ถ้าลบ 0 ทีละตัวแบบนี้
+def count_shifts(n_zeros, n_total):
+    shifts = 0
+    length = n_total
+    for _ in range(n_zeros):
+        shifts += length - 1     # ลบหนึ่งตัว = เลื่อนของที่เหลือทั้งหมด
+        length -= 1
+    return shifts
 
-        print("แถวยาว 100 มี 0 อยู่ 50 ตัว -> เลื่อนของทั้งหมด", count_shifts(50, 100), "ครั้ง")
-        print("แถวยาว 1000 มี 0 อยู่ 500 ตัว -> เลื่อน", count_shifts(500, 1000), "ครั้ง")
-        print("สังเกต: แถวยาวขึ้น 10 เท่า แต่งานเพิ่มขึ้นประมาณ 100 เท่า")`,
+print("แถวยาว 100 มี 0 อยู่ 50 ตัว -> เลื่อนของทั้งหมด", count_shifts(50, 100), "ครั้ง")
+print("แถวยาว 1000 มี 0 อยู่ 500 ตัว -> เลื่อน", count_shifts(500, 1000), "ครั้ง")
+print("สังเกต: แถวยาวขึ้น 10 เท่า แต่งานเพิ่มขึ้นประมาณ 100 เท่า")`,
                 out: `ก่อน : [10, 20, 30, 40, 50]
-        หลัง pop(0) : [20, 30, 40, 50] <- ทุกตัวเลื่อนซ้าย 1 ช่อง และลิสต์สั้นลง
-        แถวยาว 100 มี 0 อยู่ 50 ตัว -> เลื่อนของทั้งหมด 3725 ครั้ง
-        แถวยาว 1000 มี 0 อยู่ 500 ตัว -> เลื่อน 374750 ครั้ง
-        สังเกต: แถวยาวขึ้น 10 เท่า แต่งานเพิ่มขึ้นประมาณ 100 เท่า`,
+หลัง pop(0) : [20, 30, 40, 50] <- ทุกตัวเลื่อนซ้าย 1 ช่อง และลิสต์สั้นลง
+แถวยาว 100 มี 0 อยู่ 50 ตัว -> เลื่อนของทั้งหมด 3725 ครั้ง
+แถวยาว 1000 มี 0 อยู่ 500 ตัว -> เลื่อน 374750 ครั้ง
+สังเกต: แถวยาวขึ้น 10 เท่า แต่งานเพิ่มขึ้นประมาณ 100 เท่า`,
               },
               { t: "p", c: "บรรทัดสุดท้ายคือหัวใจ: งานโตเป็นกำลังสองของความยาวแถว ไม่ใช่โตตามความยาวแถวตรง ๆ (เขียนย่อว่า O(n²)) นอกจากนี้ pop(0) ยังทำให้ลิสต์สั้นลง ซึ่งขัดกับโจทย์ที่ต้องการให้จำนวนช่องเท่าเดิม และ remove(0) แย่กว่าอีกขั้นเพราะต้องไล่หาตำแหน่งของ 0 ก่อนแล้วจึงเลื่อน" },
               { t: "callout", title: "กฎที่ใช้ได้ตลอดชีวิตการเขียนโปรแกรม", c: "การลบหรือแทรกของ กลาง ลิสต์แพงเสมอ เพราะต้องเลื่อนของที่เหลือ ส่วนการ อ่านหรือเขียนทับ ช่องเดิม (nums[i] = ...) ถูกและเร็วเสมอ เพราะไม่ต้องขยับใคร โจทย์แนวจัดของใน array แทบทุกข้อจึงแก้ด้วยการเขียนทับช่อง ไม่ใช่การลบและแทรก" },
@@ -510,19 +510,19 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "ทำไมสลับสองบรรทัดไม่ได้",
                 code: `a, b = 10, 20
-        print("ก่อน  : a =", a, ", b =", b)
-        a, b = b, a                     # Python คำนวณฝั่งขวาให้เสร็จก่อน แล้วค่อยจ่ายให้ฝั่งซ้าย
-        print("หลัง  : a =", a, ", b =", b)
+print("ก่อน  : a =", a, ", b =", b)
+a, b = b, a                     # Python คำนวณฝั่งขวาให้เสร็จก่อน แล้วค่อยจ่ายให้ฝั่งซ้าย
+print("หลัง  : a =", a, ", b =", b)
 
-        print("--- ถ้าแยกเป็นสองบรรทัดจะพัง")
-        x, y = 10, 20
-        x = y                           # x กลายเป็น 20 ทับค่า 10 ทิ้งไปแล้ว
-        y = x                           # y ได้ 20 กลับมา ไม่ใช่ 10
-        print("x =", x, ", y =", y, "<- ค่า 10 หายไปเลย ไม่ได้สลับ")`,
+print("--- ถ้าแยกเป็นสองบรรทัดจะพัง")
+x, y = 10, 20
+x = y                           # x กลายเป็น 20 ทับค่า 10 ทิ้งไปแล้ว
+y = x                           # y ได้ 20 กลับมา ไม่ใช่ 10
+print("x =", x, ", y =", y, "<- ค่า 10 หายไปเลย ไม่ได้สลับ")`,
                 out: `ก่อน  : a = 10 , b = 20
-        หลัง  : a = 20 , b = 10
-        --- ถ้าแยกเป็นสองบรรทัดจะพัง
-        x = 20 , y = 20 <- ค่า 10 หายไปเลย ไม่ได้สลับ`,
+หลัง  : a = 20 , b = 10
+--- ถ้าแยกเป็นสองบรรทัดจะพัง
+x = 20 , y = 20 <- ค่า 10 หายไปเลย ไม่ได้สลับ`,
               },
               { t: "p", c: "เรื่องนี้ใช้กับช่องใน array ได้เหมือนกัน คือ nums[i], nums[j] = nums[j], nums[i] และเราจะใช้มันในเฉลยของข้อนี้" },
 
@@ -533,27 +533,27 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "เลขติดลบเปิดโปงบั๊กนี้",
                 code: `def wrong_gt(nums):
-            insert = 0
-            for i in range(len(nums)):
-                if nums[i] > 0:            # ผิด: เลขติดลบถูกมองว่าเป็นศูนย์
-                    nums[insert], nums[i] = nums[i], nums[insert]
-                    insert += 1
-            return nums
+    insert = 0
+    for i in range(len(nums)):
+        if nums[i] > 0:            # ผิด: เลขติดลบถูกมองว่าเป็นศูนย์
+            nums[insert], nums[i] = nums[i], nums[insert]
+            insert += 1
+    return nums
 
 
-        def right_ne(nums):
-            insert = 0
-            for i in range(len(nums)):
-                if nums[i] != 0:
-                    nums[insert], nums[i] = nums[i], nums[insert]
-                    insert += 1
-            return nums
+def right_ne(nums):
+    insert = 0
+    for i in range(len(nums)):
+        if nums[i] != 0:
+            nums[insert], nums[i] = nums[i], nums[insert]
+            insert += 1
+    return nums
 
 
-        print("แบบ > 0  :", wrong_gt([-1, 0, -2, 3]), "<- เลขติดลบถูกดันไปท้าย และ 0 ค้างกลางแถว")
-        print("แบบ != 0 :", right_ne([-1, 0, -2, 3]), "<- ถูกต้อง")`,
+print("แบบ > 0  :", wrong_gt([-1, 0, -2, 3]), "<- เลขติดลบถูกดันไปท้าย และ 0 ค้างกลางแถว")
+print("แบบ != 0 :", right_ne([-1, 0, -2, 3]), "<- ถูกต้อง")`,
                 out: `แบบ > 0  : [3, 0, -2, -1] <- เลขติดลบถูกดันไปท้าย และ 0 ค้างกลางแถว
-        แบบ != 0 : [-1, -2, 3, 0] <- ถูกต้อง`,
+แบบ != 0 : [-1, -2, 3, 0] <- ถูกต้อง`,
               },
               { t: "callout", title: "นิสัยที่ควรติดตัว", c: "ทุกครั้งที่เขียนเงื่อนไข ให้ย้อนไปอ่าน constraint ว่าค่าที่เป็นไปได้มีอะไร แล้วลองแทนค่าสุดขั้วเข้าไป (ติดลบ, ศูนย์, ตัวเดียว, ยาวสุด) ตัวอย่างในโจทย์ถูกคัดมาให้เข้าใจโจทย์ ไม่ได้คัดมาให้จับบั๊ก" },
 
@@ -563,11 +563,11 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `def build_new(nums):
-            kept = [x for x in nums if x != 0]          # เก็บตัวที่ไม่ใช่ 0 ตามลำดับเดิม
-            zeros = len(nums) - len(kept)
-            return kept + [0] * zeros                   # ต่อท้ายด้วย 0 ให้ครบ
+    kept = [x for x in nums if x != 0]          # เก็บตัวที่ไม่ใช่ 0 ตามลำดับเดิม
+    zeros = len(nums) - len(kept)
+    return kept + [0] * zeros                   # ต่อท้ายด้วย 0 ให้ครบ
 
-        print(build_new([0, 1, 0, 3, 12]))   # [1, 3, 12, 0, 0]`,
+print(build_new([0, 1, 0, 3, 12]))   # [1, 3, 12, 0, 0]`,
               },
               { t: "p", c: "แต่วิธีนี้ผิดกติกาข้อ in-place เพราะลิสต์ kept โตตามจำนวนข้อมูล ถ้าแถวยาวหนึ่งหมื่น kept ก็อาจยาวหนึ่งหมื่นตาม เราจึงต้องหาวิธีทำงานเดียวกันนี้โดยไม่สร้างที่เก็บใหม่ ทั้งหน้าที่เหลือคือการไล่จากวิธีนี้ไปหาวิธีที่ไม่กินพื้นที่เพิ่ม" },
 
@@ -578,21 +578,21 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "รันดูว่าพังตอนไหน",
                 code: `def shift_left(nums):
-            """ความคิดตรงไปตรงมา: เจอ 0 ที่ไหน ก็เลื่อนของหลังมันมาข้างหน้า แล้วยัด 0 ไว้ท้าย"""
-            for i in range(len(nums)):
-                if nums[i] == 0:
-                    for j in range(i, len(nums) - 1):
-                        nums[j] = nums[j + 1]      # เลื่อนของหลังมาทับ
-                    nums[-1] = 0                   # เอา 0 ไปไว้ท้ายสุด
-            return nums
+    """ความคิดตรงไปตรงมา: เจอ 0 ที่ไหน ก็เลื่อนของหลังมันมาข้างหน้า แล้วยัด 0 ไว้ท้าย"""
+    for i in range(len(nums)):
+        if nums[i] == 0:
+            for j in range(i, len(nums) - 1):
+                nums[j] = nums[j + 1]      # เลื่อนของหลังมาทับ
+            nums[-1] = 0                   # เอา 0 ไปไว้ท้ายสุด
+    return nums
 
 
-        print(shift_left([0, 1, 0, 3, 12]), "<- เคสนี้ดูเหมือนถูก")
-        print(shift_left([0, 0, 1]), "<- ควรได้ [1, 0, 0]  แต่ได้ผิด!")
-        print(shift_left([0, 0, 0, 1]), "<- ควรได้ [1, 0, 0, 0]")`,
+print(shift_left([0, 1, 0, 3, 12]), "<- เคสนี้ดูเหมือนถูก")
+print(shift_left([0, 0, 1]), "<- ควรได้ [1, 0, 0]  แต่ได้ผิด!")
+print(shift_left([0, 0, 0, 1]), "<- ควรได้ [1, 0, 0, 0]")`,
                 out: `[1, 3, 12, 0, 0] <- เคสนี้ดูเหมือนถูก
-        [0, 1, 0] <- ควรได้ [1, 0, 0]  แต่ได้ผิด!
-        [0, 1, 0, 0] <- ควรได้ [1, 0, 0, 0]`,
+[0, 1, 0] <- ควรได้ [1, 0, 0]  แต่ได้ผิด!
+[0, 1, 0, 0] <- ควรได้ [1, 0, 0, 0]`,
               },
               { t: "p", c: "สาเหตุที่พัง: เมื่อเลื่อนของมาทับช่องที่ i แล้ว ช่องที่ i อาจกลายเป็น 0 ตัวใหม่ (เพราะตัวที่เลื่อนมาเป็น 0) แต่ลูป for พาเราไปช่อง i+1 แล้ว จึงข้าม 0 ตัวนั้นไปเลยไม่มีวันย้อนกลับมาดู เคส [0,0,1] จึงเหลือ 0 ค้างอยู่หน้าแถว" },
               { t: "p", c: "แล้วถ้าแก้ด้วยการเขียน i -= 1 เพื่อให้ย้อนกลับมาดูช่องเดิมอีกครั้ง จะเจอปัญหาใหม่คือ for loop ของ Python จะไม่สนใจการแก้ค่า i ข้างในลูปเลย (เรื่องนี้อธิบายไว้แล้วในหน้า \"เลือก for หรือ while ให้ถูก\" ของคอร์สพื้นฐาน) และถ้าเปลี่ยนไปใช้ while แล้วเขียน i -= 1 จริง โปรแกรมจะวนไม่จบเพราะ i เด้งไปกลับที่เดิมตลอด" },
@@ -620,30 +620,30 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "สภาพแถวระหว่างทาง — ตรงนี้สำคัญมาก",
                 code: `nums = [0, 1, 0, 3, 12]
-        insert = 0
+insert = 0
 
-        print("รอบที่ 1 — ดันตัวที่ไม่ใช่ศูนย์มาชิดซ้าย")
-        for x in nums:
-            if x != 0:
-                nums[insert] = x
-                insert += 1
-                print("   จด", x, "ลงช่อง", insert - 1, "-> nums =", nums)
+print("รอบที่ 1 — ดันตัวที่ไม่ใช่ศูนย์มาชิดซ้าย")
+for x in nums:
+    if x != 0:
+        nums[insert] = x
+        insert += 1
+        print("   จด", x, "ลงช่อง", insert - 1, "-> nums =", nums)
 
-        print("สภาพแถวหลังจบรอบที่ 1 :", nums, " <- ท้ายแถวเป็นขยะ (3, 12 ค้างอยู่)")
-        print("จำนวนตัวที่ไม่ใช่ศูนย์ =", insert)
+print("สภาพแถวหลังจบรอบที่ 1 :", nums, " <- ท้ายแถวเป็นขยะ (3, 12 ค้างอยู่)")
+print("จำนวนตัวที่ไม่ใช่ศูนย์ =", insert)
 
-        print("รอบที่ 2 — ช่องที่เหลือเติม 0")
-        for j in range(insert, len(nums)):
-            nums[j] = 0
-        print("ผลลัพธ์สุดท้าย :", nums)`,
+print("รอบที่ 2 — ช่องที่เหลือเติม 0")
+for j in range(insert, len(nums)):
+    nums[j] = 0
+print("ผลลัพธ์สุดท้าย :", nums)`,
                 out: `รอบที่ 1 — ดันตัวที่ไม่ใช่ศูนย์มาชิดซ้าย
-           จด 1 ลงช่อง 0 -> nums = [1, 1, 0, 3, 12]
-           จด 3 ลงช่อง 1 -> nums = [1, 3, 0, 3, 12]
-           จด 12 ลงช่อง 2 -> nums = [1, 3, 12, 3, 12]
-        สภาพแถวหลังจบรอบที่ 1 : [1, 3, 12, 3, 12]  <- ท้ายแถวเป็นขยะ (3, 12 ค้างอยู่)
-        จำนวนตัวที่ไม่ใช่ศูนย์ = 3
-        รอบที่ 2 — ช่องที่เหลือเติม 0
-        ผลลัพธ์สุดท้าย : [1, 3, 12, 0, 0]`,
+   จด 1 ลงช่อง 0 -> nums = [1, 1, 0, 3, 12]
+   จด 3 ลงช่อง 1 -> nums = [1, 3, 0, 3, 12]
+   จด 12 ลงช่อง 2 -> nums = [1, 3, 12, 3, 12]
+สภาพแถวหลังจบรอบที่ 1 : [1, 3, 12, 3, 12]  <- ท้ายแถวเป็นขยะ (3, 12 ค้างอยู่)
+จำนวนตัวที่ไม่ใช่ศูนย์ = 3
+รอบที่ 2 — ช่องที่เหลือเติม 0
+ผลลัพธ์สุดท้าย : [1, 3, 12, 0, 0]`,
               },
               { t: "p", c: "บรรทัด [1, 3, 12, 3, 12] คือสิ่งที่ต้องเห็นให้ได้ คนที่ไม่เคยเห็นสภาพนี้แล้วไปลอง print กลางลูปเองจะคิดว่าโค้ดพัง เพราะเลข 3 กับ 12 โผล่สองที่ ความจริงคือของเดิมที่ยังไม่ถูกทับ ซึ่งเป็นเรื่องปกติของการแก้ในที่เดิม รอบที่สองจะไปกลบมันด้วย 0 ทีหลัง" },
               { t: "p", c: "และคำถามที่ควรสงสัยตรงนี้คือ: บรรทัด nums[insert] = x เขียนทับข้อมูลที่ยังกวาดไม่จบ มันจะไปทับตัวที่ยังไม่ได้อ่านไหม คำตอบอยู่ในหัวข้อถัดไป" },
@@ -654,13 +654,13 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 c: `ตลอดการทำงาน แถวถูกแบ่งเป็น 3 โซนแบบนี้เสมอ:
 
-          [ 1 , 3 | 0 , 0 | 12 , ... ]
-            ↑        ↑       ↑
-            0        insert  i
+  [ 1 , 3 | 0 , 0 | 12 , ... ]
+    ↑        ↑       ↑
+    0        insert  i
 
-          ช่วง [0, insert)   = ตัวไม่ใช่ 0 ที่จัดเรียบร้อยแล้ว เรียงตามลำดับเดิม
-          ช่วง [insert, i)   = กอง 0 ที่รอโดนเตะไปท้าย
-          ช่วง [i, จบ)       = ส่วนที่ยังไม่ได้อ่าน`,
+  ช่วง [0, insert)   = ตัวไม่ใช่ 0 ที่จัดเรียบร้อยแล้ว เรียงตามลำดับเดิม
+  ช่วง [insert, i)   = กอง 0 ที่รอโดนเตะไปท้าย
+  ช่วง [i, จบ)       = ส่วนที่ยังไม่ได้อ่าน`,
               },
               { t: "p", c: "ข้อความสามบรรทัดนั้นเป็นจริง ก่อนเริ่มทุกรอบ และยังเป็นจริง หลังจบทุกรอบ ข้อความที่จริงเสมอแบบนี้เรียกว่า invariant (ข้อเท็จจริงคงที่) และมันคือเครื่องมือมาตรฐานที่ใช้พิสูจน์ว่าลูปทำงานถูก" },
               { t: "p", c: "ทำไมการสลับหนึ่งครั้งไม่ทำลาย invariant นี้: ตอนที่เจอ nums[i] ที่ไม่ใช่ 0 ช่องที่ตำแหน่ง insert ต้องเป็น 0 อยู่แล้วแน่นอน เพราะมันอยู่ในโซนกลางซึ่งเป็น 0 ล้วนตามบรรทัดที่สอง การสลับจึงเท่ากับเอา \"0 ตัวหน้าสุดของโซนกลาง\" ไปแลกกับ \"ตัวไม่ใช่ 0 ตัวใหม่\" พอดี ผลคือโซนซ้ายได้สมาชิกเพิ่มต่อท้าย และโซนกลางยังเป็น 0 ล้วนเหมือนเดิม ไม่มีตัวไหนหายและไม่มีลำดับไหนสลับ" },
@@ -691,21 +691,21 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "เร็วกว่าจริง แต่ตอบผิด",
                 code: `def opposite_ends(nums):
-            """เอาตัวท้ายมาถมช่องที่เป็น 0 — เร็ว แต่ทำลายลำดับเดิม"""
-            left, n = 0, len(nums)
-            while left < n:
-                if nums[left] == 0:
-                    n -= 1
-                    nums[left], nums[n] = nums[n], nums[left]
-                else:
-                    left += 1
-            return nums
+    """เอาตัวท้ายมาถมช่องที่เป็น 0 — เร็ว แต่ทำลายลำดับเดิม"""
+    left, n = 0, len(nums)
+    while left < n:
+        if nums[left] == 0:
+            n -= 1
+            nums[left], nums[n] = nums[n], nums[left]
+        else:
+            left += 1
+    return nums
 
 
-        print(opposite_ends([0, 1, 0, 3, 12]), "<- ควรได้ [1, 3, 12, 0, 0]")
-        print("ตัวที่ไม่ใช่ศูนย์เรียงผิดลำดับเดิมไปแล้ว")`,
+print(opposite_ends([0, 1, 0, 3, 12]), "<- ควรได้ [1, 3, 12, 0, 0]")
+print("ตัวที่ไม่ใช่ศูนย์เรียงผิดลำดับเดิมไปแล้ว")`,
                 out: `[12, 1, 3, 0, 0] <- ควรได้ [1, 3, 12, 0, 0]
-        ตัวที่ไม่ใช่ศูนย์เรียงผิดลำดับเดิมไปแล้ว`,
+ตัวที่ไม่ใช่ศูนย์เรียงผิดลำดับเดิมไปแล้ว`,
               },
               { t: "p", c: "บทเรียนที่ควรเก็บไป: ท่านี้ไม่ได้ผิดเสมอไป มันเป็นคำตอบที่ดีที่สุดสำหรับโจทย์ที่ ไม่สนลำดับ (เช่น LC27 Remove Element) เพราะเขียนลงแถวน้อยครั้งกว่ามาก การเลือกท่าจึงขึ้นกับว่าโจทย์บังคับเรื่องลำดับหรือเปล่า ไม่ใช่ว่าท่าไหนดีกว่าท่าไหนโดยตัวมันเอง" },
               { t: "h3", c: "กับดักที่ 2 — ลืมรอบที่สอง" },
@@ -718,23 +718,23 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `def move_zeroes(nums: list[int]) -> None:
-            """แก้ nums ในที่เดิม ไม่ต้อง return อะไร"""
-            # เขียนโค้ดของคุณที่นี่
-            pass
+    """แก้ nums ในที่เดิม ไม่ต้อง return อะไร"""
+    # เขียนโค้ดของคุณที่นี่
+    pass
 
 
-        cases = [
-            ([0, 1, 0, 3, 12], [1, 3, 12, 0, 0]),
-            ([0], [0]),
-            ([1, 2, 3], [1, 2, 3]),
-            ([0, 0, 0], [0, 0, 0]),
-            ([0, 0, 1], [1, 0, 0]),
-            ([-1, 0, -2, 3], [-1, -2, 3, 0]),
-        ]
-        for nums, expected in cases:
-            got = nums[:]
-            move_zeroes(got)
-            print(got == expected, got)`,
+cases = [
+    ([0, 1, 0, 3, 12], [1, 3, 12, 0, 0]),
+    ([0], [0]),
+    ([1, 2, 3], [1, 2, 3]),
+    ([0, 0, 0], [0, 0, 0]),
+    ([0, 0, 1], [1, 0, 0]),
+    ([-1, 0, -2, 3], [-1, -2, 3, 0]),
+]
+for nums, expected in cases:
+    got = nums[:]
+    move_zeroes(got)
+    print(got == expected, got)`,
               },
               {
                 t: "hints",
@@ -760,14 +760,14 @@ export const twoPointersPages: Record<string, Page> = {
                         t: "code",
                         lang: "python",
                         c: `insert = 0                          # ช่องว่างถัดไปที่จะวางตัวไม่ใช่ 0
-        for i in range(len(nums)):          # i ไล่อ่านทุกช่อง
-            if ______________:              # (1) nums[i] น่าเก็บไหม
-                ______________              # (2) เอา nums[i] ไปไว้ช่อง insert
-                insert += 1                 # โซนจัดแล้วโตขึ้นหนึ่งช่อง
+for i in range(len(nums)):          # i ไล่อ่านทุกช่อง
+    if ______________:              # (1) nums[i] น่าเก็บไหม
+        ______________              # (2) เอา nums[i] ไปไว้ช่อง insert
+        insert += 1                 # โซนจัดแล้วโตขึ้นหนึ่งช่อง
 
-        # ช่อง (2) ทำได้สองแบบ เลือกอันไหนก็ได้:
-        #   แบบสลับ     : nums[insert], nums[i] = nums[i], nums[insert]   (จบในรอบเดียว)
-        #   แบบเขียนทับ : nums[insert] = nums[i]   แล้วต้องมีลูปเติม 0 ต่อท้ายอีกรอบ`,
+# ช่อง (2) ทำได้สองแบบ เลือกอันไหนก็ได้:
+#   แบบสลับ     : nums[insert], nums[i] = nums[i], nums[insert]   (จบในรอบเดียว)
+#   แบบเขียนทับ : nums[insert] = nums[i]   แล้วต้องมีลูปเติม 0 ต่อท้ายอีกรอบ`,
                       },
                       { t: "callout", title: "อย่าทำสิ่งนี้", c: "อย่าใช้ nums.pop(), nums.remove(), หรือ nums.insert() เพราะทั้งสามอย่างต้องเลื่อนของทั้งแถวและเปลี่ยนความยาวแถว (เหตุผลอยู่ในพื้นฐานที่ 2) และอย่าเขียน nums = ... เพราะจะไม่มีอะไรเปลี่ยนเลย (พื้นฐานที่ 1)" },
                     ],
@@ -801,31 +801,31 @@ export const twoPointersPages: Record<string, Page> = {
                     lang: "python",
                     label: "เฉลย (Python) — แบบสลับที่ รอบเดียว",
                     code: `def move_zeroes(nums: list[int]) -> None:
-            insert = 0                                 # (1) ช่องว่างถัดไปสำหรับตัวไม่ใช่ 0
-            for i in range(len(nums)):                 # (2) ตัวอ่านไล่ทุกช่อง
-                if nums[i] != 0:                       # (3) เจอตัวที่ต้องเก็บ
-                    nums[insert], nums[i] = nums[i], nums[insert]   # (4) สลับขึ้นมาข้างหน้า
-                    insert += 1                        # (5) โซนจัดแล้วโตขึ้น
+    insert = 0                                 # (1) ช่องว่างถัดไปสำหรับตัวไม่ใช่ 0
+    for i in range(len(nums)):                 # (2) ตัวอ่านไล่ทุกช่อง
+        if nums[i] != 0:                       # (3) เจอตัวที่ต้องเก็บ
+            nums[insert], nums[i] = nums[i], nums[insert]   # (4) สลับขึ้นมาข้างหน้า
+            insert += 1                        # (5) โซนจัดแล้วโตขึ้น
 
 
-        cases = [
-            ([0, 1, 0, 3, 12], [1, 3, 12, 0, 0]),
-            ([0], [0]),
-            ([1, 2, 3], [1, 2, 3]),
-            ([0, 0, 0], [0, 0, 0]),
-            ([0, 0, 1], [1, 0, 0]),
-            ([-1, 0, -2, 3], [-1, -2, 3, 0]),
-        ]
-        for nums, expected in cases:
-            got = nums[:]
-            move_zeroes(got)
-            print(got == expected, got)`,
+cases = [
+    ([0, 1, 0, 3, 12], [1, 3, 12, 0, 0]),
+    ([0], [0]),
+    ([1, 2, 3], [1, 2, 3]),
+    ([0, 0, 0], [0, 0, 0]),
+    ([0, 0, 1], [1, 0, 0]),
+    ([-1, 0, -2, 3], [-1, -2, 3, 0]),
+]
+for nums, expected in cases:
+    got = nums[:]
+    move_zeroes(got)
+    print(got == expected, got)`,
                     out: `True [1, 3, 12, 0, 0]
-        True [0]
-        True [1, 2, 3]
-        True [0, 0, 0]
-        True [1, 0, 0]
-        True [-1, -2, 3, 0]`,
+True [0]
+True [1, 2, 3]
+True [0, 0, 0]
+True [1, 0, 0]
+True [-1, -2, 3, 0]`,
                   },
                   {
                     t: "table",
@@ -861,51 +861,51 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "นับจำนวนครั้งที่เขียนลงแถวจริง ๆ",
                 code: `def writes_swap(nums):
-            w = insert = 0
-            for i in range(len(nums)):
-                if nums[i] != 0:
-                    nums[insert], nums[i] = nums[i], nums[insert]
-                    w += 2                      # สลับหนึ่งครั้ง = เขียน 2 ช่อง
-                    insert += 1
-            return w
+    w = insert = 0
+    for i in range(len(nums)):
+        if nums[i] != 0:
+            nums[insert], nums[i] = nums[i], nums[insert]
+            w += 2                      # สลับหนึ่งครั้ง = เขียน 2 ช่อง
+            insert += 1
+    return w
 
 
-        def writes_swap_skip(nums):
-            w = insert = 0
-            for i in range(len(nums)):
-                if nums[i] != 0:
-                    if i != insert:             # ข้ามการสลับตัวเองกับตัวเอง
-                        nums[insert], nums[i] = nums[i], nums[insert]
-                        w += 2
-                    insert += 1
-            return w
+def writes_swap_skip(nums):
+    w = insert = 0
+    for i in range(len(nums)):
+        if nums[i] != 0:
+            if i != insert:             # ข้ามการสลับตัวเองกับตัวเอง
+                nums[insert], nums[i] = nums[i], nums[insert]
+                w += 2
+            insert += 1
+    return w
 
 
-        def writes_overwrite(nums):
-            w = insert = 0
-            for x in nums:
-                if x != 0:
-                    nums[insert] = x
-                    w += 1
-                    insert += 1
-            for j in range(insert, len(nums)):
-                nums[j] = 0
-                w += 1
-            return w
+def writes_overwrite(nums):
+    w = insert = 0
+    for x in nums:
+        if x != 0:
+            nums[insert] = x
+            w += 1
+            insert += 1
+    for j in range(insert, len(nums)):
+        nums[j] = 0
+        w += 1
+    return w
 
 
-        cases = [
-            ("0 เยอะ   [0,0,0,0,1]", [0, 0, 0, 0, 1]),
-            ("0 น้อย   [1,2,3,4,0]", [1, 2, 3, 4, 0]),
-            ("ไม่มี 0  [1,2,3,4,5]", [1, 2, 3, 4, 5]),
-        ]
-        print("เคส                    | สลับ | สลับ+ข้าม | เขียนทับ")
-        for name, base in cases:
-            print(f"{name} | {writes_swap(base[:]):4} | {writes_swap_skip(base[:]):9} | {writes_overwrite(base[:]):8}")`,
+cases = [
+    ("0 เยอะ   [0,0,0,0,1]", [0, 0, 0, 0, 1]),
+    ("0 น้อย   [1,2,3,4,0]", [1, 2, 3, 4, 0]),
+    ("ไม่มี 0  [1,2,3,4,5]", [1, 2, 3, 4, 5]),
+]
+print("เคส                    | สลับ | สลับ+ข้าม | เขียนทับ")
+for name, base in cases:
+    print(f"{name} | {writes_swap(base[:]):4} | {writes_swap_skip(base[:]):9} | {writes_overwrite(base[:]):8}")`,
                 out: `เคส                    | สลับ | สลับ+ข้าม | เขียนทับ
-        0 เยอะ   [0,0,0,0,1] |    2 |         2 |        5
-        0 น้อย   [1,2,3,4,0] |    8 |         0 |        5
-        ไม่มี 0  [1,2,3,4,5] |   10 |         0 |        5`,
+0 เยอะ   [0,0,0,0,1] |    2 |         2 |        5
+0 น้อย   [1,2,3,4,0] |    8 |         0 |        5
+ไม่มี 0  [1,2,3,4,5] |   10 |         0 |        5`,
               },
               { t: "p", c: "อ่านตารางแล้วจะเห็นว่าแบบสลับล้วน แพ้ แบบเขียนทับในสองเคสหลัง (8 กับ 10 เทียบกับ 5) เพราะมันเสีย 2 ครั้งต่อหนึ่งตัวไม่ใช่ 0 แม้ในตอนที่สลับตัวเองกับตัวเองซึ่งไม่ได้ย้ายอะไรจริงเลย ส่วนแบบเขียนทับเสียคงที่เท่ากับความยาวแถว เพราะไล่เขียนทุกช่อง" },
               { t: "p", c: "คำตอบของ challenge คือแบบกลาง: เติม if i != insert เข้าไปบรรทัดเดียว เพื่อ ข้ามการสลับที่ไม่ได้ย้ายอะไร ผลคือได้ 0 ครั้งในเคสที่แถวเป็นคำตอบอยู่แล้ว (ถูกต้อง เพราะไม่ต้องแก้อะไรเลย) และไม่เคยแย่กว่าอีกสองแบบในเคสไหน" },
@@ -1025,13 +1025,13 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `def is_subsequence(s: str, t: str) -> bool:
-            # เขียนโค้ดของคุณที่นี่
-            pass
+    # เขียนโค้ดของคุณที่นี่
+    pass
 
 
-        print(is_subsequence("abc", "ahbgdc"))   # ควรได้ True
-        print(is_subsequence("axc", "ahbgdc"))   # ควรได้ False
-        print(is_subsequence("", "abc"))         # ควรได้ True`,
+print(is_subsequence("abc", "ahbgdc"))   # ควรได้ True
+print(is_subsequence("axc", "ahbgdc"))   # ควรได้ False
+print(is_subsequence("", "abc"))         # ควรได้ True`,
               },
               {
                 t: "hints",
@@ -1086,10 +1086,10 @@ export const twoPointersPages: Record<string, Page> = {
                         t: "code",
                         lang: "python",
                         c: `i = 0                          # ตอนนี้กำลังหา s[i]
-        for c in t:                    # ไล่ทุกตัวอักษรของ t ทางเดียว
-            if ______ and ______:      # (1) ยังหาไม่ครบ  และ  (2) ตัวอักษรตรงกัน
-                i += 1                 # คว้าไว้ แล้วไปหาตัวถัดไปของ s
-        return ______                  # (3) เงื่อนไขว่าสำเร็จ`,
+for c in t:                    # ไล่ทุกตัวอักษรของ t ทางเดียว
+    if ______ and ______:      # (1) ยังหาไม่ครบ  และ  (2) ตัวอักษรตรงกัน
+        i += 1                 # คว้าไว้ แล้วไปหาตัวถัดไปของ s
+return ______                  # (3) เงื่อนไขว่าสำเร็จ`,
                       },
                       {
                         t: "p",
@@ -1135,17 +1135,17 @@ export const twoPointersPages: Record<string, Page> = {
               {
                 t: "code",
                 c: `สมมติมีวิธีจับคู่ที่ถูกต้องอยู่ ซึ่งเลือกตัวอักษร s[0] จากตำแหน่ง q ใน t
-        และโค้ดของเราจะคว้าตำแหน่ง p ซึ่งเป็นตำแหน่งซ้ายสุดที่ตรงกัน  ->  p <= q
+และโค้ดของเราจะคว้าตำแหน่ง p ซึ่งเป็นตำแหน่งซ้ายสุดที่ตรงกัน  ->  p <= q
 
-        t = . . . [p] . . . [q] . . . . . . . . . .
-                   ↑         ↑
-              เราคว้าตัวนี้   คำตอบสมมติใช้ตัวนี้
+t = . . . [p] . . . [q] . . . . . . . . . .
+           ↑         ↑
+      เราคว้าตัวนี้   คำตอบสมมติใช้ตัวนี้
 
-        ย้ายจาก q มาใช้ p แทน:
-          - ตัวอักษรยังตรงกันเหมือนกัน (ทั้งสองตำแหน่งเป็นตัวอักษร s[0])
-          - ตัวที่เหลือของ s เดิมหาได้ในช่วงขวาของ q
-          - ช่วงขวาของ p ครอบช่วงขวาของ q ทั้งหมด (เพราะ p <= q)
-          -> ตัวที่เหลือจึงยังหาได้ครบเหมือนเดิมแน่นอน`,
+ย้ายจาก q มาใช้ p แทน:
+  - ตัวอักษรยังตรงกันเหมือนกัน (ทั้งสองตำแหน่งเป็นตัวอักษร s[0])
+  - ตัวที่เหลือของ s เดิมหาได้ในช่วงขวาของ q
+  - ช่วงขวาของ p ครอบช่วงขวาของ q ทั้งหมด (เพราะ p <= q)
+  -> ตัวที่เหลือจึงยังหาได้ครบเหมือนเดิมแน่นอน`,
               },
               {
                 t: "p",
@@ -1179,23 +1179,23 @@ export const twoPointersPages: Record<string, Page> = {
                     lang: "python",
                     label: "เฉลย (Python)",
                     code: `def is_subsequence(s: str, t: str) -> bool:
-            i = 0                              # (1) ตัวชี้บน s = กำลังตามหา s[i]
-            for c in t:                        # (2) กวาด t ทางเดียว ไม่ย้อน
-                if i < len(s) and s[i] == c:   # (3) ยังหาไม่ครบ + ตัวอักษรตรงกัน
-                    i += 1                     # (4) คว้าตัวนี้ ไปหาตัวถัดไปของ s
-            return i == len(s)                 # (5) ขยับครบทุกตัว = เจอครบตามลำดับ
+    i = 0                              # (1) ตัวชี้บน s = กำลังตามหา s[i]
+    for c in t:                        # (2) กวาด t ทางเดียว ไม่ย้อน
+        if i < len(s) and s[i] == c:   # (3) ยังหาไม่ครบ + ตัวอักษรตรงกัน
+            i += 1                     # (4) คว้าตัวนี้ ไปหาตัวถัดไปของ s
+    return i == len(s)                 # (5) ขยับครบทุกตัว = เจอครบตามลำดับ
 
 
-        print(is_subsequence("abc", "ahbgdc"))
-        print(is_subsequence("axc", "ahbgdc"))
-        print(is_subsequence("", "abc"))
-        print(is_subsequence("acb", "ahbgdc"))
-        print(is_subsequence("abc", ""))`,
+print(is_subsequence("abc", "ahbgdc"))
+print(is_subsequence("axc", "ahbgdc"))
+print(is_subsequence("", "abc"))
+print(is_subsequence("acb", "ahbgdc"))
+print(is_subsequence("abc", ""))`,
                     out: `True
-        False
-        True
-        False
-        False`,
+False
+True
+False
+False`,
                   },
                   {
                     t: "table",
@@ -1271,37 +1271,37 @@ export const twoPointersPages: Record<string, Page> = {
                         lang: "python",
                         label: "เวอร์ชัน pre-process + binary search",
                         code: `from bisect import bisect_right
-        from collections import defaultdict
+from collections import defaultdict
 
 
-        class Matcher:
-            def __init__(self, t: str):
-                self.pos = defaultdict(list)          # ตัวอักษร -> list ของ index ใน t
-                for idx, ch in enumerate(t):
-                    self.pos[ch].append(idx)
+class Matcher:
+    def __init__(self, t: str):
+        self.pos = defaultdict(list)          # ตัวอักษร -> list ของ index ใน t
+        for idx, ch in enumerate(t):
+            self.pos[ch].append(idx)
 
-            def is_subsequence(self, s: str) -> bool:
-                cur = -1                              # ตำแหน่งล่าสุดที่ใช้ไปใน t
-                for ch in s:
-                    idxs = self.pos.get(ch)
-                    if not idxs:
-                        return False                  # ไม่มีตัวอักษรนี้ใน t เลย
-                    k = bisect_right(idxs, cur)       # หา index แรกที่ > cur
-                    if k == len(idxs):
-                        return False                  # มีแต่ตัวที่อยู่ซ้ายกว่าที่ใช้ไปแล้ว
-                    cur = idxs[k]
-                return True
+    def is_subsequence(self, s: str) -> bool:
+        cur = -1                              # ตำแหน่งล่าสุดที่ใช้ไปใน t
+        for ch in s:
+            idxs = self.pos.get(ch)
+            if not idxs:
+                return False                  # ไม่มีตัวอักษรนี้ใน t เลย
+            k = bisect_right(idxs, cur)       # หา index แรกที่ > cur
+            if k == len(idxs):
+                return False                  # มีแต่ตัวที่อยู่ซ้ายกว่าที่ใช้ไปแล้ว
+            cur = idxs[k]
+        return True
 
 
-        m = Matcher("ahbgdc")
-        for q in ["abc", "axc", "", "acb", "ahbgdc", "abcd"]:
-            print(repr(q), m.is_subsequence(q))`,
+m = Matcher("ahbgdc")
+for q in ["abc", "axc", "", "acb", "ahbgdc", "abcd"]:
+    print(repr(q), m.is_subsequence(q))`,
                         out: `'abc' True
-        'axc' False
-        '' True
-        'acb' False
-        'ahbgdc' True
-        'abcd' False`,
+'axc' False
+'' True
+'acb' False
+'ahbgdc' True
+'abcd' False`,
                       },
                       {
                         t: "p",
@@ -1402,10 +1402,10 @@ export const twoPointersPages: Record<string, Page> = {
               {
                 t: "code",
                 c: `Area = width × height
-             = (j − i) × min(height[i], height[j])
+     = (j − i) × min(height[i], height[j])
 
-        ความสูงใช้ min() เพราะน้ำล้นออกทางเส้นที่เตี้ยกว่า
-        — เติมสูงกว่าเส้นเตี้ยไม่ได้`,
+ความสูงใช้ min() เพราะน้ำล้นออกทางเส้นที่เตี้ยกว่า
+— เติมสูงกว่าเส้นเตี้ยไม่ได้`,
               },
               {
                 t: "callout",
@@ -1423,20 +1423,20 @@ export const twoPointersPages: Record<string, Page> = {
                 lang: "python",
                 label: "Brute Force — O(n²) time, O(1) space",
                 code: `def max_area(height: list[int]) -> int:
-            max_water = 0
-            n = len(height)
+    max_water = 0
+    n = len(height)
 
-            for i in range(n):
-                for j in range(i + 1, n):
-                    width = j - i
-                    h = min(height[i], height[j])
-                    area = width * h
-                    max_water = max(max_water, area)
+    for i in range(n):
+        for j in range(i + 1, n):
+            width = j - i
+            h = min(height[i], height[j])
+            area = width * h
+            max_water = max(max_water, area)
 
-            return max_water
+    return max_water
 
 
-        print(max_area([1, 8, 6, 2, 5, 4, 8, 3, 7]))`,
+print(max_area([1, 8, 6, 2, 5, 4, 8, 3, 7]))`,
                 out: `49`,
               },
               {
@@ -1526,21 +1526,21 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 c: `คู่ปัจจุบัน: area = height[left] × (right − left)
 
-        พิจารณาคู่ (left, j) ใด ๆ ที่ left < j < right:
-          area' = min(height[left], height[j]) × (j − left)
+พิจารณาคู่ (left, j) ใด ๆ ที่ left < j < right:
+  area' = min(height[left], height[j]) × (j − left)
 
-        กรณีที่ 1 — height[j] ≥ height[left]:
-          area' = height[left] × (j − left)
-                < height[left] × (right − left)   เพราะ j < right
-          → น้อยกว่าคู่ปัจจุบัน
+กรณีที่ 1 — height[j] ≥ height[left]:
+  area' = height[left] × (j − left)
+        < height[left] × (right − left)   เพราะ j < right
+  → น้อยกว่าคู่ปัจจุบัน
 
-        กรณีที่ 2 — height[j] < height[left]:
-          area' = height[j] × (j − left)
-                < height[left] × (right − left)   เพราะทั้งสูงและกว้างน้อยกว่า
-          → น้อยกว่าคู่ปัจจุบัน
+กรณีที่ 2 — height[j] < height[left]:
+  area' = height[j] × (j − left)
+        < height[left] × (right − left)   เพราะทั้งสูงและกว้างน้อยกว่า
+  → น้อยกว่าคู่ปัจจุบัน
 
-        สรุป: ไม่มีคู่ไหนที่ใช้ left เป็นผนังแล้วจับกับ j ที่แคบกว่า
-        จะใหญ่กว่าคู่ปัจจุบันได้ → ทิ้ง left ได้ปลอดภัย`,
+สรุป: ไม่มีคู่ไหนที่ใช้ left เป็นผนังแล้วจับกับ j ที่แคบกว่า
+จะใหญ่กว่าคู่ปัจจุบันได้ → ทิ้ง left ได้ปลอดภัย`,
               },
               {
                 t: "p",
@@ -1552,8 +1552,8 @@ export const twoPointersPages: Record<string, Page> = {
               {
                 t: "code",
                 c: `height  = [1, 8, 6, 2, 5, 4, 8, 3, 7]
-        index   = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        maxArea = 0`,
+index   = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+maxArea = 0`,
               },
               {
                 t: "table",
@@ -1613,37 +1613,37 @@ export const twoPointersPages: Record<string, Page> = {
                     lang: "python",
                     label: "O(n) time · O(1) space",
                     code: `def max_area(height: list[int]) -> int:
-            left = 0                    # เริ่มที่เส้นซ้ายสุด
-            right = len(height) - 1     # เริ่มที่เส้นขวาสุด
-            max_water = 0               # เก็บพื้นที่มากสุดที่เคยเจอ
+    left = 0                    # เริ่มที่เส้นซ้ายสุด
+    right = len(height) - 1     # เริ่มที่เส้นขวาสุด
+    max_water = 0               # เก็บพื้นที่มากสุดที่เคยเจอ
 
-            while left < right:
-                # คำนวณพื้นที่ภาชนะรอบนี้
-                width = right - left
-                h = min(height[left], height[right])
-                area = width * h
+    while left < right:
+        # คำนวณพื้นที่ภาชนะรอบนี้
+        width = right - left
+        h = min(height[left], height[right])
+        area = width * h
 
-                # อัปเดตถ้าของรอบนี้ใหญ่กว่า
-                max_water = max(max_water, area)
+        # อัปเดตถ้าของรอบนี้ใหญ่กว่า
+        max_water = max(max_water, area)
 
-                # ขยับตัวชี้ที่ชี้เส้นเตี้ยกว่าเข้ามา
-                # (ขยับฝั่งสูงไม่มีทางทำให้พื้นที่โต)
-                if height[left] < height[right]:
-                    left += 1     # ซ้ายเตี้ยกว่า — ขยับซ้ายเข้ามา
-                else:
-                    right -= 1    # ขวาเตี้ยกว่า (หรือเท่ากัน) — ขยับขวาเข้ามา
+        # ขยับตัวชี้ที่ชี้เส้นเตี้ยกว่าเข้ามา
+        # (ขยับฝั่งสูงไม่มีทางทำให้พื้นที่โต)
+        if height[left] < height[right]:
+            left += 1     # ซ้ายเตี้ยกว่า — ขยับซ้ายเข้ามา
+        else:
+            right -= 1    # ขวาเตี้ยกว่า (หรือเท่ากัน) — ขยับขวาเข้ามา
 
-            return max_water
+    return max_water
 
 
-        print(max_area([1, 8, 6, 2, 5, 4, 8, 3, 7]))
-        print(max_area([1, 1]))
-        print(max_area([4, 3, 2, 1, 4]))
-        print(max_area([1, 2, 1]))`,
+print(max_area([1, 8, 6, 2, 5, 4, 8, 3, 7]))
+print(max_area([1, 1]))
+print(max_area([4, 3, 2, 1, 4]))
+print(max_area([1, 2, 1]))`,
                     out: `49
-        1
-        16
-        2`,
+1
+16
+2`,
                   },
                 ],
               },
@@ -1918,13 +1918,13 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 lang: "python",
                 c: `def max_operations(nums: list[int], k: int) -> int:
-            # เขียนโค้ดของคุณที่นี่
-            pass
+    # เขียนโค้ดของคุณที่นี่
+    pass
 
 
-        print(max_operations([1, 2, 3, 4], 5))      # ควรได้ 2
-        print(max_operations([3, 1, 3, 4, 3], 6))   # ควรได้ 1
-        print(max_operations([2, 2, 2, 3], 4))      # ควรได้ 1`,
+print(max_operations([1, 2, 3, 4], 5))      # ควรได้ 2
+print(max_operations([3, 1, 3, 4, 3], 6))   # ควรได้ 1
+print(max_operations([2, 2, 2, 3], 4))      # ควรได้ 1`,
               },
               {
                 t: "hints",
@@ -1989,33 +1989,33 @@ export const twoPointersPages: Record<string, Page> = {
                         t: "code",
                         lang: "python",
                         c: `# ทางที่ 1: two pointers
-        nums.sort()
-        left, right = 0, len(nums) - 1
-        ops = 0
-        while left < right:
-            total = nums[left] + nums[right]
-            if total == k:
-                ops += 1
-                ______        # (1) ขยับอะไรบ้าง (คำใบ้: สองบรรทัด)
-            elif total < k:
-                ______        # (2)
-            else:
-                ______        # (3)
-        return ops`,
+nums.sort()
+left, right = 0, len(nums) - 1
+ops = 0
+while left < right:
+    total = nums[left] + nums[right]
+    if total == k:
+        ops += 1
+        ______        # (1) ขยับอะไรบ้าง (คำใบ้: สองบรรทัด)
+    elif total < k:
+        ______        # (2)
+    else:
+        ______        # (3)
+return ops`,
                       },
                       {
                         t: "code",
                         lang: "python",
                         c: `# ทางที่ 2: นับด้วย dict ธรรมดา
-        need = {}                     # ค่าที่ "รอคู่" -> เหลือกี่ตัว
-        ops = 0
-        for x in nums:
-            if need.get(______, 0) > 0:   # (4) มีตัวที่รอจับกับ x อยู่ไหม
-                need[______] -= 1         # (5) ใช้มันไปหนึ่งตัว
-                ops += 1
-            else:
-                need[x] = need.get(x, 0) + 1   # x เข้าคิวรอคู่
-        return ops`,
+need = {}                     # ค่าที่ "รอคู่" -> เหลือกี่ตัว
+ops = 0
+for x in nums:
+    if need.get(______, 0) > 0:   # (4) มีตัวที่รอจับกับ x อยู่ไหม
+        need[______] -= 1         # (5) ใช้มันไปหนึ่งตัว
+        ops += 1
+    else:
+        need[x] = need.get(x, 0) + 1   # x เข้าคิวรอคู่
+return ops`,
                       },
                       {
                         t: "p",
@@ -2123,13 +2123,13 @@ export const twoPointersPages: Record<string, Page> = {
                 t: "code",
                 c: `nums = [1, 5, 2, 4, 2, 4, 4, 3]   k = 6
 
-        แบ่งเป็นกลุ่มที่ไม่เกี่ยวกันเลย:
+แบ่งเป็นกลุ่มที่ไม่เกี่ยวกันเลย:
 
-          กลุ่ม (1, 5) : มี 1 อยู่ 1 ตัว , มี 5 อยู่ 1 ตัว  ->  จับได้ min(1, 1) = 1 คู่
-          กลุ่ม (2, 4) : มี 2 อยู่ 2 ตัว , มี 4 อยู่ 3 ตัว  ->  จับได้ min(2, 3) = 2 คู่
-          กลุ่ม (3, 3) : มี 3 อยู่ 1 ตัว (x = k - x)        ->  จับได้ 1 // 2 = 0 คู่
+  กลุ่ม (1, 5) : มี 1 อยู่ 1 ตัว , มี 5 อยู่ 1 ตัว  ->  จับได้ min(1, 1) = 1 คู่
+  กลุ่ม (2, 4) : มี 2 อยู่ 2 ตัว , มี 4 อยู่ 3 ตัว  ->  จับได้ min(2, 3) = 2 คู่
+  กลุ่ม (3, 3) : มี 3 อยู่ 1 ตัว (x = k - x)        ->  จับได้ 1 // 2 = 0 คู่
 
-          รวม = 1 + 2 + 0 = 3 คู่   <- ไม่มีการเลือกใดที่ทำให้ได้มากกว่านี้`,
+  รวม = 1 + 2 + 0 = 3 คู่   <- ไม่มีการเลือกใดที่ทำให้ได้มากกว่านี้`,
               },
               {
                 t: "p",
@@ -2176,32 +2176,32 @@ export const twoPointersPages: Record<string, Page> = {
                     lang: "python",
                     label: "เฉลยที่ 1 (Python) — Two Pointers",
                     code: `def max_operations(nums: list[int], k: int) -> int:
-            nums.sort()                            # (1) two pointers ต้องการ array ที่เรียงแล้ว
-            left, right = 0, len(nums) - 1
-            ops = 0
-            while left < right:                    # (2) ยังมีเลขเหลือให้จับอย่างน้อย 2 ตัว
-                total = nums[left] + nums[right]
-                if total == k:                     # (3) เจอคู่
-                    ops += 1
-                    left += 1                      # (4) เอาทั้งสองตัวออก
-                    right -= 1
-                elif total < k:                    # (5) น้อยไป -> ต้องการค่าซ้ายที่ใหญ่ขึ้น
-                    left += 1
-                else:                              # (6) มากไป -> ต้องการค่าขวาที่เล็กลง
-                    right -= 1
-            return ops
+    nums.sort()                            # (1) two pointers ต้องการ array ที่เรียงแล้ว
+    left, right = 0, len(nums) - 1
+    ops = 0
+    while left < right:                    # (2) ยังมีเลขเหลือให้จับอย่างน้อย 2 ตัว
+        total = nums[left] + nums[right]
+        if total == k:                     # (3) เจอคู่
+            ops += 1
+            left += 1                      # (4) เอาทั้งสองตัวออก
+            right -= 1
+        elif total < k:                    # (5) น้อยไป -> ต้องการค่าซ้ายที่ใหญ่ขึ้น
+            left += 1
+        else:                              # (6) มากไป -> ต้องการค่าขวาที่เล็กลง
+            right -= 1
+    return ops
 
 
-        print(max_operations([1, 2, 3, 4], 5))
-        print(max_operations([3, 1, 3, 4, 3], 6))
-        print(max_operations([2, 2, 2, 3], 4))
-        print(max_operations([1], 2))
-        print(max_operations([1, 1, 1, 1], 2))`,
+print(max_operations([1, 2, 3, 4], 5))
+print(max_operations([3, 1, 3, 4, 3], 6))
+print(max_operations([2, 2, 2, 3], 4))
+print(max_operations([1], 2))
+print(max_operations([1, 1, 1, 1], 2))`,
                     out: `2
-        1
-        1
-        0
-        2`,
+1
+1
+0
+2`,
                   },
                   {
                     t: "table",
@@ -2248,47 +2248,47 @@ export const twoPointersPages: Record<string, Page> = {
                     lang: "python",
                     label: "เฉลยที่ 2 (Python) — นับด้วย dict ธรรมดา",
                     code: `def max_operations(nums: list[int], k: int) -> int:
-            """เฉลยที่ 1 (two pointers) — ยกมาซ้ำเพื่อให้บล็อกนี้รันได้เองทั้งก้อน"""
-            nums.sort()
-            left, right = 0, len(nums) - 1
-            ops = 0
-            while left < right:
-                total = nums[left] + nums[right]
-                if total == k:
-                    ops += 1
-                    left += 1
-                    right -= 1
-                elif total < k:
-                    left += 1
-                else:
-                    right -= 1
-            return ops
+    """เฉลยที่ 1 (two pointers) — ยกมาซ้ำเพื่อให้บล็อกนี้รันได้เองทั้งก้อน"""
+    nums.sort()
+    left, right = 0, len(nums) - 1
+    ops = 0
+    while left < right:
+        total = nums[left] + nums[right]
+        if total == k:
+            ops += 1
+            left += 1
+            right -= 1
+        elif total < k:
+            left += 1
+        else:
+            right -= 1
+    return ops
 
 
-        def max_operations_hash(nums: list[int], k: int) -> int:
-            need = {}                      # ค่าที่ยัง "รอคู่" -> เหลือกี่ตัว
-            ops = 0
-            for x in nums:
-                if need.get(k - x, 0) > 0:   # มีตัวที่รอจับกับ x อยู่ไหม (ถ้าไม่เคยมี key นี้ ถือว่า 0)
-                    need[k - x] -= 1          # ใช้มันไปหนึ่งตัว (= เอาออก)
-                    ops += 1
-                else:
-                    need[x] = need.get(x, 0) + 1   # ยังไม่มีคู่ ให้ x เข้าคิวรอ
-            return ops
+def max_operations_hash(nums: list[int], k: int) -> int:
+    need = {}                      # ค่าที่ยัง "รอคู่" -> เหลือกี่ตัว
+    ops = 0
+    for x in nums:
+        if need.get(k - x, 0) > 0:   # มีตัวที่รอจับกับ x อยู่ไหม (ถ้าไม่เคยมี key นี้ ถือว่า 0)
+            need[k - x] -= 1          # ใช้มันไปหนึ่งตัว (= เอาออก)
+            ops += 1
+        else:
+            need[x] = need.get(x, 0) + 1   # ยังไม่มีคู่ ให้ x เข้าคิวรอ
+    return ops
 
 
-        tests = [([1, 2, 3, 4], 5), ([3, 1, 3, 4, 3], 6), ([2, 2, 2, 3], 4),
-                 ([1], 2), ([1, 1, 1, 1], 2),
-                 ([4, 4, 1, 3, 1, 3, 2, 2, 5, 5, 1, 5, 2, 5, 5, 5, 1, 5, 5, 5, 2,
-                   4, 4, 4, 4, 3, 3], 6)]
-        for nums, k in tests:
-            print(max_operations_hash(nums, k), max_operations(nums[:], k))`,
+tests = [([1, 2, 3, 4], 5), ([3, 1, 3, 4, 3], 6), ([2, 2, 2, 3], 4),
+         ([1], 2), ([1, 1, 1, 1], 2),
+         ([4, 4, 1, 3, 1, 3, 2, 2, 5, 5, 1, 5, 2, 5, 5, 5, 1, 5, 5, 5, 2,
+           4, 4, 4, 4, 3, 3], 6)]
+for nums, k in tests:
+    print(max_operations_hash(nums, k), max_operations(nums[:], k))`,
                     out: `2 2
-        1 1
-        1 1
-        0 0
-        2 2
-        10 10`,
+1 1
+1 1
+0 0
+2 2
+10 10`,
                   },
                   {
                     t: "p",
@@ -2309,19 +2309,19 @@ export const twoPointersPages: Record<string, Page> = {
                         code: `from collections import defaultdict
 
 
-        def max_operations_hash_v2(nums: list[int], k: int) -> int:
-            need = defaultdict(int)       # เหมือน dict ธรรมดา แต่อ่าน key ใหม่แล้วได้ 0 อัตโนมัติ
-            ops = 0
-            for x in nums:
-                if need[k - x] > 0:
-                    need[k - x] -= 1
-                    ops += 1
-                else:
-                    need[x] += 1
-            return ops
+def max_operations_hash_v2(nums: list[int], k: int) -> int:
+    need = defaultdict(int)       # เหมือน dict ธรรมดา แต่อ่าน key ใหม่แล้วได้ 0 อัตโนมัติ
+    ops = 0
+    for x in nums:
+        if need[k - x] > 0:
+            need[k - x] -= 1
+            ops += 1
+        else:
+            need[x] += 1
+    return ops
 
 
-        print(max_operations_hash_v2([3, 1, 3, 4, 3], 6))`,
+print(max_operations_hash_v2([3, 1, 3, 4, 3], 6))`,
                         out: `1`,
                       },
                       {

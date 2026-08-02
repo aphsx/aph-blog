@@ -16,17 +16,17 @@ export const prefixSumPages: Record<string, Page> = {
               { t: "p", c: "ทำไมมันเร็วขึ้น? เพราะเราจ่ายเวลา O(n) แค่ครั้งเดียวตอน build (สร้าง) prefix จากนั้นทุก range query ตอบได้ในเวลา O(1) ด้วยการลบกันแค่ครั้งเดียว ผลรวม range = ผลรวมสะสมถึงปลายขวา ลบ ผลรวมสะสมก่อนถึงปลายซ้าย" },
               { t: "code", lang: "python", c: `nums = [3, 1, 4, 1, 5]
 
-        # สร้างผลรวมสะสม โดยให้ prefix[0] = 0 นำหน้า
-        prefix = [0] * (len(nums) + 1)
-        for i in range(len(nums)):
-            prefix[i + 1] = prefix[i] + nums[i]
+# สร้างผลรวมสะสม โดยให้ prefix[0] = 0 นำหน้า
+prefix = [0] * (len(nums) + 1)
+for i in range(len(nums)):
+    prefix[i + 1] = prefix[i] + nums[i]
 
-        # prefix = [0, 3, 4, 8, 9, 14]
+# prefix = [0, 3, 4, 8, 9, 14]
 
-        # ผลรวมของช่วง nums[i..j] (รวมสองปลาย) = prefix[j + 1] - prefix[i]
-        # เช่น ผลรวมของ nums[1..3] = 1 + 4 + 1 = 6
-        i, j = 1, 3
-        print(prefix[j + 1] - prefix[i])  # 6` },
+# ผลรวมของช่วง nums[i..j] (รวมสองปลาย) = prefix[j + 1] - prefix[i]
+# เช่น ผลรวมของ nums[1..3] = 1 + 4 + 1 = 6
+i, j = 1, 3
+print(prefix[j + 1] - prefix[i])  # 6` },
               { t: "callout", title: "จำสูตรนี้ไว้", c: "sum(nums[i..j]) = prefix[j+1] - prefix[i] เมื่อ prefix มีช่อง 0 นำหน้า การมีช่อง 0 นำหน้าช่วยไม่ให้ต้องเขียน edge condition (เงื่อนไขพิเศษ) ตอน i = 0 และบ่อยครั้งเราไม่ต้องสร้าง array prefix ทั้งก้อนด้วยซ้ำ ใช้ตัวแปรเดียว accumulate (บวกสะสม) ไปก็พอ" },
 
               { t: "callout", title: "พร้อมแล้วไปต่อ", c: "หมวดนี้มี 2 ข้อ ทั้งสองข้อเป็น prefix sum แบบสะสมด้วยตัวแปรเดียว กดถัดไปเริ่มข้อแรกได้เลย" },
@@ -94,16 +94,16 @@ export const prefixSumPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def largest_altitude(gain):
-            altitude = 0        # ระดับความสูงปัจจุบัน (เริ่มที่จุด 0)
-            highest = 0         # ค่าสูงสุดที่เคยไปถึง (จุดเริ่มก็ 0)
-            for g in gain:      # ไล่ค่าต่างระดับทีละก้อน
-                altitude += g   # สะสมค่าต่างระดับ = ผลรวมสะสม (prefix sum)
-                highest = max(highest, altitude)  # จำค่ามากสุดที่เคยเจอ
-            return highest      # คืนจุดสูงสุด
+    altitude = 0        # ระดับความสูงปัจจุบัน (เริ่มที่จุด 0)
+    highest = 0         # ค่าสูงสุดที่เคยไปถึง (จุดเริ่มก็ 0)
+    for g in gain:      # ไล่ค่าต่างระดับทีละก้อน
+        altitude += g   # สะสมค่าต่างระดับ = ผลรวมสะสม (prefix sum)
+        highest = max(highest, altitude)  # จำค่ามากสุดที่เคยเจอ
+    return highest      # คืนจุดสูงสุด
 
-        print(largest_altitude([-5, 1, 5, 0, -7]))          # 1
-        print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0`, out: `1
-        0` },
+print(largest_altitude([-5, 1, 5, 0, -7]))          # 1
+print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0`, out: `1
+0` },
                 { t: "p", c: "หัวใจอยู่ที่บรรทัด altitude += g ซึ่งก็คือการสร้าง prefix sum ทีละสเต็ป ตัว altitude ณ รอบใด ๆ คือ altitude จริงของจุดนั้น ถ้าเราอยากได้ทุก altitude ก็เก็บลง array ได้ แต่โจทย์ถามแค่ max จึงเก็บแค่ highest พอ" },
                 { t: "p", c: "ถ้าลองเปลี่ยนบรรทัด highest = 0 เป็น highest = altitude แล้ว update ใน loop เฉย ๆ โดยไม่ max กับ 0 จะพังทันทีเมื่อ gain ติดลบทั้งหมด เพราะจะไม่มีรอบไหนกลับมาแตะ 0 อีกเลย การ initialize 0 ไว้ก่อนจึงการันตีว่าจุดเริ่มต้นถูกนับ" },
                 { t: "p", c: "Time O(n) iterate array รอบเดียว · Space O(1) ใช้ตัวแปรสะสมแค่สองตัว ไม่สร้าง array ใหม่" },
@@ -176,21 +176,21 @@ export const prefixSumPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def pivot_index(nums):
-            total = sum(nums)   # ผลรวมทั้งหมด (จ่าย O(n) ครั้งเดียว)
-            left_sum = 0        # ผลรวมของตัวที่อยู่ทางซ้ายของ i
-            for i, n in enumerate(nums):
-                # ผลรวมขวา = total - ฝั่งซ้าย - ตัวปัจจุบัน
-                right_sum = total - left_sum - n
-                if left_sum == right_sum:  # เช็คก่อนบวก n
-                    return i               # เจอ pivot ซ้ายสุด
-                left_sum += n   # เลื่อน i ไปขวา ตัวปัจจุบันจึงกลายเป็นฝั่งซ้าย
-            return -1           # ไล่จนจบไม่เจอ
+    total = sum(nums)   # ผลรวมทั้งหมด (จ่าย O(n) ครั้งเดียว)
+    left_sum = 0        # ผลรวมของตัวที่อยู่ทางซ้ายของ i
+    for i, n in enumerate(nums):
+        # ผลรวมขวา = total - ฝั่งซ้าย - ตัวปัจจุบัน
+        right_sum = total - left_sum - n
+        if left_sum == right_sum:  # เช็คก่อนบวก n
+            return i               # เจอ pivot ซ้ายสุด
+        left_sum += n   # เลื่อน i ไปขวา ตัวปัจจุบันจึงกลายเป็นฝั่งซ้าย
+    return -1           # ไล่จนจบไม่เจอ
 
-        print(pivot_index([1, 7, 3, 6, 5, 6]))  # 3
-        print(pivot_index([1, 2, 3]))           # -1
-        print(pivot_index([2, 1, -1]))          # 0`, out: `3
-        -1
-        0` },
+print(pivot_index([1, 7, 3, 6, 5, 6]))  # 3
+print(pivot_index([1, 2, 3]))           # -1
+print(pivot_index([2, 1, -1]))          # 0`, out: `3
+-1
+0` },
                 { t: "p", c: "หัวใจคือเราไม่อยากคำนวณผลรวมซ้าย-ขวาใหม่ทุก index (จะกลายเป็น O(n^2)) จึงเก็บ left_sum ที่ accumulate (สะสม) มาจากซ้าย ส่วนผลรวมขวาคำนวณได้จาก total ที่รู้ล่วงหน้า ลบด้วยฝั่งซ้ายและตัวปัจจุบันออก จึงเหลือแค่การ iterate รอบเดียว" },
                 { t: "p", c: "edge case (กรณีขอบ) ที่ต้องระวังคือ pivot อยู่ที่หัวหรือท้าย array เช่น [2, 1, -1] ตอบ 0 เพราะฝั่งซ้ายว่าง (ผลรวม 0) เท่ากับฝั่งขวา 1+(-1) = 0 โค้ดนี้รองรับเพราะ left_sum เริ่มที่ 0 อยู่แล้ว ถ้าเผลอสลับไปบวก n ก่อนเช็ค index 0 จะไม่มีทางถูกตรวจในสภาพฝั่งซ้ายว่าง" },
                 { t: "p", c: "Time O(n) หา total หนึ่งรอบ แล้ว iterate อีกหนึ่งรอบ · Space O(1) ใช้ตัวแปรสะสมเท่านั้น" },

@@ -15,34 +15,34 @@ export const graphBfsPages: Record<string, Page> = {
               { t: "p", c: "เครื่องมือคู่กับ BFS คือ queue (คิว) แบบเข้าก่อนออกก่อน เราใช้ deque จาก collections เพราะมัน pop (ดึง) ของจากหัว queue ได้เร็ว O(1) หลักการคือ push (ใส่) node ที่จะเริ่มลง queue แล้ว iterate (วน) pop ออกจากหัว queue มาประมวลผล พร้อม append (ต่อท้าย) เพื่อนบ้านที่ยังไม่ visited (เคยเยือน) เข้าท้าย queue ทำจน queue หมด และเหมือน DFS เราต้องมี visited กันเดินซ้ำเสมอ" },
               { t: "code", lang: "python", c: `from collections import deque
 
-        # template BFS บนกราฟ
-        def bfs(start, graph):
-            queue = deque([start])
-            visited = {start}              # ทำเครื่องหมายตั้งแต่ใส่คิว
-            steps = 0
-            while queue:
-                # ดึงทั้งชั้นออกมาพร้อมกัน เพื่อนับจำนวนก้าว (ชั้น)
-                for _ in range(len(queue)):
-                    node = queue.popleft() # ดึงจากหัวคิว
-                    # ... ทำอะไรกับ node ตรงนี้ ...
-                    for nxt in graph[node]:
-                        if nxt not in visited:
-                            visited.add(nxt)   # ทำเครื่องหมายทันทีที่ใส่คิว
-                            queue.append(nxt)  # โยนเข้าท้ายคิว
-                steps += 1                 # จบหนึ่งชั้น = ขยับไปอีกหนึ่งก้าว` },
+# template BFS บนกราฟ
+def bfs(start, graph):
+    queue = deque([start])
+    visited = {start}              # ทำเครื่องหมายตั้งแต่ใส่คิว
+    steps = 0
+    while queue:
+        # ดึงทั้งชั้นออกมาพร้อมกัน เพื่อนับจำนวนก้าว (ชั้น)
+        for _ in range(len(queue)):
+            node = queue.popleft() # ดึงจากหัวคิว
+            # ... ทำอะไรกับ node ตรงนี้ ...
+            for nxt in graph[node]:
+                if nxt not in visited:
+                    visited.add(nxt)   # ทำเครื่องหมายทันทีที่ใส่คิว
+                    queue.append(nxt)  # โยนเข้าท้ายคิว
+        steps += 1                 # จบหนึ่งชั้น = ขยับไปอีกหนึ่งก้าว` },
 
               { t: "h2", c: "BFS บน grid สองมิติ" },
               { t: "p", c: "โจทย์ BFS เจอบ่อยมากในรูป grid (ตาราง) สองมิติ เช่นแผนที่ เขาวงกต ทุ่งนา เรามองแต่ละช่อง (r, c) เป็น node และช่องที่อยู่ติดกัน 4 ทิศ (บน ล่าง ซ้าย ขวา) เป็น neighbor โดยไม่ต้องสร้าง adjacency list (ลิสต์เพื่อนบ้าน) เลย แค่คำนวณพิกัด neighbor สด ๆ ตอนเดิน" },
               { t: "code", lang: "python", c: `# เพื่อนบ้าน 4 ทิศบน grid: บน ล่าง ซ้าย ขวา
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-        rows, cols = len(grid), len(grid[0])
-        for dr, dc in directions:
-            nr, nc = r + dr, c + dc
-            # เช็คว่าไม่หลุดขอบตารางก่อนเสมอ
-            if 0 <= nr < rows and 0 <= nc < cols:
-                # ... ช่อง (nr, nc) เป็นเพื่อนบ้านที่ใช้ได้ ...
-                pass` },
+rows, cols = len(grid), len(grid[0])
+for dr, dc in directions:
+    nr, nc = r + dr, c + dc
+    # เช็คว่าไม่หลุดขอบตารางก่อนเสมอ
+    if 0 <= nr < rows and 0 <= nc < cols:
+        # ... ช่อง (nr, nc) เป็นเพื่อนบ้านที่ใช้ได้ ...
+        pass` },
               { t: "p", c: "อีกเทคนิคที่หมวดนี้ใช้คือ multi-source BFS คือเริ่มจากหลายจุดพร้อมกัน แค่ push จุดเริ่มทุกจุดเข้า queue ตั้งแต่ต้น แล้ว BFS แผ่ออกพร้อมกันหมด เหมาะกับโจทย์ที่มีต้นตอลามหลายจุด เช่นไฟไหม้ หรือของเน่าที่ลามพร้อมกันหลายที่" },
               { t: "callout", title: "DFS หรือ BFS ดี", c: "ถ้าโจทย์ถามแค่ ไปถึงไหม เชื่อมกันไหม นับกลุ่ม ใช้ได้ทั้งคู่ แต่ถ้าถาม shortest / สั้นที่สุด น้อยที่สุด ให้เลือก BFS เพราะมันแผ่เป็นชั้นตามระยะทาง เจอเป้าหมายครั้งแรกคือคำตอบที่สั้นสุดทันที ส่วน DFS ไม่การันตีเรื่องนี้" },
               { t: "callout", c: "หมวดนี้มี 2 ข้อ ทางออกใกล้สุดในเขาวงกต และส้มเน่า พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
@@ -113,31 +113,31 @@ export const graphBfsPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import deque
 
-        def nearest_exit(maze, entrance):
-            rows, cols = len(maze), len(maze[0])
-            start_r, start_c = entrance
-            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+def nearest_exit(maze, entrance):
+    rows, cols = len(maze), len(maze[0])
+    start_r, start_c = entrance
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-            queue = deque([(start_r, start_c, 0)])   # (แถว, คอลัมน์, จำนวนก้าว)
-            maze[start_r][start_c] = "+"             # ทำเครื่องหมายว่าเยี่ยมแล้ว (ปิดทาง)
+    queue = deque([(start_r, start_c, 0)])   # (แถว, คอลัมน์, จำนวนก้าว)
+    maze[start_r][start_c] = "+"             # ทำเครื่องหมายว่าเยี่ยมแล้ว (ปิดทาง)
 
-            while queue:
-                r, c, steps = queue.popleft()
-                for dr, dc in directions:
-                    nr, nc = r + dr, c + dc
-                    # ต้องอยู่ในตาราง และเป็นทางเดินได้
-                    if 0 <= nr < rows and 0 <= nc < cols and maze[nr][nc] == ".":
-                        # ถ้าช่องใหม่อยู่ติดขอบ นี่คือทางออก
-                        if nr == 0 or nr == rows - 1 or nc == 0 or nc == cols - 1:
-                            return steps + 1
-                        maze[nr][nc] = "+"           # ปิดทางกันเดินซ้ำ
-                        queue.append((nr, nc, steps + 1))
-            return -1                                # เดินจนทั่วแล้วไม่เจอทางออก
+    while queue:
+        r, c, steps = queue.popleft()
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+            # ต้องอยู่ในตาราง และเป็นทางเดินได้
+            if 0 <= nr < rows and 0 <= nc < cols and maze[nr][nc] == ".":
+                # ถ้าช่องใหม่อยู่ติดขอบ นี่คือทางออก
+                if nr == 0 or nr == rows - 1 or nc == 0 or nc == cols - 1:
+                    return steps + 1
+                maze[nr][nc] = "+"           # ปิดทางกันเดินซ้ำ
+                queue.append((nr, nc, steps + 1))
+    return -1                                # เดินจนทั่วแล้วไม่เจอทางออก
 
-        maze = [["+", "+", ".", "+"],
-                [".", ".", ".", "+"],
-                ["+", "+", "+", "."]]
-        print(nearest_exit(maze, [1, 2]))            # 1`, out: `1` },
+maze = [["+", "+", ".", "+"],
+        [".", ".", ".", "+"],
+        ["+", "+", "+", "."]]
+print(nearest_exit(maze, [1, 2]))            # 1`, out: `1` },
                 { t: "p", c: "เพราะโจทย์ถามจำนวนก้าว น้อยที่สุด นี่คือสัญญาณชัดเจนว่าใช้ BFS เราเก็บจำนวนก้าวไปพร้อมกับพิกัดใน queue เลย (r, c, steps) พอ pop ช่องไหนออกมาก็รู้ทันทีว่ามันห่างจากทางเข้ากี่ก้าว เมื่อเราเดินไปเจอช่องว่างที่ติดขอบเป็นครั้งแรก เพราะ BFS แผ่ตามระยะ ช่องนั้นย่อมเป็น exit ที่ใกล้สุด return steps + 1 ได้เลย" },
                 { t: "p", c: "ทริกประหยัด memory คือแทนที่จะสร้าง set visited แยก เราเขียนทับช่องที่ visited แล้วด้วย + (ทำให้มันกลายเป็นกำแพง) เพื่อกันเดินซ้ำ จุดที่ต้องระวังคือทางเข้า ไม่ นับเป็น exit แม้จะติดขอบ โค้ดจึงเช็คเงื่อนไขติดขอบเฉพาะกับช่อง ใหม่ (nr, nc) ที่ไม่ใช่ช่องเริ่ม และปิดช่องเริ่มตั้งแต่ต้น" },
                 { t: "p", c: "Time O(rows × cols) เยี่ยมแต่ละช่องมากสุดหนึ่งครั้ง · Space O(rows × cols) จาก queue ในกรณีแย่สุด" },
@@ -212,43 +212,43 @@ export const graphBfsPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import deque
 
-        def oranges_rotting(grid):
-            rows, cols = len(grid), len(grid[0])
-            queue = deque()
-            fresh = 0
+def oranges_rotting(grid):
+    rows, cols = len(grid), len(grid[0])
+    queue = deque()
+    fresh = 0
 
-            # หาตำแหน่งส้มเน่าทั้งหมด (จุดเริ่มหลายจุด) และนับส้มสด
-            for r in range(rows):
-                for c in range(cols):
-                    if grid[r][c] == 2:
-                        queue.append((r, c))
-                    elif grid[r][c] == 1:
-                        fresh += 1
+    # หาตำแหน่งส้มเน่าทั้งหมด (จุดเริ่มหลายจุด) และนับส้มสด
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == 2:
+                queue.append((r, c))
+            elif grid[r][c] == 1:
+                fresh += 1
 
-            if fresh == 0:
-                return 0                     # ไม่มีส้มสดตั้งแต่แรก ใช้ 0 นาที
+    if fresh == 0:
+        return 0                     # ไม่มีส้มสดตั้งแต่แรก ใช้ 0 นาที
 
-            minutes = 0
-            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    minutes = 0
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-            while queue and fresh > 0:
-                minutes += 1                 # ผ่านไปอีกหนึ่งนาที
-                for _ in range(len(queue)):  # แผ่ทั้งชั้น (ส้มเน่า ณ นาทีนี้) พร้อมกัน
-                    r, c = queue.popleft()
-                    for dr, dc in directions:
-                        nr, nc = r + dr, c + dc
-                        if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 1:
-                            grid[nr][nc] = 2         # ส้มสดเน่าตาม
-                            fresh -= 1
-                            queue.append((nr, nc))   # กลายเป็นแหล่งเน่าในนาทีถัดไป
+    while queue and fresh > 0:
+        minutes += 1                 # ผ่านไปอีกหนึ่งนาที
+        for _ in range(len(queue)):  # แผ่ทั้งชั้น (ส้มเน่า ณ นาทีนี้) พร้อมกัน
+            r, c = queue.popleft()
+            for dr, dc in directions:
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 1:
+                    grid[nr][nc] = 2         # ส้มสดเน่าตาม
+                    fresh -= 1
+                    queue.append((nr, nc))   # กลายเป็นแหล่งเน่าในนาทีถัดไป
 
-            return minutes if fresh == 0 else -1     # ถ้ายังเหลือส้มสด แปลว่าเน่าไม่ถึง
+    return minutes if fresh == 0 else -1     # ถ้ายังเหลือส้มสด แปลว่าเน่าไม่ถึง
 
-        print(oranges_rotting([[2, 1, 1], [1, 1, 0], [0, 1, 1]]))  # 4
-        print(oranges_rotting([[2, 1, 1], [0, 1, 1], [1, 0, 1]]))  # -1
-        print(oranges_rotting([[0, 2]]))                           # 0`, out: `4
-        -1
-        0` },
+print(oranges_rotting([[2, 1, 1], [1, 1, 0], [0, 1, 1]]))  # 4
+print(oranges_rotting([[2, 1, 1], [0, 1, 1], [1, 0, 1]]))  # -1
+print(oranges_rotting([[0, 2]]))                           # 0`, out: `4
+-1
+0` },
                 { t: "p", c: "จุดที่ทำให้ข้อนี้ต่างจากข้อก่อนคือมันมีจุดเริ่ม หลายจุดพร้อมกัน (ส้มเน่าทุกลูกลามในเวลาเดียวกัน) เทคนิคคือ multi-source BFS เราไม่ได้เริ่มจากจุดเดียว แต่ push ส้มเน่าทุกลูกเข้า queue ตั้งแต่ต้น แล้ว BFS แผ่ออกพร้อมกันหมด คลื่นการเน่าจึงขยายทีละวงพอดีกับเวลาจริง" },
                 { t: "p", c: "การนับนาทีต้องประมวลผล ทีละ level การเขียน for _ in range(len(queue)) ก่อน pop ของ ทำให้เราจัดการเฉพาะส้มที่เน่าอยู่ ณ ต้นนาทีนี้ให้ครบก่อน ค่อยขึ้นนาทีใหม่ ถ้าไม่ล็อกจำนวนไว้ก่อน ส้มที่เพิ่งเน่าในนาทีนี้จะถูกนับรวมทำให้นับนาทีเกิน เราใช้ตัวแปร fresh count ส้มสดที่เหลือ ทุกครั้งที่ทำให้ลูกหนึ่งเน่าก็ลด fresh ลง" },
                 { t: "p", c: "edge case สำคัญสามอย่าง หนึ่ง ไม่มีส้มสดตั้งแต่แรก ต้อง return 0 (ไม่ใช่ -1) จึงเช็ค fresh == 0 ก่อนเริ่ม loop สอง มีส้มสดที่ถูกช่องว่างตัดขาด สุดท้าย fresh ยังมากกว่า 0 จึง return -1 สาม เงื่อนไข while queue and fresh > 0 ช่วยหยุดทันทีเมื่อส้มสดหมด ไม่นับนาทีเกินโดยเปล่าประโยชน์ · Time O(rows × cols) เยี่ยมแต่ละช่องมากสุดหนึ่งครั้ง · Space O(rows × cols) จาก queue ในกรณีที่ส้มเน่าเยอะ" },

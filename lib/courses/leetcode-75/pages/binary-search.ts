@@ -14,33 +14,33 @@ export const binarySearchPages: Record<string, Page> = {
               { t: "p", c: "ลองนึกถึงการเปิด dictionary (พจนานุกรม) หาคำ เราไม่ได้เปิดทีละหน้าจากหน้าแรก แต่เปิดกลางเล่มก่อน ถ้าคำที่หาอยู่ก่อนหน้านั้นก็ตัดครึ่งหลังทิ้ง ถ้าอยู่หลังก็ตัดครึ่งแรกทิ้ง แล้วทำซ้ำกับครึ่งที่เหลือ นี่คือ binary search เป๊ะ ๆ เงื่อนไขสำคัญคือ ของต้อง sorted แล้ว เท่านั้นเราถึงจะรู้ว่าควร eliminate ครึ่งไหน" },
               { t: "p", c: "ทำไมมันเร็ว? เพราะทุกก้าวเรา halve (ลดครึ่ง) ขนาดปัญหา array n ตัว จะแบ่งครึ่งได้ราว log2(n) ครั้งก่อนเหลือตัวเดียว เช่น n = 1,000,000 ใช้แค่ประมาณ 20 ก้าว เทียบกับการ iterate (ไล่วน) ทีละตัว O(n) ที่ต้องดูถึงล้านครั้ง นี่คือความต่างระหว่าง O(log n) กับ O(n)" },
               { t: "code", lang: "python", c: `def binary_search(nums, target):
-            lo, hi = 0, len(nums) - 1        # ขอบเขตซ้าย-ขวาของช่วงที่ยังต้องค้น
-            while lo <= hi:
-                mid = (lo + hi) // 2         # จุดกึ่งกลาง
-                if nums[mid] == target:
-                    return mid               # เจอแล้ว
-                elif nums[mid] < target:
-                    lo = mid + 1             # target อยู่ครึ่งขวา ตัดครึ่งซ้ายทิ้ง
-                else:
-                    hi = mid - 1             # target อยู่ครึ่งซ้าย ตัดครึ่งขวาทิ้ง
-            return -1                        # ไม่เจอ
+    lo, hi = 0, len(nums) - 1        # ขอบเขตซ้าย-ขวาของช่วงที่ยังต้องค้น
+    while lo <= hi:
+        mid = (lo + hi) // 2         # จุดกึ่งกลาง
+        if nums[mid] == target:
+            return mid               # เจอแล้ว
+        elif nums[mid] < target:
+            lo = mid + 1             # target อยู่ครึ่งขวา ตัดครึ่งซ้ายทิ้ง
+        else:
+            hi = mid - 1             # target อยู่ครึ่งซ้าย ตัดครึ่งขวาทิ้ง
+    return -1                        # ไม่เจอ
 
-        print(binary_search([1, 3, 5, 7, 9, 11], 7))  # 3
-        print(binary_search([1, 3, 5, 7, 9, 11], 4))  # -1` },
+print(binary_search([1, 3, 5, 7, 9, 11], 7))  # 3
+print(binary_search([1, 3, 5, 7, 9, 11], 4))  # -1` },
               { t: "callout", title: "จุดพลาดที่พบบ่อยของ template นี้", c: "ใช้ mid = (lo + hi) // 2 และเงื่อนไข while lo <= hi (มีเท่ากับ) การขยับ lo = mid + 1 หรือ hi = mid - 1 ต้อง +1/-1 เสมอ ไม่งั้นจะ infinite loop (วนไม่รู้จบ) เมื่อเหลือช่วงแค่ตัวเดียว" },
 
               { t: "h2", c: "เทคนิคขั้นสูง: Binary Search on Answer" },
               { t: "p", c: "นี่คือแนวคิดที่ทำให้ binary search ทรงพลังกว่าที่คิดมาก แทนที่จะ search ค่า ใน array ที่ sorted ไว้ เรากลับ search คำตอบ ใน answer space (ช่วงของคำตอบที่เป็นไปได้ทั้งหมด) หลักการคือ ถ้าเรา guess คำตอบเป็นตัวเลข x แล้วมี function (ฟังก์ชัน) check ได้ว่า x นี้ feasible (ใช้ได้) ไหม และคำตอบมีลักษณะ monotonic (ยิ่งมากยิ่งง่าย หรือยิ่งน้อยยิ่งง่าย) แบบขั้นบันได เราก็ binary search หา boundary (จุดพลิก) ได้เลย" },
               { t: "p", c: "ตัวอย่างที่ชัดคือ LC875 (Koko Eating Bananas / โกโกะกินกล้วย) ที่จะเจอเป็นข้อสุดท้าย speed (ความเร็ว) กินยิ่งมาก ยิ่งกินทันแน่ ๆ speed ยิ่งน้อยยิ่งเสี่ยงไม่ทัน เงื่อนไข กินทันไหม จึงเป็นขั้นบันได true-false ที่เรียงตัว เราจึง binary search บนช่วง speed 1 ถึง max เพื่อหา speed น้อยสุดที่ยัง feasible" },
               { t: "code", lang: "python", c: `# template ของ binary search on answer (หาค่าน้อยสุดที่ feasible)
-        def search_on_answer(lo, hi, feasible):
-            while lo < hi:
-                mid = (lo + hi) // 2
-                if feasible(mid):
-                    hi = mid          # mid ใช้ได้ ลองหาค่าที่น้อยกว่านี้ต่อ (เก็บ mid ไว้)
-                else:
-                    lo = mid + 1      # mid ใช้ไม่ได้ ต้องมากขึ้น
-            return lo                 # จุดพลิกจาก ใช้ไม่ได้ -> ใช้ได้` },
+def search_on_answer(lo, hi, feasible):
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if feasible(mid):
+            hi = mid          # mid ใช้ได้ ลองหาค่าที่น้อยกว่านี้ต่อ (เก็บ mid ไว้)
+        else:
+            lo = mid + 1      # mid ใช้ไม่ได้ ต้องมากขึ้น
+    return lo                 # จุดพลิกจาก ใช้ไม่ได้ -> ใช้ได้` },
 
               { t: "callout", title: "หมวดนี้มี 4 ข้อ", c: "ถ้าโจทย์ถามหา minimum/maximum (ค่าน้อยที่สุด/มากที่สุด) ที่ทำให้ condition (เงื่อนไข) บางอย่างเป็นจริง และถ้าค่านั้น feasible แล้วค่าที่มากกว่า (หรือน้อยกว่า) ก็ feasible ตามด้วยเสมอ นั่นคือสัญญาณว่า binary search บน answer space ได้ พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
       ],
@@ -106,33 +106,33 @@ export const binarySearchPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ API guess() มาให้แล้ว ที่จำลองไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        SECRET = 6
+SECRET = 6
 
-        def guess(num):
-            if num > SECRET:
-                return -1          # ทายมากไป
-            if num < SECRET:
-                return 1           # ทายน้อยไป
-            return 0               # ทายถูก
+def guess(num):
+    if num > SECRET:
+        return -1          # ทายมากไป
+    if num < SECRET:
+        return 1           # ทายน้อยไป
+    return 0               # ทายถูก
 
 
-        # กำหนดให้มี API guess(num) อยู่แล้ว:
-        #   guess(num) -> -1 ถ้า num มากไป, 1 ถ้า num น้อยไป, 0 ถ้าถูก
+# กำหนดให้มี API guess(num) อยู่แล้ว:
+#   guess(num) -> -1 ถ้า num มากไป, 1 ถ้า num น้อยไป, 0 ถ้าถูก
 
-        def guessNumber(n):
-            lo, hi = 1, n
-            while lo <= hi:
-                mid = (lo + hi) // 2
-                res = guess(mid)
-                if res == 0:
-                    return mid          # ทายถูก
-                elif res < 0:
-                    hi = mid - 1        # mid มากไป เลขจริงอยู่ครึ่งซ้าย
-                else:
-                    lo = mid + 1        # mid น้อยไป เลขจริงอยู่ครึ่งขวา
-            return -1  # ไม่ควรมาถึงตรงนี้
+def guessNumber(n):
+    lo, hi = 1, n
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        res = guess(mid)
+        if res == 0:
+            return mid          # ทายถูก
+        elif res < 0:
+            hi = mid - 1        # mid มากไป เลขจริงอยู่ครึ่งซ้าย
+        else:
+            lo = mid + 1        # mid น้อยไป เลขจริงอยู่ครึ่งขวา
+    return -1  # ไม่ควรมาถึงตรงนี้
 
-        print(guessNumber(10))     # เลขลับคือ 6`, out: `6` },
+print(guessNumber(10))     # เลขลับคือ 6`, out: `6` },
                 { t: "p", c: "โจทย์นี้คือ binary search แบบตำราเป๊ะ ๆ เพียงแต่แทนที่จะ compare กับค่าใน array เราถามผลจาก function guess ที่คอยบอก direction ค่าที่ guess return มามีสามกรณี: 0 คือถูก, negative (ลบ) คือทายมากไป (ต้องลด hi), positive (บวก) คือทายน้อยไป (ต้องเพิ่ม lo)" },
                 { t: "p", c: "จุดสำคัญคืออย่าเผลอสลับทิศ res < 0 หมายถึงเลขที่เราทายมากเกินไป ดังนั้นเลขจริงอยู่ทางซ้าย ต้องขยับ hi ลง ถ้าสลับ condition สองอันนี้จะ halve ผิดข้างและหาไม่เจอ" },
                 { t: "p", c: "Time O(log n) halve ช่วงทุกก้าว · Space O(1) ใช้ตัวแปรไม่กี่ตัว ไม่มีโครงสร้างเสริม" },
@@ -200,21 +200,21 @@ export const binarySearchPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import bisect
 
-        def successful_pairs(spells, potions, success):
-            potions.sort()                 # เรียงยาจากน้อยไปมาก
-            m = len(potions)
-            res = []
-            for s in spells:
-                # ต้องการ potion ที่ s * potion >= success  =>  potion >= success / s
-                # หา index แรกที่ potion >= เกณฑ์ ด้วย binary search
-                need = (success + s - 1) // s   # เพดานของ success / s (ปัดขึ้น)
-                idx = bisect.bisect_left(potions, need)
-                res.append(m - idx)             # จำนวน potion ตั้งแต่ idx จนจบ คือที่สำเร็จ
-            return res
+def successful_pairs(spells, potions, success):
+    potions.sort()                 # เรียงยาจากน้อยไปมาก
+    m = len(potions)
+    res = []
+    for s in spells:
+        # ต้องการ potion ที่ s * potion >= success  =>  potion >= success / s
+        # หา index แรกที่ potion >= เกณฑ์ ด้วย binary search
+        need = (success + s - 1) // s   # เพดานของ success / s (ปัดขึ้น)
+        idx = bisect.bisect_left(potions, need)
+        res.append(m - idx)             # จำนวน potion ตั้งแต่ idx จนจบ คือที่สำเร็จ
+    return res
 
-        print(successful_pairs([5, 1, 3], [1, 2, 3, 4, 5], 7))  # [4, 0, 3]
-        print(successful_pairs([3, 1, 2], [8, 5, 8], 16))       # [2, 0, 2]`, out: `[4, 0, 3]
-        [2, 0, 2]` },
+print(successful_pairs([5, 1, 3], [1, 2, 3, 4, 5], 7))  # [4, 0, 3]
+print(successful_pairs([3, 1, 2], [8, 5, 8], 16))       # [2, 0, 2]`, out: `[4, 0, 3]
+[2, 0, 2]` },
                 { t: "p", c: "หัวใจคือการมองว่า สำหรับ spell แรง s หนึ่งตัว potion ที่ทำให้สำเร็จคือ potion ที่มากกว่าหรือเท่ากับ success / s พอเรา sort potions แล้ว potion ที่ผ่าน threshold จะเป็นช่วงต่อเนื่องด้านขวาสุดเสมอ เราจึงแค่หา boundary ของช่วงนั้นด้วย bisect_left แล้ว count ที่ผ่านก็คือ ความยาวทั้งหมด ลบ index จุดเริ่ม" },
                 { t: "p", c: "จุดพลาดที่พบบ่อยคือการหารด้วย float success / s แล้วเจอปัญหา floating-point error เราเลี่ยงด้วย integer ล้วน โดย compute ceiling (เพดาน ปัดขึ้น) ด้วยสูตร (success + s - 1) // s ซึ่งให้ค่าน้อยที่สุดของ potion ที่ยังทำให้ s * potion มากกว่าหรือเท่ากับ success พอดี ปลอดภัยกว่าใช้ float มาก" },
                 { t: "p", c: "Time O((n + m) log m) sort potions เป็น O(m log m) แล้ว iterate spell n ตัว แต่ละตัว binary search เป็น O(log m) · Space O(1) นอกจาก array คำตอบ (sort potions in-place/ในที่เดิม)" },
@@ -282,20 +282,20 @@ export const binarySearchPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_peak_element(nums):
-            lo, hi = 0, len(nums) - 1
-            while lo < hi:
-                mid = (lo + hi) // 2
-                if nums[mid] < nums[mid + 1]:
-                    # กำลังขาขึ้น ยอดต้องอยู่ทางขวา (mid ไม่ใช่ยอดแน่)
-                    lo = mid + 1
-                else:
-                    # กำลังขาลงหรือเท่า ยอดอยู่ทางซ้าย รวม mid ด้วย
-                    hi = mid
-            return lo   # lo == hi คือตำแหน่งยอด
+    lo, hi = 0, len(nums) - 1
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if nums[mid] < nums[mid + 1]:
+            # กำลังขาขึ้น ยอดต้องอยู่ทางขวา (mid ไม่ใช่ยอดแน่)
+            lo = mid + 1
+        else:
+            # กำลังขาลงหรือเท่า ยอดอยู่ทางซ้าย รวม mid ด้วย
+            hi = mid
+    return lo   # lo == hi คือตำแหน่งยอด
 
-        print(find_peak_element([1, 2, 3, 1]))         # 2
-        print(find_peak_element([1, 2, 1, 3, 5, 6, 4]))  # 5`, out: `2
-        5` },
+print(find_peak_element([1, 2, 3, 1]))         # 2
+print(find_peak_element([1, 2, 1, 3, 5, 6, 4]))  # 5`, out: `2
+5` },
                 { t: "p", c: "หลายคนแปลกใจว่าทำไม binary search ใช้กับ array ที่ไม่ได้ sort ได้ กุญแจอยู่ที่การ compare nums[mid] กับ nums[mid+1] ถ้า nums[mid] น้อยกว่า nums[mid+1] แปลว่าตรงนี้เป็น ทางขึ้น เดินขึ้นไปเรื่อย ๆ ทางขวาต้องเจอ peak สักจุด (อย่างช้าสุดคือปลายขวา เพราะขอบนอกเป็นลบอนันต์) เราจึงตัดครึ่งซ้ายทิ้ง ในทางกลับกันถ้าเป็นทางลง peak อยู่ทางซ้าย (รวม mid เองที่อาจเป็น peak) เราจึงตั้ง hi = mid ไม่ใช่ mid - 1" },
                 { t: "p", c: "จุดพลาดที่พบบ่อยคือใช้ while lo <= hi กับ hi = mid ซึ่งจะวนไม่รู้จบ ต้องใช้ while lo < hi คู่กับ hi = mid เสมอ อีกจุดคือการเข้าถึง nums[mid+1] ปลอดภัยเพราะเมื่อ lo < hi จะมี mid < hi ทำให้ mid+1 ไม่เกินขอบ array เมื่อ loop จบ lo กับ hi ชนกันที่ตำแหน่ง peak พอดี" },
                 { t: "p", c: "Time O(log n) ตัดครึ่งช่วงทุกก้าวตามที่โจทย์บังคับ · Space O(1) ใช้แค่ pointer (ตัวชี้) lo กับ hi" },
@@ -368,23 +368,23 @@ export const binarySearchPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import math
 
-        def min_eating_speed(piles, h):
-            def hours_needed(k):
-                # ที่ความเร็ว k แต่ละกองใช้เวลา ceil(pile / k) ชั่วโมง
-                return sum(math.ceil(pile / k) for pile in piles)
+def min_eating_speed(piles, h):
+    def hours_needed(k):
+        # ที่ความเร็ว k แต่ละกองใช้เวลา ceil(pile / k) ชั่วโมง
+        return sum(math.ceil(pile / k) for pile in piles)
 
-            lo, hi = 1, max(piles)     # ช่วงความเร็วที่เป็นไปได้
-            while lo < hi:
-                mid = (lo + hi) // 2
-                if hours_needed(mid) <= h:
-                    hi = mid           # เร็ว mid ก็ทัน ลองช้าลงอีก (เก็บ mid ไว้)
-                else:
-                    lo = mid + 1       # mid ช้าไป กินไม่ทัน ต้องเร็วขึ้น
-            return lo                  # ความเร็วน้อยสุดที่ยังทัน
+    lo, hi = 1, max(piles)     # ช่วงความเร็วที่เป็นไปได้
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if hours_needed(mid) <= h:
+            hi = mid           # เร็ว mid ก็ทัน ลองช้าลงอีก (เก็บ mid ไว้)
+        else:
+            lo = mid + 1       # mid ช้าไป กินไม่ทัน ต้องเร็วขึ้น
+    return lo                  # ความเร็วน้อยสุดที่ยังทัน
 
-        print(min_eating_speed([3, 6, 7, 11], 8))        # 4
-        print(min_eating_speed([30, 11, 23, 4, 20], 5))  # 30`, out: `4
-        30` },
+print(min_eating_speed([3, 6, 7, 11], 8))        # 4
+print(min_eating_speed([30, 11, 23, 4, 20], 5))  # 30`, out: `4
+30` },
                 { t: "p", c: "แทนที่จะ search ใน array เราค้นบน answer space คือ speed k ที่เป็นไปได้ตั้งแต่ 1 (ช้าสุดที่มีความหมาย) ถึง max(piles) (เร็วสุดที่จำเป็น เพราะเร็วกว่านี้ก็กินกองใหญ่สุดได้ในชั่วโมงเดียวอยู่แล้ว) กุญแจคือความสัมพันธ์แบบ monotonic (ขั้นบันได): ยิ่ง k มากยิ่งใช้เวลาน้อย ดังนั้นถ้า k ตัวหนึ่ง feasible (กินทัน เวลา <= h) แล้ว k ที่มากกว่าก็ทันด้วยเสมอ เราจึง binary search หา boundary จาก ไม่ทัน เป็น ทัน ตัวแรก" },
                 { t: "p", c: "function hours_needed compute (คำนวณ) เวลาที่ต้องใช้ที่ speed k โดยแต่ละกองใช้ ceil(pile / k) ชั่วโมง (ต้องปัดขึ้นเพราะเศษกล้วยก็ยังต้องใช้อีกหนึ่งชั่วโมง และกินข้ามกองไม่ได้) เมื่อ mid ทำเวลาได้ <= h เราเก็บ mid ไว้แล้วลองหาที่ช้ากว่า (hi = mid) ถ้าไม่ทันก็ต้องเร็วขึ้น (lo = mid + 1) ถ้าลืมปัดขึ้นจะได้เวลาน้อยกว่าจริงและตอบ speed ผิดต่ำเกินไป" },
                 { t: "p", c: "Time O(n log(max(piles))) binary search ราว log(max) รอบ แต่ละรอบเรียก hours_needed ที่ iterate ทุกกอง O(n) · Space O(1) ไม่มีโครงสร้างเสริม" },

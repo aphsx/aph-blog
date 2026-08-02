@@ -13,12 +13,12 @@ export const treeBfsPages: Record<string, Page> = {
               { t: "h2", c: "BFS / level-order คืออะไร" },
               { t: "p", c: "BFS ย่อมาจาก Breadth-First Search แปลว่า \"ค้นแบบกวาดกว้างก่อน\" บนต้นไม้เรามักเรียกอีกชื่อว่า level-order traversal คือ traverse ครบทั้ง level หนึ่งก่อน แล้วค่อยลง level ถัดไป ลองนึกภาพต้นไม้นี้: เราจะแตะ 3 ก่อน (level 1) แล้วแตะ 9, 20 (level 2) แล้วค่อย 15, 7 (level 3)" },
               { t: "code", c: `          3          <- ชั้น 1: [3]
-                 / \\
-                9   20         <- ชั้น 2: [9, 20]
-                   /  \\
-                  15   7       <- ชั้น 3: [15, 7]
+         / \\
+        9   20         <- ชั้น 2: [9, 20]
+           /  \\
+          15   7       <- ชั้น 3: [15, 7]
 
-        # ลำดับที่ BFS แตะ node: 3, 9, 20, 15, 7 (บนลงล่าง ซ้ายไปขวา)` },
+# ลำดับที่ BFS แตะ node: 3, 9, 20, 15, 7 (บนลงล่าง ซ้ายไปขวา)` },
               { t: "p", c: "เครื่องมือหัวใจของ BFS คือ queue (คิว) — โครงสร้างแบบ \"เข้าก่อนออกก่อน\" (FIFO) เราสร้าง queue ด้วย collections.deque (คิวสองหัว) ของ Python ซึ่ง popleft() (เอาตัวหน้าออก) เร็ว O(1) ต่างจาก list ธรรมดาที่ pop(0) ช้า O(n) ไอเดียคือ: enqueue root ใส่ queue แล้ว loop (วน) pop ออกทีละตัว พอ pop node ไหนออกมาก็ append (ต่อท้าย) left child และ right child ของมันเข้า queue loop แบบนี้ node จะทยอยออกมาเรียงตาม level พอดี" },
               { t: "table", head: ["operation", "deque", "list ธรรมดา"], rows: [
                 ["append() ต่อท้าย", "O(1)", "O(1)"],
@@ -27,21 +27,21 @@ export const treeBfsPages: Record<string, Page> = {
               { t: "callout", title: "เคล็ด loop ทีละ level", c: "ก่อนเริ่ม loop แต่ละ level ให้จด size = len(queue) ไว้ก่อน นั่นคือจำนวน node ของ level นั้นพอดี แล้ว loop pop ออกมา size ครั้ง = จบหนึ่ง level เป๊ะ ๆ เทคนิคนี้ทำให้เราแยกแต่ละ level ออกจากกันได้ทั้งที่ทุก node ปนอยู่ใน queue เดียว" },
               { t: "code", lang: "python", c: `from collections import deque
 
-        # template BFS วนทีละชั้น ใช้ได้แทบทุกโจทย์ level-order
-        def level_order(root):
-            if root is None:
-                return
-            queue = deque([root])          # เริ่มด้วย root ในคิว
-            while queue:
-                size = len(queue)          # จำนวน node ของชั้นนี้ (จดไว้ก่อน!)
-                for _ in range(size):      # วนให้ครบทั้งชั้น
-                    node = queue.popleft() # ดึงตัวหน้าออก O(1)
-                    # ... ทำอะไรกับ node ตรงนี้ ...
-                    if node.left:
-                        queue.append(node.left)   # โยนลูกซ้ายเข้าคิว
-                    if node.right:
-                        queue.append(node.right)  # โยนลูกขวาเข้าคิว
-                # จบ for = จบหนึ่งชั้นพอดี` },
+# template BFS วนทีละชั้น ใช้ได้แทบทุกโจทย์ level-order
+def level_order(root):
+    if root is None:
+        return
+    queue = deque([root])          # เริ่มด้วย root ในคิว
+    while queue:
+        size = len(queue)          # จำนวน node ของชั้นนี้ (จดไว้ก่อน!)
+        for _ in range(size):      # วนให้ครบทั้งชั้น
+            node = queue.popleft() # ดึงตัวหน้าออก O(1)
+            # ... ทำอะไรกับ node ตรงนี้ ...
+            if node.left:
+                queue.append(node.left)   # โยนลูกซ้ายเข้าคิว
+            if node.right:
+                queue.append(node.right)  # โยนลูกขวาเข้าคิว
+        # จบ for = จบหนึ่งชั้นพอดี` },
 
               { t: "callout", title: "พร้อมลุยแล้ว", c: "หมวดนี้มี 2 ข้อ (LC199, LC1161) ทั้งคู่ใช้ template วนทีละชั้นด้านบนเป็นแกน พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
       ],
@@ -108,41 +108,41 @@ export const treeBfsPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class TreeNode:
-            def __init__(self, val=0, left=None, right=None):
-                self.val = val
-                self.left = left
-                self.right = right
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
-        from collections import deque
+from collections import deque
 
-        # class TreeNode:
-        #     def __init__(self, val=0, left=None, right=None):
-        #         self.val = val
-        #         self.left = left
-        #         self.right = right
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
-        def rightSideView(root):
-            if root is None:
-                return []
-            result = []
-            queue = deque([root])
-            while queue:
-                size = len(queue)
-                for i in range(size):
-                    node = queue.popleft()
-                    if i == size - 1:            # ตัวสุดท้ายของชั้น = ขวาสุด
-                        result.append(node.val)
-                    if node.left:
-                        queue.append(node.left)  # ต้องใส่ซ้ายก่อนขวา
-                    if node.right:
-                        queue.append(node.right) # เพื่อให้ขวาสุดออกท้ายสุด
-            return result
+def rightSideView(root):
+    if root is None:
+        return []
+    result = []
+    queue = deque([root])
+    while queue:
+        size = len(queue)
+        for i in range(size):
+            node = queue.popleft()
+            if i == size - 1:            # ตัวสุดท้ายของชั้น = ขวาสุด
+                result.append(node.val)
+            if node.left:
+                queue.append(node.left)  # ต้องใส่ซ้ายก่อนขวา
+            if node.right:
+                queue.append(node.right) # เพื่อให้ขวาสุดออกท้ายสุด
+    return result
 
-        # ต้นไม้ [1, 2, 3, null, 5, null, 4]
-        root = TreeNode(1, TreeNode(2, None, TreeNode(5)), TreeNode(3, None, TreeNode(4)))
-        print(rightSideView(root))`, out: `[1, 3, 4]` },
+# ต้นไม้ [1, 2, 3, null, 5, null, 4]
+root = TreeNode(1, TreeNode(2, None, TreeNode(5)), TreeNode(3, None, TreeNode(4)))
+print(rightSideView(root))`, out: `[1, 3, 4]` },
                 { t: "p", c: "หัวใจคือใช้ template วนทีละชั้น แล้วเช็คว่า i == size - 1 ไหม ถ้าใช่แปลว่าเป็นตัวสุดท้ายที่ออกจากชั้นนี้ = ขวาสุด เก็บค่าเข้า result ที่ต้อง append ลูกซ้ายก่อนลูกขวาเสมอ เพื่อรับประกันว่าภายในชั้นถัดไป node จะเรียงซ้ายไปขวา ตัวที่ออกท้ายสุดจึงเป็นตัวขวาสุดจริง ๆ" },
                 { t: "p", c: "จุดพลาดที่พบบ่อยคือเผลอคิดว่าคำตอบคือลูกขวาของทุก node หรือเก็บแต่ node.right ซึ่งจะพลาดกรณีที่ชั้นนั้นฝั่งขวาว่างแต่ฝั่งซ้ายมี node การยึดตำแหน่ง \"ตัวสุดท้ายในชั้น\" แก้ปัญหานี้ได้หมด อย่าลืมเช็ค root เป็น None ตั้งแต่ต้นด้วย" },
                 { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว · Space O(w) โดย w คือความกว้างมากสุดของต้นไม้ = จำนวน node มากสุดในคิวพร้อมกันในหนึ่งชั้น กรณีแย่สุด w ราว ๆ n/2" },
@@ -207,39 +207,39 @@ export const treeBfsPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-        class TreeNode:
-            def __init__(self, val=0, left=None, right=None):
-                self.val = val
-                self.left = left
-                self.right = right
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
-        from collections import deque
+from collections import deque
 
-        def maxLevelSum(root):
-            best_sum = float('-inf')   # ผลรวมมากสุดที่เจอ (เริ่ม -inf กันค่าติดลบ)
-            best_level = 1             # เลขชั้นที่ให้ผลรวมมากสุด
-            level = 0
-            queue = deque([root])
-            while queue:
-                level += 1            # ขึ้นชั้นใหม่
-                size = len(queue)
-                total = 0
-                for _ in range(size):
-                    node = queue.popleft()
-                    total += node.val         # บวกทุก node ในชั้นนี้
-                    if node.left:
-                        queue.append(node.left)
-                    if node.right:
-                        queue.append(node.right)
-                if total > best_sum:          # เจอชั้นที่รวมมากกว่าเดิม
-                    best_sum = total
-                    best_level = level
-            return best_level
+def maxLevelSum(root):
+    best_sum = float('-inf')   # ผลรวมมากสุดที่เจอ (เริ่ม -inf กันค่าติดลบ)
+    best_level = 1             # เลขชั้นที่ให้ผลรวมมากสุด
+    level = 0
+    queue = deque([root])
+    while queue:
+        level += 1            # ขึ้นชั้นใหม่
+        size = len(queue)
+        total = 0
+        for _ in range(size):
+            node = queue.popleft()
+            total += node.val         # บวกทุก node ในชั้นนี้
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        if total > best_sum:          # เจอชั้นที่รวมมากกว่าเดิม
+            best_sum = total
+            best_level = level
+    return best_level
 
-        # ต้นไม้ [1, 7, 0, 7, -8, null, null]
-        root = TreeNode(1, TreeNode(7, TreeNode(7), TreeNode(-8)), TreeNode(0))
-        print(maxLevelSum(root))`, out: `2` },
+# ต้นไม้ [1, 7, 0, 7, -8, null, null]
+root = TreeNode(1, TreeNode(7, TreeNode(7), TreeNode(-8)), TreeNode(0))
+print(maxLevelSum(root))`, out: `2` },
                 { t: "p", c: "โครงเดียวกับข้อก่อน เพิ่มตัวนับ level ที่บวก 1 ทุกครั้งที่เริ่มชั้นใหม่ และตัวแปร total บวกค่าทุก node ในชั้น เมื่อจบชั้นก็เทียบ total กับ best_sum ถ้ามากกว่าจึงอัปเดต ใช้ > (มากกว่าเท่านั้น ไม่ใช่ >=) เพื่อให้เมื่อผลรวมเสมอกัน เราเก็บชั้นแรก (เลขน้อยกว่า) ไว้ตามที่โจทย์ต้องการ" },
                 { t: "p", c: "จุดพลาดที่พบบ่อยคือเริ่ม best_sum ด้วย 0 ซึ่งพังทันทีถ้าทุกชั้นมีผลรวมติดลบ ต้องเริ่มด้วย float('-inf') และอย่าลืมว่าโจทย์นับชั้นเริ่มที่ 1 ไม่ใช่ 0 โจทย์นี้ทำด้วย DFS ก็ได้ แต่ BFS เข้ากับโจทย์ \"เป็นชั้น\" อย่างเป็นธรรมชาติกว่า" },
                 { t: "p", c: "Time O(n) แตะทุก node ครั้งเดียว · Space O(w) โดย w คือความกว้างมากสุดของต้นไม้ (จำนวน node มากสุดในคิวพร้อมกัน)" },

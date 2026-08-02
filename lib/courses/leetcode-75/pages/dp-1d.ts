@@ -18,40 +18,40 @@ export const dp1dPages: Record<string, Page> = {
             return fib(n - 1) + fib(n - 2)   # ช้า! O(2^n)` },
               { t: "p", c: "ทำไมช้า? เพราะเรา compute ค่าเดิมซ้ำนับครั้งไม่ถ้วน ลองวาด recursion tree (ต้นไม้การเรียกฟังก์ชัน) ของ fib(5):" },
               { t: "code", c: `                fib(5)
-                      /        \\
-                  fib(4)       fib(3)
-                  /    \\        /    \\
-             fib(3)  fib(2)  fib(2) fib(1)
-              ...     ...     ...
-        # fib(3) ถูกคำนวณ 2 ครั้ง, fib(2) ถูกคำนวณ 3 ครั้ง ...
-        # ยิ่ง n ใหญ่ ยิ่งซ้ำมหาศาล = overlapping subproblems` },
+              /        \\
+          fib(4)       fib(3)
+          /    \\        /    \\
+     fib(3)  fib(2)  fib(2) fib(1)
+      ...     ...     ...
+# fib(3) ถูกคำนวณ 2 ครั้ง, fib(2) ถูกคำนวณ 3 ครั้ง ...
+# ยิ่ง n ใหญ่ ยิ่งซ้ำมหาศาล = overlapping subproblems` },
               { t: "p", c: "การที่ subproblem ตัวเดียวกัน (เช่น fib(3)) ถูก compute ซ้ำหลายรอบ เรียกว่า overlapping subproblems (ปัญหาย่อยที่ทับซ้อนกัน) นี่แหละคือสัญญาณว่าใช้ DP ได้ ทางแก้มีสองสไตล์ ให้ผลลัพธ์เท่ากันแต่คิดคนละทิศ" },
 
               { t: "h3", c: "แบบที่ 1 — Memoization (top-down)" },
               { t: "p", c: "Memoization (การจดจำคำตอบ) แบบ top-down (บนลงล่าง) คือเริ่มจากปัญหาใหญ่ (fib(n)) แล้วเรียก recursion ลงไปหา subproblem ตามปกติ แต่เพิ่ม memo (สมุดโน้ต) ไว้จดคำตอบที่เคย compute แล้ว ก่อน compute อะไรก็ lookup (เปิดดู) ก่อนว่าเคยทำไว้หรือยัง ถ้าเคยก็หยิบมาใช้เลย ไม่ต้อง compute ซ้ำ" },
               { t: "code", lang: "python", c: `def fib(n, memo=None):
-            if memo is None:
-                memo = {}
-            if n < 2:
-                return n
-            if n in memo:          # เคยคำนวณแล้ว หยิบมาใช้เลย
-                return memo[n]
-            memo[n] = fib(n - 1, memo) + fib(n - 2, memo)  # คำนวณแล้วจด
-            return memo[n]
+    if memo is None:
+        memo = {}
+    if n < 2:
+        return n
+    if n in memo:          # เคยคำนวณแล้ว หยิบมาใช้เลย
+        return memo[n]
+    memo[n] = fib(n - 1, memo) + fib(n - 2, memo)  # คำนวณแล้วจด
+    return memo[n]
 
-        print(fib(10))  # 55` },
+print(fib(10))  # 55` },
               { t: "h3", c: "แบบที่ 2 — Tabulation (bottom-up)" },
               { t: "p", c: "Tabulation (การเติมตาราง) แบบ bottom-up (ล่างขึ้นบน) คือกลับด้าน เริ่มจาก subproblem ที่เล็กที่สุดก่อน (fib(0), fib(1)) แล้วค่อย ๆ ไต่ขึ้นไป build คำตอบที่ใหญ่ขึ้นทีละขั้น โดยเก็บผลลง table (ตาราง) มักเป็น array ชื่อ dp ไม่ใช้ recursion เลย" },
               { t: "code", lang: "python", c: `def fib(n):
-            if n < 2:
-                return n
-            dp = [0] * (n + 1)     # dp[i] = คำตอบของปัญหาย่อยขนาด i
-            dp[1] = 1
-            for i in range(2, n + 1):
-                dp[i] = dp[i - 1] + dp[i - 2]  # transition: ต่อยอดจากตัวก่อนหน้า
-            return dp[n]
+    if n < 2:
+        return n
+    dp = [0] * (n + 1)     # dp[i] = คำตอบของปัญหาย่อยขนาด i
+    dp[1] = 1
+    for i in range(2, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]  # transition: ต่อยอดจากตัวก่อนหน้า
+    return dp[n]
 
-        print(fib(10))  # 55` },
+print(fib(10))  # 55` },
 
               { t: "h2", c: "จับ 2 อย่างนี้ให้ได้ในทุกโจทย์ DP" },
               { t: "callout", title: "state + transition", c: "1) state (สถานะ) คืออะไร: dp[i] หมายถึงคำตอบของอะไร ต้อง define ให้ชัดก่อนเสมอ เช่น dp[i] = จำนวนวิธีถึงขั้นที่ i 2) transition (การเปลี่ยนสถานะ) คืออะไร: recurrence (สูตรความสัมพันธ์) ที่บอกว่า dp[i] compute จาก state ก่อนหน้าอย่างไร เช่น dp[i] = dp[i-1] + dp[i-2] เมื่อจับสองอย่างนี้ได้ ที่เหลือแค่กำหนด base case แล้วไล่เติม table" },
@@ -121,18 +121,18 @@ export const dp1dPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def tribonacci(n):
-            if n == 0:
-                return 0
-            if n <= 2:            # T1 และ T2 เท่ากับ 1
-                return 1
-            a, b, c = 0, 1, 1     # T0, T1, T2
-            for _ in range(3, n + 1):
-                a, b, c = b, c, a + b + c  # เลื่อนหน้าต่างสามตัวไปข้างหน้า
-            return c
+    if n == 0:
+        return 0
+    if n <= 2:            # T1 และ T2 เท่ากับ 1
+        return 1
+    a, b, c = 0, 1, 1     # T0, T1, T2
+    for _ in range(3, n + 1):
+        a, b, c = b, c, a + b + c  # เลื่อนหน้าต่างสามตัวไปข้างหน้า
+    return c
 
-        print(tribonacci(4))   # 4
-        print(tribonacci(25))  # 1389537`, out: `4
-        1389537` },
+print(tribonacci(4))   # 4
+print(tribonacci(25))  # 1389537`, out: `4
+1389537` },
                 { t: "p", c: "state คือ dp[i] = ค่า Tribonacci ตัวที่ i และ transition คือ dp[i] = dp[i-1] + dp[i-2] + dp[i-3] แต่เพราะแต่ละตัว depend on แค่สามตัวก่อนหน้า เราเลยไม่ต้องเก็บ array ทั้งก้อน ใช้ variable a, b, c แทน dp[i-3], dp[i-2], dp[i-1] แล้วเลื่อนไปข้างหน้าทีละก้าวด้วยการ assign พร้อมกัน (a, b, c = b, c, a+b+c)" },
                 { t: "p", c: "ทำไมต้อง assign พร้อมกันบรรทัดเดียว? เพราะฝั่งขวาของ = จะถูก evaluate (คำนวณ) ให้เสร็จก่อนทั้งหมด แล้วค่อยจ่ายให้ฝั่งซ้าย ถ้าแยกเป็น a = b แล้ว b = c ทีละบรรทัด ค่า a เดิมจะถูก overwrite ก่อนที่เราจะได้ใช้ ทำให้ a + b + c ผิด" },
                 { t: "p", c: "Time O(n) iterate รอบเดียวจาก 3 ถึง n · Space O(1) ใช้แค่สาม variable ไม่โตตาม n" },
@@ -197,17 +197,17 @@ export const dp1dPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def min_cost_climbing_stairs(cost):
-            n = len(cost)
-            dp = [0] * (n + 1)   # dp[i] = ค่าใช้จ่ายน้อยสุดเพื่อมาถึงขั้น i
-            # dp[0] = dp[1] = 0 เพราะเริ่มที่ขั้น 0 หรือ 1 ได้ฟรี
-            for i in range(2, n + 1):
-                dp[i] = min(dp[i - 1] + cost[i - 1],   # มาจากขั้นก่อนหน้า
-                            dp[i - 2] + cost[i - 2])   # มาจากขั้นก่อนสองขั้น
-            return dp[n]
+    n = len(cost)
+    dp = [0] * (n + 1)   # dp[i] = ค่าใช้จ่ายน้อยสุดเพื่อมาถึงขั้น i
+    # dp[0] = dp[1] = 0 เพราะเริ่มที่ขั้น 0 หรือ 1 ได้ฟรี
+    for i in range(2, n + 1):
+        dp[i] = min(dp[i - 1] + cost[i - 1],   # มาจากขั้นก่อนหน้า
+                    dp[i - 2] + cost[i - 2])   # มาจากขั้นก่อนสองขั้น
+    return dp[n]
 
-        print(min_cost_climbing_stairs([10, 15, 20]))                # 15
-        print(min_cost_climbing_stairs([1,100,1,1,1,100,1,1,100,1])) # 6`, out: `15
-        6` },
+print(min_cost_climbing_stairs([10, 15, 20]))                # 15
+print(min_cost_climbing_stairs([1,100,1,1,1,100,1,1,100,1])) # 6`, out: `15
+6` },
                 { t: "p", c: "การ define dp[i] เป็นค่าที่จะมาถึงขั้น i (ยังไม่เหยียบ i) ทำให้ transition สวย: จะยืนที่ขั้น i ได้ ต้อง jump มาจาก i-1 หรือ i-2 ซึ่งต้องจ่าย cost ของขั้นที่ jump ออกมา (cost[i-1] หรือ cost[i-2]) เป้าหมาย dp[n] คือจุดที่พ้นบันได (เหนือขั้นสุดท้าย) จึงไม่มีค่า cost" },
                 { t: "p", c: "เพราะเริ่มที่ขั้น 0 หรือ 1 ได้ฟรี เราจึงตั้ง dp[0] = dp[1] = 0 เป็น base case แล้วไล่เติมจาก i = 2 ขึ้นไป โจทย์นี้คือ pattern เดียวกับ Fibonacci เป๊ะ ต่างแค่ใช้ min แทนการ sum ถ้าอยากประหยัด Space ยุบเหลือสอง variable แทน table ได้เช่นเดียวกับข้อ Tribonacci" },
                 { t: "p", c: "Time O(n) iterate table รอบเดียว · Space O(n) จาก array dp (ลดเหลือ O(1) ได้ด้วย variable สองตัวแทน table)" },
@@ -279,16 +279,16 @@ export const dp1dPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def rob(nums):
-            # prev = เงินมากสุดถึงบ้านก่อนหน้า, curr = เงินมากสุดถึงบ้านปัจจุบัน
-            prev, curr = 0, 0
-            for money in nums:
-                # ไม่ขโมยหลังนี้ (curr) เทียบกับ ขโมยหลังนี้ (prev + money)
-                prev, curr = curr, max(curr, prev + money)
-            return curr
+    # prev = เงินมากสุดถึงบ้านก่อนหน้า, curr = เงินมากสุดถึงบ้านปัจจุบัน
+    prev, curr = 0, 0
+    for money in nums:
+        # ไม่ขโมยหลังนี้ (curr) เทียบกับ ขโมยหลังนี้ (prev + money)
+        prev, curr = curr, max(curr, prev + money)
+    return curr
 
-        print(rob([1, 2, 3, 1]))     # 4
-        print(rob([2, 7, 9, 3, 1]))  # 12`, out: `4
-        12` },
+print(rob([1, 2, 3, 1]))     # 4
+print(rob([2, 7, 9, 3, 1]))  # 12`, out: `4
+12` },
                 { t: "p", c: "transition คือ dp[i] = max(dp[i-1], dp[i-2] + nums[i]) ความหมายคือ ที่บ้านหลังนี้เรามีสอง choice: skip (คำตอบเท่าเดิมกับ dp[i-1]) หรือ take (ต้องข้ามหลัง adjacent จึงต่อยอดจาก dp[i-2] แล้ว sum เงินหลังนี้) เพราะ depend on แค่สองค่าก่อนหน้า เราจึงแทน dp[i-2] ด้วย prev และ dp[i-1] ด้วย curr" },
                 { t: "p", c: "จุดสำคัญของการ rotate คือ prev, curr = curr, max(curr, prev + money) ทำพร้อมกันในบรรทัดเดียว: prev ตัวใหม่ต้องเป็น curr ตัวเก่า ส่วน curr ตัวใหม่ compute จาก curr และ prev ตัวเก่า ถ้าแยกบรรทัดจะ overwrite กันเอง initialize ด้วย 0 ทั้งคู่ครอบคลุมกรณี nums ว่างและหลังแรกได้พอดี" },
                 { t: "p", c: "Time O(n) iterate ครั้งเดียว · Space O(1) ใช้สอง variable แทน table" },
@@ -360,20 +360,20 @@ export const dp1dPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def num_tilings(n):
-            MOD = 10**9 + 7
-            if n <= 2:
-                return n          # n=1 -> 1, n=2 -> 2
-            dp = [0] * (n + 1)
-            dp[0], dp[1], dp[2] = 1, 1, 2   # base case
-            for i in range(3, n + 1):
-                dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD
-            return dp[n]
+    MOD = 10**9 + 7
+    if n <= 2:
+        return n          # n=1 -> 1, n=2 -> 2
+    dp = [0] * (n + 1)
+    dp[0], dp[1], dp[2] = 1, 1, 2   # base case
+    for i in range(3, n + 1):
+        dp[i] = (2 * dp[i - 1] + dp[i - 3]) % MOD
+    return dp[n]
 
-        print(num_tilings(3))   # 5
-        print(num_tilings(4))   # 11
-        print(num_tilings(30))  # 312342182`, out: `5
-        11
-        312342182` },
+print(num_tilings(3))   # 5
+print(num_tilings(4))   # 11
+print(num_tilings(30))  # 312342182`, out: `5
+11
+312342182` },
                 { t: "p", c: "การหา transition dp[n] = 2*dp[n-1] + dp[n-3] มาจากการวิเคราะห์ว่าตอนปิดคอลัมน์สุดท้ายทำได้กี่แบบ: วางโดมิโนแนวตั้งหนึ่งอันปิดคอลัมน์เดียว (ต่อจาก dp[n-1]), วางโดมิโนแนวนอนสองอันปิดสองคอลัมน์ (ต่อจาก dp[n-2]), หรือวางโทรมิโนที่ทำให้เกิดขอบหยัก การรวมกรณีขอบหยักทั้งหมดยุบลงมาได้เป็นสูตรกระชับข้างต้น ในการแก้โจทย์จริง เรามักจำสูตรนี้ไว้เลย" },
                 { t: "p", c: "จุดที่พลาดบ่อยคือลืมใส่ mod ทุกก้าว ถ้าใส่แค่ตอนท้าย เลขระหว่างทางจะใหญ่มาก และต้องตั้ง base case ให้ครบสามตัว (dp[0], dp[1], dp[2]) เพราะสูตรอ้างถึง dp[n-3] ถ้าตั้งไม่ครบ ตอน i = 3 จะไปอ่าน dp[0] ที่ต้องเป็น 1 ไม่ใช่ 0" },
                 { t: "p", c: "Time O(n) ไล่ตารางรอบเดียว · Space O(n) จากลิสต์ dp (ลดเหลือ O(1) ได้ด้วยการเก็บแค่สามค่าล่าสุด)" },

@@ -14,19 +14,19 @@ export const monotonicStackPages: Record<string, Page> = {
               { t: "p", c: "มี array (ลิสต์) ตัวเลข ถามว่าแต่ละตัวมีตัวไหนอยู่ทางขวาที่มากกว่ามันตัวแรก ถ้าคิดตรง ๆ คือแต่ละตัว iterate (วน) ดูขวาไปเรื่อย ๆ จนเจอตัวที่มากกว่า ซึ่งกรณีแย่สุดเป็น O(n^2) monotonic stack ช่วยให้เรา iterate array รอบเดียวได้" },
               { t: "p", c: "ไอเดียคือเราเก็บ index (ตำแหน่ง) (หรือค่า) ที่ยังหาคำตอบไม่เจอไว้ใน stack โดยรักษาให้ค่าใน stack เรียงจากมากไปน้อยจากล่างขึ้นบน (decreasing) พอเจอตัวใหม่ที่มากกว่ายอด stack ก็แปลว่าตัวใหม่นี่แหละคือ next greater element ของตัวที่ยอด stack เราจึง pop ออกมาแล้วบันทึกคำตอบ" },
               { t: "code", lang: "python", c: `# template: หาตัวถัดไปที่มากกว่า (index) ของแต่ละตำแหน่ง
-        def next_greater(nums):
-            n = len(nums)
-            answer = [-1] * n     # ค่าเริ่มต้น -1 = ไม่มีตัวถัดไปที่มากกว่า
-            stack = []            # เก็บ index ที่ยังรอตัวมากกว่า (ค่าลดจากล่างขึ้นบน)
-            for i in range(n):
-                # ถ้าตัวปัจจุบันมากกว่ายอด stack แปลว่าเจอคำตอบของยอดนั้น
-                while stack and nums[i] > nums[stack[-1]]:
-                    idx = stack.pop()
-                    answer[idx] = i
-                stack.append(i)
-            return answer
+def next_greater(nums):
+    n = len(nums)
+    answer = [-1] * n     # ค่าเริ่มต้น -1 = ไม่มีตัวถัดไปที่มากกว่า
+    stack = []            # เก็บ index ที่ยังรอตัวมากกว่า (ค่าลดจากล่างขึ้นบน)
+    for i in range(n):
+        # ถ้าตัวปัจจุบันมากกว่ายอด stack แปลว่าเจอคำตอบของยอดนั้น
+        while stack and nums[i] > nums[stack[-1]]:
+            idx = stack.pop()
+            answer[idx] = i
+        stack.append(i)
+    return answer
 
-        print(next_greater([2, 1, 2, 4, 3]))  # [3, 2, 3, -1, -1]` },
+print(next_greater([2, 1, 2, 4, 3]))  # [3, 2, 3, -1, -1]` },
               { t: "p", c: "ทำไมถึงเป็น O(n) ทั้งที่มี while ซ้อนอยู่ กุญแจคือ index แต่ละตัวถูก push (ใส่) เข้า stack แค่ครั้งเดียว และ pop (ดึงออก) แค่ครั้งเดียวตลอดทั้ง loop รวมงานทั้งหมดจึงเป็น O(n) ไม่ใช่ O(n^2) แม้จะเห็น loop ซ้อนกัน" },
               { t: "callout", title: "จะเก็บ index หรือค่า", c: "ส่วนใหญ่นิยมเก็บ index ลงใน stack เพราะเข้าถึงทั้งค่า (nums[idx]) และตำแหน่งได้ ทำให้คำนวณระยะห่าง เช่น อีกกี่วัน หรือ กี่ตำแหน่ง ได้ง่าย ส่วนทิศทางว่าเรียง increasing หรือ decreasing ขึ้นกับว่าโจทย์หาตัวที่มากกว่าหรือน้อยกว่า" },
 
@@ -86,23 +86,23 @@ export const monotonicStackPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def daily_temperatures(temperatures):
-            n = len(temperatures)
-            answer = [0] * n     # 0 = ไม่มีวันร้อนกว่าในอนาคต
-            stack = []           # เก็บ index ของวันที่ยังรอวันร้อนกว่า
-            for i, temp in enumerate(temperatures):
-                # วันนี้ร้อนกว่ายอด stack ไหม ถ้าใช่คือคำตอบของวันนั้น
-                while stack and temp > temperatures[stack[-1]]:
-                    prev_day = stack.pop()
-                    answer[prev_day] = i - prev_day   # ระยะห่างเป็นจำนวนวัน
-                stack.append(i)
-            return answer
+    n = len(temperatures)
+    answer = [0] * n     # 0 = ไม่มีวันร้อนกว่าในอนาคต
+    stack = []           # เก็บ index ของวันที่ยังรอวันร้อนกว่า
+    for i, temp in enumerate(temperatures):
+        # วันนี้ร้อนกว่ายอด stack ไหม ถ้าใช่คือคำตอบของวันนั้น
+        while stack and temp > temperatures[stack[-1]]:
+            prev_day = stack.pop()
+            answer[prev_day] = i - prev_day   # ระยะห่างเป็นจำนวนวัน
+        stack.append(i)
+    return answer
 
-        print(daily_temperatures([73,74,75,71,69,72,76,73]))
-        # [1, 1, 4, 2, 1, 1, 0, 0]
-        print(daily_temperatures([30, 40, 50, 60]))  # [1, 1, 1, 0]
-        print(daily_temperatures([30, 60, 90]))      # [1, 1, 0]`, out: `[1, 1, 4, 2, 1, 1, 0, 0]
-        [1, 1, 1, 0]
-        [1, 1, 0]` },
+print(daily_temperatures([73,74,75,71,69,72,76,73]))
+# [1, 1, 4, 2, 1, 1, 0, 0]
+print(daily_temperatures([30, 40, 50, 60]))  # [1, 1, 1, 0]
+print(daily_temperatures([30, 60, 90]))      # [1, 1, 0]`, out: `[1, 1, 4, 2, 1, 1, 0, 0]
+[1, 1, 1, 0]
+[1, 1, 0]` },
                 { t: "p", c: "เรา iterate วันทีละวัน เก็บ index ของวันที่ยังไม่เจอวันร้อนกว่าไว้ใน stack โดย stack จะเรียงอุณหภูมิ decreasing จากล่างขึ้นบนเสมอ เมื่อวันปัจจุบันร้อนกว่าวันที่ยอด stack แปลว่าเราเพิ่งเจอวันร้อนกว่าของวันนั้นพอดี จึง pop ออกมาแล้วบันทึกระยะห่าง i - prev_day เป็นจำนวนวันที่ต้องรอ ทำซ้ำจนวันปัจจุบันไม่ได้ร้อนกว่ายอด stack แล้วค่อย push วันปัจจุบันเข้าไป" },
                 { t: "p", c: "จุดสำคัญที่ทำให้เร็วคือแต่ละวันถูก push และ pop อย่างละครั้งเดียว จึงเป็น O(n) วันที่ยังค้างใน stack ตอนจบ loop คือวันที่ไม่มีวันร้อนกว่า answer ของมันคงเป็น 0 ตามค่าเริ่มต้น ไม่ต้องทำอะไรเพิ่ม" },
                 { t: "p", c: "Time O(n) แต่ละ index push/pop อย่างละครั้ง · Space O(n) กรณีแย่สุด (อุณหภูมิ decreasing เรื่อย ๆ) stack เก็บทุก index" },
@@ -165,23 +165,23 @@ export const monotonicStackPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `class StockSpanner:
-            def __init__(self):
-                # stack เก็บคู่ (ราคา, span ของราคานั้น) ราคาลดจากล่างขึ้นบน
-                self.stack = []
+    def __init__(self):
+        # stack เก็บคู่ (ราคา, span ของราคานั้น) ราคาลดจากล่างขึ้นบน
+        self.stack = []
 
-            def next(self, price):
-                span = 1   # อย่างน้อยนับวันนี้เอง 1 วัน
-                # ยุบทุกวันก่อนหน้าที่ราคาไม่เกินราคาวันนี้ รวม span เข้ามา
-                while self.stack and self.stack[-1][0] <= price:
-                    _, prev_span = self.stack.pop()
-                    span += prev_span
-                self.stack.append((price, span))
-                return span
+    def next(self, price):
+        span = 1   # อย่างน้อยนับวันนี้เอง 1 วัน
+        # ยุบทุกวันก่อนหน้าที่ราคาไม่เกินราคาวันนี้ รวม span เข้ามา
+        while self.stack and self.stack[-1][0] <= price:
+            _, prev_span = self.stack.pop()
+            span += prev_span
+        self.stack.append((price, span))
+        return span
 
-        spanner = StockSpanner()
-        prices = [100, 80, 60, 70, 60, 75, 85]
-        print([spanner.next(p) for p in prices])
-        # [1, 1, 1, 2, 1, 4, 6]`, out: `[1, 1, 1, 2, 1, 4, 6]` },
+spanner = StockSpanner()
+prices = [100, 80, 60, 70, 60, 75, 85]
+print([spanner.next(p) for p in prices])
+# [1, 1, 1, 2, 1, 4, 6]`, out: `[1, 1, 1, 2, 1, 4, 6]` },
                 { t: "p", c: "แทนที่จะย้อนนับราคาทีละวันทุกครั้ง (ซึ่งเป็น O(n) ต่อการ call) เราเก็บผลลัพธ์ที่ยุบไว้แล้วใน stack ในรูปคู่ (price, span) เมื่อราคาวันใหม่มากกว่าหรือเท่ากับราคายอด stack แปลว่าวันนั้น (และ span ที่มันเก็บไว้แล้ว) ทั้งหมดถูกครอบด้วยวันนี้ เราจึง pop แล้วบวก span ของมันสะสมเข้ากับ span ของวันนี้ ทำแบบนี้ไปเรื่อย ๆ จนเจอวันที่ราคาแพงกว่า ซึ่งเป็นขอบเขตซ้ายของช่วง" },
                 { t: "p", c: "จุดที่ต้องระวังคือเงื่อนไขต้องเป็น <= (น้อยกว่าหรือเท่ากับ) เพราะโจทย์นับวันที่ราคาเท่ากันด้วย ถ้าใช้ < เฉย ๆ จะนับ span ผิดเมื่อมีราคาซ้ำ อีกจุดคือต้องเก็บ span ที่ยุบไว้ในตัว ไม่ใช่เก็บแค่ราคา ไม่งั้นจะเสียข้อมูลที่ยุบไปแล้ว" },
                 { t: "p", c: "Time เฉลี่ย O(1) ต่อการ call next หนึ่งครั้ง (amortized) เพราะแต่ละราคาถูก push และ pop อย่างละครั้งตลอดอายุการใช้งาน · Space O(n) กรณีแย่สุด (ราคา decreasing เรื่อย ๆ) stack เก็บทุกวัน" },

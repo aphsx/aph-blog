@@ -17,12 +17,12 @@ export const stackPages: Record<string, Page> = {
                 t: "code",
                 c: `push 10, 20, 30 ตามลำดับ  ->  ได้กองแบบนี้:
 
-            | 30 |  <- top (หยิบออกก่อน)
-            | 20 |
-            | 10 |  <- bottom (ใส่เข้ามาก่อนสุด)
-            +----+
+    | 30 |  <- top (หยิบออกก่อน)
+    | 20 |
+    | 10 |  <- bottom (ใส่เข้ามาก่อนสุด)
+    +----+
 
-        pop() คืน 30 (ตัวบนสุด) แล้วกองเหลือ [10, 20]`,
+pop() คืน 30 (ตัวบนสุด) แล้วกองเหลือ [10, 20]`,
               },
 
               { t: "h3", c: "operation หลักของ stack + Big-O" },
@@ -45,17 +45,17 @@ export const stackPages: Record<string, Page> = {
                 lang: "python",
                 c: `stack = []           # กองว่าง
 
-        stack.append(10)     # push  ->  [10]
-        stack.append(20)     # push  ->  [10, 20]
-        stack.append(30)     # push  ->  [10, 20, 30]
+stack.append(10)     # push  ->  [10]
+stack.append(20)     # push  ->  [10, 20]
+stack.append(30)     # push  ->  [10, 20, 30]
 
-        print(stack[-1])     # peek ตัวบนสุด  ->  30 (ยังอยู่ในกอง)
+print(stack[-1])     # peek ตัวบนสุด  ->  30 (ยังอยู่ในกอง)
 
-        top = stack.pop()    # pop  ->  top = 30, กองเหลือ [10, 20]
-        print(top)           # 30
+top = stack.pop()    # pop  ->  top = 30, กองเหลือ [10, 20]
+print(top)           # 30
 
-        while stack:         # วนจนกองว่าง
-            print(stack.pop())   # 20 แล้วก็ 10 (ออกจากบนลงล่าง)`,
+while stack:         # วนจนกองว่าง
+    print(stack.pop())   # 20 แล้วก็ 10 (ออกจากบนลงล่าง)`,
               },
 
               { t: "callout", title: "ใช้ stack ตอนไหน", c: "เจอปัญหาที่ต้อง \"จำของล่าสุดไว้ก่อน แล้วค่อยย้อนกลับมาจัดการทีหลัง\" ให้นึกถึง stack ทันที ตัวอย่างคลาสสิกคือการจับคู่วงเล็บ (เจอวงเล็บเปิดก็ push เก็บไว้ พอเจอวงเล็บปิดก็ pop ตัวบนสุดมาจับคู่), การถอยหลัง (undo), และการ decode (ถอดรหัส) ข้อความซ้อนชั้น หมวดนี้มี 3 ข้อ พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
@@ -130,16 +130,16 @@ export const stackPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def remove_stars(s):
-            stack = []                 # กองเก็บตัวอักษรที่ยังเหลืออยู่
-            for ch in s:               # ไล่อ่านทีละตัวจากซ้ายไปขวา
-                if ch == '*':
-                    stack.pop()        # เจอดาว: ลบตัวอักษรล่าสุด (ตัวบนสุด) ออก
-                else:
-                    stack.append(ch)   # เจอตัวอักษร: เก็บไว้ในกอง
-            return ''.join(stack)      # ที่เหลือในกองคือคำตอบ (เรียงซ้ายไปขวาอยู่แล้ว)
+    stack = []                 # กองเก็บตัวอักษรที่ยังเหลืออยู่
+    for ch in s:               # ไล่อ่านทีละตัวจากซ้ายไปขวา
+        if ch == '*':
+            stack.pop()        # เจอดาว: ลบตัวอักษรล่าสุด (ตัวบนสุด) ออก
+        else:
+            stack.append(ch)   # เจอตัวอักษร: เก็บไว้ในกอง
+    return ''.join(stack)      # ที่เหลือในกองคือคำตอบ (เรียงซ้ายไปขวาอยู่แล้ว)
 
-        print(remove_stars("leet**cod*e"))  # lecoe
-        print(remove_stars("erase*****"))   # (สตริงว่าง)`, out: `lecoe` },
+print(remove_stars("leet**cod*e"))  # lecoe
+print(remove_stars("erase*****"))   # (สตริงว่าง)`, out: `lecoe` },
                 { t: "p", c: "หัวใจของข้อนี้คือมองว่า \"character ขวาสุดที่ยังอยู่\" ก็คือ \"ตัวบนสุด (top) ของ stack\" นั่นเอง เพราะเรา push character เข้า stack ตามลำดับซ้ายไปขวา ตัวที่เพิ่ง push ล่าสุด (บนสุด) จึงเป็นตัวขวาสุดที่ยังเหลือ พอเจอ * เราแค่ pop ตัวบนสุดทิ้ง ก็เท่ากับลบตัวที่ * ต้องลบพอดี ไม่ต้องไปไล่ค้นใน string เลย" },
                 { t: "p", c: "ถ้าเปลี่ยน stack.pop() เป็นการ slice string result = result[:-1] ผลลัพธ์จะถูกต้องเหมือนกัน แต่ช้าลงมากเพราะแต่ละครั้งสร้าง string ใหม่ทั้งก้อน ส่วน ''.join(stack) ตอนท้ายจะ merge (รวม) list ของ character เป็น string เดียวในทีเดียว ซึ่งเร็วกว่าการ append string ทีละตัวใน loop" },
                 { t: "p", c: "Time O(n) iterate ทุก character รอบเดียว แต่ละตัว push หรือ pop เป็น O(1) · Space O(n) stack อาจเก็บ character ได้มากสุดเกือบทั้ง string" },
@@ -224,26 +224,26 @@ export const stackPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def asteroid_collision(asteroids):
-            stack = []
-            for a in asteroids:
-                alive = True                       # สมมติว่า a รอด จนกว่าจะพิสูจน์ว่าแตก
-                # จะชนก็ต่อเมื่อ a วิ่งซ้าย (a < 0) และตัวบนสุดวิ่งขวา (บวก)
-                while alive and a < 0 and stack and stack[-1] > 0:
-                    if stack[-1] < -a:      # ตัวบนสุดเล็กกว่า -> มันแตก
-                        stack.pop()
-                        continue            # a รอดชั่วคราว ไปชนตัวถัดไปในกอง
-                    elif stack[-1] == -a:   # ขนาดเท่ากัน -> แตกทั้งคู่
-                        stack.pop()
-                    alive = False           # a แตก (หรือเสมอ) เลิกวน
-                if alive:
-                    stack.append(a)         # a รอดจากทุกการชน เก็บเข้ากอง
-            return stack
+    stack = []
+    for a in asteroids:
+        alive = True                       # สมมติว่า a รอด จนกว่าจะพิสูจน์ว่าแตก
+        # จะชนก็ต่อเมื่อ a วิ่งซ้าย (a < 0) และตัวบนสุดวิ่งขวา (บวก)
+        while alive and a < 0 and stack and stack[-1] > 0:
+            if stack[-1] < -a:      # ตัวบนสุดเล็กกว่า -> มันแตก
+                stack.pop()
+                continue            # a รอดชั่วคราว ไปชนตัวถัดไปในกอง
+            elif stack[-1] == -a:   # ขนาดเท่ากัน -> แตกทั้งคู่
+                stack.pop()
+            alive = False           # a แตก (หรือเสมอ) เลิกวน
+        if alive:
+            stack.append(a)         # a รอดจากทุกการชน เก็บเข้ากอง
+    return stack
 
-        print(asteroid_collision([5, 10, -5]))   # [5, 10]
-        print(asteroid_collision([8, -8]))       # []
-        print(asteroid_collision([10, 2, -5]))   # [10]`, out: `[5, 10]
-        []
-        [10]` },
+print(asteroid_collision([5, 10, -5]))   # [5, 10]
+print(asteroid_collision([8, -8]))       # []
+print(asteroid_collision([10, 2, -5]))   # [10]`, out: `[5, 10]
+[]
+[10]` },
                 { t: "p", c: "ไอเดียคือ: การชนจะเกิดเฉพาะกรณีเดียว — ดวงใน stack วิ่งขวา (บวก) แล้วมีดวงวิ่งซ้าย (ลบ) วิ่งเข้ามาหา ถ้า a เป็นบวก มันวิ่งขวาเหมือนกัน ไม่มีทางชนของใน stack เงื่อนไข while จึงเป็นเท็จทันที และเราก็แค่ push a เข้าไป แต่ถ้า a เป็นลบ เราต้องเอามันไปไล่ชนตัวบนสุดของ stack ไปเรื่อย ๆ ด้วย while loop ตราบใดที่ตัวบนสุดยังเป็นบวก" },
                 { t: "p", c: "ในแต่ละการชนมีสามผลลัพธ์: (1) ตัวใน stack เล็กกว่า a ก็ pop ตัวใน stack ทิ้งแล้ว continue เพื่อให้ a ไปชนตัวถัดไปต่อ (2) ขนาดเท่ากัน pop ตัวใน stack ทิ้งและ a ก็แตกด้วย (3) ตัวใน stack ใหญ่กว่า a แตกดวงเดียว ทั้งกรณี (2) และ (3) เราตั้ง alive = False เพื่อบอกว่า a ไม่รอดแล้ว จะได้ไม่ push มันเข้า stack ถ้าลืม continue ในกรณี (1) โค้ดจะไหลไปที่ alive = False ทำให้ a หยุดชนทั้งที่ควรไปชนต่อ" },
                 { t: "p", c: "Time O(n) แม้จะมี while ซ้อน แต่ดาวแต่ละดวงถูก push และ pop อย่างละครั้งเดียวตลอดทั้งโปรแกรม รวมงานทั้งหมดจึงเป็นเชิงเส้น · Space O(n) stack อาจเก็บดาวได้เกือบทุกดวงถ้าไม่มีการชนเลย" },
@@ -327,33 +327,33 @@ export const stackPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def decode_string(s):
-            num_stack = []      # เก็บ k ของแต่ละชั้นที่พักไว้
-            str_stack = []      # เก็บสตริงที่ทำค้างไว้ก่อนเข้าชั้นใน
-            cur = ""            # สตริงของชั้นปัจจุบันที่กำลังสร้าง
-            num = 0             # ตัวเลข k ที่กำลังอ่าน (อาจหลายหลัก)
+    num_stack = []      # เก็บ k ของแต่ละชั้นที่พักไว้
+    str_stack = []      # เก็บสตริงที่ทำค้างไว้ก่อนเข้าชั้นใน
+    cur = ""            # สตริงของชั้นปัจจุบันที่กำลังสร้าง
+    num = 0             # ตัวเลข k ที่กำลังอ่าน (อาจหลายหลัก)
 
-            for ch in s:
-                if ch.isdigit():
-                    num = num * 10 + int(ch)   # อ่านเลขทีละหลัก เช่น "12"
-                elif ch == '[':
-                    num_stack.append(num)      # พัก k ไว้
-                    str_stack.append(cur)      # พักสตริงชั้นนอกไว้
-                    num = 0                    # รีเซ็ตเพื่อเริ่มชั้นใน
-                    cur = ""
-                elif ch == ']':
-                    k = num_stack.pop()        # ดึง k ของชั้นนี้กลับมา
-                    prev = str_stack.pop()     # ดึงสตริงชั้นนอกกลับมา
-                    cur = prev + cur * k       # ต่อ: ชั้นนอก + (ชั้นใน ซ้ำ k)
-                else:
-                    cur += ch                  # ตัวอักษรธรรมดา ต่อเข้าชั้นปัจจุบัน
+    for ch in s:
+        if ch.isdigit():
+            num = num * 10 + int(ch)   # อ่านเลขทีละหลัก เช่น "12"
+        elif ch == '[':
+            num_stack.append(num)      # พัก k ไว้
+            str_stack.append(cur)      # พักสตริงชั้นนอกไว้
+            num = 0                    # รีเซ็ตเพื่อเริ่มชั้นใน
+            cur = ""
+        elif ch == ']':
+            k = num_stack.pop()        # ดึง k ของชั้นนี้กลับมา
+            prev = str_stack.pop()     # ดึงสตริงชั้นนอกกลับมา
+            cur = prev + cur * k       # ต่อ: ชั้นนอก + (ชั้นใน ซ้ำ k)
+        else:
+            cur += ch                  # ตัวอักษรธรรมดา ต่อเข้าชั้นปัจจุบัน
 
-            return cur
+    return cur
 
-        print(decode_string("3[a]2[bc]"))      # aaabcbc
-        print(decode_string("3[a2[c]]"))       # accaccacc
-        print(decode_string("2[abc]3[cd]ef"))  # abcabccdcdcdef`, out: `aaabcbc
-        accaccacc
-        abcabccdcdcdef` },
+print(decode_string("3[a]2[bc]"))      # aaabcbc
+print(decode_string("3[a2[c]]"))       # accaccacc
+print(decode_string("2[abc]3[cd]ef"))  # abcabccdcdcdef`, out: `aaabcbc
+accaccacc
+abcabccdcdcdef` },
                 { t: "p", c: "เรา iterate อ่านทีละ character และแยกเป็น 4 กรณี ถ้าเป็น digit ให้สะสมเป็น num (คูณสิบบวกหลักใหม่ เผื่อ k เป็น multi-digit เช่น 12) ถ้าเป็น character ธรรมดา ก็ append เข้า cur ที่กำลังสร้างอยู่ กรณีสำคัญคือวงเล็บ: พอเจอ [ แปลว่ากำลังจะเข้าชั้นในที่ลึกกว่า เราต้อง push ทั้ง k และ string ชั้นนอก (cur) เก็บไว้ใน stack แล้ว reset num กับ cur เพื่อเริ่มสร้าง string ชั้นในสด ๆ" },
                 { t: "p", c: "พอเจอ ] แปลว่าชั้นในจบแล้ว เรา pop k และ string ชั้นนอก (prev) กลับมาจาก stack แล้วประกอบใหม่เป็น prev + cur * k คือเอา string ชั้นในที่เพิ่งสร้างเสร็จมาซ้ำ k ครั้ง append ต่อท้าย string ชั้นนอกที่พักไว้ การใช้ stack ทำให้จัดการ nested หลายชั้นได้อัตโนมัติ เพราะแต่ละ [ จับคู่กับ ] ตามหลัง LIFO พอดี" },
                 { t: "p", c: "Time O(N) เมื่อ N คือความยาวของ string ผลลัพธ์ (เพราะเราต้องสร้าง character ทุกตัวของผลลัพธ์) · Space O(N) จาก stack และ string ที่สร้างขึ้น" },

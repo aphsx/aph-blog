@@ -14,18 +14,18 @@ export const dpMultiPages: Record<string, Page> = {
               { t: "p", c: "DP หลายมิติคือการขยาย state จากเส้นเดียวเป็น table dp[i][j] หมายถึงคำตอบของ subproblem (ปัญหาย่อย) ที่ระบุด้วย index สองตัว i และ j โจทย์ที่เข้าข่ายมักมีสองหน้าตา: (1) two strings / two sequences (สองสตริง/สองลำดับ) เช่นเทียบ word1 กับ word2 โดย i วิ่งบน word1 และ j วิ่งบน word2 หรือ (2) grid เช่นเดินบน table ขนาด m x n โดย i คือ row, j คือ column" },
               { t: "p", c: "วิธีคิด transition คือถามว่าช่อง dp[i][j] คำนวณได้จากช่องข้างเคียงตัวไหน โดยทั่วไปเป็นเพื่อนบ้านสามช่อง: บน dp[i-1][j], ซ้าย dp[i][j-1], และทแยงบนซ้าย dp[i-1][j-1] เรา iterate เติม table จากซ้ายบนไปขวาล่าง เพื่อให้ตอนคำนวณช่องหนึ่ง ช่องที่มันต้องพึ่งพาถูกเติมไว้ก่อนแล้ว" },
               { t: "code", lang: "python", c: `# template DP 2 มิติ (นิยมเผื่อแถว/คอลัมน์ที่ 0 ไว้เป็น base case)
-        m, n = len(a), len(b)
-        dp = [[0] * (n + 1) for _ in range(m + 1)]   # ตาราง (m+1) x (n+1)
+m, n = len(a), len(b)
+dp = [[0] * (n + 1) for _ in range(m + 1)]   # ตาราง (m+1) x (n+1)
 
-        # เติม base case ที่ขอบ (dp[0][*] และ dp[*][0]) ตามโจทย์
-        # ...
+# เติม base case ที่ขอบ (dp[0][*] และ dp[*][0]) ตามโจทย์
+# ...
 
-        for i in range(1, m + 1):
-            for j in range(1, n + 1):
-                # dp[i][j] คำนวณจากเพื่อนบ้าน: บน / ซ้าย / ทแยง
-                dp[i][j] = f(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+for i in range(1, m + 1):
+    for j in range(1, n + 1):
+        # dp[i][j] คำนวณจากเพื่อนบ้าน: บน / ซ้าย / ทแยง
+        dp[i][j] = f(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
 
-        answer = dp[m][n]   # มุมขวาล่างมักเป็นคำตอบ` },
+answer = dp[m][n]   # มุมขวาล่างมักเป็นคำตอบ` },
               { t: "callout", title: "เคล็ดลับสร้าง 2D table ใน Python", warn: true, c: "ต้องใช้ [[0]*n for _ in range(m)] เท่านั้น อย่าเขียน [[0]*n]*m เด็ดขาด เพราะแบบหลังจะสร้าง row ที่เป็น object เดียวกันซ้ำ m ครั้ง พอแก้ช่องใน row หนึ่ง row อื่นจะเปลี่ยนตามหมด กลายเป็น bug (บั๊ก) ที่หายาก" },
               { t: "callout", title: "ทำไมเผื่อขอบ index 0", c: "การทำ table ให้ใหญ่กว่าข้อมูลจริงหนึ่ง row หนึ่ง column (m+1 x n+1) แล้วให้ row/column แรกแทนกรณี empty string (สตริงว่าง) ช่วยให้ไม่ต้องเขียนเงื่อนไขพิเศษตอน i=0 หรือ j=0 สูตร transition จึงสะอาดขึ้นมาก" },
 
@@ -91,16 +91,16 @@ export const dpMultiPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def unique_paths(m, n):
-            # dp[i][j] = จำนวนทางเดินมาถึงช่อง (i, j)
-            dp = [[1] * n for _ in range(m)]   # แถวบนสุด/คอลัมน์ซ้ายสุด = 1 ทาง
-            for i in range(1, m):
-                for j in range(1, n):
-                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1]  # จากบน + จากซ้าย
-            return dp[m - 1][n - 1]
+    # dp[i][j] = จำนวนทางเดินมาถึงช่อง (i, j)
+    dp = [[1] * n for _ in range(m)]   # แถวบนสุด/คอลัมน์ซ้ายสุด = 1 ทาง
+    for i in range(1, m):
+        for j in range(1, n):
+            dp[i][j] = dp[i - 1][j] + dp[i][j - 1]  # จากบน + จากซ้าย
+    return dp[m - 1][n - 1]
 
-        print(unique_paths(3, 7))  # 28
-        print(unique_paths(3, 2))  # 3`, out: `28
-        3` },
+print(unique_paths(3, 7))  # 28
+print(unique_paths(3, 2))  # 3`, out: `28
+3` },
                 { t: "p", c: "transition คือ dp[i][j] = dp[i-1][j] + dp[i][j-1] เพราะทุก path ที่มาถึงช่อง (i, j) ก้าวสุดท้ายต้องเป็นการเดินลงมาจากช่องบน หรือเดินขวามาจากช่องซ้าย จำนวน path ทั้งหมดจึงเป็นผลบวกของทั้งสองแหล่ง เรา initialize ทั้ง table เป็น 1 ซึ่งจัดการ base case ให้เลย: row บนสุด (i=0) และ column ซ้ายสุด (j=0) มีทางเดียวเสมอเพราะเดินได้ทิศเดียว" },
                 { t: "p", c: "จุดที่ต้องระวังคือลำดับการ iterate ต้องเริ่ม i และ j จาก 1 เพื่อไม่ไปทับค่า base case ที่ขอบ และเพราะเราเติมจากบนลงล่าง ซ้ายไปขวา ตอนคำนวณ dp[i][j] ช่องบนและช่องซ้ายจึงถูกเติมเรียบร้อยแล้ว" },
                 { t: "p", c: "Time O(m·n) เติมทุกช่องใน table · Space O(m·n) จาก table dp (ลดเหลือ O(n) ได้ด้วยการเก็บแค่ row เดียว)" },
@@ -171,20 +171,20 @@ export const dpMultiPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def longest_common_subsequence(text1, text2):
-            m, n = len(text1), len(text2)
-            # dp[i][j] = LCS ของ text1[:i] กับ text2[:j] ; ขอบ = 0 (สตริงว่าง)
-            dp = [[0] * (n + 1) for _ in range(m + 1)]
-            for i in range(1, m + 1):
-                for j in range(1, n + 1):
-                    if text1[i - 1] == text2[j - 1]:   # ตัวอักษรตรงกัน
-                        dp[i][j] = dp[i - 1][j - 1] + 1
-                    else:                              # ไม่ตรง: ตัดตัวใดตัวหนึ่ง
-                        dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-            return dp[m][n]
+    m, n = len(text1), len(text2)
+    # dp[i][j] = LCS ของ text1[:i] กับ text2[:j] ; ขอบ = 0 (สตริงว่าง)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if text1[i - 1] == text2[j - 1]:   # ตัวอักษรตรงกัน
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:                              # ไม่ตรง: ตัดตัวใดตัวหนึ่ง
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return dp[m][n]
 
-        print(longest_common_subsequence("abcde", "ace"))  # 3
-        print(longest_common_subsequence("abc", "def"))    # 0`, out: `3
-        0` },
+print(longest_common_subsequence("abcde", "ace"))  # 3
+print(longest_common_subsequence("abc", "def"))    # 0`, out: `3
+0` },
                 { t: "p", c: "หัวใจของ LCS คือการเทียบตัวอักษรทีละคู่ ที่ช่อง dp[i][j] เราพิจารณาตัวอักษร text1[i-1] กับ text2[j-1] (ต้องลบ 1 เพราะ dp เผื่อขอบ index 0 ไว้แทน empty string) ถ้าสองตัวนี้ตรงกัน เราได้ตัวร่วมเพิ่มหนึ่งตัว จึงต่อยอดจาก dp[i-1][j-1] (คำตอบก่อนรวมสองตัวนี้) แล้ว +1 ถ้าไม่ตรง แปลว่าอย่างน้อยหนึ่งในสองตัวนี้ไม่ได้อยู่ใน LCS จึงลองตัดทิ้งทีละตัวแล้วเลือกผลที่ดีกว่าระหว่าง dp[i-1][j] กับ dp[i][j-1]" },
                 { t: "p", c: "การเผื่อ row/column ที่ 0 เป็น 0 คือ base case ที่ถูกต้อง เพราะ LCS กับ empty string ย่อมมีความยาว 0 ถ้าไม่เผื่อขอบ เราต้องเขียนเงื่อนไขพิเศษดักตอน i=0 หรือ j=0 ทำให้โค้ดยุ่งขึ้นโดยไม่จำเป็น" },
                 { t: "p", c: "Time O(m·n) เติมทุกช่อง · Space O(m·n) จาก table (ลดเหลือ O(n) ได้ด้วยการเก็บสอง row)" },
@@ -250,18 +250,18 @@ export const dpMultiPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def max_profit(prices, fee):
-            cash = 0             # กำไรมากสุดเมื่อ "ไม่ถือ" หุ้น (เริ่มวันแรก)
-            hold = -prices[0]    # กำไรมากสุดเมื่อ "ถือ" หุ้น (ซื้อวันแรก จ่ายไปแล้ว)
-            for price in prices[1:]:
-                # วันนี้ไม่ถือ: อยู่เฉย ๆ หรือ ขายหุ้นที่ถืออยู่ (จ่าย fee ตอนขาย)
-                cash = max(cash, hold + price - fee)
-                # วันนี้ถือ: ถืออยู่แล้ว หรือ เพิ่งซื้อวันนี้ด้วยเงิน cash
-                hold = max(hold, cash - price)
-            return cash          # จบเกมต้องไม่ถือหุ้น กำไรจึงอยู่ที่ cash
+    cash = 0             # กำไรมากสุดเมื่อ "ไม่ถือ" หุ้น (เริ่มวันแรก)
+    hold = -prices[0]    # กำไรมากสุดเมื่อ "ถือ" หุ้น (ซื้อวันแรก จ่ายไปแล้ว)
+    for price in prices[1:]:
+        # วันนี้ไม่ถือ: อยู่เฉย ๆ หรือ ขายหุ้นที่ถืออยู่ (จ่าย fee ตอนขาย)
+        cash = max(cash, hold + price - fee)
+        # วันนี้ถือ: ถืออยู่แล้ว หรือ เพิ่งซื้อวันนี้ด้วยเงิน cash
+        hold = max(hold, cash - price)
+    return cash          # จบเกมต้องไม่ถือหุ้น กำไรจึงอยู่ที่ cash
 
-        print(max_profit([1, 3, 2, 8, 4, 9], 2))  # 8
-        print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6`, out: `8
-        6` },
+print(max_profit([1, 3, 2, 8, 4, 9], 2))  # 8
+print(max_profit([1, 3, 7, 5, 10, 3], 3)) # 6`, out: `8
+6` },
                 { t: "p", c: "แม้เขียนด้วยตัวแปรสองตัว แต่แท้จริงนี่คือ 2D DP dp[i][ถือ/ไม่ถือ] แค่ยุบมิติวัน (i) ให้เหลือค่าปัจจุบัน เพราะแต่ละวันใช้แค่คำตอบของวันก่อนหน้า transition ของ cash คือ วันนี้ไม่ถือ ได้จากเมื่อวานก็ไม่ถือ (อยู่เฉย) หรือเมื่อวานถือแล้ววันนี้ขาย (บวก price ลบ fee) ส่วน hold คือ วันนี้ถือ ได้จากเมื่อวานก็ถือ หรือวันนี้เพิ่งซื้อ (เอา cash เมื่อวานมาลบ price)" },
                 { t: "p", c: "ข้อสังเกตเล็ก ๆ: บรรทัด hold ใช้ cash ที่เพิ่ง update ในบรรทัดบน แต่ก็ยังถูกต้อง เพราะการซื้อในวันเดียวกับที่เพิ่งขายไม่ได้ให้กำไรเพิ่ม (การขายแล้วซื้อทันทีที่ราคาเดิมไม่เปลี่ยนอะไร) จึงไม่กระทบคำตอบ เราหัก fee ตอนขายเพียงครั้งเดียวต่อรอบ" },
                 { t: "p", c: "Time O(n) iterate ราคาครั้งเดียว · Space O(1) ใช้สองตัวแปรแทน table เต็ม" },
@@ -332,28 +332,28 @@ export const dpMultiPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def min_distance(word1, word2):
-            m, n = len(word1), len(word2)
-            dp = [[0] * (n + 1) for _ in range(m + 1)]
-            # base case: เทียบกับสตริงว่าง
-            for i in range(m + 1):
-                dp[i][0] = i    # ลบ i ตัวให้กลายเป็นสตริงว่าง
-            for j in range(n + 1):
-                dp[0][j] = j    # แทรก j ตัวจากสตริงว่าง
-            for i in range(1, m + 1):
-                for j in range(1, n + 1):
-                    if word1[i - 1] == word2[j - 1]:   # ตรงกัน ไม่ต้องแก้
-                        dp[i][j] = dp[i - 1][j - 1]
-                    else:
-                        dp[i][j] = 1 + min(
-                            dp[i - 1][j],       # ลบตัวจาก word1
-                            dp[i][j - 1],       # แทรกตัวเข้า word1
-                            dp[i - 1][j - 1],   # แทนที่ตัว
-                        )
-            return dp[m][n]
+    m, n = len(word1), len(word2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    # base case: เทียบกับสตริงว่าง
+    for i in range(m + 1):
+        dp[i][0] = i    # ลบ i ตัวให้กลายเป็นสตริงว่าง
+    for j in range(n + 1):
+        dp[0][j] = j    # แทรก j ตัวจากสตริงว่าง
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if word1[i - 1] == word2[j - 1]:   # ตรงกัน ไม่ต้องแก้
+                dp[i][j] = dp[i - 1][j - 1]
+            else:
+                dp[i][j] = 1 + min(
+                    dp[i - 1][j],       # ลบตัวจาก word1
+                    dp[i][j - 1],       # แทรกตัวเข้า word1
+                    dp[i - 1][j - 1],   # แทนที่ตัว
+                )
+    return dp[m][n]
 
-        print(min_distance("horse", "ros"))            # 3
-        print(min_distance("intention", "execution"))  # 5`, out: `3
-        5` },
+print(min_distance("horse", "ros"))            # 3
+print(min_distance("intention", "execution"))  # 5`, out: `3
+5` },
                 { t: "p", c: "ที่ช่อง dp[i][j] ถ้าตัวอักษรท้ายสุดของทั้งสองส่วนตรงกัน (word1[i-1] == word2[j-1]) เราไม่ต้องเสีย edit ที่ตำแหน่งนี้ จึงลอกค่าทแยง dp[i-1][j-1] มาตรง ๆ ถ้าไม่ตรง เราต้อง edit หนึ่งครั้ง แล้วเลือกทางที่ถูกที่สุดจากสามแบบ: delete ตัวท้ายของ word1 (มาจาก dp[i-1][j]), insert ตัวให้ตรง (มาจาก dp[i][j-1]), หรือ replace ตัวท้าย (มาจาก dp[i-1][j-1]) แล้ว +1 สำหรับ edit ครั้งนั้น" },
                 { t: "p", c: "base case สำคัญมาก: dp[i][0] = i หมายถึงเปลี่ยน string ยาว i ให้เป็น empty string ต้อง delete i ครั้ง และ dp[0][j] = j หมายถึงสร้าง string ยาว j จาก empty string ต้อง insert j ครั้ง การจับคู่ทิศทางกับความหมาย (บน=delete, ซ้าย=insert, ทแยง=replace) ช่วยให้ไม่งงเวลาเขียนสูตร" },
                 { t: "p", c: "Time O(m·n) เติมทุกช่องใน table · Space O(m·n) จาก table dp (ลดเหลือ O(n) ได้ด้วยการเก็บสอง row)" },

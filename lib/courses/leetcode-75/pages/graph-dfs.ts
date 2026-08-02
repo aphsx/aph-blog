@@ -29,34 +29,34 @@ export const graphDfsPages: Record<string, Page> = {
               { t: "h2", c: "เก็บกราฟยังไง — adjacency list" },
               { t: "p", c: "วิธีเก็บ graph ที่นิยมและใช้ง่ายสุดคือ adjacency list (ลิสต์เพื่อนบ้าน) ไอเดียคือใช้ dict ที่ key เป็น node และ value เป็น list ของ node ที่มันเชื่อมถึงโดยตรง พูดง่าย ๆ คือ สำหรับแต่ละ node เราจดไว้ว่ามันเดินไปหาใครได้บ้าง" },
               { t: "code", lang: "python", c: `# สร้าง adjacency list จากภาพด้านบน
-        from collections import defaultdict
+from collections import defaultdict
 
-        edges = [(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)]
+edges = [(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)]
 
-        graph = defaultdict(list)
-        for a, b in edges:
-            graph[a].append(b)
-            graph[b].append(a)   # ไม่มีทิศ ต้องใส่ทั้งสองทาง
+graph = defaultdict(list)
+for a, b in edges:
+    graph[a].append(b)
+    graph[b].append(a)   # ไม่มีทิศ ต้องใส่ทั้งสองทาง
 
-        # graph[0] = [1, 2]  -> node 0 เชื่อมกับ 1 และ 2
-        # graph[3] = [1, 2, 4]
+# graph[0] = [1, 2]  -> node 0 เชื่อมกับ 1 และ 2
+# graph[3] = [1, 2, 4]
 
-        # ถ้าเป็นกราฟมีทิศ (a -> b เท่านั้น) ใส่ทางเดียว
-        # graph[a].append(b)   # ไม่ต้องใส่ graph[b].append(a)` },
+# ถ้าเป็นกราฟมีทิศ (a -> b เท่านั้น) ใส่ทางเดียว
+# graph[a].append(b)   # ไม่ต้องใส่ graph[b].append(a)` },
 
               { t: "h2", c: "DFS — ลุยลึก" },
               { t: "p", c: "DFS (Depth-First Search) คือวิธี traverse graph แบบ ลุยลึกไปทางหนึ่งให้สุดก่อน แล้วค่อยถอยกลับมาลองทางอื่น เหมือนเดินในเขาวงกตแล้วยึดกำแพงขวาไว้ตลอด เดินลึกเข้าไปเรื่อย ๆ จนตัน ค่อยถอยกลับ วิธีที่เขียนง่ายที่สุดคือใช้ recursion (การเรียกตัวเอง)" },
               { t: "p", c: "สิ่งที่ขาดไม่ได้เลยในการเดิน graph คือ set visited (เคยเยือน) ที่จำว่าเราเคยไป node ไหนมาแล้วบ้าง เพราะ graph มี cycle ได้ ถ้าไม่จำ เราจะเดินวนกลับมาที่เดิมไม่รู้จบ (infinite loop) กฎคือ ก่อนจะเดินเข้า node ไหน เช็คก่อนว่าเคยไปหรือยัง ถ้ายังค่อยไป และทันทีที่ไปถึงให้ mark เป็น visited" },
               { t: "code", lang: "python", c: `# template DFS ด้วย recursion จำโครงนี้ไว้ใช้ได้ทุกข้อ
-        def dfs(node, graph, visited):
-            visited.add(node)              # ทำเครื่องหมายว่ามาถึงแล้ว
-            # ... ทำอะไรกับ node ตรงนี้ เช่น นับ, เก็บค่า ...
-            for nxt in graph[node]:        # ลองเพื่อนบ้านทีละตัว
-                if nxt not in visited:     # ถ้ายังไม่เคยไป
-                    dfs(nxt, graph, visited)   # ลุยลึกต่อ
+def dfs(node, graph, visited):
+    visited.add(node)              # ทำเครื่องหมายว่ามาถึงแล้ว
+    # ... ทำอะไรกับ node ตรงนี้ เช่น นับ, เก็บค่า ...
+    for nxt in graph[node]:        # ลองเพื่อนบ้านทีละตัว
+        if nxt not in visited:     # ถ้ายังไม่เคยไป
+            dfs(nxt, graph, visited)   # ลุยลึกต่อ
 
-        visited = set()
-        dfs(0, graph, visited)             # เริ่มจาก node 0` },
+visited = set()
+dfs(0, graph, visited)             # เริ่มจาก node 0` },
               { t: "callout", title: "หัวใจของ DFS", c: "จำแค่สามอย่าง หนึ่ง mark visited ทันทีที่มาถึง node สอง iterate (วน) ดูเพื่อนบ้าน (neighbor) ทุกตัว สาม ตัวไหนยังไม่ visited ค่อยเรียก dfs ซ้ำเข้าไปลึก ๆ ถ้าลืม visited จะวนไม่จบเมื่อ graph มี cycle" },
               { t: "callout", c: "หมวดนี้มี 4 ข้อ เข้าห้องครบไหม นับแคว้น กลับทิศถนน และคำนวณอัตราส่วน พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
       ],
@@ -114,20 +114,20 @@ export const graphDfsPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def can_visit_all_rooms(rooms):
-            visited = set()
+    visited = set()
 
-            def dfs(room):
-                visited.add(room)              # เข้าห้องนี้แล้ว
-                for key in rooms[room]:        # กุญแจแต่ละดอกในห้องนี้
-                    if key not in visited:     # ถ้ายังไม่เคยเข้าห้องนั้น
-                        dfs(key)               # เข้าไปเลย
+    def dfs(room):
+        visited.add(room)              # เข้าห้องนี้แล้ว
+        for key in rooms[room]:        # กุญแจแต่ละดอกในห้องนี้
+            if key not in visited:     # ถ้ายังไม่เคยเข้าห้องนั้น
+                dfs(key)               # เข้าไปเลย
 
-            dfs(0)                             # เริ่มจากห้อง 0
-            return len(visited) == len(rooms)  # เข้าครบทุกห้องไหม
+    dfs(0)                             # เริ่มจากห้อง 0
+    return len(visited) == len(rooms)  # เข้าครบทุกห้องไหม
 
-        print(can_visit_all_rooms([[1], [2], [3], []]))          # True
-        print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False`, out: `True
-        False` },
+print(can_visit_all_rooms([[1], [2], [3], []]))          # True
+print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False`, out: `True
+False` },
                 { t: "p", c: "โจทย์นี้จริง ๆ คือการถามว่า graph เชื่อมถึงกันหมดจากจุดเริ่มไหม (reachability) เรามองห้องเป็น node และกุญแจในห้องเป็น edge แบบ directed ที่ชี้ไปยังห้องที่มันเปิดได้ rooms เองก็เป็น adjacency list อยู่แล้ว ไม่ต้องแปลงอะไร ทำ DFS จากห้อง 0 เก็บทุกห้องที่ไปถึงลง visited แล้วสุดท้าย compare จำนวนห้องที่ visited กับจำนวนห้องทั้งหมด" },
                 { t: "p", c: "set visited ทำสองหน้าที่พร้อมกัน ทั้งกันเดินวนซ้ำ และใช้ count (นับ) จำนวนห้องที่เข้าได้ ถ้าไม่มีการเช็ค visited โปรแกรมจะ error จาก recursion ลึกไม่จบเมื่อกุญแจชี้วนกัน" },
                 { t: "p", c: "Time O(V + E) traverse ทุก node หนึ่งครั้งและไล่ทุก edge หนึ่งครั้ง V คือจำนวนห้อง E คือจำนวนกุญแจทั้งหมด · Space O(V) จาก visited และความลึกของ call stack" },
@@ -196,26 +196,26 @@ export const graphDfsPages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_circle_num(is_connected):
-            n = len(is_connected)
-            visited = set()
+    n = len(is_connected)
+    visited = set()
 
-            def dfs(city):
-                visited.add(city)
-                for other in range(n):
-                    # เชื่อมกันโดยตรง และยังไม่เคยไป
-                    if is_connected[city][other] == 1 and other not in visited:
-                        dfs(other)
+    def dfs(city):
+        visited.add(city)
+        for other in range(n):
+            # เชื่อมกันโดยตรง และยังไม่เคยไป
+            if is_connected[city][other] == 1 and other not in visited:
+                dfs(other)
 
-            provinces = 0
-            for city in range(n):
-                if city not in visited:        # เจอเมืองที่ยังไม่อยู่แคว้นไหน
-                    provinces += 1             # นับเป็นแคว้นใหม่
-                    dfs(city)                  # กวาดทุกเมืองในแคว้นนี้
-            return provinces
+    provinces = 0
+    for city in range(n):
+        if city not in visited:        # เจอเมืองที่ยังไม่อยู่แคว้นไหน
+            provinces += 1             # นับเป็นแคว้นใหม่
+            dfs(city)                  # กวาดทุกเมืองในแคว้นนี้
+    return provinces
 
-        print(find_circle_num([[1, 1, 0], [1, 1, 0], [0, 0, 1]]))  # 2
-        print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3`, out: `2
-        3` },
+print(find_circle_num([[1, 1, 0], [1, 1, 0], [0, 0, 1]]))  # 2
+print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3`, out: `2
+3` },
                 { t: "p", c: "connected components คือ กลุ่มก้อน ของ node ที่เชื่อมถึงกันได้ใน undirected graph โจทย์นี้ให้ graph มาในรูปตาราง (adjacency matrix) แทน list โดย is_connected[i][j] บอกว่าเมือง i กับ j เชื่อมกันไหม เราจึงหาเพื่อนบ้านของเมืองด้วยการไล่ทั้งแถวดูว่าช่องไหนเป็น 1" },
                 { t: "p", c: "เทคนิคนับกลุ่มคือ iterate node ทุกตัวจากนอก ถ้าเจอตัวที่ยังไม่ visited แสดงว่าเราเพิ่งสะดุดเข้าแคว้นใหม่ที่ยังไม่เคยแตะ บวกตัวนับหนึ่ง แล้วยิง DFS เข้าไปกวาดทุกเมืองในแคว้นนั้นให้ visited จนหมด พอ loop นอกเดินต่อ เมืองที่อยู่แคว้นเดิมจะถูก visited แล้วจึงไม่ถูก count ซ้ำ" },
                 { t: "p", c: "Time O(n^2) เพราะต้อง iterate ตาราง n x n · Space O(n) จาก visited และ call stack" },
@@ -278,29 +278,29 @@ export const graphDfsPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import defaultdict
 
-        def min_reorder(n, connections):
-            graph = defaultdict(list)
-            for a, b in connections:
-                graph[a].append((b, 1))   # ทิศจริง a->b : ถ้าเดินทางนี้จาก 0 ออกไป ต้องกลับ (cost 1)
-                graph[b].append((a, 0))   # ทิศปลอมเพิ่มเข้ามาเพื่อเดินได้ทั่ว (cost 0)
+def min_reorder(n, connections):
+    graph = defaultdict(list)
+    for a, b in connections:
+        graph[a].append((b, 1))   # ทิศจริง a->b : ถ้าเดินทางนี้จาก 0 ออกไป ต้องกลับ (cost 1)
+        graph[b].append((a, 0))   # ทิศปลอมเพิ่มเข้ามาเพื่อเดินได้ทั่ว (cost 0)
 
-            visited = set()
-            changes = 0
+    visited = set()
+    changes = 0
 
-            def dfs(city):
-                nonlocal changes
-                visited.add(city)
-                for nxt, cost in graph[city]:
-                    if nxt not in visited:
-                        changes += cost    # ถ้า edge นี้เป็นทิศจริง (ชี้ออกจาก 0) ต้องกลับ
-                        dfs(nxt)
+    def dfs(city):
+        nonlocal changes
+        visited.add(city)
+        for nxt, cost in graph[city]:
+            if nxt not in visited:
+                changes += cost    # ถ้า edge นี้เป็นทิศจริง (ชี้ออกจาก 0) ต้องกลับ
+                dfs(nxt)
 
-            dfs(0)                         # เริ่มเดินจากเมือง 0 ออกไปทุกทิศ
-            return changes
+    dfs(0)                         # เริ่มเดินจากเมือง 0 ออกไปทุกทิศ
+    return changes
 
-        print(min_reorder(6, [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]]))  # 3
-        print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2`, out: `3
-        2` },
+print(min_reorder(6, [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]]))  # 3
+print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2`, out: `3
+2` },
                 { t: "p", c: "กุญแจของข้อนี้คือ มองกลับด้าน เราอยากให้ทุกเมืองไปถึงเมือง 0 แต่คิดแบบนั้นตรง ๆ ยาก จึงกลับมุมเป็น ถ้าเราออกเดินจากเมือง 0 ไปหาทุกเมือง ถนนเส้นไหนที่เราเดินสวนทิศของมัน เส้นนั้นแหละที่ต้องกลับทิศ เพราะในสภาพจริงเมืองปลายทางจะเดินย้อนกลับมาหาเมือง 0 ไม่ได้" },
                 { t: "p", c: "ทริกในการเก็บ graph คือ ใส่ทั้งสอง edge แบบ undirected เพื่อให้ DFS traverse ได้ทั่ว tree แต่ติดป้าย cost ไว้ด้วย edge ทิศจริง (a->b ตามที่โจทย์ให้) ติด cost 1 ส่วน edge ปลอมที่เราเติมเพื่อเดินย้อน (b->a) ติด cost 0 พอ DFS ออกจากเมือง 0 ถ้าเราวิ่งไปตาม edge cost 1 แปลว่ากำลังเดินตามทิศที่ชี้ออกจากเมือง 0 ซึ่งจริง ๆ เมืองนั้นควรชี้เข้าหา 0 จึงต้องกลับทิศ บวก changes" },
                 { t: "p", c: "Time O(n) traverse ทุกเมืองและ edge หนึ่งครั้ง (edge มี n-1 เส้น) · Space O(n) จาก graph visited และ call stack" },
@@ -360,34 +360,34 @@ export const graphDfsPages: Record<string, Page> = {
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import defaultdict
 
-        def calc_equation(equations, values, queries):
-            graph = defaultdict(dict)
-            for (a, b), val in zip(equations, values):
-                graph[a][b] = val          # a/b = val
-                graph[b][a] = 1 / val      # b/a = 1/val
+def calc_equation(equations, values, queries):
+    graph = defaultdict(dict)
+    for (a, b), val in zip(equations, values):
+        graph[a][b] = val          # a/b = val
+        graph[b][a] = 1 / val      # b/a = 1/val
 
-            def dfs(src, dst, visited):
-                if src not in graph or dst not in graph:
-                    return -1.0            # มีตัวแปรที่ไม่รู้จัก
-                if src == dst:
-                    return 1.0             # x/x = 1 (ต้องรู้จัก x ด้วย)
-                visited.add(src)
-                for nbr, weight in graph[src].items():
-                    if nbr not in visited:
-                        result = dfs(nbr, dst, visited)
-                        if result != -1.0:        # เจอทางถึง dst
-                            return weight * result  # คูณน้ำหนักสะสม
-                return -1.0                # ลองทุกทางแล้วไปไม่ถึง
+    def dfs(src, dst, visited):
+        if src not in graph or dst not in graph:
+            return -1.0            # มีตัวแปรที่ไม่รู้จัก
+        if src == dst:
+            return 1.0             # x/x = 1 (ต้องรู้จัก x ด้วย)
+        visited.add(src)
+        for nbr, weight in graph[src].items():
+            if nbr not in visited:
+                result = dfs(nbr, dst, visited)
+                if result != -1.0:        # เจอทางถึง dst
+                    return weight * result  # คูณน้ำหนักสะสม
+        return -1.0                # ลองทุกทางแล้วไปไม่ถึง
 
-            answers = []
-            for a, b in queries:
-                answers.append(dfs(a, b, set()))
-            return answers
+    answers = []
+    for a, b in queries:
+        answers.append(dfs(a, b, set()))
+    return answers
 
-        eq = [["a", "b"], ["b", "c"]]
-        vals = [2.0, 3.0]
-        q = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]
-        print(calc_equation(eq, vals, q))  # [6.0, 0.5, -1.0, 1.0, -1.0]`, out: `[6.0, 0.5, -1.0, 1.0, -1.0]` },
+eq = [["a", "b"], ["b", "c"]]
+vals = [2.0, 3.0]
+q = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]
+print(calc_equation(eq, vals, q))  # [6.0, 0.5, -1.0, 1.0, -1.0]`, out: `[6.0, 0.5, -1.0, 1.0, -1.0]` },
                 { t: "p", c: "ข้อนี้สอน weighted graph (กราฟถ่วงน้ำหนัก) คือ edge มีตัวเลขกำกับ ไอเดียคือแต่ละตัวแปรเป็น node สมการ a/b = 2.0 บอกว่าจาก a เดินไป b คูณ 2.0 และเพราะ b/a = 1/(a/b) เราจึงเพิ่ม edge ย้อนกลับจาก b ไป a คูณ 1/2.0 ด้วย ทำให้เดินได้สองทาง การหาคำตอบ x/y คือ traverse จาก x ไป y แล้วคูณ weight ของ edge ที่ผ่านทั้งหมดสะสมกันไป" },
                 { t: "p", c: "DFS ที่นี่ต่างจากข้อก่อน ๆ ตรงที่มันต้อง return ผลคูณสะสมกลับขึ้นมา ไม่ใช่แค่ mark เมื่อเดินไปเจอ dst เราคืน 1.0 แล้วระหว่างถอย recursion กลับ แต่ละชั้นคูณ weight ของ edge ตัวเองเข้าไป ผลลัพธ์ที่โผล่กลับมาถึงจุดเริ่มจึงเป็นผลคูณตลอดเส้นทางพอดี ถ้าลองทุกเพื่อนบ้านแล้วไม่มีทางไหนถึง dst ก็คืน -1.0" },
                 { t: "p", c: "edge case ที่ต้องระวังคือ ตัวแปรที่ไม่มีในสมการเลย (เช็ค src not in graph หรือ dst not in graph คืน -1.0) และกรณี a/a ที่ต้องคืน 1.0 เฉพาะเมื่อ a รู้จัก · Time O(Q × (V + E)) แต่ละ query ทำ DFS หนึ่งครั้ง Q คือจำนวน query · Space O(V + E) จาก graph และ visited" },

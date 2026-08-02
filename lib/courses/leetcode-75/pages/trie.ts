@@ -13,30 +13,30 @@ export const triePages: Record<string, Page> = {
               { t: "h2", c: "Trie หน้าตาเป็นยังไง" },
               { t: "p", c: "ลองนึกภาพว่าเราเก็บคำว่า cat, car, card ถ้าเก็บเป็น array (ลิสต์) ธรรมดา การ search ว่ามีคำที่ขึ้นต้นด้วย ca ไหมต้อง iterate (วน) ดูทุกคำ แต่ใน trie เราแตกคำออกเป็นตัวอักษรทีละตัว แล้วให้ตัวอักษรที่เหมือนกันตอนต้น share node (โหนด) ร่วมกัน หน้าตาจะเป็นแบบนี้" },
               { t: "code", c: `(root)
-           |
-           c
-           |
-           a
-          / \\
-         t   r        <- cat, car จบตรงนี้
-              \\
-               d      <- card จบตรงนี้` },
+   |
+   c
+   |
+   a
+  / \\
+ t   r        <- cat, car จบตรงนี้
+      \\
+       d      <- card จบตรงนี้` },
               { t: "p", c: "แต่ละ node เก็บสองอย่าง หนึ่งคือ children (โหนดลูก) ซึ่งเป็น hash map (dict) ที่ map จากตัวอักษรไปยัง child node และสองคือ flag บอกว่ามีคำจบตรงนี้ไหม (is_end) เหตุที่ต้องมี flag จบคำ เพราะ car เป็นทั้งคำจริง และเป็น prefix ของ card เราต้องแยกให้ออกว่า node ตัว r นั้นเป็นจุดจบคำจริง ๆ ไม่ใช่แค่ทางผ่าน" },
 
               { t: "h2", c: "โครง TrieNode ใน Python" },
               { t: "code", lang: "python", c: `class TrieNode:
-            def __init__(self):
-                self.children = {}     # dict: ตัวอักษร -> TrieNode ลูก
-                self.is_end = False    # True ถ้ามีคำจบที่ node นี้
+    def __init__(self):
+        self.children = {}     # dict: ตัวอักษร -> TrieNode ลูก
+        self.is_end = False    # True ถ้ามีคำจบที่ node นี้
 
-        # การ insert คำ: ไล่ทีละตัวอักษร ถ้ายังไม่มีเส้นทางก็สร้าง node ใหม่
-        def insert(root, word):
-            node = root
-            for ch in word:
-                if ch not in node.children:
-                    node.children[ch] = TrieNode()
-                node = node.children[ch]
-            node.is_end = True   # ปักธงว่าคำจบที่นี่` },
+# การ insert คำ: ไล่ทีละตัวอักษร ถ้ายังไม่มีเส้นทางก็สร้าง node ใหม่
+def insert(root, word):
+    node = root
+    for ch in word:
+        if ch not in node.children:
+            node.children[ch] = TrieNode()
+        node = node.children[ch]
+    node.is_end = True   # ปักธงว่าคำจบที่นี่` },
 
               { t: "h2", c: "ต้นทุนของแต่ละ operation" },
               { t: "p", c: "operation หลักคือ insert (เพิ่มคำ) และ search (ค้นคำ) ทั้งคู่ทำงานโดย traverse (เดินไล่) ตัวอักษรทีละตัวจาก root (ราก) ลงไป จึงใช้เวลาแค่ O(L) เมื่อ L คือความยาวของคำ ไม่ขึ้นกับจำนวนคำทั้งหมดที่เก็บไว้ นี่คือเหตุผลที่ trie เร็วกว่าการ iterate array ทีละคำ" },
@@ -93,50 +93,50 @@ export const triePages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `class TrieNode:
-            def __init__(self):
-                self.children = {}     # ตัวอักษร -> TrieNode
-                self.is_end = False
+    def __init__(self):
+        self.children = {}     # ตัวอักษร -> TrieNode
+        self.is_end = False
 
-        class Trie:
-            def __init__(self):
-                self.root = TrieNode()
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
 
-            def insert(self, word):
-                node = self.root
-                for ch in word:
-                    if ch not in node.children:
-                        node.children[ch] = TrieNode()   # ยังไม่มีเส้นทาง สร้างใหม่
-                    node = node.children[ch]
-                node.is_end = True                        # ปักธงว่าคำจบที่นี่
+    def insert(self, word):
+        node = self.root
+        for ch in word:
+            if ch not in node.children:
+                node.children[ch] = TrieNode()   # ยังไม่มีเส้นทาง สร้างใหม่
+            node = node.children[ch]
+        node.is_end = True                        # ปักธงว่าคำจบที่นี่
 
-            def _find(self, prefix):
-                # เดินตามตัวอักษร ถ้าหลุดเส้นทางเมื่อไรคืน None
-                node = self.root
-                for ch in prefix:
-                    if ch not in node.children:
-                        return None
-                    node = node.children[ch]
-                return node
+    def _find(self, prefix):
+        # เดินตามตัวอักษร ถ้าหลุดเส้นทางเมื่อไรคืน None
+        node = self.root
+        for ch in prefix:
+            if ch not in node.children:
+                return None
+            node = node.children[ch]
+        return node
 
-            def search(self, word):
-                node = self._find(word)
-                # ต้องเดินถึง และมีคำจบตรงนั้นจริง
-                return node is not None and node.is_end
+    def search(self, word):
+        node = self._find(word)
+        # ต้องเดินถึง และมีคำจบตรงนั้นจริง
+        return node is not None and node.is_end
 
-            def startsWith(self, prefix):
-                # แค่เดินถึงได้ก็พอ ไม่ต้องสน is_end
-                return self._find(prefix) is not None
+    def startsWith(self, prefix):
+        # แค่เดินถึงได้ก็พอ ไม่ต้องสน is_end
+        return self._find(prefix) is not None
 
-        trie = Trie()
-        trie.insert("apple")
-        print(trie.search("apple"))      # True
-        print(trie.search("app"))        # False
-        print(trie.startsWith("app"))    # True
-        trie.insert("app")
-        print(trie.search("app"))        # True`, out: `True
-        False
-        True
-        True` },
+trie = Trie()
+trie.insert("apple")
+print(trie.search("apple"))      # True
+print(trie.search("app"))        # False
+print(trie.startsWith("app"))    # True
+trie.insert("app")
+print(trie.search("app"))        # True`, out: `True
+False
+True
+True` },
                 { t: "p", c: "หัวใจของข้อนี้คือแยกความต่างระหว่างมีคำนี้จริงกับมีคำที่ขึ้นต้นด้วยสิ่งนี้ให้ออก เราจึงดึงส่วนที่ซ้ำกัน (การ traverse ตามตัวอักษรจนสุด prefix) ออกมาเป็น function _find ที่ return node ปลายทางหรือ None แล้ว search เพิ่มเงื่อนไขเช็ค is_end ส่วน startsWith แค่ดูว่าไม่ None" },
                 { t: "p", c: "ถ้าไม่แยก _find ก็เขียนได้เหมือนกันแต่โค้ดจะซ้ำสองรอบ การดึงออกมาช่วยให้ search กับ startsWith ต่างกันแค่บรรทัดสุดท้าย อ่านง่ายและลดโอกาสพลาด" },
                 { t: "p", c: "Time O(L) ต่อการเรียกหนึ่งครั้ง เมื่อ L คือความยาวคำหรือ prefix · Space O(จำนวนตัวอักษรทั้งหมดที่เก็บ) กรณีแย่สุดคือทุกคำไม่ share prefix กันเลย" },
@@ -195,41 +195,41 @@ export const triePages: Record<string, Page> = {
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `class TrieNode:
-            def __init__(self):
-                self.children = {}
-                self.suggestions = []   # สินค้าไม่เกิน 3 ตัวแรก (เรียงแล้ว) ที่ผ่าน node นี้
+    def __init__(self):
+        self.children = {}
+        self.suggestions = []   # สินค้าไม่เกิน 3 ตัวแรก (เรียงแล้ว) ที่ผ่าน node นี้
 
-        def suggested_products(products, searchWord):
-            root = TrieNode()
+def suggested_products(products, searchWord):
+    root = TrieNode()
 
-            # sort ก่อน เพื่อให้คำที่ใส่เข้า trie มาตามลำดับพจนานุกรม
-            for product in sorted(products):
-                node = root
-                for ch in product:
-                    if ch not in node.children:
-                        node.children[ch] = TrieNode()
-                    node = node.children[ch]
-                    # เก็บได้แค่ 3 ตัวแรกพอ (มาตามลำดับ sort อยู่แล้ว)
-                    if len(node.suggestions) < 3:
-                        node.suggestions.append(product)
+    # sort ก่อน เพื่อให้คำที่ใส่เข้า trie มาตามลำดับพจนานุกรม
+    for product in sorted(products):
+        node = root
+        for ch in product:
+            if ch not in node.children:
+                node.children[ch] = TrieNode()
+            node = node.children[ch]
+            # เก็บได้แค่ 3 ตัวแรกพอ (มาตามลำดับ sort อยู่แล้ว)
+            if len(node.suggestions) < 3:
+                node.suggestions.append(product)
 
-            result = []
-            node = root
-            for ch in searchWord:
-                # ถ้ายังเดินตาม prefix ได้ ก็หยิบ suggestions ที่ node นั้น
-                if node and ch in node.children:
-                    node = node.children[ch]
-                    result.append(node.suggestions)
-                else:
-                    # หลุดเส้นทางแล้ว ที่เหลือไม่มีคำแนะนำ
-                    node = None
-                    result.append([])
-            return result
+    result = []
+    node = root
+    for ch in searchWord:
+        # ถ้ายังเดินตาม prefix ได้ ก็หยิบ suggestions ที่ node นั้น
+        if node and ch in node.children:
+            node = node.children[ch]
+            result.append(node.suggestions)
+        else:
+            # หลุดเส้นทางแล้ว ที่เหลือไม่มีคำแนะนำ
+            node = None
+            result.append([])
+    return result
 
-        print(suggested_products(
-            ["mobile", "mouse", "moneypot", "monitor", "mousepad"], "mouse"))
-        # [['mobile','moneypot','monitor'], ['mobile','moneypot','monitor'],
-        #  ['mouse','mousepad'], ['mouse','mousepad'], ['mouse','mousepad']]`, out: `[['mobile', 'moneypot', 'monitor'], ['mobile', 'moneypot', 'monitor'], ['mouse', 'mousepad'], ['mouse', 'mousepad'], ['mouse', 'mousepad']]` },
+print(suggested_products(
+    ["mobile", "mouse", "moneypot", "monitor", "mousepad"], "mouse"))
+# [['mobile','moneypot','monitor'], ['mobile','moneypot','monitor'],
+#  ['mouse','mousepad'], ['mouse','mousepad'], ['mouse','mousepad']]`, out: `[['mobile', 'moneypot', 'monitor'], ['mobile', 'moneypot', 'monitor'], ['mouse', 'mousepad'], ['mouse', 'mousepad'], ['mouse', 'mousepad']]` },
                 { t: "p", c: "ไอเดียคือ sort products ก่อนหนึ่งครั้ง ทำให้เวลาไล่ insert คำเข้า trie ตามลำดับ ทุก node จะได้รับสินค้าตาม lexicographic order อยู่แล้ว เราจึงเก็บแค่ 3 ตัวแรกที่ผ่าน node นั้นไว้ใน suggestions เมื่อผู้ใช้พิมพ์ prefix มาเรื่อย ๆ ก็แค่ traverse ตามตัวอักษรแล้วหยิบ suggestions ที่ node ปลายทางออกมาได้ทันที ไม่ต้อง search ใหม่ทุกครั้ง" },
                 { t: "p", c: "จุดสำคัญคือเมื่อพิมพ์ตัวอักษรที่ทำให้หลุดเส้นทางใน trie (ไม่มีสินค้าไหนขึ้นต้นแบบนั้นแล้ว) ตัวอักษรที่เหลือหลังจากนั้นต้องแนะนำเป็น empty list (ลิสต์ว่าง) ทั้งหมด โค้ดจึงตั้ง node = None แล้ว append [] ต่อไปเรื่อย ๆ" },
                 { t: "p", c: "Time O(N log N + total) โดย N คือจำนวนสินค้า มาจากการ sort (N log N) บวกกับการสร้าง trie ตามจำนวนตัวอักษรรวมของทุกคำ ส่วนการตอบ searchWord ใช้ O(ความยาว searchWord) · Space O(total) เก็บตัวอักษรทั้งหมดใน trie (แต่ละ node เก็บ suggestions ไม่เกิน 3)" },
