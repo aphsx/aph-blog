@@ -15,16 +15,6 @@ export const LOCALE_LABEL: Record<Locale, string> = {
   th: "TH",
 };
 
-function isLocalized<T>(value: T | Localized<T>): value is Localized<T> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    !Array.isArray(value) &&
-    "en" in value &&
-    "th" in value
-  );
-}
-
 function isEmptyLocalizedValue(value: unknown): boolean {
   if (typeof value === "string") return value.trim().length === 0;
   if (Array.isArray(value)) return value.length === 0;
@@ -32,14 +22,10 @@ function isEmptyLocalizedValue(value: unknown): boolean {
 }
 
 /**
- * Pick a locale field from a `{ en, th }` map (or a plain Thai-only value).
+ * Pick a locale field from a `{ th, en }` map.
  * Empty English → fall back to Thai so untranslated pages still render.
  */
-export function pickLocalized<T>(
-  value: T | Localized<T>,
-  locale: Locale,
-): T {
-  if (!isLocalized(value)) return value;
+export function pickLocalized<T>(value: Localized<T>, locale: Locale): T {
   const chosen = value[locale];
   if (locale === "en" && isEmptyLocalizedValue(chosen)) return value.th;
   return chosen;

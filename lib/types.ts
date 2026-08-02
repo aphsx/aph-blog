@@ -44,24 +44,25 @@ export type Block =
    */
   | { t: "solution"; summary?: string; c: Block[] };
 
-/** Per-locale map. Prefer this shape for new / bilingual pages. */
+/**
+ * Per-locale map. Always write `th` first, then `en`.
+ * Empty English (`""` / `[]`) means “not translated yet” → UI falls back to Thai.
+ */
 export type Localized<T> = {
-  en: T;
   th: T;
+  en: T;
 };
 
 /**
  * A documentation page.
- * Prefer `title`/`lead`/`blocks` as `{ en, th }` maps.
- * Plain string / Block[] is still accepted and treated as Thai-only
- * (English falls back to Thai until filled).
+ * `title` / `lead` / `blocks` are always `{ th, en }` maps.
  */
 export type Page = {
   slug: string;
-  title: string | Localized<string>;
-  lead: string | Localized<string>;
+  title: Localized<string>;
+  lead: Localized<string>;
   group?: string;
-  blocks: Block[] | Localized<Block[]>;
+  blocks: Localized<Block[]>;
 };
 
 /** A heading extracted from a page's blocks, used to build the table of contents. */
