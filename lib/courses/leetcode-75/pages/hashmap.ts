@@ -521,7 +521,7 @@ print("คำตอบ =", sum(rowc[col] for col in cols))`,
               {
                 t: "callout",
                 title: "แบบที่ 4 · สรุป",
-                c: "เจอในข้อ 23 · Equal Row and Column Pairs · จำสองอย่าง: tuple(...) เพื่อให้ hashable และ zip(*grid) เพื่อพลิกตาราง · กับดัก: ต้องบวกด้วย rowc[col] ไม่ใช่บวก 1 เพราะแถวหน้าตาเดียวกันอาจมีหลายแถว แต่ละแถวนับเป็นหนึ่งคู่",
+                c: "เจอในข้อ 23 · Equal Row and Column Pairs · จำ: แปลงแถวเป็น tuple(...) เพื่อให้ hashable แล้วใช้ Counter นับ · ประกอบคอลัมน์ด้วย tuple(grid[i][j] for i in ...) หรือ zip(*grid) ก็ได้ · กับดัก: ต้องบวกด้วย rowc[col] ไม่ใช่บวก 1 เพราะแถวหน้าตาเดียวกันอาจมีหลายแถว แต่ละแถวนับเป็นหนึ่งคู่",
               },
 
               { t: "h3", c: "แบบที่ 5 · Seen-so-far — \"เพื่อนที่ฉันต้องการ เดินผ่านมาแล้วหรือยัง\"" },
@@ -1258,7 +1258,7 @@ answer = 1`,
     {
       t: "callout",
       title: "Pattern 4 · summary",
-      c: "Problem 23 · Equal Row and Column Pairs. Remember two things: tuple(...) for hashability, and zip(*grid) to transpose. Trap: add rowc[col], not +1 — duplicate-looking rows each form their own pair.",
+      c: "Problem 23 · Equal Row and Column Pairs. Remember: tuple(...) for hashability, then Counter. Build columns with tuple(grid[i][j] for i in ...) or zip(*grid). Trap: add rowc[col], not +1 — duplicate-looking rows each form their own pair.",
     },
 
     { t: "h3", c: 'Pattern 5 · Seen-so-far — "has the partner I need already walked by?"' },
@@ -1991,8 +1991,8 @@ False`,
     slug: "lc75-p23",
     title: { th: "ข้อ 23 · LC2352 Equal Row and Column Pairs (คู่แถว-คอลัมน์) 🟡", en: "2352. Equal Row and Column Pairs" },
     lead: {
-      th: "หลอม Hash Map + tuple + Counter + zip(*grid) — นับหน้าตาแถว แล้วถามทีละคอลัมน์",
-      en: "Hash Map + tuple + Counter + zip(*grid) — count row shapes, then query each column.",
+      th: "จดบัญชีหน้าตาแถวด้วย Counter แล้วประกอบคอลัมน์ทีละเส้นไปถามบัญชี",
+      en: "Ledger row shapes with Counter, then build each column and query the ledger.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -2023,79 +2023,88 @@ False`,
               },
               { t: "callout", c: "ลำดับของค่าใน row/column สำคัญ [2,7,7] ตรงกับ [2,7,7] เท่านั้น ไม่ตรงกับ [7,2,7] และ row ที่หน้าตาซ้ำกันหลายแถวก็นับเป็นหลาย pair" },
 
-              { t: "h2", c: "ภาพรวมของปัญหา — เรากำลังตามหาอะไร?" },
-              { t: "p", c: "โจทย์ให้ตารางตัวเลขสี่เหลี่ยมจัตุรัสมา หน้าที่ของเราคือหาว่ามีกี่คู่ที่ \"แนวนอน (Row)\" หน้าตาเหมือน \"แนวตั้ง (Column)\" เป๊ะ ๆ" },
-              { t: "p", c: "สมมติตารางตัวอย่างแรก:" },
+              { t: "h2", c: "ทำความเข้าใจโจทย์ — เรากำลังหาอะไร?" },
+              { t: "p", c: "โจทย์ให้ตารางตัวเลขสี่เหลี่ยมจัตุรัสมา หน้าที่ของเราคือ \"นับว่ามีแนวนอนกี่เส้น ที่หน้าตาตัวเลขเหมือนแนวตั้งแบบเป๊ะ ๆ\"" },
+              { t: "p", c: "ลองดูตารางตัวอย่างขนาด 3×3:" },
               {
                 t: "code",
                 lang: "text",
                 label: "แกะ Row / Col จากตาราง",
-                c: `3  2  1
-1  7  6
-2  7  7
+                c: `(แถวที่ 0)    3    2    1
+(แถวที่ 1)    1    7    6
+(แถวที่ 2)    2    7    7
 
-Row: (3,2,1), (1,7,6), (2,7,7)
-Col: (3,1,2), (2,7,7), (1,6,7)
+Row: (3, 2, 1), (1, 7, 6), (2, 7, 7)
+Col: (3, 1, 2), (2, 7, 7), (1, 6, 7)
 
-แนวนอนล่างสุด (2,7,7) = แนวตั้งกลาง (2,7,7) → นับ 1 คู่`,
+แนวนอนล่างสุด (2, 7, 7) = แนวตั้งกลาง (2, 7, 7) → นับ 1 คู่`,
               },
 
-              { t: "h2", c: "แผนการรบ — ทำไมต้อง Hash Map?" },
-              { t: "p", c: "ถ้าเอาแนวนอน 1 เส้นไปวิ่งเทียบกับแนวตั้งทีละเส้น โปรแกรมจะทำงานหนักมาก (ยิ่งตารางใหญ่ยิ่งช้า) — เทียบทุกคู่แล้วเทียบทีละช่องเป็น O(n³)" },
-              { t: "p", c: "เราเลยใช้ Hash Map มาช่วยทำบัญชีรายชื่อ:" },
+              { t: "h2", c: "ไอเดียในการแก้ปัญหา — ใช้การ \"จดบัญชี\"" },
+              { t: "p", c: "ถ้าเอาแนวนอนทีละเส้นไปไล่เทียบกับแนวตั้งทีละเส้น มันจะช้าและซับซ้อน ไอเดียที่ดีกว่าคือแบ่งงานเป็น 2 เฟส:" },
               { t: "ol", c: [
-                "จดบัญชีแนวนอน: เดินสำรวจแนวนอนทุกเส้น แล้วจดลงสมุดบัญชี (Hash Map) ว่า \"หน้าตาแบบนี้ โผล่มากี่ครั้ง\"",
-                "ตรวจเช็คแนวตั้ง: เดินสำรวจแนวตั้งทีละเส้น แล้วหันไปถามสมุดบัญชีว่า \"หน้าตาแบบนี้มีในบัญชีไหม? ถ้ามี โผล่มากี่ครั้ง?\" เอาจำนวนครั้งนั้นมาบวกสะสมเป็นคำตอบ",
-              ] },
-
-              { t: "h2", c: "อาวุธลับของ Python — เตรียมตัวก่อนเขียนโค้ด" },
-              { t: "p", c: "เราจะใช้ 3 ทริคของ Python เพื่อให้โค้ดสั้นและทำงานเร็ว:" },
-              { t: "ul", c: [
-                "tuple(row) — Hash Map ไม่ยอมให้ list [] เป็นคีย์ ต้องแปลงเป็น tuple () เสมอ",
-                "Counter — Hash Map ร่างอัปเกรดจาก collections ที่เกิดมาเพื่อ \"นับความถี่\" โดยเฉพาะ สร้างสมุดบัญชีได้ในบรรทัดเดียว",
-                "zip(*grid) — เวทมนตร์พลิกตาราง ดึงแนวตั้ง (Column) ออกมาเป็น tuple ให้เลย ไม่ต้องเขียนลูปซ้อน",
+                "เฟส 1 \"จดบัญชี\": กวาดตามองแนวนอนทุกเส้น แล้วจดลงสมุดบัญชีไว้ว่า \"หน้าตาแบบนี้ โผล่มากี่ครั้ง\"",
+                "เฟส 2 \"ตรวจบัญชี\": กวาดตามองแนวตั้งทีละเส้น แล้วเอาไปถามสมุดบัญชีว่า \"หน้าตาแบบนี้ มีในบัญชีไหม?\" ถ้ามี ก็เอาจำนวนครั้งมาบวกเป็นคะแนน",
               ] },
               { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ต้อง บวกจำนวน row_count[col] ไม่ใช่บวกทีละหนึ่ง เพราะ row ที่เหมือนกันหลายแถวจับคู่กับ column นี้ได้ทุกแถว ข้อดีของ Counter คือถ้า key ไม่มีจะคืน 0 ให้เอง ไม่ error" },
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "สร้าง row_count เสร็จแล้ว สมุดบัญชีจดไว้ว่า (3,2,1) → 1, (1,7,6) → 1, (2,7,7) → 1 จากนั้นลูป for col in zip(*grid):" },
-              { t: "table", head: ["รอบ", "col ที่ดึงได้", "ถามสมุดบัญชี", "total_pairs สะสม"], rows: [
-                ["1", "(3, 1, 2)", "ไม่มี → 0", "0"],
-                ["2", "(2, 7, 7)", "มี! → 1", "1"],
-                ["3", "(1, 6, 7)", "ไม่มี → 0", "1"],
+              { t: "h2", c: "ไล่ทีละสเต็ป — สมุดบัญชีกับคอลัมน์" },
+              { t: "p", c: "หลังเฟส 1 สมุดบัญชีได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1} จากนั้นลูป for j in range(n) ประกอบคอลัมน์ทีละเส้น:" },
+              { t: "table", head: ["j", "col ที่ประกอบได้", "ถามสมุดบัญชี", "pairs สะสม"], rows: [
+                ["0", "(3, 1, 2)", "ไม่มี → 0", "0"],
+                ["1", "(2, 7, 7)", "มี! → 1", "1"],
+                ["2", "(1, 6, 7)", "ไม่มี → 0", "1"],
               ] },
-              { t: "p", c: "จบลูป คืนค่า total_pairs = 1 ถูกต้องเป๊ะ" },
+              { t: "p", c: "จบลูป คืนค่า pairs = 1 ถูกต้องเป๊ะ" },
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
 def equal_pairs(grid):
-    # --- ขั้นที่ 1: สร้างสมุดบัญชีจดแนวนอน (Row) ---
-    # List comprehension ดึงแถวทีละเส้น → แปลงเป็น tuple
-    # แล้วโยนใส่ Counter ให้นับความถี่ทันที
+    # --- เฟสที่ 1: เตรียมสมุดบัญชีจดแนวนอน ---
+    n = len(grid)
     row_count = Counter(tuple(row) for row in grid)
-    # ตัวอย่าง: {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}
+    # {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}
 
-    total_pairs = 0
+    pairs = 0
 
-    # --- ขั้นที่ 2: ดึงแนวตั้ง (Col) มาตรวจกับสมุดบัญชี ---
-    # zip(*grid) ดึงคอลัมน์ทีละเส้น (เป็น tuple ให้แล้ว)
-    for col in zip(*grid):
-        # มี → คืนจำนวนครั้ง; ไม่มี → คืน 0 (ความฉลาดของ Counter)
-        total_pairs += row_count[col]
+    # --- เฟสที่ 2: ประกอบแนวตั้ง แล้วเอาไปตรวจบัญชี ---
+    for j in range(n):
+        # ล็อคคอลัมน์ j ให้นิ่ง แล้วปล่อยแถว i วิ่งจากบนลงล่าง
+        col = tuple(grid[i][j] for i in range(n))
+        pairs += row_count[col]
 
-    return total_pairs
+    return pairs
 
 print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
 print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
                    [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`, out: `1
 3` },
-                { t: "p", c: "ขั้นที่ 1 — จดบัญชีแนวนอน: tuple(row) ทำให้ hashable แล้ว Counter นับว่าหน้าตาแบบไหนโผล่กี่ครั้งในบรรทัดเดียว" },
-                { t: "p", c: "ขั้นที่ 2 — ตรวจแนวตั้ง: zip(*grid) พลิกตารางให้ได้คอลัมน์เป็น tuple โดยตรง แล้วถาม row_count[col] บวกสะสม ในตัวอย่างที่สอง คอลัมน์หนึ่งตรงกับแถวที่หน้าตาซ้ำสองแถว ก็บวก 2 ทีเดียว" },
-                { t: "p", c: "สรุปจุดเด่น: เปลี่ยนโจทย์ที่ต้องวนลูปซ้อนวุ่นวาย O(n³) ให้เหลือแค่เดินอ่านแนวนอน 1 รอบ + แนวตั้ง 1 รอบ O(n²) ด้วยการค้นหาพริบตาเดียวของ Hash Map (Counter) · Space O(n²) เก็บ tuple ของแถวทั้งหมด" },
+                { t: "h3", c: "เฟสที่ 1: เตรียมสมุดบัญชี" },
+                { t: "p", c: "n = len(grid) เช็คขนาดตารางก่อน (เช่น n = 3 คือมี 3 แถว 3 คอลัมน์)" },
+                { t: "p", c: "row_count = Counter(tuple(row) for row in grid) คือการสร้างสมุดบัญชี — ดึงแนวนอนทีละเส้น แปลงเป็น tuple (วงเล็บโค้ง) เพราะ list เป็น key ของ dict ไม่ได้ แล้วให้ Counter นับสถิติ หน้าตาสมุดบัญชีจะได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}" },
+                { t: "p", c: "pairs = 0 สร้างกล่องเปล่าไว้เตรียมใส่คะแนนสะสม" },
+                { t: "h3", c: "เฟสที่ 2: สร้างแนวตั้งมาตรวจบัญชี (จุดสำคัญที่สุด)" },
+                { t: "p", c: "ลูป for j in range(n) ล็อคเป้าไปทีละคอลัมน์ (j คือตำแหน่งคอลัมน์) บรรทัดไฮไลท์คือ:" },
+                {
+                  t: "code",
+                  lang: "python",
+                  label: "ประกอบคอลัมน์ j",
+                  c: `col = tuple(grid[i][j] for i in range(n))`,
+                },
+                { t: "p", c: "บรรทัดนี้ทำงานโดยการล็อคคอลัมน์ j ให้อยู่นิ่ง ๆ แล้วปล่อยให้แถว i วิ่งจากบนลงล่าง สมมติกำลังตรวจคอลัมน์แรก (j = 0):" },
+                { t: "ul", c: [
+                  "i = 0 → หยิบ grid[0][0] ได้เลข 3",
+                  "i = 1 → หยิบ grid[1][0] ได้เลข 1",
+                  "i = 2 → หยิบ grid[2][0] ได้เลข 2",
+                ] },
+                { t: "p", c: "พอวิ่งจบ เอาเลขที่หยิบได้มามัดรวมเป็น tuple ได้ col = (3, 1, 2) — ประกอบแนวตั้งเสร็จแล้ว 1 เส้น" },
+                { t: "h3", c: "จบงาน: เช็คและให้คะแนน" },
+                { t: "p", c: "pairs += row_count[col] — พอได้ col มาแล้ว เอาไปเปิดหาในสมุดบัญชี row_count แนวตั้งเส้นแรก (3, 1, 2) ไม่มีในบัญชี → ได้ 0 แต่พอลูปสร้างแนวตั้งเส้นที่สองได้ (2, 7, 7) มีตรงกันเป๊ะ 1 ครั้ง → บวก 1 เข้า pairs พอลูปทำจนครบทุกคอลัมน์ก็ return pairs" },
+                { t: "p", c: "Time O(n²) เดินอ่านแถว 1 รอบ + ประกอบคอลัมน์ 1 รอบ · Space O(n²) เก็บ tuple ของแถวทั้งหมดใน Counter" },
               ] },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้องจับคู่ของที่เหมือนกันจากสองกอง อย่าเทียบทุก pair ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว · จำสองอย่าง: tuple(...) เพื่อให้ hashable และ zip(*grid) เพื่อพลิกตาราง · กับดัก: ต้องบวกด้วย row_count[col] ไม่ใช่บวก 1" },
+              { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้องจับคู่ของที่เหมือนกันจากสองกอง อย่าเทียบทุก pair ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว · จำไว้ว่าจะเอา list/row เป็น key ต้องแปลงเป็น tuple ก่อน · กับดัก: ต้องบวกด้วย row_count[col] ไม่ใช่บวก 1" },
       ],
       en: [
     {
@@ -2133,48 +2142,36 @@ print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
       c: "Order matters: [2,7,7] matches [2,7,7] only, not [7,2,7]. Duplicate-looking rows each form their own pairs.",
     },
 
-    { t: "h2", c: "Problem overview — what are we counting?" },
+    { t: "h2", c: "Understand the problem — what are we counting?" },
     {
       t: "p",
-      c: "You're given a square grid of numbers. Count how many pairs have a row that looks exactly like a column.",
+      c: "You're given a square grid of numbers. Count how many rows look exactly like some column.",
     },
-    { t: "p", c: "Take the first example:" },
+    { t: "p", c: "Take this 3×3 example:" },
     {
       t: "code",
       lang: "text",
       label: "Unpack rows / cols from the grid",
-      c: `3  2  1
-1  7  6
-2  7  7
+      c: `(row 0)    3    2    1
+(row 1)    1    7    6
+(row 2)    2    7    7
 
-Row: (3,2,1), (1,7,6), (2,7,7)
-Col: (3,1,2), (2,7,7), (1,6,7)
+Row: (3, 2, 1), (1, 7, 6), (2, 7, 7)
+Col: (3, 1, 2), (2, 7, 7), (1, 6, 7)
 
-Bottom row (2,7,7) = middle column (2,7,7) → 1 pair`,
+Bottom row (2, 7, 7) = middle column (2, 7, 7) → 1 pair`,
     },
 
-    { t: "h2", c: "Battle plan — why a Hash Map?" },
+    { t: "h2", c: "Idea — keep a ledger" },
     {
       t: "p",
-      c: "Comparing every row against every column cell-by-cell is O(n³) — fine for tiny grids, painful as n grows.",
+      c: "Comparing every row against every column is slow and messy. Better: two phases.",
     },
-    { t: "p", c: "Use a Hash Map as a ledger instead:" },
     {
       t: "ol",
       c: [
-        "Ledger the rows: walk every row and record \"this shape appeared how many times?\"",
-        "Check the columns: for each column, ask the ledger \"does this shape exist — and how many times?\" Add that count to the answer",
-      ],
-    },
-
-    { t: "h2", c: "Python tools — before you write code" },
-    { t: "p", c: "Three Python tricks keep the solution short and fast:" },
-    {
-      t: "ul",
-      c: [
-        "tuple(row) — Hash Maps reject list [] keys; always convert to tuple ()",
-        "Counter — a frequency-specialized Hash Map from collections; builds the ledger in one line",
-        "zip(*grid) — transpose magic: yields each column as a tuple, no nested loops",
+        "Phase 1 \"ledger\": scan every row and record \"this shape appeared how many times?\"",
+        "Phase 2 \"check\": for each column, ask the ledger \"does this shape exist?\" If yes, add that count to the score",
       ],
     },
     {
@@ -2183,21 +2180,21 @@ Bottom row (2,7,7) = middle column (2,7,7) → 1 pair`,
       c: "Add row_count[col], not just +1 — duplicate rows each pair with this column. Counter returns 0 for missing keys, so you won’t get a KeyError.",
     },
 
-    { t: "h2", c: "Walk through a step" },
+    { t: "h2", c: "Walk through — ledger and columns" },
     {
       t: "p",
-      c: "After building row_count: (3,2,1)→1, (1,7,6)→1, (2,7,7)→1. Then loop for col in zip(*grid):",
+      c: "After phase 1 the ledger is {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}. Then for j in range(n) build each column:",
     },
     {
       t: "table",
-      head: ["round", "col pulled", "ask the ledger", "total_pairs so far"],
+      head: ["j", "col built", "ask the ledger", "pairs so far"],
       rows: [
-        ["1", "(3, 1, 2)", "missing → 0", "0"],
-        ["2", "(2, 7, 7)", "hit → 1", "1"],
-        ["3", "(1, 6, 7)", "missing → 0", "1"],
+        ["0", "(3, 1, 2)", "missing → 0", "0"],
+        ["1", "(2, 7, 7)", "hit → 1", "1"],
+        ["2", "(1, 6, 7)", "missing → 0", "1"],
       ],
     },
-    { t: "p", c: "Loop ends with total_pairs = 1 — exact match." },
+    { t: "p", c: "Loop ends with pairs = 1 — exact match." },
 
     {
       t: "details",
@@ -2210,20 +2207,20 @@ Bottom row (2,7,7) = middle column (2,7,7) → 1 pair`,
           code: `from collections import Counter
 
 def equal_pairs(grid):
-    # --- Step 1: ledger the rows ---
-    # List comprehension → tuple each row, Counter tallies frequency
+    # --- Phase 1: ledger the rows ---
+    n = len(grid)
     row_count = Counter(tuple(row) for row in grid)
-    # e.g. {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}
+    # {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}
 
-    total_pairs = 0
+    pairs = 0
 
-    # --- Step 2: pull columns and query the ledger ---
-    # zip(*grid) yields each column as a tuple already
-    for col in zip(*grid):
-        # hit → count; miss → 0 (Counter's gift)
-        total_pairs += row_count[col]
+    # --- Phase 2: build each column and query the ledger ---
+    for j in range(n):
+        # lock column j, let row i walk top → bottom
+        col = tuple(grid[i][j] for i in range(n))
+        pairs += row_count[col]
 
-    return total_pairs
+    return pairs
 
 print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
 print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
@@ -2231,17 +2228,51 @@ print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
           out: `1
 3`,
         },
+        { t: "h3", c: "Phase 1: prepare the ledger" },
         {
           t: "p",
-          c: "Step 1 — ledger rows: tuple(row) makes them hashable; Counter counts each shape in one line.",
+          c: "n = len(grid) — read the grid size first (e.g. n = 3 means 3 rows and 3 columns).",
         },
         {
           t: "p",
-          c: "Step 2 — check columns: zip(*grid) yields column tuples directly; add row_count[col]. In the second example, one column matches two identical rows → add 2 at once.",
+          c: "row_count = Counter(tuple(row) for row in grid) builds the ledger: pull each row, convert to a tuple (lists can’t be dict keys), and let Counter tally. Result: {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}.",
+        },
+        { t: "p", c: "pairs = 0 — empty score box ready to accumulate." },
+        { t: "h3", c: "Phase 2: build columns and check the ledger (the key part)" },
+        {
+          t: "p",
+          c: "for j in range(n) locks onto one column at a time (j is the column index). The highlight line:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Build column j",
+          c: `col = tuple(grid[i][j] for i in range(n))`,
         },
         {
           t: "p",
-          c: "Takeaway: nested O(n³) comparisons become one pass over rows + one over columns — O(n²) — thanks to instant Hash Map (Counter) lookup · Space O(n²) storing all row tuples",
+          c: "Lock column j still; let row i walk top to bottom. For the first column (j = 0):",
+        },
+        {
+          t: "ul",
+          c: [
+            "i = 0 → pick grid[0][0] → 3",
+            "i = 1 → pick grid[1][0] → 1",
+            "i = 2 → pick grid[2][0] → 2",
+          ],
+        },
+        {
+          t: "p",
+          c: "When the walk finishes, bundle the numbers into a tuple: col = (3, 1, 2) — one column ready.",
+        },
+        { t: "h3", c: "Finish: check and score" },
+        {
+          t: "p",
+          c: "pairs += row_count[col] — look col up in the ledger. First column (3, 1, 2) is missing → 0. Second column (2, 7, 7) matches once → add 1. After every column, return pairs.",
+        },
+        {
+          t: "p",
+          c: "Time O(n²) one pass over rows + one pass building columns · Space O(n²) storing all row tuples in the Counter",
         },
       ],
     },
@@ -2249,7 +2280,7 @@ print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
     {
       t: "callout",
       title: "💡 Pattern takeaway",
-      c: "When matching identical items across two groups, don’t compare every pair. Count one group into a hash map, then query the other one by one. Remember two things: tuple(...) for hashability, and zip(*grid) to transpose. Trap: add row_count[col], not +1.",
+      c: "When matching identical items across two groups, don’t compare every pair. Count one group into a hash map, then query the other one by one. Remember: list/row as a key → convert to tuple first. Trap: add row_count[col], not +1.",
     },
   ],
     },
