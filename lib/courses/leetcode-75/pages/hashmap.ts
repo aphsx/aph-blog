@@ -1778,7 +1778,7 @@ True`,
   "lc75-p22": {
     slug: "lc75-p22",
     title: { th: "ข้อ 22 · LC1657 Determine if Two Strings Are Close (สองสตริงใกล้กัน) 🟡", en: "1657. Determine if Two Strings Are Close" },
-    lead: { th: "แปล operation (ปฏิบัติการ) สองแบบให้เป็นเงื่อนไขบน character set (ชุดตัวอักษร) และกอง frequency (ความถี่)", en: "Turn the two allowed operations into conditions on character set and frequency multiset." },
+    lead: { th: "แปล operation สองแบบเป็น checkpoint สามด่าน — ความยาว, ชุดตัวอักษร, และ pattern ของ frequency", en: "Turn the two operations into three checkpoints — same length, same character set, same frequency pattern." },
     group: "LeetCode 75",
     blocks: {
       th: [
@@ -1816,35 +1816,54 @@ True`,
                 ],
               },
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "กุญแจคือแปลความหมายของ operation ทั้งสองให้เป็นเงื่อนไขที่เช็คได้ operation 1 (swap ตำแหน่ง) บอกว่าลำดับไม่มีผล เหลือแค่ ตัวอะไรมีกี่ตัว operation 2 (สลับ frequency) บอกว่าเราจับคู่ character กับจำนวนได้อิสระ ตราบใดที่ character นั้นมีอยู่แล้ว" },
-              { t: "p", c: "เราจึงใช้ Counter นับ frequency ของแต่ละ string แล้วตรวจสองเงื่อนไข ไม่ต้องลอง swap จริง ๆ ซึ่งจะเป็นการ search ที่ระเบิดเป็น factorial (แฟกทอเรียล)" },
-              { t: "ol", c: [
-                "สร้าง Counter ของ word1 และ word2 เป็น c1, c2",
-                "เงื่อนไข 1: set(c1) == set(c2) — ต้องใช้ character set เดียวกัน (operation 2 สลับได้เฉพาะตัวที่มีอยู่ เสกตัวใหม่ไม่ได้)",
-                "เงื่อนไข 2: sorted(c1.values()) == sorted(c2.values()) — กองของ frequency ต้องจับคู่กันได้พอดี",
-                "เป็นจริงทั้งสองข้อ → close return True",
+              { t: "h2", c: "ทำความเข้าใจโจทย์ — Close หมายความว่าอะไร?" },
+              { t: "p", c: "Close ไม่ใช่ \"คล้ายกันโดยประมาณ\" แต่หมายถึง เปลี่ยนจาก string หนึ่งไปอีก string ได้ด้วย operation สองแบบนี้เท่านั้น (ทำกี่ครั้งก็ได้):" },
+              { t: "ul", c: [
+                'Operation 1 — swap ตัวอักษรสองตำแหน่งใดก็ได้ → ลำดับไม่สำคัญ เหลือแค่ \"มีตัวอะไรบ้าง\"',
+                "Operation 2 — สลับ frequency ของตัว A กับตัว B ทั้งก้อน (ต้องเป็นตัวที่มีอยู่แล้ว) → กองจำนวนครั้งย้ายไปมาระหว่างตัวที่มีอยู่ได้ แต่เสกตัวอักษรใหม่ไม่ได้",
               ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าลืมเงื่อนไขข้อ 1 (character set เดียวกัน) ถ้าเช็คแค่ frequency เรียงเท่ากัน cabbba กับ aabbss จะถูกตอบผิดเป็น True ทั้งที่ตัว s ไม่มีใน word1 เลย operation 2 จึงเสกมันขึ้นมาไม่ได้" },
+              { t: "p", c: "อย่าลอง simulate (จำลอง) swap จริง ๆ — search จะระเบิดเป็น factorial (แฟกทอเรียล) ให้แปล operation เป็นเงื่อนไขที่เช็คได้แทน" },
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "เทียบสองเงื่อนไขบนตัวอย่างทั้งสี่" },
-              { t: "table", head: ["word1 / word2", "character set เท่ากัน?", "frequency เรียงเท่ากัน?", "ผล"], rows: [
-                ["abc / bca", "ใช่ {a,b,c}", "ใช่ [1,1,1]", "True"],
-                ["a / aa", "ใช่ {a}", "ไม่ [1] vs [2]", "False"],
-                ["cabbba / abbccc", "ใช่ {a,b,c}", "ใช่ [1,2,3]", "True"],
-                ["cabbba / aabbss", "ไม่ {a,b,c} vs {a,b,s}", "(ใช่ [1,2,3])", "False"],
+              { t: "h2", c: "ถอดรหัสเป็นกฎเหล็ก 3 ข้อ" },
+              { t: "p", c: "จาก operation ทั้งสอง ถอดเป็น checkpoint สามด่าน — ผ่านครบทุกด่านถึงจะ close:" },
+              { t: "ol", c: [
+                "Gate 1 · ความยาวเท่ากัน — len(word1) == len(word2) (swap / remap ความถี่ไม่เปลี่ยนความยาว)",
+                "Gate 2 · ชุดตัวอักษรเดียวกัน — set(word1) == set(word2) (op 2 ย้าย frequency ได้เฉพาะตัวที่มีอยู่แล้ว ห้ามมีตัวแปลกปลอม)",
+                "Gate 3 · pattern ของ frequency เดียวกัน — sorted(Counter(word1).values()) == sorted(Counter(word2).values()) (op 2 ย้ายกองจำนวนได้ จึงเทียบกองตัวเลขหลังเรียง ไม่สนว่าตัวไหนถือจำนวนไหน)",
+              ] },
+              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าข้าม Gate 2 ถ้าเช็คแค่ frequency เรียงเท่ากัน cabbba กับ aabbss จะถูกตอบผิดเป็น True ทั้งที่ตัว s ไม่มีใน word1 เลย — op 2 เสกมันขึ้นมาไม่ได้" },
+
+              { t: "h2", c: 'ไล่ทีละสเต็ป — word1 = "cabbba", word2 = "abbccc"' },
+              { t: "p", c: "ไล่สามด่านกับตัวอย่างหลัก:" },
+              { t: "ol", c: [
+                "Gate 1: len(\"cabbba\") = 6, len(\"abbccc\") = 6 → ผ่าน",
+                "Gate 2: set ทั้งคู่ = {a, b, c} → ผ่าน (ไม่มีตัวแปลกปลอม)",
+                "Gate 3: Counter(\"cabbba\") = {c:1, a:2, b:3} · Counter(\"abbccc\") = {a:1, b:2, c:3} → sorted values ทั้งคู่ = [1, 2, 3] → ผ่าน → True",
+              ] },
+              { t: "p", c: "เทียบด่วนกับตัวอย่างอื่น:" },
+              { t: "table", head: ["word1 / word2", "Gate 1 ความยาว", "Gate 2 ชุดตัวอักษร", "Gate 3 frequency", "ผล"], rows: [
+                ["abc / bca", "ผ่าน 3=3", "ผ่าน {a,b,c}", "ผ่าน [1,1,1]", "True"],
+                ["a / aa", "ไม่ผ่าน 1≠2", "—", "—", "False"],
+                ["cabbba / abbccc", "ผ่าน 6=6", "ผ่าน {a,b,c}", "ผ่าน [1,2,3]", "True"],
+                ["cabbba / aabbss", "ผ่าน 6=6", "ไม่ผ่าน {a,b,c}≠{a,b,s}", "(กอง [1,2,3] เท่ากันก็ไร้ประโยชน์)", "False"],
               ] },
 
               { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
                 { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
 
 def close_strings(word1, word2):
-    c1, c2 = Counter(word1), Counter(word2)
-    # เงื่อนไข 1: ต้องใช้ชุดตัวอักษรเดียวกัน (set ของคีย์เท่ากัน)
-    # เงื่อนไข 2: กองของจำนวนความถี่ต้องตรงกัน (เรียงแล้วเท่ากัน)
-    return (set(c1) == set(c2)
-            and sorted(c1.values()) == sorted(c2.values()))
+    # Gate 1: ความยาวต้องเท่ากัน
+    if len(word1) != len(word2):
+        return False
+    # Gate 2: ชุดตัวอักษรต้องเหมือนกัน (op 2 เสกตัวใหม่ไม่ได้)
+    if set(word1) != set(word2):
+        return False
+    # Gate 3: กอง frequency หลังเรียงต้องตรงกัน
+    count1 = Counter(word1)
+    count2 = Counter(word2)
+    freq1 = sorted(count1.values())
+    freq2 = sorted(count2.values())
+    return freq1 == freq2
 
 print(close_strings("abc", "bca"))        # True
 print(close_strings("a", "aa"))           # False
@@ -1853,12 +1872,12 @@ print(close_strings("cabbba", "aabbss"))  # False`, out: `True
 False
 True
 False` },
-                { t: "p", c: "set(c1) เอาเฉพาะ key (ตัวอักษรที่ปรากฏ) มาเทียบกัน ส่วน c1.values() คือ frequency ของแต่ละตัว การ sort (เรียง) ก่อนเทียบทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกันไหม ซึ่งตรงกับอิสระของ operation 2 พอดี" },
-                { t: "p", c: "ทำไมต้องมีทั้งสองเงื่อนไขคู่กัน? เงื่อนไข 2 อย่างเดียวยอมให้ character คนละชุดผ่านได้ (เช่น s แทน c) ส่วนเงื่อนไข 1 อย่างเดียวก็ไม่พอเพราะ frequency แต่ละตัวอาจไม่จับคู่กันได้ ต้องครบทั้งสองข้อ" },
-                { t: "p", c: "Time O(n + k log k) count frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter ของ character (คงที่ 26 ตัว)" },
+                { t: "p", c: "set(word1) เทียบชุดตัวอักษรตรง ๆ อ่านง่ายกว่า set(Counter) ซึ่งเทียบแค่ keys — ผลเดียวกัน ส่วน sorted(...values()) ทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกัน ซึ่งตรงกับอิสระของ operation 2" },
+                { t: "p", c: "ทำไมต้องครบสามด่าน? Gate 1 กรองเคสสั้น ๆ ออกก่อน Gate 2 กันตัวแปลกปลอม (เช่น s แทน c) Gate 3 กันเคสชุดตัวอักษรตรงแต่กองจำนวนจับคู่กันไม่ได้ — ขาดข้อใดข้อหนึ่งคำตอบผิดได้" },
+                { t: "p", c: "Time O(n + k log k) นับ frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter / set ของ character (คงที่ 26 ตัว)" },
               ] },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate (จำลอง) จริง ที่นี่ invariant คือ character set กับ กอง frequency" },
+              { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate จริง ที่นี่มีสามด่าน: ความยาว · ชุดตัวอักษร · กอง frequency" },
       ],
       en: [
     {
@@ -1896,44 +1915,66 @@ False` },
       ],
     },
 
-    { t: "h2", c: "Approach — what to use & how to think" },
+    { t: "h2", c: "Understand the problem — what does Close mean?" },
     {
       t: "p",
-      c: "Translate both operations into checkable conditions. Operation 1 (swap) means order doesn’t matter — only which characters appear how often. Operation 2 (swap frequencies) means you can freely re-pair characters with counts, as long as those characters already exist.",
+      c: "Close does not mean “roughly similar.” It means you can turn one string into the other using only these two operations (any number of times):",
+    },
+    {
+      t: "ul",
+      c: [
+        "Operation 1 — swap any two character positions → order does not matter; only which letters you have",
+        "Operation 2 — swap frequencies of existing letters A ↔ B as wholes → frequency counts can be remapped among letters that already exist; you cannot invent a new letter",
+      ],
     },
     {
       t: "p",
-      c: "So count frequencies with Counter for each string and check two conditions. Don’t try to simulate swaps — that search blows up factorially.",
+      c: "Don’t simulate the swaps — that search blows up factorially. Translate the operations into checkable conditions instead.",
+    },
+
+    { t: "h2", c: "Decode into 3 hard rules" },
+    {
+      t: "p",
+      c: "From the two operations, extract three checkpoints — all must pass for the strings to be close:",
     },
     {
       t: "ol",
       c: [
-        "Build Counters c1, c2 for word1 and word2",
-        "Condition 1: set(c1) == set(c2) — same character set (op 2 can only remap existing letters)",
-        "Condition 2: sorted(c1.values()) == sorted(c2.values()) — frequency bags must match",
-        "Both true → close → return True",
+        "Gate 1 · Same length — len(word1) == len(word2) (swaps / frequency remaps never change length)",
+        "Gate 2 · Same character set — set(word1) == set(word2) (op 2 remaps frequencies only among existing letters; no foreign letters)",
+        "Gate 3 · Same frequency pattern — sorted(Counter(word1).values()) == sorted(Counter(word2).values()) (op 2 can reassign counts, so compare the sorted bags of numbers, not which letter owns which count)",
       ],
     },
     {
       t: "callout",
       title: "Common pitfalls",
-      c: "Don’t skip condition 1 (same character set). If you only check sorted frequencies, cabbba vs aabbss would wrongly return True even though s never appears in word1 — op 2 cannot invent it.",
+      c: "Don’t skip Gate 2. If you only check sorted frequencies, cabbba vs aabbss wrongly returns True even though s never appears in word1 — op 2 cannot invent it.",
     },
 
-    { t: "h2", c: "Walk through the examples" },
-    { t: "p", c: "Check both conditions on the official examples." },
+    { t: "h2", c: 'Walkthrough — word1 = "cabbba", word2 = "abbccc"' },
+    { t: "p", c: "Run all three gates on the main example:" },
+    {
+      t: "ol",
+      c: [
+        'Gate 1: len("cabbba") = 6, len("abbccc") = 6 → pass',
+        "Gate 2: both sets = {a, b, c} → pass (no foreign letters)",
+        'Gate 3: Counter("cabbba") = {c:1, a:2, b:3} · Counter("abbccc") = {a:1, b:2, c:3} → both sorted values = [1, 2, 3] → pass → True',
+      ],
+    },
+    { t: "p", c: "Quick check on the other examples:" },
     {
       t: "table",
       head: [
         "word1 / word2",
-        "Same character set?",
-        "Same sorted frequencies?",
+        "Gate 1 length",
+        "Gate 2 charset",
+        "Gate 3 frequency",
         "Result",
       ],
       rows: [
-        ["abc / bca", "Yes {a,b,c}", "Yes [1,1,1]", "True"],
-        ["a / aa", "Yes {a}", "No [1] vs [2]", "False"],
-        ["cabbba / abbccc", "Yes {a,b,c}", "Yes [1,2,3]", "True"],
+        ["abc / bca", "pass 3=3", "pass {a,b,c}", "pass [1,1,1]", "True"],
+        ["a / aa", "fail 1≠2", "—", "—", "False"],
+        ["cabbba / abbccc", "pass 6=6", "pass {a,b,c}", "pass [1,2,3]", "True"],
       ],
     },
 
@@ -1948,11 +1989,18 @@ False` },
           code: `from collections import Counter
 
 def close_strings(word1, word2):
-    c1, c2 = Counter(word1), Counter(word2)
-    # Condition 1: same set of characters (keys)
-    # Condition 2: same multiset of frequencies (sort then compare)
-    return (set(c1) == set(c2)
-            and sorted(c1.values()) == sorted(c2.values()))
+    # Gate 1: lengths must match
+    if len(word1) != len(word2):
+        return False
+    # Gate 2: same character set (op 2 cannot invent letters)
+    if set(word1) != set(word2):
+        return False
+    # Gate 3: same sorted frequency bag
+    count1 = Counter(word1)
+    count2 = Counter(word2)
+    freq1 = sorted(count1.values())
+    freq2 = sorted(count2.values())
+    return freq1 == freq2
 
 print(close_strings("abc", "bca"))        # True
 print(close_strings("a", "aa"))           # False
@@ -1965,15 +2013,15 @@ False`,
         },
         {
           t: "p",
-          c: "set(c1) compares only keys (characters that appear). c1.values() are the frequencies; sorting before comparing means we don’t care which character owns which count — only that the bags match, which is exactly the freedom of operation 2.",
+          c: "set(word1) compares the character set directly — clearer than set(Counter), which compares only keys (same result). sorted(...values()) ignores which letter owns which count; only the bag of numbers must match, which is exactly the freedom of operation 2.",
         },
         {
           t: "p",
-          c: "Why both conditions? Condition 2 alone would allow different alphabets (e.g. s replacing c). Condition 1 alone isn’t enough because per-character frequencies might not rematch. You need both.",
+          c: "Why all three gates? Gate 1 filters obvious mismatches early. Gate 2 blocks foreign letters (e.g. s replacing c). Gate 3 catches same alphabet but unmatched frequency bags. Miss any one and you can get the wrong answer.",
         },
         {
           t: "p",
-          c: "Time O(n + k log k) count O(n) and sort at most k = 26 frequencies · Space O(k) for the Counters (fixed 26 letters)",
+          c: "Time O(n + k log k) count O(n) and sort at most k = 26 frequencies · Space O(k) for Counters / sets (fixed 26 letters)",
         },
       ],
     },
@@ -1981,7 +2029,7 @@ False`,
     {
       t: "callout",
       title: "💡 Pattern takeaway",
-      c: "Weird operation problems often reduce to invariants — properties that stay true no matter how many times you apply the ops. Check the invariants instead of simulating. Here the invariants are character set and frequency bag.",
+      c: "Weird operation problems often reduce to invariants — properties that stay true no matter how many times you apply the ops. Check the invariants instead of simulating. Here: same length · same character set · same frequency bag.",
     },
   ],
     },
