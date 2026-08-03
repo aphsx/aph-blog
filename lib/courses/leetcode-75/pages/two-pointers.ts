@@ -1005,35 +1005,24 @@ for i in range(len(nums)):          # i ไล่อ่านทุกช่อ�
                 c: [
                   { t: "p", c: "ไอเดียหนึ่งบรรทัด: ให้ insert ชี้ช่องว่างถัดไป แล้วทุกครั้งที่ตัวอ่านเจอเลขไม่ใช่ 0 ก็สลับมันขึ้นมาข้างหน้า — 0 จะถูกเตะไปท้ายเอง" },
                   {
-                    t: "codeout",
+                    t: "code",
                     lang: "python",
-                    label: "เฉลย (Python) — แบบสลับที่ รอบเดียว",
-                    code: `def move_zeroes(nums: list[int]) -> None:
-    insert = 0                                 # (1) ช่องว่างถัดไปสำหรับตัวไม่ใช่ 0
-    for i in range(len(nums)):                 # (2) ตัวอ่านไล่ทุกช่อง
-        if nums[i] != 0:                       # (3) เจอตัวที่ต้องเก็บ
-            nums[insert], nums[i] = nums[i], nums[insert]   # (4) สลับขึ้นมาข้างหน้า
-            insert += 1                        # (5) โซนจัดแล้วโตขึ้น
-
-
-cases = [
-    ([0, 1, 0, 3, 12], [1, 3, 12, 0, 0]),
-    ([0], [0]),
-    ([1, 2, 3], [1, 2, 3]),
-    ([0, 0, 0], [0, 0, 0]),
-    ([0, 0, 1], [1, 0, 0]),
-    ([-1, 0, -2, 3], [-1, -2, 3, 0]),
-]
-for nums, expected in cases:
-    got = nums[:]
-    move_zeroes(got)
-    print(got == expected, got)`,
-                    out: `True [1, 3, 12, 0, 0]
-True [0]
-True [1, 2, 3]
-True [0, 0, 0]
-True [1, 0, 0]
-True [-1, -2, 3, 0]`,
+                    label: "คำตอบสำหรับวางใน LeetCode — slow/fast แบบสลับที่ รอบเดียว",
+                    c: `class Solution:
+    def moveZeroes(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+        insert = 0                          # (1) slow — ช่องว่างถัดไปของตัวที่ไม่ใช่ 0
+        for i in range(len(nums)):          # (2) fast — ไล่ดูทุกช่อง
+            if nums[i] != 0:                # (3) เจอตัวที่ต้องเก็บ
+                nums[insert], nums[i] = nums[i], nums[insert]   # (4) สลับขึ้นมาข้างหน้า
+                insert += 1                 # (5) โซนที่จัดแล้วโตขึ้นหนึ่งช่อง`,
+                  },
+                  {
+                    t: "callout",
+                    title: "ทำไมเฉลยหน้าตาแบบนี้",
+                    c: "LeetCode ให้เราเติมโค้ดในคลาสชื่อ Solution และชื่อเมธอดต้องตรงตามที่โจทย์กำหนด (moveZeroes ไม่ใช่ move_zeroes) · ข้อนี้ประเภทผลลัพธ์เป็น None เพราะโจทย์ให้แก้ในลิสต์เดิม ไม่ใช่คืนลิสต์ใหม่ · ส่วน List[int] มาจาก typing ซึ่ง LeetCode import ไว้ให้แล้ว จึงไม่ต้องเขียน import เอง",
                   },
                   {
                     t: "table",
@@ -1383,27 +1372,21 @@ t = . . . [p] . . . [q] . . . . . . . . . .
                     c: "ไอเดียหนึ่งบรรทัด: กวาด t ทีละตัว เจอตัวที่ตรงกับ s[i] ก็ขยับ i — ถ้า i เดินครบความยาว s ก็แปลว่าใช่",
                   },
                   {
-                    t: "codeout",
+                    t: "code",
                     lang: "python",
-                    label: "เฉลย (Python)",
-                    code: `def is_subsequence(s: str, t: str) -> bool:
-    i = 0                              # (1) ตัวชี้บน s = กำลังตามหา s[i]
-    for c in t:                        # (2) กวาด t ทางเดียว ไม่ย้อน
-        if i < len(s) and s[i] == c:   # (3) ยังหาไม่ครบ + ตัวอักษรตรงกัน
-            i += 1                     # (4) คว้าตัวนี้ ไปหาตัวถัดไปของ s
-    return i == len(s)                 # (5) ขยับครบทุกตัว = เจอครบตามลำดับ
-
-
-print(is_subsequence("abc", "ahbgdc"))
-print(is_subsequence("axc", "ahbgdc"))
-print(is_subsequence("", "abc"))
-print(is_subsequence("acb", "ahbgdc"))
-print(is_subsequence("abc", ""))`,
-                    out: `True
-False
-True
-False
-False`,
+                    label: "คำตอบสำหรับวางใน LeetCode — ตัวชี้สองตัวบนสองสตริง",
+                    c: `class Solution:
+    def isSubsequence(self, s: str, t: str) -> bool:
+        i = 0                              # (1) ตัวชี้บน s = กำลังตามหา s[i]
+        for c in t:                        # (2) ตัวชี้บน t กวาดทางเดียว ไม่ย้อน
+            if i < len(s) and s[i] == c:   # (3) ยังหาไม่ครบ และตัวอักษรตรงกัน
+                i += 1                     # (4) คว้าตัวนี้ แล้วไปหาตัวถัดไปของ s
+        return i == len(s)                 # (5) ขยับครบทุกตัว = เจอครบตามลำดับ`,
+                  },
+                  {
+                    t: "callout",
+                    title: "นี่คือแบบที่ 3 ของหน้าแนวคิด",
+                    c: "ตัวชี้ i อยู่บน s และตัวชี้ที่วนด้วย for อยู่บน t คือตัวชี้อยู่คนละแถวกัน และขยับเฉพาะตัวที่ถูกใช้ไปในก้าวนั้น · ตัวชี้บน t ขยับทุกก้าวเพราะเราต้องดู t ให้ครบ ส่วนตัวชี้บน s ขยับเฉพาะตอนจับคู่ได้",
                   },
                   {
                     t: "table",
@@ -1817,41 +1800,34 @@ maxArea = 0`,
                 summary: "🔓 Python Solution",
                 c: [
                   {
-                    t: "codeout",
+                    t: "code",
                     lang: "python",
-                    label: "O(n) time · O(1) space",
-                    code: `def max_area(height: list[int]) -> int:
-    left = 0                    # เริ่มที่เส้นซ้ายสุด
-    right = len(height) - 1     # เริ่มที่เส้นขวาสุด
-    max_water = 0               # เก็บพื้นที่มากสุดที่เคยเจอ
+                    label: "คำตอบสำหรับวางใน LeetCode — หัวท้ายเดินเข้าหากัน · O(n) time · O(1) space",
+                    c: `class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        left = 0                     # เริ่มที่เส้นซ้ายสุด
+        right = len(height) - 1      # เริ่มที่เส้นขวาสุด
+        max_water = 0                # พื้นที่มากสุดที่เคยเจอ
 
-    while left < right:
-        # คำนวณพื้นที่ภาชนะรอบนี้
-        width = right - left
-        h = min(height[left], height[right])
-        area = width * h
+        while left < right:
+            # พื้นที่ = กว้าง x สูง โดยสูงถูกจำกัดด้วยเส้นที่เตี้ยกว่า
+            width = right - left
+            h = min(height[left], height[right])
+            max_water = max(max_water, width * h)
 
-        # อัปเดตถ้าของรอบนี้ใหญ่กว่า
-        max_water = max(max_water, area)
+            # ขยับตัวชี้ที่ชี้เส้น "เตี้ยกว่า" เข้ามา
+            # เพราะขยับฝั่งสูงมีแต่ทำให้แคบลงโดยความสูงไม่เพิ่ม
+            if height[left] < height[right]:
+                left += 1
+            else:
+                right -= 1
 
-        # ขยับตัวชี้ที่ชี้เส้นเตี้ยกว่าเข้ามา
-        # (ขยับฝั่งสูงไม่มีทางทำให้พื้นที่โต)
-        if height[left] < height[right]:
-            left += 1     # ซ้ายเตี้ยกว่า — ขยับซ้ายเข้ามา
-        else:
-            right -= 1    # ขวาเตี้ยกว่า (หรือเท่ากัน) — ขยับขวาเข้ามา
-
-    return max_water
-
-
-print(max_area([1, 8, 6, 2, 5, 4, 8, 3, 7]))
-print(max_area([1, 1]))
-print(max_area([4, 3, 2, 1, 4]))
-print(max_area([1, 2, 1]))`,
-                    out: `49
-1
-16
-2`,
+        return max_water`,
+                  },
+                  {
+                    t: "callout",
+                    title: "นี่คือแบบที่ 1 ของหน้าแนวคิด",
+                    c: "ตัวชี้เริ่มที่หัวและท้ายแล้วเดินเข้าหากัน และทุกครั้งที่ขยับ เราตอบได้ว่าทำไมคู่ที่ทิ้งไปไม่มีทางดีกว่า ซึ่งตรงกับเงื่อนไขในส่วนที่ 3 ของหน้าแนวคิดพอดี · สังเกตว่าข้อนี้ไม่ต้องเรียงข้อมูลก่อน เพราะเหตุผลในการตัดทิ้งมาจากความสูงที่จำกัดพื้นที่ ไม่ได้มาจากลำดับของค่า",
                   },
                 ],
               },
@@ -2380,36 +2356,32 @@ return ops`,
                     c: "ไอเดียหนึ่งบรรทัด: เลข x จับได้กับ k − x เท่านั้น จึงไม่มีอะไรต้องเลือก — แค่จับให้ครบทุกคู่ที่มีอยู่ ทำได้ทั้งด้วย two pointers บน array ที่ sort แล้ว หรือด้วยการนับด้วย dict",
                   },
                   {
-                    t: "codeout",
+                    t: "code",
                     lang: "python",
-                    label: "เฉลยที่ 1 (Python) — Two Pointers",
-                    code: `def max_operations(nums: list[int], k: int) -> int:
-    nums.sort()                            # (1) two pointers ต้องการ array ที่เรียงแล้ว
-    left, right = 0, len(nums) - 1
-    ops = 0
-    while left < right:                    # (2) ยังมีเลขเหลือให้จับอย่างน้อย 2 ตัว
-        total = nums[left] + nums[right]
-        if total == k:                     # (3) เจอคู่
-            ops += 1
-            left += 1                      # (4) เอาทั้งสองตัวออก
-            right -= 1
-        elif total < k:                    # (5) น้อยไป -> ต้องการค่าซ้ายที่ใหญ่ขึ้น
-            left += 1
-        else:                              # (6) มากไป -> ต้องการค่าขวาที่เล็กลง
-            right -= 1
-    return ops
+                    label: "คำตอบที่ 1 สำหรับวางใน LeetCode — Two Pointers (ตรงตามหมวดนี้)",
+                    c: `class Solution:
+    def maxOperations(self, nums: List[int], k: int) -> int:
+        nums.sort()                        # (1) แบบที่ 1 ต้องการข้อมูลที่เรียงแล้ว
+        left, right = 0, len(nums) - 1
+        ops = 0
 
+        while left < right:                # (2) ยังเหลือเลขให้จับอย่างน้อย 2 ตัว
+            total = nums[left] + nums[right]
+            if total == k:                 # (3) เจอคู่
+                ops += 1
+                left += 1                  # (4) เอาออกทั้งสองตัว
+                right -= 1
+            elif total < k:                # (5) น้อยไป ต้องการค่าซ้ายที่ใหญ่ขึ้น
+                left += 1
+            else:                          # (6) มากไป ต้องการค่าขวาที่เล็กลง
+                right -= 1
 
-print(max_operations([1, 2, 3, 4], 5))
-print(max_operations([3, 1, 3, 4, 3], 6))
-print(max_operations([2, 2, 2, 3], 4))
-print(max_operations([1], 2))
-print(max_operations([1, 1, 1, 1], 2))`,
-                    out: `2
-1
-1
-0
-2`,
+        return ops`,
+                  },
+                  {
+                    t: "callout",
+                    title: "นี่คือแบบที่ 1 ของหน้าแนวคิด",
+                    c: "ข้อนี้เรียงข้อมูลก่อนได้เพราะโจทย์ขอแค่ จำนวนคู่ ไม่ได้ขอตำแหน่งเดิม ซึ่งตรงกับคำถามคัดกรองข้อแรกในส่วนที่ 6 ของหน้าแนวคิดพอดี · ถ้าโจทย์เปลี่ยนเป็นขอตำแหน่งของคู่ ท่านี้จะใช้ไม่ได้ทันที และต้องเปลี่ยนไปใช้ hash map",
                   },
                   {
                     t: "table",
@@ -2452,51 +2424,28 @@ print(max_operations([1, 1, 1, 1], 2))`,
                     c: 'ทำไม greedy นี้ให้จำนวนคู่มากที่สุดจริง: เพราะ "ใครจับกับใครได้" ในโจทย์นี้แยกเป็นกลุ่มเล็ก ๆ ที่ไม่เกี่ยวกันเลย — ค่า x เกี่ยวกับ k − x เท่านั้น ถ้าค่า x มี a ตัวและ k − x มี b ตัว จำนวนคู่ในกลุ่มนั้นคือ min(a, b) ตายตัว ไม่มีการเลือกที่ทำให้ดีกว่านี้ได้ (กรณีพิเศษ x = k − x ได้ a หาร 2 แบบปัดลง คู่)',
                   },
                   {
-                    t: "codeout",
+                    t: "code",
                     lang: "python",
-                    label: "เฉลยที่ 2 (Python) — นับด้วย dict ธรรมดา",
-                    code: `def max_operations(nums: list[int], k: int) -> int:
-    """เฉลยที่ 1 (two pointers) — ยกมาซ้ำเพื่อให้บล็อกนี้รันได้เองทั้งก้อน"""
-    nums.sort()
-    left, right = 0, len(nums) - 1
-    ops = 0
-    while left < right:
-        total = nums[left] + nums[right]
-        if total == k:
-            ops += 1
-            left += 1
-            right -= 1
-        elif total < k:
-            left += 1
-        else:
-            right -= 1
-    return ops
+                    label: "คำตอบที่ 2 สำหรับวางใน LeetCode — นับด้วย dict (ไม่ใช่ท่าของหมวดนี้)",
+                    c: `class Solution:
+    def maxOperations(self, nums: List[int], k: int) -> int:
+        need = {}                          # ค่าที่ยัง "รอคู่" -> เหลือกี่ตัว
+        ops = 0
 
+        for x in nums:
+            if need.get(k - x, 0) > 0:     # มีตัวที่รอจับกับ x อยู่ไหม
+                need[k - x] -= 1           # ใช้มันไปหนึ่งตัว เท่ากับจับคู่สำเร็จ
+                ops += 1
+            else:
+                need[x] = need.get(x, 0) + 1   # ยังไม่มีคู่ ให้ x เข้าคิวรอ
 
-def max_operations_hash(nums: list[int], k: int) -> int:
-    need = {}                      # ค่าที่ยัง "รอคู่" -> เหลือกี่ตัว
-    ops = 0
-    for x in nums:
-        if need.get(k - x, 0) > 0:   # มีตัวที่รอจับกับ x อยู่ไหม (ถ้าไม่เคยมี key นี้ ถือว่า 0)
-            need[k - x] -= 1          # ใช้มันไปหนึ่งตัว (= เอาออก)
-            ops += 1
-        else:
-            need[x] = need.get(x, 0) + 1   # ยังไม่มีคู่ ให้ x เข้าคิวรอ
-    return ops
-
-
-tests = [([1, 2, 3, 4], 5), ([3, 1, 3, 4, 3], 6), ([2, 2, 2, 3], 4),
-         ([1], 2), ([1, 1, 1, 1], 2),
-         ([4, 4, 1, 3, 1, 3, 2, 2, 5, 5, 1, 5, 2, 5, 5, 5, 1, 5, 5, 5, 2,
-           4, 4, 4, 4, 3, 3], 6)]
-for nums, k in tests:
-    print(max_operations_hash(nums, k), max_operations(nums[:], k))`,
-                    out: `2 2
-1 1
-1 1
-0 0
-2 2
-10 10`,
+        return ops`,
+                  },
+                  {
+                    t: "callout",
+                    title: "ทำไมเอาคำตอบที่ 2 มาให้ดูด้วย",
+                    warn: true,
+                    c: "คำตอบที่ 2 เร็วกว่าเพราะไม่ต้องเรียงข้อมูล จึงเป็น O(n) แทน O(n log n) แต่มัน ไม่ใช่ท่าของหมวดนี้ · ถ้ากำลังฝึกหมวด Two Pointers ให้ส่งคำตอบที่ 1 เพราะเป้าหมายคือฝึกท่าให้ติดมือ ไม่ใช่หาโค้ดที่เร็วที่สุด · เก็บคำตอบที่ 2 ไว้เป็นตัวเทียบ แล้วจะเจอท่านี้เต็ม ๆ อีกครั้งในหมวด Hash Map / Set",
                   },
                   {
                     t: "p",

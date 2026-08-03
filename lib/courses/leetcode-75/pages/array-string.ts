@@ -1679,6 +1679,7 @@ str1='LEET' str2='CODE' | ลอง 'LEET': หาร str1 ได้? True ห�
             {
               t: "code",
               lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
               c: `import math
 
 class Solution:
@@ -1698,6 +1699,7 @@ class Solution:
             {
               t: "code",
               lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
               c: `import math
 
 class Solution:
@@ -1984,7 +1986,7 @@ candies หลัง: [5, 6, 8, 4, 6] <- ลิสต์ต้นฉบับถ
               lang: "python",
               label: "คำตอบ",
               c: `class Solution:
-    def kidsWithCandies(self, candies: list[int], extraCandies: int) -> list[bool]:
+    def kidsWithCandies(self, candies: List[int], extraCandies: int) -> List[bool]:
         best = max(candies)     # เกณฑ์ หาครั้งเดียวก่อนเข้าลูป เพราะไม่เคยเปลี่ยน
 
         # >= เพราะโจทย์นับ "เท่ากับคนที่มากที่สุด" ว่าใช่ด้วย
@@ -2324,7 +2326,7 @@ bed=[1, 0, 0, 0, 1] | อ่าน bed[i-1] ตรง ๆ ปลูกได้ 
               lang: "python",
               label: "คำตอบ",
               c: `class Solution:
-    def canPlaceFlowers(self, flowerbed: list[int], n: int) -> bool:
+    def canPlaceFlowers(self, flowerbed: List[int], n: int) -> bool:
         if n == 0:
             return True                     # ไม่ต้องปลูกอะไรเลย ก็ถือว่าได้
 
@@ -3208,8 +3210,9 @@ suffix = [24, 12, 4, 1]
             {
               t: "code",
               lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
               c: `class Solution:
-    def productExceptSelf(self, nums: list[int]) -> list[int]:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
         n = len(nums)
         prefix = [1] * n              # prefix[i] = ผลคูณของทุกตัว "ก่อน" i
         suffix = [1] * n              # suffix[i] = ผลคูณของทุกตัว "หลัง" i
@@ -3226,8 +3229,9 @@ suffix = [24, 12, 4, 1]
             {
               t: "code",
               lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
               c: `class Solution:
-    def productExceptSelf(self, nums: list[int]) -> list[int]:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
         n = len(nums)
         answer = [1] * n
 
@@ -3535,7 +3539,7 @@ nums=[2,1,5,0,4,6] -> True`,
               lang: "python",
               label: "คำตอบ",
               c: `class Solution:
-    def increasingTriplet(self, nums: list[int]) -> bool:
+    def increasingTriplet(self, nums: List[int]) -> bool:
         first = second = float("inf")   # ยังไม่เจออะไร ตั้งเป็นค่าใหญ่สุดไว้ก่อน
 
         for x in nums:
@@ -3869,7 +3873,7 @@ print('สังเกตว่า 12 ถูกแยกเป็น "1" กั�
               lang: "python",
               label: "คำตอบ",
               c: `class Solution:
-    def compress(self, chars: list[str]) -> int:
+    def compress(self, chars: List[str]) -> int:
         write = 0                 # ตำแหน่งที่จะเขียนผลลัพธ์ตัวถัดไป
         read = 0                  # ตำแหน่งที่กำลังอ่านของเดิม
         n = len(chars)
