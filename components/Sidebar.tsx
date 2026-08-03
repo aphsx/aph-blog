@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { COURSE_MAP } from "@/lib/courses";
 import { courseFromPathname, isPagePath, pagePath } from "@/lib/paths";
 
@@ -22,6 +23,7 @@ function NavLink({
     <Link
       href={href}
       onClick={onNavigate}
+      data-active={active ? "true" : undefined}
       className={`block rounded-sm py-[0.375rem] pl-3 pr-2 text-[0.875rem] leading-[1.4] no-underline transition-colors hover:no-underline ${
         active
           ? "font-semibold text-primary"
@@ -31,6 +33,10 @@ function NavLink({
       {title}
     </Link>
   );
+}
+
+function scrollStorageKey(courseId: string) {
+  return `aph-sidebar-scroll:${courseId}`;
 }
 
 export default function Sidebar({
@@ -43,14 +49,58 @@ export default function Sidebar({
   const pathname = usePathname();
   const courseId = courseFromPathname(pathname);
   const course = courseId ? COURSE_MAP[courseId] : undefined;
+  const asideRef = useRef<HTMLElement>(null);
+
+  // Restore sidebar scroll after remount; keep the active item in view.
+  useEffect(() => {
+    if (!courseId) return;
+    const el = asideRef.current;
+    if (!el) return;
+
+    const saved = sessionStorage.getItem(scrollStorageKey(courseId));
+    if (saved != null) {
+      const y = Number(saved);
+      if (!Number.isNaN(y)) el.scrollTop = y;
+    }
+
+    // If the active link ended up outside the viewport, nudge just enough.
+    const active = el.querySelector<HTMLElement>("[data-active='true']");
+    active?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [courseId, pathname]);
+
+  // Persist scroll while the user scrolls the sidebar.
+  useEffect(() => {
+    if (!courseId) return;
+    const el = asideRef.current;
+    if (!el) return;
+
+    let frame = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        sessionStorage.setItem(
+          scrollStorageKey(courseId),
+          String(el.scrollTop),
+        );
+      });
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      sessionStorage.setItem(scrollStorageKey(courseId), String(el.scrollTop));
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, [courseId]);
 
   // No sidebar on the blog home (or any non-course route).
-  if (!course) return null;
+  if (!course || !courseId) return null;
 
   const nav = course.nav;
 
   return (
     <aside
+      ref={asideRef}
       className={`doc-sticky-top sticky h-[calc(100vh-var(--doc-sticky-top))] w-[300px] shrink-0 overflow-y-auto border-r border-border bg-white pb-12 pt-3 max-[996px]:fixed max-[996px]:left-0 max-[996px]:top-[var(--doc-sticky-top)] max-[996px]:z-40 max-[996px]:shadow-[4px_0_24px_rgba(0,0,0,0.1)] max-[996px]:transition-transform max-[996px]:duration-200 ${
         open ? "max-[996px]:translate-x-0" : "max-[996px]:-translate-x-full"
       }`}
