@@ -1460,116 +1460,152 @@ dict.fromkeys     : 36960 bytes`,
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC2215): กำหนด array จำนวนเต็มแบบ 0-indexed สองตัวคือ nums1 และ nums2 ให้ return ผลลัพธ์เป็น array ขนาด 2 ชื่อ answer โดย answer[0] คือ list ของค่าจำนวนเต็มที่ distinct (ไม่ซ้ำกัน) ทั้งหมดใน nums1 ที่ไม่ปรากฏใน nums2 และ answer[1] คือ list ของค่าจำนวนเต็มที่ distinct ทั้งหมดใน nums2 ที่ไม่ปรากฏใน nums1 ลำดับของค่าใน list แต่ละอันไม่มีผลต่อความถูกต้องของคำตอบ" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "nums1 = [1, 2, 3], nums2 = [2, 4, 6]",
-                    output: "[[1, 3], [4, 6]]",
-                    explain: "1 และ 3 อยู่ใน nums1 แต่ไม่อยู่ใน nums2 ส่วน 4 และ 6 อยู่ใน nums2 แต่ไม่อยู่ใน nums1",
-                  },
-                  {
-                    input: "nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]",
-                    output: "[[3], []]",
-                    explain: "มีแค่ 3 ที่อยู่ใน nums1 แต่ไม่อยู่ใน nums2 (นับครั้งเดียวเพราะต้อง distinct) ส่วนทุกค่าใน nums2 มีอยู่ใน nums1 ครบแล้ว answer[1] จึงว่าง",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= nums1.length, nums2.length <= 1000",
-                "-1000 <= nums1[i], nums2[i] <= 1000",
-                ],
-              },
+        { t: "p", c: "โจทย์ (LC2215): กำหนด array จำนวนเต็มแบบ 0-indexed สองตัวคือ nums1 และ nums2 ให้ return ผลลัพธ์เป็น array ขนาด 2 ชื่อ answer โดย answer[0] คือ list ของค่าจำนวนเต็มที่ distinct (ไม่ซ้ำกัน) ทั้งหมดใน nums1 ที่ไม่ปรากฏใน nums2 และ answer[1] คือ list ของค่าจำนวนเต็มที่ distinct ทั้งหมดใน nums2 ที่ไม่ปรากฏใน nums1 ลำดับของค่าใน list แต่ละอันไม่มีผลต่อความถูกต้องของคำตอบ" },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums1 = [1, 2, 3], nums2 = [2, 4, 6]",
+              output: "[[1, 3], [4, 6]]",
+              explain: "1 และ 3 อยู่ใน nums1 แต่ไม่อยู่ใน nums2 ส่วน 4 และ 6 อยู่ใน nums2 แต่ไม่อยู่ใน nums1",
+            },
+            {
+              input: "nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]",
+              output: "[[3], []]",
+              explain: "มีแค่ 3 ที่อยู่ใน nums1 แต่ไม่อยู่ใน nums2 (นับครั้งเดียวเพราะต้อง distinct) ส่วนทุกค่าใน nums2 มีอยู่ใน nums1 ครบแล้ว answer[1] จึงว่าง",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums1.length, nums2.length <= 1000",
+            "-1000 <= nums1[i], nums2[i] <= 1000",
+          ],
+        },
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "โจทย์นี้พูดถึง ค่าไม่ซ้ำ และ อยู่ในกองนี้แต่ไม่อยู่ในอีกกอง ซึ่งตรงกับนิยามของ set เป๊ะ ๆ เพราะ set ตัด duplicate (ตัวซ้ำ) ให้อัตโนมัติและมี operator (ตัวดำเนินการ) difference ในตัว" },
-              { t: "p", c: "ถ้าไม่ใช้ set แล้วเช็คด้วย if x in nums2 บน list ตรง ๆ การเช็คแต่ละครั้งจะเป็น O(n) ทำให้รวมกลายเป็น O(n^2) การ convert (แปลง) เป็น set ก่อนจึงคุ้มมาก เพราะ check membership เหลือ O(1)" },
-              { t: "ol", c: [
-                "convert nums1 เป็น set s1 และ nums2 เป็น set s2 (ตัด duplicate ในตัว)",
-                "หา s1 - s2 = ค่าที่อยู่ใน s1 แต่ไม่อยู่ใน s2",
-                "หา s2 - s1 = ค่าที่อยู่ใน s2 แต่ไม่อยู่ใน s1",
-                "return ผลลัพธ์เป็น array สองชั้น โดย convert set กลับเป็น list",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าลืมว่าต้องทำ difference ทั้ง สองทิศทาง (s1-s2 และ s2-s1) คนละค่ากัน และเพราะโจทย์บอกว่าลำดับไม่สำคัญ จึงไม่ต้องกังวลว่า list(set) จะเรียงยังไง" },
+        { t: "h2", c: "ทำความเข้าใจโจทย์" },
+        { t: "p", c: "โจทย์นี้พูดถึง ค่าไม่ซ้ำ และ อยู่ในกองนี้แต่ไม่อยู่ในอีกกอง ซึ่งตรงกับนิยามของ set เป๊ะ ๆ เพราะ set ตัด duplicate (ตัวซ้ำ) ให้อัตโนมัติและมี operator (ตัวดำเนินการ) difference ในตัว" },
+        { t: "p", c: "ถ้าไม่ใช้ set แล้วเช็คด้วย if x in nums2 บน list ตรง ๆ การเช็คแต่ละครั้งจะเป็น O(n) ทำให้รวมกลายเป็น O(n^2) การ convert (แปลง) เป็น set ก่อนจึงคุ้มมาก เพราะ check membership เหลือ O(1)" },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_difference(nums1, nums2):
+        { t: "h2", c: "แนวทาง" },
+        {
+          t: "ol",
+          c: [
+            "convert nums1 เป็น set s1 และ nums2 เป็น set s2 (ตัด duplicate ในตัว)",
+            "หา s1 - s2 = ค่าที่อยู่ใน s1 แต่ไม่อยู่ใน s2",
+            "หา s2 - s1 = ค่าที่อยู่ใน s2 แต่ไม่อยู่ใน s1",
+            "return ผลลัพธ์เป็น array สองชั้น โดย convert set กลับเป็น list",
+          ],
+        },
+        { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าลืมว่าต้องทำ difference ทั้ง สองทิศทาง (s1-s2 และ s2-s1) คนละค่ากัน และเพราะโจทย์บอกว่าลำดับไม่สำคัญ จึงไม่ต้องกังวลว่า list(set) จะเรียงยังไง" },
+
+        { t: "h2", c: "ไล่ทีละสเต็ป — nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]" },
+        {
+          t: "ol",
+          c: [
+            "แปลงเป็น set: s1 = {1, 2, 3} (เลข 3 ซ้ำถูกยุบเหลือตัวเดียว), s2 = {1, 2}",
+            "s1 − s2 = {1, 2, 3} − {1, 2} = {3}",
+            "s2 − s1 = {1, 2} − {1, 2, 3} = ∅ (เซตว่าง)",
+            "แปลงกลับเป็น list → คำตอบ [[3], []]",
+          ],
+        },
+        { t: "p", c: "เคสพิเศษ: ถ้าสองกองหน้าตาเหมือนกันเป๊ะ เช่น nums1 = [1, 2], nums2 = [1, 2] ทั้งสองทิศทางได้เซตว่าง → [[], []] ซึ่งถูกต้องตามโจทย์ และเลขติดลบก็ใช้ set ได้ปกติ" },
+
+        { t: "h2", c: "โค้ด" },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
+          code: `def find_difference(nums1, nums2):
     s1, s2 = set(nums1), set(nums2)  # ตัดตัวซ้ำของแต่ละกอง
     # s1 - s2 = อยู่ใน s1 แต่ไม่อยู่ใน s2
     # s2 - s1 = อยู่ใน s2 แต่ไม่อยู่ใน s1
     return [list(s1 - s2), list(s2 - s1)]
 
 print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
-print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`, out: `[[1, 3], [4, 6]]
-[[3], []]` },
-                { t: "p", c: "เมื่อ convert เป็น set ปัญหาเรื่องค่าไม่ซ้ำถูกจัดการให้อัตโนมัติ ที่เหลือคือใช้ operator difference (เครื่องหมายลบระหว่าง set) ซึ่งคืน element (สมาชิก) ที่อยู่ในฝั่งซ้ายแต่ไม่อยู่ฝั่งขวา ทำสองทิศทางก็ได้คำตอบครบ" },
-                { t: "p", c: "ถ้าลองเปลี่ยนไปทำบน list โดยไม่ convert เป็น set ก่อน นอกจากจะช้าเป็น O(n^2) แล้ว ยังต้องเขียนโค้ดตัด duplicate เองอีก ซึ่ง set จัดการให้หมดในบรรทัดเดียว" },
-                { t: "p", c: "Time O(n + m) convert สอง array เป็น set และทำ difference · Space O(n + m) เก็บสอง set" },
-              ] },
+print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
+          out: `[[1, 3], [4, 6]]
+[[3], []]`,
+        },
+        { t: "p", c: "เมื่อ convert เป็น set ปัญหาเรื่องค่าไม่ซ้ำถูกจัดการให้อัตโนมัติ ที่เหลือคือใช้ operator difference (เครื่องหมายลบระหว่าง set) ซึ่งคืน element (สมาชิก) ที่อยู่ในฝั่งซ้ายแต่ไม่อยู่ฝั่งขวา ทำสองทิศทางก็ได้คำตอบครบ" },
+        { t: "p", c: "ถ้าลองเปลี่ยนไปทำบน list โดยไม่ convert เป็น set ก่อน นอกจากจะช้าเป็น O(n^2) แล้ว ยังต้องเขียนโค้ดตัด duplicate เองอีก ซึ่ง set จัดการให้หมดในบรรทัดเดียว" },
+        { t: "p", c: "Time O(n + m) convert สอง array เป็น set และทำ difference · Space O(n + m) เก็บสอง set" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "เจอโจทย์ที่พูดถึง อยู่ในกองนี้แต่ไม่อยู่ในกองนั้น หรือ ค่าที่ต่างกัน ให้นึกถึง set difference ทันที และ operator & | - ของ set ช่วยเขียน set logic (ตรรกะเซต) ให้สั้นและเร็ว" },
+        { t: "callout", title: "💡 สรุป pattern", c: "เจอโจทย์ที่พูดถึง อยู่ในกองนี้แต่ไม่อยู่ในกองนั้น หรือ ค่าที่ต่างกัน ให้นึกถึง set difference ทันที และ operator & | - ของ set ช่วยเขียน set logic (ตรรกะเซต) ให้สั้นและเร็ว" },
       ],
       en: [
-    {
-      t: "p",
-      c: "Given two 0-indexed integer arrays nums1 and nums2, return a list answer of size 2 where:\n\n• answer[0] is a list of all distinct integers in nums1 which are not present in nums2.\n• answer[1] is a list of all distinct integers in nums2 which are not present in nums1.\n\nNote that the integers in the lists may be returned in any order.",
-    },
-    {
-      t: "example",
-      c: [
         {
-          input: "nums1 = [1,2,3], nums2 = [2,4,6]",
-          output: "[[1,3],[4,6]]",
-          explain:
-            "For nums1, nums1[1] = 2 is present at index 0 of nums2, whereas nums1[0] = 1 and nums1[2] = 3 are not present in nums2. Therefore, answer[0] = [1,3]. For nums2, nums2[0] = 2 is present at index 1 of nums1, whereas nums2[1] = 4 and nums2[2] = 6 are not present in nums1. Therefore, answer[1] = [4,6].",
+          t: "p",
+          c: "Given two 0-indexed integer arrays nums1 and nums2, return a list answer of size 2 where:\n\n• answer[0] is a list of all distinct integers in nums1 which are not present in nums2.\n• answer[1] is a list of all distinct integers in nums2 which are not present in nums1.\n\nNote that the integers in the lists may be returned in any order.",
         },
         {
-          input: "nums1 = [1,2,3,3], nums2 = [1,1,2,2]",
-          output: "[[3],[]]",
-          explain:
-            "For nums1, nums1[2] and nums1[3] are not present in nums2. Since nums1[2] == nums1[3], their value is only included once and answer[0] = [3]. Every integer in nums2 is present in nums1. Therefore, answer[1] = [].",
+          t: "example",
+          c: [
+            {
+              input: "nums1 = [1,2,3], nums2 = [2,4,6]",
+              output: "[[1,3],[4,6]]",
+              explain:
+                "For nums1, nums1[1] = 2 is present at index 0 of nums2, whereas nums1[0] = 1 and nums1[2] = 3 are not present in nums2. Therefore, answer[0] = [1,3]. For nums2, nums2[0] = 2 is present at index 1 of nums1, whereas nums2[1] = 4 and nums2[2] = 6 are not present in nums1. Therefore, answer[1] = [4,6].",
+            },
+            {
+              input: "nums1 = [1,2,3,3], nums2 = [1,1,2,2]",
+              output: "[[3],[]]",
+              explain:
+                "For nums1, nums1[2] and nums1[3] are not present in nums2. Since nums1[2] == nums1[3], their value is only included once and answer[0] = [3]. Every integer in nums2 is present in nums1. Therefore, answer[1] = [].",
+            },
+          ],
         },
-      ],
-    },
-    {
-      t: "constraints",
-      c: [
-        "1 <= nums1.length, nums2.length <= 1000",
-        "-1000 <= nums1[i], nums2[i] <= 1000",
-      ],
-    },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums1.length, nums2.length <= 1000",
+            "-1000 <= nums1[i], nums2[i] <= 1000",
+          ],
+        },
 
-    { t: "h2", c: "Approach — what to use & how to think" },
-    {
-      t: "p",
-      c: "The problem talks about unique values and “in this set but not that set,” which matches set semantics exactly: sets drop duplicates automatically and support a difference operator.",
-    },
-    {
-      t: "p",
-      c: "If you skip sets and check with if x in nums2 on a list, each check is O(n) and the whole solution becomes O(n²). Converting to sets first is worth it because membership checks become O(1).",
-    },
-    {
-      t: "ol",
-      c: [
-        "Convert nums1 to set s1 and nums2 to set s2 (dedupes for free)",
-        "Compute s1 - s2 = values in s1 but not in s2",
-        "Compute s2 - s1 = values in s2 but not in s1",
-        "Return a two-element list, converting each set back to a list",
-      ],
-    },
-    {
-      t: "callout",
-      title: "Common pitfalls",
-      c: "Don’t forget difference in both directions (s1-s2 and s2-s1) — they are different. And because order does not matter, you don’t need to worry about how list(set(...)) is ordered.",
-    },
+        { t: "h2", c: "Understand the problem" },
+        {
+          t: "p",
+          c: "The problem talks about unique values and “in this set but not that set,” which matches set semantics exactly: sets drop duplicates automatically and support a difference operator.",
+        },
+        {
+          t: "p",
+          c: "If you skip sets and check with if x in nums2 on a list, each check is O(n) and the whole solution becomes O(n²). Converting to sets first is worth it because membership checks become O(1).",
+        },
 
-    {
-      t: "details",
-      summary: "▶ Detailed solution (try it yourself first)",
-      c: [
+        { t: "h2", c: "Approach" },
+        {
+          t: "ol",
+          c: [
+            "Convert nums1 to set s1 and nums2 to set s2 (dedupes for free)",
+            "Compute s1 - s2 = values in s1 but not in s2",
+            "Compute s2 - s1 = values in s2 but not in s1",
+            "Return a two-element list, converting each set back to a list",
+          ],
+        },
+        {
+          t: "callout",
+          title: "Common pitfalls",
+          c: "Don’t forget difference in both directions (s1-s2 and s2-s1) — they are different. And because order does not matter, you don’t need to worry about how list(set(...)) is ordered.",
+        },
+
+        { t: "h2", c: "Walkthrough — nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]" },
+        {
+          t: "ol",
+          c: [
+            "Convert to sets: s1 = {1, 2, 3} (duplicate 3 collapses), s2 = {1, 2}",
+            "s1 − s2 = {1, 2, 3} − {1, 2} = {3}",
+            "s2 − s1 = {1, 2} − {1, 2, 3} = ∅ (empty)",
+            "Convert back to lists → [[3], []]",
+          ],
+        },
+        {
+          t: "p",
+          c: "Edge case: identical arrays like nums1 = [1, 2], nums2 = [1, 2] yield empty sets both ways → [[], []], which is correct. Negative numbers work fine in a Python set.",
+        },
+
+        { t: "h2", c: "Code" },
         {
           t: "codeout",
           lang: "python",
@@ -1597,15 +1633,13 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
           t: "p",
           c: "Time O(n + m) to build two sets and compute differences · Space O(n + m) for the two sets",
         },
-      ],
-    },
 
-    {
-      t: "callout",
-      title: "💡 Pattern takeaway",
-      c: "When a problem talks about “in this group but not that group” or “values that differ,” think set difference immediately. The set operators & | - keep set logic short and fast.",
-    },
-  ],
+        {
+          t: "callout",
+          title: "💡 Pattern takeaway",
+          c: "When a problem talks about “in this group but not that group” or “values that differ,” think set difference immediately. The set operators & | - keep set logic short and fast.",
+        },
+      ],
     },
   },
 
@@ -1616,48 +1650,68 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1207): กำหนด array จำนวนเต็ม arr ให้ return true ถ้าจำนวนครั้ง (occurrences) ที่แต่ละค่าปรากฏใน array นี้ไม่ซ้ำกันเลยสักคู่ มิเช่นนั้น return false" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "arr = [1, 2, 2, 1, 1, 3]",
-                    output: "true",
-                    explain: "1 ปรากฏ 3 ครั้ง, 2 ปรากฏ 2 ครั้ง, 3 ปรากฏ 1 ครั้ง — จำนวนครั้ง {3, 2, 1} ไม่มีตัวไหนซ้ำกันเลย",
-                  },
-                  {
-                    input: "arr = [1, 2]",
-                    output: "false",
-                    explain: "ทั้ง 1 และ 2 ต่างปรากฏ 1 ครั้งเท่ากัน จำนวนครั้งจึงซ้ำกัน",
-                  },
-                  {
-                    input: "arr = [3, 5, 7, 7, 5, 5]",
-                    output: "true",
-                    explain: "3 ปรากฏ 1 ครั้ง, 5 ปรากฏ 3 ครั้ง, 7 ปรากฏ 2 ครั้ง — จำนวนครั้งไม่ซ้ำกันเลย",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= arr.length <= 1000",
-                "-1000 <= arr[i] <= 1000",
-                ],
-              },
+        { t: "p", c: "โจทย์ (LC1207): กำหนด array จำนวนเต็ม arr ให้ return true ถ้าจำนวนครั้ง (occurrences) ที่แต่ละค่าปรากฏใน array นี้ไม่ซ้ำกันเลยสักคู่ มิเช่นนั้น return false" },
+        {
+          t: "example",
+          c: [
+            {
+              input: "arr = [1, 2, 2, 1, 1, 3]",
+              output: "true",
+              explain: "1 ปรากฏ 3 ครั้ง, 2 ปรากฏ 2 ครั้ง, 3 ปรากฏ 1 ครั้ง — จำนวนครั้ง {3, 2, 1} ไม่มีตัวไหนซ้ำกันเลย",
+            },
+            {
+              input: "arr = [1, 2]",
+              output: "false",
+              explain: "ทั้ง 1 และ 2 ต่างปรากฏ 1 ครั้งเท่ากัน จำนวนครั้งจึงซ้ำกัน",
+            },
+            {
+              input: "arr = [3, 5, 7, 7, 5, 5]",
+              output: "true",
+              explain: "3 ปรากฏ 1 ครั้ง, 5 ปรากฏ 3 ครั้ง, 7 ปรากฏ 2 ครั้ง — จำนวนครั้งไม่ซ้ำกันเลย",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= arr.length <= 1000",
+            "-1000 <= arr[i] <= 1000",
+          ],
+        },
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "โจทย์แบ่งเป็นสองชั้น ชั้นแรกต้อง count frequency (นับความถี่) ของแต่ละค่า (ใช้ dict/Counter) ชั้นสองต้องเช็คว่า occurrences (ค่าจำนวนครั้ง) เหล่านั้นมี duplicate (ตัวซ้ำ) กันไหม" },
-              { t: "p", c: "ทริกเช็ค duplicate ที่ใช้บ่อยคือเทียบ len ของ list เดิมกับ len ของ set ของมัน ถ้าเท่ากันแปลว่าไม่มีตัวไหนซ้ำ (เพราะ set ตัดตัวซ้ำออก ถ้ามีซ้ำ ขนาดจะหด)" },
-              { t: "ol", c: [
-                "count frequency ด้วย Counter(arr) ได้ dict ที่ key คือค่า value คือ occurrences (จำนวนครั้ง)",
-                "ดึงเฉพาะ occurrences ออกมาด้วย .values()",
-                "เทียบ len ของ occurrences ทั้งหมด กับ len ของ set ของมัน",
-                "เท่ากัน → ไม่มี occurrences ซ้ำ return True มิเช่นนั้น return False",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าเผลอเอา key (ตัวค่า) ไปเช็คแทน occurrences ต้องใช้ .values() ซึ่งเป็น occurrences ไม่ใช่ .keys() เพราะ key ย่อมไม่ซ้ำกันอยู่แล้วโดยธรรมชาติของ dict" },
+        { t: "h2", c: "ทำความเข้าใจโจทย์" },
+        { t: "p", c: "โจทย์แบ่งเป็นสองชั้น ชั้นแรกต้อง count frequency (นับความถี่) ของแต่ละค่า (ใช้ dict/Counter) ชั้นสองต้องเช็คว่า occurrences (ค่าจำนวนครั้ง) เหล่านั้นมี duplicate (ตัวซ้ำ) กันไหม" },
+        { t: "p", c: "ทริกเช็ค duplicate ที่ใช้บ่อยคือเทียบ len ของ list เดิมกับ len ของ set ของมัน ถ้าเท่ากันแปลว่าไม่มีตัวไหนซ้ำ (เพราะ set ตัดตัวซ้ำออก ถ้ามีซ้ำ ขนาดจะหด)" },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
+        { t: "h2", c: "แนวทาง" },
+        {
+          t: "ol",
+          c: [
+            "count frequency ด้วย Counter(arr) ได้ dict ที่ key คือค่า value คือ occurrences (จำนวนครั้ง)",
+            "ดึงเฉพาะ occurrences ออกมาด้วย .values()",
+            "เทียบ len ของ occurrences ทั้งหมด กับ len ของ set ของมัน",
+            "เท่ากัน → ไม่มี occurrences ซ้ำ return True มิเช่นนั้น return False",
+          ],
+        },
+        { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าเผลอเอา key (ตัวค่า) ไปเช็คแทน occurrences ต้องใช้ .values() ซึ่งเป็น occurrences ไม่ใช่ .keys() เพราะ key ย่อมไม่ซ้ำกันอยู่แล้วโดยธรรมชาติของ dict" },
+
+        { t: "h2", c: "ไล่ทีละสเต็ป — arr = [1, 2, 2, 1, 1, 3]" },
+        {
+          t: "ol",
+          c: [
+            "Counter(arr) → {1: 3, 2: 2, 3: 1}",
+            "ดึง .values() ได้ occurrences = [3, 2, 1]",
+            "set([3, 2, 1]) = {1, 2, 3} ขนาดยังเท่าเดิม → ไม่มีตัวซ้ำ → True",
+          ],
+        },
+        { t: "p", c: "เทียบกับ arr = [1, 2]: Counter → {1: 1, 2: 1} · values = [1, 1] · set ยุบเหลือ {1} ขนาดหด → False" },
+
+        { t: "h2", c: "โค้ด" },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
+          code: `from collections import Counter
 
 def unique_occurrences(arr):
     counts = Counter(arr).values()   # จำนวนครั้งของแต่ละค่า เช่น [3, 2, 1]
@@ -1666,73 +1720,87 @@ def unique_occurrences(arr):
 
 print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
 print(unique_occurrences([1, 2]))              # False
-print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)`, out: `True
+print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)`,
+          out: `True
 False
-True` },
-                { t: "p", c: "ชั้นแรก Counter(arr) นับให้อัตโนมัติ แล้ว .values() คืน occurrences ทั้งหมดออกมาเป็นลำดับหนึ่งชุด ชั้นสอง convert ชุดนั้นเป็น set แล้วเทียบขนาด ถ้ามี occurrences ที่ซ้ำกัน set จะยุบตัวลง ขนาดจึงไม่เท่ากับต้นฉบับ" },
-                { t: "p", c: "ถ้าลองเขียนเองแบบไล่เช็คคู่ทุกคู่ของ occurrences จะเป็น O(k^2) แต่ทริก len เทียบ set ทำให้เหลือ O(k) และอ่านง่ายกว่ามาก" },
-                { t: "p", c: "Time O(n) count frequency หนึ่งรอบ สร้าง set หนึ่งรอบ · Space O(n) เก็บ Counter และ set ของ frequency" },
-              ] },
+True`,
+        },
+        { t: "p", c: "ชั้นแรก Counter(arr) นับให้อัตโนมัติ แล้ว .values() คืน occurrences ทั้งหมดออกมาเป็นลำดับหนึ่งชุด ชั้นสอง convert ชุดนั้นเป็น set แล้วเทียบขนาด ถ้ามี occurrences ที่ซ้ำกัน set จะยุบตัวลง ขนาดจึงไม่เท่ากับต้นฉบับ" },
+        { t: "p", c: "ถ้าลองเขียนเองแบบไล่เช็คคู่ทุกคู่ของ occurrences จะเป็น O(k^2) แต่ทริก len เทียบ set ทำให้เหลือ O(k) และอ่านง่ายกว่ามาก" },
+        { t: "p", c: "Time O(n) count frequency หนึ่งรอบ สร้าง set หนึ่งรอบ · Space O(n) เก็บ Counter และ set ของ frequency" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "pattern สองชั้น นับก่อนด้วย Counter แล้วค่อยประมวลผลบน frequency (ค่าความถี่) พบบ่อยมาก และทริก len(x) == len(set(x)) คือวิธีเช็ค duplicate (มีตัวซ้ำไหม) ที่สั้นที่สุด" },
+        { t: "callout", title: "💡 สรุป pattern", c: "pattern สองชั้น นับก่อนด้วย Counter แล้วค่อยประมวลผลบน frequency (ค่าความถี่) พบบ่อยมาก และทริก len(x) == len(set(x)) คือวิธีเช็ค duplicate (มีตัวซ้ำไหม) ที่สั้นที่สุด" },
       ],
       en: [
-    {
-      t: "p",
-      c: "Given an array of integers arr, return true if the number of occurrences of each value in the array is unique or false otherwise.",
-    },
-    {
-      t: "example",
-      c: [
         {
-          input: "arr = [1,2,2,1,1,3]",
-          output: "true",
-          explain:
-            "The value 1 has 3 occurrences, 2 has 2 and 3 has 1. No two values have the same number of occurrences.",
+          t: "p",
+          c: "Given an array of integers arr, return true if the number of occurrences of each value in the array is unique or false otherwise.",
         },
         {
-          input: "arr = [1,2]",
-          output: "false",
+          t: "example",
+          c: [
+            {
+              input: "arr = [1,2,2,1,1,3]",
+              output: "true",
+              explain:
+                "The value 1 has 3 occurrences, 2 has 2 and 3 has 1. No two values have the same number of occurrences.",
+            },
+            {
+              input: "arr = [1,2]",
+              output: "false",
+            },
+            {
+              input: "arr = [-3,0,1,-3,1,1,1,-3,10,0]",
+              output: "true",
+            },
+          ],
         },
         {
-          input: "arr = [-3,0,1,-3,1,1,1,-3,10,0]",
-          output: "true",
+          t: "constraints",
+          c: ["1 <= arr.length <= 1000", "-1000 <= arr[i] <= 1000"],
         },
-      ],
-    },
-    {
-      t: "constraints",
-      c: ["1 <= arr.length <= 1000", "-1000 <= arr[i] <= 1000"],
-    },
 
-    { t: "h2", c: "Approach — what to use & how to think" },
-    {
-      t: "p",
-      c: "Two layers. First, count the frequency of each value (dict/Counter). Second, check whether those occurrence counts themselves have any duplicates.",
-    },
-    {
-      t: "p",
-      c: "A common duplicate check: compare len(list) with len(set(list)). If equal, nothing was duplicated (a set shrinks when duplicates exist).",
-    },
-    {
-      t: "ol",
-      c: [
-        "Count frequencies with Counter(arr) → key = value, value = occurrences",
-        "Pull only the occurrence counts via .values()",
-        "Compare len of those counts with len of their set",
-        "Equal → no duplicate occurrences → return True; else False",
-      ],
-    },
-    {
-      t: "callout",
-      title: "Common pitfalls",
-      c: "Don’t check the keys (the values themselves) instead of the occurrence counts. Use .values(), not .keys() — keys are unique by definition of a dict.",
-    },
+        { t: "h2", c: "Understand the problem" },
+        {
+          t: "p",
+          c: "Two layers. First, count the frequency of each value (dict/Counter). Second, check whether those occurrence counts themselves have any duplicates.",
+        },
+        {
+          t: "p",
+          c: "A common duplicate check: compare len(list) with len(set(list)). If equal, nothing was duplicated (a set shrinks when duplicates exist).",
+        },
 
-    {
-      t: "details",
-      summary: "▶ Detailed solution (try it yourself first)",
-      c: [
+        { t: "h2", c: "Approach" },
+        {
+          t: "ol",
+          c: [
+            "Count frequencies with Counter(arr) → key = value, value = occurrences",
+            "Pull only the occurrence counts via .values()",
+            "Compare len of those counts with len of their set",
+            "Equal → no duplicate occurrences → return True; else False",
+          ],
+        },
+        {
+          t: "callout",
+          title: "Common pitfalls",
+          c: "Don’t check the keys (the values themselves) instead of the occurrence counts. Use .values(), not .keys() — keys are unique by definition of a dict.",
+        },
+
+        { t: "h2", c: "Walkthrough — arr = [1, 2, 2, 1, 1, 3]" },
+        {
+          t: "ol",
+          c: [
+            "Counter(arr) → {1: 3, 2: 2, 3: 1}",
+            ".values() → occurrence counts [3, 2, 1]",
+            "set([3, 2, 1]) = {1, 2, 3} same length → no duplicates → True",
+          ],
+        },
+        {
+          t: "p",
+          c: "Contrast arr = [1, 2]: Counter → {1: 1, 2: 1} · values = [1, 1] · set shrinks to {1} → False",
+        },
+
+        { t: "h2", c: "Code" },
         {
           t: "codeout",
           lang: "python",
@@ -1763,15 +1831,13 @@ True`,
           t: "p",
           c: "Time O(n) one counting pass and one set build · Space O(n) for the Counter and the set of frequencies",
         },
-      ],
-    },
 
-    {
-      t: "callout",
-      title: "💡 Pattern takeaway",
-      c: "Two-layer pattern: count first with Counter, then reason about the frequencies. And len(x) == len(set(x)) is the shortest way to ask “any duplicates?”",
-    },
-  ],
+        {
+          t: "callout",
+          title: "💡 Pattern takeaway",
+          c: "Two-layer pattern: count first with Counter, then reason about the frequencies. And len(x) == len(set(x)) is the shortest way to ask “any duplicates?”",
+        },
+      ],
     },
   },
 
@@ -1782,74 +1848,91 @@ True`,
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: 'โจทย์ (LC1657): กำหนด string สองตัวคือ word1 และ word2 ให้ return true ถ้า word1 และ word2 เป็น close (ใกล้กัน) มิเช่นนั้น return false ทั้งสอง string จะ close กันได้ก็ต่อเมื่อเปลี่ยนจาก string หนึ่งไปเป็นอีก string ได้ด้วย operation สองแบบนี้ (ทำกี่ครั้งก็ได้ กับ string ฝั่งไหนก็ได้): (1) swap ตำแหน่งของ character สองตัวที่มีอยู่จริงใน string (เช่น "abcde" → "aecdb") (2) เปลี่ยนทุกตำแหน่งของ character ตัวหนึ่งที่มีอยู่จริงให้กลายเป็น character อีกตัวที่มีอยู่จริง พร้อมกับสลับกลับพร้อมกัน (เช่น "aacabb" → "bbcbaa" คือเปลี่ยน a ทั้งหมดเป็น b และ b ทั้งหมดเป็น a พร้อมกัน)' },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: 'word1 = "abc", word2 = "bca"',
-                    output: "true",
-                    explain: 'เปลี่ยน "abc" เป็น "bca" ได้ด้วยการ swap ตำแหน่ง character เท่านั้น',
-                  },
-                  {
-                    input: 'word1 = "a", word2 = "aa"',
-                    output: "false",
-                    explain: "ความยาวไม่เท่ากัน character set และกอง frequency จึงต่างกันไปด้วย เป็น close กันไม่ได้",
-                  },
-                  {
-                    input: 'word1 = "cabbba", word2 = "abbccc"',
-                    output: "true",
-                    explain: "ทั้งสอง string ใช้ character set {a, b, c} เดียวกัน และกอง frequency ตรงกัน (สลับ frequency ระหว่าง a กับ c ได้)",
-                  },
-                  {
-                    input: 'word1 = "cabbba", word2 = "aabbss"',
-                    output: "false",
-                    explain: "แม้กอง frequency จะเรียงเท่ากัน แต่ character set ต่างกัน ({a, b, c} กับ {a, b, s}) จึงไม่ close",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= word1.length, word2.length <= 10^5",
-                "word1 และ word2 เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
-                ],
-              },
+        { t: "p", c: 'โจทย์ (LC1657): กำหนด string สองตัวคือ word1 และ word2 ให้ return true ถ้า word1 และ word2 เป็น close (ใกล้กัน) มิเช่นนั้น return false ทั้งสอง string จะ close กันได้ก็ต่อเมื่อเปลี่ยนจาก string หนึ่งไปเป็นอีก string ได้ด้วย operation สองแบบนี้ (ทำกี่ครั้งก็ได้ กับ string ฝั่งไหนก็ได้): (1) swap ตำแหน่งของ character สองตัวที่มีอยู่จริงใน string (เช่น "abcde" → "aecdb") (2) เปลี่ยนทุกตำแหน่งของ character ตัวหนึ่งที่มีอยู่จริงให้กลายเป็น character อีกตัวที่มีอยู่จริง พร้อมกับสลับกลับพร้อมกัน (เช่น "aacabb" → "bbcbaa" คือเปลี่ยน a ทั้งหมดเป็น b และ b ทั้งหมดเป็น a พร้อมกัน)' },
+        {
+          t: "example",
+          c: [
+            {
+              input: 'word1 = "abc", word2 = "bca"',
+              output: "true",
+              explain: 'เปลี่ยน "abc" เป็น "bca" ได้ด้วยการ swap ตำแหน่ง character เท่านั้น',
+            },
+            {
+              input: 'word1 = "a", word2 = "aa"',
+              output: "false",
+              explain: "ความยาวไม่เท่ากัน character set และกอง frequency จึงต่างกันไปด้วย เป็น close กันไม่ได้",
+            },
+            {
+              input: 'word1 = "cabbba", word2 = "abbccc"',
+              output: "true",
+              explain: "ทั้งสอง string ใช้ character set {a, b, c} เดียวกัน และกอง frequency ตรงกัน (สลับ frequency ระหว่าง a กับ c ได้)",
+            },
+            {
+              input: 'word1 = "cabbba", word2 = "aabbss"',
+              output: "false",
+              explain: "แม้กอง frequency จะเรียงเท่ากัน แต่ character set ต่างกัน ({a, b, c} กับ {a, b, s}) จึงไม่ close",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= word1.length, word2.length <= 10^5",
+            "word1 และ word2 เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
+          ],
+        },
 
-              { t: "h2", c: "ทำความเข้าใจโจทย์ — Close หมายความว่าอะไร?" },
-              { t: "p", c: "Close ไม่ใช่ \"คล้ายกันโดยประมาณ\" แต่หมายถึง เปลี่ยนจาก string หนึ่งไปอีก string ได้ด้วย operation สองแบบนี้เท่านั้น (ทำกี่ครั้งก็ได้):" },
-              { t: "ul", c: [
-                'Operation 1 — swap ตัวอักษรสองตำแหน่งใดก็ได้ → ลำดับไม่สำคัญ เหลือแค่ \"มีตัวอะไรบ้าง\"',
-                "Operation 2 — สลับ frequency ของตัว A กับตัว B ทั้งก้อน (ต้องเป็นตัวที่มีอยู่แล้ว) → กองจำนวนครั้งย้ายไปมาระหว่างตัวที่มีอยู่ได้ แต่เสกตัวอักษรใหม่ไม่ได้",
-              ] },
-              { t: "p", c: "อย่าลอง simulate (จำลอง) swap จริง ๆ — search จะระเบิดเป็น factorial (แฟกทอเรียล) ให้แปล operation เป็นเงื่อนไขที่เช็คได้แทน" },
+        { t: "h2", c: "ทำความเข้าใจโจทย์ — Close หมายความว่าอะไร?" },
+        { t: "p", c: "Close ไม่ใช่ \"คล้ายกันโดยประมาณ\" แต่หมายถึง เปลี่ยนจาก string หนึ่งไปอีก string ได้ด้วย operation สองแบบนี้เท่านั้น (ทำกี่ครั้งก็ได้):" },
+        {
+          t: "ul",
+          c: [
+            'Operation 1 — swap ตัวอักษรสองตำแหน่งใดก็ได้ → ลำดับไม่สำคัญ เหลือแค่ \"มีตัวอะไรบ้าง\"',
+            "Operation 2 — สลับ frequency ของตัว A กับตัว B ทั้งก้อน (ต้องเป็นตัวที่มีอยู่แล้ว) → กองจำนวนครั้งย้ายไปมาระหว่างตัวที่มีอยู่ได้ แต่เสกตัวอักษรใหม่ไม่ได้",
+          ],
+        },
+        { t: "p", c: "อย่าลอง simulate (จำลอง) swap จริง ๆ — search จะระเบิดเป็น factorial (แฟกทอเรียล) ให้แปล operation เป็นเงื่อนไขที่เช็คได้แทน" },
 
-              { t: "h2", c: "ถอดรหัสเป็นกฎเหล็ก 3 ข้อ" },
-              { t: "p", c: "จาก operation ทั้งสอง ถอดเป็น checkpoint สามด่าน — ผ่านครบทุกด่านถึงจะ close:" },
-              { t: "ol", c: [
-                "Gate 1 · ความยาวเท่ากัน — len(word1) == len(word2) (swap / remap ความถี่ไม่เปลี่ยนความยาว)",
-                "Gate 2 · ชุดตัวอักษรเดียวกัน — set(word1) == set(word2) (op 2 ย้าย frequency ได้เฉพาะตัวที่มีอยู่แล้ว ห้ามมีตัวแปลกปลอม)",
-                "Gate 3 · pattern ของ frequency เดียวกัน — sorted(Counter(word1).values()) == sorted(Counter(word2).values()) (op 2 ย้ายกองจำนวนได้ จึงเทียบกองตัวเลขหลังเรียง ไม่สนว่าตัวไหนถือจำนวนไหน)",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าข้าม Gate 2 ถ้าเช็คแค่ frequency เรียงเท่ากัน cabbba กับ aabbss จะถูกตอบผิดเป็น True ทั้งที่ตัว s ไม่มีใน word1 เลย — op 2 เสกมันขึ้นมาไม่ได้" },
+        { t: "h2", c: "แนวทาง — ถอดรหัสเป็นกฎเหล็ก 3 ข้อ" },
+        { t: "p", c: "จาก operation ทั้งสอง ถอดเป็น checkpoint สามด่าน — ผ่านครบทุกด่านถึงจะ close:" },
+        {
+          t: "ol",
+          c: [
+            "Gate 1 · ความยาวเท่ากัน — len(word1) == len(word2) (swap / remap ความถี่ไม่เปลี่ยนความยาว)",
+            "Gate 2 · ชุดตัวอักษรเดียวกัน — set(word1) == set(word2) (op 2 ย้าย frequency ได้เฉพาะตัวที่มีอยู่แล้ว ห้ามมีตัวแปลกปลอม)",
+            "Gate 3 · pattern ของ frequency เดียวกัน — sorted(Counter(word1).values()) == sorted(Counter(word2).values()) (op 2 ย้ายกองจำนวนได้ จึงเทียบกองตัวเลขหลังเรียง ไม่สนว่าตัวไหนถือจำนวนไหน)",
+          ],
+        },
+        { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าข้าม Gate 2 ถ้าเช็คแค่ frequency เรียงเท่ากัน cabbba กับ aabbss จะถูกตอบผิดเป็น True ทั้งที่ตัว s ไม่มีใน word1 เลย — op 2 เสกมันขึ้นมาไม่ได้" },
 
-              { t: "h2", c: 'ไล่ทีละสเต็ป — word1 = "cabbba", word2 = "abbccc"' },
-              { t: "p", c: "ไล่สามด่านกับตัวอย่างหลัก:" },
-              { t: "ol", c: [
-                "Gate 1: len(\"cabbba\") = 6, len(\"abbccc\") = 6 → ผ่าน",
-                "Gate 2: set ทั้งคู่ = {a, b, c} → ผ่าน (ไม่มีตัวแปลกปลอม)",
-                "Gate 3: Counter(\"cabbba\") = {c:1, a:2, b:3} · Counter(\"abbccc\") = {a:1, b:2, c:3} → sorted values ทั้งคู่ = [1, 2, 3] → ผ่าน → True",
-              ] },
-              { t: "p", c: "เทียบด่วนกับตัวอย่างอื่น:" },
-              { t: "table", head: ["word1 / word2", "Gate 1 ความยาว", "Gate 2 ชุดตัวอักษร", "Gate 3 frequency", "ผล"], rows: [
-                ["abc / bca", "ผ่าน 3=3", "ผ่าน {a,b,c}", "ผ่าน [1,1,1]", "True"],
-                ["a / aa", "ไม่ผ่าน 1≠2", "—", "—", "False"],
-                ["cabbba / abbccc", "ผ่าน 6=6", "ผ่าน {a,b,c}", "ผ่าน [1,2,3]", "True"],
-                ["cabbba / aabbss", "ผ่าน 6=6", "ไม่ผ่าน {a,b,c}≠{a,b,s}", "(กอง [1,2,3] เท่ากันก็ไร้ประโยชน์)", "False"],
-              ] },
+        { t: "h2", c: 'ไล่ทีละสเต็ป — word1 = "cabbba", word2 = "abbccc"' },
+        { t: "p", c: "ไล่สามด่านกับตัวอย่างหลัก:" },
+        {
+          t: "ol",
+          c: [
+            "Gate 1: len(\"cabbba\") = 6, len(\"abbccc\") = 6 → ผ่าน",
+            "Gate 2: set ทั้งคู่ = {a, b, c} → ผ่าน (ไม่มีตัวแปลกปลอม)",
+            "Gate 3: Counter(\"cabbba\") = {c:1, a:2, b:3} · Counter(\"abbccc\") = {a:1, b:2, c:3} → sorted values ทั้งคู่ = [1, 2, 3] → ผ่าน → True",
+          ],
+        },
+        { t: "p", c: "เทียบด่วนกับตัวอย่างอื่น:" },
+        {
+          t: "table",
+          head: ["word1 / word2", "Gate 1 ความยาว", "Gate 2 ชุดตัวอักษร", "Gate 3 frequency", "ผล"],
+          rows: [
+            ["abc / bca", "ผ่าน 3=3", "ผ่าน {a,b,c}", "ผ่าน [1,1,1]", "True"],
+            ["a / aa", "ไม่ผ่าน 1≠2", "—", "—", "False"],
+            ["cabbba / abbccc", "ผ่าน 6=6", "ผ่าน {a,b,c}", "ผ่าน [1,2,3]", "True"],
+            ["cabbba / aabbss", "ผ่าน 6=6", "ไม่ผ่าน {a,b,c}≠{a,b,s}", "(กอง [1,2,3] เท่ากันก็ไร้ประโยชน์)", "False"],
+          ],
+        },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
+        { t: "h2", c: "โค้ด" },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
+          code: `from collections import Counter
 
 def close_strings(word1, word2):
     # Gate 1: ความยาวต้องเท่ากัน
@@ -1868,120 +1951,119 @@ def close_strings(word1, word2):
 print(close_strings("abc", "bca"))        # True
 print(close_strings("a", "aa"))           # False
 print(close_strings("cabbba", "abbccc"))  # True
-print(close_strings("cabbba", "aabbss"))  # False`, out: `True
+print(close_strings("cabbba", "aabbss"))  # False`,
+          out: `True
 False
 True
-False` },
-                { t: "p", c: "set(word1) เทียบชุดตัวอักษรตรง ๆ อ่านง่ายกว่า set(Counter) ซึ่งเทียบแค่ keys — ผลเดียวกัน ส่วน sorted(...values()) ทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกัน ซึ่งตรงกับอิสระของ operation 2" },
-                { t: "p", c: "ทำไมต้องครบสามด่าน? Gate 1 กรองเคสสั้น ๆ ออกก่อน Gate 2 กันตัวแปลกปลอม (เช่น s แทน c) Gate 3 กันเคสชุดตัวอักษรตรงแต่กองจำนวนจับคู่กันไม่ได้ — ขาดข้อใดข้อหนึ่งคำตอบผิดได้" },
-                { t: "p", c: "Time O(n + k log k) นับ frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter / set ของ character (คงที่ 26 ตัว)" },
-              ] },
+False`,
+        },
+        { t: "p", c: "set(word1) เทียบชุดตัวอักษรตรง ๆ อ่านง่ายกว่า set(Counter) ซึ่งเทียบแค่ keys — ผลเดียวกัน ส่วน sorted(...values()) ทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกัน ซึ่งตรงกับอิสระของ operation 2" },
+        { t: "p", c: "ทำไมต้องครบสามด่าน? Gate 1 กรองเคสสั้น ๆ ออกก่อน Gate 2 กันตัวแปลกปลอม (เช่น s แทน c) Gate 3 กันเคสชุดตัวอักษรตรงแต่กองจำนวนจับคู่กันไม่ได้ — ขาดข้อใดข้อหนึ่งคำตอบผิดได้" },
+        { t: "p", c: "Time O(n + k log k) นับ frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter / set ของ character (คงที่ 26 ตัว)" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate จริง ที่นี่มีสามด่าน: ความยาว · ชุดตัวอักษร · กอง frequency" },
+        { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate จริง ที่นี่มีสามด่าน: ความยาว · ชุดตัวอักษร · กอง frequency" },
       ],
       en: [
-    {
-      t: "p",
-      c: "Two strings are considered close if you can attain one from the other using the following operations:\n\nOperation 1: Swap any two existing characters.\n• For example, abcde -> aecdb\n\nOperation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.\n• For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)\n\nYou can use the operations on either string as many times as necessary.\n\nGiven two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise.",
-    },
-    {
-      t: "example",
-      c: [
         {
-          input: 'word1 = "abc", word2 = "bca"',
-          output: "true",
-          explain:
-            'You can attain word2 from word1 in 2 operations. Apply Operation 1: "abc" -> "acb". Apply Operation 1: "acb" -> "bca".',
+          t: "p",
+          c: "Two strings are considered close if you can attain one from the other using the following operations:\n\nOperation 1: Swap any two existing characters.\n• For example, abcde -> aecdb\n\nOperation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.\n• For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)\n\nYou can use the operations on either string as many times as necessary.\n\nGiven two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise.",
         },
         {
-          input: 'word1 = "a", word2 = "aa"',
-          output: "false",
-          explain:
-            "It is impossible to attain word2 from word1, or vice versa, in any number of operations.",
+          t: "example",
+          c: [
+            {
+              input: 'word1 = "abc", word2 = "bca"',
+              output: "true",
+              explain:
+                'You can attain word2 from word1 in 2 operations. Apply Operation 1: "abc" -> "acb". Apply Operation 1: "acb" -> "bca".',
+            },
+            {
+              input: 'word1 = "a", word2 = "aa"',
+              output: "false",
+              explain:
+                "It is impossible to attain word2 from word1, or vice versa, in any number of operations.",
+            },
+            {
+              input: 'word1 = "cabbba", word2 = "abbccc"',
+              output: "true",
+              explain:
+                'You can attain word2 from word1 in 3 operations. Apply Operation 1: "cabbba" -> "caabbb". Apply Operation 2: "caabbb" -> "baaccc". Apply Operation 2: "baaccc" -> "abbccc".',
+            },
+          ],
         },
         {
-          input: 'word1 = "cabbba", word2 = "abbccc"',
-          output: "true",
-          explain:
-            'You can attain word2 from word1 in 3 operations. Apply Operation 1: "cabbba" -> "caabbb". Apply Operation 2: "caabbb" -> "baaccc". Apply Operation 2: "baaccc" -> "abbccc".',
+          t: "constraints",
+          c: [
+            "1 <= word1.length, word2.length <= 10^5",
+            "word1 and word2 contain only lowercase English letters.",
+          ],
         },
-      ],
-    },
-    {
-      t: "constraints",
-      c: [
-        "1 <= word1.length, word2.length <= 10^5",
-        "word1 and word2 contain only lowercase English letters.",
-      ],
-    },
 
-    { t: "h2", c: "Understand the problem — what does Close mean?" },
-    {
-      t: "p",
-      c: "Close does not mean “roughly similar.” It means you can turn one string into the other using only these two operations (any number of times):",
-    },
-    {
-      t: "ul",
-      c: [
-        "Operation 1 — swap any two character positions → order does not matter; only which letters you have",
-        "Operation 2 — swap frequencies of existing letters A ↔ B as wholes → frequency counts can be remapped among letters that already exist; you cannot invent a new letter",
-      ],
-    },
-    {
-      t: "p",
-      c: "Don’t simulate the swaps — that search blows up factorially. Translate the operations into checkable conditions instead.",
-    },
+        { t: "h2", c: "Understand the problem — what does Close mean?" },
+        {
+          t: "p",
+          c: "Close does not mean “roughly similar.” It means you can turn one string into the other using only these two operations (any number of times):",
+        },
+        {
+          t: "ul",
+          c: [
+            "Operation 1 — swap any two character positions → order does not matter; only which letters you have",
+            "Operation 2 — swap frequencies of existing letters A ↔ B as wholes → frequency counts can be remapped among letters that already exist; you cannot invent a new letter",
+          ],
+        },
+        {
+          t: "p",
+          c: "Don’t simulate the swaps — that search blows up factorially. Translate the operations into checkable conditions instead.",
+        },
 
-    { t: "h2", c: "Decode into 3 hard rules" },
-    {
-      t: "p",
-      c: "From the two operations, extract three checkpoints — all must pass for the strings to be close:",
-    },
-    {
-      t: "ol",
-      c: [
-        "Gate 1 · Same length — len(word1) == len(word2) (swaps / frequency remaps never change length)",
-        "Gate 2 · Same character set — set(word1) == set(word2) (op 2 remaps frequencies only among existing letters; no foreign letters)",
-        "Gate 3 · Same frequency pattern — sorted(Counter(word1).values()) == sorted(Counter(word2).values()) (op 2 can reassign counts, so compare the sorted bags of numbers, not which letter owns which count)",
-      ],
-    },
-    {
-      t: "callout",
-      title: "Common pitfalls",
-      c: "Don’t skip Gate 2. If you only check sorted frequencies, cabbba vs aabbss wrongly returns True even though s never appears in word1 — op 2 cannot invent it.",
-    },
+        { t: "h2", c: "Approach — decode into 3 hard rules" },
+        {
+          t: "p",
+          c: "From the two operations, extract three checkpoints — all must pass for the strings to be close:",
+        },
+        {
+          t: "ol",
+          c: [
+            "Gate 1 · Same length — len(word1) == len(word2) (swaps / frequency remaps never change length)",
+            "Gate 2 · Same character set — set(word1) == set(word2) (op 2 remaps frequencies only among existing letters; no foreign letters)",
+            "Gate 3 · Same frequency pattern — sorted(Counter(word1).values()) == sorted(Counter(word2).values()) (op 2 can reassign counts, so compare the sorted bags of numbers, not which letter owns which count)",
+          ],
+        },
+        {
+          t: "callout",
+          title: "Common pitfalls",
+          c: "Don’t skip Gate 2. If you only check sorted frequencies, cabbba vs aabbss wrongly returns True even though s never appears in word1 — op 2 cannot invent it.",
+        },
 
-    { t: "h2", c: 'Walkthrough — word1 = "cabbba", word2 = "abbccc"' },
-    { t: "p", c: "Run all three gates on the main example:" },
-    {
-      t: "ol",
-      c: [
-        'Gate 1: len("cabbba") = 6, len("abbccc") = 6 → pass',
-        "Gate 2: both sets = {a, b, c} → pass (no foreign letters)",
-        'Gate 3: Counter("cabbba") = {c:1, a:2, b:3} · Counter("abbccc") = {a:1, b:2, c:3} → both sorted values = [1, 2, 3] → pass → True',
-      ],
-    },
-    { t: "p", c: "Quick check on the other examples:" },
-    {
-      t: "table",
-      head: [
-        "word1 / word2",
-        "Gate 1 length",
-        "Gate 2 charset",
-        "Gate 3 frequency",
-        "Result",
-      ],
-      rows: [
-        ["abc / bca", "pass 3=3", "pass {a,b,c}", "pass [1,1,1]", "True"],
-        ["a / aa", "fail 1≠2", "—", "—", "False"],
-        ["cabbba / abbccc", "pass 6=6", "pass {a,b,c}", "pass [1,2,3]", "True"],
-      ],
-    },
+        { t: "h2", c: 'Walkthrough — word1 = "cabbba", word2 = "abbccc"' },
+        { t: "p", c: "Run all three gates on the main example:" },
+        {
+          t: "ol",
+          c: [
+            'Gate 1: len("cabbba") = 6, len("abbccc") = 6 → pass',
+            "Gate 2: both sets = {a, b, c} → pass (no foreign letters)",
+            'Gate 3: Counter("cabbba") = {c:1, a:2, b:3} · Counter("abbccc") = {a:1, b:2, c:3} → both sorted values = [1, 2, 3] → pass → True',
+          ],
+        },
+        { t: "p", c: "Quick check on the other examples:" },
+        {
+          t: "table",
+          head: [
+            "word1 / word2",
+            "Gate 1 length",
+            "Gate 2 charset",
+            "Gate 3 frequency",
+            "Result",
+          ],
+          rows: [
+            ["abc / bca", "pass 3=3", "pass {a,b,c}", "pass [1,1,1]", "True"],
+            ["a / aa", "fail 1≠2", "—", "—", "False"],
+            ["cabbba / abbccc", "pass 6=6", "pass {a,b,c}", "pass [1,2,3]", "True"],
+            ["cabbba / aabbss", "pass 6=6", "fail {a,b,c}≠{a,b,s}", "(freq bag [1,2,3] matches but useless)", "False"],
+          ],
+        },
 
-    {
-      t: "details",
-      summary: "▶ Detailed solution (try it yourself first)",
-      c: [
+        { t: "h2", c: "Code" },
         {
           t: "codeout",
           lang: "python",
@@ -2023,15 +2105,13 @@ False`,
           t: "p",
           c: "Time O(n + k log k) count O(n) and sort at most k = 26 frequencies · Space O(k) for Counters / sets (fixed 26 letters)",
         },
-      ],
-    },
 
-    {
-      t: "callout",
-      title: "💡 Pattern takeaway",
-      c: "Weird operation problems often reduce to invariants — properties that stay true no matter how many times you apply the ops. Check the invariants instead of simulating. Here: same length · same character set · same frequency bag.",
-    },
-  ],
+        {
+          t: "callout",
+          title: "💡 Pattern takeaway",
+          c: "Weird operation problems often reduce to invariants — properties that stay true no matter how many times you apply the ops. Check the invariants instead of simulating. Here: same length · same character set · same frequency bag.",
+        },
+      ],
     },
   },
 
@@ -2045,40 +2125,40 @@ False`,
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC2352): กำหนด integer matrix (เมทริกซ์) grid ขนาด n x n แบบ 0-indexed ให้ return จำนวนคู่ (ri, cj) ที่ row ri และ column cj เท่ากัน คู่ row-column จะถือว่าเท่ากันก็ต่อเมื่อมีสมาชิกเหมือนกันทุกตำแหน่งเรียงตามลำดับเดียวกัน" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "grid = [[3, 2, 1], [1, 7, 6], [2, 7, 7]]",
-                    output: "1",
-                    explain: "มีคู่ที่เท่ากันหนึ่งคู่คือ (row 2, column 1) ซึ่งทั้งคู่เป็น [2, 7, 7]",
-                  },
-                  {
-                    input: "grid = [[3, 1, 2, 2], [1, 4, 4, 5], [2, 4, 2, 2], [2, 4, 2, 2]]",
-                    output: "3",
-                    explain: "มี 3 คู่ที่เท่ากัน: (row 0, column 0) = [3,1,2,2], (row 2, column 2) = [2,4,2,2], (row 3, column 2) = [2,4,2,2]",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "n == grid.length == grid[i].length",
-                "1 <= n <= 200",
-                "1 <= grid[i][j] <= 10^5",
-                ],
-              },
-              { t: "callout", c: "ลำดับของค่าใน row/column สำคัญ [2,7,7] ตรงกับ [2,7,7] เท่านั้น ไม่ตรงกับ [7,2,7] และ row ที่หน้าตาซ้ำกันหลายแถวก็นับเป็นหลาย pair" },
+        { t: "p", c: "โจทย์ (LC2352): กำหนด integer matrix (เมทริกซ์) grid ขนาด n x n แบบ 0-indexed ให้ return จำนวนคู่ (ri, cj) ที่ row ri และ column cj เท่ากัน คู่ row-column จะถือว่าเท่ากันก็ต่อเมื่อมีสมาชิกเหมือนกันทุกตำแหน่งเรียงตามลำดับเดียวกัน" },
+        {
+          t: "example",
+          c: [
+            {
+              input: "grid = [[3, 2, 1], [1, 7, 6], [2, 7, 7]]",
+              output: "1",
+              explain: "มีคู่ที่เท่ากันหนึ่งคู่คือ (row 2, column 1) ซึ่งทั้งคู่เป็น [2, 7, 7]",
+            },
+            {
+              input: "grid = [[3, 1, 2, 2], [1, 4, 4, 5], [2, 4, 2, 2], [2, 4, 2, 2]]",
+              output: "3",
+              explain: "มี 3 คู่ที่เท่ากัน: (row 0, column 0) = [3,1,2,2], (row 2, column 2) = [2,4,2,2], (row 3, column 2) = [2,4,2,2]",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == grid.length == grid[i].length",
+            "1 <= n <= 200",
+            "1 <= grid[i][j] <= 10^5",
+          ],
+        },
+        { t: "callout", c: "ลำดับของค่าใน row/column สำคัญ [2,7,7] ตรงกับ [2,7,7] เท่านั้น ไม่ตรงกับ [7,2,7] และ row ที่หน้าตาซ้ำกันหลายแถวก็นับเป็นหลาย pair" },
 
-              { t: "h2", c: "ทำความเข้าใจโจทย์ — เรากำลังหาอะไร?" },
-              { t: "p", c: "โจทย์ให้ตารางตัวเลขสี่เหลี่ยมจัตุรัสมา หน้าที่ของเราคือ \"นับว่ามีแนวนอนกี่เส้น ที่หน้าตาตัวเลขเหมือนแนวตั้งแบบเป๊ะ ๆ\"" },
-              { t: "p", c: "ลองดูตารางตัวอย่างขนาด 3×3:" },
-              {
-                t: "code",
-                lang: "text",
-                label: "แกะ Row / Col จากตาราง",
-                c: `(แถวที่ 0)    3    2    1
+        { t: "h2", c: "ทำความเข้าใจโจทย์ — เรากำลังหาอะไร?" },
+        { t: "p", c: "โจทย์ให้ตารางตัวเลขสี่เหลี่ยมจัตุรัสมา หน้าที่ของเราคือ \"นับว่ามีแนวนอนกี่เส้น ที่หน้าตาตัวเลขเหมือนแนวตั้งแบบเป๊ะ ๆ\"" },
+        { t: "p", c: "ลองดูตารางตัวอย่างขนาด 3×3:" },
+        {
+          t: "code",
+          lang: "text",
+          label: "แกะ Row / Col จากตาราง",
+          c: `(แถวที่ 0)    3    2    1
 (แถวที่ 1)    1    7    6
 (แถวที่ 2)    2    7    7
 
@@ -2086,27 +2166,38 @@ Row: (3, 2, 1), (1, 7, 6), (2, 7, 7)
 Col: (3, 1, 2), (2, 7, 7), (1, 6, 7)
 
 แนวนอนล่างสุด (2, 7, 7) = แนวตั้งกลาง (2, 7, 7) → นับ 1 คู่`,
-              },
+        },
 
-              { t: "h2", c: "ไอเดียในการแก้ปัญหา — ใช้การ \"จดบัญชี\"" },
-              { t: "p", c: "ถ้าเอาแนวนอนทีละเส้นไปไล่เทียบกับแนวตั้งทีละเส้น มันจะช้าและซับซ้อน ไอเดียที่ดีกว่าคือแบ่งงานเป็น 2 เฟส:" },
-              { t: "ol", c: [
-                "เฟส 1 \"จดบัญชี\": กวาดตามองแนวนอนทุกเส้น แล้วจดลงสมุดบัญชีไว้ว่า \"หน้าตาแบบนี้ โผล่มากี่ครั้ง\"",
-                "เฟส 2 \"ตรวจบัญชี\": กวาดตามองแนวตั้งทีละเส้น แล้วเอาไปถามสมุดบัญชีว่า \"หน้าตาแบบนี้ มีในบัญชีไหม?\" ถ้ามี ก็เอาจำนวนครั้งมาบวกเป็นคะแนน",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ต้อง บวกจำนวน row_count[col] ไม่ใช่บวกทีละหนึ่ง เพราะ row ที่เหมือนกันหลายแถวจับคู่กับ column นี้ได้ทุกแถว ข้อดีของ Counter คือถ้า key ไม่มีจะคืน 0 ให้เอง ไม่ error" },
+        { t: "h2", c: "แนวทาง — ใช้การ \"จดบัญชี\"" },
+        { t: "p", c: "ถ้าเอาแนวนอนทีละเส้นไปไล่เทียบกับแนวตั้งทีละเส้น มันจะช้าและซับซ้อน ไอเดียที่ดีกว่าคือแบ่งงานเป็น 2 เฟส:" },
+        {
+          t: "ol",
+          c: [
+            "เฟส 1 \"จดบัญชี\": กวาดตามองแนวนอนทุกเส้น แล้วจดลงสมุดบัญชีไว้ว่า \"หน้าตาแบบนี้ โผล่มากี่ครั้ง\"",
+            "เฟส 2 \"ตรวจบัญชี\": กวาดตามองแนวตั้งทีละเส้น แล้วเอาไปถามสมุดบัญชีว่า \"หน้าตาแบบนี้ มีในบัญชีไหม?\" ถ้ามี ก็เอาจำนวนครั้งมาบวกเป็นคะแนน",
+          ],
+        },
+        { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ต้อง บวกจำนวน row_count[col] ไม่ใช่บวกทีละหนึ่ง เพราะ row ที่เหมือนกันหลายแถวจับคู่กับ column นี้ได้ทุกแถว ข้อดีของ Counter คือถ้า key ไม่มีจะคืน 0 ให้เอง ไม่ error" },
 
-              { t: "h2", c: "ไล่ทีละสเต็ป — สมุดบัญชีกับคอลัมน์" },
-              { t: "p", c: "หลังเฟส 1 สมุดบัญชีได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1} จากนั้นลูป for j in range(n) ประกอบคอลัมน์ทีละเส้น:" },
-              { t: "table", head: ["j", "col ที่ประกอบได้", "ถามสมุดบัญชี", "pairs สะสม"], rows: [
-                ["0", "(3, 1, 2)", "ไม่มี → 0", "0"],
-                ["1", "(2, 7, 7)", "มี! → 1", "1"],
-                ["2", "(1, 6, 7)", "ไม่มี → 0", "1"],
-              ] },
-              { t: "p", c: "จบลูป คืนค่า pairs = 1 ถูกต้องเป๊ะ" },
+        { t: "h2", c: "ไล่ทีละสเต็ป — สมุดบัญชีกับคอลัมน์" },
+        { t: "p", c: "หลังเฟส 1 สมุดบัญชีได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1} จากนั้นลูป for j in range(n) ประกอบคอลัมน์ทีละเส้น:" },
+        {
+          t: "table",
+          head: ["j", "col ที่ประกอบได้", "ถามสมุดบัญชี", "pairs สะสม"],
+          rows: [
+            ["0", "(3, 1, 2)", "ไม่มี → 0", "0"],
+            ["1", "(2, 7, 7)", "มี! → 1", "1"],
+            ["2", "(1, 6, 7)", "ไม่มี → 0", "1"],
+          ],
+        },
+        { t: "p", c: "จบลูป คืนค่า pairs = 1 ถูกต้องเป๊ะ" },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import Counter
+        { t: "h2", c: "โค้ด" },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
+          code: `from collections import Counter
 
 def equal_pairs(grid):
     # --- เฟสที่ 1: เตรียมสมุดบัญชีจดแนวนอน ---
@@ -2126,81 +2217,85 @@ def equal_pairs(grid):
 
 print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
 print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
-                   [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`, out: `1
-3` },
-                { t: "h3", c: "เฟสที่ 1: เตรียมสมุดบัญชี" },
-                { t: "p", c: "n = len(grid) เช็คขนาดตารางก่อน (เช่น n = 3 คือมี 3 แถว 3 คอลัมน์)" },
-                { t: "p", c: "row_count = Counter(tuple(row) for row in grid) คือการสร้างสมุดบัญชี — ดึงแนวนอนทีละเส้น แปลงเป็น tuple (วงเล็บโค้ง) เพราะ list เป็น key ของ dict ไม่ได้ แล้วให้ Counter นับสถิติ หน้าตาสมุดบัญชีจะได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}" },
-                { t: "p", c: "pairs = 0 สร้างกล่องเปล่าไว้เตรียมใส่คะแนนสะสม" },
-                { t: "h3", c: "เฟสที่ 2: สร้างแนวตั้งมาตรวจบัญชี (จุดสำคัญที่สุด)" },
-                { t: "p", c: "ลูป for j in range(n) ล็อคเป้าไปทีละคอลัมน์ (j คือตำแหน่งคอลัมน์) บรรทัดไฮไลท์คือ:" },
-                {
-                  t: "code",
-                  lang: "python",
-                  label: "ประกอบคอลัมน์ j",
-                  c: `col = tuple(grid[i][j] for i in range(n))`,
-                },
-                { t: "p", c: "บรรทัดนี้ทำงานโดยการล็อคคอลัมน์ j ให้อยู่นิ่ง ๆ แล้วปล่อยให้แถว i วิ่งจากบนลงล่าง สมมติกำลังตรวจคอลัมน์แรก (j = 0):" },
-                { t: "ul", c: [
-                  "i = 0 → หยิบ grid[0][0] ได้เลข 3",
-                  "i = 1 → หยิบ grid[1][0] ได้เลข 1",
-                  "i = 2 → หยิบ grid[2][0] ได้เลข 2",
-                ] },
-                { t: "p", c: "พอวิ่งจบ เอาเลขที่หยิบได้มามัดรวมเป็น tuple ได้ col = (3, 1, 2) — ประกอบแนวตั้งเสร็จแล้ว 1 เส้น" },
-                { t: "h3", c: "จบงาน: เช็คและให้คะแนน" },
-                { t: "p", c: "pairs += row_count[col] — พอได้ col มาแล้ว เอาไปเปิดหาในสมุดบัญชี row_count แนวตั้งเส้นแรก (3, 1, 2) ไม่มีในบัญชี → ได้ 0 แต่พอลูปสร้างแนวตั้งเส้นที่สองได้ (2, 7, 7) มีตรงกันเป๊ะ 1 ครั้ง → บวก 1 เข้า pairs พอลูปทำจนครบทุกคอลัมน์ก็ return pairs" },
-                { t: "p", c: "Time O(n²) เดินอ่านแถว 1 รอบ + ประกอบคอลัมน์ 1 รอบ · Space O(n²) เก็บ tuple ของแถวทั้งหมดใน Counter" },
-              ] },
+                   [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`,
+          out: `1
+3`,
+        },
+        { t: "h3", c: "เฟสที่ 1: เตรียมสมุดบัญชี" },
+        { t: "p", c: "n = len(grid) เช็คขนาดตารางก่อน (เช่น n = 3 คือมี 3 แถว 3 คอลัมน์)" },
+        { t: "p", c: "row_count = Counter(tuple(row) for row in grid) คือการสร้างสมุดบัญชี — ดึงแนวนอนทีละเส้น แปลงเป็น tuple (วงเล็บโค้ง) เพราะ list เป็น key ของ dict ไม่ได้ แล้วให้ Counter นับสถิติ หน้าตาสมุดบัญชีจะได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}" },
+        { t: "p", c: "pairs = 0 สร้างกล่องเปล่าไว้เตรียมใส่คะแนนสะสม" },
+        { t: "h3", c: "เฟสที่ 2: สร้างแนวตั้งมาตรวจบัญชี (จุดสำคัญที่สุด)" },
+        { t: "p", c: "ลูป for j in range(n) ล็อคเป้าไปทีละคอลัมน์ (j คือตำแหน่งคอลัมน์) บรรทัดไฮไลท์คือ:" },
+        {
+          t: "code",
+          lang: "python",
+          label: "ประกอบคอลัมน์ j",
+          c: `col = tuple(grid[i][j] for i in range(n))`,
+        },
+        { t: "p", c: "บรรทัดนี้ทำงานโดยการล็อคคอลัมน์ j ให้อยู่นิ่ง ๆ แล้วปล่อยให้แถว i วิ่งจากบนลงล่าง สมมติกำลังตรวจคอลัมน์แรก (j = 0):" },
+        {
+          t: "ul",
+          c: [
+            "i = 0 → หยิบ grid[0][0] ได้เลข 3",
+            "i = 1 → หยิบ grid[1][0] ได้เลข 1",
+            "i = 2 → หยิบ grid[2][0] ได้เลข 2",
+          ],
+        },
+        { t: "p", c: "พอวิ่งจบ เอาเลขที่หยิบได้มามัดรวมเป็น tuple ได้ col = (3, 1, 2) — ประกอบแนวตั้งเสร็จแล้ว 1 เส้น" },
+        { t: "h3", c: "จบงาน: เช็คและให้คะแนน" },
+        { t: "p", c: "pairs += row_count[col] — พอได้ col มาแล้ว เอาไปเปิดหาในสมุดบัญชี row_count แนวตั้งเส้นแรก (3, 1, 2) ไม่มีในบัญชี → ได้ 0 แต่พอลูปสร้างแนวตั้งเส้นที่สองได้ (2, 7, 7) มีตรงกันเป๊ะ 1 ครั้ง → บวก 1 เข้า pairs พอลูปทำจนครบทุกคอลัมน์ก็ return pairs" },
+        { t: "p", c: "Time O(n²) เดินอ่านแถว 1 รอบ + ประกอบคอลัมน์ 1 รอบ · Space O(n²) เก็บ tuple ของแถวทั้งหมดใน Counter" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้องจับคู่ของที่เหมือนกันจากสองกอง อย่าเทียบทุก pair ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว · จำไว้ว่าจะเอา list/row เป็น key ต้องแปลงเป็น tuple ก่อน · กับดัก: ต้องบวกด้วย row_count[col] ไม่ใช่บวก 1" },
+        { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้องจับคู่ของที่เหมือนกันจากสองกอง อย่าเทียบทุก pair ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว · จำไว้ว่าจะเอา list/row เป็น key ต้องแปลงเป็น tuple ก่อน · กับดัก: ต้องบวกด้วย row_count[col] ไม่ใช่บวก 1" },
       ],
       en: [
-    {
-      t: "p",
-      c: "Given a 0-indexed n x n integer matrix grid, return the number of pairs (ri, cj) such that row ri and column cj are equal.\n\nA row and column pair is considered equal if they contain the same elements in the same order (i.e., an equal array).",
-    },
-    {
-      t: "example",
-      c: [
         {
-          input: "grid = [[3,2,1],[1,7,6],[2,7,7]]",
-          output: "1",
-          explain:
-            "There is 1 equal row and column pair: (Row 2, Column 1): [2,7,7].",
+          t: "p",
+          c: "Given a 0-indexed n x n integer matrix grid, return the number of pairs (ri, cj) such that row ri and column cj are equal.\n\nA row and column pair is considered equal if they contain the same elements in the same order (i.e., an equal array).",
         },
         {
-          input:
-            "grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]",
-          output: "3",
-          explain:
-            "There are 3 equal row and column pairs: (Row 0, Column 0): [3,1,2,2]; (Row 2, Column 2): [2,4,2,2]; (Row 3, Column 2): [2,4,2,2].",
+          t: "example",
+          c: [
+            {
+              input: "grid = [[3,2,1],[1,7,6],[2,7,7]]",
+              output: "1",
+              explain:
+                "There is 1 equal row and column pair: (Row 2, Column 1): [2,7,7].",
+            },
+            {
+              input:
+                "grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]",
+              output: "3",
+              explain:
+                "There are 3 equal row and column pairs: (Row 0, Column 0): [3,1,2,2]; (Row 2, Column 2): [2,4,2,2]; (Row 3, Column 2): [2,4,2,2].",
+            },
+          ],
         },
-      ],
-    },
-    {
-      t: "constraints",
-      c: [
-        "n == grid.length == grid[i].length",
-        "1 <= n <= 200",
-        "1 <= grid[i][j] <= 10^5",
-      ],
-    },
-    {
-      t: "callout",
-      c: "Order matters: [2,7,7] matches [2,7,7] only, not [7,2,7]. Duplicate-looking rows each form their own pairs.",
-    },
+        {
+          t: "constraints",
+          c: [
+            "n == grid.length == grid[i].length",
+            "1 <= n <= 200",
+            "1 <= grid[i][j] <= 10^5",
+          ],
+        },
+        {
+          t: "callout",
+          c: "Order matters: [2,7,7] matches [2,7,7] only, not [7,2,7]. Duplicate-looking rows each form their own pairs.",
+        },
 
-    { t: "h2", c: "Understand the problem — what are we counting?" },
-    {
-      t: "p",
-      c: "You're given a square grid of numbers. Count how many rows look exactly like some column.",
-    },
-    { t: "p", c: "Take this 3×3 example:" },
-    {
-      t: "code",
-      lang: "text",
-      label: "Unpack rows / cols from the grid",
-      c: `(row 0)    3    2    1
+        { t: "h2", c: "Understand the problem — what are we counting?" },
+        {
+          t: "p",
+          c: "You're given a square grid of numbers. Count how many rows look exactly like some column.",
+        },
+        { t: "p", c: "Take this 3×3 example:" },
+        {
+          t: "code",
+          lang: "text",
+          label: "Unpack rows / cols from the grid",
+          c: `(row 0)    3    2    1
 (row 1)    1    7    6
 (row 2)    2    7    7
 
@@ -2208,46 +2303,43 @@ Row: (3, 2, 1), (1, 7, 6), (2, 7, 7)
 Col: (3, 1, 2), (2, 7, 7), (1, 6, 7)
 
 Bottom row (2, 7, 7) = middle column (2, 7, 7) → 1 pair`,
-    },
+        },
 
-    { t: "h2", c: "Idea — keep a ledger" },
-    {
-      t: "p",
-      c: "Comparing every row against every column is slow and messy. Better: two phases.",
-    },
-    {
-      t: "ol",
-      c: [
-        "Phase 1 \"ledger\": scan every row and record \"this shape appeared how many times?\"",
-        "Phase 2 \"check\": for each column, ask the ledger \"does this shape exist?\" If yes, add that count to the score",
-      ],
-    },
-    {
-      t: "callout",
-      title: "Common pitfalls",
-      c: "Add row_count[col], not just +1 — duplicate rows each pair with this column. Counter returns 0 for missing keys, so you won’t get a KeyError.",
-    },
+        { t: "h2", c: "Approach — keep a ledger" },
+        {
+          t: "p",
+          c: "Comparing every row against every column is slow and messy. Better: two phases.",
+        },
+        {
+          t: "ol",
+          c: [
+            "Phase 1 \"ledger\": scan every row and record \"this shape appeared how many times?\"",
+            "Phase 2 \"check\": for each column, ask the ledger \"does this shape exist?\" If yes, add that count to the score",
+          ],
+        },
+        {
+          t: "callout",
+          title: "Common pitfalls",
+          c: "Add row_count[col], not just +1 — duplicate rows each pair with this column. Counter returns 0 for missing keys, so you won’t get a KeyError.",
+        },
 
-    { t: "h2", c: "Walk through — ledger and columns" },
-    {
-      t: "p",
-      c: "After phase 1 the ledger is {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}. Then for j in range(n) build each column:",
-    },
-    {
-      t: "table",
-      head: ["j", "col built", "ask the ledger", "pairs so far"],
-      rows: [
-        ["0", "(3, 1, 2)", "missing → 0", "0"],
-        ["1", "(2, 7, 7)", "hit → 1", "1"],
-        ["2", "(1, 6, 7)", "missing → 0", "1"],
-      ],
-    },
-    { t: "p", c: "Loop ends with pairs = 1 — exact match." },
+        { t: "h2", c: "Walkthrough — ledger and columns" },
+        {
+          t: "p",
+          c: "After phase 1 the ledger is {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}. Then for j in range(n) build each column:",
+        },
+        {
+          t: "table",
+          head: ["j", "col built", "ask the ledger", "pairs so far"],
+          rows: [
+            ["0", "(3, 1, 2)", "missing → 0", "0"],
+            ["1", "(2, 7, 7)", "hit → 1", "1"],
+            ["2", "(1, 6, 7)", "missing → 0", "1"],
+          ],
+        },
+        { t: "p", c: "Loop ends with pairs = 1 — exact match." },
 
-    {
-      t: "details",
-      summary: "▶ Detailed solution (try it yourself first)",
-      c: [
+        { t: "h2", c: "Code" },
         {
           t: "codeout",
           lang: "python",
@@ -2322,15 +2414,13 @@ print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
           t: "p",
           c: "Time O(n²) one pass over rows + one pass building columns · Space O(n²) storing all row tuples in the Counter",
         },
-      ],
-    },
 
-    {
-      t: "callout",
-      title: "💡 Pattern takeaway",
-      c: "When matching identical items across two groups, don’t compare every pair. Count one group into a hash map, then query the other one by one. Remember: list/row as a key → convert to tuple first. Trap: add row_count[col], not +1.",
-    },
-  ],
+        {
+          t: "callout",
+          title: "💡 Pattern takeaway",
+          c: "When matching identical items across two groups, don’t compare every pair. Count one group into a hash map, then query the other one by one. Remember: list/row as a key → convert to tuple first. Trap: add row_count[col], not +1.",
+        },
+      ],
     },
   },
 };
