@@ -39,8 +39,8 @@ export type Block =
   /** A code block paired with the output it prints (separate panel). */
   | { t: "codeout"; code: string; out: string; lang?: string; label?: string }
   /**
-   * The final answer reveal — visually distinct from `details` so the reader
-   * knows this is the "no turning back" box.
+   * Collapsed answer fold. Closed by default — teaching stays outside;
+   * inside is usually: one-line idea → codeout → short “จุดที่ต้องเห็น” → Time/Space.
    */
   | { t: "solution"; summary?: string; c: Block[] };
 

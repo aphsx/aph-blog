@@ -220,12 +220,35 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       return (
         <details
           key={i}
-          className="my-6 rounded-md border-2 border-primary/70 bg-white px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+          className="group/sol my-8 overflow-hidden rounded-lg border border-border bg-surface-soft/40 open:bg-white [&_p]:my-2 [&_pre]:my-3 [&_h3]:mt-5 [&_h3]:mb-2"
         >
-          <summary className="cursor-pointer text-[1.05em] font-bold text-primary marker:text-primary">
-            {b.summary ?? "🔓 เปิดเฉลยเต็ม (ลองเองก่อนนะ)"}
+          <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 select-none [&::-webkit-details-marker]:hidden">
+            <span
+              aria-hidden
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border bg-white text-[0.95em] transition-colors group-open/sol:border-primary/50 group-open/sol:bg-primary-soft/50"
+            >
+              <span className="group-open/sol:hidden">🔒</span>
+              <span className="hidden group-open/sol:inline">🔓</span>
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-bold text-[#1c1e21]">
+                {b.summary ?? "เฉลยโค้ด · ซ่อนไว้ให้ลองเองก่อน"}
+              </span>
+              <span className="mt-0.5 block text-[0.8em] text-muted group-open/sol:hidden">
+                พับไว้ด้านใน — คลิกเมื่อพร้อมดู
+              </span>
+              <span className="mt-0.5 hidden text-[0.8em] text-muted group-open/sol:block">
+                เปิดแล้ว · คลิกอีกครั้งเพื่อพับกลับ
+              </span>
+            </span>
+            <span
+              aria-hidden
+              className="shrink-0 text-muted transition-transform duration-200 group-open/sol:rotate-180"
+            >
+              ▾
+            </span>
           </summary>
-          <div className="mt-3">
+          <div className="border-t border-dashed border-border px-4 pb-5 pt-2">
             {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j)))}
           </div>
         </details>

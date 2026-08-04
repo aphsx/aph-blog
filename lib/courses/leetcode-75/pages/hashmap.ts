@@ -1512,12 +1512,18 @@ dict.fromkeys     : 36960 bytes`,
         },
         { t: "p", c: "เคสพิเศษ: ถ้าสองกองหน้าตาเหมือนกันเป๊ะ เช่น nums1 = [1, 2], nums2 = [1, 2] ทั้งสองทิศทางได้เซตว่าง → [[], []] ซึ่งถูกต้องตามโจทย์ และเลขติดลบก็ใช้ set ได้ปกติ" },
 
-        { t: "h2", c: "โค้ด" },
+        { t: "h2", c: "ลองเขียนก่อน" },
+        { t: "p", c: "แนวทางกับสเต็ปอยู่ด้านบนแล้ว — ลองลงมือก่อน เปิดกล่องด้านล่างเมื่อติดหรืออยากเทียบ" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
-          code: `def find_difference(nums1, nums2):
+          t: "solution",
+          summary: "เฉลยโค้ด · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "p", c: "แก่น: แปลงเป็น set แล้วลบสองทิศทาง — distinct กับ membership จบในบรรทัดเดียว" },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — รันได้",
+              code: `def find_difference(nums1, nums2):
     s1, s2 = set(nums1), set(nums2)  # ตัดตัวซ้ำของแต่ละกอง
     # s1 - s2 = อยู่ใน s1 แต่ไม่อยู่ใน s2
     # s2 - s1 = อยู่ใน s2 แต่ไม่อยู่ใน s1
@@ -1525,12 +1531,22 @@ dict.fromkeys     : 36960 bytes`,
 
 print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
 print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
-          out: `[[1, 3], [4, 6]]
+              out: `[[1, 3], [4, 6]]
 [[3], []]`,
+            },
+            { t: "h3", c: "จุดที่ต้องเห็น" },
+            {
+              t: "ul",
+              c: [
+                "set(...) ตัด duplicate และทำให้เช็ค membership เป็น O(1)",
+                "s1 - s2 กับ s2 - s1 คนละทิศ — ต้องทำทั้งคู่",
+                "list(...) แปลงกลับเพราะโจทย์ขอ array และลำดับไม่สำคัญ",
+                "ถ้าอยู่บน list โดยไม่แปลงเป็น set จะช้าเป็น O(n²) และต้องตัด duplicate เอง",
+              ],
+            },
+            { t: "callout", title: "Time · Space", c: "Time O(n + m) สร้างสอง set + difference · Space O(n + m) เก็บสอง set" },
+          ],
         },
-        { t: "p", c: "เมื่อ convert เป็น set ปัญหาเรื่องค่าไม่ซ้ำถูกจัดการให้อัตโนมัติ ที่เหลือคือใช้ operator difference (เครื่องหมายลบระหว่าง set) ซึ่งคืน element (สมาชิก) ที่อยู่ในฝั่งซ้ายแต่ไม่อยู่ฝั่งขวา ทำสองทิศทางก็ได้คำตอบครบ" },
-        { t: "p", c: "ถ้าลองเปลี่ยนไปทำบน list โดยไม่ convert เป็น set ก่อน นอกจากจะช้าเป็น O(n^2) แล้ว ยังต้องเขียนโค้ดตัด duplicate เองอีก ซึ่ง set จัดการให้หมดในบรรทัดเดียว" },
-        { t: "p", c: "Time O(n + m) convert สอง array เป็น set และทำ difference · Space O(n + m) เก็บสอง set" },
 
         { t: "callout", title: "💡 สรุป pattern", c: "เจอโจทย์ที่พูดถึง อยู่ในกองนี้แต่ไม่อยู่ในกองนั้น หรือ ค่าที่ต่างกัน ให้นึกถึง set difference ทันที และ operator & | - ของ set ช่วยเขียน set logic (ตรรกะเซต) ให้สั้นและเร็ว" },
       ],
@@ -1605,12 +1621,24 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
           c: "Edge case: identical arrays like nums1 = [1, 2], nums2 = [1, 2] yield empty sets both ways → [[], []], which is correct. Negative numbers work fine in a Python set.",
         },
 
-        { t: "h2", c: "Code" },
+        { t: "h2", c: "Try it yourself first" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "Solution (Python) — runnable",
-          code: `def find_difference(nums1, nums2):
+          t: "p",
+          c: "Approach and walkthrough are above — write it yourself, then open the fold below when stuck or ready to compare.",
+        },
+        {
+          t: "solution",
+          summary: "Solution code · folded so you can try first",
+          c: [
+            {
+              t: "p",
+              c: "Core: convert to sets, then difference both ways — uniqueness and membership in one line.",
+            },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — runnable",
+              code: `def find_difference(nums1, nums2):
     s1, s2 = set(nums1), set(nums2)  # dedupe each array
     # s1 - s2 = in s1 but not in s2
     # s2 - s1 = in s2 but not in s1
@@ -1618,20 +1646,25 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
 
 print(find_difference([1, 2, 3], [2, 4, 6]))        # [[1, 3], [4, 6]]
 print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
-          out: `[[1, 3], [4, 6]]
+              out: `[[1, 3], [4, 6]]
 [[3], []]`,
-        },
-        {
-          t: "p",
-          c: "Once you convert to sets, uniqueness is handled automatically. What’s left is the difference operator (minus between sets), which returns elements on the left that are not on the right. Do both directions and you have the full answer.",
-        },
-        {
-          t: "p",
-          c: "If you stay on lists without converting, you not only get O(n²) but also have to dedupe yourself — sets handle both in one line.",
-        },
-        {
-          t: "p",
-          c: "Time O(n + m) to build two sets and compute differences · Space O(n + m) for the two sets",
+            },
+            { t: "h3", c: "What to notice" },
+            {
+              t: "ul",
+              c: [
+                "set(...) drops duplicates and makes membership O(1)",
+                "s1 - s2 and s2 - s1 are different — do both",
+                "list(...) converts back because the judge wants arrays; order does not matter",
+                "Staying on lists without sets is O(n²) and you must dedupe yourself",
+              ],
+            },
+            {
+              t: "callout",
+              title: "Time · Space",
+              c: "Time O(n + m) build two sets + differences · Space O(n + m) for the two sets",
+            },
+          ],
         },
 
         {
@@ -1706,12 +1739,18 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
         },
         { t: "p", c: "เทียบกับ arr = [1, 2]: Counter → {1: 1, 2: 1} · values = [1, 1] · set ยุบเหลือ {1} ขนาดหด → False" },
 
-        { t: "h2", c: "โค้ด" },
+        { t: "h2", c: "ลองเขียนก่อน" },
+        { t: "p", c: "แนวทางกับสเต็ปอยู่ด้านบนแล้ว — ลองลงมือก่อน เปิดกล่องด้านล่างเมื่อติดหรืออยากเทียบ" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
-          code: `from collections import Counter
+          t: "solution",
+          summary: "เฉลยโค้ด · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "p", c: "แก่น: นับ frequency ก่อน แล้วถามว่า occurrences ซ้ำกันไหมด้วย len เทียบ set" },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — รันได้",
+              code: `from collections import Counter
 
 def unique_occurrences(arr):
     counts = Counter(arr).values()   # จำนวนครั้งของแต่ละค่า เช่น [3, 2, 1]
@@ -1721,13 +1760,22 @@ def unique_occurrences(arr):
 print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
 print(unique_occurrences([1, 2]))              # False
 print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True (3->1, 5->3, 7->2)`,
-          out: `True
+              out: `True
 False
 True`,
+            },
+            { t: "h3", c: "จุดที่ต้องเห็น" },
+            {
+              t: "ul",
+              c: [
+                "ชั้น 1: Counter(arr) นับให้ · ชั้น 2: ทำงานบน .values() ไม่ใช่บน keys",
+                "keys ของ dict ไม่ซ้ำอยู่แล้ว — เช็ค keys จึงตอบถูกตลอดและผิดโจทย์",
+                "len(x) == len(set(x)) คือทริกเช็ค duplicate ที่สั้นที่สุด เร็วกว่าไล่คู่ทุกคู่",
+              ],
+            },
+            { t: "callout", title: "Time · Space", c: "Time O(n) นับหนึ่งรอบ + สร้าง set หนึ่งรอบ · Space O(n) เก็บ Counter และ set ของ frequency" },
+          ],
         },
-        { t: "p", c: "ชั้นแรก Counter(arr) นับให้อัตโนมัติ แล้ว .values() คืน occurrences ทั้งหมดออกมาเป็นลำดับหนึ่งชุด ชั้นสอง convert ชุดนั้นเป็น set แล้วเทียบขนาด ถ้ามี occurrences ที่ซ้ำกัน set จะยุบตัวลง ขนาดจึงไม่เท่ากับต้นฉบับ" },
-        { t: "p", c: "ถ้าลองเขียนเองแบบไล่เช็คคู่ทุกคู่ของ occurrences จะเป็น O(k^2) แต่ทริก len เทียบ set ทำให้เหลือ O(k) และอ่านง่ายกว่ามาก" },
-        { t: "p", c: "Time O(n) count frequency หนึ่งรอบ สร้าง set หนึ่งรอบ · Space O(n) เก็บ Counter และ set ของ frequency" },
 
         { t: "callout", title: "💡 สรุป pattern", c: "pattern สองชั้น นับก่อนด้วย Counter แล้วค่อยประมวลผลบน frequency (ค่าความถี่) พบบ่อยมาก และทริก len(x) == len(set(x)) คือวิธีเช็ค duplicate (มีตัวซ้ำไหม) ที่สั้นที่สุด" },
       ],
@@ -1800,12 +1848,24 @@ True`,
           c: "Contrast arr = [1, 2]: Counter → {1: 1, 2: 1} · values = [1, 1] · set shrinks to {1} → False",
         },
 
-        { t: "h2", c: "Code" },
+        { t: "h2", c: "Try it yourself first" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "Solution (Python) — runnable",
-          code: `from collections import Counter
+          t: "p",
+          c: "Approach and walkthrough are above — write it yourself, then open the fold below when stuck or ready to compare.",
+        },
+        {
+          t: "solution",
+          summary: "Solution code · folded so you can try first",
+          c: [
+            {
+              t: "p",
+              c: "Core: count frequencies first, then ask whether occurrence counts are unique via len vs set.",
+            },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — runnable",
+              code: `from collections import Counter
 
 def unique_occurrences(arr):
     counts = Counter(arr).values()   # occurrence counts, e.g. [3, 2, 1]
@@ -1815,21 +1875,25 @@ def unique_occurrences(arr):
 print(unique_occurrences([1, 2, 2, 1, 1, 3]))  # True
 print(unique_occurrences([1, 2]))              # False
 print(unique_occurrences([3, 5, 7, 7, 5, 5]))  # True`,
-          out: `True
+              out: `True
 False
 True`,
-        },
-        {
-          t: "p",
-          c: "Layer one: Counter(arr) counts for you; .values() returns every occurrence count. Layer two: convert that sequence to a set and compare sizes. If any count repeats, the set shrinks and sizes won’t match.",
-        },
-        {
-          t: "p",
-          c: "Pairwise checking every pair of occurrence counts would be O(k²). The len-vs-set trick is O(k) and much easier to read.",
-        },
-        {
-          t: "p",
-          c: "Time O(n) one counting pass and one set build · Space O(n) for the Counter and the set of frequencies",
+            },
+            { t: "h3", c: "What to notice" },
+            {
+              t: "ul",
+              c: [
+                "Layer 1: Counter(arr) counts · Layer 2: work on .values(), not keys",
+                "Dict keys are unique by definition — checking keys always “passes” and misses the problem",
+                "len(x) == len(set(x)) is the shortest duplicate check — faster than pairwise compares",
+              ],
+            },
+            {
+              t: "callout",
+              title: "Time · Space",
+              c: "Time O(n) one counting pass and one set build · Space O(n) for the Counter and the set of frequencies",
+            },
+          ],
         },
 
         {
@@ -1927,12 +1991,18 @@ True`,
           ],
         },
 
-        { t: "h2", c: "โค้ด" },
+        { t: "h2", c: "ลองเขียนก่อน" },
+        { t: "p", c: "สามด่านอยู่ด้านบนแล้ว — ลองลงมือก่อน เปิดกล่องด้านล่างเมื่อติดหรืออยากเทียบ" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
-          code: `from collections import Counter
+          t: "solution",
+          summary: "เฉลยโค้ด · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "p", c: "แก่น: ไม่ simulate swap — เช็ค invariant สามข้อตามลำดับ แล้ว return" },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — รันได้",
+              code: `from collections import Counter
 
 def close_strings(word1, word2):
     # Gate 1: ความยาวต้องเท่ากัน
@@ -1952,14 +2022,24 @@ print(close_strings("abc", "bca"))        # True
 print(close_strings("a", "aa"))           # False
 print(close_strings("cabbba", "abbccc"))  # True
 print(close_strings("cabbba", "aabbss"))  # False`,
-          out: `True
+              out: `True
 False
 True
 False`,
+            },
+            { t: "h3", c: "จุดที่ต้องเห็น" },
+            {
+              t: "ul",
+              c: [
+                "Gate 1 กรองเคสสั้น ๆ ออกก่อน — ความยาวต่าง = จบทันที",
+                "Gate 2 กันตัวแปลกปลอม (เช่น s แทน c) — ข้ามด่านนี้แล้วตอบผิดได้แม้กอง frequency เท่ากัน",
+                "Gate 3 ใช้ sorted(...values()) เพราะ op 2 ย้ายกองจำนวนได้ สนแค่ว่ากองตัวเลขเหมือนกัน",
+                "set(word1) อ่านง่ายกว่า set(Counter) — ผลเทียบ keys เดียวกัน",
+              ],
+            },
+            { t: "callout", title: "Time · Space", c: "Time O(n + k log k) นับ O(n) + sort อย่างมาก k = 26 · Space O(k) เก็บ Counter / set (คงที่ 26 ตัว)" },
+          ],
         },
-        { t: "p", c: "set(word1) เทียบชุดตัวอักษรตรง ๆ อ่านง่ายกว่า set(Counter) ซึ่งเทียบแค่ keys — ผลเดียวกัน ส่วน sorted(...values()) ทำให้ไม่สนว่าตัวไหนจับกับจำนวนไหน สนแค่ว่ากองตัวเลขเหมือนกัน ซึ่งตรงกับอิสระของ operation 2" },
-        { t: "p", c: "ทำไมต้องครบสามด่าน? Gate 1 กรองเคสสั้น ๆ ออกก่อน Gate 2 กันตัวแปลกปลอม (เช่น s แทน c) Gate 3 กันเคสชุดตัวอักษรตรงแต่กองจำนวนจับคู่กันไม่ได้ — ขาดข้อใดข้อหนึ่งคำตอบผิดได้" },
-        { t: "p", c: "Time O(n + k log k) นับ frequency O(n) และ sort frequency ที่มีอย่างมาก k = 26 ตัว · Space O(k) เก็บ Counter / set ของ character (คงที่ 26 ตัว)" },
 
         { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ให้ operation แปลก ๆ มักแก้ด้วยการแปล operation เป็น invariant (สิ่งที่ไม่เปลี่ยนไม่ว่าทำกี่ครั้ง) แล้วเช็ค invariant นั้นแทนการ simulate จริง ที่นี่มีสามด่าน: ความยาว · ชุดตัวอักษร · กอง frequency" },
       ],
@@ -2063,12 +2143,24 @@ False`,
           ],
         },
 
-        { t: "h2", c: "Code" },
+        { t: "h2", c: "Try it yourself first" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "Solution (Python) — runnable",
-          code: `from collections import Counter
+          t: "p",
+          c: "The three gates are above — write it yourself, then open the fold below when stuck or ready to compare.",
+        },
+        {
+          t: "solution",
+          summary: "Solution code · folded so you can try first",
+          c: [
+            {
+              t: "p",
+              c: "Core: don’t simulate swaps — check three invariants in order, then return.",
+            },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — runnable",
+              code: `from collections import Counter
 
 def close_strings(word1, word2):
     # Gate 1: lengths must match
@@ -2088,22 +2180,27 @@ print(close_strings("abc", "bca"))        # True
 print(close_strings("a", "aa"))           # False
 print(close_strings("cabbba", "abbccc"))  # True
 print(close_strings("cabbba", "aabbss"))  # False`,
-          out: `True
+              out: `True
 False
 True
 False`,
-        },
-        {
-          t: "p",
-          c: "set(word1) compares the character set directly — clearer than set(Counter), which compares only keys (same result). sorted(...values()) ignores which letter owns which count; only the bag of numbers must match, which is exactly the freedom of operation 2.",
-        },
-        {
-          t: "p",
-          c: "Why all three gates? Gate 1 filters obvious mismatches early. Gate 2 blocks foreign letters (e.g. s replacing c). Gate 3 catches same alphabet but unmatched frequency bags. Miss any one and you can get the wrong answer.",
-        },
-        {
-          t: "p",
-          c: "Time O(n + k log k) count O(n) and sort at most k = 26 frequencies · Space O(k) for Counters / sets (fixed 26 letters)",
+            },
+            { t: "h3", c: "What to notice" },
+            {
+              t: "ul",
+              c: [
+                "Gate 1 filters short mismatches — different length ends immediately",
+                "Gate 2 blocks foreign letters (e.g. s for c) — skip it and matching frequency bags still give the wrong True",
+                "Gate 3 uses sorted(...values()) because op 2 remaps counts; only the bag of numbers must match",
+                "set(word1) reads clearer than set(Counter) — same key comparison",
+              ],
+            },
+            {
+              t: "callout",
+              title: "Time · Space",
+              c: "Time O(n + k log k) count O(n) and sort at most k = 26 · Space O(k) for Counters / sets (fixed 26 letters)",
+            },
+          ],
         },
 
         {
@@ -2192,12 +2289,18 @@ Col: (3, 1, 2), (2, 7, 7), (1, 6, 7)
         },
         { t: "p", c: "จบลูป คืนค่า pairs = 1 ถูกต้องเป๊ะ" },
 
-        { t: "h2", c: "โค้ด" },
+        { t: "h2", c: "ลองเขียนก่อน" },
+        { t: "p", c: "บัญชีกับตาราง walkthrough อยู่ด้านบนแล้ว — ลองลงมือก่อน เปิดกล่องด้านล่างเมื่อติดหรืออยากเทียบ" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "เฉลย (Python) — โค้ดนี้รันได้จริง",
-          code: `from collections import Counter
+          t: "solution",
+          summary: "เฉลยโค้ด · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "p", c: "แก่น: จดหน้าตาแถวลง Counter ก่อน แล้วประกอบคอลัมน์ทีละเส้นไปถามบัญชี — บวกด้วยจำนวนครั้ง ไม่ใช่บวก 1" },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — รันได้",
+              code: `from collections import Counter
 
 def equal_pairs(grid):
     # --- เฟสที่ 1: เตรียมสมุดบัญชีจดแนวนอน ---
@@ -2218,34 +2321,28 @@ def equal_pairs(grid):
 print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
 print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
                    [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`,
-          out: `1
+              out: `1
 3`,
-        },
-        { t: "h3", c: "เฟสที่ 1: เตรียมสมุดบัญชี" },
-        { t: "p", c: "n = len(grid) เช็คขนาดตารางก่อน (เช่น n = 3 คือมี 3 แถว 3 คอลัมน์)" },
-        { t: "p", c: "row_count = Counter(tuple(row) for row in grid) คือการสร้างสมุดบัญชี — ดึงแนวนอนทีละเส้น แปลงเป็น tuple (วงเล็บโค้ง) เพราะ list เป็น key ของ dict ไม่ได้ แล้วให้ Counter นับสถิติ หน้าตาสมุดบัญชีจะได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}" },
-        { t: "p", c: "pairs = 0 สร้างกล่องเปล่าไว้เตรียมใส่คะแนนสะสม" },
-        { t: "h3", c: "เฟสที่ 2: สร้างแนวตั้งมาตรวจบัญชี (จุดสำคัญที่สุด)" },
-        { t: "p", c: "ลูป for j in range(n) ล็อคเป้าไปทีละคอลัมน์ (j คือตำแหน่งคอลัมน์) บรรทัดไฮไลท์คือ:" },
-        {
-          t: "code",
-          lang: "python",
-          label: "ประกอบคอลัมน์ j",
-          c: `col = tuple(grid[i][j] for i in range(n))`,
-        },
-        { t: "p", c: "บรรทัดนี้ทำงานโดยการล็อคคอลัมน์ j ให้อยู่นิ่ง ๆ แล้วปล่อยให้แถว i วิ่งจากบนลงล่าง สมมติกำลังตรวจคอลัมน์แรก (j = 0):" },
-        {
-          t: "ul",
-          c: [
-            "i = 0 → หยิบ grid[0][0] ได้เลข 3",
-            "i = 1 → หยิบ grid[1][0] ได้เลข 1",
-            "i = 2 → หยิบ grid[2][0] ได้เลข 2",
+            },
+            { t: "h3", c: "จุดที่ต้องเห็น" },
+            {
+              t: "ul",
+              c: [
+                "tuple(row) เพราะ list เป็น key ของ dict ไม่ได้ — ลืมแปลงแล้วพังทันที",
+                "col = tuple(grid[i][j] for i in range(n)) ล็อคคอลัมน์ j แล้วให้แถว i วิ่งบน→ล่าง",
+                "pairs += row_count[col] บวกจำนวนแถวที่หน้าตาตรงกันทั้งหมด ไม่ใช่บวก 1",
+                "Counter คืน 0 เองถ้า key ไม่มี — ไม่ต้อง if key in … ก่อนบวก",
+              ],
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "บรรทัดประกอบคอลัมน์",
+              c: `col = tuple(grid[i][j] for i in range(n))  # j = 0 → (3, 1, 2)`,
+            },
+            { t: "callout", title: "Time · Space", c: "Time O(n²) อ่านแถว 1 รอบ + ประกอบคอลัมน์ 1 รอบ · Space O(n²) เก็บ tuple ของแถวทั้งหมดใน Counter" },
           ],
         },
-        { t: "p", c: "พอวิ่งจบ เอาเลขที่หยิบได้มามัดรวมเป็น tuple ได้ col = (3, 1, 2) — ประกอบแนวตั้งเสร็จแล้ว 1 เส้น" },
-        { t: "h3", c: "จบงาน: เช็คและให้คะแนน" },
-        { t: "p", c: "pairs += row_count[col] — พอได้ col มาแล้ว เอาไปเปิดหาในสมุดบัญชี row_count แนวตั้งเส้นแรก (3, 1, 2) ไม่มีในบัญชี → ได้ 0 แต่พอลูปสร้างแนวตั้งเส้นที่สองได้ (2, 7, 7) มีตรงกันเป๊ะ 1 ครั้ง → บวก 1 เข้า pairs พอลูปทำจนครบทุกคอลัมน์ก็ return pairs" },
-        { t: "p", c: "Time O(n²) เดินอ่านแถว 1 รอบ + ประกอบคอลัมน์ 1 รอบ · Space O(n²) เก็บ tuple ของแถวทั้งหมดใน Counter" },
 
         { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้องจับคู่ของที่เหมือนกันจากสองกอง อย่าเทียบทุก pair ให้ นับกองหนึ่งลง hash map ก่อน แล้วยิงถามอีกกองทีละตัว · จำไว้ว่าจะเอา list/row เป็น key ต้องแปลงเป็น tuple ก่อน · กับดัก: ต้องบวกด้วย row_count[col] ไม่ใช่บวก 1" },
       ],
@@ -2339,12 +2436,24 @@ Bottom row (2, 7, 7) = middle column (2, 7, 7) → 1 pair`,
         },
         { t: "p", c: "Loop ends with pairs = 1 — exact match." },
 
-        { t: "h2", c: "Code" },
+        { t: "h2", c: "Try it yourself first" },
         {
-          t: "codeout",
-          lang: "python",
-          label: "Solution (Python) — runnable",
-          code: `from collections import Counter
+          t: "p",
+          c: "Ledger and walkthrough table are above — write it yourself, then open the fold below when stuck or ready to compare.",
+        },
+        {
+          t: "solution",
+          summary: "Solution code · folded so you can try first",
+          c: [
+            {
+              t: "p",
+              c: "Core: ledger row shapes in a Counter, then build each column and query — add the count, not +1.",
+            },
+            {
+              t: "codeout",
+              lang: "python",
+              label: "Python — runnable",
+              code: `from collections import Counter
 
 def equal_pairs(grid):
     # --- Phase 1: ledger the rows ---
@@ -2365,54 +2474,31 @@ def equal_pairs(grid):
 print(equal_pairs([[3, 2, 1], [1, 7, 6], [2, 7, 7]]))  # 1
 print(equal_pairs([[3, 1, 2, 2], [1, 4, 4, 5],
                    [2, 4, 2, 2], [2, 4, 2, 2]]))        # 3`,
-          out: `1
+              out: `1
 3`,
-        },
-        { t: "h3", c: "Phase 1: prepare the ledger" },
-        {
-          t: "p",
-          c: "n = len(grid) — read the grid size first (e.g. n = 3 means 3 rows and 3 columns).",
-        },
-        {
-          t: "p",
-          c: "row_count = Counter(tuple(row) for row in grid) builds the ledger: pull each row, convert to a tuple (lists can’t be dict keys), and let Counter tally. Result: {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}.",
-        },
-        { t: "p", c: "pairs = 0 — empty score box ready to accumulate." },
-        { t: "h3", c: "Phase 2: build columns and check the ledger (the key part)" },
-        {
-          t: "p",
-          c: "for j in range(n) locks onto one column at a time (j is the column index). The highlight line:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Build column j",
-          c: `col = tuple(grid[i][j] for i in range(n))`,
-        },
-        {
-          t: "p",
-          c: "Lock column j still; let row i walk top to bottom. For the first column (j = 0):",
-        },
-        {
-          t: "ul",
-          c: [
-            "i = 0 → pick grid[0][0] → 3",
-            "i = 1 → pick grid[1][0] → 1",
-            "i = 2 → pick grid[2][0] → 2",
+            },
+            { t: "h3", c: "What to notice" },
+            {
+              t: "ul",
+              c: [
+                "tuple(row) — lists can’t be dict keys; forget the conversion and it crashes",
+                "col = tuple(grid[i][j] for i in range(n)) locks column j and walks row i top → bottom",
+                "pairs += row_count[col] adds every matching row count, not just +1",
+                "Counter returns 0 for missing keys — no need for if key in … before adding",
+              ],
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Column-build line",
+              c: `col = tuple(grid[i][j] for i in range(n))  # j = 0 → (3, 1, 2)`,
+            },
+            {
+              t: "callout",
+              title: "Time · Space",
+              c: "Time O(n²) one pass over rows + one pass building columns · Space O(n²) storing all row tuples in the Counter",
+            },
           ],
-        },
-        {
-          t: "p",
-          c: "When the walk finishes, bundle the numbers into a tuple: col = (3, 1, 2) — one column ready.",
-        },
-        { t: "h3", c: "Finish: check and score" },
-        {
-          t: "p",
-          c: "pairs += row_count[col] — look col up in the ledger. First column (3, 1, 2) is missing → 0. Second column (2, 7, 7) matches once → add 1. After every column, return pairs.",
-        },
-        {
-          t: "p",
-          c: "Time O(n²) one pass over rows + one pass building columns · Space O(n²) storing all row tuples in the Counter",
         },
 
         {
