@@ -436,10 +436,10 @@ class RecentCounter:
 
   "lc75-p28": {
     slug: "lc75-p28",
-    title: { th: "ข้อ 28 · LC649 Dota2 Senate (วุฒิสภา Dota2) 🟡", en: "" },
+    title: { th: "ข้อ 28 · LC649 Dota2 Senate (วุฒิสภา Dota2) 🟡", en: "LC649 Dota2 Senate 🟡" },
     lead: {
       th: "สองฝ่ายผลัดกันแบนคู่แข่ง ใครมาถึงคิวก่อนได้แบนก่อน — ใช้ Queue สองอันเก็บ index แล้วให้ผู้รอดวนกลับไปต่อท้าย",
-      en: "",
+      en: "Two parties ban each other round by round — use two queues to track indices and let survivors re-enqueue for the next round.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -610,7 +610,171 @@ class Solution:
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "In the world of Dota2, there are two parties: Radiant and Dire.\n\nThe senate consists of senators from both parties. They vote in rounds. In each round, each active senator can exercise one of two rights:\n\n1. **Ban one senator's right** — make another senator lose all rights in this and all future rounds.\n2. **Announce victory** — if all remaining active senators belong to the same party.\n\nGiven a string `senate` where each character is `'R'` (Radiant) or `'D'` (Dire), predict which party will win. Every senator plays optimally for their own party. Senators act in order from first to last, skipping those who have lost their rights.",
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 'senate = "RD"',
+              output: '"Radiant"',
+              explain: `Explanation:\nThe first senator comes from Radiant and bans the next senator's right in round 1.\nThe second senator can't exercise any rights anymore.\nIn round 2, the first senator announces victory since he is the only one left.`,
+            },
+            {
+              input: 'senate = "RDD"',
+              output: '"Dire"',
+              explain: `Explanation:\nThe first senator (R) bans the second senator (D) in round 1.\nThe third senator (D) bans the first senator (R) in round 1.\nIn round 2, the third senator announces victory since he is the only one left.`,
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == senate.length",
+            "1 <= n <= 10^4",
+            "senate[i] is either 'R' or 'D'.",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full solution · Try yourself first",
+          c: [
+            {
+              t: "p",
+              c: "This maps to the Queue pattern: \"Process in order — whoever comes first gets to ban first.\"",
+            },
+
+            { t: "h3", c: "1. Mindset Shift" },
+            {
+              t: "p",
+              c: "Imagine two separate queues — one for Radiant, one for Dire — each storing the index (seating position) of active senators.",
+            },
+            {
+              t: "p",
+              c: "Key insight: the best strategy is always to ban the nearest opponent. In each round, compare the front of both queues. The senator with the smaller index (comes first) bans the other. The survivor re-enqueues with index + n to preserve round order.",
+            },
+            {
+              t: "p",
+              c: "Why add n? After round 1, survivors should go behind everyone still in the current round. Adding n ensures correct ordering across rounds.",
+            },
+
+            { t: "h3", c: "2. The Logic — 4 Steps" },
+            {
+              t: "p",
+              c: "Start two queues and play until one side empties:",
+            },
+            {
+              t: "ol",
+              c: [
+                "Prepare — iterate senate, push each index into radiant or dire.",
+                "Face off — popleft the front of both queues to get r and d.",
+                "Ban + re-enqueue — if r < d: R bans D, re-enqueue r + n into radiant. Else: D bans R, re-enqueue d + n into dire.",
+                "Game over — when one queue empties, the other party wins.",
+              ],
+            },
+
+            { t: "h3", c: "3. LeetCode-Ready Code" },
+            {
+              t: "p",
+              c: "Convert the two-queue rules into code:",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Submit this on LeetCode",
+              c: `from collections import deque
+
+class Solution:
+    def predictPartyVictory(self, senate: str) -> str:
+        n = len(senate)
+        radiant = deque()          # store indices of R senators
+        dire = deque()             # store indices of D senators
+
+        # Step 1: prepare queues
+        for i, c in enumerate(senate):
+            if c == "R":
+                radiant.append(i)
+            else:
+                dire.append(i)
+
+        # Steps 2–3: face off until one side empties
+        while radiant and dire:
+            r = radiant.popleft()
+            d = dire.popleft()
+            # smaller index comes first = gets to ban
+            if r < d:
+                radiant.append(r + n)   # R survives, re-enqueue for next round
+            else:
+                dire.append(d + n)      # D survives, re-enqueue for next round
+
+        # Step 4: the non-empty queue wins
+        return "Radiant" if radiant else "Dire"`,
+            },
+
+            { t: "h3", c: "4. Dry Run — senate = \"RDD\"" },
+            {
+              t: "p",
+              c: "n = 3 · Start: radiant = [0], dire = [1, 2]",
+            },
+            {
+              t: "table",
+              head: ["r (front R)", "d (front D)", "Who wins this turn", "radiant", "dire"],
+              rows: [
+                ["0", "1", "r < d → R bans D, R re-enqueues 0+3=3", "[3]", "[2]"],
+                ["3", "2", "r > d → D bans R, D re-enqueues 2+3=5", "[]", "[5]"],
+                ["(radiant empty)", "—", "Game over → Dire wins", "[]", "[5]"],
+              ],
+            },
+            {
+              t: "p",
+              c: "Done — answer is \"Dire\".",
+            },
+
+            { t: "h3", c: "5. Edge Cases & Pitfalls" },
+            {
+              t: "p",
+              c: 'The "forgot +n" mistake — most common error:',
+            },
+            {
+              t: "ul",
+              c: [
+                "If you re-enqueue r instead of r + n, the survivor gets the same small index.",
+                "They'll jump ahead of senators who haven't played this round yet — wrong order, wrong answer.",
+              ],
+            },
+            {
+              t: "callout",
+              title: "Why add n?",
+              warn: true,
+              c: "Survivors act after everyone in the current round. Adding n keeps them behind all current-round senators while still ordering correctly among themselves.",
+            },
+            {
+              t: "callout",
+              title: "Never use list.pop(0)",
+              c: "list.pop(0) is O(n). Always use deque.popleft() for O(1).",
+            },
+
+            { t: "h3", c: "6. Time & Space Complexity" },
+            {
+              t: "ul",
+              c: [
+                "Time O(n) — each senator is banned at most once; each comparison eliminates one person.",
+                "Space O(n) — store every senator's index in the two queues.",
+              ],
+            },
+
+            {
+              t: "callout",
+              title: "💡 Pattern summary",
+              c: "When a problem involves \"round-based competition with re-entry\", use queues to simulate the process. Let survivors re-enqueue with index + n to maintain correct round ordering. Comparing the front of two queues is a common pattern for head-to-head elimination games.",
+            },
+          ],
+        },
+      ],
     },
   },
 };
