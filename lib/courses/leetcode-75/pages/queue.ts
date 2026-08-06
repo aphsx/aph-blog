@@ -147,32 +147,19 @@ while q:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC933): ให้ implement class RecentCounter ที่นับจำนวน request ที่เกิดขึ้นในช่วงเวลาหนึ่ง constructor ไม่รับพารามิเตอร์ และ initialize counter ด้วยจำนวน request เป็นศูนย์ ส่วน method ping(t) รับเวลา t (หน่วย ms) เพิ่ม request ใหม่ที่เวลา t เข้าไป แล้ว return จำนวน request ที่เกิดขึ้นในช่วง 3000 มิลลิวินาทีที่ผ่านมา (รวม request ปัจจุบันด้วย) พูดให้ชัดคือ return จำนวน request ที่มีเวลาอยู่ในช่วง inclusive [t - 3000, t] รับประกันว่าแต่ละ test case เรียก ping ด้วยค่า t ที่เพิ่มขึ้นเรื่อย ๆ เสมอ (strictly increasing)",
+          c: "โจทย์ (LC933): ให้ implement class RecentCounter:\n\n- `RecentCounter()` — Initialize ตัวแปรภายในเพื่อกาหนด counter ใหม่อันหนึ่ง\n- `int ping(int t)` — เพิ่ม request ใหม่ที่เวลา t (หน่วย millisecond) แล้ว return จำนวน request ที่เกิดขึ้นในช่วง 3000 millisecond ที่ผานมา (รวม request ปจจุบันดวย) ได้อีกนัยหนึ่ง return จำนวน request ที่มีเวลาอยุ่ในชวง inclusive [t - 3000, t]\n\nรับประกันว่าแตละ test case เรียก ping ดวยคา t ที่เพิ่เพิยงขึ้นเสมอ (strictly increasing)",
         },
         {
           t: "example",
           c: [
             {
-              input: "ping(1)",
-              output: "1",
-              explain: "ช่วง [-2999, 1] มี request แค่ตัวเดียวคือเวลา 1",
-            },
-            {
-              input: "ping(100)",
-              output: "2",
-              explain: "ช่วง [-2900, 100] มี request ที่เวลา 1 และ 100",
-            },
-            {
-              input: "ping(3001)",
-              output: "3",
-              explain:
-                "ช่วง [1, 3001] มี request ที่เวลา 1, 100, 3001 — เวลา 1 ยังอยู่ในช่วงพอดี",
-            },
-            {
-              input: "ping(3002)",
-              output: "3",
-              explain:
-                "ช่วง [2, 3002] ทำให้ request ที่เวลา 1 หลุดออกจากช่วง เหลือ 100, 3001, 3002",
+              input: '["RecentCounter", "ping", "ping", "ping", "ping"]\n[[], [1], [100], [3001], [3002]]',
+              output: '[null, 1, 2, 3, 3]',
+              explain: `Explanation\nRecentCounter recentCounter = new RecentCounter();
+recentCounter.ping(1);     // requests = [1], range is [-2999,1], return 1
+recentCounter.ping(100);   // requests = [1, 100], range is [-2900,100], return 2
+recentCounter.ping(3001);  // requests = [1, 100, 3001], range is [1,3001], return 3
+recentCounter.ping(3002);  // requests = [1, 100, 3001, 3002], range is [2,3002], return 3`,
             },
           ],
         },
@@ -180,8 +167,8 @@ while q:
           t: "constraints",
           c: [
             "1 <= t <= 10^9",
-            "ค่า t ที่เรียกเข้ามาเรียงเพิ่มขึ้นเสมอ (รับประกันโดยโจทย์)",
-            "เรียก ping ได้มากสุด 10^4 ครั้ง",
+            "Each test case will call ping with strictly increasing values of t.",
+            "At most 10^4 calls will be made to ping.",
           ],
         },
 
