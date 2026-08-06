@@ -137,10 +137,10 @@ while q:
 
   "lc75-p27": {
     slug: "lc75-p27",
-    title: { th: "ข้อ 27 · LC933 Number of Recent Calls (นับ ping ล่าสุด) 🟢", en: "" },
+    title: { th: "ข้อ 27 · LC933 Number of Recent Calls (นับ ping ล่าสุด) 🟢", en: "LC933 Number of Recent Calls 🟢" },
     lead: {
       th: 'โจทย์ Queue แบบ Sliding Window — นับ ping ในช่วง 3000 ms ล่าสุด ของเก่าทยอยหลุดออกทางหัวแถว',
-      en: "",
+      en: "Sliding window with a queue — count pings in the last 3000 ms as old ones expire from the front.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -288,7 +288,149 @@ class RecentCounter:
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "Implement a class RecentCounter:\n\n- `RecentCounter()` — Initialize a new counter.\n- `int ping(int t)` — Add a new request at time t (in milliseconds), then return the number of requests that happened in the past 3000 milliseconds (including the new one). In other words, return the number of requests that have an arrival time in the inclusive range [t - 3000, t].\n\nIt is guaranteed that every call to ping uses a strictly larger value of t than the previous call.",
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: '["RecentCounter", "ping", "ping", "ping", "ping"]\n[[], [1], [100], [3001], [3002]]',
+              output: '[null, 1, 2, 3, 3]',
+              explain: `Explanation\nRecentCounter recentCounter = new RecentCounter();
+recentCounter.ping(1);     // requests = [1], range is [-2999,1], return 1
+recentCounter.ping(100);   // requests = [1, 100], range is [-2900,100], return 2
+recentCounter.ping(3001);  // requests = [1, 100, 3001], range is [1,3001], return 3
+recentCounter.ping(3002);  // requests = [1, 100, 3001, 3002], range is [2,3002], return 3`,
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= t <= 10^9",
+            "Each test case will call ping with strictly increasing values of t.",
+            "At most 10^4 calls will be made to ping.",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full solution · Try yourself first",
+          c: [
+            {
+              t: "p",
+              c: "This maps directly to the Queue pattern: \"Keep the most recent events in a sliding window.\"",
+            },
+
+            { t: "h3", c: "1. Mindset Shift" },
+            {
+              t: "p",
+              c: "We need to count how many pings landed within the last 3000 ms — like a time window that slides forward. Old pings that fall off the left edge are discarded.",
+            },
+            {
+              t: "p",
+              c: "Key insight: store every ping time in a Queue. New pings go to the back. Pings older than t − 3000 are removed from the front. The remaining size is the answer.",
+            },
+            {
+              t: "p",
+              c: "Why a Queue? Because t always increases, so the oldest ping is always at the front — we can remove it with O(1) popleft.",
+            },
+
+            { t: "h3", c: "2. The Logic — 3 Steps" },
+            {
+              t: "p",
+              c: "Start with an empty deque. Each time ping(t) is called:",
+            },
+            {
+              t: "ol",
+              c: [
+                "Enqueue — append(t) to the back.",
+                "Drain old — while the front q[0] < t − 3000, popleft().",
+                "Count survivors — return len(q) for pings still in [t − 3000, t].",
+              ],
+            },
+
+            { t: "h3", c: "3. LeetCode-Ready Code" },
+            {
+              t: "p",
+              c: "Short and straightforward:",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Submit this on LeetCode",
+              c: `from collections import deque
+
+class RecentCounter:
+    def __init__(self):
+        self.q = deque()
+
+    def ping(self, t: int) -> int:
+        self.q.append(t)          # Step 1: enqueue new ping
+        while self.q[0] < t - 3000: # Step 2: drain old
+            self.q.popleft()
+        return len(self.q)        # Step 3: count survivors`,
+            },
+
+            { t: "h3", c: "4. Dry Run — Step by Step" },
+            {
+              t: "table",
+              head: ["Call", "After append", "Drain front (< t−3000)", "Queue", "return"],
+              rows: [
+                ["ping(1)", "[1]", "1 < −2999? No", "[1]", "1"],
+                ["ping(100)", "[1, 100]", "1 < −2900? No", "[1, 100]", "2"],
+                ["ping(3001)", "[1, 100, 3001]", "1 < 1? No", "[1, 100, 3001]", "3"],
+                ["ping(3002)", "[1, 100, 3001, 3002]", "1 < 2? Yes → pop 1", "[100, 3001, 3002]", "3"],
+              ],
+            },
+            {
+              t: "p",
+              c: "Done — answers come out as 1, 2, 3, 3, matching the expected output exactly.",
+            },
+
+            { t: "h3", c: "5. Edge Cases & Pitfalls" },
+            {
+              t: "p",
+              c: 'The "inclusive boundary" — use < t − 3000, NOT <=:',
+            },
+            {
+              t: "ul",
+              c: [
+                "A ping at exactly t − 3000 is still inside [t − 3000, t].",
+                "Using <= would incorrectly remove it.",
+              ],
+            },
+            {
+              t: "callout",
+              title: "Never use list.pop(0)",
+              warn: true,
+              c: "list.pop(0) is O(n) because it shifts all remaining elements. deque.popleft() is O(1) — always use deque in this category.",
+            },
+            {
+              t: "p",
+              c: "Note: while self.q[0] is always safe — we just appended t, so the queue has at least one element (t itself), and t can never be < t − 3000, so the loop always terminates before the queue empties.",
+            },
+
+            { t: "h3", c: "6. Time & Space Complexity" },
+            {
+              t: "ul",
+              c: [
+                "Time O(1) amortized per ping — each time is appended and popped at most once.",
+                "Space O(w) — w is the max number of pings within any 3000 ms window.",
+              ],
+            },
+
+            {
+              t: "callout",
+              title: "💡 Pattern summary",
+              c: "Sliding window with a queue: when a problem asks for \"the most recent items within a time/window\", append new items to the back and drain old ones from the front. The queue size is the answer.",
+            },
+          ],
+        },
+      ],
     },
   },
 
