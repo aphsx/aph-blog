@@ -79,28 +79,45 @@ dequeue() จะได้ 10 (คนที่มาก่อนใครเพ�
         { t: "h2", c: "ส่วนที่ 4 · จำลองการทำงาน" },
         {
           t: "p",
-          c: "นี่คือ Template มาตรฐานของการใช้ deque ที่เราจะหยิบมาใช้ซ้ำ ๆ ในหมวดนี้ครับ:",
+          c: "ลองต่อคิวทีละคน แล้วดูว่า Peek กับ Dequeue ต่างกันยังไง — ทิศคงที่: ซ้าย = หัว (ออก) · ขวา = หาง (เข้า)",
+        },
+        {
+          t: "table",
+          head: ["ขั้น", "ทำอะไร", "q ตอนนี้ (หัว … หาง)"],
+          rows: [
+            ["เปิดร้าน", "—", "[]"],
+            ["append(10)", "เข้าหาง", "10"],
+            ["append(20)", "เข้าหาง", "10 → 20"],
+            ["append(30)", "เข้าหาง", "10 → 20 → 30"],
+            ["peek (q[0])", "แอบดูหัว — ไม่เอาออก", "10 → 20 → 30  (หัวยังเป็น 10)"],
+            ["popleft()", "ออกหัว ได้ 10", "20 → 30"],
+            ["popleft() × 2", "เรียกคิวที่เหลือจนหมด", "[]"],
+          ],
+        },
+        {
+          t: "p",
+          c: "สัญลักษณ์ → อ่านจากหัวไปหาง · คนที่เข้าก่อนอยู่ซ้ายสุด และจะออกก่อนเสมอ",
         },
         {
           t: "codeout",
           lang: "python",
-          label: "Walkthrough — enqueue / peek / dequeue",
+          label: "Template — enqueue / peek / dequeue",
           code: `from collections import deque
 
 q = deque()          # 1. เปิดร้าน! แถวยังว่างเปล่า
 
-q.append(10)         # 2. Enqueue 10  -> แถวคือ [10]
-q.append(20)         # 3. Enqueue 20  -> แถวคือ [10, 20]
-q.append(30)         # 4. Enqueue 30  -> แถวคือ [10, 20, 30]
+q.append(10)         # 2. Enqueue 10  ->  10
+q.append(20)         # 3. Enqueue 20  ->  10 → 20
+q.append(30)         # 4. Enqueue 30  ->  10 → 20 → 30
 
-print(q[0])          # 5. Peek (แอบดูหน้าสุด) -> เห็น 10 (แถวยังเป็น [10, 20, 30])
+print(q[0])          # 5. Peek (แอบดูหัว) -> เห็น 10 (คิวยังเป็น 10 → 20 → 30)
 
-first = q.popleft()  # 6. Dequeue (เรียกคิว) -> ได้ 10 เดินออกไป, แถวเหลือ [20, 30]
+first = q.popleft()  # 6. Dequeue -> ได้ 10, คิวเหลือ 20 → 30
 print(first)         # พิมพ์ 10
 
 # 7. เรียกคิวที่เหลือจนกว่าจะหมดแถว
 while q:
-    print(q.popleft())  # จะได้ 20 ก่อน แล้วตามด้วย 30 (ออกตามลำดับที่มาเป๊ะ ๆ)`,
+    print(q.popleft())  # จะได้ 20 ก่อน แล้วตามด้วย 30`,
           out: `10
 10
 20
@@ -147,19 +164,16 @@ while q:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC933): ให้ implement class RecentCounter:\n\n- `RecentCounter()` — Initialize ตัวแปรภายในเพื่อกาหนด counter ใหม่อันหนึ่ง\n- `int ping(int t)` — เพิ่ม request ใหม่ที่เวลา t (หน่วย millisecond) แล้ว return จำนวน request ที่เกิดขึ้นในช่วง 3000 millisecond ที่ผานมา (รวม request ปจจุบันดวย) ได้อีกนัยหนึ่ง return จำนวน request ที่มีเวลาอยุ่ในชวง inclusive [t - 3000, t]\n\nรับประกันว่าแตละ test case เรียก ping ดวยคา t ที่เพิ่เพิยงขึ้นเสมอ (strictly increasing)",
+          c: "โจทย์ (LC933): ให้ implement class RecentCounter:\n\n- `RecentCounter()` — Initialize ตัวแปรภายในเพื่อกำหนด counter ใหม่อันหนึ่ง\n- `int ping(int t)` — เพิ่ม request ใหม่ที่เวลา t (หน่วย millisecond) แล้ว return จำนวน request ที่เกิดขึ้นในช่วง 3000 millisecond ที่ผ่านมา (รวม request ปัจจุบันด้วย) ได้อีกนัยหนึ่ง return จำนวน request ที่มีเวลาอยู่ในช่วง inclusive `[t - 3000, t]`\n\nรับประกันว่าแต่ละ test case เรียก ping ด้วยค่า t ที่เพิ่มขึ้นเสมอ (strictly increasing)",
         },
         {
           t: "example",
           c: [
             {
               input: '["RecentCounter", "ping", "ping", "ping", "ping"]\n[[], [1], [100], [3001], [3002]]',
-              output: '[null, 1, 2, 3, 3]',
-              explain: `Explanation\nRecentCounter recentCounter = new RecentCounter();
-recentCounter.ping(1);     // requests = [1], range is [-2999,1], return 1
-recentCounter.ping(100);   // requests = [1, 100], range is [-2900,100], return 2
-recentCounter.ping(3001);  // requests = [1, 100, 3001], range is [1,3001], return 3
-recentCounter.ping(3002);  // requests = [1, 100, 3001, 3002], range is [2,3002], return 3`,
+              output: "[null, 1, 2, 3, 3]",
+              explain:
+                "ping(1) → คิว [1] ช่วง [-2999,1] ได้ 1 · ping(100) → [1,100] ได้ 2 · ping(3001) → [1,100,3001] ได้ 3 · ping(3002) → 1 หลุดช่วง [2,3002] ต้อง pop ทิ้ง เหลือ [100,3001,3002] ได้ 3",
             },
           ],
         },
@@ -235,17 +249,29 @@ class RecentCounter:
             { t: "h3", c: "4. จำลองการทำงาน — ping ตามตัวอย่าง" },
             {
               t: "table",
-              head: ["เรียก", "หลัง append", "pop หัวแถว (< t−3000)", "q สุดท้าย", "return"],
+              head: [
+                "เรียก",
+                "ช่วง [t−3000, t]",
+                "ทำกับคิว",
+                "q ตอนนี้ (หัว … หาง)",
+                "return",
+              ],
               rows: [
-                ["ping(1)", "[1]", "1 < −2999? ไม่", "[1]", "1"],
-                ["ping(100)", "[1, 100]", "1 < −2900? ไม่", "[1, 100]", "2"],
-                ["ping(3001)", "[1, 100, 3001]", "1 < 1? ไม่", "[1, 100, 3001]", "3"],
-                ["ping(3002)", "[1, 100, 3001, 3002]", "1 < 2? ใช่ → pop 1", "[100, 3001, 3002]", "3"],
+                ["ping(1)", "[−2999, 1]", "append 1", "1", "1"],
+                ["ping(100)", "[−2900, 100]", "append 100", "1 → 100", "2"],
+                ["ping(3001)", "[1, 3001]", "append 3001", "1 → 100 → 3001", "3"],
+                [
+                  "ping(3002)",
+                  "[2, 3002]",
+                  "append 3002 แล้ว popleft 1 (หลุดขอบ)",
+                  "100 → 3001 → 3002",
+                  "3",
+                ],
               ],
             },
             {
               t: "p",
-              c: "จบตัวอย่าง — คำตอบเรียงกันเป็น 1, 2, 3, 3 ตรงกับ expected output เป๊ะ",
+              c: "ทิศคิว: ซ้าย = หัว (ping เก่าสุด) · ขวา = หาง (ping ใหม่สุด) — popleft เมื่อหัว < t − 3000 · คำตอบเรียงกันเป็น 1, 2, 3, 3 ตรง expected",
             },
 
             { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
@@ -378,17 +404,29 @@ class RecentCounter:
             { t: "h3", c: "4. Dry Run — Step by Step" },
             {
               t: "table",
-              head: ["Call", "After append", "Drain front (< t−3000)", "Queue", "return"],
+              head: [
+                "Call",
+                "Window [t−3000, t]",
+                "Queue action",
+                "q now (front … back)",
+                "return",
+              ],
               rows: [
-                ["ping(1)", "[1]", "1 < −2999? No", "[1]", "1"],
-                ["ping(100)", "[1, 100]", "1 < −2900? No", "[1, 100]", "2"],
-                ["ping(3001)", "[1, 100, 3001]", "1 < 1? No", "[1, 100, 3001]", "3"],
-                ["ping(3002)", "[1, 100, 3001, 3002]", "1 < 2? Yes → pop 1", "[100, 3001, 3002]", "3"],
+                ["ping(1)", "[−2999, 1]", "append 1", "1", "1"],
+                ["ping(100)", "[−2900, 100]", "append 100", "1 → 100", "2"],
+                ["ping(3001)", "[1, 3001]", "append 3001", "1 → 100 → 3001", "3"],
+                [
+                  "ping(3002)",
+                  "[2, 3002]",
+                  "append 3002, then popleft 1 (fell off)",
+                  "100 → 3001 → 3002",
+                  "3",
+                ],
               ],
             },
             {
               t: "p",
-              c: "Done — answers come out as 1, 2, 3, 3, matching the expected output exactly.",
+              c: "Queue direction: left = front (oldest ping) · right = back (newest) — popleft while front < t − 3000. Answers: 1, 2, 3, 3 matching expected output.",
             },
 
             { t: "h3", c: "5. Edge Cases & Pitfalls" },
@@ -569,20 +607,56 @@ class Solution:
             { t: "h3", c: '4. จำลองการทำงาน — senate = "RDD"' },
             {
               t: "p",
-              c: "n = 3 · เริ่มต้น radiant = [0], dire = [1, 2]",
+              c: "n = 3 · เริ่มต้น senate = R0 D1 D2 · radiant = 0 · dire = 1 → 2",
             },
             {
               t: "table",
-              head: ["r (หน้าสุด R)", "d (หน้าสุด D)", "ใครชนะตานี้", "radiant", "dire"],
+              head: [
+                "ตา",
+                "ดึงมาเทียบ",
+                "ใครได้แบน",
+                "คนที่หาย",
+                "คนรอดไปต่อท้าย",
+                "radiant (หัว…หาง)",
+                "dire (หัว…หาง)",
+                "ยังมีสิทธิ์",
+              ],
               rows: [
-                ["0", "1", "r < d → R แบน D, R วนไป 0+3=3", "[3]", "[2]"],
-                ["3", "2", "r > d → D แบน R, D วนไป 2+3=5", "[]", "[5]"],
-                ["(radiant ว่าง)", "—", "จบ → Dire ชนะ", "[]", "[5]"],
+                [
+                  "1",
+                  "R0 vs D1",
+                  "R0 มาก่อน → แบน D1",
+                  "D1",
+                  "R0 วนเป็น 0+3=3",
+                  "3",
+                  "2",
+                  "R0 · D2",
+                ],
+                [
+                  "2",
+                  "R3 vs D2",
+                  "D2 มาก่อน → แบน R3",
+                  "R3",
+                  "D2 วนเป็น 2+3=5",
+                  "[]",
+                  "5",
+                  "D2",
+                ],
+                [
+                  "จบ",
+                  "radiant ว่าง",
+                  "—",
+                  "—",
+                  "—",
+                  "[]",
+                  "5",
+                  'Dire ชนะ',
+                ],
               ],
             },
             {
               t: "p",
-              c: 'จบเกม — ได้คำตอบ "Dire"',
+              c: "สัญลักษณ์: ซ้ายของแต่ละคิว = หัว (ถึงคิวก่อน) · +n = ส่งผู้รอดไปต่อท้ายรอบหน้า ไม่ให้แซงคนที่ยังไม่ได้เล่นในรอบนี้ — จบเกมได้คำตอบ \"Dire\"",
             },
 
             { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
@@ -731,23 +805,59 @@ class Solution:
         return "Radiant" if radiant else "Dire"`,
             },
 
-            { t: "h3", c: "4. Dry Run — senate = \"RDD\"" },
+            { t: "h3", c: '4. Dry Run — senate = "RDD"' },
             {
               t: "p",
-              c: "n = 3 · Start: radiant = [0], dire = [1, 2]",
+              c: "n = 3 · Start: senate = R0 D1 D2 · radiant = 0 · dire = 1 → 2",
             },
             {
               t: "table",
-              head: ["r (front R)", "d (front D)", "Who wins this turn", "radiant", "dire"],
+              head: [
+                "Turn",
+                "Face-off",
+                "Who bans",
+                "Banned",
+                "Survivor re-enqueues",
+                "radiant (front…back)",
+                "dire (front…back)",
+                "Still active",
+              ],
               rows: [
-                ["0", "1", "r < d → R bans D, R re-enqueues 0+3=3", "[3]", "[2]"],
-                ["3", "2", "r > d → D bans R, D re-enqueues 2+3=5", "[]", "[5]"],
-                ["(radiant empty)", "—", "Game over → Dire wins", "[]", "[5]"],
+                [
+                  "1",
+                  "R0 vs D1",
+                  "R0 first → bans D1",
+                  "D1",
+                  "R0 becomes 0+3=3",
+                  "3",
+                  "2",
+                  "R0 · D2",
+                ],
+                [
+                  "2",
+                  "R3 vs D2",
+                  "D2 first → bans R3",
+                  "R3",
+                  "D2 becomes 2+3=5",
+                  "[]",
+                  "5",
+                  "D2",
+                ],
+                [
+                  "End",
+                  "radiant empty",
+                  "—",
+                  "—",
+                  "—",
+                  "[]",
+                  "5",
+                  "Dire wins",
+                ],
               ],
             },
             {
               t: "p",
-              c: "Done — answer is \"Dire\".",
+              c: "Left of each queue = front (acts first) · +n = send survivor to the back of the next round so they don't cut ahead of anyone still waiting this round. Answer: \"Dire\".",
             },
 
             { t: "h3", c: "5. Edge Cases & Pitfalls" },
