@@ -383,7 +383,11 @@ return prev           # prev จะกลายเป็น Head ตัวให
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC2095): กำหนด head ของ linked list มาให้ ให้ลบ middle node ออกจาก list แล้ว return head ของ list ที่แก้ไขแล้ว โดยนิยามตัวกลางของ list ขนาด n คือ node ลำดับที่ ⌊n/2⌋ นับ index จาก 0 (เช่น n = 1, 2, 3, 4, 5 ตัวกลางคือ index 0, 1, 1, 2, 2 ตามลำดับ)",
+          c: `โจทย์ (LC2095): You are given the head of a linked list. Delete the middle node, and return the head of the modified linked list.
+
+The middle node of a linked list of size n is the ⌊n / 2⌋ᵗʰ node from the start using 0-based indexing, where ⌊x⌋ denotes the largest integer less than or equal to x.
+
+- For n = 1, 2, 3, 4, and 5, the middle nodes are 0, 1, 1, 2, and 2, respectively.`,
         },
         {
           t: "example",
@@ -391,27 +395,32 @@ return prev           # prev จะกลายเป็น Head ตัวให
             {
               input: "head = [1,3,4,7,1,2,6]",
               output: "[1,3,4,1,2,6]",
-              explain:
-                "list มี n = 7 ตัว ตัวกลางอยู่ที่ index ⌊7/2⌋ = 3 ซึ่งคือ node ค่า 7 ลบออกแล้วเหลือ [1,3,4,1,2,6]",
+              explain: `Explanation:
+The above figure represents the given linked list. The indices of the nodes are written below.
+Since n = 7, node 3 with value 7 is the middle node, which is marked in red.
+We return the new list after removing this node.`,
             },
             {
               input: "head = [1,2,3,4]",
               output: "[1,2,4]",
-              explain:
-                "list มี n = 4 ตัว ตัวกลางอยู่ที่ index ⌊4/2⌋ = 2 ซึ่งคือ node ค่า 3 ลบออกแล้วเหลือ [1,2,4]",
+              explain: `Explanation:
+The above figure represents the given linked list.
+For n = 4, node 2 with value 3 is the middle node, which is marked in red.`,
             },
             {
-              input: "head = [1]",
-              output: "[]",
-              explain:
-                "list มี node เดียว (n = 1) ตัวกลางคือ index ⌊1/2⌋ = 0 ซึ่งคือตัวมันเอง ลบออกแล้วเหลือ list ว่าง",
+              input: "head = [2,1]",
+              output: "[2]",
+              explain: `Explanation:
+The above figure represents the given linked list.
+For n = 2, node 1 with value 1 is the middle node, which is marked in red.
+Node 0 with value 2 is the only node remaining after removing node 1.`,
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ระหว่าง 1 ถึง 10^5",
+            "The number of nodes in the list is in the range [1, 10^5].",
             "1 <= Node.val <= 10^5",
           ],
         },
@@ -587,7 +596,13 @@ class Solution:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC328): กำหนด head ของ singly linked list มาให้ ให้ group node ที่มี index เป็นเลขคี่มาไว้ด้วยกัน ตามด้วย node ที่มี index เป็นเลขคู่ แล้ว return list ที่จัดลำดับใหม่แล้ว โดยนิยามให้ node ตัวแรกเป็นคี่ (index 1) ตัวที่สองเป็นคู่ (index 2) ไล่ไปเรื่อย ๆ ลำดับสัมพัทธ์ภายในกลุ่มคี่และกลุ่มคู่ต้องคงเดิมเหมือนใน input ต้องแก้ปัญหาด้วย space complexity O(1) และ time complexity O(n)",
+          c: `โจทย์ (LC328): Given the head of a singly linked list, group all the nodes with odd indices together followed by the nodes with even indices, and return the reordered list.
+
+The first node is considered odd, and the second node is even, and so on.
+
+Note that the relative order inside both the even and odd groups should remain as it was in the input.
+
+You must solve the problem in O(1) extra space complexity and O(n) time complexity.`,
         },
         {
           t: "example",
@@ -595,21 +610,17 @@ class Solution:
             {
               input: "head = [1,2,3,4,5]",
               output: "[1,3,5,2,4]",
-              explain:
-                "ตำแหน่งคี่ (index 1,3,5) คือค่า 1,3,5 มาก่อน ตามด้วยตำแหน่งคู่ (index 2,4) คือค่า 2,4",
             },
             {
               input: "head = [2,1,3,5,6,4,7]",
               output: "[2,3,6,7,1,5,4]",
-              explain:
-                "ตำแหน่งคี่ (index 1,3,5,7) คือค่า 2,3,6,7 มาก่อน ตามด้วยตำแหน่งคู่ (index 2,4,6) คือค่า 1,5,4",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ระหว่าง 0 ถึง 10^4",
+            "The number of nodes in the linked list is in the range [0, 10^4].",
             "-10^6 <= Node.val <= 10^6",
           ],
         },
@@ -775,7 +786,7 @@ class Solution:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC206): กำหนด head ของ singly linked list มาให้ ให้ reverse ทั้ง list แล้ว return head ตัวใหม่ของ list ที่ reverse แล้ว",
+          c: "โจทย์ (LC206): Given the head of a singly linked list, reverse the list, and return the reversed list.",
         },
         {
           t: "example",
@@ -791,15 +802,13 @@ class Solution:
             {
               input: "head = []",
               output: "[]",
-              explain:
-                "list ว่าง reverse แล้วยังว่างเหมือนเดิม โค้ดคืนค่าถูกต้องโดยอัตโนมัติโดยไม่ต้องดัก edge case พิเศษ",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ระหว่าง 0 ถึง 5000",
+            "The number of nodes in the list is the range [0, 5000].",
             "-5000 <= Node.val <= 5000",
           ],
         },
@@ -947,7 +956,13 @@ class Solution:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC2130): ใน linked list ขนาด n ที่ n เป็นเลขคู่ นิยามว่า node ลำดับที่ i (นับจาก 0) คือ twin ของ node ลำดับที่ n-1-i เมื่อ 0 <= i <= (n/2)-1 นิยาม twin sum คือผลรวมของค่า node หนึ่งกับ twin ของมัน กำหนด head ของ linked list ที่มีความยาวเป็นเลขคู่มาให้ ให้ return ค่า twin sum ที่มากที่สุด",
+          c: `โจทย์ (LC2130): In a linked list of size n, where n is even, the iᵗʰ node (0-indexed) of the linked list is known as the twin of the (n-1-i)ᵗʰ node, if 0 <= i <= (n / 2) - 1.
+
+- For example, if n = 4, then node 0 is the twin of node 3, and node 1 is the twin of node 2. These are the only nodes with twins for n = 4.
+
+The twin sum is defined as the sum of a node and its twin.
+
+Given the head of a linked list with even length, return the maximum twin sum of the linked list.`,
         },
         {
           t: "example",
@@ -955,27 +970,32 @@ class Solution:
             {
               input: "head = [5,4,2,1]",
               output: "6",
-              explain:
-                "node 0 กับ node 3 เป็น twin กัน (5+1=6) และ node 1 กับ node 2 เป็น twin กัน (4+2=6) ทั้งคู่ได้ twin sum เท่ากันคือ 6",
+              explain: `Explanation:
+Nodes 0 and 1 are the twins of nodes 3 and 2, respectively. All have twin sum = 6.
+There are no other nodes with twins in the linked list.
+Thus, the maximum twin sum of the linked list is 6.`,
             },
             {
               input: "head = [4,2,2,3]",
               output: "7",
-              explain:
-                "node 0 (val=4) กับ node 3 (val=3) เป็น twin กัน ได้ twin sum = 7 ส่วน node 1 กับ node 2 ได้ twin sum = 4 ดังนั้นค่ามากสุดคือ max(7,4) = 7",
+              explain: `Explanation:
+The nodes with twins present in this linked list are:
+- Node 0 is the twin of node 3 having a twin sum of 4 + 3 = 7.
+- Node 1 is the twin of node 2 having a twin sum of 2 + 2 = 4.
+Thus, the maximum twin sum of the linked list is max(7, 4) = 7.`,
             },
             {
               input: "head = [1,100000]",
               output: "100001",
-              explain:
-                "list มีแค่คู่ twin เดียวคือ node 0 กับ node 1 ผลรวม 1 + 100000 = 100001",
+              explain: `Explanation:
+There is only one node with a twin in the linked list having twin sum of 1 + 100000 = 100001.`,
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node เป็นเลขคู่เสมอ อยู่ระหว่าง 2 ถึง 10^5",
+            "The number of nodes in the list is an even integer in the range [2, 10^5].",
             "1 <= Node.val <= 10^5",
           ],
         },
