@@ -80,7 +80,7 @@ async function CodePanel({
 async function renderBlock(b: Block, i: number): Promise<ReactNode> {
   switch (b.t) {
     case "p":
-      return <p key={i}>{b.c}</p>;
+      return <p key={i}>{renderText(b.c)}</p>;
     case "h2":
       return (
         <h2
