@@ -182,13 +182,15 @@
 
 ## ข้อ 34 · Leaf-Similar Trees
 
-ข้อ 34 (Leaf-Similar Trees) พูดง่าย ๆ คือ: มีต้นไม้สองต้น ให้เช็คว่าถ้าเราอ่านค่าเฉพาะ leaf (ใบ) จากซ้ายไปขวาของแต่ละต้น จะได้ลำดับเดียวกันไหม (สนใจแค่ใบ ไม่สนโครงหรือ node ภายใน)
+ข้อ 34 (Leaf-Similar Trees): มี Binary Tree สองต้น ให้เช็คว่า Leaf Sequence (ค่า Leaf Node จากซ้ายไปขวา) ของทั้งคู่เหมือนกันเป๊ะไหม — สนใจแค่ Leaf ไม่สน Shape ของ Tree
 
-จุดที่ต้องระวังคือทำยังไงให้ได้ลำดับ "ซ้ายไปขวา" ถูกต้องเป๊ะโดยไม่ต้องคิดอะไรซับซ้อน คำตอบคือแค่ traverse ลงซ้ายก่อนขวาเสมอ (แล้วเอาผลซ้าย + ผลขวาต่อกัน) ลำดับซ้ายไปขวาก็ได้มาฟรี ๆ โดยอัตโนมัติ เราเขียนฟังก์ชันย่อยที่คืน array ของค่าที่เป็น leaf เท่านั้น แล้วสุดท้ายก็แค่เทียบสอง array ว่าเท่ากันไหม
+กลยุทธ์คือ DFS: Helper function ถ้า Node เป็น None ข้าม ถ้าเป็น Leaf (left/right เป็น None) เก็บ node.val ไม่งั้น recurse ไป left ก่อนแล้วค่อย right แล้วนำ Array จาก root1 มาเทียบ root2
 
-ลองไล่กับตัวอย่างในหน้า t1 = TreeNode(1, TreeNode(2), TreeNode(3)) เดิน DFS: node 1 ไม่ใช่ leaf เรียกซ้าย (node 2 เป็น leaf คืน [2]) แล้วเรียกขวา (node 3 เป็น leaf คืน [3]) รวมกันได้ [2,3] เทียบกับ t2 = TreeNode(9, TreeNode(2), TreeNode(3)) ซึ่งได้ใบ [2,3] เหมือนกัน แม้ค่า root ต่างกัน (1 vs 9) ผลลัพธ์เป็น True ส่วน t3 = TreeNode(1, TreeNode(3), TreeNode(2)) สลับตำแหน่งใบ ได้ [3,2] ซึ่งไม่เท่ากับ [2,3] ผลลัพธ์เป็น False
+Walkthrough ต้น 3→(5→(6,2), 1): ได้ Leaf Sequence [6, 2, 1]
 
-ถ้าเผลอต่อขวาก่อนซ้าย ลำดับใบจะกลับด้านทันที
+Time O(T₁ + T₂) เยี่ยมทุก Node ครั้งเดียว · Space O(L₁ + L₂ + H) สำหรับ Leaf List + Call Stack ตาม Height
+
+ถ้าเผลอ Concatenate ขวาก่อนซ้าย Leaf Sequence จะกลับด้านทันที
 
 ## ข้อ 35 · Count Good Nodes in Binary Tree
 
