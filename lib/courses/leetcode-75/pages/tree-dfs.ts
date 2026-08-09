@@ -495,19 +495,20 @@ class Solution:
       en: "LC872 Leaf-Similar Trees 🟢",
     },
     lead: {
-      th: "เก็บ leaf จากซ้ายไปขวาของสองต้น แล้วเทียบลิสต์ — DFS ซ้ายก่อนขวาได้ลำดับฟรี ๆ",
-      en: "Collect leaves left-to-right from both trees, then compare lists — left-before-right DFS gives order for free.",
+      th: "ดึง Leaf Sequence จากซ้ายไปขวาของสองต้นด้วย DFS แล้วเทียบ List — วิ่ง left ก่อน right ได้ลำดับฟรี ๆ",
+      en: "Pull leaf sequences left-to-right from both trees with DFS, then compare lists — left-before-right gives order for free.",
     },
     group: "LeetCode 75",
     blocks: {
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC872): พิจารณา leaf ทั้งหมดของ binary tree เรียงจากซ้ายไปขวา ค่าของ leaf เหล่านั้นเรียงกันเรียกว่า leaf value sequence ของต้นไม้นั้น
+          c: `ใน Binary Tree เราจะเรียก Node ต่างๆ ตามตำแหน่งของมัน:
 
-ต้นไม้สองต้นจะถือว่าเป็น leaf-similar ก็ต่อเมื่อ leaf value sequence ของทั้งคู่เหมือนกันทุกประการ
+• Root: Node บนสุดที่เป็นจุดเริ่มต้น
+• Leaf: Node ที่อยู่ปลายสุด คือ Node ที่ left == None และ right == None
 
-กำหนด root ของต้นไม้สองต้นคือ root1 และ root2 มาให้ ให้ return true ก็ต่อเมื่อทั้งสองต้นเป็น leaf-similar`,
+เป้าหมายของโจทย์: เรามี Binary Tree 2 ต้น (root1 และ root2) โจทย์อยากรู้ว่า ถ้าเราดึงค่า (Value) ของ Leaf Node ทั้งหมดออกมา โดยเรียงลำดับจากซ้ายไปขวา (Left to Right) ลำดับของ Leaf จาก Tree ทั้งสองต้นจะหน้าตาเหมือนกันเป๊ะเลยหรือไม่?`,
         },
         {
           t: "example",
@@ -517,20 +518,20 @@ class Solution:
                 "root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]",
               output: "true",
               explain:
-                "ใบของทั้งสองต้นเรียงจากซ้ายไปขวาได้ลำดับเดียวกันคือ [6,7,4,9,8] แม้โครงต้นไม้จะไม่เหมือนกันก็ตาม",
+                "Leaf Sequence ของทั้งสองต้นเรียงจากซ้ายไปขวาได้ลำดับเดียวกันคือ [6,7,4,9,8] แม้ Shape ของ Tree จะไม่เหมือนกันก็ตาม",
             },
             {
               input: "root1 = [1,2,3], root2 = [1,3,2]",
               output: "false",
               explain:
-                "ต้นแรกมีใบเรียง [2,3] ส่วนต้นที่สองมีใบเรียง [3,2] ลำดับต่างกันจึงไม่ leaf-similar",
+                "ต้นแรกมี Leaf Sequence เป็น [2,3] ส่วนต้นที่สองเป็น [3,2] ลำดับต่างกันจึงไม่ leaf-similar",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node ของแต่ละต้นอยู่ในช่วง [1, 200]",
+            "จำนวน Node ของแต่ละต้นอยู่ในช่วง [1, 200]",
             "0 <= Node.val <= 200",
           ],
         },
@@ -541,32 +542,55 @@ class Solution:
           c: [
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับ pattern "Collect แล้วเทียบ" — ยุบโครงต้นไม้ให้เหลือแค่ลิสต์ใบ แล้วเทียบเท่ากันไหม',
+              c: 'ข้อนี้ตรงกับ pattern "Collect แล้วเทียบ" — ยุบโครง Tree ให้เหลือแค่ Leaf Sequence แล้วเทียบว่าเท่ากันไหม',
             },
 
-            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            { t: "h3", c: "1. กลยุทธ์ในการแก้ปัญหา (Core Strategy)" },
             {
               t: "p",
-              c: "เราไม่สนใจโครงหรือ node ภายในเลย — สนใจแค่ลำดับ leaf จากซ้ายไปขวา",
+              c: "เมื่อเราต้องการเจาะลงไปให้ลึกที่สุดเพื่อหา Leaf และต้องวิ่งจากซ้ายไปขวา อัลกอริทึมที่ตอบโจทย์ที่สุดคือ DFS (Depth-First Search)",
             },
-            {
-              t: "p",
-              c: "หัวใจสำคัญ: traverse ซ้ายก่อนขวาเสมอ (แล้วต่อผลซ้าย + ผลขวา) → ลำดับซ้ายไปขวาได้มาฟรี ๆ โดยอัตโนมัติ",
-            },
-
-            { t: "h3", c: "2. กฎเหล็ก 5 ข้อ (The Logic)" },
             {
               t: "ol",
               c: [
-                "เขียนฟังก์ชันย่อย leaves(node) ที่คืน array ค่า leaf",
-                "ถ้า node เป็น None → return []",
-                "ถ้าไม่มีลูกทั้งสองฝั่ง → เป็น leaf → return [node.val]",
-                "ไม่งั้น return leaves(ซ้าย) + leaves(ขวา) — ซ้ายก่อนเสมอ",
-                "สุดท้ายเทียบ leaves(root1) == leaves(root2)",
+                "สร้าง Helper function ที่รับ Node เข้ามาทำ DFS",
+                "ถ้า Node ปัจจุบันว่าง (None) ให้ข้ามไป",
+                "เช็คว่า Node นี้คือ Leaf ไหม? (ไม่มี left และไม่มี right) ถ้าใช่ ให้เก็บค่า node.val เอาไว้ใน Array/List",
+                "ถ้าไม่ใช่ Leaf ให้เรียกฟังก์ชันตัวเองซ้ำ (Recursive) โดยวิ่งไปที่ node.left ก่อน แล้วค่อยตามด้วย node.right — การทำแบบนี้จะการันตีว่าเราเก็บ Leaf ลำดับจากซ้ายไปขวาเสมอ",
+                "นำ Array ของ Leaf จาก root1 มาเทียบกับ root2",
+              ],
+            },
+
+            { t: "h3", c: "2. จำลองการทำงาน (DFS Walkthrough)" },
+            {
+              t: "p",
+              c: "สมมติว่าเรามี Tree หน้าตาแบบนี้:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              c: `        3
+       / \\
+      5   1
+     / \\
+    6   2`,
+            },
+            {
+              t: "ol",
+              c: [
+                "เริ่มต้นที่ Root: Node 3 — เข้ามาที่ Root Node 3 เช็คแล้วว่ามีลูก (ไม่ใช่ Leaf) จึงทำ Recursive ลงไปที่ node.left",
+                "Traverse กิ่งซ้าย: Node 5 — ไม่ใช่ Leaf จึงทำ Recursive ลงไปที่ node.left อีกครั้ง",
+                "เจอ Leaf ตัวแรก: Node 6 — ไม่มี left และไม่มี right สรุปว่ามันคือ Leaf! เก็บค่า [6] ไว้ใน List จากนั้น Return กลับขึ้นไปที่ Node 5 เพื่อไปฝั่งขวาต่อ",
+                "เจอ Leaf ตัวที่สอง: Node 2 — วิ่งมาทาง node.right ของ Node 5 เจอ Node 2 ซึ่งไม่มีลูกเลย มันคือ Leaf! เก็บค่าเพิ่มลง List เป็น [6, 2] แล้ว Return ถอยรวดเดียวกลับไปที่ Root 3",
+                "Traverse กิ่งขวาของ Root: Node 1 — จาก Root 3 วิ่งไปที่ node.right คือ Node 1 ไม่มีลูกเลย เป็น Leaf! เก็บค่าได้ลำดับสุดท้าย Array คือ [6, 2, 1]",
               ],
             },
 
             { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            {
+              t: "p",
+              c: "ใน Python เราสามารถ Return เป็น List ออกมาจาก Recursive Function แล้วจับมาต่อกัน (Concatenate) ด้วยเครื่องหมาย + ได้เลย โค้ดจะออกมาสั้นและคลีนมาก",
+            },
             {
               t: "code",
               lang: "python",
@@ -580,53 +604,44 @@ class Solution:
 
 class Solution:
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
-        def leaves(node):
-            if node is None:
+
+        def get_leaves(node):
+            if not node:
                 return []
-            if node.left is None and node.right is None:
+
+            # Base Case: ถ้าเป็น Leaf Node
+            if not node.left and not node.right:
                 return [node.val]
-            return leaves(node.left) + leaves(node.right)
 
-        return leaves(root1) == leaves(root2)`,
+            # Recursive Step: วิ่งซ้ายก่อน แล้วเอา List มาต่อกับฝั่งขวา
+            return get_leaves(node.left) + get_leaves(node.right)
+
+        # ดึง Leaf Sequence ของทั้ง 2 ต้นมาเปรียบเทียบกัน
+        return get_leaves(root1) == get_leaves(root2)`,
             },
 
-            { t: "h3", c: "4. จำลองการทำงาน — t1=[1,2,3] vs t2=[1,3,2]" },
-            {
-              t: "table",
-              head: ["ต้น", "เดิน DFS", "ลิสต์ใบ", "ผลเทียบ"],
-              rows: [
-                ["t1 root=1", "ซ้าย 2 (leaf) แล้วขวา 3 (leaf)", "[2, 3]", "—"],
-                ["t2 root=1", "ซ้าย 3 (leaf) แล้วขวา 2 (leaf)", "[3, 2]", "—"],
-                ["เทียบ", "[2,3] vs [3,2]", "ไม่เท่า", "False"],
-              ],
-            },
-            {
-              t: "p",
-              c: "เทียบกับ t2' = TreeNode(9, TreeNode(2), TreeNode(3)) ได้ใบ [2,3] เหมือน t1 → True แม้ค่า root ต่างกัน",
-            },
-
-            { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
+            { t: "h3", c: "4. จุดระวังตกหลุมพราง (Edge Cases)" },
             {
               t: "ul",
               c: [
-                "ลืมเช็คว่าเป็น leaf จริง ๆ แล้วเผลอเก็บค่า node ภายในด้วย",
-                "ต่อฝั่งขวาก่อนซ้าย → ลำดับใบกลับด้านทันที",
+                "ลืมเช็คว่าเป็น Leaf จริง ๆ แล้วเผลอเก็บค่า Internal Node ด้วย",
+                "Concatenate ฝั่ง right ก่อน left → Leaf Sequence กลับด้านทันที",
               ],
             },
 
-            { t: "h3", c: "6. Time & Space Complexity" },
+            { t: "h3", c: "5. การวิเคราะห์ประสิทธิภาพ (Complexity)" },
             {
               t: "ul",
               c: [
-                "Time O(n1 + n2) — แตะทุก node ของทั้งสองต้น",
-                "Space O(n1 + n2) — ลิสต์ใบ + ความลึก call stack",
+                "Time Complexity: O(T₁ + T₂) โดยที่ T คือจำนวน Node ทั้งหมดของ Tree แต่ละต้น เพราะกระบวนการ DFS ต้องแวะไปเยี่ยมทุกๆ Node ใน Tree 1 ครั้ง",
+                "Space Complexity: O(L₁ + L₂ + H) — L คือจำนวน Leaf Node (Memory สำหรับสร้าง List เก็บค่า Leaf ทั้งหมด) และ H คือความสูงของ Tree (Height) ซึ่งเป็น Memory ที่ต้องใช้เก็บ Call Stack ระหว่างทำ Recursive",
               ],
             },
 
             {
               t: "callout",
               title: "💡 สรุป pattern",
-              c: "DFS ซ้ายก่อนขวาเสมอ = ได้ลำดับซ้ายไปขวาฟรี ๆ แล้วยุบปัญหาโครงสร้างซับซ้อนให้เหลือแค่เทียบลิสต์ธรรมดา",
+              c: "DFS วิ่ง left ก่อน right เสมอ = ได้ Leaf Sequence จากซ้ายไปขวาฟรี ๆ แล้วยุบปัญหาโครงสร้างซับซ้อนให้เหลือแค่เทียบ List ธรรมดา",
             },
           ],
         },
@@ -634,11 +649,12 @@ class Solution:
       en: [
         {
           t: "p",
-          c: `Consider all the leaves of a binary tree, from left to right order, forming a leaf value sequence.
+          c: `In a Binary Tree we name Nodes by position:
 
-Two binary trees are considered leaf-similar if their leaf value sequences are the same.
+• Root: the top Node — the starting point
+• Leaf: a tip Node where left == None and right == None
 
-Return true if and only if the two given trees with head nodes root1 and root2 are leaf-similar.`,
+Goal: given two Binary Trees (root1 and root2), pull every Leaf Node value left to right. Are the two leaf sequences identical?`,
         },
         {
           t: "example",
@@ -648,13 +664,13 @@ Return true if and only if the two given trees with head nodes root1 and root2 a
                 "root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]",
               output: "true",
               explain:
-                "Both trees have the same leaf value sequence [6,7,4,9,8] even though the shapes differ.",
+                "Both trees share the same leaf sequence [6,7,4,9,8] even though their shapes differ.",
             },
             {
               input: "root1 = [1,2,3], root2 = [1,3,2]",
               output: "false",
               explain:
-                "First tree leaves [2,3]; second tree leaves [3,2] — order differs.",
+                "First tree leaf sequence [2,3]; second [3,2] — order differs, so not leaf-similar.",
             },
           ],
         },
@@ -672,32 +688,55 @@ Return true if and only if the two given trees with head nodes root1 and root2 a
           c: [
             {
               t: "p",
-              c: 'This matches the "collect then compare" pattern — collapse each tree into a leaf list, then check equality.',
+              c: 'This matches the "collect then compare" pattern — collapse each tree into a leaf sequence, then check equality.',
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
+            { t: "h3", c: "1. Core Strategy" },
             {
               t: "p",
-              c: "Ignore internal structure — only the left-to-right leaf sequence matters.",
+              c: "To dig all the way down for leaves while walking left to right, DFS (Depth-First Search) is the right tool.",
             },
-            {
-              t: "p",
-              c: "Key insight: always traverse left before right (and concatenate left + right results) — left-to-right order comes for free.",
-            },
-
-            { t: "h3", c: "2. The Logic — 5 Steps" },
             {
               t: "ol",
               c: [
-                "Write a helper leaves(node) that returns a list of leaf values",
-                "If node is None → return []",
-                "If both children are None → it's a leaf → return [node.val]",
-                "Otherwise return leaves(left) + leaves(right) — left first",
-                "Finally compare leaves(root1) == leaves(root2)",
+                "Write a helper that DFS-walks a Node",
+                "If the current Node is None, skip it",
+                "Is this Node a Leaf? (no left and no right) — if yes, append node.val to the list",
+                "If not a Leaf, recurse on node.left first, then node.right — that guarantees left-to-right leaf order",
+                "Compare the leaf arrays from root1 and root2",
+              ],
+            },
+
+            { t: "h3", c: "2. DFS Walkthrough" },
+            {
+              t: "p",
+              c: "Suppose the tree looks like this:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              c: `        3
+       / \\
+      5   1
+     / \\
+    6   2`,
+            },
+            {
+              t: "ol",
+              c: [
+                "Start at Root: Node 3 — has children (not a Leaf), recurse to node.left",
+                "Traverse left branch: Node 5 — not a Leaf, recurse to node.left again",
+                "First Leaf: Node 6 — no left, no right → Leaf! List is [6], return to Node 5 to take the right side",
+                "Second Leaf: Node 2 — node.right of 5; no children → Leaf! List becomes [6, 2], return all the way to Root 3",
+                "Traverse right of Root: Node 1 — no children → Leaf! Final array [6, 2, 1]",
               ],
             },
 
             { t: "h3", c: "3. LeetCode-Ready Code" },
+            {
+              t: "p",
+              c: "In Python, return lists from the recursive helper and concatenate with + — short and clean.",
+            },
             {
               t: "code",
               lang: "python",
@@ -711,49 +750,44 @@ Return true if and only if the two given trees with head nodes root1 and root2 a
 
 class Solution:
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
-        def leaves(node):
-            if node is None:
+
+        def get_leaves(node):
+            if not node:
                 return []
-            if node.left is None and node.right is None:
+
+            # Base Case: Leaf Node
+            if not node.left and not node.right:
                 return [node.val]
-            return leaves(node.left) + leaves(node.right)
 
-        return leaves(root1) == leaves(root2)`,
+            # Recursive Step: left first, then concatenate right
+            return get_leaves(node.left) + get_leaves(node.right)
+
+        # Compare leaf sequences of both trees
+        return get_leaves(root1) == get_leaves(root2)`,
             },
 
-            { t: "h3", c: "4. Dry Run — [1,2,3] vs [1,3,2]" },
-            {
-              t: "table",
-              head: ["Tree", "DFS walk", "Leaf list", "Compare"],
-              rows: [
-                ["t1 root=1", "left 2 (leaf), right 3 (leaf)", "[2, 3]", "—"],
-                ["t2 root=1", "left 3 (leaf), right 2 (leaf)", "[3, 2]", "—"],
-                ["Compare", "[2,3] vs [3,2]", "not equal", "False"],
-              ],
-            },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
+            { t: "h3", c: "4. Edge Cases & Pitfalls" },
             {
               t: "ul",
               c: [
-                "Forgetting the leaf check and collecting internal nodes too",
-                "Concatenating right before left reverses the sequence",
+                "Forgetting the Leaf check and collecting internal nodes too",
+                "Concatenating right before left reverses the leaf sequence instantly",
               ],
             },
 
-            { t: "h3", c: "6. Time & Space Complexity" },
+            { t: "h3", c: "5. Complexity" },
             {
               t: "ul",
               c: [
-                "Time O(n1 + n2) — visit every node in both trees",
-                "Space O(n1 + n2) — leaf lists + call-stack depth",
+                "Time Complexity: O(T₁ + T₂) where T is the node count of each tree — DFS visits every node once",
+                "Space Complexity: O(L₁ + L₂ + H) — L for the leaf lists in memory, H for the recursive call-stack height",
               ],
             },
 
             {
               t: "callout",
               title: "💡 Pattern summary",
-              c: "Left-before-right DFS gives left-to-right order for free — then reduce a structural problem to plain list equality.",
+              c: "Left-before-right DFS gives a left-to-right leaf sequence for free — then reduce a structural problem to plain list equality.",
             },
           ],
         },
