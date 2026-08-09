@@ -501,39 +501,13 @@ class Solution:
     group: "LeetCode 75",
     blocks: {
       th: [
-        { t: "h2", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
         {
           t: "p",
-          c: `เรามี Binary Tree อยู่ 2 ต้น (root1 กับ root2)
-ภารกิจของเราคือ: วิ่งเข้าไปเก็บค่าของ Leaf Node (Node ที่อยู่ปลายสุด ไม่มีลูกแล้ว) โดยมีเงื่อนไขว่าต้องเก็บจากซ้ายไปขวา
+          c: `Consider all the leaves of a binary tree, from left to right order, forming a leaf value sequence.
 
-ถ้ารายการ Leaf Node ของ Tree ต้นแรก หน้าตาเหมือนกับ Tree ต้นที่สองเป๊ะๆ ทุกตำแหน่ง ให้ตอบ True ถ้าไม่เหมือนให้ตอบ False`,
-        },
+Two binary trees are considered leaf-similar if their leaf value sequences are the same.
 
-        { t: "h2", c: "2. สร้างภาพจำ (Mental Model)" },
-        {
-          t: "p",
-          c: "ให้จินตนาการว่า Tree คือ \"เขาวงกต\"",
-        },
-        {
-          t: "ul",
-          c: [
-            "Root: ประตูทางเข้าเขาวงกต",
-            "Node: ทางแยก",
-            'Leaf: "ทางตัน" (ไม่มีทางให้ไปต่อทั้งซ้ายและขวา)',
-          ],
-        },
-        {
-          t: "p",
-          c: "อัลกอริทึมที่เราจะใช้คือ DFS (Depth-First Search) ซึ่งมีกฎในการเดินเขาวงกตดังนี้:",
-        },
-        {
-          t: "ol",
-          c: [
-            "ต้องเลี้ยวซ้ายก่อนเสมอ",
-            'เมื่อไหร่ที่เจอ "ทางตัน (Leaf)" ให้เอาตัวเลขที่กำแพงใส่กล่อง (List) แล้วเดินย้อนกลับ (Return)',
-            "ถอยกลับมาที่ทางแยกเดิม แล้วค่อยไปสำรวจกิ่งขวาต่อ",
-          ],
+Return true if and only if the two given trees with head nodes root1 and root2 are leaf-similar.`,
         },
 
         {
@@ -571,7 +545,43 @@ class Solution:
               c: 'ข้อนี้ตรงกับ pattern "Collect แล้วเทียบ" — เดินเขาวงกตเก็บทางตันใส่กล่อง แล้วเทียบว่าสองกล่องหน้าตาเหมือนกันไหม',
             },
 
-            { t: "h3", c: "1. หั่นโค้ดทีละส่วน (Logic-to-Code Mapping)" },
+
+            { t: "h3", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
+            {
+              t: "p",
+              c: `เรามี Binary Tree อยู่ 2 ต้น (root1 กับ root2)
+ภารกิจของเราคือ: วิ่งเข้าไปเก็บค่าของ Leaf Node (Node ที่อยู่ปลายสุด ไม่มีลูกแล้ว) โดยมีเงื่อนไขว่าต้องเก็บจากซ้ายไปขวา
+
+ถ้ารายการ Leaf Node ของ Tree ต้นแรก หน้าตาเหมือนกับ Tree ต้นที่สองเป๊ะๆ ทุกตำแหน่ง ให้ตอบ True ถ้าไม่เหมือนให้ตอบ False`,
+            },
+
+            { t: "h3", c: "2. สร้างภาพจำ (Mental Model)" },
+            {
+              t: "p",
+              c: "ให้จินตนาการว่า Tree คือ \"เขาวงกต\"",
+            },
+            {
+              t: "ul",
+              c: [
+                "Root: ประตูทางเข้าเขาวงกต",
+                "Node: ทางแยก",
+                'Leaf: "ทางตัน" (ไม่มีทางให้ไปต่อทั้งซ้ายและขวา)',
+              ],
+            },
+            {
+              t: "p",
+              c: "อัลกอริทึมที่เราจะใช้คือ DFS (Depth-First Search) ซึ่งมีกฎในการเดินเขาวงกตดังนี้:",
+            },
+            {
+              t: "ol",
+              c: [
+                "ต้องเลี้ยวซ้ายก่อนเสมอ",
+                'เมื่อไหร่ที่เจอ "ทางตัน (Leaf)" ให้เอาตัวเลขที่กำแพงใส่กล่อง (List) แล้วเดินย้อนกลับ (Return)',
+                "ถอยกลับมาที่ทางแยกเดิม แล้วค่อยไปสำรวจกิ่งขวาต่อ",
+              ],
+            },
+
+            { t: "h3", c: "3. หั่นโค้ดทีละส่วน (Logic-to-Code Mapping)" },
             {
               t: "p",
               c: "เราจะสร้างฟังก์ชันชื่อ get_leaves(node) เพื่อทำหน้าที่เดินเขาวงกต โดยเราจะดักสถานการณ์ที่จะเกิดขึ้น 3 รูปแบบ",
@@ -618,7 +628,7 @@ if not node.left and not node.right:
 return get_leaves(node.left) + get_leaves(node.right)`,
             },
 
-            { t: "h3", c: "2. จำลองการทำงาน (Step-by-Step Walkthrough)" },
+            { t: "h3", c: "4. จำลองการทำงาน (Step-by-Step Walkthrough)" },
             {
               t: "p",
               c: "สมมติเรามี Tree หน้าตาแบบนี้ และเอาไปเข้าฟังก์ชัน get_leaves:",
@@ -645,7 +655,7 @@ return get_leaves(node.left) + get_leaves(node.right)`,
               ],
             },
 
-            { t: "h3", c: "3. ประกอบร่างโค้ดฉบับเต็ม" },
+            { t: "h3", c: "5. ประกอบร่างโค้ดฉบับเต็ม" },
             {
               t: "p",
               c: "เมื่อเราเอาโค้ดทั้ง 3 ส่วนมาประกอบกัน ไว้ข้างใน Class ที่ LeetCode เตรียมไว้ให้ จะได้โค้ดที่สั้น คลีน และอ่านลอจิกได้ทะลุปรุโปร่งแบบนี้",
@@ -674,7 +684,7 @@ return get_leaves(node.left) + get_leaves(node.right)`,
         return get_leaves(root1) == get_leaves(root2)`,
             },
 
-            { t: "h3", c: "4. วิเคราะห์ประสิทธิภาพ (Complexity)" },
+            { t: "h3", c: "6. วิเคราะห์ประสิทธิภาพ (Complexity)" },
             {
               t: "ul",
               c: [
@@ -692,39 +702,13 @@ return get_leaves(node.left) + get_leaves(node.right)`,
         },
       ],
       en: [
-        { t: "h2", c: "1. Problem Decoding" },
         {
           t: "p",
-          c: `We have two Binary Trees (root1 and root2).
-Mission: walk in and collect Leaf Node values (tip nodes with no children), left to right.
+          c: `Consider all the leaves of a binary tree, from left to right order, forming a leaf value sequence.
 
-If the leaf list of the first tree matches the second tree position-by-position, return True; otherwise False.`,
-        },
+Two binary trees are considered leaf-similar if their leaf value sequences are the same.
 
-        { t: "h2", c: "2. Mental Model" },
-        {
-          t: "p",
-          c: 'Picture the Tree as a "maze":',
-        },
-        {
-          t: "ul",
-          c: [
-            "Root: the entrance door",
-            "Node: a fork / junction",
-            'Leaf: a "dead end" (nowhere left or right to go)',
-          ],
-        },
-        {
-          t: "p",
-          c: "We'll use DFS (Depth-First Search) with these maze rules:",
-        },
-        {
-          t: "ol",
-          c: [
-            "Always turn left first",
-            'When you hit a "dead end (Leaf)", put the wall number in the box (List), then walk back (Return)',
-            "Back at the fork, then explore the right branch",
-          ],
+Return true if and only if the two given trees with head nodes root1 and root2 are leaf-similar.`,
         },
 
         {
@@ -762,7 +746,43 @@ If the leaf list of the first tree matches the second tree position-by-position,
               c: 'This matches the "collect then compare" pattern — walk the maze, fill boxes with dead ends, then check if the two boxes match.',
             },
 
-            { t: "h3", c: "1. Logic-to-Code Mapping" },
+
+            { t: "h3", c: "1. Problem Decoding" },
+            {
+              t: "p",
+              c: `We have two Binary Trees (root1 and root2).
+Mission: walk in and collect Leaf Node values (tip nodes with no children), left to right.
+
+If the leaf list of the first tree matches the second tree position-by-position, return True; otherwise False.`,
+            },
+
+            { t: "h3", c: "2. Mental Model" },
+            {
+              t: "p",
+              c: 'Picture the Tree as a "maze":',
+            },
+            {
+              t: "ul",
+              c: [
+                "Root: the entrance door",
+                "Node: a fork / junction",
+                'Leaf: a "dead end" (nowhere left or right to go)',
+              ],
+            },
+            {
+              t: "p",
+              c: "We'll use DFS (Depth-First Search) with these maze rules:",
+            },
+            {
+              t: "ol",
+              c: [
+                "Always turn left first",
+                'When you hit a "dead end (Leaf)", put the wall number in the box (List), then walk back (Return)',
+                "Back at the fork, then explore the right branch",
+              ],
+            },
+
+            { t: "h3", c: "3. Logic-to-Code Mapping" },
             {
               t: "p",
               c: "We'll write get_leaves(node) to walk the maze, handling three situations:",
@@ -809,7 +829,7 @@ if not node.left and not node.right:
 return get_leaves(node.left) + get_leaves(node.right)`,
             },
 
-            { t: "h3", c: "2. Step-by-Step Walkthrough" },
+            { t: "h3", c: "4. Step-by-Step Walkthrough" },
             {
               t: "p",
               c: "Suppose the Tree looks like this, and we call get_leaves:",
@@ -836,7 +856,7 @@ return get_leaves(node.left) + get_leaves(node.right)`,
               ],
             },
 
-            { t: "h3", c: "3. Full Assembled Code" },
+            { t: "h3", c: "5. Full Assembled Code" },
             {
               t: "p",
               c: "Glue the three pieces into LeetCode's Solution class — short, clean, logic transparent:",
@@ -865,7 +885,7 @@ return get_leaves(node.left) + get_leaves(node.right)`,
         return get_leaves(root1) == get_leaves(root2)`,
             },
 
-            { t: "h3", c: "4. Complexity" },
+            { t: "h3", c: "6. Complexity" },
             {
               t: "ul",
               c: [
@@ -898,28 +918,11 @@ return get_leaves(node.left) + get_leaves(node.right)`,
     group: "LeetCode 75",
     blocks: {
       th: [
-        { t: "h2", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
         {
           t: "p",
-          c: `เรามี Binary Tree อยู่ 1 ต้น
-โจทย์นิยามคำว่า "Good Node" (โหนดที่ดี) ว่า: ถ้าเราเดินจาก Root ลงมาเรื่อยๆ จนถึง Node ปัจจุบัน ต้องไม่มี Node ไหนเลยในเส้นทางนี้ที่มีค่า "มากกว่า" ตัวมัน (พูดง่ายๆ คือ ตัวมันต้องมีค่า ≥ ตัวที่มากที่สุดที่เคยเจอมาตั้งแต่ต้นทาง)
+          c: `Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X.
 
-ภารกิจของเราคือ: นับว่าใน Tree ต้นนี้ มี Good Node อยู่ทั้งหมดกี่ตัว?`,
-        },
-
-        { t: "h2", c: "2. สร้างภาพจำ (Mental Model)" },
-        {
-          t: "p",
-          c: 'ให้จินตนาการว่า การเดินลงไปใน Tree คือ "การเดินป่าและจดสถิติต้นไม้ที่สูงที่สุด"',
-        },
-        {
-          t: "ul",
-          c: [
-            'คุณเริ่มเดินจาก Root พร้อมกับถือ "สมุดจดสถิติความสูง (Max So Far)" ไว้ในมือ',
-            "ทุกครั้งที่คุณเดินไปถึงต้นไม้ต้นใหม่ (Node ปัจจุบัน) คุณจะมองดูความสูงของมัน แล้วเทียบกับตัวเลขในสมุด",
-            'ถ้าต้นไม้นี้สูง "เท่ากับ หรือ มากกว่า" ตัวเลขในสมุด: แปลว่านี่คือ Good Node! คุณก็นับแต้มเพิ่มให้ตัวเอง 1 แต้ม',
-            "ก่อนจะเดินไปสำรวจทางแยกถัดไป: คุณต้องเช็คว่าต้นไม้นี้ทำลายสถิติเดิมไหม? ถ้าทำลายสถิติ คุณต้องอัปเดตตัวเลขในสมุด เป็นความสูงใหม่ แล้วค่อยแบกสมุดเล่มนี้เดินไปที่ลูกซ้ายและลูกขวาต่อ",
-          ],
+Return the number of good nodes in the binary tree.`,
         },
 
         {
@@ -961,7 +964,32 @@ return get_leaves(node.left) + get_leaves(node.right)`,
               c: 'ข้อนี้ตรงกับ pattern "Top-down พก state" — ต่างจาก Leaf-Similar ที่รอผลจากลูกขึ้นมา ข้อนี้พกสมุดจดสถิติลงไปด้วยตอนเดิน',
             },
 
-            { t: "h3", c: "1. หั่นโค้ดทีละส่วน (Logic-to-Code Mapping)" },
+
+            { t: "h3", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
+            {
+              t: "p",
+              c: `เรามี Binary Tree อยู่ 1 ต้น
+โจทย์นิยามคำว่า "Good Node" (โหนดที่ดี) ว่า: ถ้าเราเดินจาก Root ลงมาเรื่อยๆ จนถึง Node ปัจจุบัน ต้องไม่มี Node ไหนเลยในเส้นทางนี้ที่มีค่า "มากกว่า" ตัวมัน (พูดง่ายๆ คือ ตัวมันต้องมีค่า ≥ ตัวที่มากที่สุดที่เคยเจอมาตั้งแต่ต้นทาง)
+
+ภารกิจของเราคือ: นับว่าใน Tree ต้นนี้ มี Good Node อยู่ทั้งหมดกี่ตัว?`,
+            },
+
+            { t: "h3", c: "2. สร้างภาพจำ (Mental Model)" },
+            {
+              t: "p",
+              c: 'ให้จินตนาการว่า การเดินลงไปใน Tree คือ "การเดินป่าและจดสถิติต้นไม้ที่สูงที่สุด"',
+            },
+            {
+              t: "ul",
+              c: [
+                'คุณเริ่มเดินจาก Root พร้อมกับถือ "สมุดจดสถิติความสูง (Max So Far)" ไว้ในมือ',
+                "ทุกครั้งที่คุณเดินไปถึงต้นไม้ต้นใหม่ (Node ปัจจุบัน) คุณจะมองดูความสูงของมัน แล้วเทียบกับตัวเลขในสมุด",
+                'ถ้าต้นไม้นี้สูง "เท่ากับ หรือ มากกว่า" ตัวเลขในสมุด: แปลว่านี่คือ Good Node! คุณก็นับแต้มเพิ่มให้ตัวเอง 1 แต้ม',
+                "ก่อนจะเดินไปสำรวจทางแยกถัดไป: คุณต้องเช็คว่าต้นไม้นี้ทำลายสถิติเดิมไหม? ถ้าทำลายสถิติ คุณต้องอัปเดตตัวเลขในสมุด เป็นความสูงใหม่ แล้วค่อยแบกสมุดเล่มนี้เดินไปที่ลูกซ้ายและลูกขวาต่อ",
+              ],
+            },
+
+            { t: "h3", c: "3. หั่นโค้ดทีละส่วน (Logic-to-Code Mapping)" },
             {
               t: "p",
               c: 'เราจะสร้างฟังก์ชันชื่อ dfs(node, max_so_far) โดยต้องรับค่า 2 อย่างคือ "จุดที่ยืนอยู่" และ "สมุดจดสถิติ" เราจะดักสถานการณ์ 3 อย่างดังนี้',
@@ -1013,7 +1041,7 @@ new_max = max(max_so_far, node.val)
 return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
             },
 
-            { t: "h3", c: "2. จำลองการทำงาน (Step-by-Step Walkthrough)" },
+            { t: "h3", c: "4. จำลองการทำงาน (Step-by-Step Walkthrough)" },
             {
               t: "p",
               c: "สมมติเรามี Tree หน้าตาแบบนี้:",
@@ -1039,7 +1067,7 @@ return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
               ],
             },
 
-            { t: "h3", c: "3. ประกอบร่างโค้ดฉบับเต็ม" },
+            { t: "h3", c: "5. ประกอบร่างโค้ดฉบับเต็ม" },
             {
               t: "p",
               c: "เมื่อนำโค้ดมารวมกัน จะได้ฟังก์ชันที่สะอาดตามาก (Python สามารถยุบโค้ดการหา Good Node และอัปเดต Max ให้อยู่ในบรรทัดเดียวกันได้เลย)",
@@ -1077,7 +1105,7 @@ class Solution:
         return dfs(root, root.val)`,
             },
 
-            { t: "h3", c: "4. วิเคราะห์ประสิทธิภาพ (Complexity)" },
+            { t: "h3", c: "6. วิเคราะห์ประสิทธิภาพ (Complexity)" },
             {
               t: "ul",
               c: [
@@ -1095,28 +1123,11 @@ class Solution:
         },
       ],
       en: [
-        { t: "h2", c: "1. Problem Decoding" },
         {
           t: "p",
-          c: `We have one Binary Tree.
-A "Good Node" means: on the path from Root down to the current Node, nothing has a value strictly greater than it (i.e. its value is ≥ the maximum seen so far from the start).
+          c: `Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X.
 
-Mission: count how many Good Nodes are in the tree.`,
-        },
-
-        { t: "h2", c: "2. Mental Model" },
-        {
-          t: "p",
-          c: 'Picture walking down the Tree as "hiking and logging the tallest tree so far."',
-        },
-        {
-          t: "ul",
-          c: [
-            'Start at Root holding a "height record book (Max So Far)"',
-            "At every new tree (current Node), compare its height to the book",
-            'If this tree is "equal to or taller" than the book: it\'s a Good Node — add 1 point',
-            "Before exploring the next fork: if this tree broke the record, update the book, then carry that book to the left and right children",
-          ],
+Return the number of good nodes in the binary tree.`,
         },
 
         {
@@ -1158,7 +1169,32 @@ Mission: count how many Good Nodes are in the tree.`,
               c: 'This matches the "top-down carry state" pattern — unlike Leaf-Similar (bottom-up), we carry the height log downward as we walk.',
             },
 
-            { t: "h3", c: "1. Logic-to-Code Mapping" },
+
+            { t: "h3", c: "1. Problem Decoding" },
+            {
+              t: "p",
+              c: `We have one Binary Tree.
+A "Good Node" means: on the path from Root down to the current Node, nothing has a value strictly greater than it (i.e. its value is ≥ the maximum seen so far from the start).
+
+Mission: count how many Good Nodes are in the tree.`,
+            },
+
+            { t: "h3", c: "2. Mental Model" },
+            {
+              t: "p",
+              c: 'Picture walking down the Tree as "hiking and logging the tallest tree so far."',
+            },
+            {
+              t: "ul",
+              c: [
+                'Start at Root holding a "height record book (Max So Far)"',
+                "At every new tree (current Node), compare its height to the book",
+                'If this tree is "equal to or taller" than the book: it\'s a Good Node — add 1 point',
+                "Before exploring the next fork: if this tree broke the record, update the book, then carry that book to the left and right children",
+              ],
+            },
+
+            { t: "h3", c: "3. Logic-to-Code Mapping" },
             {
               t: "p",
               c: 'Write dfs(node, max_so_far) — two inputs: "where you stand" and "the record book." Handle three situations:',
@@ -1210,7 +1246,7 @@ new_max = max(max_so_far, node.val)
 return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
             },
 
-            { t: "h3", c: "2. Step-by-Step Walkthrough" },
+            { t: "h3", c: "4. Step-by-Step Walkthrough" },
             {
               t: "p",
               c: "Suppose the Tree looks like this:",
@@ -1236,7 +1272,7 @@ return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
               ],
             },
 
-            { t: "h3", c: "3. Full Assembled Code" },
+            { t: "h3", c: "5. Full Assembled Code" },
             {
               t: "p",
               c: "Glue the pieces together — Python can collapse the Good check into one line:",
@@ -1274,7 +1310,7 @@ class Solution:
         return dfs(root, root.val)`,
             },
 
-            { t: "h3", c: "4. Complexity" },
+            { t: "h3", c: "6. Complexity" },
             {
               t: "ul",
               c: [
