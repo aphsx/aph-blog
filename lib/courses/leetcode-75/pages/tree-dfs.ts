@@ -495,21 +495,47 @@ class Solution:
       en: "LC872 Leaf-Similar Trees 🟢",
     },
     lead: {
-      th: "ดึง Leaf Sequence จากซ้ายไปขวาของสองต้นด้วย DFS แล้วเทียบ List — วิ่ง left ก่อน right ได้ลำดับฟรี ๆ",
-      en: "Pull leaf sequences left-to-right from both trees with DFS, then compare lists — left-before-right gives order for free.",
+      th: "Tree = เขาวงกต · Leaf = ทางตัน — เดิน DFS เลี้ยวซ้ายก่อน เก็บทางตันจากซ้ายไปขวา แล้วเทียบกล่องของสองต้น",
+      en: "Tree = maze · Leaf = dead end — DFS left-first, collect dead ends left-to-right, then compare the two boxes.",
     },
     group: "LeetCode 75",
     blocks: {
       th: [
+        { t: "h2", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
         {
           t: "p",
-          c: `ใน Binary Tree เราจะเรียก Node ต่างๆ ตามตำแหน่งของมัน:
+          c: `เรามี Binary Tree อยู่ 2 ต้น (root1 กับ root2)
+ภารกิจของเราคือ: วิ่งเข้าไปเก็บค่าของ Leaf Node (Node ที่อยู่ปลายสุด ไม่มีลูกแล้ว) โดยมีเงื่อนไขว่าต้องเก็บจากซ้ายไปขวา
 
-• Root: Node บนสุดที่เป็นจุดเริ่มต้น
-• Leaf: Node ที่อยู่ปลายสุด คือ Node ที่ left == None และ right == None
-
-เป้าหมายของโจทย์: เรามี Binary Tree 2 ต้น (root1 และ root2) โจทย์อยากรู้ว่า ถ้าเราดึงค่า (Value) ของ Leaf Node ทั้งหมดออกมา โดยเรียงลำดับจากซ้ายไปขวา (Left to Right) ลำดับของ Leaf จาก Tree ทั้งสองต้นจะหน้าตาเหมือนกันเป๊ะเลยหรือไม่?`,
+ถ้ารายการ Leaf Node ของ Tree ต้นแรก หน้าตาเหมือนกับ Tree ต้นที่สองเป๊ะๆ ทุกตำแหน่ง ให้ตอบ True ถ้าไม่เหมือนให้ตอบ False`,
         },
+
+        { t: "h2", c: "2. สร้างภาพจำ (Mental Model)" },
+        {
+          t: "p",
+          c: "ให้จินตนาการว่า Tree คือ \"เขาวงกต\"",
+        },
+        {
+          t: "ul",
+          c: [
+            "Root: ประตูทางเข้าเขาวงกต",
+            "Node: ทางแยก",
+            'Leaf: "ทางตัน" (ไม่มีทางให้ไปต่อทั้งซ้ายและขวา)',
+          ],
+        },
+        {
+          t: "p",
+          c: "อัลกอริทึมที่เราจะใช้คือ DFS (Depth-First Search) ซึ่งมีกฎในการเดินเขาวงกตดังนี้:",
+        },
+        {
+          t: "ol",
+          c: [
+            "ต้องเลี้ยวซ้ายก่อนเสมอ",
+            'เมื่อไหร่ที่เจอ "ทางตัน (Leaf)" ให้เอาตัวเลขที่กำแพงใส่กล่อง (List) แล้วเดินย้อนกลับ (Return)',
+            "ถอยกลับมาที่ทางแยกเดิม แล้วค่อยไปสำรวจกิ่งขวาต่อ",
+          ],
+        },
+
         {
           t: "example",
           c: [
@@ -542,29 +568,60 @@ class Solution:
           c: [
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับ pattern "Collect แล้วเทียบ" — ยุบโครง Tree ให้เหลือแค่ Leaf Sequence แล้วเทียบว่าเท่ากันไหม',
+              c: 'ข้อนี้ตรงกับ pattern "Collect แล้วเทียบ" — เดินเขาวงกตเก็บทางตันใส่กล่อง แล้วเทียบว่าสองกล่องหน้าตาเหมือนกันไหม',
             },
 
-            { t: "h3", c: "1. กลยุทธ์ในการแก้ปัญหา (Core Strategy)" },
+            { t: "h3", c: "1. หั่นโค้ดทีละส่วน (Logic-to-Code Mapping)" },
             {
               t: "p",
-              c: "เมื่อเราต้องการเจาะลงไปให้ลึกที่สุดเพื่อหา Leaf และต้องวิ่งจากซ้ายไปขวา อัลกอริทึมที่ตอบโจทย์ที่สุดคือ DFS (Depth-First Search)",
-            },
-            {
-              t: "ol",
-              c: [
-                "สร้าง Helper function ที่รับ Node เข้ามาทำ DFS",
-                "ถ้า Node ปัจจุบันว่าง (None) ให้ข้ามไป",
-                "เช็คว่า Node นี้คือ Leaf ไหม? (ไม่มี left และไม่มี right) ถ้าใช่ ให้เก็บค่า node.val เอาไว้ใน Array/List",
-                "ถ้าไม่ใช่ Leaf ให้เรียกฟังก์ชันตัวเองซ้ำ (Recursive) โดยวิ่งไปที่ node.left ก่อน แล้วค่อยตามด้วย node.right — การทำแบบนี้จะการันตีว่าเราเก็บ Leaf ลำดับจากซ้ายไปขวาเสมอ",
-                "นำ Array ของ Leaf จาก root1 มาเทียบกับ root2",
-              ],
+              c: "เราจะสร้างฟังก์ชันชื่อ get_leaves(node) เพื่อทำหน้าที่เดินเขาวงกต โดยเราจะดักสถานการณ์ที่จะเกิดขึ้น 3 รูปแบบ",
             },
 
-            { t: "h3", c: "2. จำลองการทำงาน (DFS Walkthrough)" },
+            { t: "h3", c: "สถานการณ์ที่ 1: เดินตกขอบ (ไม่มีกิ่งให้ไป)" },
             {
               t: "p",
-              c: "สมมติว่าเรามี Tree หน้าตาแบบนี้:",
+              c: 'เวลากิ่งมันสุดทางแล้ว คอมพิวเตอร์จะมองว่า Node นั้นมีค่าเป็นความว่างเปล่า (Null / None) สิ่งที่เราต้องทำคือบอกว่า "ไม่มีอะไรให้เก็บนะ ส่งกล่องเปล่ากลับไป"',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สถานการณ์ที่ 1",
+              c: `# ถ้า node ว่างเปล่า (กิ่งนี้ไม่มีอยู่จริง)
+if not node:
+    return []  # ส่ง List ว่างๆ กลับไป`,
+            },
+
+            { t: "h3", c: "สถานการณ์ที่ 2: เจอทางตัน (นี่คือ Leaf!)" },
+            {
+              t: "p",
+              c: 'เป้าหมายหลักของเรา! เราจะรู้ได้ว่าเป็นทางตันก็ต่อเมื่อ Node ที่เรายืนอยู่ "ไม่มีลูกซ้าย" และ "ไม่มีลูกขวา" สิ่งที่เราต้องทำคือ เอาตัวเลขของ Node นี้ใส่ลงในกล่อง แล้วส่งกลับขึ้นไปให้คนที่เรียกมัน',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สถานการณ์ที่ 2",
+              c: `# ถ้าไม่มีลูกซ้าย และ ไม่มีลูกขวา
+if not node.left and not node.right:
+    return [node.val]  # เอาตัวเลขใส่ List แล้ว Return กลับ`,
+            },
+
+            { t: "h3", c: "สถานการณ์ที่ 3: เจอทางแยก (ต้องสำรวจให้สุด)" },
+            {
+              t: "p",
+              c: 'ถ้า Node นั้นไม่ใช่ทางตัน แปลว่ามันคือทางแยก กฎของเราคือ "ไปซ้ายก่อน แล้วค่อยไปขวา" เราจะสั่งให้ฟังก์ชันทำงานซ้ำ (Recursive) เพื่อดำดิ่งลงไปทางซ้าย เมื่อได้กล่องผลลัพธ์จากซ้ายมาแล้ว ค่อยไปเอากล่องผลลัพธ์จากขวามา แล้วเอาของในกล่องมาเทรวมกัน (ใน Python ใช้เครื่องหมาย + เพื่อเอา List มาต่อกัน)',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สถานการณ์ที่ 3",
+              c: `# ไปเอากล่องจากซ้าย มาต่อกับกล่องจากขวา
+return get_leaves(node.left) + get_leaves(node.right)`,
+            },
+
+            { t: "h3", c: "2. จำลองการทำงาน (Step-by-Step Walkthrough)" },
+            {
+              t: "p",
+              c: "สมมติเรามี Tree หน้าตาแบบนี้ และเอาไปเข้าฟังก์ชัน get_leaves:",
             },
             {
               t: "code",
@@ -578,84 +635,98 @@ class Solution:
             {
               t: "ol",
               c: [
-                "เริ่มต้นที่ Root: Node 3 — เข้ามาที่ Root Node 3 เช็คแล้วว่ามีลูก (ไม่ใช่ Leaf) จึงทำ Recursive ลงไปที่ node.left",
-                "Traverse กิ่งซ้าย: Node 5 — ไม่ใช่ Leaf จึงทำ Recursive ลงไปที่ node.left อีกครั้ง",
-                "เจอ Leaf ตัวแรก: Node 6 — ไม่มี left และไม่มี right สรุปว่ามันคือ Leaf! เก็บค่า [6] ไว้ใน List จากนั้น Return กลับขึ้นไปที่ Node 5 เพื่อไปฝั่งขวาต่อ",
-                "เจอ Leaf ตัวที่สอง: Node 2 — วิ่งมาทาง node.right ของ Node 5 เจอ Node 2 ซึ่งไม่มีลูกเลย มันคือ Leaf! เก็บค่าเพิ่มลง List เป็น [6, 2] แล้ว Return ถอยรวดเดียวกลับไปที่ Root 3",
-                "Traverse กิ่งขวาของ Root: Node 1 — จาก Root 3 วิ่งไปที่ node.right คือ Node 1 ไม่มีลูกเลย เป็น Leaf! เก็บค่าได้ลำดับสุดท้าย Array คือ [6, 2, 1]",
+                'จุดเริ่มต้น (Root): Node 3 — เดินเข้ามาที่ 3 มันไม่ใช่ทางตัน ฟังก์ชันจึงทำงานในสถานการณ์ที่ 3 คือสั่งว่า "ไปเอากล่องซ้ายมาต่อกับกล่องขวานะ" แล้วดำดิ่งไปที่ node.left (ไปที่ 5)',
+                "สำรวจกิ่งซ้าย: Node 5 — ลงมาที่ 5 ก็ไม่ใช่ทางตัน จึงดำดิ่งไปซ้ายต่อ (ไปที่ 6)",
+                "เจอ Leaf ตัวแรก!: Node 6 — เข้าเงื่อนไขสถานการณ์ที่ 2 (ไม่มีลูกซ้ายและขวา) จึงเอาตัวเองใส่กล่อง → [6] แล้ว Return กล่องนี้ย้อนกลับขึ้นไปให้ Node 5",
+                "เจอ Leaf ตัวที่สอง!: Node 2 — Node 5 ได้กล่องซ้ายมาแล้ว จึงไปสำรวจกิ่งขวาต่อ ลงมาเจอ 2 เข้าเงื่อนไขสถานการณ์ที่ 2 เช่นกัน จึงใส่กล่อง → [2] แล้ว Return กลับไปให้ Node 5",
+                "รวมกล่องที่ทางแยก: Node 5 — ได้กล่องครบแล้ว จึงเอามาต่อกันตามลอจิก ซ้าย + ขวา กลายเป็น [6] + [2] = [6, 2] แล้ว Return กล่องใหญ่นี้ย้อนกลับไปให้ Root 3",
+                "สำรวจกิ่งขวาของ Root: Node 1 — Root 3 ได้กล่องซ้ายมาแล้ว จึงลงไปสำรวจกิ่งขวา เจอ Node 1 เข้าเงื่อนไขสถานการณ์ที่ 2 จึงใส่กล่อง → [1] แล้ว Return ย้อนกลับไปให้ Root 3",
+                "บทสรุป: Node 3 — Root 3 เอากล่องซ้ายและขวามาต่อกัน: [6, 2] + [1] ผลลัพธ์ของ Tree ต้นนี้คือ [6, 2, 1]",
               ],
             },
 
-            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            { t: "h3", c: "3. ประกอบร่างโค้ดฉบับเต็ม" },
             {
               t: "p",
-              c: "ใน Python เราสามารถ Return เป็น List ออกมาจาก Recursive Function แล้วจับมาต่อกัน (Concatenate) ด้วยเครื่องหมาย + ได้เลย โค้ดจะออกมาสั้นและคลีนมาก",
+              c: "เมื่อเราเอาโค้ดทั้ง 3 ส่วนมาประกอบกัน ไว้ข้างใน Class ที่ LeetCode เตรียมไว้ให้ จะได้โค้ดที่สั้น คลีน และอ่านลอจิกได้ทะลุปรุโปร่งแบบนี้",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-
-class Solution:
+              c: `class Solution:
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
 
+        # ฟังก์ชันเดินเขาวงกตแบบ DFS
         def get_leaves(node):
+            # 1. เดินตกขอบ
             if not node:
                 return []
 
-            # Base Case: ถ้าเป็น Leaf Node
+            # 2. เจอทางตัน (Leaf Node)
             if not node.left and not node.right:
                 return [node.val]
 
-            # Recursive Step: วิ่งซ้ายก่อน แล้วเอา List มาต่อกับฝั่งขวา
+            # 3. ทางแยก: เอากล่องซ้ายมาต่อกับกล่องขวา
             return get_leaves(node.left) + get_leaves(node.right)
 
-        # ดึง Leaf Sequence ของทั้ง 2 ต้นมาเปรียบเทียบกัน
+        # ดึง Leaf ของ Tree ต้นแรก และ ต้นที่สอง มาเช็คว่าหน้าตาเหมือนกันไหม
         return get_leaves(root1) == get_leaves(root2)`,
             },
 
-            { t: "h3", c: "4. จุดระวังตกหลุมพราง (Edge Cases)" },
+            { t: "h3", c: "4. วิเคราะห์ประสิทธิภาพ (Complexity)" },
             {
               t: "ul",
               c: [
-                "ลืมเช็คว่าเป็น Leaf จริง ๆ แล้วเผลอเก็บค่า Internal Node ด้วย",
-                "Concatenate ฝั่ง right ก่อน left → Leaf Sequence กลับด้านทันที",
-              ],
-            },
-
-            { t: "h3", c: "5. การวิเคราะห์ประสิทธิภาพ (Complexity)" },
-            {
-              t: "ul",
-              c: [
-                "Time Complexity: O(T₁ + T₂) โดยที่ T คือจำนวน Node ทั้งหมดของ Tree แต่ละต้น เพราะกระบวนการ DFS ต้องแวะไปเยี่ยมทุกๆ Node ใน Tree 1 ครั้ง",
-                "Space Complexity: O(L₁ + L₂ + H) — L คือจำนวน Leaf Node (Memory สำหรับสร้าง List เก็บค่า Leaf ทั้งหมด) และ H คือความสูงของ Tree (Height) ซึ่งเป็น Memory ที่ต้องใช้เก็บ Call Stack ระหว่างทำ Recursive",
+                "Time Complexity: O(T₁ + T₂) โดยที่ T คือจำนวน Node ทั้งหมดของ Tree แต่ละต้น เพราะอัลกอริทึม DFS ของเราต้องเดินไปเหยียบทุก Node ใน Tree ต้นนั้น 1 ครั้งพอดีเป๊ะ",
+                "Space Complexity: O(L₁ + L₂ + H) — L คือ Memory ที่เราใช้สร้าง List เพื่อเก็บคำตอบของ Leaf แต่ละต้น และ H คือความสูงของ Tree (Height) ซึ่งคอมพิวเตอร์ต้องแอบกัน Memory ส่วนหนึ่งไว้ใช้จดจำเส้นทางเดินย้อนกลับ (Call Stack) ตอนที่เราทำ Recursive",
               ],
             },
 
             {
               t: "callout",
               title: "💡 สรุป pattern",
-              c: "DFS วิ่ง left ก่อน right เสมอ = ได้ Leaf Sequence จากซ้ายไปขวาฟรี ๆ แล้วยุบปัญหาโครงสร้างซับซ้อนให้เหลือแค่เทียบ List ธรรมดา",
+              c: "DFS เลี้ยวซ้ายก่อนเสมอ → ได้ Leaf จากซ้ายไปขวาฟรี ๆ · ยุบเขาวงกตให้เหลือแค่เทียบกล่อง (List) สองใบ",
             },
           ],
         },
       ],
       en: [
+        { t: "h2", c: "1. Problem Decoding" },
         {
           t: "p",
-          c: `In a Binary Tree we name Nodes by position:
+          c: `We have two Binary Trees (root1 and root2).
+Mission: walk in and collect Leaf Node values (tip nodes with no children), left to right.
 
-• Root: the top Node — the starting point
-• Leaf: a tip Node where left == None and right == None
-
-Goal: given two Binary Trees (root1 and root2), pull every Leaf Node value left to right. Are the two leaf sequences identical?`,
+If the leaf list of the first tree matches the second tree position-by-position, return True; otherwise False.`,
         },
+
+        { t: "h2", c: "2. Mental Model" },
+        {
+          t: "p",
+          c: 'Picture the Tree as a "maze":',
+        },
+        {
+          t: "ul",
+          c: [
+            "Root: the entrance door",
+            "Node: a fork / junction",
+            'Leaf: a "dead end" (nowhere left or right to go)',
+          ],
+        },
+        {
+          t: "p",
+          c: "We'll use DFS (Depth-First Search) with these maze rules:",
+        },
+        {
+          t: "ol",
+          c: [
+            "Always turn left first",
+            'When you hit a "dead end (Leaf)", put the wall number in the box (List), then walk back (Return)',
+            "Back at the fork, then explore the right branch",
+          ],
+        },
+
         {
           t: "example",
           c: [
@@ -688,29 +759,60 @@ Goal: given two Binary Trees (root1 and root2), pull every Leaf Node value left 
           c: [
             {
               t: "p",
-              c: 'This matches the "collect then compare" pattern — collapse each tree into a leaf sequence, then check equality.',
+              c: 'This matches the "collect then compare" pattern — walk the maze, fill boxes with dead ends, then check if the two boxes match.',
             },
 
-            { t: "h3", c: "1. Core Strategy" },
+            { t: "h3", c: "1. Logic-to-Code Mapping" },
             {
               t: "p",
-              c: "To dig all the way down for leaves while walking left to right, DFS (Depth-First Search) is the right tool.",
-            },
-            {
-              t: "ol",
-              c: [
-                "Write a helper that DFS-walks a Node",
-                "If the current Node is None, skip it",
-                "Is this Node a Leaf? (no left and no right) — if yes, append node.val to the list",
-                "If not a Leaf, recurse on node.left first, then node.right — that guarantees left-to-right leaf order",
-                "Compare the leaf arrays from root1 and root2",
-              ],
+              c: "We'll write get_leaves(node) to walk the maze, handling three situations:",
             },
 
-            { t: "h3", c: "2. DFS Walkthrough" },
+            { t: "h3", c: "Situation 1: Fall off the edge (no branch)" },
             {
               t: "p",
-              c: "Suppose the tree looks like this:",
+              c: 'When a branch doesn\'t exist, the computer sees Null / None. Tell it: "nothing to collect — send back an empty box."',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Situation 1",
+              c: `# If node is empty (this branch doesn't exist)
+if not node:
+    return []  # send back an empty List`,
+            },
+
+            { t: "h3", c: "Situation 2: Dead end (it's a Leaf!)" },
+            {
+              t: "p",
+              c: "Our main goal! A dead end means the Node you're on has no left child and no right child. Put this Node's number in the box and return it upward.",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Situation 2",
+              c: `# No left child and no right child
+if not node.left and not node.right:
+    return [node.val]  # put the number in a List and Return`,
+            },
+
+            { t: "h3", c: "Situation 3: A fork (keep exploring)" },
+            {
+              t: "p",
+              c: 'If it\'s not a dead end, it\'s a fork. Rule: "left first, then right." Recurse left, then right, then pour the boxes together (Python + concatenates Lists).',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Situation 3",
+              c: `# Take the left box, concatenate the right box
+return get_leaves(node.left) + get_leaves(node.right)`,
+            },
+
+            { t: "h3", c: "2. Step-by-Step Walkthrough" },
+            {
+              t: "p",
+              c: "Suppose the Tree looks like this, and we call get_leaves:",
             },
             {
               t: "code",
@@ -724,70 +826,58 @@ Goal: given two Binary Trees (root1 and root2), pull every Leaf Node value left 
             {
               t: "ol",
               c: [
-                "Start at Root: Node 3 — has children (not a Leaf), recurse to node.left",
-                "Traverse left branch: Node 5 — not a Leaf, recurse to node.left again",
-                "First Leaf: Node 6 — no left, no right → Leaf! List is [6], return to Node 5 to take the right side",
-                "Second Leaf: Node 2 — node.right of 5; no children → Leaf! List becomes [6, 2], return all the way to Root 3",
-                "Traverse right of Root: Node 1 — no children → Leaf! Final array [6, 2, 1]",
+                'Start (Root): Node 3 — not a dead end → Situation 3: "left box + right box", dive to node.left (5)',
+                "Left branch: Node 5 — not a dead end, dive left again (to 6)",
+                "First Leaf!: Node 6 — Situation 2 → box [6], Return up to Node 5",
+                "Second Leaf!: Node 2 — Node 5 got the left box, explores right, hits 2 → Situation 2 → box [2], Return to Node 5",
+                "Merge at fork: Node 5 — left + right → [6] + [2] = [6, 2], Return big box up to Root 3",
+                "Right of Root: Node 1 — Root 3 explores right, hits 1 → Situation 2 → box [1], Return to Root 3",
+                "Finale: Node 3 — left + right → [6, 2] + [1] = [6, 2, 1]",
               ],
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
+            { t: "h3", c: "3. Full Assembled Code" },
             {
               t: "p",
-              c: "In Python, return lists from the recursive helper and concatenate with + — short and clean.",
+              c: "Glue the three pieces into LeetCode's Solution class — short, clean, logic transparent:",
             },
             {
               t: "code",
               lang: "python",
               label: "Submit this on LeetCode",
-              c: `# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-
-class Solution:
+              c: `class Solution:
     def leafSimilar(self, root1: Optional[TreeNode], root2: Optional[TreeNode]) -> bool:
 
+        # DFS maze walker
         def get_leaves(node):
+            # 1. Fall off the edge
             if not node:
                 return []
 
-            # Base Case: Leaf Node
+            # 2. Dead end (Leaf Node)
             if not node.left and not node.right:
                 return [node.val]
 
-            # Recursive Step: left first, then concatenate right
+            # 3. Fork: left box + right box
             return get_leaves(node.left) + get_leaves(node.right)
 
-        # Compare leaf sequences of both trees
+        # Compare leaf boxes of both trees
         return get_leaves(root1) == get_leaves(root2)`,
             },
 
-            { t: "h3", c: "4. Edge Cases & Pitfalls" },
+            { t: "h3", c: "4. Complexity" },
             {
               t: "ul",
               c: [
-                "Forgetting the Leaf check and collecting internal nodes too",
-                "Concatenating right before left reverses the leaf sequence instantly",
-              ],
-            },
-
-            { t: "h3", c: "5. Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time Complexity: O(T₁ + T₂) where T is the node count of each tree — DFS visits every node once",
-                "Space Complexity: O(L₁ + L₂ + H) — L for the leaf lists in memory, H for the recursive call-stack height",
+                "Time Complexity: O(T₁ + T₂) where T is each tree's node count — DFS steps on every node exactly once",
+                "Space Complexity: O(L₁ + L₂ + H) — L for the leaf Lists, H for the recursive Call Stack that remembers the walk-back path",
               ],
             },
 
             {
               t: "callout",
               title: "💡 Pattern summary",
-              c: "Left-before-right DFS gives a left-to-right leaf sequence for free — then reduce a structural problem to plain list equality.",
+              c: "DFS always left-first → left-to-right leaves for free · collapse the maze into comparing two boxes (Lists).",
             },
           ],
         },
