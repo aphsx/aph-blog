@@ -892,20 +892,36 @@ return get_leaves(node.left) + get_leaves(node.right)`,
       en: "LC1448 Count Good Nodes in Binary Tree 🟡",
     },
     lead: {
-      th: "Top-down พกค่ามากสุดลงไป — node ดีถ้าไม่มีใครบนเส้นทางจาก root ค่ามากกว่ามัน",
-      en: "Top-down: carry the path max downward — a node is good if nothing larger sits above it on the path from the root.",
+      th: "เดินป่าพกสมุดจดสถิติ (max_so_far) — นับ Good Node ทุกครั้งที่ต้นไม้ทำลายหรือเสมอสถิติสูงสุดบนเส้นทาง",
+      en: "Hike with a height log (max_so_far) — count a Good Node whenever the tree ties or breaks the path record.",
     },
     group: "LeetCode 75",
     blocks: {
       th: [
+        { t: "h2", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
         {
           t: "p",
-          c: `โจทย์ (LC1448): กำหนด root ของ binary tree มาให้
+          c: `เรามี Binary Tree อยู่ 1 ต้น
+โจทย์นิยามคำว่า "Good Node" (โหนดที่ดี) ว่า: ถ้าเราเดินจาก Root ลงมาเรื่อยๆ จนถึง Node ปัจจุบัน ต้องไม่มี Node ไหนเลยในเส้นทางนี้ที่มีค่า "มากกว่า" ตัวมัน (พูดง่ายๆ คือ ตัวมันต้องมีค่า ≥ ตัวที่มากที่สุดที่เคยเจอมาตั้งแต่ต้นทาง)
 
-node X ตัวหนึ่งจะถูกเรียกว่า good ถ้าบนเส้นทางจาก root ไปถึง X ไม่มี node ใดเลยที่มีค่ามากกว่า X
-
-ให้ return จำนวน good node ทั้งหมดในต้นไม้`,
+ภารกิจของเราคือ: นับว่าใน Tree ต้นนี้ มี Good Node อยู่ทั้งหมดกี่ตัว?`,
         },
+
+        { t: "h2", c: "2. สร้างภาพจำ (Mental Model)" },
+        {
+          t: "p",
+          c: 'ให้จินตนาการว่า การเดินลงไปใน Tree คือ "การเดินป่าและจดสถิติต้นไม้ที่สูงที่สุด"',
+        },
+        {
+          t: "ul",
+          c: [
+            'คุณเริ่มเดินจาก Root พร้อมกับถือ "สมุดจดสถิติความสูง (Max So Far)" ไว้ในมือ',
+            "ทุกครั้งที่คุณเดินไปถึงต้นไม้ต้นใหม่ (Node ปัจจุบัน) คุณจะมองดูความสูงของมัน แล้วเทียบกับตัวเลขในสมุด",
+            'ถ้าต้นไม้นี้สูง "เท่ากับ หรือ มากกว่า" ตัวเลขในสมุด: แปลว่านี่คือ Good Node! คุณก็นับแต้มเพิ่มให้ตัวเอง 1 แต้ม',
+            "ก่อนจะเดินไปสำรวจทางแยกถัดไป: คุณต้องเช็คว่าต้นไม้นี้ทำลายสถิติเดิมไหม? ถ้าทำลายสถิติ คุณต้องอัปเดตตัวเลขในสมุด เป็นความสูงใหม่ แล้วค่อยแบกสมุดเล่มนี้เดินไปที่ลูกซ้ายและลูกขวาต่อ",
+          ],
+        },
+
         {
           t: "example",
           c: [
@@ -913,25 +929,25 @@ node X ตัวหนึ่งจะถูกเรียกว่า good ถ�
               input: "root = [3,1,4,3,null,1,5]",
               output: "4",
               explain:
-                "good node คือ 3 (root), 3 (ใต้ 1), 4, และ 5 — ส่วน 1 สองตัวไม่ดีเพราะมีค่ามากกว่าอยู่ก่อนหน้าบนเส้นทาง",
+                "Good Node คือ 3 (root), 3 (ใต้ 1), 4, และ 5 — ส่วน 1 สองตัวไม่ดีเพราะมีค่ามากกว่าอยู่ก่อนหน้าบนเส้นทาง",
             },
             {
               input: "root = [3,3,null,4,2]",
               output: "3",
               explain:
-                "node 2 ไม่ดี เพราะเส้นทาง (3,3,2) มี 3 ที่มากกว่ามันอยู่ก่อนหน้า",
+                "Node 2 ไม่ดี เพราะเส้นทาง (3,3,2) มี 3 ที่มากกว่ามันอยู่ก่อนหน้า",
             },
             {
               input: "root = [1]",
               output: "1",
-              explain: "มีแค่ root ตัวเดียว ถือเป็น good เสมอ",
+              explain: "มีแค่ Root ตัวเดียว ถือเป็น Good Node เสมอ",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ในช่วง [1, 10^5]",
+            "จำนวน Node อยู่ในช่วง [1, 10^5]",
             "-10^4 <= Node.val <= 10^4",
           ],
         },
@@ -942,32 +958,92 @@ node X ตัวหนึ่งจะถูกเรียกว่า good ถ�
           c: [
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับ pattern "Top-down พก state" — ส่งค่ามากสุดบนเส้นทางลงเป็นพารามิเตอร์',
+              c: 'ข้อนี้ตรงกับ pattern "Top-down พก state" — ต่างจาก Leaf-Similar ที่รอผลจากลูกขึ้นมา ข้อนี้พกสมุดจดสถิติลงไปด้วยตอนเดิน',
             },
 
-            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            { t: "h3", c: "1. หั่นโค้ดทีละส่วน (Logic-to-Code Mapping)" },
             {
               t: "p",
-              c: "ต่างจากข้อ 33–34 ที่รอผลจากลูกขึ้นมา (bottom-up) ข้อนี้ตัดสินที่ node ปัจจุบันก่อน แล้วค่อยลงลูก",
-            },
-            {
-              t: "p",
-              c: "หัวใจสำคัญ: พก max_so_far = ค่ามากสุดที่เจอมาบนเส้นทางจนถึงก่อน node นี้ · ถ้า node.val >= max_so_far ก็นับเป็น good แล้วอัปเดต max ส่งลงต่อ",
+              c: 'เราจะสร้างฟังก์ชันชื่อ dfs(node, max_so_far) โดยต้องรับค่า 2 อย่างคือ "จุดที่ยืนอยู่" และ "สมุดจดสถิติ" เราจะดักสถานการณ์ 3 อย่างดังนี้',
             },
 
-            { t: "h3", c: "2. กฎเหล็ก 5 ข้อ (The Logic)" },
+            { t: "h3", c: "สถานการณ์ที่ 1: เดินตกขอบ (ไม่มี Node แล้ว)" },
+            {
+              t: "p",
+              c: "ถ้าเราเดินจนสุดทางแล้วตกขอบ (Null / None) แปลว่าไม่มีอะไรให้นับแล้ว ให้ส่งค่า 0 กลับไป",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สถานการณ์ที่ 1",
+              c: `# ถ้าเดินตกขอบ
+if not node:
+    return 0  # ไม่เจอ Good Node เลยสักตัว ส่ง 0 กลับไป`,
+            },
+
+            { t: "h3", c: "สถานการณ์ที่ 2: เช็คว่าเป็น Good Node ไหม?" },
+            {
+              t: "p",
+              c: "เราจะเปรียบเทียบค่าของตัวเอง (node.val) กับสถิติที่พกมา (max_so_far) ถ้าตัวเองใหญ่กว่าหรือเท่ากับสถิติ แปลว่าผ่านเงื่อนไข! เราจะจดไว้ว่าตรงนี้ได้ 1 แต้ม (ถ้าไม่ผ่านก็ได้ 0 แต้ม)",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สถานการณ์ที่ 2",
+              c: `# เช็คว่าเป็น Good Node หรือไม่
+if node.val >= max_so_far:
+    good = 1
+else:
+    good = 0`,
+            },
+
+            { t: "h3", c: "สถานการณ์ที่ 3: อัปเดตสถิติ แล้วลุยต่อซ้าย-ขวา" },
+            {
+              t: "p",
+              c: 'ก่อนจะเดินลงไปหากิ่งซ้ายและขวา เราต้องอัปเดต max_so_far ก่อน โดยเลือกตัวที่มากที่สุดระหว่าง "สถิติเดิม" กับ "ค่าของ Node ปัจจุบัน" จากนั้นให้เอาแต้มของตัวเอง (good) ไปบวกกับแต้มที่จะไปหาได้จากกิ่งซ้าย และแต้มจากกิ่งขวา',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สถานการณ์ที่ 3",
+              c: `# อัปเดตสถิติสำหรับให้ลูกๆ เอาไปใช้ต่อ
+new_max = max(max_so_far, node.val)
+
+# แต้มรวม = แต้มตัวเอง + แต้มจากกิ่งซ้าย + แต้มจากกิ่งขวา
+return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
+            },
+
+            { t: "h3", c: "2. จำลองการทำงาน (Step-by-Step Walkthrough)" },
+            {
+              t: "p",
+              c: "สมมติเรามี Tree หน้าตาแบบนี้:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              c: `        3
+       / \\
+      1   4
+     /   / \\
+    3   1   5`,
+            },
             {
               t: "ol",
               c: [
-                "เขียน dfs(node, max_so_far)",
-                "ถ้า node เป็น None → return 0",
-                "นับ good = 1 ถ้า node.val >= max_so_far ไม่งั้น 0",
-                "new_max = max(max_so_far, node.val) ก่อนส่งต่อ",
-                "return good + dfs(ซ้าย, new_max) + dfs(ขวา, new_max) — เริ่มด้วย max_so_far = -inf",
+                "จุดเริ่มต้น (Root): Node 3 | สมุดจด: 3 — เดินเข้ามาที่ Root (3) โดยถือสมุดจดสถิติเริ่มต้นเป็น 3 (ค่าของตัวมันเอง) เช็ค: 3 >= 3 ไหม? → ใช่! เป็น Good Node (+1 แต้ม) อัปเดตสมุดจดเป็น max(3, 3) = 3 แล้วแยกย้ายไปกิ่งซ้ายและขวา",
+                "สำรวจกิ่งซ้าย: Node 1 | สมุดจด: 3 — ลงมาที่ 1 พร้อมสมุดที่จดเลข 3 ไว้ เช็ค: 1 >= 3 ไหม? → ไม่ใช่! (0 แต้ม) อัปเดตสมุดจดเป็น max(3, 1) = 3 (สถิติยังคงเป็น 3) แล้วลงไปทางซ้ายต่อ",
+                "สุดทางกิ่งซ้าย: Node 3 | สมุดจด: 3 — ลงมาที่ 3 พร้อมสมุดที่จดเลข 3 เช็ค: 3 >= 3 ไหม? → ใช่! เป็น Good Node (+1 แต้ม) สุดทางแล้ว Return แต้มกลับขึ้นไป ฝั่งซ้ายทั้งหมดหาแต้มมาได้ 1 แต้ม",
+                "สำรวจกิ่งขวาของ Root: Node 4 | สมุดจด: 3 — กลับมาที่ Root แล้วไปทางขวา เจอ 4 พร้อมสมุดที่จดเลข 3 (สถิติจาก Root) เช็ค: 4 >= 3 ไหม? → ใช่! เป็น Good Node (+1 แต้ม) อัปเดตสมุดจดเป็น max(3, 4) = 4 (ทำลายสถิติแล้ว!) ถือสมุดเลข 4 ไปหาลูกซ้ายและขวาต่อ",
+                "สุดทางกิ่งขวา: Node 1 และ 5 | สมุดจด: 4 — ไปทางซ้ายเจอ 1 เทียบกับสมุด 4: 1 >= 4 → ไม่ใช่! (0 แต้ม) · ไปทางขวาเจอ 5 เทียบกับสมุด 4: 5 >= 4 → ใช่! เป็น Good Node (+1 แต้ม) ฝั่งขวาทั้งหมดหาแต้มมาได้ 2 แต้ม",
+                "บทสรุป: แต้มจาก Root(1) + ฝั่งซ้าย(1) + ฝั่งขวา(2) = มี Good Node ทั้งหมด 4 โหนด",
               ],
             },
 
-            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            { t: "h3", c: "3. ประกอบร่างโค้ดฉบับเต็ม" },
+            {
+              t: "p",
+              c: "เมื่อนำโค้ดมารวมกัน จะได้ฟังก์ชันที่สะอาดตามาก (Python สามารถยุบโค้ดการหา Good Node และอัปเดต Max ให้อยู่ในบรรทัดเดียวกันได้เลย)",
+            },
             {
               t: "code",
               lang: "python",
@@ -981,67 +1057,68 @@ node X ตัวหนึ่งจะถูกเรียกว่า good ถ�
 
 class Solution:
     def goodNodes(self, root: TreeNode) -> int:
+
+        # ฟังก์ชันเดินป่าและจดสถิติ (DFS)
         def dfs(node, max_so_far):
-            if node is None:
+            # 1. เดินตกขอบ
+            if not node:
                 return 0
+
+            # 2. เช็คว่าเป็น Good Node ไหม (ถ้าใช่ได้ 1 แต้ม ถ้าไม่ใช่ได้ 0)
             good = 1 if node.val >= max_so_far else 0
+
+            # 3. อัปเดตสมุดจดสถิติ
             new_max = max(max_so_far, node.val)
+
+            # 4. เอายอดรวมของตัวเอง + ฝั่งซ้าย + ฝั่งขวา ส่งกลับไป
             return good + dfs(node.left, new_max) + dfs(node.right, new_max)
 
-        return dfs(root, float("-inf"))  # root ผ่านเงื่อนไขเสมอ`,
+        # เริ่มต้นเดินที่ Root โดยให้สถิติแรกสุดคือค่าของ Root เอง
+        return dfs(root, root.val)`,
             },
 
-            { t: "h3", c: "4. จำลองการทำงาน — [3,1,4,3,null,1,5]" },
-            {
-              t: "table",
-              head: ["node", "max_so_far", "node.val >= max?", "นับ good?"],
-              rows: [
-                ["3 (root)", "-inf", "ใช่", "✓"],
-                ["1 (ลูกซ้าย)", "3", "ไม่", "✗"],
-                ["3 (ใต้ 1)", "3", "ใช่", "✓"],
-                ["4 (ลูกขวา)", "3", "ใช่", "✓"],
-                ["1 (ใต้ 4)", "4", "ไม่", "✗"],
-                ["5 (ใต้ 4)", "4", "ใช่", "✓"],
-              ],
-            },
-            {
-              t: "p",
-              c: "รวม good = 4 ตัว ตรงกับ output",
-            },
-
-            { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
+            { t: "h3", c: "4. วิเคราะห์ประสิทธิภาพ (Complexity)" },
             {
               t: "ul",
               c: [
-                "ต้องอัปเดต new_max ก่อนเรียกลูก",
-                "ส่ง max เป็นพารามิเตอร์ (แต่ละกิ่งมีสำเนาของตัวเอง) ไม่ใช่ตัวแปรร่วม — ไม่งั้นฝั่งซ้ายกวนฝั่งขวา",
-              ],
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — แตะทุก node ครั้งเดียว",
-                "Space O(h) — ความลึก call stack",
+                "Time Complexity: O(N) โดยที่ N คือจำนวน Node ทั้งหมดของ Tree เพราะเราเดินผ่านทุก Node เพียงแค่ครั้งเดียวเท่านั้น",
+                "Space Complexity: O(H) โดยที่ H คือความสูงของ Tree (Height) เพราะเราใช้พื้นที่ของ Call Stack ในการจำลองการเดินย้อนกลับ (Recursive) ในกรณีที่แย่ที่สุด (Tree เอียงไปทางเดียวเป็นเส้นตรง) Space จะเป็น O(N)",
               ],
             },
 
             {
               t: "callout",
               title: "💡 สรุป pattern",
-              c: "DFS top-down: เมื่อคำตอบของ node ขึ้นกับสิ่งที่เจอมาระหว่างทางจาก root ให้ส่ง state ลงไปเป็นพารามิเตอร์ของ recursion",
+              c: "DFS top-down: เมื่อคำตอบของ Node ขึ้นกับสิ่งที่เจอมาระหว่างทางจาก Root ให้ส่ง state (ที่นี่คือ max_so_far) ลงไปเป็นพารามิเตอร์ของ recursion — แต่ละกิ่งได้สมุดจดของตัวเอง ไม่กวนกัน",
             },
           ],
         },
       ],
       en: [
+        { t: "h2", c: "1. Problem Decoding" },
         {
           t: "p",
-          c: `Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X.
+          c: `We have one Binary Tree.
+A "Good Node" means: on the path from Root down to the current Node, nothing has a value strictly greater than it (i.e. its value is ≥ the maximum seen so far from the start).
 
-Return the number of good nodes in the binary tree.`,
+Mission: count how many Good Nodes are in the tree.`,
         },
+
+        { t: "h2", c: "2. Mental Model" },
+        {
+          t: "p",
+          c: 'Picture walking down the Tree as "hiking and logging the tallest tree so far."',
+        },
+        {
+          t: "ul",
+          c: [
+            'Start at Root holding a "height record book (Max So Far)"',
+            "At every new tree (current Node), compare its height to the book",
+            'If this tree is "equal to or taller" than the book: it\'s a Good Node — add 1 point',
+            "Before exploring the next fork: if this tree broke the record, update the book, then carry that book to the left and right children",
+          ],
+        },
+
         {
           t: "example",
           c: [
@@ -1060,7 +1137,7 @@ Return the number of good nodes in the binary tree.`,
             {
               input: "root = [1]",
               output: "1",
-              explain: "A single root is always good.",
+              explain: "A single Root is always a Good Node.",
             },
           ],
         },
@@ -1078,32 +1155,92 @@ Return the number of good nodes in the binary tree.`,
           c: [
             {
               t: "p",
-              c: 'This matches the "top-down carry state" pattern — pass the path maximum down as a parameter.',
+              c: 'This matches the "top-down carry state" pattern — unlike Leaf-Similar (bottom-up), we carry the height log downward as we walk.',
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
+            { t: "h3", c: "1. Logic-to-Code Mapping" },
             {
               t: "p",
-              c: "Unlike p33–p34 (bottom-up), decide at the current node first, then recurse into children.",
-            },
-            {
-              t: "p",
-              c: "Key insight: carry max_so_far along the path. Count the node if node.val >= max_so_far, then push an updated max downward.",
+              c: 'Write dfs(node, max_so_far) — two inputs: "where you stand" and "the record book." Handle three situations:',
             },
 
-            { t: "h3", c: "2. The Logic — 5 Steps" },
+            { t: "h3", c: "Situation 1: Fall off the edge (no Node left)" },
+            {
+              t: "p",
+              c: "If you walk off the edge (Null / None), there's nothing to count — return 0.",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Situation 1",
+              c: `# Fell off the edge
+if not node:
+    return 0  # no Good Nodes here`,
+            },
+
+            { t: "h3", c: "Situation 2: Is this a Good Node?" },
+            {
+              t: "p",
+              c: "Compare node.val with max_so_far. If yours is ≥ the record, you pass — score 1 point (else 0).",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Situation 2",
+              c: `# Check Good Node
+if node.val >= max_so_far:
+    good = 1
+else:
+    good = 0`,
+            },
+
+            { t: "h3", c: "Situation 3: Update the record, then go left & right" },
+            {
+              t: "p",
+              c: 'Before diving into children, update max_so_far to the max of "old record" and "current Node." Then return your points + left subtree points + right subtree points.',
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "Situation 3",
+              c: `# Update the record for children
+new_max = max(max_so_far, node.val)
+
+# Total = self + left + right
+return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
+            },
+
+            { t: "h3", c: "2. Step-by-Step Walkthrough" },
+            {
+              t: "p",
+              c: "Suppose the Tree looks like this:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              c: `        3
+       / \\
+      1   4
+     /   / \\
+    3   1   5`,
+            },
             {
               t: "ol",
               c: [
-                "Write dfs(node, max_so_far)",
-                "If node is None → return 0",
-                "good = 1 if node.val >= max_so_far else 0",
-                "new_max = max(max_so_far, node.val) before recursing",
-                "return good + dfs(left, new_max) + dfs(right, new_max) — start with -inf",
+                "Start (Root): Node 3 | book: 3 — enter Root with book = 3. Check 3 >= 3 → Yes! Good Node (+1). Update max(3,3)=3, split to left and right",
+                "Left branch: Node 1 | book: 3 — Check 1 >= 3 → No (0). Update max(3,1)=3, continue left",
+                "End of left: Node 3 | book: 3 — Check 3 >= 3 → Yes! (+1). Left side totals 1 point",
+                "Right of Root: Node 4 | book: 3 — Check 4 >= 3 → Yes! (+1). Update max(3,4)=4 (record broken!), carry 4 to children",
+                "End of right: Nodes 1 and 5 | book: 4 — left 1: 1 >= 4 → No (0) · right 5: 5 >= 4 → Yes! (+1). Right side totals 2 points",
+                "Finale: Root(1) + left(1) + right(2) = 4 Good Nodes",
               ],
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
+            { t: "h3", c: "3. Full Assembled Code" },
+            {
+              t: "p",
+              c: "Glue the pieces together — Python can collapse the Good check into one line:",
+            },
             {
               t: "code",
               lang: "python",
@@ -1117,52 +1254,39 @@ Return the number of good nodes in the binary tree.`,
 
 class Solution:
     def goodNodes(self, root: TreeNode) -> int:
+
+        # Hike + log the height record (DFS)
         def dfs(node, max_so_far):
-            if node is None:
+            # 1. Fall off the edge
+            if not node:
                 return 0
+
+            # 2. Good Node? (1 point or 0)
             good = 1 if node.val >= max_so_far else 0
+
+            # 3. Update the record book
             new_max = max(max_so_far, node.val)
+
+            # 4. Self + left + right
             return good + dfs(node.left, new_max) + dfs(node.right, new_max)
 
-        return dfs(root, float("-inf"))`,
+        # Start at Root with the first record = Root's own value
+        return dfs(root, root.val)`,
             },
 
-            { t: "h3", c: "4. Dry Run — [3,1,4,3,null,1,5]" },
-            {
-              t: "table",
-              head: ["node", "max_so_far", ">= max?", "count?"],
-              rows: [
-                ["3 (root)", "-inf", "yes", "✓"],
-                ["1 (left)", "3", "no", "✗"],
-                ["3 (under 1)", "3", "yes", "✓"],
-                ["4 (right)", "3", "yes", "✓"],
-                ["1 (under 4)", "4", "no", "✗"],
-                ["5 (under 4)", "4", "yes", "✓"],
-              ],
-            },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
+            { t: "h3", c: "4. Complexity" },
             {
               t: "ul",
               c: [
-                "Update new_max before calling children",
-                "Pass max as a parameter (per-branch copy), not a shared variable",
-              ],
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — visit every node once",
-                "Space O(h) — call-stack depth",
+                "Time Complexity: O(N) where N is the node count — we visit every node once",
+                "Space Complexity: O(H) where H is tree height (Call Stack). Worst case (a straight line) is O(N)",
               ],
             },
 
             {
               t: "callout",
               title: "💡 Pattern summary",
-              c: "Top-down DFS: when a node's answer depends on what you've seen from the root, pass that state as a recursion parameter.",
+              c: "Top-down DFS: when a Node's answer depends on what you've seen from the Root, pass that state (here max_so_far) as a recursion parameter — each branch gets its own copy of the book.",
             },
           ],
         },
