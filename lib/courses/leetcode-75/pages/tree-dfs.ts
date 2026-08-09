@@ -503,11 +503,11 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `Consider all the leaves of a binary tree, from left to right order, forming a leaf value sequence.
+          c: `พิจารณา leaf ทั้งหมดของ binary tree เรียงจากซ้ายไปขวา ค่าของ leaf เหล่านั้นเรียงกันเรียกว่า leaf value sequence ของต้นไม้นั้น
 
-Two binary trees are considered leaf-similar if their leaf value sequences are the same.
+ต้นไม้สองต้นจะถือว่าเป็น leaf-similar ก็ต่อเมื่อ leaf value sequence ของทั้งคู่เหมือนกัน
 
-Return true if and only if the two given trees with head nodes root1 and root2 are leaf-similar.`,
+กำหนด root ของต้นไม้สองต้นคือ root1 และ root2 มาให้ ให้ return true ก็ต่อเมื่อทั้งสองต้นเป็น leaf-similar`,
         },
 
         {
@@ -544,7 +544,6 @@ Return true if and only if the two given trees with head nodes root1 and root2 a
               t: "p",
               c: 'ข้อนี้ตรงกับ pattern "Collect แล้วเทียบ" — เดินเขาวงกตเก็บทางตันใส่กล่อง แล้วเทียบว่าสองกล่องหน้าตาเหมือนกันไหม',
             },
-
 
             { t: "h3", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
             {
@@ -920,9 +919,9 @@ return get_leaves(node.left) + get_leaves(node.right)`,
       th: [
         {
           t: "p",
-          c: `Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with a value greater than X.
+          c: `กำหนด root ของ binary tree มาให้ node X ในต้นไม้จะถูกเรียกว่า good ถ้าบนเส้นทางจาก root ไปถึง X ไม่มี node ใดเลยที่มีค่ามากกว่า X
 
-Return the number of good nodes in the binary tree.`,
+ให้ return จำนวน good node ทั้งหมดใน binary tree`,
         },
 
         {
@@ -963,7 +962,6 @@ Return the number of good nodes in the binary tree.`,
               t: "p",
               c: 'ข้อนี้ตรงกับ pattern "Top-down พก state" — ต่างจาก Leaf-Similar ที่รอผลจากลูกขึ้นมา ข้อนี้พกสมุดจดสถิติลงไปด้วยตอนเดิน',
             },
-
 
             { t: "h3", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
             {
