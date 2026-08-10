@@ -194,13 +194,13 @@ Time O(T₁ + T₂) เยี่ยมทุก Node ครั้งเดีย
 
 ## ข้อ 35 · Count Good Nodes in Binary Tree
 
-ข้อ 35 (Count Good Nodes): นับ Good Node — Node ที่บนเส้นทางจาก Root มาถึงมัน ไม่มีใครค่ามากกว่ามัน (ตัวมัน ≥ max ที่เคยเจอ)
+ข้อ 35 (LC1448 Count Good Nodes): นับ Good Node — Node ที่บนเส้นทางจาก Root มาถึงมัน ไม่มีใครค่ามากกว่ามัน (ตัวมัน ≥ max ที่เคยเจอตั้งแต่ต้นทาง)
 
-Mental model: เดินป่าพกสมุดจดสถิติความสูง (max_so_far) ถึงต้นใหม่ถ้าสูง ≥ สมุด = Good (+1) แล้วอัปเดตสมุดก่อนส่งลงลูก
+Mental model: เดินป่าพกสมุดจดสถิติความสูง (max_so_far) — ถึงต้นใหม่ถ้าสูง ≥ สมุด = Good (+1) แล้วอัปเดตสมุดก่อนส่งลงลูกซ้าย/ขวา
 
 dfs(node, max_so_far): ตกขอบ → 0 · good = 1 ถ้า val ≥ max · new_max = max(max, val) · return good + ซ้าย + ขวา · เริ่ม dfs(root, root.val)
 
-Walkthrough [3,1,4,3,null,1,5] → Root+1 + ซ้าย+1 + ขวา+2 = 4 · Time O(N) · Space O(H)
+Walkthrough [3,1,4,3,null,1,5]: Root(3) +1 → ซ้าย 1 (0) → ใต้ 1 ได้ 3 (+1) รวมซ้าย 1 · ขวา 4 (+1, สมุด→4) → 1 (0) กับ 5 (+1) รวมขวา 2 · รวมทั้งต้น 4 · Time O(N) · Space O(H)
 
 ## ข้อ 36 · Path Sum III
 

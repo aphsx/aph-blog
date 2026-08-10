@@ -967,7 +967,7 @@ return get_leaves(node.left) + get_leaves(node.right)`,
           c: [
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับ pattern "Top-down พก state" — ต่างจาก Leaf-Similar ที่รอผลจากลูกขึ้นมา ข้อนี้พกสมุดจดสถิติลงไปด้วยตอนเดิน',
+              c: 'โจทย์ข้อนี้เป็นอีกหนึ่งข้อสุดคลาสสิกของชาว Tree — เราจะยังคงใช้ DFS (Depth-First Search) แต่จะมีการ "พกข้อมูลบางอย่าง" ติดตัวไปด้วยตอนเดิน',
             },
 
             { t: "h3", c: "1. แปลโจทย์ภาษาคน (Problem Decoding)" },
@@ -1060,28 +1060,63 @@ return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
      /   / \\
     3   1   5`,
             },
+
+            { t: "h3", c: "จุดเริ่มต้น (Root) → Node 3 | สมุดจด: 3" },
             {
-              t: "p",
-              c: "ไล่ทีละ Node — คอลัมน์สมุดจดคือ max_so_far ที่พกมาถึงจุดนั้น",
-            },
-            {
-              t: "table",
-              head: ["จุด", "Node", "สมุดจด", "เช็ค", "แต้ม", "สมุดใหม่"],
-              rows: [
-                ["1. Root", "3", "3", "3 ≥ 3 ✓", "+1", "max(3,3)=3"],
-                ["2. กิ่งซ้าย", "1", "3", "1 ≥ 3 ✗", "0", "max(3,1)=3"],
-                ["3. ใต้ 1", "3", "3", "3 ≥ 3 ✓", "+1", "— (สุดทาง)"],
-                ["4. กิ่งขวาของ Root", "4", "3", "4 ≥ 3 ✓", "+1", "max(3,4)=4"],
-                ["5. ลูกซ้ายของ 4", "1", "4", "1 ≥ 4 ✗", "0", "—"],
-                ["6. ลูกขวาของ 4", "5", "4", "5 ≥ 4 ✓", "+1", "—"],
+              t: "ul",
+              c: [
+                "เดินเข้ามาที่ Root (3) โดยถือสมุดจดสถิติเริ่มต้นเป็น 3 (ค่าของตัวมันเอง)",
+                "เช็ค: 3 ≥ 3 ไหม? → ใช่! เป็น Good Node (+1 แต้ม)",
+                "อัปเดตสมุดจดเป็น max(3, 3) = 3 แล้วแยกย้ายไปกิ่งซ้ายและขวา",
               ],
             },
+
+            { t: "h3", c: "สำรวจกิ่งซ้าย → Node 1 | สมุดจด: 3" },
             {
-              t: "p",
-              c: "บทสรุป: Root(+1) + ฝั่งซ้าย(+1) + ฝั่งขวา(+1 จาก 4 และ +1 จาก 5) = Good Node ทั้งหมด 4 โหนด",
+              t: "ul",
+              c: [
+                "ลงมาที่ 1 พร้อมสมุดที่จดเลข 3 ไว้",
+                "เช็ค: 1 ≥ 3 ไหม? → ไม่ใช่! (0 แต้ม)",
+                "อัปเดตสมุดจดเป็น max(3, 1) = 3 (สถิติยังคงเป็น 3) แล้วลงไปทางซ้ายต่อ",
+              ],
             },
 
-            { t: "h3", c: "5. ประกอบร่างโค้ดฉบับเต็ม" },
+            { t: "h3", c: "สุดทางกิ่งซ้าย → Node 3 | สมุดจด: 3" },
+            {
+              t: "ul",
+              c: [
+                "ลงมาที่ 3 พร้อมสมุดที่จดเลข 3",
+                "เช็ค: 3 ≥ 3 ไหม? → ใช่! เป็น Good Node (+1 แต้ม)",
+                "สุดทางแล้ว Return แต้มกลับขึ้นไป — ฝั่งซ้ายทั้งหมดหาแต้มมาได้ 1 แต้ม",
+              ],
+            },
+
+            { t: "h3", c: "สำรวจกิ่งขวาของ Root → Node 4 | สมุดจด: 3" },
+            {
+              t: "ul",
+              c: [
+                "กลับมาที่ Root แล้วไปทางขวา เจอ 4 พร้อมสมุดที่จดเลข 3 (สถิติจาก Root)",
+                "เช็ค: 4 ≥ 3 ไหม? → ใช่! เป็น Good Node (+1 แต้ม)",
+                "อัปเดตสมุดจดเป็น max(3, 4) = 4 (ทำลายสถิติแล้ว!) ถือสมุดเลข 4 ไปหาลูกซ้ายและขวาต่อ",
+              ],
+            },
+
+            { t: "h3", c: "สุดทางกิ่งขวา → Node 1 และ 5 | สมุดจด: 4" },
+            {
+              t: "ul",
+              c: [
+                "ไปทางซ้ายเจอ 1 เทียบกับสมุด 4: 1 ≥ 4 → ไม่ใช่! (0 แต้ม)",
+                "ไปทางขวาเจอ 5 เทียบกับสมุด 4: 5 ≥ 4 → ใช่! เป็น Good Node (+1 แต้ม)",
+                "ฝั่งขวาทั้งหมดหาแต้มมาได้ 2 แต้ม",
+              ],
+            },
+
+            {
+              t: "p",
+              c: "บทสรุป: แต้มจาก Root (1) + ฝั่งซ้าย (1) + ฝั่งขวา (2) = มี Good Node ทั้งหมด 4 โหนด",
+            },
+
+            { t: "h3", c: "5. ประกอบร่างโค้ดฉบับเต็ม (Clean Code)" },
             {
               t: "p",
               c: "เมื่อนำโค้ดมารวมกัน จะได้ฟังก์ชันที่สะอาดตามาก (Python สามารถยุบโค้ดการหา Good Node และอัปเดต Max ให้อยู่ในบรรทัดเดียวกันได้เลย)",
@@ -1119,7 +1154,7 @@ class Solution:
         return dfs(root, root.val)`,
             },
 
-            { t: "h3", c: "6. วิเคราะห์ประสิทธิภาพ (Complexity)" },
+            { t: "h3", c: "6. วิเคราะห์ประสิทธิภาพ (Complexity Analysis)" },
             {
               t: "ul",
               c: [
@@ -1180,9 +1215,8 @@ Return the number of good nodes in the binary tree.`,
           c: [
             {
               t: "p",
-              c: 'This matches the "top-down carry state" pattern — unlike Leaf-Similar (bottom-up), we carry the height log downward as we walk.',
+              c: 'A classic Tree problem — we still use DFS, but we "carry some state" with us as we walk.',
             },
-
 
             { t: "h3", c: "1. Problem Decoding" },
             {
@@ -1274,28 +1308,63 @@ return good + dfs(node.left, new_max) + dfs(node.right, new_max)`,
      /   / \\
     3   1   5`,
             },
+
+            { t: "h3", c: "Start (Root) → Node 3 | Book: 3" },
             {
-              t: "p",
-              c: "Walk node by node — the book column is max_so_far carried to that point.",
-            },
-            {
-              t: "table",
-              head: ["Step", "Node", "Book", "Check", "Pts", "New book"],
-              rows: [
-                ["1. Root", "3", "3", "3 ≥ 3 ✓", "+1", "max(3,3)=3"],
-                ["2. Left", "1", "3", "1 ≥ 3 ✗", "0", "max(3,1)=3"],
-                ["3. Under 1", "3", "3", "3 ≥ 3 ✓", "+1", "— (leaf)"],
-                ["4. Right of Root", "4", "3", "4 ≥ 3 ✓", "+1", "max(3,4)=4"],
-                ["5. Left of 4", "1", "4", "1 ≥ 4 ✗", "0", "—"],
-                ["6. Right of 4", "5", "4", "5 ≥ 4 ✓", "+1", "—"],
+              t: "ul",
+              c: [
+                "Enter Root (3) with the initial record book set to 3 (its own value)",
+                "Check: 3 ≥ 3? → Yes! Good Node (+1)",
+                "Update the book to max(3, 3) = 3, then explore left and right",
               ],
             },
+
+            { t: "h3", c: "Left branch → Node 1 | Book: 3" },
             {
-              t: "p",
-              c: "Total: Root(+1) + left(+1) + right(+1 from 4 and +1 from 5) = 4 Good Nodes",
+              t: "ul",
+              c: [
+                "Arrive at 1 carrying book value 3",
+                "Check: 1 ≥ 3? → No! (0 points)",
+                "Update the book to max(3, 1) = 3 (record stays 3), then go left",
+              ],
             },
 
-            { t: "h3", c: "5. Full Assembled Code" },
+            { t: "h3", c: "End of left branch → Node 3 | Book: 3" },
+            {
+              t: "ul",
+              c: [
+                "Arrive at 3 carrying book value 3",
+                "Check: 3 ≥ 3? → Yes! Good Node (+1)",
+                "Leaf — return up. The whole left side scored 1 point",
+              ],
+            },
+
+            { t: "h3", c: "Right of Root → Node 4 | Book: 3" },
+            {
+              t: "ul",
+              c: [
+                "Back at Root, go right to 4 carrying book value 3 (Root's record)",
+                "Check: 4 ≥ 3? → Yes! Good Node (+1)",
+                "Update the book to max(3, 4) = 4 (new record!) and carry 4 to both children",
+              ],
+            },
+
+            { t: "h3", c: "End of right branch → Nodes 1 and 5 | Book: 4" },
+            {
+              t: "ul",
+              c: [
+                "Left child 1 vs book 4: 1 ≥ 4 → No! (0 points)",
+                "Right child 5 vs book 4: 5 ≥ 4 → Yes! Good Node (+1)",
+                "The whole right side scored 2 points",
+              ],
+            },
+
+            {
+              t: "p",
+              c: "Total: Root (1) + left (1) + right (2) = 4 Good Nodes",
+            },
+
+            { t: "h3", c: "5. Full Assembled Code (Clean Code)" },
             {
               t: "p",
               c: "Glue the pieces together — Python can collapse the Good check into one line:",
@@ -1333,7 +1402,7 @@ class Solution:
         return dfs(root, root.val)`,
             },
 
-            { t: "h3", c: "6. Complexity" },
+            { t: "h3", c: "6. Complexity Analysis" },
             {
               t: "ul",
               c: [
@@ -1352,6 +1421,7 @@ class Solution:
       ],
     },
   },
+
 
   "lc75-p36": {
     slug: "lc75-p36",
