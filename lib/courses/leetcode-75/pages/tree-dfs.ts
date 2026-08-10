@@ -184,6 +184,13 @@ print(root.right.right.val)  # 7`,
           ],
         },
         {
+          t: "image",
+          src: "/leetcode-75/inorder-search.gif",
+          alt: "In-order traversal animation: Left → ROOT → Right on a binary tree",
+          caption:
+            "In-order (L → N → R): ดิ่งซ้ายสุดก่อน แล้วค่อยแตะตัวเอง แล้วไปขวา — บน BST ได้ลำดับจากน้อยไปมาก · In-order search courtesy of Giphy",
+        },
+        {
           t: "p",
           c: "หมวดนี้ส่วนใหญ่ใช้ postorder (รอลูกเสร็จก่อนค่อยสรุป) แต่บางข้ออย่าง Count Good Nodes ใช้ top-down ที่พกข้อมูลลงไปด้วย",
         },
