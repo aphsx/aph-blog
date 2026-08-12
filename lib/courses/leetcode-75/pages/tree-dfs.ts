@@ -2171,8 +2171,8 @@ class Solution:
       en: "LC1372 Longest ZigZag Path in a Binary Tree 🟡",
     },
     lead: {
-      th: "พกทิศ + ความยาวลงไป — ไปตามแผนก็ต่อความยาว สวนทางก็รีเซ็ต · นับเป็นจำนวนก้าว (edge)",
-      en: "Carry direction + length — continue when you match the expected turn, reset when you don't. Length counts edges.",
+      th: "พกทิศ + ความยาวลงไป — สลับทิศก็ต่อความยาว ทิศซ้ำก็รีเซ็ตเป็น 1 · นับเป็นจำนวนก้าว (edge)",
+      en: "Carry direction + length — continue when you flip, reset to 1 when you repeat. Length counts edges.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -2221,173 +2221,254 @@ class Solution:
           c: [
             {
               t: "p",
-              c: 'จัดให้อีกหนึ่งข้อระดับ Masterpiece ครับ! ข้อ **LeetCode 1372: Longest ZigZag Path in a Binary Tree** เป็นโจทย์ที่ทดสอบการทำ **State Management** ได้ยอดเยี่ยมมาก เพราะคราวนี้เราไม่ได้พกแค่ "ตัวเลขสะสม" ลงไป แต่เราต้องพก **"ทิศทาง (Direction)"** ลงไปด้วย! มาชำแหละลอจิกด้วย **Concept-First Framework (Definitive Edition)** กันเลยครับ!',
+              c: "ต่อยอดจาก Tree DFS — ข้อนี้พก state ลงไป 2 อย่าง: **ทิศทางก้าวที่แล้ว** กับ **ความยาวสะสม** มาชำแหละทีละชั้นครับ",
             },
 
-            { t: "h3", c: "1. Problem Decoding (แปลโจทย์ภาษาคน)" },
+            { t: "h3", c: "1. Pattern Recognition (วิธีมองโจทย์ให้ออก)" },
             {
               t: "p",
-              c: `เรามีแผนผังต้นไม้ (Binary Tree)
-โจทย์ต้องการให้เราหาความยาวของ **"เส้นทางซิกแซก (ZigZag Path)"** ที่ยาวที่สุดในต้นไม้นี้`,
+              c: "โจทย์กำหนด Binary Tree มาให้ และต้องการหา **ความยาวของเส้นทาง ZigZag ที่ยาวที่สุด**",
             },
             {
               t: "p",
-              c: "**ซิกแซกคืออะไร?:** การสลับทิศทางซ้าย-ขวาไปเรื่อยๆ (ซ้าย → ขวา → ซ้าย → ขวา หรือกลับกัน)",
-            },
-            {
-              t: "p",
-              c: "**กฎการนับ:**",
+              c: "กฎการเดินแบบ ZigZag:",
             },
             {
               t: "ol",
               c: [
-                "ความยาวนับตาม **จำนวนก้าว (Edges)** ไม่ใช่จำนวนโหนด (ก้าว 1 ครั้ง = ความยาว 1)",
-                "เริ่มก้าวแรกจากโหนดไหนก็ได้ในต้นไม้",
-                "ถ้าเผลอก้าวไปทิศเดิมซ้ำ (เช่น ซ้าย แล้ว ซ้ายอีก) ถือว่า **คอมโบหลุด (Combo Broken)** ต้องเริ่มนับหนึ่งใหม่!",
+                "สลับทิศทาง: เดินซ้าย → ขวา → ซ้าย → ขวา สลับกันไปเรื่อยๆ (หรือ ขวา → ซ้าย → ขวา → ซ้าย)",
+                'ห้ามเดินทิศเดิมซ้ำ: ถ้าก้าวที่แล้วเดิน "ซ้าย" ก้าวนี้ต้องเดิน "ขวา" เท่านั้น ถ้าเดินซ้ายซ้ำ จะไม่นับต่อ แต่ต้อง "เริ่มนับ 1 ใหม่"',
+                'การนับความยาว: นับจำนวน "เส้นเชื่อม (Edges)" ไม่ใช่นับจำนวนโหนด (เช่น เดิน 1 ก้าว ได้ความยาว = 1)',
               ],
             },
+            {
+              t: "code",
+              lang: "text",
+              label: "ZigZag vs ไม่ใช่ ZigZag",
+              c: `      ZigZag Path (ยาว 3)            ไม่ใช่ ZigZag (ซ้ายซ้ำ)
+          O                              O
+         /                              /
+        O                              O
+         \\                            /
+          O                          O  <-- เลี้ยวซ้ายซ้ำ!
+         /
+        O`,
+            },
 
-            { t: "h3", c: "2. Mental Model (สร้างภาพจำ)" },
-            {
-              t: "p",
-              c: 'ให้จินตนาการว่าคุณคือ **"นักสกีผาดโผน"** ที่กำลังสกีลงภูเขา (Tree)',
-            },
-            {
-              t: "p",
-              c: 'กติกาการเก็บแต้มคอมโบคือ คุณต้อง **"สลับฝั่งเลี้ยว"** เลี้ยวซ้ายที เลี้ยวขวาที แต้มคอมโบถึงจะเพิ่มขึ้น',
-            },
+            { t: "h3", c: "2. เครื่องมือที่เลือกใช้ & การออกแบบสถานะ (State Design)" },
             {
               t: "ul",
               c: [
-                "สมมติว่าเมื่อกี้คุณเพิ่ง **เลี้ยวซ้าย** มา:",
-                "ถ้าสถานีต่อไปคุณ **เลี้ยวขวา**: สวยงาม! คอมโบต่อเนื่อง (แต้มเดิม + 1)",
-                'แต่ถ้าสถานีต่อไปคุณ **เลี้ยวซ้ายอีกรอบ**: ผิดกติกา! คอมโบเก่าขาดสะบั้นทันที แต่ไม่ได้แปลว่าแต้มเป็น 0 นะ เพราะการเลี้ยวซ้ายรอบใหม่นี้ ถือเป็นการ **"เริ่มนับก้าวที่ 1 ของคอมโบชุดใหม่"**',
+                "DFS (Depth-First Search): เดินท่องลงไปตามกิ่งก้านของต้นไม้",
+                "State Passing (ส่งค่าสถานะผ่าน Parameter): ส่งข้อมูลติดตัวไปด้วยขณะเดินลงไป",
               ],
             },
             {
               t: "p",
-              c: 'ระหว่างที่คุณไถลลงเขาไปเรื่อยๆ คุณแค่ต้องตะโกนบอกกรรมการว่า *"แต้มคอมโบสูงสุดที่ฉันเคยทำได้ในรอบนี้คือเท่าไหร่!"*',
+              c: "ของที่พกติดตัวตอนเดินลง:",
+            },
+            {
+              t: "ol",
+              c: [
+                "direction: บอกว่า ก้าวที่แล้วเดินมาทางไหน ('left' หรือ 'right')",
+                "length: บอกว่า ตอนนี้สะสมความยาว ZigZag ได้กี่ก้าวแล้ว",
+              ],
             },
 
-            { t: "h3", c: "3. Logic-to-Code Mapping (ชำแหละแก่นโค้ด)" },
+            { t: "h3", c: "3. Mental Model: กฎการตัดสินใจ ณ โหนดปัจจุบัน" },
             {
               t: "p",
-              c: 'เราจะสร้างฟังก์ชัน dfs(node, direction, steps) โดยต้องพกของ 2 อย่างคือ **"ทิศทางที่เพิ่งเลี้ยวมา"** และ **"แต้มคอมโบปัจจุบัน"**',
+              c: "เมื่อเราอยู่ที่โหนดใดโหนดหนึ่ง แล้วกำลังจะก้าวไปทาง ซ้าย หรือ ขวา:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              c: `                  โหนดปัจจุบัน (เดินมาจากทิศ direction, ความยาวสะสม = length)
+                               /            \\
+                              /              \\
+                        ไปทางซ้าย           ไปทางขวา`,
+            },
+            {
+              t: "p",
+              c: "กฎ 2 ข้อในการก้าวต่อ:",
+            },
+            {
+              t: "ol",
+              c: [
+                'ถ้าก้าวไปใน "ทิศตรงข้าม" กับก้าวที่แล้ว (ได้ ZigZag!): ความยาวสะสมจะเพิ่มขึ้น → length + 1',
+                'ถ้าก้าวไปใน "ทิศเดิม" ซ้ำกับก้าวที่แล้ว (ZigZag ขาด!): เส้นทางเดิมจบลงทันที แต่โหนดปัจจุบันสามารถ "เริ่มต้นนับ ZigZag เส้นใหม่" ก้าวไปทิศนี้เป็นก้าวแรกได้ → รีเซ็ตเป็น 1',
+              ],
             },
 
-            { t: "h3", c: "ส่วนที่ 1: การอัปเดตสถิติสูงสุด (The High Score)" },
+            { t: "h3", c: "4. ชำแหละไวยากรณ์และตรรกะโค้ด (Line-by-Line Breakdown)" },
             {
               t: "code",
               lang: "python",
-              label: "ส่วนที่ 1",
-              c: `self.max_step = max(self.max_step, steps)`,
+              label: "ตัวแปรเก็บคำตอบสูงสุด",
+              c: `class Solution:
+    def longestZigZag(self, root: Optional[TreeNode]) -> int:
+        self.max_len = 0`,
             },
             {
               t: "callout",
               title: "ทำไมต้องเขียน (The Why)",
-              c: "ทุกครั้งที่เราก้าวมาถึงโหนดใหม่ เราต้องรีบจดสถิติคอมโบปัจจุบันเทียบกับสถิติสูงสุดที่เคยทำได้ (Global Maximum) ทันที เพราะบางทีคอมโบอาจจะขาดสะบั้นในก้าวถัดไป เราจึงต้อง Save ค่าที่ดีที่สุดไว้เสมอ",
+              c: 'self.max_len = 0 สร้างตัวแปรระดับ instance เอาไว้เก็บบันทึก "ความยาว ZigZag ที่ยาวที่สุด" ที่เคยเจอมาตลอดการเดินทั้งต้นไม้',
+            },
+
+            {
+              t: "code",
+              lang: "python",
+              label: "เข้าโหนด → อัปเดตสถิติทันที",
+              c: `def dfs(node, direction, length):
+    if not node:
+        return
+
+    self.max_len = max(self.max_len, length)`,
+            },
+            {
+              t: "callout",
+              title: "ทำไมต้องเขียน (The Why)",
+              c: "ทุกครั้งที่ก้าวเข้าสู่โหนดใหม่ ให้อัปเดตค่าความยาวที่ยาวที่สุดทันที เพราะก้าวถัดไปอาจรีเซ็ตความยาวได้",
             },
             {
               t: "callout",
               title: "ถ้าไม่เขียนไว้ตรงนี้ (What If)",
               warn: true,
-              c: "ถ้าคุณรอไปอัปเดตตอนตกขอบต้นไม้ (Base case) คุณอาจจะพลาดคอมโบสูงสุดที่ถูกทำลายไปแล้วระหว่างทาง และได้คำตอบที่ผิด",
+              c: "ถ้าคุณรอไปอัปเดตตอนตกขอบต้นไม้ (Base case) คุณอาจจะพลาดความยาวสูงสุดที่ถูกทำลายไปแล้วระหว่างทาง และได้คำตอบที่ผิด",
             },
 
-            { t: "h3", c: "ส่วนที่ 2: คอมโบต่อเนื่อง (Combo Continued) (จุดตัดคนผ่าน/ไม่ผ่าน)" },
             {
               t: "code",
               lang: "python",
-              label: "ส่วนที่ 2",
-              c: `if direction == "left":
-    dfs(node.right, "right", steps + 1)`,
+              label: "กรณีก้าวที่แล้วมาทางซ้าย",
+              c: `if direction == 'left':
+    # เดินซ้ายมา -> ก้าวไปขวาต่อ (ZigZag สำเร็จ: ความยาว + 1)
+    dfs(node.right, 'right', length + 1)
+
+    # เดินซ้ายมา -> แต่ดันเดินซ้ายซ้ำ (ZigZag ขาด: เริ่มนับ 1 ใหม่)
+    dfs(node.left, 'left', 1)`,
             },
             {
               t: "callout",
               title: "ทำไมต้องเขียน (The Why)",
-              c: "นี่คือการทำตามกติกาซิกแซก ถ้าตาที่แล้วคุณมาทาง left ตานี้คุณต้องบังคับเลี้ยว right และถ้าเลี้ยวถูก คอมโบจะบวกเพิ่มขึ้น 1 (steps + 1)",
+              c: "ก้าวไปทางขวา = สลับทิศ ได้ ZigZag → ส่ง 'right' และ length + 1 · ก้าวไปทางซ้าย = ทิศซ้ำ เส้นทางเดิมพัง แต่เริ่มเส้นใหม่ด้วยก้าวซ้ายก้าวแรก → ส่ง 'left' และรีเซ็ตเป็น 1",
             },
             {
               t: "callout",
               title: "ถ้าสลับเงื่อนไขผิด (What If)",
               warn: true,
-              c: 'ถ้าเพิ่งมาทางซ้าย แล้วดันสั่งให้คอมโบบวก 1 เมื่อไปทางซ้ายอีกรอบ อัลกอริทึมจะกลายเป็นการหา "เส้นตรงที่ยาวที่สุด" แทนที่จะเป็นเส้นซิกแซกทันที!',
-            },
-
-            { t: "h3", c: "ส่วนที่ 3: คอมโบหลุด (Combo Broken & Reset)" },
-            {
-              t: "code",
-              lang: "python",
-              label: "ส่วนที่ 3",
-              c: `if direction == "left":
-    dfs(node.left, "left", 1) # รีเซ็ตเป็น 1 ไม่ใช่ 0!`,
+              c: 'ถ้าเพิ่งมาทางซ้าย แล้วดันสั่งให้บวก 1 เมื่อไปทางซ้ายอีกรอบ อัลกอริทึมจะกลายเป็นการหา "เส้นตรงที่ยาวที่สุด" แทนที่จะเป็นเส้นซิกแซกทันที!',
             },
             {
               t: "callout",
-              title: "ทำไมต้องเขียน (The Why)",
-              c: "ถ้าตาที่แล้วมาทาง left แล้วดันฝืนก้าวไปทาง left อีก คอมโบเก่าถือว่าจบลง! แต่การก้าวไปทาง left ครั้งใหม่นี้ มันคือ **ก้าวแรกของเส้นทางใหม่** เราจึงส่งค่าเป็น 1",
-            },
-            {
-              t: "callout",
-              title: "ถ้าส่งเป็น 0 (What If)",
+              title: "ถ้ารีเซ็ตเป็น 0 (What If)",
               warn: true,
               c: "พลาดมหันต์ครับ! ถ้าคุณส่ง 0 ไป แปลว่าโหนดที่คุณเพิ่งเดินไปถึงนั้นไม่ถูกนับก้าว ทั้งๆ ที่คุณขยับจากโหนดพ่อมาหาโหนดลูก 1 ก้าวแล้ว ความยาวของเส้นทางใหม่จะหดสั้นไป 1 แต้มเสมอ",
             },
 
-            { t: "h3", c: "4. Step-by-Step Walkthrough (จำลองการทำงาน)" },
+            {
+              t: "code",
+              lang: "python",
+              label: "กรณีก้าวที่แล้วมาทางขวา",
+              c: `elif direction == 'right':
+    # เดินขวามา -> ก้าวไปซ้ายต่อ (ZigZag สำเร็จ: ความยาว + 1)
+    dfs(node.left, 'left', length + 1)
+
+    # เดินขวามา -> แต่ดันเดินขวาซ้ำ (ZigZag ขาด: เริ่มนับ 1 ใหม่)
+    dfs(node.right, 'right', 1)`,
+            },
+            {
+              t: "callout",
+              title: "ทำไมต้องเขียน (The Why)",
+              c: "สมมาตรกับกรณีซ้าย: ก้าวไปซ้าย = สลับทิศ → length + 1 · ก้าวไปขวาซ้ำ = รีเซ็ตเป็น 1",
+            },
+
+            {
+              t: "code",
+              lang: "python",
+              label: "จุดเริ่มต้นจาก Root",
+              c: `# จุดเริ่มต้นจาก Root: ลองก้าวซ้ายเป็นก้าวแรก และ ลองก้าวขวาเป็นก้าวแรก
+dfs(root.left, 'left', 1)
+dfs(root.right, 'right', 1)
+
+return self.max_len`,
+            },
+            {
+              t: "callout",
+              title: "ทำไมต้องเขียน (The Why)",
+              c: "ที่ Root เรายังไม่มีทิศทางก่อนหน้า จึงต้องแยกสั่งเดิน 2 สาย: ก้าวซ้ายเป็นก้าวแรก และ ก้าวขวาเป็นก้าวแรก",
+            },
+
+            { t: "h3", c: "5. Step-by-Step Walkthrough (จำลองการทำงาน)" },
             {
               t: "p",
-              c: "สมมติ Tree: Root(A) -> ซ้าย(B) -> ซ้าย(C) -> ขวา(D)",
+              c: "กำหนดต้นไม้ตัวอย่าง:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              c: `        1 (Root)
+         \\
+          2
+         / \\
+        3   4
+           /
+          5`,
             },
 
-            { t: "h3", c: "1. จุดเริ่มต้น (Root A)" },
-            {
-              t: "p",
-              c: "เราบอกให้มันลองเริ่มก้าวใหม่ทั้ง 2 ทาง",
-            },
+            { t: "h3", c: "1. เริ่มต้นที่ Root (1)" },
             {
               t: "ul",
               c: [
-                'ลองไปซ้าย: dfs(B, "left", 1)',
-                "ลองไปขวา: (สมมติว่ากิ่งขวาไม่มี ก็ตกขอบไป)",
+                "ลองก้าวซ้าย root.left → เจอ None (จบ)",
+                "ลองก้าวขวา root.right (Node 2) → dfs(Node 2, 'right', length=1) → max_len = 1",
               ],
             },
 
-            { t: "h3", c: '2. มาถึงโหนด B (ทิศ = "left", steps = 1)' },
+            { t: "h3", c: "2. ยืนที่ Node 2 (direction='right', length=1)" },
             {
               t: "ul",
               c: [
-                "*อัปเดตสถิติ:* max_step = max(0, 1) = 1",
-                'ลองไปขวา (ถูกกฎ): dfs(B.right, "right", 1 + 1) (แต่โหนดนี้ไม่มีกิ่งขวา)',
-                'ลองไปซ้าย (ผิดกฎ คอมโบหลุด!): dfs(C, "left", 1) **→ เริ่มนับ 1 ใหม่**',
+                "สลับทิศ (ไปซ้าย → Node 3): dfs(Node 3, 'left', length=1+1=2)",
+                "ทิศซ้ำ (ไปขวา → Node 4): dfs(Node 4, 'right', length=1) (รีเซ็ตนับ 1)",
               ],
             },
 
-            { t: "h3", c: '3. มาถึงโหนด C (ทิศ = "left", steps = 1)' },
+            { t: "h3", c: "3. ยืนที่ Node 3 (direction='left', length=2)" },
             {
               t: "ul",
               c: [
-                "*อัปเดตสถิติ:* max_step = max(1, 1) = 1",
-                'ลองไปขวา (ถูกกฎ! เลี้ยวขวา): dfs(D, "right", 1 + 1) **→ ส่ง steps = 2**',
+                "max_len = 2",
+                "ซ้าย/ขวา เป็น None ทั้งคู่ → ถอยกลับ",
               ],
             },
 
-            { t: "h3", c: '4. มาถึงโหนด D (ทิศ = "right", steps = 2)' },
+            { t: "h3", c: "4. ยืนที่ Node 4 (direction='right', length=1)" },
             {
               t: "ul",
               c: [
-                "*อัปเดตสถิติ:* max_step = max(1, 2) = 2",
-                "(ตกขอบ สิ้นสุดการค้นหา)",
+                "max_len ยังคงเป็น 2",
+                "สลับทิศ (ไปซ้าย → Node 5): dfs(Node 5, 'left', length=1+1=2)",
+                "ทิศซ้ำ (ไปขวา): None",
+              ],
+            },
+
+            { t: "h3", c: "5. ยืนที่ Node 5 (direction='left', length=2)" },
+            {
+              t: "ul",
+              c: [
+                "max_len = 2",
+                "ซ้าย/ขวา เป็น None ทั้งคู่ → จบการทำงาน",
               ],
             },
 
             {
               t: "callout",
               title: "🧠 บทสรุป",
-              c: "**คำตอบสุดท้ายคือ 2 ก้าว** (จากเส้นทาง C → D)",
+              c: "คำตอบสุดท้าย: max_len = 2",
             },
 
-            { t: "h3", c: "5. Clean Code (โค้ดฉบับสมบูรณ์)" },
+            { t: "h3", c: "6. Clean Code (โค้ดฉบับสมบูรณ์สำหรับส่ง LeetCode)" },
             {
               t: "code",
               lang: "python",
@@ -2398,57 +2479,54 @@ class Solution:
 #         self.val = val
 #         self.left = left
 #         self.right = right
+
 class Solution:
     def longestZigZag(self, root: Optional[TreeNode]) -> int:
-        
-        # ตัวแปรเก็บสถิติสูงสุด
-        self.max_step = 0
-        
-        # ฟังก์ชันนักสกี: dfs(จุดที่ยืน, ทิศทางที่เพิ่งเลี้ยวมา, แต้มคอมโบ)
-        def dfs(node, direction, steps):
-            # 1. เดินตกขอบ (Base Case)
+        # ตัวแปรเก็บความยาว ZigZag ที่ยาวที่สุดที่เคยเจอ
+        self.max_len = 0
+
+        def dfs(node, direction, length):
+            # Base Case: ถ้าเดินตกขอบต้นไม้
             if not node:
                 return
-            
-            # 2. จดสถิติสูงสุดเสมอทุกครั้งที่มาถึงโหนดใหม่
-            self.max_step = max(self.max_step, steps)
-            
-            # 3. แยกลอจิกตามทิศทางที่เพิ่งผ่านมา
-            if direction == "left":
-                # ถ้าเพิ่งเลี้ยวซ้ายมา:
-                # - เลี้ยวขวาต่อ -> คอมโบต่อเนื่อง (+1)
-                dfs(node.right, "right", steps + 1)
-                # - เลี้ยวซ้ายซ้ำ -> คอมโบหลุด! เริ่มต้นนับ 1 ใหม่
-                dfs(node.left, "left", 1)
-                
-            else: # ถ้า direction == "right"
-                # ถ้าเพิ่งเลี้ยวขวามา:
-                # - เลี้ยวซ้ายต่อ -> คอมโบต่อเนื่อง (+1)
-                dfs(node.left, "left", steps + 1)
-                # - เลี้ยวขวาซ้ำ -> คอมโบหลุด! เริ่มต้นนับ 1 ใหม่
-                dfs(node.right, "right", 1)
-                
-        # เริ่มต้นกระโดดออกจาก Root: 
-        # ให้ลองก้าวไปทางซ้าย 1 ก้าว และลองก้าวไปทางขวา 1 ก้าว
-        dfs(root.left, "left", 1)
-        dfs(root.right, "right", 1)
-        
-        return self.max_step`,
+
+            # อัปเดตค่าความยาวสูงสุด
+            self.max_len = max(self.max_len, length)
+
+            # ถ้าก้าวที่แล้วเดินมาทาง "ซ้าย"
+            if direction == 'left':
+                # 1. เดินสลับทิศไปทางขวา -> ZigZag สำเร็จ (ความยาว + 1)
+                dfs(node.right, 'right', length + 1)
+                # 2. เดินซ้ำทิศไปทางซ้าย -> ZigZag ขาด (เริ่มนับ 1 ใหม่)
+                dfs(node.left, 'left', 1)
+
+            # ถ้าก้าวที่แล้วเดินมาทาง "ขวา"
+            elif direction == 'right':
+                # 1. เดินสลับทิศไปทางซ้าย -> ZigZag สำเร็จ (ความยาว + 1)
+                dfs(node.left, 'left', length + 1)
+                # 2. เดินซ้ำทิศไปทางขวา -> ZigZag ขาด (เริ่มนับ 1 ใหม่)
+                dfs(node.right, 'right', 1)
+
+        # เริ่มต้นจาก Root: ทดลองเดินก้าวแรกไปทางซ้าย และ ทางขวา
+        dfs(root.left, 'left', 1)
+        dfs(root.right, 'right', 1)
+
+        return self.max_len`,
             },
 
-            { t: "h3", c: "6. Complexity Analysis (วิเคราะห์ Big O)" },
+            { t: "h3", c: "7. Complexity Analysis (วิเคราะห์ประสิทธิภาพ)" },
             {
               t: "ul",
               c: [
-                "**Time Complexity: O(N)** — แม้ว่าโค้ดดูเหมือนจะมีการแตกกิ่งซ้าย-ขวาทุกๆ ครั้ง แต่จริงๆ แล้วมันคือการทำ DFS ปกติ เราเยี่ยมชมทุกโหนด โหนดละ 1 ครั้งถ้วน (แค่พก state ต่างกันไป) เวลาที่ใช้จึงแปรผันตรงตามจำนวนโหนดทั้งหมด",
-                "**Space Complexity: O(H)** — โดยที่ H คือความสูง (Height) ของต้นไม้ ใช้ไปกับ Call Stack ของ Recursion ถ้ายิ่งต้นไม้ลึก (เช่นเป็นเส้นตรง) ก็จะใช้พื้นที่ Call Stack มากสุดที่ O(N) ครับ",
+                "**Time Complexity: O(N)** — เพราะ DFS จะท่องผ่านทุกโหนดในต้นไม้เพียง 1 ครั้ง",
+                "**Space Complexity: O(N)** — ใช้หน่วยความจำใน Call Stack ตามความสูงของต้นไม้ ซึ่งกรณีแย่ที่สุด (ต้นไม้เรียงเป็นเส้นตรง) จะใช้พื้นที่ O(N)",
               ],
             },
 
             {
               t: "callout",
               title: "💡 สรุป pattern",
-              c: 'โจทย์ข้อนี้คือจุดสูงสุดของการโชว์กึ๋นเรื่อง **"การส่งต่อสถานะ (State Passing)"** ใน Tree DFS ครับ ถ้าเข้าใจ Why/What If ของข้อนี้ การส่งตัวแปรลงไปใน Recursion จะกลายเป็นเรื่องหมูๆ ไปเลยครับ!',
+              c: 'โจทย์ข้อนี้คือจุดสูงสุดของการโชว์กึ๋นเรื่อง **"การส่งต่อสถานะ (State Passing)"** ใน Tree DFS ครับ — พกทิศ + ความยาว สลับทิศก็ต่อ สวนทางก็รีเซ็ตเป็น 1',
             },
           ],
         },
@@ -2502,32 +2580,38 @@ Return the longest ZigZag path contained in that tree.`,
           c: [
             {
               t: "p",
-              c: 'Top-down with state — the state is the expected next direction plus the length so far.',
+              c: "Build on Tree DFS — carry two pieces of state down the recursion: **previous direction** and **accumulated length**.",
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
-            {
-              t: "p",
-              c: "The best zigzag can start anywhere and in either direction.",
-            },
-            {
-              t: "p",
-              c: "Key insight: carry go_left and length. Match the plan → length+1 and flip direction. Mismatch → restart at length 1.",
-            },
-
-            { t: "h3", c: "2. The Logic — 5 Steps" },
+            { t: "h3", c: "1. Pattern Recognition" },
             {
               t: "ol",
               c: [
-                "ans = 0",
-                "dfs(node, go_left, length): return if None",
-                "Update ans at every visited node",
-                "If go_left: continue left (length+1, next expects right) and restart right at 1",
-                "Symmetric for go_left=False · call from root twice with length 0",
+                "Alternate left → right → left → right (or the reverse)",
+                "Same direction twice breaks the path — restart length at 1",
+                "Length counts edges, not nodes",
               ],
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
+            { t: "h3", c: "2. State Design" },
+            {
+              t: "ul",
+              c: [
+                "direction: how we arrived ('left' or 'right')",
+                "length: zigzag length so far",
+              ],
+            },
+
+            { t: "h3", c: "3. Decision at each node" },
+            {
+              t: "ol",
+              c: [
+                "Opposite direction → continue with length + 1",
+                "Same direction → reset to 1 (new path starts with this step)",
+              ],
+            },
+
+            { t: "h3", c: "4. LeetCode-Ready Code" },
             {
               t: "code",
               lang: "python",
@@ -2541,43 +2625,47 @@ Return the longest ZigZag path contained in that tree.`,
 
 class Solution:
     def longestZigZag(self, root: Optional[TreeNode]) -> int:
-        ans = 0
+        self.max_len = 0
 
-        def dfs(node, go_left, length):
-            nonlocal ans
-            if node is None:
+        def dfs(node, direction, length):
+            if not node:
                 return
-            ans = max(ans, length)
-            if go_left:
-                dfs(node.left, False, length + 1)
-                dfs(node.right, True, 1)
-            else:
-                dfs(node.right, True, length + 1)
-                dfs(node.left, False, 1)
 
-        dfs(root, True, 0)
-        dfs(root, False, 0)
-        return ans`,
+            self.max_len = max(self.max_len, length)
+
+            if direction == 'left':
+                dfs(node.right, 'right', length + 1)
+                dfs(node.left, 'left', 1)
+            elif direction == 'right':
+                dfs(node.left, 'left', length + 1)
+                dfs(node.right, 'right', 1)
+
+        dfs(root.left, 'left', 1)
+        dfs(root.right, 'right', 1)
+
+        return self.max_len`,
             },
 
-            { t: "h3", c: "4. Dry Run — right → left → right" },
+            { t: "h3", c: "5. Dry Run" },
             {
-              t: "table",
-              head: ["step", "expected", "actual", "length", "ans"],
-              rows: [
-                ["at root", "go right", "has right child", "0 → 1", "1"],
-                ["at right", "go left", "has left child", "1 → 2", "2"],
-                ["at left", "go right", "has right child", "2 → 3", "3"],
-                ["next", "go left", "dead end", "stop", "3"],
-              ],
+              t: "code",
+              lang: "text",
+              c: `        1
+         \\
+          2
+         / \\
+        3   4
+           /
+          5`,
             },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
             {
               t: "ul",
               c: [
-                "Length counts edges, not nodes — start at 0 on the root",
-                "Update ans at every node, not only at path ends",
+                "Start right to 2 with length 1 → max_len = 1",
+                "From 2: flip left to 3 with length 2; same-dir right to 4 with length 1",
+                "At 3: max_len = 2; both children None",
+                "From 4: flip left to 5 with length 2 → max_len stays 2",
+                "Answer: 2",
               ],
             },
 
@@ -2585,8 +2673,8 @@ class Solution:
             {
               t: "ul",
               c: [
-                "Time O(n) — visit every node once",
-                "Space O(h) — call-stack depth",
+                "Time O(N) — DFS over the tree",
+                "Space O(N) — call stack in the worst case (skewed tree)",
               ],
             },
 
