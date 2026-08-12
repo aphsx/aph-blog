@@ -1615,9 +1615,9 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
             {
               t: "ol",
               c: [
-                "**ต้องวิ่งลงข้างล่างเสมอ:** จากโหนดพ่อไปหาลูกหรือหลานเท่านั้น (ห้ามเลี้ยวกลับขึ้นบน)",
-                "**เริ่มตรงไหนก็ได้:** ไม่จำเป็นต้องเริ่มที่รากสุด (Root)",
-                "**จบตรงไหนก็ได้:** ไม่จำเป็นต้องจบที่ใบสุด (Leaf)",
+                "**ต้องวิ่งลงข้างล่างเสมอ:** จากโหนดพ่อไปหาลูกหรือหลานเท่านั้น (ห้ามเลี้ยวกลับขึ้นบน) เพื่อให้ path เป็น “แนวทางลงเท่านั้น”",
+                "**เริ่มตรงไหนก็ได้:** ไม่จำเป็นต้องเริ่มที่รากสุด (Root) ดังนั้นเรานับ path ที่เริ่มจากโหนดกลางๆ ได้ด้วย",
+                "**จบตรงไหนก็ได้:** ไม่จำเป็นต้องจบที่ใบสุด (Leaf) ดังนั้น path ที่จบที่ “node กลางทาง” ก็ต้องนับเช่นกัน",
               ],
             },
 
@@ -1628,7 +1628,7 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
             },
             {
               t: "p",
-              c: "**หลักการทำงานของสมุดบันทึก:** สมการหลักคือ: ยอดในอดีต = ยอดปัจจุบัน - เป้าหมาย",
+              c: "**หลักการทำงานของสมุดบันทึก:** สมการหลักคือ: ยอดในอดีต = ยอดปัจจุบัน - เป้าหมาย\n(เราจะเอา “ยอดในอดีต” ไปค้นใน prefix_map เพื่อบอกว่ามี path กี่เส้นที่ลงท้ายที่ node ปัจจุบัน)",
             },
             {
               t: "p",
@@ -1663,8 +1663,14 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
               t: "code",
               lang: "python",
               label: "ส่วนที่ 1",
-              c: `# สมุดบันทึก: เก็บ {ยอดสะสม: จำนวนครั้งที่เจอ}
-# ต้องใส่ {0: 1} ไว้เสมอ เพื่อจำลอง "จุดเริ่มต้น" ก่อนก้าวแรก
+              c: `# prefix_map คือ Hash Map (สมุดบันทึกของเรา)
+#   key   = prefix sum (ผลรวมสะสมจาก Root มาถึง “node ปัจจุบัน”)
+#   value = จำนวนครั้งที่ prefix sum นั้นเคยเกิดขึ้น “บนเส้นทาง DFS เดียวกัน” (ไม่ใช่ทั้งต้นไม้)
+#
+# {0: 1} แปลว่า “ก่อนจะเริ่มเดิน (ยังไม่แตะ node ใดๆ) เรานับยอดสะสม 0 ไว้ 1 ครั้ง”
+# The Why: ถ้า node ปัจจุบันทำให้ current_sum == targetSum
+#   => old_sum = current_sum - targetSum = 0
+# ดังนั้น prefix_map[0] ต้องมี 1 ไว้เพื่อให้ path ที่เริ่มจาก Root ถูกนับได้ทันที
 prefix_map = {0: 1}
 
 # อย่าลืม: เดินตกขอบ (Base Case) — โหนดนี้ไม่มีอยู่จริง → ไม่มีเส้นทาง
@@ -1674,13 +1680,15 @@ if not node:
             {
               t: "callout",
               title: "ทำไมต้องเขียน (The Why)",
-              c: 'สมมติว่า targetSum = 8 และโหนดแรกสุด (Root) มีค่าเป็น 8 พอดี เมื่อเราเดินมาถึง Root ยอดรวมปัจจุบันคือ 8 สมการคือ old_sum = 8 - 8 = 0 เราจะหันไปค้นในสมุดว่า "มีเลข 0 ไหม?" การใส่ {0: 1} คือการจำลอง "จุดเริ่มต้นก่อนก้าวแรก" ที่เรามีแต้ม 0 ครับ',
+              c: 'เพราะเราต้องนับ path ที่ “เริ่มตั้งแต่ Root” ให้ครบ: ถ้า current_sum เท่ากับ targetSum
+เราจะได้ old_sum = current_sum - targetSum = 0 ทันที
+ดังนั้น prefix_map ต้องมี {0: 1} ตั้งแต่เริ่มต้น เพื่อให้ path ที่เริ่มจาก Root ถูกนับได้เลย (ไม่ใช่รอให้มี node ก่อนหน้า)',
             },
             {
               t: "callout",
               title: "ถ้าไม่เขียน (What If)",
               warn: true,
-              c: "เส้นทางที่บวกกันได้ targetSum พอดีตั้งแต่ Root (เช่น [8], [3, 5]) จะถูกข้ามไปทั้งหมด เพราะหาเลข 0 ในสมุดไม่เจอ",
+              c: "ถ้าไม่ใส่ {0: 1} จะนับ “พลาดทันที”: path ที่เริ่มจาก Root แล้วรวมได้ targetSum จะถูกข้าม เพราะ old_sum จะเป็น 0 แต่ไม่มี 0 ในสมุดให้ดึงนับ",
             },
 
             { t: "h3", c: "ส่วนที่ 2: สมการตามหาเส้นทาง (The Magic Formula)" },
@@ -1747,46 +1755,55 @@ paths += dfs(node.right, current_sum)`,
             { t: "h3", c: "4. Step-by-Step Walkthrough (จำลองการทำงานบนต้นไม้)" },
             {
               t: "p",
-              c: "สมมติ Tree: [10, 5, -3, 3, 2, null, 11] และ targetSum = 8 — ต้นไม้นี้คือตัวอย่างจริงของ LeetCode ที่ตัดกิ่งย่อยออก (ต้นเต็มตอบ 3 เส้น เพราะมีโหนด 1 ต่อท้ายโหนด 2) เพื่อให้เราไล่ดูครบทุกขั้นจนเห็นภาพเต็ม",
+              c: "ไล่ตามโค้ดจริง (DFS แบบซ้ายก่อนขวา) บนตัวอย่าง LeetCode: root=[10,5,-3,3,2,null,11,3,-2,null,1], targetSum=8",
             },
             {
               t: "code",
               lang: "text",
               label: "ต้นไม้ตัวอย่าง",
-              c: `      10
-     /  \\
-    5   -3
-   / \\    \\
-  3   2    11`,
+              c: `        10
+      /    \\
+     5      -3
+   /  \\       \\
+  3    2       11
+ / \\     \\
+3  -2     1`,
             },
             {
               t: "p",
-              c: "**จุดเริ่มต้น:** สมุดบันทึก prefix_map = {0: 1} — ไล่ดูทุกขั้นตอนในตารางนี้ (สัญลักษณ์ 🎉 = เจอเส้นทาง, 🚨 = ถอยหลังลบรอยเท้า)",
+              c: "**จุดเริ่มต้น:** prefix_map = {0: 1}\n(แปลว่า “ก่อนเริ่มเดิน (ยังไม่แตะ node ใดๆ) เรานับยอดสะสม 0 ไว้ 1 ครั้ง” เพื่อให้ path ที่เริ่มจาก Root ถูกนับได้ทันที)",
             },
 
             {
               t: "table",
-              head: ["ขั้น", "โหนด / การกระทำ", "current_sum", "old_sum = current_sum - 8", "เปิดสมุดเจอไหม?", "สมุดหลังขั้นตอน"],
+              head: ["ขั้น", "โหนด / Action", "current_sum", "old_sum = current_sum - 8", "paths_added", "นับว่าเป็น path ไหน", "prefix_map หลังขั้นตอน"],
               rows: [
-                ["①", "ลงซ้าย: โหนด 10 (Root)", "0 + 10 = 10", "10 - 8 = 2", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1}"],
-                ["②", "ลงซ้าย: โหนด 5", "10 + 5 = 15", "15 - 8 = 7", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1, 15: 1}"],
-                ["③", "ลงซ้าย: โหนด 3", "15 + 3 = 18", "18 - 8 = 10", "🎉 เจอ 10 → +1 เส้น (5→3)", "{0: 1, 10: 1, 15: 1, 18: 1}"],
-                ["④", "🚨 ถอยหลัง: ลบรอยเท้าโหนด 3", "ลบ 18", "—", "—", "{0: 1, 10: 1, 15: 1}"],
-                ["⑤", "ลงขวา: โหนด 2", "15 + 2 = 17", "17 - 8 = 9", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1, 15: 1, 17: 1}"],
-                ["⑥", "🚨 ถอยหลัง: ลบรอยเท้าโหนด 2 → โหนด 5", "ลบ 17 → 15", "—", "—", "{0: 1, 10: 1}"],
-                ["⑦", "ลงขวา: โหนด -3", "10 + (-3) = 7", "7 - 8 = -1", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1, 7: 1}"],
-                ["⑧", "ลงขวา: โหนด 11", "7 + 11 = 18", "18 - 8 = 10", "🎉 เจอ 10 → +1 เส้น (-3→11)", "{0: 1, 10: 1, 7: 1, 18: 1}"],
-                ["⑨", "🚨 ถอยหลัง: ลบรอยเท้า 11 → -3 → 10", "ลบ 18 → 7 → 0", "—", "—", "{0: 1}"],
+                ["①", "เข้า node 10 (Root)", "0 + 10 = 10", "10 - 8 = 2", "0", "—", "{0: 1, 10: 1}"],
+                ["②", "เข้า node 5", "10 + 5 = 15", "15 - 8 = 7", "0", "—", "{0: 1, 10: 1, 15: 1}"],
+                ["③", "เข้า node 3 (ซ้ายของ 5)", "15 + 3 = 18", "18 - 8 = 10", "1", "5→3", "{0: 1, 10: 1, 15: 1, 18: 1}"],
+                ["④", "เข้า node 3 (ซ้ายของ 3)", "18 + 3 = 21", "21 - 8 = 13", "0", "—", "{0: 1, 10: 1, 15: 1, 18: 1, 21: 1}"],
+                ["⑤", "🚨 Backtrack: ลบ prefix 21", "ลบ 21", "—", "—", "—", "{0: 1, 10: 1, 15: 1, 18: 1}"],
+                ["⑥", "เข้า node -2 (ขวาของ 3)", "18 + (-2) = 16", "16 - 8 = 8", "0", "—", "{0: 1, 10: 1, 15: 1, 18: 1, 16: 1}"],
+                ["⑦", "🚨 Backtrack: ลบ prefix 16", "ลบ 16", "—", "—", "—", "{0: 1, 10: 1, 15: 1, 18: 1}"],
+                ["⑧", "🚨 Backtrack: ลบ prefix 18 (ออกจาก subtree ของ node 3)", "ลบ 18", "—", "—", "—", "{0: 1, 10: 1, 15: 1}"],
+                ["⑨", "เข้า node 2", "15 + 2 = 17", "17 - 8 = 9", "0", "—", "{0: 1, 10: 1, 15: 1, 17: 1}"],
+                ["⑩", "เข้า node 1 (ขวาของ 2)", "17 + 1 = 18", "18 - 8 = 10", "1", "5→2→1", "{0: 1, 10: 1, 15: 1, 17: 1, 18: 1}"],
+                ["⑪", "🚨 Backtrack: ลบ prefix 18 (ออกจาก subtree ของ node 1)", "ลบ 18", "—", "—", "—", "{0: 1, 10: 1, 15: 1, 17: 1}"],
+                ["⑫", "🚨 Backtrack: ลบ prefix 17 (ออกจาก subtree ของ node 2)", "ลบ 17", "—", "—", "—", "{0: 1, 10: 1, 15: 1}"],
+                ["⑬", "🚨 Backtrack: ลบ prefix 15 (ออกจาก subtree ของ node 5)", "ลบ 15", "—", "—", "—", "{0: 1, 10: 1}"],
+                ["⑭", "เข้า node -3", "10 + (-3) = 7", "7 - 8 = -1", "0", "—", "{0: 1, 10: 1, 7: 1}"],
+                ["⑮", "เข้า node 11", "7 + 11 = 18", "18 - 8 = 10", "1", "-3→11", "{0: 1, 10: 1, 7: 1, 18: 1}"],
+                ["⑯", "🚨 Backtrack: ลบ prefix 18/7/10 จบงาน", "ลบ 18 → 7 → 10", "—", "—", "—", "{0: 1}"],
               ],
             },
             {
               t: "callout",
-              title: "🧠 สรุปการไล่รอบต้นไม้",
-              c: "รวมเส้นทางที่เจอ = 1 (5→3) + 1 (-3→11) = **2 เส้น → คำตอบของต้นไม้นี้คือ 2** (ถ้าเป็นต้นเต็มของ LeetCode จะได้ 3 เพราะมีโหนด 1 ต่อท้ายโหนด 2 เพิ่มอีกเส้นคือ 5→2→1) — สังเกตว่าทั้งสองเส้นทางเปิดสมุดเจอเลข 10 ตัวเดียวกัน (รอยเท้าจาก Root) แต่คนละช่วงบนเส้นทาง = คนละเส้นทาง! และทุกครั้งที่ถอยหลัง สมุดต้องกลับมาสะอาดเสมอ เพื่อไม่ให้กิ่งคู่ขนานเห็นรอยเท้าของกัน",
+              title: "สรุปสิ่งที่ควรจำ",
+              c: "ทุกครั้งที่เราไปถึง node ที่ทำให้ current_sum = 18 (และ targetSum = 8) เราจะได้ old_sum = 10\nดังนั้น prefix_map[10] จะบอกทันทีว่าต้องนับกี่ path\n\nในตัวอย่างนี้ prefix_map[10] = 1 ตลอดเวลาที่เจอ และ node 3 / node 1 / node 11 คือจุดจบของ path สามเส้น:\n- 5→3\n- 5→2→1\n- -3→11",
             },
             {
               t: "p",
-              c: "**วิธีอ่านแถว 🚨:** ช่อง current_sum ในแถวถอยหลังคือเลขที่กำลังถูกลบออกจากสมุด (เช่น ลบ 17 → 15 = ลบรอยเท้าโหนด 2 แล้วลบรอยเท้าโหนด 5) — ตัวแปร current_sum เป็นตัวแปรท้องถิ่นของแต่ละ call ที่ถูกทิ้งไปเองตอนกลับ ส่วนที่ถูกแก้จริงคือสมุดบันทึก prefix_map",
+              c: "**วิธีอ่านแถว 🚨 (Backtracking):** แถวนั้นคือ “เรากำลังถอยกลับ” ดังนั้นสิ่งที่ถูกเปลี่ยนจริงคือ prefix_map — เราลดความถี่ของ prefix_map[current_sum] ลง 1 เพื่อให้กิ่งขวาไม่เห็นประวัติของกิ่งซ้าย",
             },
 
             { t: "h3", c: "5. Clean Code (โค้ดฉบับสมบูรณ์)" },
@@ -1915,9 +1932,9 @@ Count how many downward "paths" have node values that sum exactly to targetSum.`
             {
               t: "ol",
               c: [
-                "Always go downward: parent → child/grandchild only (no climbing back up)",
-                "Start anywhere: does not have to begin at the Root",
-                "End anywhere: does not have to end at a Leaf",
+                "Always go downward: parent → child/grandchild only (no climbing back up) so every counted path is downward-only",
+                "Start anywhere: does not have to begin at the Root, so paths can start from a middle node",
+                "End anywhere: does not have to end at a Leaf, so paths can stop at any node",
               ],
             },
 
@@ -1951,13 +1968,19 @@ Count how many downward "paths" have node values that sum exactly to targetSum.`
             { t: "h3", c: "Part 1: Prepare the notebook & fall off the edge" },
             {
               t: "p",
-              c: "Seed the notebook with {0: 1} so paths that hit the target from the very start are covered.",
+              c: "Seed the notebook with {0: 1} so paths that hit the target from the very start are covered.\n\n{0: 1} means: \"before you visit any node, the prefix sum is 0 once\" — this lets us count paths that start at the Root when current_sum == targetSum.",
             },
             {
               t: "code",
               lang: "python",
               label: "Part 1",
-              c: `# Notebook: key = prefix sum, value = how often we've seen it
+              c: `# prefix_map is a Hash Map (our notebook)
+#   key   = prefix sum (sum from Root to the current node)
+#   value = how many times that prefix sum appeared on the current DFS path
+#
+# {0: 1} means: before visiting any node, we've already logged prefix sum = 0 once.
+# The Why: if at some node current_sum == targetSum, then old_sum = 0
+# and prefix_map[0] must be 1 so we count paths that start from the Root.
 prefix_map = {0: 1}
 
 if not node:
@@ -2066,7 +2089,7 @@ return paths`,
             },
             {
               t: "p",
-              c: "Continue the DFS: node 2 gives 15 + 2 = 17 (look up 9 → miss, then backtrack to erase 17 and 15), the right branch −3 gives 10 − 3 = 7 (look up −1 → miss), and node 11 gives 7 + 11 = 18 → look up 10 → hit! That's the second path (−3→11). Total for this trimmed tree: 2 — the full LeetCode example adds node 1 under node 2, giving the third path 5→2→1.",
+              c: "Continue DFS (left-first) on the same prefix_map state:\n- node 2: current_sum = 17, old_sum = 9 → miss (no new path)\n- node 1: current_sum = 18, old_sum = 10 → hit because prefix_map[10] = 1 => path 5→2→1\nThen backtrack removes 18/17 so the right subtree starts clean:\n- node -3: current_sum = 7, old_sum = -1 → miss\n- node 11: current_sum = 18, old_sum = 10 → hit => path -3→11\nCombine with the earlier hit at the first node 3 => total 3 paths.",
             },
 
             { t: "h3", c: "5. Full Assembled Code (Clean Code)" },
