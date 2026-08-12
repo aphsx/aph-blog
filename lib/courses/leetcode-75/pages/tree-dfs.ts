@@ -1649,7 +1649,7 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
             {
               t: "callout",
               title: "💡 ความมหัศจรรย์ของ Prefix Sum",
-              c: "นี่คือความมหัศจรรย์ของ Prefix Sum! เราสามารถหาคำตอบได้โดยไม่ต้องเดินย้อนกลับไปนับใหม่เลย",
+              c: "นี่คือความมหัศจรรย์ของ Prefix Sum! เราสามารถหาคำตอบได้โดยไม่ต้องเดินย้อนกลับไปนับใหม่เลย — แค่เปิดสมุดถามว่า 'เคยเจอ old_sum ไหม' ถ้าเจอ นั่นคือจุดเริ่มต้นของช่วงที่รวมได้เป้าหมายพอดี และทริกนี้ใช้บนต้นไม้ได้ด้วยการลบรอยเท้า (Backtrack) ตามหัวข้อถัดไป",
             },
 
             { t: "h3", c: "3. Logic-to-Code Mapping (ชำแหละแก่นโค้ดเมื่อมีทางแยก)" },
@@ -1663,7 +1663,13 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
               t: "code",
               lang: "python",
               label: "ส่วนที่ 1",
-              c: `prefix_map = {0: 1}`,
+              c: `# สมุดบันทึก: เก็บ {ยอดสะสม: จำนวนครั้งที่เจอ}
+# ต้องใส่ {0: 1} ไว้เสมอ เพื่อจำลอง "จุดเริ่มต้น" ก่อนก้าวแรก
+prefix_map = {0: 1}
+
+# อย่าลืม: เดินตกขอบ (Base Case) — โหนดนี้ไม่มีอยู่จริง → ไม่มีเส้นทาง
+if not node:
+    return 0`,
             },
             {
               t: "callout",
@@ -1689,7 +1695,13 @@ paths = prefix_map.get(old_sum, 0)`,
             {
               t: "callout",
               title: "ทำไมต้องเขียน (The Why)",
-              c: 'นี่คือการพลิกมุมมองแทนที่จะเอา targetSum ไล่ลบย้อนกลับขึ้นไป เราใช้พีชคณิตจากตัวอย่างด้านบน ถ้ายอดรวม = 15, เป้าหมาย = 8 แสดงว่า X + 8 = 15 ดังนั้นค่าในอดีต X = 15 - 8 = 7 เราแค่เช็คว่ามีเลข 7 ในสมุดไหม',
+              c: 'นี่คือการพลิกมุมมองแทนที่จะเอา targetSum ไล่ลบย้อนกลับขึ้นไป เราใช้พีชคณิตจากตัวอย่างด้านบน ถ้ายอดรวม = 15, เป้าหมาย = 8 แสดงว่า X + 8 = 15 ดังนั้นค่าในอดีต X = 15 - 8 = 7 เราแค่เช็คว่ามีเลข 7 ในสมุดไหม (ตรงกับก้าวที่ 4 ในตารางข้อ 2 พอดี)',
+            },
+            {
+              t: "callout",
+              title: "ถ้าไม่เขียน (What If)",
+              warn: true,
+              c: "พังแน่นอน! ถ้าไม่ใช้สมการนี้แล้วไปเขียนลูปไล่บวกย้อนกลับขึ้นไปหาพ่อ (Brute Force) เพื่อนับเส้นทางทั้งหมด Time Complexity จะพังจาก O(N) กลายเป็น O(N²) ทันที — สมการ magic formula + การเปิดสมุดดูคือเหตุผลที่ทำให้ข้อนี้รอด O(N)",
             },
 
             { t: "h3", c: "ส่วนที่ 3: จดบันทึกแล้วลุยต่อ" },
@@ -1705,6 +1717,12 @@ paths += dfs(node.right, current_sum)`,
               t: "callout",
               title: "ทำไมต้องเขียน (The Why)",
               c: 'เราต้องเอาผลรวมปัจจุบันจดลงสมุด เพื่อให้ "ลูกๆ และหลานๆ" ที่กำลังจะเดินไปสำรวจกิ่งนั้นๆ ต่อ สามารถมองเห็นยอดสะสมนี้ได้',
+            },
+            {
+              t: "callout",
+              title: "ถ้าจดผิดจังหวะ (What If)",
+              warn: true,
+              c: "ถ้าสลับไปจดบันทึก 'หลัง' เดินลงลูกเสร็จ ลูกและหลานจะเปิดสมุดไม่เจอประวัติยอดสะสมของเรา เส้นทางช่วงที่เริ่มต้นจากโหนดนี้ (เช่น 5→3, -3→11) จะถูกนับพลาดทันที — จังหวะที่ถูกต้องคือ จดก่อนลุยต่อเสมอ",
             },
 
             { t: "h3", c: "ส่วนที่ 4: การลบรอยเท้า (Backtracking) — จุดตัดคนผ่าน/ไม่ผ่าน" },
@@ -1729,7 +1747,7 @@ paths += dfs(node.right, current_sum)`,
             { t: "h3", c: "4. Step-by-Step Walkthrough (จำลองการทำงานบนต้นไม้)" },
             {
               t: "p",
-              c: "สมมติ Tree: [10, 5, -3, 3, 2, null, 11] และ targetSum = 8",
+              c: "สมมติ Tree: [10, 5, -3, 3, 2, null, 11] และ targetSum = 8 — ต้นไม้นี้คือตัวอย่างจริงของ LeetCode ที่ตัดกิ่งย่อยออก (ต้นเต็มตอบ 3 เส้น เพราะมีโหนด 1 ต่อท้ายโหนด 2) เพื่อให้เราไล่ดูครบทุกขั้นจนเห็นภาพเต็ม",
             },
             {
               t: "code",
@@ -1743,47 +1761,32 @@ paths += dfs(node.right, current_sum)`,
             },
             {
               t: "p",
-              c: "**จุดเริ่มต้น:** สมุดบันทึก prefix_map = {0: 1}",
+              c: "**จุดเริ่มต้น:** สมุดบันทึก prefix_map = {0: 1} — ไล่ดูทุกขั้นตอนในตารางนี้ (สัญลักษณ์ 🎉 = เจอเส้นทาง, 🚨 = ถอยหลังลบรอยเท้า)",
             },
 
-            { t: "h3", c: "1. โหนด 10 (Root)" },
             {
-              t: "ul",
-              c: [
-                "current_sum = 10",
-                "หา 10 - 8 = 2 ในสมุด (ไม่เจอ → 0 เส้นทาง)",
-                "จด 10 ลงสมุด → {0: 1, 10: 1}",
+              t: "table",
+              head: ["ขั้น", "โหนด / การกระทำ", "current_sum", "old_sum = current_sum - 8", "เปิดสมุดเจอไหม?", "สมุดหลังขั้นตอน"],
+              rows: [
+                ["①", "ลงซ้าย: โหนด 10 (Root)", "0 + 10 = 10", "10 - 8 = 2", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1}"],
+                ["②", "ลงซ้าย: โหนด 5", "10 + 5 = 15", "15 - 8 = 7", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1, 15: 1}"],
+                ["③", "ลงซ้าย: โหนด 3", "15 + 3 = 18", "18 - 8 = 10", "🎉 เจอ 10 → +1 เส้น (5→3)", "{0: 1, 10: 1, 15: 1, 18: 1}"],
+                ["④", "🚨 ถอยหลัง: ลบรอยเท้าโหนด 3", "ลบ 18", "—", "—", "{0: 1, 10: 1, 15: 1}"],
+                ["⑤", "ลงขวา: โหนด 2", "15 + 2 = 17", "17 - 8 = 9", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1, 15: 1, 17: 1}"],
+                ["⑥", "🚨 ถอยหลัง: ลบรอยเท้าโหนด 2 → โหนด 5", "ลบ 17 → 15", "—", "—", "{0: 1, 10: 1}"],
+                ["⑦", "ลงขวา: โหนด -3", "10 + (-3) = 7", "7 - 8 = -1", "ไม่เจอ → 0 เส้น", "{0: 1, 10: 1, 7: 1}"],
+                ["⑧", "ลงขวา: โหนด 11", "7 + 11 = 18", "18 - 8 = 10", "🎉 เจอ 10 → +1 เส้น (-3→11)", "{0: 1, 10: 1, 7: 1, 18: 1}"],
+                ["⑨", "🚨 ถอยหลัง: ลบรอยเท้า 11 → -3 → 10", "ลบ 18 → 7 → 0", "—", "—", "{0: 1}"],
               ],
             },
-
-            { t: "h3", c: "2. เดินลงซ้าย โหนด 5" },
             {
-              t: "ul",
-              c: [
-                "current_sum = 10 + 5 = 15",
-                "หา 15 - 8 = 7 ในสมุด (ไม่เจอ → 0 เส้นทาง)",
-                "จด 15 ลงสมุด → {0: 1, 10: 1, 15: 1}",
-              ],
+              t: "callout",
+              title: "🧠 สรุปการไล่รอบต้นไม้",
+              c: "รวมเส้นทางที่เจอ = 1 (5→3) + 1 (-3→11) = **2 เส้น → คำตอบของต้นไม้นี้คือ 2** (ถ้าเป็นต้นเต็มของ LeetCode จะได้ 3 เพราะมีโหนด 1 ต่อท้ายโหนด 2 เพิ่มอีกเส้นคือ 5→2→1) — สังเกตว่าทั้งสองเส้นทางเปิดสมุดเจอเลข 10 ตัวเดียวกัน (รอยเท้าจาก Root) แต่คนละช่วงบนเส้นทาง = คนละเส้นทาง! และทุกครั้งที่ถอยหลัง สมุดต้องกลับมาสะอาดเสมอ เพื่อไม่ให้กิ่งคู่ขนานเห็นรอยเท้าของกัน",
             },
-
-            { t: "h3", c: "3. เดินลงซ้ายสุด โหนด 3" },
             {
-              t: "ul",
-              c: [
-                "current_sum = 15 + 3 = 18",
-                "หา 18 - 8 = 10 ในสมุด **(เจอเลข 10 อยู่ 1 ครั้ง!)** → ได้มา 1 เส้นทาง! (จากโหนด 5 → 3)",
-                "จด 18 ลงสมุด → {0: 1, 10: 1, 15: 1, 18: 1}",
-              ],
-            },
-
-            { t: "h3", c: "4. 🚨 ถอยหลัง (Backtrack)" },
-            {
-              t: "ul",
-              c: [
-                "โหนด 3 ไม่มีลูกแล้ว ฟังก์ชันจะถอยหลังกลับไปหาโหนด 5",
-                "ระบบจะเรียกลบรอยเท้า: prefix_map[18] -= 1",
-                'สมุดจะกลับมาเป็น {0: 1, 10: 1, 15: 1} เพื่อให้โหนด 5 พร้อมส่งสมุดที่ "สะอาด" ไม่มีข้อมูลของกิ่งซ้าย ไปให้ลูกกิ่งขวา (โหนด 2) ต่อไป',
-              ],
+              t: "p",
+              c: "**วิธีอ่านแถว 🚨:** ช่อง current_sum ในแถวถอยหลังคือเลขที่กำลังถูกลบออกจากสมุด (เช่น ลบ 17 → 15 = ลบรอยเท้าโหนด 2 แล้วลบรอยเท้าโหนด 5) — ตัวแปร current_sum เป็นตัวแปรท้องถิ่นของแต่ละ call ที่ถูกทิ้งไปเองตอนกลับ ส่วนที่ถูกแก้จริงคือสมุดบันทึก prefix_map",
             },
 
             { t: "h3", c: "5. Clean Code (โค้ดฉบับสมบูรณ์)" },
@@ -1800,34 +1803,46 @@ paths += dfs(node.right, current_sum)`,
 
 class Solution:
     def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
-        
-        # สมุดบันทึก: {ยอดสะสม: จำนวนครั้งที่เจอ}
+        # Prefix-map = "สมุดบันทึกยอดสะสม" บนเส้นทางจาก Root → ปัจจุบัน (เส้นทางเดียวกันเท่านั้น)
+        # key   = prefix_sum
+        # value = จำนวนครั้งที่ prefix_sum นี้เคยเกิดบนเส้นทางเดียวกันนั้น
+        #
+        # The Why: ใส่ {0: 1} เพื่อรองรับกรณีที่เส้นทางเริ่มจาก Root แล้วรวมได้พอดี
+        # (ถ้า current_sum == targetSum จะได้ old_sum = 0 และ prefix_map[0] = 1 ทำให้เรานับ path ถูก)
         prefix_map = {0: 1}
-        
+
         def dfs(node, current_sum):
-            # 1. เดินตกขอบ (Base Case)
+            # Base Case: เดินตกขอบ => ไม่มี path เพิ่ม
             if not node:
                 return 0
-            
-            # 2. อัปเดตยอดสะสมปัจจุบัน
+
+            # 1) อัปเดตยอดสะสมปัจจุบัน
             current_sum += node.val
-            
-            # 3. ตามหาเส้นทางจากสมุดบันทึก (The Magic Formula)
+
+            # 2) Magic Formula:
+            # เราต้องหายอดในอดีต (old_sum) ที่ทำให้:
+            # old_sum → current_sum  รวมกันได้ targetSum
+            # current_sum - old_sum = targetSum
+            # => old_sum = current_sum - targetSum
             old_sum = current_sum - targetSum
+
+            # 3) ถ้า old_sum เคยเกิด k ครั้งบนเส้นทางนี้ => มี path ที่จบที่ node นี้เท่ากับ k
             paths = prefix_map.get(old_sum, 0)
-            
-            # 4. จดบันทึกยอดปัจจุบันลงสมุด (ก่อนลงไปหาลูก)
+
+            # 4) Log ลงสมุดก่อนลงลูก (สำคัญ!)
+            # The Why: ให้ลูกๆ เห็น prefix_map ของ "เส้นทางปัจจุบัน" ระหว่าง DFS
             prefix_map[current_sum] = prefix_map.get(current_sum, 0) + 1
-            
-            # 5. ลุยต่อซ้าย-ขวา และเอาจำนวนเส้นทางมาบวกทบกัน
+
+            # 5) รวมผลจากซ้ายและขวา
             paths += dfs(node.left, current_sum)
             paths += dfs(node.right, current_sum)
-            
-            # 6. Backtracking: ลบรอยเท้าทิ้งเมื่อกำลังจะถอยหลังกลับขึ้นบน
+
+            # 6) Backtracking: ลบยอดสะสมนี้ทิ้งเมื่อกำลังจะถอยกลับขึ้นไป
+            # The Why: กันไม่ให้กิ่งขวาเห็น prefix_sum ของกิ่งซ้าย (ซึ่งจะนับ path ข้ามกิ่งผิดโจทย์)
             prefix_map[current_sum] -= 1
-            
+
             return paths
-            
+
         return dfs(root, 0)`,
             },
 
@@ -2051,7 +2066,7 @@ return paths`,
             },
             {
               t: "p",
-              c: "Continue through the rest of the tree to find the other paths (e.g. -3→11 and 5→2→1 in the full example) — total 3.",
+              c: "Continue the DFS: node 2 gives 15 + 2 = 17 (look up 9 → miss, then backtrack to erase 17 and 15), the right branch −3 gives 10 − 3 = 7 (look up −1 → miss), and node 11 gives 7 + 11 = 18 → look up 10 → hit! That's the second path (−3→11). Total for this trimmed tree: 2 — the full LeetCode example adds node 1 under node 2, giving the third path 5→2→1.",
             },
 
             { t: "h3", c: "5. Full Assembled Code (Clean Code)" },
@@ -2072,29 +2087,42 @@ return paths`,
 
 class Solution:
     def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
-
-        # Prefix Sum notebook
+        # Prefix-map = "notebook of prefix sums" on the current root → node path.
+        # key   = prefix_sum
+        # value = how many times we've seen that prefix_sum on THIS exact path.
+        #
+        # The Why: initialize with {0: 1}
+        # If current_sum == targetSum, then old_sum = 0 and we count the path starting from Root.
         prefix_map = {0: 1}
 
         def dfs(node, current_sum):
+            # Base Case: no node => no additional paths
             if not node:
                 return 0
 
-            # 1. Add this node's points
+            # 1) Update the current prefix sum
             current_sum += node.val
 
-            # 2. Have we seen (current − target) before?
+            # 2) Magic Formula:
+            # old_sum -> current_sum must add up to targetSum:
+            # current_sum - old_sum = targetSum
+            # => old_sum = current_sum - targetSum
             old_sum = current_sum - targetSum
+
+            # 3) If old_sum appeared k times on this path,
+            # then there are k valid paths ending at this node.
             paths = prefix_map.get(old_sum, 0)
 
-            # 3. Log the current sum (+1 frequency)
+            # 4) Log before going down
+            # The Why: children need to see the prefix sums of the current path.
             prefix_map[current_sum] = prefix_map.get(current_sum, 0) + 1
 
-            # 4. Explore left & right; accumulate path counts
+            # 5) Explore both children and accumulate
             paths += dfs(node.left, current_sum)
             paths += dfs(node.right, current_sum)
 
-            # 5. Backtracking: erase this node's footprint
+            # 6) Backtracking: erase footprint when climbing up
+            # The Why: prevent sibling branches from polluting each other (invalid cross-branch paths).
             prefix_map[current_sum] -= 1
 
             return paths
