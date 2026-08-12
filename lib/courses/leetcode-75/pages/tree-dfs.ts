@@ -1558,8 +1558,8 @@ class Solution:
       en: "LC437 Path Sum III 🟡",
     },
     lead: {
-      th: "เดินป่าพกสมุดบันทึกยอดสะสม (Prefix Sum + Hash Map) — นับช่วงที่ได้เป้า พร้อมลบรอยเท้าตอนถอยขึ้น (Backtracking)",
-      en: "Hike with a prefix-sum notebook (Hash Map) — count path ranges that hit the target, and erase your footprint when you climb back (Backtracking).",
+      th: "Pattern Recognition → Prefix Sum + Hash Map + Backtracking — นับช่วงที่ได้เป้า แล้วลบรอยเท้าตอนถอยขึ้น",
+      en: "Pattern Recognition → Prefix Sum + Hash Map + Backtracking — count ranges that hit the target, then erase footprints when you climb back.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -1599,214 +1599,220 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
           c: [
             {
               t: "p",
-              c: 'ข้อนี้ถือเป็นข้อปราบเซียนข้อหนึ่ง — ต่อยอดจาก Path Sum ธรรมดาตรงที่ "เส้นทางจะเริ่มหรือจบตรงไหนก็ได้" เราจะใช้ DFS พร้อม **สมุดบันทึก Prefix Sum** และ **Backtracking**',
+              c: "ข้อนี้ถือเป็นข้อปราบเซียน — ต่อยอดจาก Path Sum ธรรมดาตรงที่เส้นทางเริ่มหรือจบตรงไหนก็ได้ เราจะไล่จาก Pattern Recognition → เครื่องมือ → พีชคณิตย้อนอดีต → ชำแหละโค้ดทีละบรรทัด → จำลองบนต้นไม้ → โค้ดส่งจริง",
             },
 
-            { t: "h3", c: "1. Problem Decoding (แปลโจทย์ภาษาคน)" },
+            { t: "h3", c: "1. Pattern Recognition (วิธีมองโจทย์ให้ออก)" },
             {
               t: "p",
-              c: `เรามีแผนผังต้นไม้ (Binary Tree) ที่แต่ละโหนดมีตัวเลข และมีเป้าหมายคือตัวเลข targetSum
-โจทย์ต้องการให้เราหาว่ามี "เส้นทาง (Path)" ทั้งหมดกี่เส้นที่ตัวเลขในโหนดบวกกันแล้วได้เท่ากับ targetSum พอดี`,
-            },
-            {
-              t: "p",
-              c: "**กฎเหล็ก 3 ข้อของการเดิน:**",
+              c: "เมื่อเจอโจทย์ที่มีลักษณะดังนี้:",
             },
             {
               t: "ol",
               c: [
-                "**ต้องวิ่งลงข้างล่างเสมอ:** จากโหนดพ่อไปหาลูกหรือหลานเท่านั้น (ห้ามเลี้ยวกลับขึ้นบน) เพื่อให้ path เป็น “แนวทางลงเท่านั้น”",
-                "**เริ่มตรงไหนก็ได้:** ไม่จำเป็นต้องเริ่มที่รากสุด (Root) ดังนั้นเรานับ path ที่เริ่มจากโหนดกลางๆ ได้ด้วย",
-                "**จบตรงไหนก็ได้:** ไม่จำเป็นต้องจบที่ใบสุด (Leaf) ดังนั้น path ที่จบที่ “node กลางทาง” ก็ต้องนับเช่นกัน",
+                "ข้อมูลเป็น Binary Tree",
+                "ต้องการหาจำนวนช่วงหรือเส้นทางที่ผลรวมเท่ากับเป้าหมาย (targetSum)",
+                "กฎการเดิน: เริ่มตรงไหนก็ได้ · จบตรงไหนก็ได้ · ต้องวิ่งลงข้างล่างเสมอ (จากพ่อไปลูก/หลานเท่านั้น ห้ามเลี้ยวกลับขึ้นบน)",
               ],
             },
+            {
+              t: "callout",
+              title: "💡 การเลือกเทคนิคแก้ปัญหา",
+              c: "Brute Force (DFS ซ้อน DFS): ยืนที่ทุกโหนดแล้วไล่บวกย้อนขึ้นไป → Time O(N²) · ช้า\nPrefix Sum + Hash Map + Backtracking: จำยอดสะสมในอดีตขณะเดินลงไป → Time O(N) · เร็วที่สุด",
+            },
 
-            { t: "h3", c: "2. Mental Model (สร้างภาพจำ & ความลับของสมุดบันทึก)" },
+            { t: "h3", c: "2. เครื่องมือที่เลือกใช้ & Hash Map (prefix_map)" },
             {
-              t: "p",
-              c: 'ให้มองว่าคุณคือ "นักปีนเขาเก็บแต้ม" ที่เดินลงเขาไปเรื่อยๆ การจะมานั่งนับแต้มใหม่ทุกครั้งจากทุกๆ จุดเริ่มต้น มันเหนื่อยและเสียเวลา (Brute Force) เราจึงใช้เทคนิค **"สมุดบันทึกยอดสะสม (Prefix Sum Notebook)"** เข้ามาช่วย',
+              t: "ul",
+              c: [
+                "DFS (Depth-First Search) — เดินท่องลงไปตามกิ่งก้านของต้นไม้",
+                "Hash Map / Dictionary (prefix_map) — สมุดบันทึกย้อนอดีต เก็บบันทึกยอดสะสม ค้นหาได้ใน O(1)",
+                "Backtracking — ลบรอยเท้าเมื่อถอยออกจากกิ่ง เพื่อไม่ให้ข้อมูลข้ามกิ่งมาปนกัน",
+              ],
             },
             {
               t: "p",
-              c: "**หลักการทำงานของสมุดบันทึก:** สมการหลักคือ: ยอดในอดีต = ยอดปัจจุบัน - เป้าหมาย\n(เราจะเอา “ยอดในอดีต” ไปค้นใน prefix_map เพื่อบอกว่ามี path กี่เส้นที่ลงท้ายที่ node ปัจจุบัน)",
+              c: "ใน Python สร้าง Hash Map ด้วย Dictionary:",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "ตั้งต้นสมุดบันทึก",
+              c: `prefix_map = {0: 1}`,
+            },
+            {
+              t: "ul",
+              c: [
+                "Key = ยอดสะสม (Prefix Sum) นับตั้งแต่ Root ยาวมาถึงโหนดปัจจุบัน",
+                "Value = จำนวนครั้งที่เคยเกิด Key นั้นขึ้น บนเส้นทาง DFS เดียวกัน (ไม่ใช่ทั้งต้นไม้)",
+              ],
+            },
+            {
+              t: "callout",
+              title: "ทำไมต้องเริ่มด้วย {0: 1}?",
+              c: "ก่อนแตะโหนดแรก ถือว่ามียอดสะสม 0 สแตนด์บายอยู่แล้ว 1 ครั้ง — สมมติ current_sum = 8 และ targetSum = 8 จะได้ old_sum = 8 − 8 = 0 เปิดสมุดเจอ Key 0 มีค่า 1 → พบ 1 เส้นทางที่เริ่มนับตั้งแต่ Root ยาวมาถึงจุดนี้พอดี ถ้าไม่มี {0: 1} เส้นทางที่เริ่มจาก Root จะถูกมองข้ามทันที",
+            },
+
+            { t: "h3", c: "3. Mental Model: พีชคณิตย้อนอดีต (Prefix Sum Magic)" },
+            {
+              t: "p",
+              c: "แทนที่จะยืนที่โหนดปัจจุบันแล้วไล่บวกย้อนขึ้นไป ใช้อสมการนี้ช่วย:",
+            },
+            {
+              t: "code",
+              lang: "text",
+              label: "สูตรหลัก",
+              c: `old_sum = current_sum - targetSum
+
+[ Root ] ──( old_sum )──> [ จุดเริ่มต้นช่วง ] ──( targetSum )──> [ โหนดปัจจุบัน ]`,
             },
             {
               t: "p",
-              c: `เพื่อให้เห็นภาพชัดที่สุด **สมมติว่าเราเดินเป็นเส้นตรงก่อน** (ยังไม่มีทางแยกซ้ายขวา)
-สมมติแต้มตามรายทางคือ: [3, 4, 1, 7, -2] และเป้าหมาย targetSum = 8`,
+              c: "ตัวอย่างบนเส้นตรง: [3, 4, 1, 7, -2] เมื่อ targetSum = 8",
             },
             {
               t: "table",
-              head: ["ก้าว", "แต้มปัจจุบัน", "หาอดีต (ปัจจุบัน - 8)", "ผลลัพธ์", "สมุดบันทึก prefix_map"],
+              head: ["ก้าว", "แต้ม", "current_sum", "old_sum = current − 8", "ผลลัพธ์", "prefix_map"],
               rows: [
-                ["จุดเริ่มต้น", "0", "—", "—", "{0: 1} (เลข 0 มี 1 ครั้ง)"],
-                ["ก้าวที่ 1 (แต้ม 3)", "0 + 3 = 3", "3 - 8 = -5", "ไม่เจอ", "{0: 1, 3: 1}"],
-                ["ก้าวที่ 2 (แต้ม 4)", "3 + 4 = 7", "7 - 8 = -1", "ไม่เจอ", "{0: 1, 3: 1, 7: 1}"],
-                ["ก้าวที่ 3 (แต้ม 1)", "7 + 1 = 8", "8 - 8 = 0", "เจอ 1 ครั้ง! 🎉 → ช่วง [3, 4, 1] รวมได้ 8 พอดี", "{0: 1, 3: 1, 7: 1, 8: 1}"],
-                ["ก้าวที่ 4 (แต้ม 7)", "8 + 7 = 15", "15 - 8 = 7", "เจอ 1 ครั้ง! 🎉 → ช่วง [1, 7] รวมได้ 8 พอดี", "{0: 1, 3: 1, 7: 1, 8: 1, 15: 1}"],
+                ["เริ่มต้น", "—", "0", "—", "—", "{0: 1}"],
+                ["1", "3", "3", "3 − 8 = −5", "ไม่เจอ", "{0: 1, 3: 1}"],
+                ["2", "4", "7", "7 − 8 = −1", "ไม่เจอ", "{0: 1, 3: 1, 7: 1}"],
+                ["3", "1", "8", "8 − 8 = 0", "เจอ 1 ครั้ง! → ช่วง [3, 4, 1]", "{0: 1, 3: 1, 7: 1, 8: 1}"],
+                ["4", "7", "15", "15 − 8 = 7", "เจอ 1 ครั้ง! → ช่วง [1, 7]", "{0: 1, 3: 1, 7: 1, 8: 1, 15: 1}"],
               ],
             },
             {
               t: "callout",
               title: "💡 ความมหัศจรรย์ของ Prefix Sum",
-              c: "นี่คือความมหัศจรรย์ของ Prefix Sum! เราสามารถหาคำตอบได้โดยไม่ต้องเดินย้อนกลับไปนับใหม่เลย — แค่เปิดสมุดถามว่า 'เคยเจอ old_sum ไหม' ถ้าเจอ นั่นคือจุดเริ่มต้นของช่วงที่รวมได้เป้าหมายพอดี และทริกนี้ใช้บนต้นไม้ได้ด้วยการลบรอยเท้า (Backtrack) ตามหัวข้อถัดไป",
+              c: "หาคำตอบได้โดยไม่ต้องเดินย้อนกลับไปนับใหม่ — แค่เปิดสมุดถามว่าเคยเจอ old_sum ไหม ถ้าเจอ นั่นคือจุดเริ่มต้นของช่วงที่รวมได้เป้าหมายพอดี",
             },
 
-            { t: "h3", c: "3. Logic-to-Code Mapping (ชำแหละแก่นโค้ดเมื่อมีทางแยก)" },
-            {
-              t: "p",
-              c: 'พอเป็นต้นไม้ (Tree) มันจะมีทางแยกซ้าย-ขวา นี่คือหัวใจของโค้ด 4 ส่วนพร้อมเหตุผลว่า "ทำไมถึงเขียนแบบนี้?"',
-            },
+            { t: "h3", c: "4. ชำแหละไวยากรณ์และตรรกะโค้ด (Line-by-Line)" },
 
-            { t: "h3", c: "ส่วนที่ 1: การตั้งค่าเริ่มต้นของสมุดบันทึก" },
+            { t: "h3", c: "ส่วนที่ 1: Base Case + สะสมยอด" },
             {
               t: "code",
               lang: "python",
               label: "ส่วนที่ 1",
-              c: `# prefix_map คือ Hash Map (สมุดบันทึกของเรา)
-#   key   = prefix sum (ผลรวมสะสมจาก Root มาถึง “node ปัจจุบัน”)
-#   value = จำนวนครั้งที่ prefix sum นั้นเคยเกิดขึ้น “บนเส้นทาง DFS เดียวกัน” (ไม่ใช่ทั้งต้นไม้)
-#
-# {0: 1} แปลว่า “ก่อนจะเริ่มเดิน (ยังไม่แตะ node ใดๆ) เรานับยอดสะสม 0 ไว้ 1 ครั้ง”
-# The Why: ถ้า node ปัจจุบันทำให้ current_sum == targetSum
-#   => old_sum = current_sum - targetSum = 0
-# ดังนั้น prefix_map[0] ต้องมี 1 ไว้เพื่อให้ path ที่เริ่มจาก Root ถูกนับได้ทันที
-prefix_map = {0: 1}
+              c: `prefix_map = {0: 1}
 
-# อย่าลืม: เดินตกขอบ (Base Case) — โหนดนี้ไม่มีอยู่จริง → ไม่มีเส้นทาง
-if not node:
-    return 0`,
+def dfs(node, current_sum):
+    if not node:
+        return 0
+
+    current_sum += node.val
+    old_sum = current_sum - targetSum`,
             },
             {
-              t: "callout",
-              title: "ทำไมต้องเขียน (The Why)",
-              c: 'เพราะเราต้องนับ path ที่ “เริ่มตั้งแต่ Root” ให้ครบ: ถ้า current_sum เท่ากับ targetSum
-เราจะได้ old_sum = current_sum - targetSum = 0 ทันที
-ดังนั้น prefix_map ต้องมี {0: 1} ตั้งแต่เริ่มต้น เพื่อให้ path ที่เริ่มจาก Root ถูกนับได้เลย (ไม่ใช่รอให้มี node ก่อนหน้า)',
-            },
-            {
-              t: "callout",
-              title: "ถ้าไม่เขียน (What If)",
-              warn: true,
-              c: "ถ้าไม่ใส่ {0: 1} จะนับ “พลาดทันที”: path ที่เริ่มจาก Root แล้วรวมได้ targetSum จะถูกข้าม เพราะ old_sum จะเป็น 0 แต่ไม่มี 0 ในสมุดให้ดึงนับ",
+              t: "ul",
+              c: [
+                "if not node: return 0 — ตกขอบต้นไม้ (เจอ None) คืนค่า 0 เส้นทาง",
+                "current_sum += node.val — บวกค่าโหนดปัจจุบันเข้ายอดสะสม",
+                "old_sum = current_sum − targetSum — หายอดในอดีตที่ทำให้ช่วงอดีต→ปัจจุบันรวมได้ targetSum พอดี",
+              ],
             },
 
-            { t: "h3", c: "ส่วนที่ 2: สมการตามหาเส้นทาง (The Magic Formula)" },
+            { t: "h3", c: "ส่วนที่ 2: เปิดสมุดด้วย .get()" },
             {
               t: "code",
               lang: "python",
               label: "ส่วนที่ 2",
-              c: `current_sum += node.val
-old_sum = current_sum - targetSum
-paths = prefix_map.get(old_sum, 0)`,
+              c: `paths = prefix_map.get(old_sum, 0)`,
             },
             {
               t: "callout",
-              title: "ทำไมต้องเขียน (The Why)",
-              c: 'นี่คือการพลิกมุมมองแทนที่จะเอา targetSum ไล่ลบย้อนกลับขึ้นไป เราใช้พีชคณิตจากตัวอย่างด้านบน ถ้ายอดรวม = 15, เป้าหมาย = 8 แสดงว่า X + 8 = 15 ดังนั้นค่าในอดีต X = 15 - 8 = 7 เราแค่เช็คว่ามีเลข 7 ในสมุดไหม (ตรงกับก้าวที่ 4 ในตารางข้อ 2 พอดี)',
-            },
-            {
-              t: "callout",
-              title: "ถ้าไม่เขียน (What If)",
-              warn: true,
-              c: "พังแน่นอน! ถ้าไม่ใช้สมการนี้แล้วไปเขียนลูปไล่บวกย้อนกลับขึ้นไปหาพ่อ (Brute Force) เพื่อนับเส้นทางทั้งหมด Time Complexity จะพังจาก O(N) กลายเป็น O(N²) ทันที — สมการ magic formula + การเปิดสมุดดูคือเหตุผลที่ทำให้ข้อนี้รอด O(N)",
+              title: "ชำแหละ .get(key, default)",
+              c: "prefix_map.get(old_sum, 0) แปลว่า: เปิดดูว่ามี Key ชื่อ old_sum ไหม? ถ้ามี คืน Value (จำนวนครั้งที่เคยเกิด) · ถ้าไม่มี คืน 0 โดยไม่เกิด KeyError\n\nตรรกะ: ถ้าเคยเกิด old_sum ขึ้น k ครั้ง แสดงว่ามียอดรวมเท่ากับ targetSum สิ้นสุดที่โหนดปัจจุบันจำนวน k เส้นทาง",
             },
 
-            { t: "h3", c: "ส่วนที่ 3: จดบันทึกแล้วลุยต่อ" },
+            { t: "h3", c: "ส่วนที่ 3: จดบันทึกก่อนลงลูก" },
             {
               t: "code",
               lang: "python",
               label: "ส่วนที่ 3",
               c: `prefix_map[current_sum] = prefix_map.get(current_sum, 0) + 1
+
 paths += dfs(node.left, current_sum)
 paths += dfs(node.right, current_sum)`,
             },
             {
-              t: "callout",
-              title: "ทำไมต้องเขียน (The Why)",
-              c: 'เราต้องเอาผลรวมปัจจุบันจดลงสมุด เพื่อให้ "ลูกๆ และหลานๆ" ที่กำลังจะเดินไปสำรวจกิ่งนั้นๆ ต่อ สามารถมองเห็นยอดสะสมนี้ได้',
-            },
-            {
-              t: "callout",
-              title: "ถ้าจดผิดจังหวะ (What If)",
-              warn: true,
-              c: "ถ้าสลับไปจดบันทึก 'หลัง' เดินลงลูกเสร็จ ลูกและหลานจะเปิดสมุดไม่เจอประวัติยอดสะสมของเรา เส้นทางช่วงที่เริ่มต้นจากโหนดนี้ (เช่น 5→3, -3→11) จะถูกนับพลาดทันที — จังหวะที่ถูกต้องคือ จดก่อนลุยต่อเสมอ",
-            },
-
-            { t: "h3", c: "ส่วนที่ 4: การลบรอยเท้า (Backtracking) — จุดตัดคนผ่าน/ไม่ผ่าน" },
-            {
-              t: "code",
-              lang: "python",
-              label: "ส่วนที่ 4",
-              c: `prefix_map[current_sum] -= 1`,
-            },
-            {
-              t: "callout",
-              title: "ทำไมต้องเขียน (The Why)",
-              c: 'บรรทัดนี้จะทำงานเมื่อเราสำรวจสุดทางและ "กำลังจะถอยหลังกลับขึ้นไปหาพ่อ" เพื่อเปลี่ยนไปเดินกิ่งอื่น เราต้องหักลบยอดสะสมของกิ่งนี้ออกจากสมุด เพื่อบอกว่า "ฉันเดินออกจากเส้นทางนี้แล้วนะ"',
-            },
-            {
-              t: "callout",
-              title: "ถ้าไม่เขียน (What If)",
-              warn: true,
-              c: 'พังพินาศครับ! กิ่งทางซ้ายกับกิ่งทางขวาคือ "เส้นทางคู่ขนาน" ถ้าคุณไม่ลบรอยเท้าของกิ่งซ้ายทิ้ง พอกระโดดไปกิ่งขวา กิ่งขวาจะเห็นสมุดที่จดข้อมูลของกิ่งซ้ายไว้ และเอามาคำนวณเชื่อมกัน ซึ่งแหกกฎโจทย์ที่ว่า "ต้องวิ่งลงข้างล่างเสมอ" ครับ',
-            },
-
-            { t: "h3", c: "4. Step-by-Step Walkthrough (จำลองการทำงานบนต้นไม้)" },
-            {
-              t: "p",
-              c: "ไล่ตามโค้ดจริง (DFS แบบซ้ายก่อนขวา) บนตัวอย่าง LeetCode: root=[10,5,-3,3,2,null,11,3,-2,null,1], targetSum=8",
-            },
-            {
-              t: "code",
-              lang: "text",
-              label: "ต้นไม้ตัวอย่าง",
-              c: `        10
-      /    \\
-     5      -3
-   /  \\       \\
-  3    2       11
- / \\     \\
-3  -2     1`,
-            },
-            {
-              t: "p",
-              c: "**จุดเริ่มต้น:** prefix_map = {0: 1}\n(แปลว่า “ก่อนเริ่มเดิน (ยังไม่แตะ node ใดๆ) เรานับยอดสะสม 0 ไว้ 1 ครั้ง” เพื่อให้ path ที่เริ่มจาก Root ถูกนับได้ทันที)",
-            },
-
-            {
-              t: "table",
-              head: ["ขั้น", "โหนด / Action", "current_sum", "old_sum = current_sum - 8", "paths_added", "นับว่าเป็น path ไหน", "prefix_map หลังขั้นตอน"],
-              rows: [
-                ["①", "เข้า node 10 (Root)", "0 + 10 = 10", "10 - 8 = 2", "0", "—", "{0: 1, 10: 1}"],
-                ["②", "เข้า node 5", "10 + 5 = 15", "15 - 8 = 7", "0", "—", "{0: 1, 10: 1, 15: 1}"],
-                ["③", "เข้า node 3 (ซ้ายของ 5)", "15 + 3 = 18", "18 - 8 = 10", "1", "5→3", "{0: 1, 10: 1, 15: 1, 18: 1}"],
-                ["④", "เข้า node 3 (ซ้ายของ 3)", "18 + 3 = 21", "21 - 8 = 13", "0", "—", "{0: 1, 10: 1, 15: 1, 18: 1, 21: 1}"],
-                ["⑤", "🚨 Backtrack: ลบ prefix 21", "ลบ 21", "—", "—", "—", "{0: 1, 10: 1, 15: 1, 18: 1}"],
-                ["⑥", "เข้า node -2 (ขวาของ 3)", "18 + (-2) = 16", "16 - 8 = 8", "0", "—", "{0: 1, 10: 1, 15: 1, 18: 1, 16: 1}"],
-                ["⑦", "🚨 Backtrack: ลบ prefix 16", "ลบ 16", "—", "—", "—", "{0: 1, 10: 1, 15: 1, 18: 1}"],
-                ["⑧", "🚨 Backtrack: ลบ prefix 18 (ออกจาก subtree ของ node 3)", "ลบ 18", "—", "—", "—", "{0: 1, 10: 1, 15: 1}"],
-                ["⑨", "เข้า node 2", "15 + 2 = 17", "17 - 8 = 9", "0", "—", "{0: 1, 10: 1, 15: 1, 17: 1}"],
-                ["⑩", "เข้า node 1 (ขวาของ 2)", "17 + 1 = 18", "18 - 8 = 10", "1", "5→2→1", "{0: 1, 10: 1, 15: 1, 17: 1, 18: 1}"],
-                ["⑪", "🚨 Backtrack: ลบ prefix 18 (ออกจาก subtree ของ node 1)", "ลบ 18", "—", "—", "—", "{0: 1, 10: 1, 15: 1, 17: 1}"],
-                ["⑫", "🚨 Backtrack: ลบ prefix 17 (ออกจาก subtree ของ node 2)", "ลบ 17", "—", "—", "—", "{0: 1, 10: 1, 15: 1}"],
-                ["⑬", "🚨 Backtrack: ลบ prefix 15 (ออกจาก subtree ของ node 5)", "ลบ 15", "—", "—", "—", "{0: 1, 10: 1}"],
-                ["⑭", "เข้า node -3", "10 + (-3) = 7", "7 - 8 = -1", "0", "—", "{0: 1, 10: 1, 7: 1}"],
-                ["⑮", "เข้า node 11", "7 + 11 = 18", "18 - 8 = 10", "1", "-3→11", "{0: 1, 10: 1, 7: 1, 18: 1}"],
-                ["⑯", "🚨 Backtrack: ลบ prefix 18/7/10 จบงาน", "ลบ 18 → 7 → 10", "—", "—", "—", "{0: 1}"],
+              t: "ol",
+              c: [
+                "prefix_map.get(current_sum, 0) — เช็คว่ายอดนี้เคยจดกี่ครั้ง ยังไม่เคยได้ 0",
+                "+ 1 — บวกเพิ่มเพราะเพิ่งเดินมาถึงโหนดนี้",
+                "prefix_map[current_sum] = ... — บันทึกอัปเดตกลับลง Dictionary",
               ],
             },
             {
               t: "callout",
-              title: "สรุปสิ่งที่ควรจำ",
-              c: "ทุกครั้งที่เราไปถึง node ที่ทำให้ current_sum = 18 (และ targetSum = 8) เราจะได้ old_sum = 10\nดังนั้น prefix_map[10] จะบอกทันทีว่าต้องนับกี่ path\n\nในตัวอย่างนี้ prefix_map[10] = 1 ตลอดเวลาที่เจอ และ node 3 / node 1 / node 11 คือจุดจบของ path สามเส้น:\n- 5→3\n- 5→2→1\n- -3→11",
+              title: "ทำไมต้องจดก่อนลงลูก?",
+              c: "โหนดลูกและหลานที่ถูกเรียกด้วย DFS ในบรรทัดถัดไป จำเป็นต้องเปิดสมุดแล้วเห็นประวัติ current_sum ของโหนดบรรพบุรุษ — จดก่อนลุยต่อเสมอ",
+            },
+            {
+              t: "callout",
+              title: "ถ้าจดผิดจังหวะ",
+              warn: true,
+              c: "ถ้าสลับไปจดหลังเดินลงลูกเสร็จ ลูกและหลานจะเปิดสมุดไม่เจอประวัติยอดสะสมของเรา เส้นทางช่วงที่เริ่มจากโหนดนี้จะถูกนับพลาดทันที",
+            },
+
+            { t: "h3", c: "ส่วนที่ 4: Backtracking — ลบรอยเท้า" },
+            {
+              t: "code",
+              lang: "python",
+              label: "ส่วนที่ 4",
+              c: `prefix_map[current_sum] -= 1
+return paths`,
+            },
+            {
+              t: "callout",
+              title: "ทำไมต้องเขียน?",
+              c: "เมื่อสำรวจกิ่งนี้เสร็จและกำลังถอยกลับขึ้นไปหาโหนดพ่อ ต้องหักลบจำนวนครั้งของ current_sum ออก 1 — ลบรอยเท้าของกิ่งซ้ายก่อนเปลี่ยนไปเดินกิ่งขวา",
+            },
+            {
+              t: "callout",
+              title: "ถ้าไม่ลบรอยเท้า",
+              warn: true,
+              c: "กิ่งขวาจะมองเห็นประวัติยอดสะสมของกิ่งซ้าย แล้วนำมาคำนวณเส้นทางข้ามกิ่ง ซึ่งผิดกฎโจทย์ที่ต้องวิ่งลงข้างล่างเสมอ",
+            },
+
+            { t: "h3", c: "5. Step-by-Step Walkthrough (จำลองบนต้นไม้)" },
+            {
+              t: "p",
+              c: "กำหนด targetSum = 8 และต้นไม้ย่อส่วน (โฟกัสกิ่งซ้ายเพื่อเห็น Backtracking ชัด):",
+            },
+            {
+              t: "code",
+              lang: "text",
+              label: "ต้นไม้ย่อส่วน",
+              c: `       10 (Root)
+      /
+     5
+    /
+   3`,
+            },
+
+            {
+              t: "table",
+              head: ["ขั้น", "โหนด / Action", "current_sum", "old_sum", "paths", "prefix_map"],
+              rows: [
+                ["เริ่ม", "—", "0", "—", "—", "{0: 1}"],
+                ["①", "เข้า node 10", "10", "10 − 8 = 2 → ไม่เจอ", "0", "{0: 1, 10: 1}"],
+                ["②", "เข้า node 5", "15", "15 − 8 = 7 → ไม่เจอ", "0", "{0: 1, 10: 1, 15: 1}"],
+                ["③", "เข้า node 3", "18", "18 − 8 = 10 → เจอ 1!", "1 (path 5→3)", "{0: 1, 10: 1, 15: 1, 18: 1}"],
+                ["④", "🚨 Backtrack จาก 3", "ลบ 18", "—", "—", "{0: 1, 10: 1, 15: 1, 18: 0}"],
+              ],
+            },
+            {
+              t: "callout",
+              title: "อ่านแถว Backtracking",
+              c: "เมื่อออกจาก node 3 เราลด prefix_map[18] ลง 1 เพื่อให้กิ่งอื่นไม่เห็นประวัติของกิ่งนี้ — นี่คือหัวใจของ Backtracking บนต้นไม้",
             },
             {
               t: "p",
-              c: "**วิธีอ่านแถว 🚨 (Backtracking):** แถวนั้นคือ “เรากำลังถอยกลับ” ดังนั้นสิ่งที่ถูกเปลี่ยนจริงคือ prefix_map — เราลดความถี่ของ prefix_map[current_sum] ลง 1 เพื่อให้กิ่งขวาไม่เห็นประวัติของกิ่งซ้าย",
+              c: "บนตัวอย่างเต็มของ LeetCode ([10,5,-3,3,2,null,11,...], targetSum = 8) ไล่ DFS แบบเดียวกันครบทั้งต้นจะได้อีกสอง path คือ 5→2→1 และ −3→11 รวมทั้งหมด 3 เส้นทาง",
             },
 
-            { t: "h3", c: "5. Clean Code (โค้ดฉบับสมบูรณ์)" },
+            { t: "h3", c: "6. Clean Code (โค้ดฉบับสมบูรณ์สำหรับส่ง LeetCode)" },
             {
               t: "code",
               lang: "python",
@@ -1820,42 +1826,33 @@ paths += dfs(node.right, current_sum)`,
 
 class Solution:
     def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
-        # Prefix-map = "สมุดบันทึกยอดสะสม" บนเส้นทางจาก Root → ปัจจุบัน (เส้นทางเดียวกันเท่านั้น)
-        # key   = prefix_sum
-        # value = จำนวนครั้งที่ prefix_sum นี้เคยเกิดบนเส้นทางเดียวกันนั้น
-        #
-        # The Why: ใส่ {0: 1} เพื่อรองรับกรณีที่เส้นทางเริ่มจาก Root แล้วรวมได้พอดี
-        # (ถ้า current_sum == targetSum จะได้ old_sum = 0 และ prefix_map[0] = 1 ทำให้เรานับ path ถูก)
+        # 1. ประกาศ Dictionary สำหรับเก็บ Prefix Sum
+        #    ใส่ {0: 1} ไว้เพื่อรองรับเส้นทางที่เริ่มนับตั้งแต่ Root
         prefix_map = {0: 1}
 
         def dfs(node, current_sum):
-            # Base Case: เดินตกขอบ => ไม่มี path เพิ่ม
+            # Base Case: ตกขอบต้นไม้
             if not node:
                 return 0
 
-            # 1) อัปเดตยอดสะสมปัจจุบัน
+            # 2. สะสมค่าโหนดปัจจุบัน
             current_sum += node.val
 
-            # 2) Magic Formula:
-            # เราต้องหายอดในอดีต (old_sum) ที่ทำให้:
-            # old_sum → current_sum  รวมกันได้ targetSum
-            # current_sum - old_sum = targetSum
-            # => old_sum = current_sum - targetSum
+            # 3. คำนวณหาเป้าหมายในอดีต (Magic Formula)
             old_sum = current_sum - targetSum
 
-            # 3) ถ้า old_sum เคยเกิด k ครั้งบนเส้นทางนี้ => มี path ที่จบที่ node นี้เท่ากับ k
+            # 4. ดึงจำนวนครั้งที่เคยเกิด old_sum (ถ้าไม่เจอให้คืนค่า 0)
             paths = prefix_map.get(old_sum, 0)
 
-            # 4) Log ลงสมุดก่อนลงลูก (สำคัญ!)
-            # The Why: ให้ลูกๆ เห็น prefix_map ของ "เส้นทางปัจจุบัน" ระหว่าง DFS
+            # 5. จดบันทึก current_sum ลงสมุด (+1 จากจำนวนเดิมที่มี)
+            #    ต้องทำก่อนเรียก DFS ลงกิ่งลูก เพื่อให้กิ่งลูกมองเห็นประวัติ
             prefix_map[current_sum] = prefix_map.get(current_sum, 0) + 1
 
-            # 5) รวมผลจากซ้ายและขวา
+            # 6. ท่อง DFS ลงกิ่งซ้ายและกิ่งขวา
             paths += dfs(node.left, current_sum)
             paths += dfs(node.right, current_sum)
 
-            # 6) Backtracking: ลบยอดสะสมนี้ทิ้งเมื่อกำลังจะถอยกลับขึ้นไป
-            # The Why: กันไม่ให้กิ่งขวาเห็น prefix_sum ของกิ่งซ้าย (ซึ่งจะนับ path ข้ามกิ่งผิดโจทย์)
+            # 7. Backtracking: ลบรอยเท้าเมื่อออกจากกิ่งนี้
             prefix_map[current_sum] -= 1
 
             return paths
@@ -1863,19 +1860,19 @@ class Solution:
         return dfs(root, 0)`,
             },
 
-            { t: "h3", c: "6. Complexity Analysis (วิเคราะห์ Big O)" },
+            { t: "h3", c: "7. Complexity Analysis (วิเคราะห์ประสิทธิภาพ)" },
             {
               t: "ul",
               c: [
-                "**Time Complexity: O(N)** — เราเยี่ยมชมแต่ละโหนดเพียงแค่ครั้งเดียว (DFS) และการอ่าน/เขียนข้อมูลใน Hash Map (Dictionary) ใช้เวลาโดยเฉลี่ยคือ O(1) ต่อการกระทำหนึ่งครั้ง ดังนั้นเวลาจะแปรผันตรงกับจำนวนโหนด",
-                "**Space Complexity: O(N)** — ใช้หน่วยความจำสูงสุด 2 ส่วน คือ: 1) **Call Stack:** ลึกสุดเท่ากับความสูงของต้นไม้ (กรณีแย่สุดที่ต้นไม้เรียงเป็นเส้นตรงคือ O(N)) และ 2) **Hash Map:** เก็บยอดสะสมต่างๆ (กรณีแย่สุดที่ยอดไม่ซ้ำกันเลยคือ O(N)) รวมแล้วจึงเป็น O(N)",
+                "Time Complexity: O(N) — ท่องผ่านแต่ละโหนดเพียง 1 ครั้ง และการอ่าน/เขียน Dictionary ใช้เวลาโดยเฉลี่ย O(1) ต่อการกระทำ",
+                "Space Complexity: O(N) — ใช้หน่วยความจำใน Call Stack และ Hash Map สูงสุดตามจำนวนโหนด N",
               ],
             },
 
             {
               t: "callout",
               title: "💡 สรุป pattern",
-              c: "Prefix Sum + Hash Map นับช่วงที่รวมเท่าเป้าหมาย ใช้ได้ทั้งบนลิสต์และบนเส้นทางของต้นไม้ — **กุญแจสำคัญในต้นไม้คือต้อง Backtrack เสมอเมื่อออกจากเส้นทาง**",
+              c: "Prefix Sum + Hash Map นับช่วงที่รวมเท่าเป้าหมาย ใช้ได้ทั้งบนลิสต์และบนเส้นทางของต้นไม้ — กุญแจสำคัญในต้นไม้คือต้อง Backtrack เสมอเมื่อออกจากเส้นทาง",
             },
           ],
         },
@@ -1916,98 +1913,120 @@ The path does not need to start at the root or end at a leaf, but it must go dow
           c: [
             {
               t: "p",
-              c: 'A tough Path Sum upgrade — paths may start or end anywhere. We use DFS with a Prefix Sum notebook and Backtracking.',
+              c: "A tough Path Sum upgrade — paths may start or end anywhere. We go Pattern Recognition → tools → reverse-algebra → line-by-line code → tree walkthrough → submit-ready code.",
             },
 
-            { t: "h3", c: "1. Problem Decoding" },
+            { t: "h3", c: "1. Pattern Recognition" },
             {
               t: "p",
-              c: `We have a Binary Tree whose nodes hold numbers (positive, negative, or zero) and a targetSum.
-Count how many downward "paths" have node values that sum exactly to targetSum.`,
-            },
-            {
-              t: "p",
-              c: "Three hard rules for counting paths:",
+              c: "You have this flavor of problem when:",
             },
             {
               t: "ol",
               c: [
-                "Always go downward: parent → child/grandchild only (no climbing back up) so every counted path is downward-only",
-                "Start anywhere: does not have to begin at the Root, so paths can start from a middle node",
-                "End anywhere: does not have to end at a Leaf, so paths can stop at any node",
+                "The input is a Binary Tree",
+                "You need the count of ranges/paths whose values sum to targetSum",
+                "Rules: start anywhere · end anywhere · always go downward (parent → child/grandchild only)",
               ],
             },
-
-            { t: "h3", c: "2. Mental Model" },
             {
-              t: "p",
-              c: 'Picture the tree as a "hiking trail" and yourself as a "point collector" walking downhill. Recounting from every possible start is slow — so we keep a "prefix-sum notebook."',
+              t: "callout",
+              title: "💡 Choosing a technique",
+              c: "Brute Force (DFS inside DFS): stand at every node and sum upward → Time O(N²)\nPrefix Sum + Hash Map + Backtracking: remember past cumulative sums while walking down → Time O(N)",
+            },
+
+            { t: "h3", c: "2. Tools & the Hash Map (prefix_map)" },
+            {
+              t: "ul",
+              c: [
+                "DFS — walk down the tree branches",
+                "Hash Map / Dictionary (prefix_map) — a \"past totals notebook\" with O(1) lookups",
+                "Backtracking — erase footprints when leaving a branch so sibling branches stay clean",
+              ],
             },
             {
-              t: "p",
-              c: "How the notebook works:",
+              t: "code",
+              lang: "python",
+              label: "Seed the notebook",
+              c: `prefix_map = {0: 1}`,
             },
             {
               t: "ul",
               c: [
-                'As you walk downhill, always log the "Current Sum" from the summit',
-                "Suppose targetSum is 8 and you've reached a Current Sum of 15",
-                "Is there a stretch along the way that totals exactly 8?",
-                'Instead of walking back to count, open the notebook and ask: "Have we ever logged a cumulative total of 7?"',
-                "Why 7? Because 15 (current) − 8 (wanted) = 7 (past total)",
-                "If 7 is in the notebook, the stretch from that past point to here added exactly 8 — that's one path we want",
+                "Key = prefix sum from Root down to the current node",
+                "Value = how many times that key appeared on the current DFS path (not the whole tree)",
+              ],
+            },
+            {
+              t: "callout",
+              title: "Why start with {0: 1}?",
+              c: "Before touching any node, treat prefix sum 0 as already seen once. If current_sum = 8 and targetSum = 8, then old_sum = 0 — the notebook hits Key 0 with value 1, so we count the path that starts at Root. Without {0: 1}, Root-started paths are missed.",
+            },
+
+            { t: "h3", c: "3. Mental Model: reverse algebra (Prefix Sum Magic)" },
+            {
+              t: "code",
+              lang: "text",
+              label: "Core formula",
+              c: `old_sum = current_sum - targetSum
+
+[ Root ] ──( old_sum )──> [ range start ] ──( targetSum )──> [ current node ]`,
+            },
+            {
+              t: "p",
+              c: "Straight-line example: [3, 4, 1, 7, -2] with targetSum = 8",
+            },
+            {
+              t: "table",
+              head: ["Step", "Value", "current_sum", "old_sum = current − 8", "Result", "prefix_map"],
+              rows: [
+                ["Start", "—", "0", "—", "—", "{0: 1}"],
+                ["1", "3", "3", "3 − 8 = −5", "miss", "{0: 1, 3: 1}"],
+                ["2", "4", "7", "7 − 8 = −1", "miss", "{0: 1, 3: 1, 7: 1}"],
+                ["3", "1", "8", "8 − 8 = 0", "hit! → range [3, 4, 1]", "{0: 1, 3: 1, 7: 1, 8: 1}"],
+                ["4", "7", "15", "15 − 8 = 7", "hit! → range [1, 7]", "{0: 1, 3: 1, 7: 1, 8: 1, 15: 1}"],
               ],
             },
 
-            { t: "h3", c: "3. Logic-to-Code Mapping" },
-            {
-              t: "p",
-              c: "Write dfs(node, current_sum) with a Hash Map as the notebook, plus Backtracking (erasing footprints).",
-            },
+            { t: "h3", c: "4. Line-by-Line Breakdown" },
 
-            { t: "h3", c: "Part 1: Prepare the notebook & fall off the edge" },
-            {
-              t: "p",
-              c: "Seed the notebook with {0: 1} so paths that hit the target from the very start are covered.\n\n{0: 1} means: \"before you visit any node, the prefix sum is 0 once\" — this lets us count paths that start at the Root when current_sum == targetSum.",
-            },
+            { t: "h3", c: "Part 1: Base case + accumulate" },
             {
               t: "code",
               lang: "python",
               label: "Part 1",
-              c: `# prefix_map is a Hash Map (our notebook)
-#   key   = prefix sum (sum from Root to the current node)
-#   value = how many times that prefix sum appeared on the current DFS path
-#
-# {0: 1} means: before visiting any node, we've already logged prefix sum = 0 once.
-# The Why: if at some node current_sum == targetSum, then old_sum = 0
-# and prefix_map[0] must be 1 so we count paths that start from the Root.
-prefix_map = {0: 1}
+              c: `prefix_map = {0: 1}
 
-if not node:
-    return 0  # fell off the edge — nothing to count`,
+def dfs(node, current_sum):
+    if not node:
+        return 0
+
+    current_sum += node.val
+    old_sum = current_sum - targetSum`,
             },
-
-            { t: "h3", c: "Part 2: Check the notebook (any path hitting Target?)" },
             {
-              t: "p",
-              c: 'Update the current sum, then subtract the target to find the "past total" we need.',
+              t: "ul",
+              c: [
+                "if not node: return 0 — fell off the tree → 0 paths",
+                "current_sum += node.val — add this node's value",
+                "old_sum = current_sum − targetSum — the past total that makes the past→now stretch equal targetSum",
+              ],
             },
+
+            { t: "h3", c: "Part 2: Lookup with .get()" },
             {
               t: "code",
               lang: "python",
               label: "Part 2",
-              c: `current_sum += node.val
-old_sum = current_sum - targetSum
-
-# If that past total is in the notebook, count those paths
-paths = prefix_map.get(old_sum, 0)`,
+              c: `paths = prefix_map.get(old_sum, 0)`,
             },
-
-            { t: "h3", c: "Part 3: Log yourself, then go left & right" },
             {
-              t: "p",
-              c: "Record the current sum, recurse into both children, and add their path counts.",
+              t: "callout",
+              title: ".get(key, default)",
+              c: "Look up old_sum. If present, return its count; if missing, return 0 (no KeyError).\n\nIf old_sum appeared k times, there are k paths ending at this node that sum to targetSum.",
             },
+
+            { t: "h3", c: "Part 3: Log before recursing" },
             {
               t: "code",
               lang: "python",
@@ -2017,12 +2036,19 @@ paths = prefix_map.get(old_sum, 0)`,
 paths += dfs(node.left, current_sum)
 paths += dfs(node.right, current_sum)`,
             },
-
-            { t: "h3", c: "Part 4: Backtracking (erase the footprint — most important!)" },
             {
-              t: "p",
-              c: 'Before climbing up to explore another branch, remove this node\'s prefix sum from the notebook so the right sibling never sees the left sibling\'s totals — that would break the "downward only" rule.',
+              t: "callout",
+              title: "Why log before children?",
+              c: "Children and grandchildren must see this ancestor's current_sum in the notebook. Always log first, then dive.",
             },
+            {
+              t: "callout",
+              title: "Wrong timing",
+              warn: true,
+              c: "If you log after the child DFS returns, descendants never see your prefix — paths that start at this node get undercounted.",
+            },
+
+            { t: "h3", c: "Part 4: Backtracking" },
             {
               t: "code",
               lang: "python",
@@ -2030,73 +2056,50 @@ paths += dfs(node.right, current_sum)`,
               c: `prefix_map[current_sum] -= 1
 return paths`,
             },
+            {
+              t: "callout",
+              title: "Why?",
+              c: "Before climbing back to the parent to try another branch, decrement this current_sum so the left branch's history never leaks into the right.",
+            },
+            {
+              t: "callout",
+              title: "If you skip it",
+              warn: true,
+              c: "The right branch sees left-branch prefixes and invents cross-branch paths — breaking the downward-only rule.",
+            },
 
-            { t: "h3", c: "4. Step-by-Step Walkthrough" },
+            { t: "h3", c: "5. Step-by-Step Walkthrough" },
             {
               t: "p",
-              c: "Tree: [10, 5, -3, 3, 2, null, 11] with targetSum = 8",
+              c: "targetSum = 8 on a tiny left spine (so Backtracking is obvious):",
             },
             {
               t: "code",
               lang: "text",
-              c: `      10
-     /  \\
-    5   -3
-   / \\    \\
-  3   2    11`,
+              label: "Mini tree",
+              c: `       10 (Root)
+      /
+     5
+    /
+   3`,
             },
             {
-              t: "p",
-              c: "Start: notebook = {0: 1}",
-            },
-
-            { t: "h3", c: "At node 10 (Root)" },
-            {
-              t: "ul",
-              c: [
-                "Current Sum = 10",
-                "Look up 10 − 8 = 2 in the notebook (miss → 0 paths)",
-                "Log 10 → notebook becomes {0: 1, 10: 1}",
-              ],
-            },
-
-            { t: "h3", c: "Down left to node 5" },
-            {
-              t: "ul",
-              c: [
-                "Current Sum = 10 + 5 = 15",
-                "Look up 15 − 8 = 7 (miss → 0 paths)",
-                "Log 15 → notebook becomes {0: 1, 10: 1, 15: 1}",
-              ],
-            },
-
-            { t: "h3", c: "Down left again to node 3" },
-            {
-              t: "ul",
-              c: [
-                "Current Sum = 15 + 3 = 18",
-                "Look up 18 − 8 = 10 (hit! once) → +1 path (nodes 5 → 3)",
-                "Log 18 → notebook becomes {0: 1, 10: 1, 15: 1, 18: 1}",
-              ],
-            },
-
-            { t: "h3", c: "Backtrack out of node 3" },
-            {
-              t: "ul",
-              c: [
-                "Can't go further — climb back to 5 and erase 18 from the notebook so the right child (node 2) never sees it",
+              t: "table",
+              head: ["Step", "Node / Action", "current_sum", "old_sum", "paths", "prefix_map"],
+              rows: [
+                ["Start", "—", "0", "—", "—", "{0: 1}"],
+                ["①", "enter 10", "10", "10 − 8 = 2 → miss", "0", "{0: 1, 10: 1}"],
+                ["②", "enter 5", "15", "15 − 8 = 7 → miss", "0", "{0: 1, 10: 1, 15: 1}"],
+                ["③", "enter 3", "18", "18 − 8 = 10 → hit!", "1 (path 5→3)", "{0: 1, 10: 1, 15: 1, 18: 1}"],
+                ["④", "🚨 backtrack from 3", "drop 18", "—", "—", "{0: 1, 10: 1, 15: 1, 18: 0}"],
               ],
             },
             {
               t: "p",
-              c: "Continue DFS (left-first) on the same prefix_map state:\n- node 2: current_sum = 17, old_sum = 9 → miss (no new path)\n- node 1: current_sum = 18, old_sum = 10 → hit because prefix_map[10] = 1 => path 5→2→1\nThen backtrack removes 18/17 so the right subtree starts clean:\n- node -3: current_sum = 7, old_sum = -1 → miss\n- node 11: current_sum = 18, old_sum = 10 → hit => path -3→11\nCombine with the earlier hit at the first node 3 => total 3 paths.",
+              c: "On the full LeetCode example ([10,5,-3,3,2,null,11,...], targetSum = 8) the same DFS also finds 5→2→1 and −3→11 — three paths total.",
             },
 
-            { t: "h3", c: "5. Full Assembled Code (Clean Code)" },
-            {
-              t: "p",
-              c: "One shared prefix_map for the whole tree, with backtracking before climbing up:",
-            },
+            { t: "h3", c: "6. Clean Code" },
             {
               t: "code",
               lang: "python",
@@ -2110,42 +2113,30 @@ return paths`,
 
 class Solution:
     def pathSum(self, root: Optional[TreeNode], targetSum: int) -> int:
-        # Prefix-map = "notebook of prefix sums" on the current root → node path.
-        # key   = prefix_sum
-        # value = how many times we've seen that prefix_sum on THIS exact path.
-        #
-        # The Why: initialize with {0: 1}
-        # If current_sum == targetSum, then old_sum = 0 and we count the path starting from Root.
+        # 1. Prefix-sum notebook; {0: 1} covers paths that start at Root
         prefix_map = {0: 1}
 
         def dfs(node, current_sum):
-            # Base Case: no node => no additional paths
             if not node:
                 return 0
 
-            # 1) Update the current prefix sum
+            # 2. Accumulate
             current_sum += node.val
 
-            # 2) Magic Formula:
-            # old_sum -> current_sum must add up to targetSum:
-            # current_sum - old_sum = targetSum
-            # => old_sum = current_sum - targetSum
+            # 3. Magic formula
             old_sum = current_sum - targetSum
 
-            # 3) If old_sum appeared k times on this path,
-            # then there are k valid paths ending at this node.
+            # 4. How many times have we seen old_sum on this path?
             paths = prefix_map.get(old_sum, 0)
 
-            # 4) Log before going down
-            # The Why: children need to see the prefix sums of the current path.
+            # 5. Log before children so they can see this prefix
             prefix_map[current_sum] = prefix_map.get(current_sum, 0) + 1
 
-            # 5) Explore both children and accumulate
+            # 6. Explore both branches
             paths += dfs(node.left, current_sum)
             paths += dfs(node.right, current_sum)
 
-            # 6) Backtracking: erase footprint when climbing up
-            # The Why: prevent sibling branches from polluting each other (invalid cross-branch paths).
+            # 7. Backtrack: erase footprint before climbing up
             prefix_map[current_sum] -= 1
 
             return paths
@@ -2153,19 +2144,19 @@ class Solution:
         return dfs(root, 0)`,
             },
 
-            { t: "h3", c: "6. Complexity Analysis" },
+            { t: "h3", c: "7. Complexity Analysis" },
             {
               t: "ul",
               c: [
-                "Time Complexity: O(N) — one DFS visit per node; Hash Map ops average O(1)",
-                "Space Complexity: O(N) — recursion stack up to O(H), and the map up to O(N) in the worst case (all distinct prefixes), so overall O(N)",
+                "Time Complexity: O(N) — visit each node once; Hash Map ops average O(1)",
+                "Space Complexity: O(N) — recursion stack and Hash Map up to O(N)",
               ],
             },
 
             {
               t: "callout",
               title: "💡 Pattern summary",
-              c: "Prefix sum + hash map counts ranges that hit a target — on arrays or tree paths. The key is backtracking when you leave a path.",
+              c: "Prefix sum + hash map counts ranges that hit a target — on arrays or tree paths. On trees, always backtrack when you leave a path.",
             },
           ],
         },
