@@ -246,9 +246,9 @@ print(root.right.right.val)  # 7`,
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC104): กำหนด root ของ binary tree มาให้ ให้ return maximum depth ของต้นไม้นั้น
+          c: `กำหนด root ของ binary tree มาให้ ให้ return maximum depth ของต้นไม้นั้น
 
-maximum depth คือจำนวน node บนเส้นทางที่ยาวที่สุดจาก root ลงไปจนถึง leaf ที่ไกลที่สุด`,
+maximum depth ของ binary tree คือจำนวน node บนเส้นทางที่ยาวที่สุดจาก root node ลงไปจนถึง leaf node ที่ไกลที่สุด`,
         },
         {
           t: "example",
@@ -256,25 +256,17 @@ maximum depth คือจำนวน node บนเส้นทางที่
             {
               input: "root = [3,9,20,null,null,15,7]",
               output: "3",
-              explain:
-                "เส้นทางยาวสุดคือ 3 → 20 → 15 หรือ 3 → 20 → 7 นับ node ได้ 3 ตัว",
             },
             {
               input: "root = [1,null,2]",
               output: "2",
-              explain: "เส้นทางยาวสุดคือ 1 → 2 นับ node ได้ 2 ตัว",
-            },
-            {
-              input: "root = []",
-              output: "0",
-              explain: "ต้นไม้ว่าง ไม่มี node เลย ความลึกจึงเป็น 0",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ในช่วง [0, 10^4]",
+            "จำนวน node ในต้นไม้อยู่ในช่วง [0, 10^4]",
             "-100 <= Node.val <= 100",
           ],
         },
@@ -476,25 +468,17 @@ A binary tree's maximum depth is the number of nodes along the longest path from
             {
               input: "root = [3,9,20,null,null,15,7]",
               output: "3",
-              explain:
-                "The longest paths are 3 → 20 → 15 and 3 → 20 → 7 — each has 3 nodes.",
             },
             {
               input: "root = [1,null,2]",
               output: "2",
-              explain: "The longest path is 1 → 2 — 2 nodes.",
-            },
-            {
-              input: "root = []",
-              output: "0",
-              explain: "Empty tree — depth is 0.",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "The number of nodes is in the range [0, 10^4].",
+            "The number of nodes in the tree is in the range [0, 10^4].",
             "-100 <= Node.val <= 100",
           ],
         },
@@ -607,11 +591,13 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `พิจารณา leaf ทั้งหมดของ binary tree เรียงจากซ้ายไปขวา ค่าของ leaf เหล่านั้นเรียงกันเรียกว่า leaf value sequence ของต้นไม้นั้น
+          c: `พิจารณาใบไม้ (leaf) ทั้งหมดของ binary tree เรียงตามลำดับจากซ้ายไปขวา ค่าของใบไม้เหล่านั้นรวมกันเป็น leaf value sequence ของต้นไม้นั้น
 
-ต้นไม้สองต้นจะถือว่าเป็น leaf-similar ก็ต่อเมื่อ leaf value sequence ของทั้งคู่เหมือนกัน
+ตัวอย่างเช่น ในต้นไม้ที่ให้ไว้ข้างต้น leaf value sequence คือ (6, 7, 4, 9, 8)
 
-กำหนด root ของต้นไม้สองต้นคือ root1 และ root2 มาให้ ให้ return true ก็ต่อเมื่อทั้งสองต้นเป็น leaf-similar`,
+ต้นไม้สองต้นถือว่าเป็น leaf-similar ก็ต่อเมื่อ leaf value sequence ของมันเหมือนกัน
+
+ให้ return true ก็ต่อเมื่อต้นไม้สองต้นที่กำหนดให้ (มี head nodes คือ root1 และ root2) เป็น leaf-similar`,
         },
 
         {
@@ -621,22 +607,18 @@ class Solution:
               input:
                 "root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]",
               output: "true",
-              explain:
-                "Leaf Sequence ของทั้งสองต้นเรียงจากซ้ายไปขวาได้ลำดับเดียวกันคือ [6,7,4,9,8] แม้ Shape ของ Tree จะไม่เหมือนกันก็ตาม",
             },
             {
               input: "root1 = [1,2,3], root2 = [1,3,2]",
               output: "false",
-              explain:
-                "ต้นแรกมี Leaf Sequence เป็น [2,3] ส่วนต้นที่สองเป็น [3,2] ลำดับต่างกันจึงไม่ leaf-similar",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน Node ของแต่ละต้นอยู่ในช่วง [1, 200]",
-            "0 <= Node.val <= 200",
+            "จำนวน node ในแต่ละต้นไม้จะอยู่ในช่วง [1, 200]",
+            "ต้นไม้ทั้งสองต้นที่กำหนดให้จะมีค่าอยู่ในช่วง [0, 200]",
           ],
         },
 
@@ -850,9 +832,11 @@ class Solution:
       en: [
         {
           t: "p",
-          c: `Consider all the leaves of a binary tree, from left to right order, forming a leaf value sequence.
+          c: `Consider all the leaves of a binary tree, from left to right order, the values of those leaves form a leaf value sequence.
 
-Two binary trees are considered leaf-similar if their leaf value sequences are the same.
+For example, in the given tree above, the leaf value sequence is (6, 7, 4, 9, 8).
+
+Two binary trees are considered leaf-similar if their leaf value sequence is the same.
 
 Return true if and only if the two given trees with head nodes root1 and root2 are leaf-similar.`,
         },
@@ -864,22 +848,18 @@ Return true if and only if the two given trees with head nodes root1 and root2 a
               input:
                 "root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]",
               output: "true",
-              explain:
-                "Both trees share the same leaf sequence [6,7,4,9,8] even though their shapes differ.",
             },
             {
               input: "root1 = [1,2,3], root2 = [1,3,2]",
               output: "false",
-              explain:
-                "First tree leaf sequence [2,3]; second [3,2] — order differs, so not leaf-similar.",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "The number of nodes in each tree is in the range [1, 200].",
-            "0 <= Node.val <= 200",
+            "The number of nodes in each tree will be in the range [1, 200].",
+            "Both of the given trees will have values in the range [0, 200].",
           ],
         },
 
@@ -1077,27 +1057,30 @@ return get_leaves(node.left) + get_leaves(node.right)`,
             {
               input: "root = [3,1,4,3,null,1,5]",
               output: "4",
-              explain:
-                "Good Node คือ 3 (root), 3 (ใต้ 1), 4, และ 5 — ส่วน 1 สองตัวไม่ดีเพราะมีค่ามากกว่าอยู่ก่อนหน้าบนเส้นทาง",
+              explain: `โหนดที่แสดงเป็นสีฟ้าคือ good nodes
+Root Node (3) เป็น good node เสมอ
+Node 4 -> (3,4) คือค่ามากสุดในเส้นทางที่เริ่มจาก root
+Node 5 -> (3,4,5) คือค่ามากสุดในเส้นทาง
+Node 3 -> (3,1,3) คือค่ามากสุดในเส้นทาง`,
             },
             {
               input: "root = [3,3,null,4,2]",
               output: "3",
               explain:
-                "Node 2 ไม่ดี เพราะเส้นทาง (3,3,2) มี 3 ที่มากกว่ามันอยู่ก่อนหน้า",
+                'Node 2 -> (3, 3, 2) ไม่ใช่ good node เพราะมีค่า "3" ที่สูงกว่ามันอยู่ก่อนหน้า',
             },
             {
               input: "root = [1]",
               output: "1",
-              explain: "มีแค่ Root ตัวเดียว ถือเป็น Good Node เสมอ",
+              explain: "Root ถือเป็น good node",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน Node อยู่ในช่วง [1, 10^5]",
-            "-10^4 <= Node.val <= 10^4",
+            "จำนวน node ใน binary tree อยู่ในช่วง [1, 10^5]",
+            "ค่าของแต่ละ node อยู่ในช่วง [-10^4, 10^4]",
           ],
         },
 
@@ -1320,27 +1303,30 @@ Return the number of good nodes in the binary tree.`,
             {
               input: "root = [3,1,4,3,null,1,5]",
               output: "4",
-              explain:
-                "Good nodes: 3 (root), 3 (under 1), 4, and 5. The two 1s are not good.",
+              explain: `Nodes in blue are good.
+Root Node (3) is always a good node.
+Node 4 -> (3,4) is the maximum value in the path starting from the root.
+Node 5 -> (3,4,5) is the maximum value in the path
+Node 3 -> (3,1,3) is the maximum value in the path.`,
             },
             {
               input: "root = [3,3,null,4,2]",
               output: "3",
               explain:
-                "Node 2 is not good — path (3,3,2) has a larger value above it.",
+                'Node 2 -> (3, 3, 2) is not good, because "3" is higher than it.',
             },
             {
               input: "root = [1]",
               output: "1",
-              explain: "A single Root is always a Good Node.",
+              explain: "Root is considered as good.",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "The number of nodes is in the range [1, 10^5].",
-            "-10^4 <= Node.val <= 10^4",
+            "The number of nodes in the binary tree is in the range [1, 10^5].",
+            "Each node's value is between [-10^4, 10^4].",
           ],
         },
 
@@ -1573,9 +1559,9 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC437): กำหนด root ของ binary tree และเลขจำนวนเต็ม targetSum มาให้ ให้ return จำนวน path ที่ผลรวมของค่าตลอด path เท่ากับ targetSum
+          c: `กำหนด root ของ binary tree และจำนวนเต็ม targetSum มาให้ ให้ return จำนวน path ที่ผลรวมของค่าตามเส้นทางเท่ากับ targetSum
 
-path ไม่จำเป็นต้องเริ่มต้นที่ root หรือจบที่ leaf แต่ต้องเดินลงล่างเท่านั้น (จาก parent ไปยัง child)`,
+path ไม่จำเป็นต้องเริ่มหรือจบที่ root หรือ leaf แต่ต้องเดินลงล่างเท่านั้น (คือเดินจาก parent node ไปยัง child node เท่านั้น)`,
         },
         {
           t: "example",
@@ -1583,7 +1569,7 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
             {
               input: "root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8",
               output: "3",
-              explain: "path ที่รวมได้ 8 มีสามเส้น: 5→3, 5→2→1, และ -3→11",
+              explain: "เส้นทางที่รวมกันได้ 8 แสดงอยู่ในภาพ: 5→3, 5→2→1 และ -3→11",
             },
             {
               input: "root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22",
@@ -1594,7 +1580,7 @@ path ไม่จำเป็นต้องเริ่มต้นที่ ro
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ในช่วง [0, 1000]",
+            "จำนวน node ในต้นไม้อยู่ในช่วง [0, 1000]",
             "-10^9 <= Node.val <= 10^9",
             "-1000 <= targetSum <= 1000",
           ],
@@ -1889,7 +1875,7 @@ class Solution:
           t: "p",
           c: `Given the root of a binary tree and an integer targetSum, return the number of paths where the sum of the values along the path equals targetSum.
 
-The path does not need to start at the root or end at a leaf, but it must go downwards (traveling only from parent nodes to child nodes).`,
+The path does not need to start or end at the root or a leaf, but it must go downwards (i.e., traveling only from parent nodes to child nodes).`,
         },
         {
           t: "example",
@@ -1897,7 +1883,7 @@ The path does not need to start at the root or end at a leaf, but it must go dow
             {
               input: "root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8",
               output: "3",
-              explain: "The paths that sum to 8 are 5→3, 5→2→1, and -3→11.",
+              explain: "The paths that sum to 8 are shown.",
             },
             {
               input: "root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22",
@@ -1908,7 +1894,7 @@ The path does not need to start at the root or end at a leaf, but it must go dow
         {
           t: "constraints",
           c: [
-            "The number of nodes is in the range [0, 1000].",
+            "The number of nodes in the tree is in the range [0, 1000].",
             "-10^9 <= Node.val <= 10^9",
             "-1000 <= targetSum <= 1000",
           ],
@@ -2186,13 +2172,17 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC1372): กำหนด root ของ binary tree มาให้
+          c: `คุณได้รับ root ของ binary tree มาให้
 
-นิยาม ZigZag path ว่าคือการเลือก node หนึ่งใด ๆ พร้อมทิศทางเริ่มต้น (ซ้ายหรือขวา) จากนั้นถ้าทิศปัจจุบันคือขวา ให้ก้าวไป right child ถ้าเป็นซ้ายให้ก้าวไป left child แล้วสลับทิศ ทำซ้ำไปเรื่อย ๆ จนกว่าจะก้าวต่อไม่ได้
+ZigZag path ของ binary tree ถูกนิยามดังนี้:
+- เลือก node ใด ๆ ใน binary tree และทิศทาง (ขวาหรือซ้าย)
+- ถ้าทิศทางปัจจุบันคือขวา ให้ก้าวไปที่ right child ของ node ปัจจุบัน ถ้าไม่ใช่ ให้ก้าวไปที่ left child
+- เปลี่ยนทิศทางจากขวาเป็นซ้าย หรือจากซ้ายเป็นขวา
+- ทำขั้นตอนที่สองและสามซ้ำไปเรื่อย ๆ จนกว่าจะก้าวต่อไปในต้นไม้ไม่ได้
 
-ความยาวของ ZigZag path คือจำนวน node ที่ผ่านทั้งหมดลบหนึ่ง (node เดี่ยว ๆ มีความยาว 0)
+ความยาวของ zigzag ถูกนิยามว่าเป็นจำนวน node ที่เยี่ยมชมลบ 1 (node เดี่ยว ๆ มีความยาว 0)
 
-ให้ return ความยาวของ ZigZag path ที่ยาวที่สุดในต้นไม้`,
+ให้ return เส้นทาง ZigZag ที่ยาวที่สุดที่อยู่ในต้นไม้นั้น`,
         },
         {
           t: "example",
@@ -2200,24 +2190,23 @@ class Solution:
             {
               input: "root = [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1]",
               output: "3",
-              explain: "เส้นทางซิกแซกที่ยาวสุดสลับทิศ ขวา → ซ้าย → ขวา รวม 3 ก้าว",
+              explain: "เส้นทาง ZigZag ที่ยาวที่สุดคือโหนดสีฟ้า (ขวา -> ซ้าย -> ขวา)",
             },
             {
               input: "root = [1,1,1,null,1,null,null,1,1,null,1]",
               output: "4",
-              explain: "เส้นทางซิกแซกที่ยาวสุดสลับทิศ ซ้าย → ขวา → ซ้าย → ขวา รวม 4 ก้าว",
+              explain: "เส้นทาง ZigZag ที่ยาวที่สุดคือโหนดสีฟ้า (ซ้าย -> ขวา -> ซ้าย -> ขวา)",
             },
             {
               input: "root = [1]",
               output: "0",
-              explain: "มีแค่ root ตัวเดียว ก้าวต่อไม่ได้ ความยาวจึงเป็น 0",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ในช่วง [1, 5 * 10^4]",
+            "จำนวน node ในต้นไม้อยู่ในช่วง [1, 5 * 10^4]",
             "1 <= Node.val <= 100",
           ],
         },
@@ -2543,13 +2532,13 @@ class Solution:
           t: "p",
           c: `You are given the root of a binary tree.
 
-A ZigZag path for a binary tree is defined as follows:
+A ZigZag path for a binary tree is defined as follow:
 - Choose any node in the binary tree and a direction (right or left).
-- If the current direction is right, move to the right child; otherwise move to the left child.
+- If the current direction is right, move to the right child of the current node; otherwise, move to the left child.
 - Change the direction from right to left or from left to right.
-- Repeat until you can't move in the tree.
+- Repeat the second and third steps until you can't move in the tree.
 
-Zigzag length is defined as the number of nodes visited − 1. (A single node has length 0.)
+Zigzag length is defined as the number of nodes visited - 1. (A single node has a length of 0).
 
 Return the longest ZigZag path contained in that tree.`,
         },
@@ -2559,24 +2548,23 @@ Return the longest ZigZag path contained in that tree.`,
             {
               input: "root = [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1]",
               output: "3",
-              explain: "Longest zigzag: right → left → right — 3 edges.",
+              explain: "Longest ZigZag path in blue nodes (right -> left -> right).",
             },
             {
               input: "root = [1,1,1,null,1,null,null,1,1,null,1]",
               output: "4",
-              explain: "Longest zigzag: left → right → left → right — 4 edges.",
+              explain: "Longest ZigZag path in blue nodes (left -> right -> left -> right).",
             },
             {
               input: "root = [1]",
               output: "0",
-              explain: "Single node — length 0.",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "The number of nodes is in the range [1, 5 * 10^4].",
+            "The number of nodes in the tree is in the range [1, 5 * 10^4].",
             "1 <= Node.val <= 100",
           ],
         },
@@ -2711,9 +2699,9 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC236): กำหนด binary tree มาให้ ให้หา lowest common ancestor (LCA) ของ node สองตัวคือ p และ q
+          c: `กำหนด binary tree มาให้ ให้หา lowest common ancestor (LCA) ของ node สองตัวที่กำหนดในต้นไม้นั้น
 
-LCA ของ p และ q คือ node ที่อยู่ต่ำสุดใน tree ซึ่งมีทั้ง p และ q เป็น descendant ของมัน (โดยอนุญาตให้ node หนึ่งเป็น descendant ของตัวเองได้ด้วย)`,
+ตามนิยามของ LCA บน Wikipedia: “lowest common ancestor ถูกนิยามระหว่าง node p และ q ว่าเป็น node ที่ต่ำที่สุดใน T ซึ่งมีทั้ง p และ q เป็น descendant (โดยอนุญาตให้ node เป็น descendant ของตัวเองได้)”`,
         },
         {
           t: "example",
@@ -2721,24 +2709,28 @@ LCA ของ p และ q คือ node ที่อยู่ต่ำสุ�
             {
               input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1",
               output: "3",
-              explain:
-                "LCA ของ node 5 และ node 1 คือ node 3 เพราะทั้งสองแยกอยู่คนละฝั่งของ root",
+              explain: "LCA ของ node 5 และ 1 คือ 3",
             },
             {
               input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4",
               output: "5",
               explain:
-                "node 5 เป็นบรรพบุรุษของ node 4 อยู่แล้ว ตามนิยาม node เป็น ancestor ของตัวเองได้ — คำตอบคือ 5",
+                "LCA ของ node 5 และ 4 คือ 5 เนื่องจาก node สามารถเป็น descendant ของตัวเองได้ตามนิยามของ LCA",
+            },
+            {
+              input: "root = [1,2], p = 1, q = 2",
+              output: "1",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node อยู่ในช่วง [2, 10^5]",
+            "จำนวน node ในต้นไม้อยู่ในช่วง [2, 10^5]",
             "-10^9 <= Node.val <= 10^9",
-            "ค่าใน node ไม่ซ้ำกัน",
-            "p != q และทั้งคู่มีอยู่ในต้นไม้จริง",
+            "ค่า Node.val ทั้งหมดไม่ซ้ำกัน",
+            "p != q",
+            "p และ q จะมีอยู่ในต้นไม้แน่นอน",
           ],
         },
 
@@ -2979,24 +2971,28 @@ According to the definition of LCA on Wikipedia: “The lowest common ancestor i
             {
               input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1",
               output: "3",
-              explain:
-                "The LCA of nodes 5 and 1 is 3 — they sit on opposite sides of the root.",
+              explain: "The LCA of nodes 5 and 1 is 3.",
             },
             {
               input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4",
               output: "5",
               explain:
-                "Node 5 is an ancestor of 4; a node may be a descendant of itself — answer is 5.",
+                "The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself according to the LCA definition.",
+            },
+            {
+              input: "root = [1,2], p = 1, q = 2",
+              output: "1",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "The number of nodes is in the range [2, 10^5].",
+            "The number of nodes in the tree is in the range [2, 10^5].",
             "-10^9 <= Node.val <= 10^9",
             "All Node.val are unique.",
-            "p != q and both exist in the tree.",
+            "p != q",
+            "p and q will exist in the tree.",
           ],
         },
 
