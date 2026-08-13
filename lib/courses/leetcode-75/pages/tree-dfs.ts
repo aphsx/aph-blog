@@ -145,6 +145,13 @@ print(root.right.right.val)  # 7`,
           c: 'DFS ย่อมาจาก Depth-First Search แปลตรงตัวว่า "ค้นหาแบบลงลึกก่อน" — เลือกกิ่งหนึ่งแล้ว traverse (เดินไล่) ดิ่งลงไปให้สุดจนชน leaf แล้วค่อย backtrack (ถอยกลับ) มาลองกิ่งอื่น ต่างจาก BFS (Breadth-First Search = ค้นแบบกว้างก่อน) ที่ไล่ทีละชั้น ซึ่งเราจะเรียนหมวดถัดไป',
         },
         {
+          t: "image",
+          src: "/leetcode-75/dfs-search.gif",
+          alt: "DFS animation: dive deep A → B → D → H then backtrack, using STACK · LIFO",
+          caption:
+            "DFS (preorder): ดิ่งลึก A → B → D → H แล้วค่อยถอยกลับ — ใช้ STACK · LIFO · โหนด teal = เยี่ยมแล้ว · ส้ม = กำลังเยี่ยม · ทอง = ยังไม่ถึง",
+        },
+        {
           t: "p",
           c: "recursion แปลว่า \"การเรียกตัวเอง\" — คือเขียนฟังก์ชันที่เรียกตัวเองเพื่อแก้ปัญหาย่อยที่หน้าตาเหมือนปัญหาใหญ่ ทำไม recursion เข้ากับ tree ได้พอดิบพอดี? เพราะ left child ของ node ก็คือ root ของ subtree อีกต้นหนึ่ง — ทุก node จึงเป็น \"ปัญหาย่อยหน้าตาเหมือนกันเป๊ะ\" เราเขียนวิธีแก้ที่ node เดียว แล้วสั่งให้เรียกตัวเองกับลูกซ้ายและลูกขวา",
         },
