@@ -4,11 +4,31 @@ import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
 import { highlightCode } from "@/lib/highlight";
 
-function renderInline(text: string): ReactNode {
+/* parse **bold** only (backticks already stripped/handled by renderInline) */
+function renderBold(text: string): ReactNode {
   const parts = text.split("**");
   if (parts.length === 1) return text;
   return parts.map((part, k) =>
     k % 2 === 1 ? <strong key={k}>{part}</strong> : <Fragment key={k}>{part}</Fragment>
+  );
+}
+
+/* parse `inline code` → <code>, then **bold** inside the non-code segments */
+function renderInline(text: string): ReactNode {
+  const segs = text.split("`");
+  // even segment count = unbalanced backtick → keep it literal, bold only
+  if (segs.length % 2 === 0) return renderBold(text);
+  return segs.map((seg, i) =>
+    i % 2 === 1 ? (
+      <code
+        key={i}
+        className="rounded bg-code px-[0.3em] py-[0.12em] font-mono text-[0.85em]"
+      >
+        {seg}
+      </code>
+    ) : (
+      <Fragment key={i}>{renderBold(seg)}</Fragment>
+    )
   );
 }
 
