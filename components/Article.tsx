@@ -4,13 +4,21 @@ import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
 import { highlightCode } from "@/lib/highlight";
 
+function renderInline(text: string): ReactNode {
+  const parts = text.split("**");
+  if (parts.length === 1) return text;
+  return parts.map((part, k) =>
+    k % 2 === 1 ? <strong key={k}>{part}</strong> : <Fragment key={k}>{part}</Fragment>
+  );
+}
+
 function renderText(text: string) {
   const lines = text.split("\n");
-  if (lines.length === 1) return text;
+  if (lines.length === 1) return renderInline(text);
   return lines.map((line, k) => (
     <Fragment key={k}>
       {k > 0 && <br />}
-      {line}
+      {renderInline(line)}
     </Fragment>
   ));
 }
