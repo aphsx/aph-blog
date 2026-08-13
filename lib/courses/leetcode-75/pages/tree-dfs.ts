@@ -4,11 +4,11 @@ export const treeDfsPages: Record<string, Page> = {
   "lc75-intro-tree-dfs": {
     slug: "lc75-intro-tree-dfs",
     title: {
-      th: "Binary Tree & DFS — จากศูนย์จนพร้อมลุย LeetCode",
+      th: "Binary Tree — DFS: ปูพื้นฐานจากศูนย์จนพร้อมลุย LeetCode",
       en: "",
     },
     lead: {
-      th: "ทิ้งแถวยาว มาปลูกต้นไม้ — รู้จัก TreeNode · DFS (ค้นแบบลงลึกก่อน) · recursion (การเรียกตัวเอง) แล้วจับ 3 patterns ที่ใช้ลุยโจทย์ได้จริง",
+      th: "รู้จัก TreeNode แล้วจับ pattern ของ DFS — traversal orders, top-down state passing, bottom-up return values และการใช้ recursion อย่างเป็นระบบ",
       en: "",
     },
     group: "LeetCode 75",
@@ -139,10 +139,10 @@ print(root.right.right.val)  # 7`,
 7`,
         },
 
-        { t: "h2", c: "4. DFS คืออะไร และทำไมใช้ recursion" },
+        { t: "h2", c: "4. Pattern Recognition: มองโจทย์ DFS ให้ออก" },
         {
           t: "p",
-          c: 'DFS ย่อมาจาก Depth-First Search แปลตรงตัวว่า "ค้นหาแบบลงลึกก่อน" — เลือกกิ่งหนึ่งแล้ว traverse (เดินไล่) ดิ่งลงไปให้สุดจนชน leaf แล้วค่อย backtrack (ถอยกลับ) มาลองกิ่งอื่น ต่างจาก BFS (Breadth-First Search = ค้นแบบกว้างก่อน) ที่ไล่ทีละชั้น ซึ่งเราจะเรียนหมวดถัดไป',
+          c: 'DFS ย่อมาจาก Depth-First Search หรือ "ค้นหาแบบลงลึกก่อน" — เมื่ออยู่ที่ node ใด เราเลือกกิ่งหนึ่งแล้วเดินลงไปให้สุดทางก่อน จึงค่อย backtrack (ถอยกลับ) มาสำรวจกิ่งที่เหลือ ต่างจาก BFS ที่กวาดทีละชั้น',
         },
         {
           t: "image",
@@ -153,12 +153,12 @@ print(root.right.right.val)  # 7`,
         },
         {
           t: "p",
-          c: "recursion แปลว่า \"การเรียกตัวเอง\" — คือเขียนฟังก์ชันที่เรียกตัวเองเพื่อแก้ปัญหาย่อยที่หน้าตาเหมือนปัญหาใหญ่ ทำไม recursion เข้ากับ tree ได้พอดิบพอดี? เพราะ left child ของ node ก็คือ root ของ subtree อีกต้นหนึ่ง — ทุก node จึงเป็น \"ปัญหาย่อยหน้าตาเหมือนกันเป๊ะ\" เราเขียนวิธีแก้ที่ node เดียว แล้วสั่งให้เรียกตัวเองกับลูกซ้ายและลูกขวา",
+          c: "การเดินจะเริ่มจาก root ดิ่งลงไปทางซ้ายเรื่อย ๆ จนพบ leaf หรือขอบต้นไม้ (None) จากนั้นจึงย้อนกลับขึ้นมา 1 ขั้นเพื่อไปสำรวจกิ่งขวา เครื่องมือที่ทำให้จำตำแหน่งเดิมได้คือ recursion ซึ่งใช้ call stack เก็บงานที่ยังทำไม่เสร็จไว้",
         },
         {
           t: "callout",
-          title: "หัวใจของ recursion บน tree",
-          c: "ทุกฟังก์ชัน recursion ต้องมี 2 ส่วน: (1) base case (เงื่อนไขหยุด) — มักเป็น \"ถ้า node เป็น None ให้คืนค่าเริ่มต้น\" กันไม่ให้เรียกทะลุปลายกิ่ง และ (2) recursive case (กรณีเรียกตัวเองต่อ) — แก้ที่ node ปัจจุบันโดยอาศัยคำตอบของลูกซ้ายและลูกขวา",
+          title: "หัวใจของ DFS บน tree",
+          c: "ทุกฟังก์ชัน recursion ต้องมี 2 ส่วน: (1) base case — เงื่อนไขหยุดเมื่อ node เป็น None และ (2) recursive case — เรียกตัวเองกับ subtree ที่เล็กลง โดยเลือกว่าจะประมวลผล node ก่อนลงลูก หรือรอให้ลูกส่งคำตอบกลับมาก่อน",
         },
         {
           t: "code",
@@ -168,26 +168,39 @@ print(root.right.right.val)  # 7`,
     if node is None:        # (1) base case: ตกขอบแล้ว — หยุดเรียกตัวเอง
         return              #     คืน 0 / None / [] แล้วแต่โจทย์
 
-    # (2) recursive case: ถามสองต้นย่อยก่อน (เรียกตัวเอง)
+    # (2) recursive case: ถาม subtree ซ้ายและขวา
     left = dfs(node.left)
     right = dfs(node.right)
 
-    # รวม left, right กับ node.val เป็นคำตอบของต้นนี้
+    # รวม left, right และ node.val เป็นคำตอบของ subtree นี้
     return combine(node.val, left, right)`,
         },
 
-        { t: "h2", c: "5. ลำดับการเดิน: preorder / inorder / postorder" },
+        { t: "h2", c: "5. ลำดับการเดินของ DFS (Traversal Orders)" },
         {
           t: "p",
-          c: "เวลา traverse ด้วย DFS ที่แต่ละ node เราแตะ 3 อย่าง: ตัวเอง (N), ต้นย่อยซ้าย (L), ต้นย่อยขวา (R) — ลำดับที่เลือกทำมีชื่อต่างกัน แต่ทั้งหมดยังเป็น DFS (ลงลึกก่อน) เหมือนกัน",
+          c: "ที่แต่ละ node เรามี 3 จุดให้เลือกว่าจะทำงานเมื่อไหร่: node ปัจจุบัน (N), subtree ซ้าย (L) และ subtree ขวา (R) ลำดับที่เลือกทำให้เกิด traversal 3 แบบหลัก ทั้งหมดยังเป็น DFS เหมือนกัน",
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `                  1 (Root)
+                /   \\
+               2     3
+              / \\
+             4   5
+
+Pre-order:  1 -> 2 -> 4 -> 5 -> 3
+In-order:   4 -> 2 -> 5 -> 1 -> 3
+Post-order: 4 -> 5 -> 2 -> 3 -> 1`,
         },
         {
           t: "table",
           head: ["ชื่อ", "ลำดับ", "จำง่าย ๆ / ใช้ตอนไหน"],
           rows: [
-            ["preorder (ก่อนลำดับ)", "N → L → R", "ทำตัวเองก่อนค่อยลงลูก — ส่ง state ลงล่าง (top-down)"],
-            ["inorder (ตามลำดับ)", "L → N → R", "ซ้ายก่อนค่อยตัวเอง — บน BST ได้ค่าเรียงจากน้อยไปมาก"],
-            ["postorder (หลังลำดับ)", "L → R → N", "ลูกเสร็จก่อนค่อยสรุปตัวเอง — รวมผลจากล่างขึ้น (bottom-up)"],
+            ["pre-order (ก่อน)", "N → L → R", "ทำ node ก่อนลงลูก — เหมาะกับการส่ง state จากบนลงล่าง"],
+            ["in-order (ระหว่าง)", "L → N → R", "ซ้ายก่อน node — บน BST จะได้ค่าจากน้อยไปมาก"],
+            ["post-order (หลัง)", "L → R → N", "ทำลูกให้เสร็จก่อน — เหมาะกับการรวมผลจากล่างขึ้นบน"],
           ],
         },
         {
@@ -199,27 +212,148 @@ print(root.right.right.val)  # 7`,
         },
         {
           t: "p",
-          c: "หมวดนี้ส่วนใหญ่ใช้ postorder (รอลูกเสร็จก่อนค่อยสรุป) แต่บางข้ออย่าง Count Good Nodes ใช้ top-down ที่พกข้อมูลลงไปด้วย",
+          c: "จำง่าย ๆ: ถ้าต้องรู้ข้อมูลจากบรรพบุรุษก่อน ให้คิดแบบ top-down; ถ้าต้องรอคำตอบจากลูกแล้วค่อยตัดสินใจ ให้คิดแบบ bottom-up",
         },
 
-        { t: "h2", c: '6. สัญญาณว่าโจทย์นี้ "เล่นกับ Tree DFS"' },
+        { t: "h2", c: "6. Top-Down DFS: ส่ง state จากบนลงล่าง" },
+        {
+          t: "p",
+          c: "Top-down คือการส่งข้อมูลติดตัวผ่าน argument จาก root ลงไปหา node ลูก เช่น ผลรวมของเส้นทาง ค่าสูงสุดที่เคยเจอ หรือความยาวของเส้นทาง วิธีนี้เหมาะกับโจทย์ที่คำตอบของ node ปัจจุบันขึ้นกับสิ่งที่เกิดขึ้นระหว่างทางจาก root",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "ตัวอย่าง: ผลรวมจาก root ถึงแต่ละ node",
+          c: `class Solution:
+    def maxRootToNodeSum(self, root: Optional[TreeNode]) -> int:
+        self.best = float("-inf")
+
+        def dfs(node, current_sum):
+            # Base case: กิ่งนี้ไม่มี node แล้ว
+            if node is None:
+                return
+
+            # อัปเดต state ของเส้นทางที่กำลังเดินอยู่
+            current_sum += node.val
+            self.best = max(self.best, current_sum)
+
+            # ส่ง state ที่อัปเดตแล้วให้ลูกทั้งสองฝั่ง
+            dfs(node.left, current_sum)
+            dfs(node.right, current_sum)
+
+        if root is None:
+            return 0
+        dfs(root, 0)
+        return self.best`,
+        },
         {
           t: "ul",
           c: [
-            "โจทย์ให้ root ของ binary tree มา (หรือสองต้น)",
-            "ถามเรื่องความลึก · เส้นทาง · ใบ · บรรพบุรุษ · นับ node ตามเงื่อนไข",
-            "ไม่มี index ให้กระโดด — ต้อง traverse จาก root ลงไปด้วย DFS / recursion",
+            "**Base case:** ตกขอบแล้วหยุด ไม่พยายามอ่าน `node.val` ต่อ",
+            "**Update state:** ประมวลผล node ปัจจุบันก่อน แล้วสร้าง state ใหม่สำหรับลูก",
+            "**Branch:** เรียก DFS ทั้งซ้ายและขวา โดยแต่ละกิ่งได้รับค่า state ของเส้นทางตัวเอง",
           ],
         },
-
-        { t: "h2", c: "7. สาม patterns ที่จะเจอในหมวดนี้" },
         {
-          t: "ol",
+          t: "callout",
+          title: "หมายเหตุเรื่อง self",
+          c: "`self.best` เป็นเพียง accumulator (ตัวสะสม) ที่ทุก call ใช้ร่วมกัน ไม่ใช่กฎว่าต้องใช้เสมอไป เราสามารถใช้ตัวแปรใน closure กับ `nonlocal` หรือให้ฟังก์ชัน return คำตอบก็ได้ เลือกตามรูปแบบข้อมูลที่โจทย์ต้องการ",
+        },
+
+        { t: "h2", c: "7. Bottom-Up DFS: รับคำตอบจากลูกขึ้นมาหาแม่" },
+        {
+          t: "p",
+          c: "Bottom-up คือการให้ subtree ซ้ายและขวาคำนวณคำตอบของตัวเองให้เสร็จก่อน แล้ว node ปัจจุบันจึงนำผลลัพธ์ทั้งสองฝั่งมาประกอบกัน วิธีนี้ตรงกับ post-order traversal และเหมาะกับโจทย์อย่างการหาความสูงหรือรวมค่าจากลูก",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "แม่แบบ Bottom-Up: ความสูงของต้นไม้",
+          c: `class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        # Base case: ต้นไม้เปล่ามีความสูง 0
+        if root is None:
+            return 0
+
+        # รอให้ subtree ทั้งสองฝั่งรายงานคำตอบ
+        left_depth = self.maxDepth(root.left)
+        right_depth = self.maxDepth(root.right)
+
+        # รวมคำตอบของลูก และนับ node ปัจจุบันอีก 1
+        return max(left_depth, right_depth) + 1`,
+        },
+        {
+          t: "ul",
           c: [
-            "Bottom-up รวมผล — ลูกคืนคำตอบขึ้นมาก่อน แล้ว node ปัจจุบันค่อยรวม (เช่น Maximum Depth, LCA)",
-            "Top-down พก state — ส่งค่าที่เจอระหว่างทางลงเป็นพารามิเตอร์ของ recursion (เช่น Good Nodes, ZigZag)",
-            "Collect แล้วเทียบ — เก็บของที่สนใจลงลิสต์ แล้วยุบปัญหาให้เหลือเทียบลิสต์ธรรมดา (เช่น Leaf-Similar)",
+            "**Base case:** `None` คืนค่าพื้นฐานที่เหมาะกับโจทย์ ในที่นี้คือ `0`",
+            "**Recursive calls:** ลูกซ้ายและขวาส่งคำตอบกลับขึ้นมา",
+            "**Combine:** ใช้ `max` เลือกกิ่งที่ลึกกว่า แล้ว `+ 1` เพื่อรวม node ปัจจุบัน",
           ],
+        },
+        {
+          t: "callout",
+          title: "Top-down หรือ Bottom-up?",
+          c: "ถ้าข้อมูลสำคัญเดินทางจาก root ไปหา leaf ให้ส่ง state ลงไป (top-down) แต่ถ้าต้องรวบรวมคำตอบจากหลาย subtree ที่ node เดียว ให้ใช้ return value (bottom-up) ทั้งสองแบบยังใช้ DFS และ recursion เหมือนกัน",
+        },
+
+        { t: "h2", c: "8. ชำแหละ Base Case และ Call Stack" },
+        {
+          t: "ul",
+          c: [
+            "**`if node is None`:** ใบไม้จะมีลูกซ้ายและขวาเป็น `None` ดังนั้นเมื่อ recursion เดินต่อจากใบไม้ ต้องมีเงื่อนไขหยุดก่อนเข้าถึง `.val` หรือ `.left`",
+            "**หน้าที่ของ `return`:** หยุด call ปัจจุบัน แล้วปล่อยให้ call ที่ค้างอยู่ใน stack ทำงานต่อ",
+            "**Backtrack:** ตอน `dfs(node.left)` กำลังทำงาน บรรทัด `dfs(node.right)` ยังรออยู่ เมื่อฝั่งซ้าย return จึงย้อนกลับมาทำฝั่งขวา",
+          ],
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `maxDepth(1)
+├─ maxDepth(2)
+│  ├─ maxDepth(None) -> 0
+│  ├─ maxDepth(None) -> 0
+│  └─ return 1
+├─ maxDepth(3)
+│  ├─ maxDepth(None) -> 0
+│  ├─ maxDepth(None) -> 0
+│  └─ return 1
+└─ return max(1, 1) + 1 -> 2`,
+        },
+        {
+          t: "p",
+          c: "ในตัวอย่างนี้ `maxDepth(1)` ต้องรอคำตอบจากฝั่งซ้ายก่อน จึงค่อยไปฝั่งขวา และสุดท้ายจึงคำนวณ `max(1, 1) + 1 = 2` นี่คือพฤติกรรมของ post-order และ bottom-up อย่างชัดเจน",
+        },
+
+        { t: "h2", c: "9. BFS vs DFS: เลือกใช้เมื่อไหร่?" },
+        {
+          t: "table",
+          head: ["มิติ", "BFS", "DFS"],
+          rows: [
+            ["แนวทางการเดิน", "กวาดทีละชั้น จากบนลงล่าง", "พุ่งลงลึกทีละกิ่ง แล้ว backtrack"],
+            ["โครงสร้างข้อมูล", "Queue เช่น `collections.deque`", "Recursion call stack หรือ explicit stack"],
+            ["เหมาะกับ", "Level order และ shortest path ใน tree ที่ไม่มีน้ำหนัก", "ตรวจทุกเส้นทาง, รวมผลจากลูก, และโจทย์ที่มี state ตามเส้นทาง"],
+            ["พื้นที่เสริม", "O(W) ตามความกว้างสูงสุดของชั้น", "O(H) ตามความสูงของต้นไม้"],
+          ],
+        },
+        {
+          t: "p",
+          c: "โจทย์บางข้อทำได้ทั้ง BFS และ DFS การเลือกจึงดูจากสิ่งที่โจทย์ถาม: ถ้าถามข้อมูลแยกตาม level หรือระยะทางสั้นสุด ให้เริ่มคิดจาก BFS; ถ้าต้องลงไปจนสุดเส้นทางหรือรวมคำตอบจาก subtree ให้เริ่มจาก DFS",
+        },
+
+        { t: "h2", c: "10. Complexity Analysis" },
+        {
+          t: "ul",
+          c: [
+            "**Time Complexity: O(N)** — DFS เยี่ยมทุก node หนึ่งครั้ง และงานที่แต่ละ node เป็น O(1)",
+            "**Space Complexity: O(H)** — recursion call stack ลึกสุดตามความสูง H ของต้นไม้ (ยังไม่รวมพื้นที่ผลลัพธ์)",
+            "**Balanced tree:** H ประมาณ `log N` จึงใช้ stack ราว O(log N)",
+            "**Skewed tree:** ถ้าต้นไม้เอียงเป็นเส้นตรง H = N จึงใช้ stack O(N)",
+          ],
+        },
+        {
+          t: "callout",
+          title: "สรุป pattern",
+          c: "เมื่อเห็น Binary Tree ให้ถามตัวเอง 3 ข้อ: (1) ต้องประมวลผล node ก่อนหรือหลังลูก? (2) ข้อมูลต้องส่งลงไปหรือคำตอบต้องส่งกลับขึ้นมา? (3) base case ของ None ควรคืนค่าอะไร? ตอบ 3 ข้อนี้ได้ ก็จะเลือก traversal และเขียน DFS ได้ถูกทางมากขึ้น",
         },
         {
           t: "callout",
