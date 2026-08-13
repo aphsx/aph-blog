@@ -49,19 +49,21 @@ print(prefix[j + 1] - prefix[i])  # 6` },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1732): นักปั่นจักรยานออกทริปบนเส้นทางที่มี n + 1 จุดซึ่งมี altitude (ระดับความสูง) ต่างกัน เริ่มต้นทริปที่จุด 0 ด้วย altitude เท่ากับ 0 กำหนด array จำนวนเต็ม gain ความยาว n โดย gain[i] คือค่าต่างสุทธิของ altitude ระหว่างจุดที่ i กับจุดที่ i + 1 ให้ return altitude ที่สูงที่สุดของจุดใดจุดหนึ่งบนเส้นทางนี้" },
+              { t: "p", c: `มีนักปั่นจักรยานกำลังเดินทางทริปบนเส้นทาง ทริปนี้ประกอบด้วยจุดทั้งหมด n + 1 จุดที่มี altitude (ระดับความสูง) ต่างกัน นักปั่นเริ่มทริปที่จุด 0 ด้วย altitude เท่ากับ 0
+
+กำหนด array จำนวนเต็ม gain ความยาว n มาให้ โดย gain[i] คือค่าต่างสุทธิของ altitude ระหว่างจุดที่ i กับจุดที่ i + 1 สำหรับทุก (0 <= i < n) ให้ return altitude ที่สูงที่สุดของจุดใดจุดหนึ่งบนเส้นทาง` },
               {
                 t: "example",
                 c: [
                   {
-                    input: "gain = [-5, 1, 5, 0, -7]",
+                    input: "gain = [-5,1,5,0,-7]",
                     output: "1",
-                    explain: "altitude ตามลำดับจุดคือ [0, -5, -4, 1, 1, -6] ค่าสูงสุดคือ 1",
+                    explain: "altitudes คือ [0,-5,-4,1,1,-6] ค่าที่สูงที่สุดคือ 1",
                   },
                   {
-                    input: "gain = [-4, -3, -2, -1, 4, 3, 2]",
+                    input: "gain = [-4,-3,-2,-1,4,3,2]",
                     output: "0",
-                    explain: "altitude ตามลำดับจุดคือ [0, -4, -7, -9, -10, -6, -3, -1] ค่าสูงสุดคือ 0 ซึ่งเป็นจุดเริ่มต้น",
+                    explain: "altitudes คือ [0,-4,-7,-9,-10,-6,-3,-1] ค่าที่สูงที่สุดคือ 0",
                   },
                 ],
               },
@@ -118,7 +120,37 @@ print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0`, out: `1
 
               { t: "callout", title: "💡 สรุป pattern", c: "เมื่อโจทย์พูดถึง ค่าต่าง/ส่วนเพิ่มทีละก้อน แล้วถามค่าสะสม ให้คิดถึง prefix sum และถ้าต้องการแค่ค่าสุดขั้ว (มากสุด/น้อยสุด) ก็บวกสะสมด้วยตัวแปรเดียวแล้ว track ค่าไป ไม่ต้องเก็บทั้ง array" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `There is a biker going on a road trip. The road trip consists of n + 1 points at different altitudes. The biker starts his trip on point 0 with altitude equal 0.
+
+You are given an integer array gain of length n where gain[i] is the net gain in altitude between points i and i + 1 for all (0 <= i < n). Return the highest altitude of a point.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "gain = [-5,1,5,0,-7]",
+              output: "1",
+              explain: "The altitudes are [0,-5,-4,1,1,-6]. The highest is 1.",
+            },
+            {
+              input: "gain = [-4,-3,-2,-1,4,3,2]",
+              output: "0",
+              explain: "The altitudes are [0,-4,-7,-9,-10,-6,-3,-1]. The highest is 0.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == gain.length",
+            "1 <= n <= 100",
+            "-100 <= gain[i] <= 100",
+          ],
+        },
+      ],
     },
   },
 
@@ -129,24 +161,34 @@ print(largest_altitude([-4, -3, -2, -1, 4, 3, 2]))  # 0`, out: `1
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC724): กำหนด array จำนวนเต็ม nums ให้คำนวณหา pivot index (ดัชนีจุดสมดุล) ของ array นี้ pivot index คือ index ที่ผลรวมของตัวเลขทั้งหมดที่อยู่ทางซ้ายของ index นั้น (strictly) เท่ากับผลรวมของตัวเลขทั้งหมดที่อยู่ทางขวาของ index นั้น (strictly) ถ้า index อยู่ริมซ้ายสุดของ array ให้ถือว่าผลรวมฝั่งซ้ายเป็น 0 เพราะไม่มีสมาชิกอยู่ทางซ้ายเลย กรณีริมขวาสุดก็เช่นเดียวกัน ให้ return pivot index ที่อยู่ซ้ายสุด ถ้าไม่มี index แบบนี้เลยให้ return -1" },
+              { t: "p", c: `กำหนด array จำนวนเต็ม nums มาให้ จงคำนวณหา pivot index ของ array นี้
+
+pivot index คือ index ที่ผลรวมของตัวเลขทั้งหมดที่อยู่ทางซ้ายของ index นั้น (โดยเคร่งครัด) เท่ากับผลรวมของตัวเลขทั้งหมดที่อยู่ทางขวาของ index นั้น (โดยเคร่งครัด)
+
+ถ้า index อยู่ที่ขอบซ้ายสุดของ array ผลรวมฝั่งซ้ายจะเป็น 0 เพราะไม่มีสมาชิกอยู่ทางซ้ายเลย หลักการนี้ใช้กับขอบขวาของ array ด้วยเช่นกัน
+
+ให้ return pivot index ที่อยู่ซ้ายสุด ถ้าไม่มี index แบบนี้เลยให้ return -1` },
               {
                 t: "example",
                 c: [
                   {
-                    input: "nums = [1, 7, 3, 6, 5, 6]",
+                    input: "nums = [1,7,3,6,5,6]",
                     output: "3",
-                    explain: "pivot index คือ 3: ผลรวมซ้าย = 1 + 7 + 3 = 11 เท่ากับผลรวมขวา = 5 + 6 = 11",
+                    explain: `pivot index คือ 3
+ผลรวมซ้าย = nums[0] + nums[1] + nums[2] = 1 + 7 + 3 = 11
+ผลรวมขวา = nums[4] + nums[5] = 5 + 6 = 11`,
                   },
                   {
-                    input: "nums = [1, 2, 3]",
+                    input: "nums = [1,2,3]",
                     output: "-1",
-                    explain: "ไม่มี index ไหนใน array นี้ที่ทำให้ผลรวมสองฝั่งสมดุลกันได้",
+                    explain: "ไม่มี index ใดที่ตรงตามเงื่อนไขในโจทย์",
                   },
                   {
-                    input: "nums = [2, 1, -1]",
+                    input: "nums = [2,1,-1]",
                     output: "0",
-                    explain: "pivot index คือ 0: ผลรวมซ้ายว่างจึงเป็น 0 เท่ากับผลรวมขวา = 1 + (-1) = 0",
+                    explain: `pivot index คือ 0
+ผลรวมซ้าย = 0 (ไม่มีสมาชิกอยู่ทางซ้ายของ index 0)
+ผลรวมขวา = nums[1] + nums[2] = 1 + -1 = 0`,
                   },
                 ],
               },
@@ -205,7 +247,49 @@ print(pivot_index([2, 1, -1]))          # 0`, out: `3
 
               { t: "callout", title: "💡 สรุป pattern", c: "เมื่อโจทย์ถามความสัมพันธ์ระหว่าง ผลรวมฝั่งซ้าย กับ ฝั่งขวา ที่แต่ละจุด ให้รู้ total ก่อนแล้ว accumulate ฝั่งเดียว ฝั่งตรงข้ามได้มาจากการลบ เทคนิคนี้เปลี่ยน O(n^2) ให้เหลือ O(n) ในหลายโจทย์" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an array of integers nums, calculate the pivot index of this array.
+
+The pivot index is the index where the sum of all the numbers strictly to the left of the index is equal to the sum of all the numbers strictly to the index's right.
+
+If the index is on the left edge of the array, then the left sum is 0 because there are no elements to the left. This also applies to the right edge of the array.
+
+Return the leftmost pivot index. If no such index exists, return -1.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,7,3,6,5,6]",
+              output: "3",
+              explain: `The pivot index is 3.
+Left sum = nums[0] + nums[1] + nums[2] = 1 + 7 + 3 = 11
+Right sum = nums[4] + nums[5] = 5 + 6 = 11`,
+            },
+            {
+              input: "nums = [1,2,3]",
+              output: "-1",
+              explain: "There is no index that satisfies the conditions in the problem statement.",
+            },
+            {
+              input: "nums = [2,1,-1]",
+              output: "0",
+              explain: `The pivot index is 0.
+Left sum = 0 (there are no elements to the left of index 0)
+Right sum = nums[1] + nums[2] = 1 + -1 = 0`,
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 10^4",
+            "-1000 <= nums[i] <= 1000",
+          ],
+        },
+      ],
     },
   },
 };

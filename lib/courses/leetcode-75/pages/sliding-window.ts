@@ -309,28 +309,29 @@ right=7 ch='b' window='b' best=3
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC643): กำหนด array จำนวนเต็ม nums ที่มี n สมาชิก และเลขจำนวนเต็ม k ให้หา contiguous subarray (ช่วงต่อเนื่อง) ที่ยาวเท่ากับ k ซึ่งมีค่าเฉลี่ยมากที่สุด แล้ว return ค่าเฉลี่ยนั้น (คำตอบที่คลาดเคลื่อนจากเฉลยไม่เกิน 10⁻⁵ ถือว่าถูกต้อง)" },
+              { t: "p", c: `กำหนดอาร์เรย์จำนวนเต็ม nums ที่ประกอบด้วยสมาชิก n ตัว และจำนวนเต็ม k
+
+จงหา contiguous subarray (ช่วงต่อเนื่อง) ที่มีความยาวเท่ากับ k ซึ่งมีค่าเฉลี่ยมากที่สุด แล้ว return ค่านั้น คำตอบใดที่คลาดเคลื่อนจากการคำนวณน้อยกว่า 10^-5 จะถือว่าผ่าน` },
               {
                 t: "example",
                 c: [
                   {
-                    input: "nums = [1, 12, -5, -6, 50, 3], k = 4",
+                    input: "nums = [1,12,-5,-6,50,3], k = 4",
                     output: "12.75000",
-                    explain: "ช่วง [12, -5, -6, 50] ผลรวม (12 - 5 - 6 + 50) = 51 หาร 4 = 12.75 — เป็นช่วงยาว 4 ที่ให้ค่าเฉลี่ยมากที่สุด",
+                    explain: "ค่าเฉลี่ยมากที่สุดคือ (12 - 5 - 6 + 50) / 4 = 51 / 4 = 12.75",
                   },
                   {
                     input: "nums = [5], k = 1",
                     output: "5.00000",
-                    explain: "มี subarray ยาว 1 แบบเดียวคือ [5] ค่าเฉลี่ยจึงเท่ากับตัวมันเอง",
                   },
                 ],
               },
               {
                 t: "constraints",
                 c: [
-                "1 <= k <= nums.length <= 10^5",
+                "n == nums.length",
+                "1 <= k <= n <= 10^5",
                 "-10^4 <= nums[i] <= 10^4",
-                "n ถึง 10^5 → ต้องกวาดรอบเดียว วิธีคำนวณผลรวมทุกช่วงใหม่ (O(nk)) รันไม่ทัน",
                 ],
               },
 
@@ -374,7 +375,32 @@ print(find_max_average([1, 12, -5, -6, 50, 3], 4))  # 12.75`, out: `12.75` },
 
               { t: "callout", title: "💡 สรุป pattern", c: "window ขนาดคงที่ k: บวกตัวเข้า ลบตัวออก อย่าคำนวณทั้งช่วงใหม่ และถ้าโจทย์ถามค่าเฉลี่ย ให้แปลงเป็นหาผลรวมก่อนแล้วค่อยหารตอนท้าย" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You are given an integer array nums consisting of n elements, and an integer k.
+
+Find a contiguous subarray whose length is equal to k that has the maximum average value and return this value. Any answer with a calculation error less than 10^-5 will be accepted.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,12,-5,-6,50,3], k = 4",
+              output: "12.75000",
+              explain: "Maximum average is (12 - 5 - 6 + 50) / 4 = 51 / 4 = 12.75",
+            },
+            {
+              input: "nums = [5], k = 1",
+              output: "5.00000",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: ["n == nums.length", "1 <= k <= n <= 10^5", "-10^4 <= nums[i] <= 10^4"],
+        },
+      ],
     },
   },
 
@@ -385,24 +411,26 @@ print(find_max_average([1, 12, -5, -6, 50, 3], 4))  # 12.75`, out: `12.75` },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1456): กำหนด string s และเลขจำนวนเต็ม k ให้หาจำนวน vowel (สระในภาษาอังกฤษ: a, e, i, o, u) ที่มากที่สุด ที่สามารถปรากฏได้ใน substring ใด ๆ ของ s ที่มีความยาวเท่ากับ k พอดี" },
+              { t: "p", c: `กำหนดสตริง s และจำนวนเต็ม k มาให้ ให้ return จำนวนตัวอักษรสระสูงสุดใน substring ใด ๆ ของ s ที่มีความยาว k
+
+ตัวอักษรสระในภาษาอังกฤษคือ 'a', 'e', 'i', 'o' และ 'u'` },
               {
                 t: "example",
                 c: [
                   {
                     input: 's = "abciiidef", k = 3',
                     output: "3",
-                    explain: 'ช่วง "iii" มีสระครบทั้ง 3 ตัว เป็น substring ยาว 3 ที่มีสระมากที่สุดที่เป็นไปได้',
+                    explain: 'substring "iii" มีตัวสระ 3 ตัว',
                   },
                   {
                     input: 's = "aeiou", k = 2',
                     output: "2",
-                    explain: "ทุกตัวอักษรเป็นสระ ดังนั้น substring ยาว 2 ช่วงไหนก็มีสระครบ 2 ตัวเท่ากันหมด",
+                    explain: "substring ยาว 2 ช่วงใดก็มีสระ 2 ตัว",
                   },
                   {
                     input: 's = "leetcode", k = 3',
                     output: "2",
-                    explain: 'ช่วง "lee", "eet" หรือ "ode" ต่างมีสระ 2 ตัว ซึ่งเป็นค่ามากที่สุดที่หาได้ในสตริงนี้',
+                    explain: '"lee", "eet" และ "ode" มีสระ 2 ตัว',
                   },
                 ],
               },
@@ -410,7 +438,7 @@ print(find_max_average([1, 12, -5, -6, 50, 3], 4))  # 12.75`, out: `12.75` },
                 t: "constraints",
                 c: [
                 "1 <= s.length <= 10^5",
-                "s เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
+                "s ประกอบด้วยตัวอักษรอังกฤษพิมพ์เล็ก",
                 "1 <= k <= s.length",
                 ],
               },
@@ -465,7 +493,42 @@ print(max_vowels("leetcode", 3))   # 2`, out: `3
 
               { t: "callout", title: "💡 สรุป pattern", c: "window ขนาดคงที่ที่ track \"count\" แทนผลรวม: ตัวเข้าเพิ่มนับ ตัวออกลดนับ pattern เดียวกับผลรวมแต่เปลี่ยนสิ่งที่ track เท่านั้น" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given a string s and an integer k, return the maximum number of vowel letters in any substring of s with length k.
+
+Vowel letters in English are 'a', 'e', 'i', 'o', and 'u'.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 's = "abciiidef", k = 3',
+              output: "3",
+              explain: 'The substring "iii" contains 3 vowel letters.',
+            },
+            {
+              input: 's = "aeiou", k = 2',
+              output: "2",
+              explain: "Any substring of length 2 contains 2 vowels.",
+            },
+            {
+              input: 's = "leetcode", k = 3',
+              output: "2",
+              explain: '"lee", "eet" and "ode" contain 2 vowels.',
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= s.length <= 10^5",
+            "s consists of lowercase English letters.",
+            "1 <= k <= s.length",
+          ],
+        },
+      ],
     },
   },
 
@@ -476,19 +539,19 @@ print(max_vowels("leetcode", 3))   # 2`, out: `3
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1004): กำหนด binary array (มีแค่ 0 กับ 1) ชื่อ nums และเลขจำนวนเต็ม k ให้ return จำนวนสูงสุดของ 1 ที่ต่อเนื่องกันในอาร์เรย์ หากสามารถพลิก (flip) 0 เป็น 1 ได้อย่างมากที่สุด k ตัว" },
+              { t: "p", c: `กำหนด binary array nums และจำนวนเต็ม k มาให้ ให้ return จำนวนสูงสุดของ 1 ที่ต่อเนื่องกันในอาร์เรย์ หากคุณสามารถพลิก (flip) 0 ได้อย่างมากที่สุด k ตัว` },
               {
                 t: "example",
                 c: [
                   {
-                    input: "nums = [1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], k = 2",
+                    input: "nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2",
                     output: "6",
-                    explain: "พลิก 0 สองตัวตรงกลาง (index 4-5) เป็น 1 จะได้ช่วง [1,1,1,1,1,1] ยาว 6 ตัวติดกัน — ยาวที่สุดเท่าที่พลิกได้ 2 ตัว",
+                    explain: "[1,1,1,0,0,1,1,1,1,1,1]\nตัวเลขตัวหนาคือ 0 ที่ถูกพลิกเป็น 1 ส่วน subarray ที่ยาวที่สุดถูกขีดเส้นใต้",
                   },
                   {
-                    input: "nums = [0, 0, 0], k = 0",
-                    output: "0",
-                    explain: "k = 0 พลิกไม่ได้เลยสักตัว และไม่มี 1 อยู่ในอาร์เรย์เดิม จึงไม่มีช่วง 1 ต่อเนื่องแม้แต่ตัวเดียว",
+                    input: "nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3",
+                    output: "10",
+                    explain: "[0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]\nตัวเลขตัวหนาคือ 0 ที่ถูกพลิกเป็น 1 ส่วน subarray ที่ยาวที่สุดถูกขีดเส้นใต้",
                   },
                 ],
               },
@@ -496,7 +559,7 @@ print(max_vowels("leetcode", 3))   # 2`, out: `3
                 t: "constraints",
                 c: [
                 "1 <= nums.length <= 10^5",
-                "nums[i] เป็น 0 หรือ 1 เท่านั้น",
+                "nums[i] เป็น 0 หรือ 1",
                 "0 <= k <= nums.length",
                 ],
               },
@@ -547,7 +610,35 @@ print(longest_ones([1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2))  # 6`, out: `6` },
 
               { t: "callout", title: "💡 สรุป pattern", c: "window ขนาดยืดหยุ่น + \"เปลี่ยนโจทย์เป็น condition (เงื่อนไข) บน window\": พลิก k ตัว = window ที่มี 0 ไม่เกิน k ขยายขวาเสมอ หดซ้ายเมื่อผิด condition" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given a binary array nums and an integer k, return the maximum number of consecutive 1's in the array if you can flip at most k 0's.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2",
+              output: "6",
+              explain: "[1,1,1,0,0,1,1,1,1,1,1]\nBolded numbers were flipped from 0 to 1. The longest subarray is underlined.",
+            },
+            {
+              input: "nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3",
+              output: "10",
+              explain: "[0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]\nBolded numbers were flipped from 0 to 1. The longest subarray is underlined.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 10^5",
+            "nums[i] is either 0 or 1.",
+            "0 <= k <= nums.length",
+          ],
+        },
+      ],
     },
   },
 
@@ -558,24 +649,26 @@ print(longest_ones([1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2))  # 6`, out: `6` },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1493): กำหนด binary array (มีแค่ 0 กับ 1) ชื่อ nums ต้องลบสมาชิก (element) ออกจากอาร์เรย์ 1 ตัวเสมอ ให้ return ขนาดของ subarray ที่ไม่ว่างเปล่าและมีแต่ 1 ล้วนที่ยาวที่สุดในอาร์เรย์ที่เหลือ ถ้าไม่มี subarray แบบนั้นให้ return 0" },
+              { t: "p", c: `กำหนด binary array nums มาให้ คุณต้องลบสมาชิกหนึ่งตัวออกจากอาร์เรย์
+
+ให้ return ขนาดของ subarray ที่ไม่ว่างเปล่าซึ่งมีแต่ 1 ล้วนที่ยาวที่สุดในอาร์เรย์ผลลัพธ์ ถ้าไม่มี subarray แบบนั้น ให้ return 0` },
               {
                 t: "example",
                 c: [
                   {
-                    input: "nums = [1, 1, 0, 1]",
+                    input: "nums = [1,1,0,1]",
                     output: "3",
-                    explain: "ลบ 0 (index 2) ออก เหลือ [1,1,1] ซึ่งเป็น 1 ต่อกัน 3 ตัวรวด",
+                    explain: "หลังลบตัวเลขที่ตำแหน่ง 2 แล้ว [1,1,1] ประกอบด้วยตัวเลข 1 อยู่ 3 ตัว",
                   },
                   {
-                    input: "nums = [0, 1, 1, 1, 0, 1, 1, 0, 1]",
+                    input: "nums = [0,1,1,1,0,1,1,0,1]",
                     output: "5",
-                    explain: "ลบ 0 ที่ index 4 (ตัวคั่นกลาง) จะเหลือ [0,1,1,1,1,1,0,1] ทำให้ 1 สองฝั่งเชื่อมกันเป็นช่วงยาว 5 ตัวติดกัน",
+                    explain: "หลังลบตัวเลขที่ตำแหน่ง 4 แล้ว [0,1,1,1,1,1,0,1] subarray ของ 1 ที่ยาวที่สุดคือ [1,1,1,1,1]",
                   },
                   {
-                    input: "nums = [1, 1, 1]",
+                    input: "nums = [1,1,1]",
                     output: "2",
-                    explain: "ไม่มี 0 ให้ลบเลย แต่โจทย์บังคับต้องลบ 1 ตัวอยู่ดี จึงเหลือ 1 ต่อกันแค่ 2 ตัว",
+                    explain: "คุณต้องลบหนึ่งสมาชิก",
                   },
                 ],
               },
@@ -583,7 +676,7 @@ print(longest_ones([1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2))  # 6`, out: `6` },
                 t: "constraints",
                 c: [
                 "1 <= nums.length <= 10^5",
-                "nums[i] เป็น 0 หรือ 1 เท่านั้น",
+                "nums[i] เป็น 0 หรือ 1",
                 ],
               },
 
@@ -635,7 +728,41 @@ print(longest_subarray([1, 1, 1]))     # 2`, out: `3
 
               { t: "callout", title: "💡 สรุป pattern", c: "โจทย์ที่ดูต่าง แต่จริง ๆ คือ variable size window แบบ k = 1 ที่มีลูกเล่นเรื่องการนับความยาว: ถ้าเจอโจทย์ใกล้เคียง ให้ถามว่า \"condition (เงื่อนไข) บน window คืออะไร\" และ \"ความยาวที่ต้องตอบนับยังไง\"" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given a binary array nums, you should delete one element from it.
+
+Return the size of the longest non-empty subarray containing only 1's in the resulting array. Return 0 if there is no such subarray.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,1,0,1]",
+              output: "3",
+              explain: "After deleting the number in position 2, [1,1,1] contains 3 numbers with value of 1's.",
+            },
+            {
+              input: "nums = [0,1,1,1,0,1,1,0,1]",
+              output: "5",
+              explain: "After deleting the number in position 4, [0,1,1,1,1,1,0,1] longest subarray with value of 1's is [1,1,1,1,1].",
+            },
+            {
+              input: "nums = [1,1,1]",
+              output: "2",
+              explain: "You must delete one element.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 10^5",
+            "nums[i] is either 0 or 1.",
+          ],
+        },
+      ],
     },
   },
 };

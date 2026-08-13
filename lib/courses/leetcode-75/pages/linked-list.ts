@@ -391,7 +391,7 @@ return prev           # prev จะกลายเป็น Head ตัวให
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC2095): กำหนด head ของ linked list มาให้ ให้ Delete (ลบ) middle node ออก แล้ว return head ของ linked list ที่แก้ไขแล้ว
+          c: `กำหนด head ของ linked list มาให้ ให้ลบ middle node ออก แล้ว return head ของ linked list ที่แก้ไขแล้ว
 
 middle node ของ linked list ขนาด n คือ node ลำดับที่ ⌊n / 2⌋ นับจากจุดเริ่มต้นแบบ 0-based indexing โดย ⌊x⌋ หมายถึงจำนวนเต็มที่มากที่สุดที่น้อยกว่าหรือเท่ากับ x
 
@@ -831,13 +831,13 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC328): กำหนด head ของ singly linked list มาให้ ให้ group node ที่มี odd indices ไว้ด้วยกัน ตามด้วย node ที่มี even indices แล้ว return list ที่จัดลำดับใหม่แล้ว
+          c: `กำหนด head ของ singly linked list มาให้ ให้ group node ที่มี odd indices ไว้ด้วยกัน ตามด้วย node ที่มี even indices แล้ว return list ที่จัดลำดับใหม่แล้ว
 
 node ตัวแรกถือว่าเป็น odd และตัวที่สองถือว่าเป็น even ไล่ไปเรื่อย ๆ
 
-Note ว่า relative order ภายในกลุ่ม even และกลุ่ม odd ต้องคงเดิมเหมือนใน input
+หมายเหตุว่า relative order ภายในกลุ่ม even และกลุ่ม odd ต้องคงเดิมเหมือนใน input
 
-ต้องแก้ปัญหาด้วย O(1) extra space complexity และ O(n) time complexity`,
+คุณต้องแก้ปัญหาด้วย O(1) extra space complexity และ O(n) time complexity`,
         },
         {
           t: "example",
@@ -1197,7 +1197,7 @@ class Solution:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC206): กำหนด head ของ singly linked list มาให้ ให้ reverse list แล้ว return list ที่ reverse แล้ว",
+          c: "กำหนด head ของ singly linked list มาให้ ให้ reverse list แล้ว return list ที่ reverse แล้ว",
         },
         {
           t: "example",
@@ -1523,9 +1523,9 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC2130): ใน linked list ขนาด n ที่ n เป็นเลขคู่ (even) node ลำดับที่ i (0-indexed) เรียกว่า twin ของ node ลำดับที่ (n-1-i) เมื่อ 0 <= i <= (n / 2) - 1
+          c: `ใน linked list ขนาด n ที่ n เป็นเลขคู่ (even) node ลำดับที่ i (0-indexed) เรียกว่า twin ของ node ลำดับที่ (n-1-i) เมื่อ 0 <= i <= (n / 2) - 1
 
-- ตัวอย่างเช่น ถ้า n = 4 แล้ว node 0 คือ twin ของ node 3 และ node 1 คือ twin ของ node 2 นี่คือคู่ twin ทั้งหมดของ n = 4
+- ตัวอย่างเช่น ถ้า n = 4 แล้ว node 0 คือ twin ของ node 3 และ node 1 คือ twin ของ node 2 นี่คือโหนดเดียวที่มี twin สำหรับ n = 4
 
 twin sum นิยามว่าคือผลรวมของค่า node หนึ่งกับ twin ของมัน
 

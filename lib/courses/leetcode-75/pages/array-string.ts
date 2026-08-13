@@ -1140,11 +1140,9 @@ n=10000  list.pop(0) รวมการขยับ: 49995000   | deque.popleft(
       th: [
         {
           t: "p",
-          c: "ให้สตริงสองตัวคือ word1 กับ word2 จงรวมเข้าด้วยกันโดยหยิบตัวอักษรสลับกันทีละตัว เริ่มจาก word1 เสมอ",
-        },
-        {
-          t: "p",
-          c: "ถ้าสตริงหนึ่งหมดก่อน ให้นำส่วนที่เหลือของอีกสตริงมาต่อท้าย แล้ว return สตริงผลลัพธ์",
+          c: `กำหนดสตริงสองตัวคือ word1 และ word2 มาให้ จงรวมสตริงทั้งสองเข้าด้วยกันโดยเพิ่มตัวอักษรสลับกันทีละตัว โดยเริ่มจาก word1 ถ้าสตริงใดยาวกว่าอีกสตริง ให้ต่อตัวอักษรที่เหลือไว้ท้ายสตริงที่รวมแล้ว
+
+ให้ return สตริงที่รวมแล้ว`,
         },
         {
           t: "example",
@@ -1152,26 +1150,26 @@ n=10000  list.pop(0) รวมการขยับ: 49995000   | deque.popleft(
             {
               input: 'word1 = "abc", word2 = "pqr"',
               output: '"apbqcr"',
-              explain:
-                "สองฝั่งยาว 3 เท่ากันพอดี จึงสลับกันได้ครบทุกตัวโดยไม่มีใครเหลือ: หยิบ a (word1 ตัวที่ 0) แล้ว p (word2 ตัวที่ 0) แล้ว b แล้ว q แล้ว c แล้ว r",
+              explain: `สตริงที่รวมแล้วจะรวมกันดังนี้:
+word1: a b c
+word2: p q r
+merged: a p b q c r`,
             },
             {
               input: 'word1 = "ab", word2 = "pqrs"',
               output: '"apbqrs"',
-              explain:
-                "สลับกันได้แค่ 2 คู่ (a-p และ b-q) เพราะ word1 มีแค่ 2 ตัว พอ word1 หมด ก็ไม่มีอะไรให้สลับด้วยอีกแล้ว ตัวที่เหลือของ word2 คือ r กับ s จึงถูกต่อท้ายติดกันรวดเดียวเป็น rs ไม่ใช่แทรกสลับกับอะไร",
+              explain: `สังเกตว่า word2 ยาวกว่า "rs" จึงถูกต่อท้าย
+word1: a b
+word2: p q r s
+merged: a p b q r s`,
             },
             {
               input: 'word1 = "abcd", word2 = "pq"',
               output: '"apbqcd"',
-              explain:
-                'กลับด้านกับเคสก่อน คราวนี้ word2 หมดก่อน เหลือ c กับ d ของ word1 ต่อท้ายเป็น cd — สังเกตว่ากติกาไม่ได้สนใจว่าใครยาวกว่า สนใจแค่ว่า "ใครหมดก่อน" แล้วที่เหลือของอีกฝั่งไปต่อท้าย',
-            },
-            {
-              input: 'word1 = "a", word2 = ""',
-              output: '"a"',
-              explain:
-                "เคสสุดขั้วที่ควรลองเอง (ไม่ได้อยู่ใน constraint จริงของ LeetCode แต่เป็นเคสที่คนเขียนโค้ดพังบ่อย): ฝั่งหนึ่งว่างเปล่า แปลว่าสลับกันได้ 0 คู่ ผลลัพธ์คืออีกฝั่งทั้งก้อน โค้ดต้องไม่ error และต้องไม่คืนสตริงว่าง",
+              explain: `สังเกตว่า word1 ยาวกว่า "cd" จึงถูกต่อท้าย
+word1: a b c d
+word2: p q
+merged: a p b q c d`,
             },
           ],
         },
@@ -1179,7 +1177,7 @@ n=10000  list.pop(0) รวมการขยับ: 49995000   | deque.popleft(
           t: "constraints",
           c: [
             "1 <= word1.length, word2.length <= 100",
-            "word1 และ word2 เป็นตัวอักษรอังกฤษพิมพ์เล็ก",
+            "word1 และ word2 ประกอบด้วยตัวอักษรอังกฤษพิมพ์เล็ก",
           ],
         },
         {
@@ -1437,7 +1435,50 @@ merge('ab','pqrs') = apbqrs`,
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You are given two strings word1 and word2. Merge the strings by adding letters in alternating order, starting with word1. If a string is longer than the other, append the additional letters onto the end of the merged string.
+
+Return the merged string.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 'word1 = "abc", word2 = "pqr"',
+              output: '"apbqcr"',
+              explain: `The merged string will be merged as so:
+word1: a b c
+word2: p q r
+merged: a p b q c r`,
+            },
+            {
+              input: 'word1 = "ab", word2 = "pqrs"',
+              output: '"apbqrs"',
+              explain: `Notice that as word2 is longer, "rs" is appended to the end.
+word1: a b
+word2: p q r s
+merged: a p b q r s`,
+            },
+            {
+              input: 'word1 = "abcd", word2 = "pq"',
+              output: '"apbqcd"',
+              explain: `Notice that as word1 is longer, "cd" is appended to the end.
+word1: a b c d
+word2: p q
+merged: a p b q c d`,
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= word1.length, word2.length <= 100",
+            "word1 and word2 consist of lowercase English letters.",
+          ],
+        },
+      ],
     },
   },
   "lc75-p02": {
@@ -1449,15 +1490,9 @@ merge('ab','pqrs') = apbqrs`,
       th: [
         {
           t: "p",
-          c: 'โจทย์ตั้งนิยามขึ้นมาเองก่อน: เราจะบอกว่าสตริง t "หาร" สตริง s ได้ ก็ต่อเมื่อเอา t มาต่อกันซ้ำ ๆ ตั้งแต่ 1 ครั้งขึ้นไป แล้วได้ s พอดี ไม่ขาดไม่เกิน',
-        },
-        {
-          t: "p",
-          c: "ตัวอย่างของนิยามนี้: AB หาร ABABAB ได้ เพราะ AB ต่อกัน 3 ครั้งได้ ABABAB เป๊ะ · แต่ AB ไม่หาร ABA เพราะต่อกี่ครั้งก็ได้ความยาวเป็นเลขคู่เสมอ ไม่มีทางได้ความยาว 3",
-        },
-        {
-          t: "p",
-          c: "โจทย์ให้ str1 กับ str2 มา แล้วขอสตริง x ที่ ยาวที่สุด ที่หารได้ทั้ง str1 และ str2 ถ้าไม่มีเลยให้คืนสตริงว่าง",
+          c: `สำหรับสตริงสองตัว s และ t เราจะบอกว่า "t หาร s" ก็ต่อเมื่อ s = t + t + t + ... + t + t (คือ t ถูกต่อเข้ากับตัวเองหนึ่งครั้งหรือมากกว่า)
+
+กำหนดสตริงสองตัวคือ str1 และ str2 มาให้ ให้ return สตริง x ที่ยาวที่สุดที่หารได้ทั้ง str1 และ str2`,
         },
         {
           t: "example",
@@ -1465,26 +1500,18 @@ merge('ab','pqrs') = apbqrs`,
             {
               input: 'str1 = "ABCABC", str2 = "ABC"',
               output: '"ABC"',
-              explain:
-                "ABC ต่อกัน 2 ครั้งได้ ABCABC และต่อกัน 1 ครั้งได้ ABC จึงหารได้ทั้งคู่\nและไม่มีบล็อกไหนยาวกว่านี้ที่ทำได้ เพราะบล็อกต้องไม่ยาวเกิน str2 ซึ่งยาวแค่ 3",
             },
             {
               input: 'str1 = "ABABAB", str2 = "ABAB"',
               output: '"AB"',
-              explain:
-                "ลองบล็อก ABAB ดูก่อน: มันหาร ABAB ได้ แต่หาร ABABAB ไม่ได้ เพราะ 6 หารด้วย 4 ไม่ลงตัว\nจึงต้องถอยลงมาที่ AB ซึ่งต่อกัน 3 ครั้งได้ str1 และต่อกัน 2 ครั้งได้ str2 — สังเกตว่าคำตอบสั้นกว่าทั้งสองตัว",
             },
             {
               input: 'str1 = "LEET", str2 = "CODE"',
               output: '""',
-              explain:
-                "ตัวอักษรตัวแรกก็คนละตัวแล้ว (L กับ C) บล็อกร่วมจึงต้องเริ่มด้วยทั้ง L และ C พร้อมกัน ซึ่งเป็นไปไม่ได้ ต้องคืน string ว่าง",
             },
             {
-              input: 'str1 = "ABABABAB", str2 = "ABAB"',
-              output: '"ABAB"',
-              explain:
-                "คู่นี้ต่างจากตัวอย่างที่ 2 ตรงที่ 8 หารด้วย 4 ลงตัว ABAB จึงหาร str1 ได้จริง (ต่อกัน 2 ครั้ง)\nคำตอบจึงเป็น ABAB ไม่ใช่ AB เพราะโจทย์ขอตัวที่ยาวที่สุด — เทียบสองตัวอย่างนี้คู่กันจะเห็นว่าความยาวคือหัวใจ",
+              input: 'str1 = "AAAAAB", str2 = "AAA"',
+              output: '""',
             },
           ],
         },
@@ -1492,7 +1519,7 @@ merge('ab','pqrs') = apbqrs`,
           t: "constraints",
           c: [
             "1 <= str1.length, str2.length <= 1000",
-            "str1 และ str2 เป็นตัวอักษรอังกฤษพิมพ์ใหญ่",
+            "str1 และ str2 ประกอบด้วยตัวอักษรอังกฤษพิมพ์ใหญ่",
           ],
         },
         {
@@ -1737,7 +1764,42 @@ class Solution:
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `For two strings s and t, we say "t divides s" if and only if s = t + t + t + ... + t + t (i.e., t is concatenated with itself one or more times).
+
+Given two strings str1 and str2, return the largest string x such that x divides both str1 and str2.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 'str1 = "ABCABC", str2 = "ABC"',
+              output: '"ABC"',
+            },
+            {
+              input: 'str1 = "ABABAB", str2 = "ABAB"',
+              output: '"AB"',
+            },
+            {
+              input: 'str1 = "LEET", str2 = "CODE"',
+              output: '""',
+            },
+            {
+              input: 'str1 = "AAAAAB", str2 = "AAA"',
+              output: '""',
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= str1.length, str2.length <= 1000",
+            "str1 and str2 consist of English uppercase letters.",
+          ],
+        },
+      ],
     },
   },
   "lc75-p03": {
@@ -1749,15 +1811,11 @@ class Solution:
       th: [
         {
           t: "p",
-          c: "มีเด็กยืนเรียงกันอยู่ n คน เด็กคนที่ i ถือลูกอมอยู่ candies[i] เม็ด และเรามีลูกอมพิเศษอีกก้อนหนึ่งจำนวน extraCandies เม็ด",
-        },
-        {
-          t: "p",
-          c: "จงตอบทีละคนว่า ถ้ายกลูกอมพิเศษก้อนนี้ให้เด็กคนนั้นไปทั้งก้อน เขาจะมีลูกอมมากที่สุดในกลุ่มหรือไม่ (นับว่าเท่ากับคนที่มากที่สุดก็ถือว่าใช่)",
-        },
-        {
-          t: "p",
-          c: "คำตอบเป็นลิสต์ของ true/false ที่ยาวเท่ากับจำนวนเด็ก",
+          c: `มีเด็ก n คนพร้อมลูกอม (candies) คุณได้รับอาร์เรย์จำนวนเต็ม candies โดย candies[i] แทนจำนวนลูกอมที่เด็กคนที่ i มี และจำนวนเต็ม extraCandies แทนจำนวนลูกอมพิเศษที่คุณมี
+
+ให้ return อาร์เรย์บูลีน result ความยาว n โดย result[i] เป็น true ถ้าหลังจากให้ลูกอมพิเศษทั้งหมดกับเด็กคนที่ i แล้ว เขาจะมีลูกอมมากที่สุดในบรรดาเด็กทั้งหมด หรือ false ถ้าไม่ใช่
+
+หมายเหตุ: เด็กหลายคนสามารถมีลูกอมมากที่สุดพร้อมกันได้`,
         },
         {
           t: "example",
@@ -1765,20 +1823,22 @@ class Solution:
             {
               input: "candies = [2,3,5,1,3], extraCandies = 3",
               output: "[true,true,true,false,true]",
-              explain:
-                "คนที่ถือเยอะสุดตอนนี้คือ 5 เม็ด ทุกคนจึงต้องไปให้ถึงเลข 5 นี้\nเด็กคนที่ 0: 2+3 = 5 เท่ากับ 5 พอดี ซึ่งนับว่าถึงแล้ว จึงเป็น true\nเด็กคนที่ 3: 1+3 = 4 ยังไม่ถึง 5 จึงเป็น false\nสังเกตว่าเกณฑ์ยังเป็น 5 เท่าเดิมตอนตรวจเด็กคนที่ 3 แม้ว่าเด็กคนที่ 2 จะเพิ่งได้ 8 ไปก็ตาม เพราะแต่ละคำถามเป็นอิสระต่อกัน",
+              explain: `ถ้าให้ลูกอมพิเศษทั้งหมดกับ:
+- เด็กคนที่ 1 จะได้ 2 + 3 = 5 เม็ด ซึ่งมากที่สุดในบรรดาเด็ก
+- เด็กคนที่ 2 จะได้ 3 + 3 = 6 เม็ด ซึ่งมากที่สุดในบรรดาเด็ก
+- เด็กคนที่ 3 จะได้ 5 + 3 = 8 เม็ด ซึ่งมากที่สุดในบรรดาเด็ก
+- เด็กคนที่ 4 จะได้ 1 + 3 = 4 เม็ด ซึ่งไม่มากที่สุดในบรรดาเด็ก
+- เด็กคนที่ 5 จะได้ 3 + 3 = 6 เม็ด ซึ่งมากที่สุดในบรรดาเด็ก`,
             },
             {
               input: "candies = [4,2,1,1,2], extraCandies = 1",
               output: "[true,false,false,false,false]",
               explain:
-                "เกณฑ์คือ 4 และลูกอมพิเศษมีแค่ 1 เม็ด คนที่ถือ 2 บวกแล้วได้ 3 ยังห่างเกณฑ์อยู่ 1 เม็ด จึงไม่มีใครถึงเลย เหลือแค่เจ้าของเกณฑ์เองที่ 4+1 = 5",
+                "มีลูกอมพิเศษแค่ 1 เม็ด\nเด็กคนที่ 1 จะมีลูกอมมากที่สุดเสมอ แม้จะให้ลูกอมพิเศษกับเด็กคนอื่นก็ตาม",
             },
             {
               input: "candies = [12,1,12], extraCandies = 10",
               output: "[true,false,true]",
-              explain:
-                "เคสนี้มีคนถือ 12 เท่ากันสองคนตั้งแต่แรก ทั้งคู่บวก 10 แล้วได้ 22 ซึ่ง >= 12 จึงเป็น true ทั้งคู่\nนี่คือเคสที่ยืนยันว่าคำว่า ที่หนึ่ง ในโจทย์นี้มีได้หลายคนพร้อมกัน",
             },
           ],
         },
@@ -2021,7 +2081,50 @@ candies หลัง: [5, 6, 8, 4, 6] <- ลิสต์ต้นฉบับถ
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `There are n kids with candies. You are given an integer array candies, where each candies[i] represents the number of candies the ith kid has, and an integer extraCandies, denoting the number of extra candies that you have.
+
+Return a boolean array result of length n, where result[i] is true if, after giving the ith kid all the extraCandies, they will have the greatest number of candies among all the kids, or false otherwise.
+
+Note that multiple kids can have the greatest number of candies.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "candies = [2,3,5,1,3], extraCandies = 3",
+              output: "[true,true,true,false,true]",
+              explain: `If you give all extraCandies to:
+- Kid 1, they will have 2 + 3 = 5 candies, which is the greatest among the kids.
+- Kid 2, they will have 3 + 3 = 6 candies, which is the greatest among the kids.
+- Kid 3, they will have 5 + 3 = 8 candies, which is the greatest among the kids.
+- Kid 4, they will have 1 + 3 = 4 candies, which is not the greatest among the kids.
+- Kid 5, they will have 3 + 3 = 6 candies, which is the greatest among the kids.`,
+            },
+            {
+              input: "candies = [4,2,1,1,2], extraCandies = 1",
+              output: "[true,false,false,false,false]",
+              explain:
+                "There is only 1 extra candy.\nKid 1 will always have the greatest number of candies, even if a different kid is given the extra candy.",
+            },
+            {
+              input: "candies = [12,1,12], extraCandies = 10",
+              output: "[true,false,true]",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == candies.length",
+            "2 <= n <= 100",
+            "1 <= candies[i] <= 100",
+            "1 <= extraCandies <= 50",
+          ],
+        },
+      ],
     },
   },
   "lc75-p04": {
@@ -2033,19 +2136,9 @@ candies หลัง: [5, 6, 8, 4, 6] <- ลิสต์ต้นฉบับถ
       th: [
         {
           t: "p",
-          c: "มีแปลงดอกไม้ที่แบ่งเป็นช่องเรียงกันเป็นแถวเดียว ให้เป็นลิสต์ชื่อ flowerbed โดย 0 คือช่องว่าง และ 1 คือช่องที่มีดอกไม้ปลูกอยู่แล้ว",
-        },
-        {
-          t: "p",
-          c: "กติกามีข้อเดียว: ดอกไม้สองต้นห้ามอยู่ในช่องที่ติดกัน",
-        },
-        {
-          t: "p",
-          c: "จงตอบว่าปลูกเพิ่มอีก n ดอกโดยไม่ผิดกติกาได้หรือไม่ ตอบเป็น true หรือ false",
-        },
-        {
-          t: "p",
-          c: "โจทย์รับประกันว่า flowerbed ที่ส่งมาไม่ผิดกติกาอยู่ก่อนแล้ว",
+          c: `คุณมีแปลงดอกไม้ยาวที่บางช่องมีดอกไม้ปลูกอยู่แล้ว บางช่องว่าง อย่างไรก็ตาม ดอกไม้ห้ามปลูกในช่องที่ติดกัน
+
+กำหนดอาร์เรย์จำนวนเต็ม flowerbed ที่ประกอบด้วย 0 และ 1 โดย 0 หมายถึงว่าง และ 1 หมายถึงไม่ว่าง พร้อมกับจำนวนเต็ม n ให้ return true ถ้าสามารถปลูกดอกไม้ใหม่ n ต้นในแปลงได้โดยไม่ผิดกฎห้ามช่องติดกัน และ return false ในกรณีอื่น`,
         },
         {
           t: "example",
@@ -2053,41 +2146,19 @@ candies หลัง: [5, 6, 8, 4, 6] <- ลิสต์ต้นฉบับถ
             {
               input: "flowerbed = [1,0,0,0,1], n = 1",
               output: "true",
-              explain:
-                "ช่อง index 1 ปลูกไม่ได้เพราะซ้ายมือมีดอกอยู่ (index 0 เป็น 1) ช่อง index 3 ก็ปลูกไม่ได้เพราะขวามือมีดอกอยู่ (index 4 เป็น 1)\nเหลือ index 2 ช่องเดียวที่ทั้งซ้ายและขวาว่าง ปลูกได้พอดี 1 ดอก แปลงกลายเป็น [1,0,1,0,1] ซึ่งขอมา 1 ก็พอดี",
             },
             {
               input: "flowerbed = [1,0,0,0,1], n = 2",
               output: "false",
-              explain:
-                "แปลงเดียวกันเป๊ะ แต่คราวนี้ขอ 2 ดอก\nจากเหตุผลข้างบน แปลงนี้รับได้มากสุดจริง ๆ แค่ 1 ดอก ไม่ว่าจะเลือกปลูกยังไงก็ตาม จึงตอบ false",
-            },
-            {
-              input: "flowerbed = [0], n = 1",
-              output: "true",
-              explain:
-                "ช่องเดียวโดด ๆ ไม่มีเพื่อนบ้านทั้งซ้ายและขวา จึงไม่มีทางผิดกติกา ปลูกได้เลย\nนี่คือเคสที่โค้ดของคนส่วนใหญ่พังในรอบแรก เพราะเผลอไปอ่านช่องข้าง ๆ ที่ไม่มีอยู่จริง",
-            },
-            {
-              input: "flowerbed = [0,0,1,0,0], n = 2",
-              output: "true",
-              explain:
-                "ปลูกที่ index 0 ได้ (ไม่มีเพื่อนบ้านซ้าย ส่วนขวาคือ index 1 ว่าง) และปลูกที่ index 4 ได้ (ไม่มีเพื่อนบ้านขวา ส่วนซ้ายคือ index 3 ว่าง)\nได้ครบ 2 ดอกจากขอบแปลงล้วน ๆ กลายเป็น [1,0,1,0,1] — เคสนี้บอกว่าขอบแปลงไม่ใช่แค่กับดัก แต่เป็นโอกาสด้วย",
-            },
-            {
-              input: "flowerbed = [1,0,0,0,0,1], n = 2",
-              output: "false",
-              explain:
-                "ตรงกลางมีช่องว่างติดกัน 4 ช่อง (index 1 ถึง 4) ดูเหมือนน่าจะปลูกได้ 2 ดอก แต่ index 1 ติดดอกทางซ้าย และ index 4 ติดดอกทางขวา\nเหลือใช้ได้จริงแค่ index 2 กับ 3 ซึ่งอยู่ติดกัน จึงปลูกได้แค่ 1 ดอก — จำนวนช่องว่างกับจำนวนดอกที่ปลูกได้ไม่ได้แปรผันตรงกันแบบง่าย ๆ",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "1 <= flowerbed.length <= 2 × 10^4",
-            "flowerbed[i] เป็น 0 หรือ 1 เท่านั้น",
-            "flowerbed ที่ให้มาไม่มี 1 สองตัวติดกัน",
+            "1 <= flowerbed.length <= 2 * 10^4",
+            "flowerbed[i] เป็น 0 หรือ 1",
+            "ใน flowerbed ไม่มีดอกไม้สองต้นที่อยู่ติดกัน",
             "0 <= n <= flowerbed.length",
           ],
         },
@@ -2383,7 +2454,36 @@ bed=[1, 0, 0, 0, 1] | อ่าน bed[i-1] ตรง ๆ ปลูกได้ 
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You have a long flowerbed in which some of the plots are planted, and some are not. However, flowers cannot be planted in adjacent plots.
+
+Given an integer array flowerbed containing 0's and 1's, where 0 means empty and 1 means not empty, and an integer n, return true if n new flowers can be planted in the flowerbed without violating the no-adjacent-flowers rule and false otherwise.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "flowerbed = [1,0,0,0,1], n = 1",
+              output: "true",
+            },
+            {
+              input: "flowerbed = [1,0,0,0,1], n = 2",
+              output: "false",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= flowerbed.length <= 2 * 10^4",
+            "flowerbed[i] is 0 or 1.",
+            "There are no two adjacent flowers in flowerbed.",
+            "0 <= n <= flowerbed.length",
+          ],
+        },
+      ],
     },
   },
   "lc75-p05": {
@@ -2395,15 +2495,9 @@ bed=[1, 0, 0, 0, 1] | อ่าน bed[i-1] ตรง ๆ ปลูกได้ 
       th: [
         {
           t: "p",
-          c: "ให้สตริง s มา จงกลับลำดับของสระทุกตัวใน s แล้ว return สตริงที่ได้",
-        },
-        {
-          t: "p",
-          c: "การกลับลำดับเฉพาะสระ หมายความว่าสระตัวแรกไปอยู่ตำแหน่งของสระตัวสุดท้าย สระตัวที่สองไปอยู่ตำแหน่งของสระตัวรองสุดท้าย ไล่แบบนี้ไปเรื่อย ๆ",
-        },
-        {
-          t: "p",
-          c: "ตัวอักษรที่ไม่ใช่สระต้องอยู่ตำแหน่งเดิมทุกตัว และสระนับรวมทั้ง a e i o u และ A E I O U",
+          c: `กำหนดสตริง s มาให้ จงกลับลำดับเฉพาะสระทั้งหมดในสตริงแล้ว return สตริงนั้น
+
+สระคือ 'a', 'e', 'i', 'o' และ 'u' ซึ่งสามารถปรากฏได้ทั้งพิมพ์เล็กและพิมพ์ใหญ่ และปรากฏซ้ำได้หลายครั้ง`,
         },
         {
           t: "example",
@@ -2412,33 +2506,19 @@ bed=[1, 0, 0, 0, 1] | อ่าน bed[i-1] ตรง ๆ ปลูกได้ 
               input: 's = "IceCreAm"',
               output: '"AceCreIm"',
               explain:
-                "สระใน s คือ I, e, e, A ที่ index 0, 2, 5, 6\nกลับลำดับตัวสระได้เป็น A, e, e, I แล้ววางกลับลงชุด index เดิม (0, 2, 5, 6)\nindex 0 จึงกลายเป็น A และ index 6 กลายเป็น I ส่วน c, C, r, m ไม่ขยับเลยสักตัว",
+                "สระใน s คือ ['I', 'e', 'e', 'A'] เมื่อกลับลำดับสระแล้ว s จะกลายเป็น \"AceCreIm\"",
             },
             {
               input: 's = "leetcode"',
               output: '"leotcede"',
-              explain:
-                "สระคือ e, e, o, e ที่ index 1, 2, 5, 7\nกลับลำดับได้ e, o, e, e — เห็นการเปลี่ยนจริงแค่คู่ index 2 กับ 5 เพราะอีกคู่บังเอิญเป็น e เหมือนกันทั้งคู่",
-            },
-            {
-              input: 's = "aA"',
-              output: '"Aa"',
-              explain:
-                'สระสองตัวคือ a กับ A สลับกันได้ Aa\nถ้าเช็คสระด้วย "aeiou" อย่างเดียว โปรแกรมจะมองไม่เห็น A แล้วคืนค่า "aA" ซึ่งผิด — เคสนี้คือเคสที่จับคนลืมพิมพ์ใหญ่',
-            },
-            {
-              input: 's = "xyz"',
-              output: '"xyz"',
-              explain:
-                "ไม่มีสระเลยสักตัว จึงไม่มีอะไรให้สลับ ผลลัพธ์เท่ากับ input เดิม — เคสนี้คือเคสที่ทำโค้ดพังถ้าเขียน loop ไม่รัดกุม (เดี๋ยวจะได้เห็นของจริง)",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "1 <= s.length <= 3 × 10^5",
-            "s เป็นอักขระ ASCII ที่พิมพ์ได้ (อาจมีตัวเลขหรือเครื่องหมายปนมาด้วย)",
+            "1 <= s.length <= 3 * 10^5",
+            "s ประกอบด้วยอักขระ ASCII ที่พิมพ์ได้",
           ],
         },
         {
@@ -2689,7 +2769,36 @@ s='xyz' | ใช้แค่ aeiou -> 'xyz' | ใส่พิมพ์ใหญ�
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given a string s, reverse only all the vowels in the string and return it.
+
+The vowels are 'a', 'e', 'i', 'o', and 'u', and they can appear in both lower and upper cases, more than once.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 's = "IceCreAm"',
+              output: '"AceCreIm"',
+              explain:
+                "The vowels in s are ['I', 'e', 'e', 'A']. On reversing the vowels, s becomes \"AceCreIm\".",
+            },
+            {
+              input: 's = "leetcode"',
+              output: '"leotcede"',
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= s.length <= 3 * 10^5",
+            "s consist of printable ASCII characters.",
+          ],
+        },
+      ],
     },
   },
   "lc75-p06": {
@@ -2701,15 +2810,13 @@ s='xyz' | ใช้แค่ aeiou -> 'xyz' | ใส่พิมพ์ใหญ�
       th: [
         {
           t: "p",
-          c: "ให้สตริง s ที่เป็นประโยคซึ่งมีคำหลายคำคั่นด้วยช่องว่าง จง return สตริงใหม่ที่กลับลำดับคำ",
-        },
-        {
-          t: "p",
-          c: "กลับแค่ลำดับของคำเท่านั้น ตัวอักษรในแต่ละคำยังสะกดเหมือนเดิม",
-        },
-        {
-          t: "p",
-          c: "s อาจมีช่องว่างนำหน้า มีช่องว่างต่อท้าย หรือมีช่องว่างซ้อนกันหลายช่องระหว่างคำ แต่ผลลัพธ์ต้องคั่นคำด้วยช่องว่างเพียงหนึ่งช่อง และไม่มีช่องว่างเหลือที่หัวหรือท้าย",
+          c: `กำหนดสตริงอินพุต s มาให้ จงกลับลำดับของคำ
+
+คำถูกนิยามว่าเป็นลำดับของอักขระที่ไม่ใช่ช่องว่าง คำใน s จะถูกคั่นด้วยช่องว่างอย่างน้อยหนึ่งช่อง
+
+ให้ return สตริงของคำที่เรียงลำดับย้อนกลับโดยคั่นด้วยช่องว่างหนึ่งช่อง
+
+หมายเหตุ: s อาจมีช่องว่างนำหน้า ช่องว่างต่อท้าย หรือช่องว่างหลายช่องระหว่างคำสองคำ สตริงที่ return ควรมีช่องว่างหนึ่งช่องคั่นระหว่างคำเท่านั้น ห้ามรวมช่องว่างพิเศษใด ๆ`,
         },
         {
           t: "example",
@@ -2717,20 +2824,17 @@ s='xyz' | ใช้แค่ aeiou -> 'xyz' | ใส่พิมพ์ใหญ�
             {
               input: 's = "the sky is blue"',
               output: '"blue is sky the"',
-              explain:
-                "input สะอาดอยู่แล้ว (คั่นช่องเดียว ไม่มีช่องว่างหัวท้าย) จึงเหลืองานเดียวคือสลับลำดับคำ 4 คำ: คำสุดท้าย blue ต้องมาอยู่หน้าสุด แล้วไล่ย้อนมาจนถึง the ที่ไปอยู่ท้ายสุด",
             },
             {
-              input: 's = "  hello world  "',
+              input: 's = " hello world "',
               output: '"world hello"',
-              explain:
-                "มีช่องว่าง 2 ช่องนำหน้าและ 2 ช่องต่อท้าย ซึ่งไม่ใช่ส่วนหนึ่งของคำไหนเลย จึงต้องหายไปทั้งหมด\nเหลือคำจริงแค่ 2 คำคือ hello กับ world สลับกันได้ world hello โดยผลลัพธ์ยาว 11 ตัวอักษร ไม่ใช่ 15 เท่า input",
+              explain: "สตริงที่กลับแล้วต้องไม่มีช่องว่างนำหน้าหรือต่อท้าย",
             },
             {
-              input: 's = "a good   example"',
+              input: 's = "a good example"',
               output: '"example good a"',
               explain:
-                'ระหว่าง good กับ example มีช่องว่าง 3 ช่อง แต่ช่องว่างกี่ช่องก็ยังหมายถึง "รอยต่อระหว่างคำ" อันเดียวกัน จึงต้องยุบเหลือช่องเดียวในผลลัพธ์\nนี่คือเคสที่หักคอวิธีที่ใช้ช่องว่างหนึ่งตัวเป็นตัวคั่นแบบตรงตัว',
+                "คุณต้องย่อช่องว่างหลายช่องระหว่างคำสองคำให้เหลือหนึ่งช่องในสตริงที่กลับแล้ว",
             },
           ],
         },
@@ -2738,8 +2842,9 @@ s='xyz' | ใช้แค่ aeiou -> 'xyz' | ใส่พิมพ์ใหญ�
           t: "constraints",
           c: [
             "1 <= s.length <= 10^4",
-            "s ประกอบด้วยตัวอักษรอังกฤษ (พิมพ์เล็ก/ใหญ่), ตัวเลข และช่องว่าง",
-            "รับประกันว่ามีคำอย่างน้อยหนึ่งคำใน s",
+            "s ประกอบด้วยตัวอักษรอังกฤษ (พิมพ์เล็กและพิมพ์ใหญ่) ตัวเลข และช่องว่าง ' '",
+            "มีคำอย่างน้อยหนึ่งคำใน s",
+            "คำถามต่อยอด: ถ้าชนิดข้อมูลสตริงในภาษาของคุณแก้ไขได้ในที่ (mutable) คุณสามารถแก้แบบ in-place โดยใช้พื้นที่เพิ่ม O(1) ได้หรือไม่?",
           ],
         },
         {
@@ -2959,7 +3064,47 @@ s='a good   example'
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an input string s, reverse the order of the words.
+
+A word is defined as a sequence of non-space characters. The words in s will be separated by at least one space.
+
+Return a string of the words in reverse order concatenated by a single space.
+
+Note that s may contain leading or trailing spaces or multiple spaces between two words. The returned string should only have a single space separating the words. Do not include any extra spaces.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 's = "the sky is blue"',
+              output: '"blue is sky the"',
+            },
+            {
+              input: 's = " hello world "',
+              output: '"world hello"',
+              explain: "Your reversed string should not contain leading or trailing spaces.",
+            },
+            {
+              input: 's = "a good example"',
+              output: '"example good a"',
+              explain:
+                "You need to reduce multiple spaces between two words to a single space in the reversed string.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= s.length <= 10^4",
+            "s contains English letters (upper-case and lower-case), digits, and spaces ' '.",
+            "There is at least one word in s.",
+            "Follow-up: If the string data type is mutable in your language, can you solve it in-place with O(1) extra space?",
+          ],
+        },
+      ],
     },
   },
   "lc75-p07": {
@@ -2971,11 +3116,11 @@ s='a good   example'
       th: [
         {
           t: "p",
-          c: "ให้ลิสต์ nums จง return ลิสต์ answer ที่ยาวเท่ากัน โดย answer[i] คือผลคูณของสมาชิกทุกตัวใน nums ยกเว้นตัวที่อยู่ตำแหน่ง i",
-        },
-        {
-          t: "p",
-          c: "ห้ามใช้การหาร และต้องทำให้เสร็จในเวลา O(n)",
+          c: `กำหนดอาร์เรย์จำนวนเต็ม nums มาให้ ให้ return อาร์เรย์ answer โดย answer[i] เท่ากับผลคูณของสมาชิกทุกตัวใน nums ยกเว้น nums[i]
+
+ผลคูณของ prefix หรือ suffix ใด ๆ ของ nums รับประกันว่าใส่ในจำนวนเต็ม 32 บิตได้
+
+คุณต้องเขียนอัลกอริทึมที่ทำงานในเวลา O(n) และไม่ใช้การหาร`,
         },
         {
           t: "example",
@@ -2983,14 +3128,10 @@ s='a good   example'
             {
               input: "nums = [1,2,3,4]",
               output: "[24,12,8,6]",
-              explain:
-                "answer[0] = 2×3×4 = 24, answer[1] = 1×3×4 = 12, answer[2] = 1×2×4 = 8, answer[3] = 1×2×3 = 6",
             },
             {
               input: "nums = [-1,1,0,-3,3]",
               output: "[0,0,9,0,0]",
-              explain:
-                "มี 0 อยู่หนึ่งตัว → ทุกตำแหน่งที่ไม่ใช่ตำแหน่งของ 0 จะมี 0 ร่วมวงคูณอยู่ด้วยเสมอ จึงได้ 0 มีแค่ตำแหน่งของ 0 เองที่ไม่โดน 0 คูณ → ได้ (-1)×1×(-3)×3 = 9",
             },
           ],
         },
@@ -2999,8 +3140,8 @@ s='a good   example'
           c: [
             "2 <= nums.length <= 10^5",
             "-30 <= nums[i] <= 30",
-            "ห้ามใช้การหาร และต้องทำใน O(n)",
-            "ท้าทาย: ใช้พื้นที่เพิ่มแค่ O(1) โดยไม่นับลิสต์คำตอบ",
+            "อินพุตถูกสร้างให้ answer[i] รับประกันว่าใส่ในจำนวนเต็ม 32 บิตได้",
+            "คำถามต่อยอด: คุณสามารถแก้โดยใช้พื้นที่เพิ่ม O(1) ได้หรือไม่? (อาร์เรย์ผลลัพธ์ไม่นับเป็นพื้นที่เพิ่มในการวิเคราะห์ space complexity)",
           ],
         },
         {
@@ -3276,7 +3417,38 @@ suffix = [24, 12, 4, 1]
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an integer array nums, return an array answer such that answer[i] is equal to the product of all the elements of nums except nums[i].
+
+The product of any prefix or suffix of nums is guaranteed to fit in a 32-bit integer.
+
+You must write an algorithm that runs in O(n) time and without using the division operation.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,2,3,4]",
+              output: "[24,12,8,6]",
+            },
+            {
+              input: "nums = [-1,1,0,-3,3]",
+              output: "[0,0,9,0,0]",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "2 <= nums.length <= 10^5",
+            "-30 <= nums[i] <= 30",
+            "The input is generated such that answer[i] is guaranteed to fit in a 32-bit integer.",
+            "Follow up: Can you solve the problem in O(1) extra space complexity? (The output array does not count as extra space for space complexity analysis.)",
+          ],
+        },
+      ],
     },
   },
   "lc75-p08": {
@@ -3288,15 +3460,7 @@ suffix = [24, 12, 4, 1]
       th: [
         {
           t: "p",
-          c: "ให้ลิสต์ nums จงตอบว่ามีสามตำแหน่ง i < j < k ที่ทำให้ nums[i] < nums[j] < nums[k] อยู่หรือไม่",
-        },
-        {
-          t: "p",
-          c: "สามตัวนี้ไม่ต้องอยู่ติดกันในลิสต์ ขอแค่ตำแหน่งเรียงจากซ้ายไปขวา และค่าเรียงจากน้อยไปมาก",
-        },
-        {
-          t: "p",
-          c: "ตอบเป็น true หรือ false เท่านั้น ไม่ต้องบอกว่าสามตัวนั้นคือตัวไหน",
+          c: `กำหนดอาร์เรย์จำนวนเต็ม nums มาให้ ให้ return true ถ้ามีสามตำแหน่ง (i, j, k) ที่ i < j < k และ nums[i] < nums[j] < nums[k] ถ้าไม่มีตำแหน่งเช่นนั้น ให้ return false`,
         },
         {
           t: "example",
@@ -3304,23 +3468,27 @@ suffix = [24, 12, 4, 1]
             {
               input: "nums = [1,2,3,4,5]",
               output: "true",
-              explain:
-                "1 < 2 < 3 ก็นับว่าเจอแล้ว (ไม่ต้องหาชุดที่ดีที่สุดหรือชุดเดียวเท่านั้น แค่หาว่ามีสักชุดหนึ่งที่ใช้ได้ก็พอ)",
+              explain: "ทริปเปิลใด ๆ ที่ i < j < k ก็ใช้ได้",
             },
             {
               input: "nums = [5,4,3,2,1]",
               output: "false",
+              explain: "ไม่มีทริปเปิลเลย",
+            },
+            {
+              input: "nums = [2,1,5,0,4,6]",
+              output: "true",
               explain:
-                "ตัวเลขลดลงตลอดทั้งแถว ไม่มีสามตัวไหนเรียงเพิ่มขึ้นได้เลยสักชุด",
+                "หนึ่งในทริปเปิลที่ใช้ได้คือ (1, 4, 5) เพราะ nums[1] == 1 < nums[4] == 4 < nums[5] == 6",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "1 <= nums.length <= 5 × 10^5",
+            "1 <= nums.length <= 5 * 10^5",
             "-2^31 <= nums[i] <= 2^31 - 1",
-            "ท้าทาย: ทำให้เป็น O(n) time และ O(1) space",
+            "คำถามต่อยอด: คุณสามารถเขียนวิธีแก้ที่ทำงานใน O(n) time complexity และ O(1) space complexity ได้หรือไม่?",
           ],
         },
         {
@@ -3581,7 +3749,41 @@ nums=[2,1,5,0,4,6] -> True`,
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an integer array nums, return true if there exists a triple of indices (i, j, k) such that i < j < k and nums[i] < nums[j] < nums[k]. If no such indices exists, return false.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,2,3,4,5]",
+              output: "true",
+              explain: "Any triplet where i < j < k is valid.",
+            },
+            {
+              input: "nums = [5,4,3,2,1]",
+              output: "false",
+              explain: "No triplet exists.",
+            },
+            {
+              input: "nums = [2,1,5,0,4,6]",
+              output: "true",
+              explain:
+                "One of the valid triplet is (1, 4, 5), because nums[1] == 1 < nums[4] == 4 < nums[5] == 6.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 5 * 10^5",
+            "-2^31 <= nums[i] <= 2^31 - 1",
+            "Follow up: Could you implement a solution that runs in O(n) time complexity and O(1) space complexity?",
+          ],
+        },
+      ],
     },
   },
   "lc75-p09": {
@@ -3593,40 +3795,41 @@ nums=[2,1,5,0,4,6] -> True`,
       th: [
         {
           t: "p",
-          c: "ให้ลิสต์ของตัวอักษรชื่อ chars โดยหนึ่งช่องเก็บได้หนึ่งตัวอักษร จงย่อมันให้สั้นลง",
-        },
-        {
-          t: "p",
-          c: "วิธีย่อคือมองหาตัวอักษรเดิมที่ซ้ำกันและอยู่ติดกันเป็นกลุ่ม แล้วเขียนแทนกลุ่มนั้นด้วยตัวอักษรหนึ่งตัวตามด้วยจำนวนที่นับได้ ถ้ากลุ่มไหนมีแค่ตัวเดียว ให้เขียนแค่ตัวอักษร ไม่ต้องเขียนเลข 1",
-        },
-        {
-          t: "p",
-          c: "ต้องแก้ลงใน chars เดิม ห้ามสร้างลิสต์ใหม่มาช่วย และ return ความยาวใหม่ ไม่ใช่ return ลิสต์",
-        },
-        {
-          t: "p",
-          c: 'ถ้าจำนวนที่นับได้มีหลายหลัก เช่น 12 ต้องแยกลงสองช่อง ช่องหนึ่งเก็บ "1" อีกช่องเก็บ "2"',
+          c: `กำหนดอาร์เรย์ของตัวอักษร chars มาให้ จงบีบอัดโดยใช้อัลกอริทึมต่อไปนี้:
+
+เริ่มจากสตริงว่าง s สำหรับกลุ่มของตัวอักษรซ้ำที่ติดกันแต่ละกลุ่มใน chars:
+- ถ้าความยาวของกลุ่มเป็น 1 ให้ต่อตัวอักษรนั้นเข้ากับ s
+- ถ้าไม่ใช่ ให้ต่อตัวอักษรตามด้วยความยาวของกลุ่ม
+
+สตริงที่บีบอัดแล้ว s ไม่ควรถูก return แยกต่างหาก แต่ให้เก็บลงในอาร์เรย์ตัวอักษรอินพุต chars แทน หมายเหตุ: ความยาวกลุ่มที่ 10 ขึ้นไปจะถูกแยกเป็นหลายตัวอักษรใน chars
+
+หลังจากแก้ไขอาร์เรย์อินพุตเสร็จแล้ว ให้ return ความยาวใหม่ของอาร์เรย์
+
+คุณต้องเขียนอัลกอริทึมที่ใช้พื้นที่เพิ่มคงที่เท่านั้น
+
+หมายเหตุ: ตัวอักษรในอาร์เรย์ที่เกินความยาวที่ return ไม่สำคัญและควรเพิกเฉย`,
         },
         {
           t: "example",
           c: [
             {
               input: 'chars = ["a","a","b","b","c","c","c"]',
-              output: '6, chars 6 ช่องแรกกลายเป็น ["a","2","b","2","c","3"]',
-              explain:
-                "กลุ่ม a ยาว 2 → a2, กลุ่ม b ยาว 2 → b2, กลุ่ม c ยาว 3 → c3 ต่อกันได้ a2b2c3 ยาว 6 ช่อง",
+              output: "6",
+              explain: `กลุ่มคือ "aa", "bb" และ "ccc" ซึ่งบีบอัดเป็น "a2b2c3"
+หลังจากแก้ไขอาร์เรย์อินพุตแบบ in-place แล้ว ตัวอักษร 6 ตัวแรกของ chars ควรเป็น ["a","2","b","2","c","3"]`,
             },
             {
               input: 'chars = ["a"]',
-              output: '1, chars = ["a"]',
-              explain: 'กลุ่มเดียวและยาวแค่ 1 จึงเขียนแค่ "a" ห้ามเขียน "a1"',
+              output: "1",
+              explain: `กลุ่มเดียวคือ "a" ซึ่งไม่ถูกบีบอัดเพราะเป็นตัวอักษรตัวเดียว
+หลังจากแก้ไขอาร์เรย์อินพุตแบบ in-place แล้ว ตัวอักษรตัวแรกของ chars ควรเป็น ["a"]`,
             },
             {
               input:
                 'chars = ["a","b","b","b","b","b","b","b","b","b","b","b","b"]',
-              output: '4, chars 4 ช่องแรกกลายเป็น ["a","b","1","2"]',
-              explain:
-                'กลุ่ม a ยาว 1 → เขียนแค่ "a" ส่วนกลุ่ม b ยาว 12 → เขียน "b" แล้วแตกเลข 12 ลงสองช่องเป็น "1" และ "2"',
+              output: "4",
+              explain: `กลุ่มคือ "a" และ "bbbbbbbbbbbb" ซึ่งบีบอัดเป็น "ab12"
+หลังจากแก้ไขอาร์เรย์อินพุตแบบ in-place แล้ว ตัวอักษร 4 ตัวแรกของ chars ควรเป็น ["a","b","1","2"]`,
             },
           ],
         },
@@ -3634,8 +3837,7 @@ nums=[2,1,5,0,4,6] -> True`,
           t: "constraints",
           c: [
             "1 <= chars.length <= 2000",
-            "chars[i] เป็นตัวอักษรพิมพ์เล็ก พิมพ์ใหญ่ หรือตัวเลข 0-9",
-            "ต้องแก้ใน chars เอง และใช้พื้นที่เพิ่มแค่ O(1)",
+            "chars[i] เป็นตัวอักษรอังกฤษพิมพ์เล็ก พิมพ์ใหญ่ ตัวเลข หรือสัญลักษณ์",
           ],
         },
         {
@@ -3933,7 +4135,55 @@ print('สังเกตว่า 12 ถูกแยกเป็น "1" กั�
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an array of characters chars, compress it using the following algorithm:
+
+Begin with an empty string s. For each group of consecutive repeating characters in chars:
+- If the group's length is 1, append the character to s.
+- Otherwise, append the character followed by the group's length.
+
+The compressed string s should not be returned separately, but instead, be stored in the input character array chars. Note that group lengths that are 10 or longer will be split into multiple characters in chars.
+
+After you are done modifying the input array, return the new length of the array.
+
+You must write an algorithm that uses only constant extra space.
+
+Note: The characters in the array beyond the returned length do not matter and should be ignored.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 'chars = ["a","a","b","b","c","c","c"]',
+              output: "6",
+              explain: `The groups are "aa", "bb", and "ccc". This compresses to "a2b2c3".
+After modifying the input array in-place, the first 6 characters of chars should be ["a","2","b","2","c","3"].`,
+            },
+            {
+              input: 'chars = ["a"]',
+              output: "1",
+              explain: `The only group is "a", which remains uncompressed since it is a single character.
+After modifying the input array in-place, the first character of chars should be ["a"].`,
+            },
+            {
+              input:
+                'chars = ["a","b","b","b","b","b","b","b","b","b","b","b","b"]',
+              output: "4",
+              explain: `The groups are "a" and "bbbbbbbbbbbb". This compresses to "ab12".
+After modifying the input array in-place, the first 4 characters of chars should be ["a","b","1","2"].`,
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= chars.length <= 2000",
+            "chars[i] is a lowercase English letter, uppercase English letter, digit, or symbol.",
+          ],
+        },
+      ],
     },
   },
 };

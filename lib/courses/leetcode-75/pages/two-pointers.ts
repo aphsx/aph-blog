@@ -632,14 +632,14 @@ two pointers ตอบ index: (1, 3) <- ผิด เพราะเป็น in
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "ให้ array (ลิสต์) ตัวเลข nums จงย้ายเลข 0 ทุกตัวไปอยู่ท้ายแถว โดยมีเงื่อนไขสองข้อ: ตัวที่ไม่ใช่ 0 ต้องยังเรียงตามลำดับเดิม และต้องแก้ลงในแถวเดิม ห้ามสร้างแถวใหม่มาแทน" },
+              { t: "p", c: `กำหนดอาร์เรย์จำนวนเต็ม nums มาให้ จงย้าย 0 ทั้งหมดไปไว้ท้ายอาร์เรย์ โดยคงลำดับสัมพันธ์ของสมาชิกที่ไม่ใช่ 0 ไว้
+
+หมายเหตุ: คุณต้องทำแบบ in-place โดยไม่สร้างสำเนาของอาร์เรย์` },
               {
                 t: "example",
                 c: [
-                  { input: "nums = [0,1,0,3,12]", output: "[1,3,12,0,0]", explain: "ตัวที่ไม่ใช่ 0 คือ 1, 3, 12 ยังเรียงลำดับเดิม แล้วต่อท้ายด้วย 0 สองตัว จำนวนช่องเท่าเดิมคือ 5 ช่อง" },
-                  { input: "nums = [0]", output: "[0]", explain: "มีตัวเดียวและเป็น 0 อยู่แล้ว ไม่มีอะไรต้องทำ" },
-                  { input: "nums = [1,2,3]", output: "[1,2,3]", explain: "ไม่มี 0 เลย โค้ดต้องไม่พังและไม่ทำอะไรเสียหาย" },
-                  { input: "nums = [0,0,1]", output: "[1,0,0]", explain: "เคสนี้จำไว้ให้ดี เดี๋ยวจะใช้จับบั๊กที่คนพลาดกันมากที่สุด" },
+                  { input: "nums = [0,1,0,3,12]", output: "[1,3,12,0,0]" },
+                  { input: "nums = [0]", output: "[0]" },
                 ],
               },
               {
@@ -647,9 +647,7 @@ two pointers ตอบ index: (1, 3) <- ผิด เพราะเป็น in
                 c: [
                   "1 <= nums.length <= 10^4",
                   "-2^31 <= nums[i] <= 2^31 - 1",
-                  "ต้องแก้ใน array เดิม (in-place) ห้าม return array ใหม่",
-                  "ท้าทาย: ทำให้จำนวนครั้งที่เขียนลง array น้อยที่สุด",
-                  "ค่าติดลบมีได้ → เงื่อนไขที่ต้องเช็คคือ \"ไม่ใช่ 0\" ไม่ใช่ \"มากกว่า 0\"",
+                  "คำถามต่อยอด: คุณสามารถลดจำนวน operation ทั้งหมดที่ทำลงได้หรือไม่?",
                 ],
               },
               { t: "callout", title: "โจทย์นี้ถามอะไรจริง ๆ", c: "อ่านให้ชัดว่ามันไม่ได้บอกให้ \"ลบ 0 ออก\" แต่บอกให้ \"ดัน 0 ไปท้าย\" — จำนวนช่องในแถวต้องเท่าเดิมตลอด และคำว่า in-place กับ คงลำดับเดิม คือสองกฎที่ตัดวิธีง่าย ๆ หลายวิธีออกไป ถ้าไม่มีสองกฎนี้ ข้อนี้จะกลายเป็นโจทย์ระดับหนึ่งบรรทัด" },
@@ -1162,7 +1160,29 @@ for name, base in cases:
               { t: "callout", title: "💡 สรุป pattern", c: "slow/fast pointer สำหรับกรองของในที่เดิม: ตัวอ่านไล่ดูทุกช่องตามจังหวะข้อมูล ตัวเขียนตามหลังมาบันทึกเฉพาะของที่เก็บ ตามจังหวะผลลัพธ์ invariant ที่ทำให้ปลอดภัยคือ ตัวเขียนไม่เคยแซงตัวอ่าน จึงเขียนทับได้เฉพาะช่องที่อ่านผ่านไปแล้ว และหัวใจของข้อนี้คือประโยคเดียว: อย่าไปขยับสิ่งที่ไม่ต้องการ ให้ขยับสิ่งที่ต้องการ แล้วสิ่งที่ไม่ต้องการจะไปกองท้ายเอง" },
               { t: "callout", title: "ต่อยอด (โจทย์พี่น้องกัน)", c: "LC27 Remove Element (ไม่สนลำดับ ใช้ opposite ends ได้ เขียนน้อยกว่า), LC26 Remove Duplicates from Sorted Array (ตัวเขียนหมายถึงตัวล่าสุด ไม่ใช่ช่องว่าง ระวัง off-by-one), LC80 Remove Duplicates II (เงื่อนไขมองย้อนไป 2 ช่อง), LC75 Sort Colors (สามโซนแทนสองโซน), LC1089 Duplicate Zeros (ต้องกวาดจากขวามาซ้าย เพราะกวาดจากซ้ายจะทับข้อมูลที่ยังไม่อ่าน — เป็นตัวอย่างที่ดีว่า invariant พังเมื่อไหร่)" },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an integer array nums, move all 0's to the end of it while maintaining the relative order of the non-zero elements.
+
+Note that you must do this in-place without making a copy of the array.`,
+        },
+        {
+          t: "example",
+          c: [
+            { input: "nums = [0,1,0,3,12]", output: "[1,3,12,0,0]" },
+            { input: "nums = [0]", output: "[0]" },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 10^4",
+            "-2^31 <= nums[i] <= 2^31 - 1",
+            "Follow up: Could you minimize the total number of operations done?",
+          ],
+        },
+      ],
     },
   },
 
@@ -1175,11 +1195,9 @@ for name, base in cases:
       th: [
               {
                 t: "p",
-                c: "ให้ string (สตริง) s และ t จง return True ถ้า s เป็น subsequence ของ t",
-              },
-              {
-                t: "p",
-                c: "subsequence คือ string ที่ได้จากการลบตัวอักษรบางตัว (หรือไม่ลบเลย) ออกจาก t โดย ไม่สลับลำดับ ตัวที่เหลือ — ต่างจาก substring ที่ต้องติดกันเป็นพืด",
+                c: `กำหนดสตริงสองตัวคือ s และ t มาให้ ให้ return true ถ้า s เป็น subsequence ของ t หรือ false ถ้าไม่ใช่
+
+subsequence ของสตริงคือสตริงใหม่ที่เกิดจากสตริงเดิมโดยการลบตัวอักษรบางตัว (ลบหรือไม่ลบก็ได้) โดยไม่กระทบลำดับสัมพันธ์ของตัวอักษรที่เหลือ (เช่น "ace" เป็น subsequence ของ "abcde" ส่วน "aec" ไม่ใช่)`,
               },
               {
                 t: "example",
@@ -1187,25 +1205,10 @@ for name, base in cases:
                   {
                     input: 's = "abc", t = "ahbgdc"',
                     output: "true",
-                    explain:
-                      "a-h-b-g-d-c → เลือก a (ตัวที่ 1), b (ตัวที่ 3), c (ตัวที่ 6) ได้ตามลำดับ",
                   },
                   {
                     input: 's = "axc", t = "ahbgdc"',
                     output: "false",
-                    explain: "หา x ใน t ไม่เจอเลย",
-                  },
-                  {
-                    input: 's = "", t = "abc"',
-                    output: "true",
-                    explain:
-                      "string ว่างเป็น subsequence ของทุก string (ไม่ต้องเลือกอะไรเลย)",
-                  },
-                  {
-                    input: 's = "acb", t = "ahbgdc"',
-                    output: "false",
-                    explain:
-                      "มีทั้ง a, c, b แต่ใน t ตัว b มาก่อน c — ลำดับผิด ห้ามสลับ",
                   },
                 ],
               },
@@ -1214,8 +1217,8 @@ for name, base in cases:
                 c: [
                   "0 <= s.length <= 100",
                   "0 <= t.length <= 10^4",
-                  "s และ t เป็นตัวอักษรอังกฤษพิมพ์เล็กเท่านั้น",
-                  "คำถามต่อยอด: ถ้ามี s เป็นล้านตัวมาเช็คกับ t เดิมซ้ำ ๆ จะทำยังไง",
+                  "s และ t ประกอบด้วยตัวอักษรอังกฤษพิมพ์เล็กเท่านั้น",
+                  "คำถามต่อยอด: สมมติมี s เข้ามาเป็นจำนวนมาก เช่น s1, s2, ..., sk โดยที่ k >= 10^9 และคุณต้องการเช็คทีละตัวว่า t มี subsequence เป็น s นั้นหรือไม่ ในกรณีนี้คุณจะเปลี่ยนโค้ดของคุณอย่างไร?",
                 ],
               },
               {
@@ -1529,7 +1532,36 @@ for q in ["abc", "axc", "", "acb", "ahbgdc", "abcd"]:
                 c: "LC524 Longest Word in Dictionary through Deleting, LC792 Number of Matching Subsequences (ใช้ trick pre-process ข้างบนได้เลย), LC1143 Longest Common Subsequence (อันนี้ต้อง DP)",
               },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given two strings s and t, return true if s is a subsequence of t, or false otherwise.
+
+A subsequence of a string is a new string that is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (i.e., "ace" is a subsequence of "abcde" while "aec" is not).`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 's = "abc", t = "ahbgdc"',
+              output: "true",
+            },
+            {
+              input: 's = "axc", t = "ahbgdc"',
+              output: "false",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "0 <= s.length <= 100",
+            "0 <= t.length <= 10^4",
+            "s and t consist only of lowercase English letters.",
+            "Follow up: Suppose there are lots of incoming s, say s1, s2, ..., sk where k >= 10^9, and you want to check one by one to see if t has its subsequence. In this scenario, how would you change your code?",
+          ],
+        },
+      ],
     },
   },
 
@@ -1557,25 +1589,26 @@ for q in ["abc", "axc", "", "acb", "ahbgdc", "abcd"]:
               { t: "h2", c: "โจทย์พูดว่าอะไร" },
               {
                 t: "p",
-                c: "ให้ integer array height ความยาว n มีเส้นแนวตั้ง n เส้น จุดปลายของเส้นที่ i อยู่ที่ (i, 0) และ (i, height[i])",
-              },
-              {
-                t: "p",
-                c: "หาเส้นสองเส้นที่รวมกับแกน x แล้วได้ภาชนะจุน้ำได้มากที่สุด แล้ว return ปริมาณน้ำนั้น — ห้ามเอียงภาชนะ",
+                c: `คุณได้รับอาร์เรย์จำนวนเต็ม height ความยาว n มีเส้นแนวตั้ง n เส้น โดยจุดปลายทั้งสองของเส้นที่ i คือ (i, 0) และ (i, height[i])
+
+จงหาเส้นสองเส้นที่รวมกับแกน x แล้วเป็นภาชนะที่จุน้ำได้มากที่สุด
+
+ให้ return ปริมาณน้ำสูงสุดที่ภาชนะสามารถเก็บได้
+
+หมายเหตุ: ห้ามเอียงภาชนะ`,
               },
               {
                 t: "example",
                 c: [
                   {
-                    input: "height = [1, 8, 6, 2, 5, 4, 8, 3, 7]",
+                    input: "height = [1,8,6,2,5,4,8,3,7]",
                     output: "49",
                     explain:
-                      "เลือกเส้นที่ index 1 (สูง 8) กับ index 8 (สูง 7)\nกว้าง = 8 − 1 = 7\nสูง = min(8, 7) = 7\nพื้นที่ = 7 × 7 = 49",
+                      "เส้นแนวตั้งข้างบนแสดงด้วยอาร์เรย์ [1,8,6,2,5,4,8,3,7] ในกรณีนี้พื้นที่น้ำสูงสุด (ส่วนสีฟ้า) ที่ภาชนะเก็บได้คือ 49",
                   },
                   {
-                    input: "height = [1, 1]",
+                    input: "height = [1,1]",
                     output: "1",
-                    explain: "มีแค่สองเส้น กว้าง = 1, สูง = min(1,1) = 1, พื้นที่ = 1",
                   },
                 ],
               },
@@ -2047,7 +2080,37 @@ maxArea = 0`,
                 c: "พี่น้องที่ใช้ opposite-ends คล้ายกัน: LC42 Trapping Rain Water (คนละโจทย์ — รวมน้ำระหว่างแท่งหลายอัน), LC167 Two Sum II (เรียงแล้ว ตัดสินใจขยับจากผลรวม), LC15 3Sum",
               },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
+
+Find two lines that together with the x-axis form a container, such that the container contains the most water.
+
+Return the maximum amount of water a container can store.
+
+Notice that you may not slant the container.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "height = [1,8,6,2,5,4,8,3,7]",
+              output: "49",
+              explain:
+                "The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water (blue section) the container can contain is 49.",
+            },
+            {
+              input: "height = [1,1]",
+              output: "1",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: ["n == height.length", "2 <= n <= 10^5", "0 <= height[i] <= 10^4"],
+        },
+      ],
     },
   },
 
@@ -2060,11 +2123,11 @@ maxArea = 0`,
       th: [
               {
                 t: "p",
-                c: "ให้ array (ลิสต์) nums และเลข k ในหนึ่ง operation (การกระทำ) เราเลือกเลขสองตัวที่บวกกันได้ k แล้วนำทั้งคู่ ออกจาก array จง return จำนวน operation มากที่สุดที่ทำได้",
-              },
-              {
-                t: "p",
-                c: "จุดที่ต้องระวัง: เลขแต่ละตัวใช้ได้ครั้งเดียว เพราะถูกเอาออกไปแล้ว",
+                c: `คุณได้รับอาร์เรย์จำนวนเต็ม nums และจำนวนเต็ม k
+
+ในการดำเนินการหนึ่งครั้ง คุณสามารถเลือกเลขสองตัวจากอาร์เรย์ที่บวกกันได้ k แล้วนำทั้งคู่ออกจากอาร์เรย์
+
+ให้ return จำนวน operation สูงสุดที่คุณสามารถทำได้กับอาร์เรย์`,
               },
               {
                 t: "example",
@@ -2072,20 +2135,17 @@ maxArea = 0`,
                   {
                     input: "nums = [1,2,3,4], k = 5",
                     output: "2",
-                    explain:
-                      "จับ (1,4) ได้ 5 → เหลือ [2,3] แล้วจับ (2,3) ได้ 5 → เหลือ [] รวม 2 คู่",
+                    explain: `เริ่มจาก nums = [1,2,3,4]:
+- ลบเลข 1 และ 4 ออก แล้ว nums = [2,3]
+- ลบเลข 2 และ 3 ออก แล้ว nums = []
+ไม่มีคู่ที่บวกกันได้ 5 เหลืออีก จึงรวมเป็น 2 operation`,
                   },
                   {
                     input: "nums = [3,1,3,4,3], k = 6",
                     output: "1",
-                    explain:
-                      "จับ 3 กับ 3 ได้ 6 → เหลือ [1,4,3] ซึ่งไม่มีคู่ไหนบวกได้ 6 อีก รวม 1 คู่",
-                  },
-                  {
-                    input: "nums = [2,2,2,3], k = 4",
-                    output: "1",
-                    explain:
-                      "มีเลข 2 อยู่ 3 ตัว จับได้แค่คู่เดียว (เหลือ 2 ตัวเดียวโดด) — เลขเหลือเศษจับไม่ได้",
+                    explain: `เริ่มจาก nums = [3,1,3,4,3]:
+- ลบ 3 สองตัวแรกออก แล้ว nums = [1,4,3]
+ไม่มีคู่ที่บวกกันได้ 6 เหลืออีก จึงรวมเป็น 1 operation`,
                   },
                 ],
               },
@@ -2095,7 +2155,6 @@ maxArea = 0`,
                   "1 <= nums.length <= 10^5",
                   "1 <= nums[i] <= 10^9",
                   "1 <= k <= 10^9",
-                  "nums ไม่ได้เรียงมาให้ (ต่างจาก LC167 Two Sum II)",
                 ],
               },
               {
@@ -2508,7 +2567,44 @@ print(max_operations_hash_v2([3, 1, 3, 4, 3], 6))`,
                 c: "LC1 Two Sum (นับด้วย dict), LC167 Two Sum II (two pointers บน array ที่เรียงแล้ว), LC15 3Sum (fix ตัวหนึ่งแล้ว two pointers), LC532 K-diff Pairs",
               },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You are given an integer array nums and an integer k.
+
+In one operation, you can pick two numbers from the array whose sum equals k and remove them from the array.
+
+Return the maximum number of operations you can perform on the array.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,2,3,4], k = 5",
+              output: "2",
+              explain: `Starting with nums = [1,2,3,4]:
+- Remove numbers 1 and 4, then nums = [2,3]
+- Remove numbers 2 and 3, then nums = []
+There are no more pairs that sum up to 5, hence a total of 2 operations.`,
+            },
+            {
+              input: "nums = [3,1,3,4,3], k = 6",
+              output: "1",
+              explain: `Starting with nums = [3,1,3,4,3]:
+- Remove the first two 3's, then nums = [1,4,3]
+There are no more pairs that sum up to 6, hence a total of 1 operation.`,
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 10^5",
+            "1 <= nums[i] <= 10^9",
+            "1 <= k <= 10^9",
+          ],
+        },
+      ],
     },
   },
 };

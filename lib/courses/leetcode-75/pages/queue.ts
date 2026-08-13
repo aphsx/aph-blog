@@ -170,7 +170,7 @@ while q:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC933): ให้ implement class RecentCounter:\n\n- `RecentCounter()` — Initialize ตัวแปรภายในเพื่อกำหนด counter ใหม่อันหนึ่ง\n- `int ping(int t)` — เพิ่ม request ใหม่ที่เวลา t (หน่วย millisecond) แล้ว return จำนวน request ที่เกิดขึ้นในช่วง 3000 millisecond ที่ผ่านมา (รวม request ปัจจุบันด้วย) ได้อีกนัยหนึ่ง return จำนวน request ที่มีเวลาอยู่ในช่วง inclusive `[t - 3000, t]`\n\nรับประกันว่าแต่ละ test case เรียก ping ด้วยค่า t ที่เพิ่มขึ้นเสมอ (strictly increasing)",
+          c: "ให้ implement class RecentCounter:\n\n- `RecentCounter()` — Initializes ตัวนับโดยให้มี recent requests เป็นศูนย์\n- `int ping(int t)` — เพิ่ม request ใหม่ที่เวลา t โดย t แทนเวลาในหน่วย millisecond แล้ว return จำนวน request ที่เกิดขึ้นในช่วง 3000 millisecond ที่ผ่านมา (รวม request ใหม่ด้วย) กล่าวคือ return จำนวน request ที่เกิดขึ้นในช่วง inclusive `[t - 3000, t]`\n\nรับประกันว่าทุกครั้งที่เรียก ping จะใช้ค่า t ที่มากกว่าการเรียกครั้งก่อนอย่างเคร่งครัด (strictly larger)",
         },
         {
           t: "example",
@@ -490,7 +490,7 @@ class RecentCounter:
       th: [
         {
           t: "p",
-          c: `โจทย์ (LC649): ในโลกของ Dota2 มีสองพรรค (party) คือ Radiant กับ Dire
+          c: `ในโลกของ Dota2 มีสองพรรค (party) คือ Radiant กับ Dire
 
 วุฒิสภา (senate) ของ Dota2 ประกอบด้วยวุฒิสมาชิก (senator) จากสองพรรค ตอนนี้ Senate ต้องการตัดสินใจเรื่องการเปลี่ยนแปลงในเกม Dota2 การโหวตเป็นกระบวนการแบบเป็นรอบ (round-based) ในแต่ละรอบ วุฒิสมาชิกแต่ละคนสามารถใช้สิทธิ์อย่างใดอย่างหนึ่งจากสองอย่างนี้ได้:
 

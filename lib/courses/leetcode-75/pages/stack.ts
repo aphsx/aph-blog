@@ -143,7 +143,17 @@ while stack:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC2390): กำหนด string s ที่มีเครื่องหมายดาว * ปนอยู่ ในหนึ่ง operation ให้เลือกดาวตัวหนึ่งใน s แล้วลบ character ที่ไม่ใช่ดาวตัวที่อยู่ใกล้ทางซ้ายของมันที่สุดออก พร้อมกับลบดาวตัวนั้นทิ้งไปด้วย ให้ return string ที่เหลือหลังลบดาวออกจนหมดทุกตัว (input ที่ให้มารับประกันว่า operation ทำได้เสมอ)",
+          c: `กำหนดสตริง s มาให้ ซึ่งประกอบด้วยเครื่องหมายดาว *
+
+ในหนึ่ง operation คุณสามารถ:
+• เลือกดาวหนึ่งดวงใน s
+• ลบอักขระที่ไม่ใช่ดาวที่อยู่ใกล้ทางซ้ายของมันที่สุดออก พร้อมกับลบดาวตัวนั้นทิ้งไปด้วย
+
+ให้ return สตริงหลังลบดาวทั้งหมดออกแล้ว
+
+หมายเหตุ:
+• input ที่ให้มารับประกันว่า operation ทำได้เสมอ
+• แสดงได้ว่าสตริงผลลัพธ์จะไม่ซ้ำกันเสมอ`,
         },
         {
           t: "example",
@@ -151,18 +161,16 @@ while stack:
             {
               input: 's = "leet**cod*e"',
               output: '"lecoe"',
-              explain:
-                'ลบจากซ้ายไปขวา: ดาวตัวแรกลบ t ได้ "lee*cod*e" ดาวตัวที่สองลบ e ได้ "lecod*e" ดาวตัวสุดท้ายลบ d ได้ "lecoe"',
+              explain: `ทำการลบจากซ้ายไปขวา:
+- อักขระที่ใกล้ดาวดวงที่ 1 มากที่สุดคือ 't' ใน "leet**cod*e" s กลายเป็น "lee*cod*e"
+- อักขระที่ใกล้ดาวดวงที่ 2 มากที่สุดคือ 'e' ใน "lee*cod*e" s กลายเป็น "lecod*e"
+- อักขระที่ใกล้ดาวดวงที่ 3 มากที่สุดคือ 'd' ใน "lecod*e" s กลายเป็น "lecoe"
+ไม่มีดาวเหลืออีกแล้ว เราจึง return "lecoe"`,
             },
             {
               input: 's = "erase*****"',
               output: '""',
-              explain: "ดาวลบตัวอักษรไปเรื่อย ๆ จนหมดทั้ง string เหลือ string ว่าง",
-            },
-            {
-              input: 's = "ab*c"',
-              output: '"ac"',
-              explain: 'ดาวลบ b ซึ่งเป็นตัวที่ใกล้ทางซ้ายที่สุด เหลือ "ac"',
+              explain: "ทั้งสตริงถูกลบออกหมด เราจึง return สตริงว่าง",
             },
           ],
         },
@@ -170,8 +178,8 @@ while stack:
           t: "constraints",
           c: [
             "1 <= s.length <= 10^5",
-            "s มีตัวอักษรพิมพ์เล็กและเครื่องหมาย *",
-            "โจทย์รับประกันว่าการลบทำได้เสมอ (ไม่มี * เกินจำนวนตัวอักษร)",
+            "s ประกอบด้วยตัวอักษรอังกฤษพิมพ์เล็กและเครื่องหมาย *",
+            "สามารถทำ operation ข้างต้นกับ s ได้",
           ],
         },
 
@@ -295,7 +303,49 @@ while stack:
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You are given a string s, which contains stars *.
+
+In one operation, you can:
+• Choose a star in s.
+• Remove the closest non-star character to its left, as well as remove the star itself.
+
+Return the string after all stars have been removed.
+
+Note:
+• The input will be generated such that the operation is always possible.
+• It can be shown that the resulting string will always be unique.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 's = "leet**cod*e"',
+              output: '"lecoe"',
+              explain: `Performing the removals from left to right:
+- The closest character to the 1st star is 't' in "leet**cod*e". s becomes "lee*cod*e".
+- The closest character to the 2nd star is 'e' in "lee*cod*e". s becomes "lecod*e".
+- The closest character to the 3rd star is 'd' in "lecod*e". s becomes "lecoe".
+There are no more stars, so we return "lecoe".`,
+            },
+            {
+              input: 's = "erase*****"',
+              output: '""',
+              explain: "The entire string is removed, so we return an empty string.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= s.length <= 10^5",
+            "s consists of lowercase English letters and stars *.",
+            "The operation above can be performed on s.",
+          ],
+        },
+      ],
     },
   },
 
@@ -311,33 +361,35 @@ while stack:
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC735): กำหนด array asteroids ของจำนวนเต็มแทนดาวเคราะห์น้อยที่เรียงกันอยู่บนเส้นตรงเดียวกัน สำหรับดาวเคราะห์น้อยแต่ละดวง ค่าสัมบูรณ์คือขนาดของมัน และเครื่องหมายคือทิศทาง (บวก = เคลื่อนที่ไปทางขวา, ลบ = เคลื่อนที่ไปทางซ้าย) ทุกดวงเคลื่อนที่ด้วยความเร็วเท่ากัน ให้หาสภาพของดาวเคราะห์น้อยทั้งหมดหลังการชนจบลง กติกาการชน: ถ้าดาวเคราะห์น้อยสองดวงมาชนกัน ดวงที่ขนาดเล็กกว่าจะแตกหายไป ถ้าขนาดเท่ากันทั้งคู่จะแตกหายไปทั้งคู่ ดาวเคราะห์น้อยสองดวงที่เคลื่อนที่ไปทิศทางเดียวกันจะไม่มีวันชนกัน",
+          c: `กำหนด array asteroids ของจำนวนเต็มแทนดาวเคราะห์น้อยที่เรียงกันอยู่บนเส้นตรงเดียวกันมาให้ โดย index ของดาวเคราะห์น้อยใน array แทนตำแหน่งสัมพัทธ์ของมันในอวกาศ
+
+สำหรับดาวเคราะห์น้อยแต่ละดวง ค่าสัมบูรณ์แทนขนาดของมัน และเครื่องหมายแทนทิศทาง (บวก = ไปทางขวา, ลบ = ไปทางซ้าย) ดาวเคราะห์น้อยแต่ละดวงเคลื่อนที่ด้วยความเร็วเท่ากัน
+
+ให้หาสภาพของดาวเคราะห์น้อยทั้งหมดหลังการชนทั้งหมดจบลง ถ้าดาวเคราะห์น้อยสองดวงมาชนกัน ดวงที่เล็กกว่าจะระเบิด ถ้าทั้งคู่มีขนาดเท่ากัน ทั้งคู่จะระเบิด ดาวเคราะห์น้อยสองดวงที่เคลื่อนที่ไปทิศทางเดียวกันจะไม่มีวันชนกัน`,
         },
         {
           t: "example",
           c: [
             {
-              input: "asteroids = [5, 10, -5]",
-              output: "[5, 10]",
-              explain:
-                "10 กับ -5 ชนกัน 10 ใหญ่กว่าจึงรอด (−5 แตก) ส่วน 5 กับ 10 วิ่งทิศทางเดียวกัน (ขวาทั้งคู่) จึงไม่มีวันชนกัน",
+              input: "asteroids = [5,10,-5]",
+              output: "[5,10]",
+              explain: "10 และ -5 ชนกัน เหลือ 10 ส่วน 5 และ 10 ไม่เคยชนกัน",
             },
             {
-              input: "asteroids = [8, -8]",
+              input: "asteroids = [8,-8]",
               output: "[]",
-              explain: "8 กับ −8 ขนาดเท่ากัน ชนกันแล้วแตกหายไปทั้งคู่",
+              explain: "8 และ -8 ชนกันและระเบิดทั้งคู่",
             },
             {
-              input: "asteroids = [10, 2, -5]",
+              input: "asteroids = [10,2,-5]",
               output: "[10]",
-              explain:
-                "2 กับ −5 ชนกันก่อน −5 ใหญ่กว่าจึงรอด (2 แตก) จากนั้น 10 กับ −5 ชนกัน 10 ใหญ่กว่าจึงรอด",
+              explain: "2 และ -5 ชนกัน เหลือ -5 จากนั้น 10 และ -5 ชนกัน เหลือ 10",
             },
             {
-              input: "asteroids = [-2, -1, 1, 2]",
-              output: "[-2, -1, 1, 2]",
+              input: "asteroids = [3,5,-6,2,-1,4]",
+              output: "[-6,2,4]",
               explain:
-                "−2 กับ −1 วิ่งไปทางซ้ายทั้งคู่ ส่วน 1 กับ 2 วิ่งไปทางขวาทั้งคู่ ดาวที่วิ่งทิศทางเดียวกันไม่มีวันชนกัน จึงไม่มีการชนเกิดขึ้นเลย",
+                "ดาวเคราะห์น้อย -6 ทำให้ดาวเคราะห์น้อย 3 และ 5 ระเบิด แล้วเดินต่อไปทางซ้าย อีกฝั่งหนึ่ง ดาวเคราะห์น้อย 2 ทำลาย -1 เนื่องจาก 2 และ 4 ต่างเคลื่อนที่ไปทางขวา ทั้งคู่จึงไม่เคยชนกัน",
             },
           ],
         },
@@ -346,7 +398,7 @@ while stack:
           c: [
             "2 <= asteroids.length <= 10^4",
             "-1000 <= asteroids[i] <= 1000",
-            "asteroids[i] != 0 (เครื่องหมายบอกทิศ ค่าบอกขนาด)",
+            "asteroids[i] != 0",
           ],
         },
 
@@ -710,7 +762,50 @@ stack = [10, 2]
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `We are given an array asteroids of integers representing asteroids in a row. The indices of the asteroid in the array represent their relative position in space.
+
+For each asteroid, the absolute value represents its size, and the sign represents its direction (positive meaning right, negative meaning left). Each asteroid moves at the same speed.
+
+Find out the state of the asteroids after all collisions. If two asteroids meet, the smaller one will explode. If both are the same size, both will explode. Two asteroids moving in the same direction will never meet.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "asteroids = [5,10,-5]",
+              output: "[5,10]",
+              explain: "The 10 and -5 collide resulting in 10. The 5 and 10 never collide.",
+            },
+            {
+              input: "asteroids = [8,-8]",
+              output: "[]",
+              explain: "The 8 and -8 collide exploding each other.",
+            },
+            {
+              input: "asteroids = [10,2,-5]",
+              output: "[10]",
+              explain: "The 2 and -5 collide resulting in -5. The 10 and -5 collide resulting in 10.",
+            },
+            {
+              input: "asteroids = [3,5,-6,2,-1,4]",
+              output: "[-6,2,4]",
+              explain:
+                "The asteroid -6 makes the asteroid 3 and 5 explode, and then continues going left. On the other side, the asteroid 2 destroys -1. Since 2 and 4 are both moving right, they never collide.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "2 <= asteroids.length <= 10^4",
+            "-1000 <= asteroids[i] <= 1000",
+            "asteroids[i] != 0",
+          ],
+        },
+      ],
     },
   },
 
@@ -726,7 +821,13 @@ stack = [10, 2]
       th: [
         {
           t: "p",
-          c: "โจทย์ (LC394): กำหนด string ที่ถูกเข้ารหัสมาแล้ว ให้ return string ที่ถอดรหัสแล้ว กฎการเข้ารหัสคือ k[encoded_string] หมายความว่า encoded_string ที่อยู่ในวงเล็บเหลี่ยมจะถูกทำซ้ำเป็นจำนวน k ครั้งพอดี (k เป็นจำนวนเต็มบวกเสมอ) รับประกันว่า input ที่ให้มาถูกต้องเสมอ ไม่มี whitespace เกินมา วงเล็บเหลี่ยมครบคู่เสมอ และตัวเลขในข้อมูลต้นฉบับใช้เป็นตัวคูณ k เท่านั้น (ไม่มีเลขปนกับตัวอักษรแบบ 3a หรือ 2[4]) ความยาวของ string ผลลัพธ์ไม่เกิน 10^5",
+          c: `กำหนดสตริงที่ถูกเข้ารหัส มาให้ ให้ return สตริงที่ถอดรหัสแล้ว
+
+กฎการเข้ารหัสคือ: k[encoded_string] โดยที่ encoded_string ที่อยู่ในวงเล็บเหลี่ยมจะถูกทำซ้ำเป็นจำนวน k ครั้งพอดี หมายเหตุว่า k รับประกันว่าเป็นจำนวนเต็มบวก
+
+คุณอาจถือว่า input string ถูกต้องเสมอ ไม่มีช่องว่างเกิน วงเล็บเหลี่ยมครบคู่เสมอ เป็นต้น ยิ่งไปกว่านั้น คุณอาจถือว่าข้อมูลต้นฉบับไม่มีตัวเลข และตัวเลขมีไว้สำหรับตัวคูณ k เท่านั้น เช่น จะไม่มี input แบบ 3a หรือ 2[4]
+
+เทสเคสถูกสร้างขึ้นเพื่อให้ความยาวของ output จะไม่มีวันเกิน 10^5`,
         },
         {
           t: "example",
@@ -734,20 +835,14 @@ stack = [10, 2]
             {
               input: 's = "3[a]2[bc]"',
               output: '"aaabcbc"',
-              explain:
-                'a ถูกทำซ้ำ 3 ครั้งเป็น "aaa" และ bc ถูกทำซ้ำ 2 ครั้งเป็น "bcbc" ต่อกันได้ "aaabcbc"',
             },
             {
               input: 's = "3[a2[c]]"',
               output: '"accaccacc"',
-              explain:
-                'ชั้นในสุด 2[c] ถอดเป็น "cc" รวมกับ a ได้ "acc" หนึ่งชุด แล้วทำซ้ำ 3 ครั้งเป็น "accaccacc"',
             },
             {
               input: 's = "2[abc]3[cd]ef"',
               output: '"abcabccdcdcdef"',
-              explain:
-                "abc ทำซ้ำ 2 ครั้ง ต่อด้วย cd ทำซ้ำ 3 ครั้ง แล้วต่อท้ายด้วย ef ที่ไม่ได้เข้ารหัส",
             },
           ],
         },
@@ -755,9 +850,9 @@ stack = [10, 2]
           t: "constraints",
           c: [
             "1 <= s.length <= 30",
-            "s มีตัวอักษรพิมพ์เล็ก ตัวเลข และวงเล็บเหลี่ยม",
-            "ตัวเลขทุกตัวใน s อยู่ในช่วง 1 ถึง 300 (คือตัวคูณ k)",
-            "โจทย์รับประกันว่า s เป็น input ที่ถูกต้องเสมอ (วงเล็บครบคู่)",
+            "s ประกอบด้วยตัวอักษรอังกฤษพิมพ์เล็ก ตัวเลข และวงเล็บเหลี่ยม '[]'",
+            "s รับประกันว่าเป็น input ที่ถูกต้องเสมอ",
+            "จำนวนเต็มทุกตัวใน s อยู่ในช่วง [1, 300]",
           ],
         },
 
@@ -921,7 +1016,44 @@ stack = [10, 2]
           ],
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given an encoded string, return its decoded string.
+
+The encoding rule is: k[encoded_string], where the encoded_string inside the square brackets is being repeated exactly k times. Note that k is guaranteed to be a positive integer.
+
+You may assume that the input string is always valid; there are no extra white spaces, square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain any digits and that digits are only for those repeat numbers, k. For example, there will not be input like 3a or 2[4].
+
+The test cases are generated so that the length of the output will never exceed 10^5.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: 's = "3[a]2[bc]"',
+              output: '"aaabcbc"',
+            },
+            {
+              input: 's = "3[a2[c]]"',
+              output: '"accaccacc"',
+            },
+            {
+              input: 's = "2[abc]3[cd]ef"',
+              output: '"abcabccdcdcdef"',
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= s.length <= 30",
+            "s consists of lowercase English letters, digits, and square brackets '[]'.",
+            "s is guaranteed to be a valid input.",
+            "All the integers in s are in the range [1, 300].",
+          ],
+        },
+      ],
     },
   },
 };
