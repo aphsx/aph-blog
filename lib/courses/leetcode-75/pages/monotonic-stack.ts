@@ -12,6 +12,13 @@ export const monotonicStackPages: Record<string, Page> = {
 
               { t: "h2", c: "ปัญหาคลาสสิก: Next Greater Element" },
               { t: "p", c: "มี array (ลิสต์) ตัวเลข ถามว่าแต่ละตัวมีตัวไหนอยู่ทางขวาที่มากกว่ามันตัวแรก ถ้าคิดตรง ๆ คือแต่ละตัว iterate (วน) ดูขวาไปเรื่อย ๆ จนเจอตัวที่มากกว่า ซึ่งกรณีแย่สุดเป็น O(n^2) monotonic stack ช่วยให้เรา iterate array รอบเดียวได้" },
+              {
+                t: "image",
+                src: "/leetcode-75/monotonic-stack.gif",
+                alt: "Monotonic stack: pop while top is smaller than current to find next greater",
+                caption:
+                  "Monotonic Stack: เจอตัวใหญ่กว่า → pop ยอดที่รออยู่แล้วบันทึก next greater · แล้วค่อย push ตัวปัจจุบัน",
+              },
               { t: "p", c: "ไอเดียคือเราเก็บ index (ตำแหน่ง) (หรือค่า) ที่ยังหาคำตอบไม่เจอไว้ใน stack โดยรักษาให้ค่าใน stack เรียงจากมากไปน้อยจากล่างขึ้นบน (decreasing) พอเจอตัวใหม่ที่มากกว่ายอด stack ก็แปลว่าตัวใหม่นี่แหละคือ next greater element ของตัวที่ยอด stack เราจึง pop ออกมาแล้วบันทึกคำตอบ" },
               { t: "code", lang: "python", c: `# template: หาตัวถัดไปที่มากกว่า (index) ของแต่ละตำแหน่ง
 def next_greater(nums):

@@ -46,6 +46,13 @@ for a, b in edges:
 
               { t: "h2", c: "DFS — ลุยลึก" },
               { t: "p", c: "DFS (Depth-First Search) คือวิธี traverse graph แบบ ลุยลึกไปทางหนึ่งให้สุดก่อน แล้วค่อยถอยกลับมาลองทางอื่น เหมือนเดินในเขาวงกตแล้วยึดกำแพงขวาไว้ตลอด เดินลึกเข้าไปเรื่อย ๆ จนตัน ค่อยถอยกลับ วิธีที่เขียนง่ายที่สุดคือใช้ recursion (การเรียกตัวเอง)" },
+              {
+                t: "image",
+                src: "/leetcode-75/graph-dfs.gif",
+                alt: "Graph DFS: visit deep then backtrack with visited set",
+                caption:
+                  "Graph DFS: mark visited → ดิ่งไปเพื่อนบ้าน → ตันแล้ว backtrack · ห้ามลืม visited กันวนไม่จบ",
+              },
               { t: "p", c: "สิ่งที่ขาดไม่ได้เลยในการเดิน graph คือ set visited (เคยเยือน) ที่จำว่าเราเคยไป node ไหนมาแล้วบ้าง เพราะ graph มี cycle ได้ ถ้าไม่จำ เราจะเดินวนกลับมาที่เดิมไม่รู้จบ (infinite loop) กฎคือ ก่อนจะเดินเข้า node ไหน เช็คก่อนว่าเคยไปหรือยัง ถ้ายังค่อยไป และทันทีที่ไปถึงให้ mark เป็น visited" },
               { t: "code", lang: "python", c: `# template DFS ด้วย recursion จำโครงนี้ไว้ใช้ได้ทุกข้อ
 def dfs(node, graph, visited):

@@ -15,6 +15,13 @@ export const intervalsPages: Record<string, Page> = {
 
               { t: "h2", c: "sort แล้ว greedy" },
               { t: "p", c: "เทคนิคหลักคือ sort interval ทั้งหมดก่อน จะ sort ตาม start หรือ end ขึ้นกับโจทย์ จากนั้น iterate ทีละ interval แบบ greedy คือตัดสินใจโดยดูแค่ interval ล่าสุดที่เก็บไว้เทียบกับ interval ปัจจุบัน ไม่ต้องมองย้อนกลับไปไกล" },
+              {
+                t: "image",
+                src: "/leetcode-75/intervals-merge.gif",
+                alt: "Merge intervals: sort by start then glue overlaps",
+                caption:
+                  "Merge intervals: sort ตาม start → ทับกันก็ยืดปลาย · ไม่ทับก็ append ช่วงใหม่",
+              },
               { t: "code", lang: "python", c: `# โครงทั่วไปของโจทย์ intervals
 intervals = [[1, 3], [2, 4], [3, 5]]
 

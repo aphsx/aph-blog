@@ -12,6 +12,13 @@ export const dpMultiPages: Record<string, Page> = {
 
               { t: "h2", c: "dp[i][j] คืออะไร — state บนตาราง" },
               { t: "p", c: "DP หลายมิติคือการขยาย state จากเส้นเดียวเป็น table dp[i][j] หมายถึงคำตอบของ subproblem (ปัญหาย่อย) ที่ระบุด้วย index สองตัว i และ j โจทย์ที่เข้าข่ายมักมีสองหน้าตา: (1) two strings / two sequences (สองสตริง/สองลำดับ) เช่นเทียบ word1 กับ word2 โดย i วิ่งบน word1 และ j วิ่งบน word2 หรือ (2) grid เช่นเดินบน table ขนาด m x n โดย i คือ row, j คือ column" },
+              {
+                t: "image",
+                src: "/leetcode-75/dp-2d.gif",
+                alt: "DP 2D unique paths: fill grid cell from above + left",
+                caption:
+                  "DP 2D (Unique Paths): ขอบ = 1 ทาง · ช่องใน = จากบน + จากซ้าย",
+              },
               { t: "p", c: "วิธีคิด transition คือถามว่าช่อง dp[i][j] คำนวณได้จากช่องข้างเคียงตัวไหน โดยทั่วไปเป็นเพื่อนบ้านสามช่อง: บน dp[i-1][j], ซ้าย dp[i][j-1], และทแยงบนซ้าย dp[i-1][j-1] เรา iterate เติม table จากซ้ายบนไปขวาล่าง เพื่อให้ตอนคำนวณช่องหนึ่ง ช่องที่มันต้องพึ่งพาถูกเติมไว้ก่อนแล้ว" },
               { t: "code", lang: "python", c: `# template DP 2 มิติ (นิยมเผื่อแถว/คอลัมน์ที่ 0 ไว้เป็น base case)
 m, n = len(a), len(b)

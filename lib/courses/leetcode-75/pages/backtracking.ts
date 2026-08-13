@@ -22,6 +22,13 @@ export const backtrackingPages: Record<string, Page> = {
 
           { t: "h2", c: "template สามจังหวะ: choose → explore → unchoose" },
           { t: "p", c: "หัวใจของ backtracking ทุกข้อจะมี structure (โครง) เดียวกัน จำ template (แม่แบบ) สามจังหวะนี้ไว้: choose (เลือก) → explore (ลงลึก) → unchoose (ถอย) ทุกโจทย์ในหมวดนี้จะเข้ารูปนี้หมด แค่เปลี่ยนว่า choices คืออะไร และเงื่อนไข คำตอบครบ คืออะไร" },
+          {
+            t: "image",
+            src: "/leetcode-75/backtracking.gif",
+            alt: "Backtracking: choose, explore, undo while building subsets",
+            caption:
+              "Backtracking: choose → explore → undo (pop) — path โตแล้วหด เพื่อลองทางอื่น",
+          },
           { t: "code", lang: "python", c: `def backtrack(path, choices):
         if is_complete(path):        # <- แทนที่ด้วยเงื่อนไข "คำตอบครบแล้ว" ของโจทย์
             result.append(path[:])   # เก็บสำเนาคำตอบ (สำคัญ! ต้อง copy)

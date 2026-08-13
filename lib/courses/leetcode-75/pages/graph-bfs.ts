@@ -12,6 +12,13 @@ export const graphBfsPages: Record<string, Page> = {
 
               { t: "h2", c: "BFS ทำงานยังไง" },
               { t: "p", c: "BFS traverse (เดินไล่) graph โดยเยี่ยม node (โหนด) ที่อยู่ ใกล้ จุดเริ่มก่อน แล้วค่อยขยายไปไกลขึ้นทีละชั้น ชั้นแรกคือเพื่อนบ้าน (neighbor) ตรงของจุดเริ่ม (ห่าง 1 ก้าว) ชั้นถัดไปคือเพื่อนบ้านของเพื่อนบ้าน (ห่าง 2 ก้าว) ไปเรื่อย ๆ เพราะมันแผ่ออกเป็นวงตามระยะทาง พอ BFS ไปถึงเป้าหมายครั้งแรก เรารับประกันได้เลยว่านั่นคือ shortest path (เส้นทางที่สั้นที่สุด, ก้าวน้อยที่สุด) นี่คือเหตุผลที่โจทย์แนว หาจำนวนก้าวน้อยสุด ระยะสั้นสุด เวลาน้อยสุด มักใช้ BFS" },
+              {
+                t: "image",
+                src: "/leetcode-75/graph-bfs.gif",
+                alt: "Grid BFS: expand layer by layer from start to goal",
+                caption:
+                  "Grid BFS: แผ่ทีละชั้นด้วย QUEUE — ถึงเป้าครั้งแรก = ระยะสั้นสุด",
+              },
               { t: "p", c: "เครื่องมือคู่กับ BFS คือ queue (คิว) แบบเข้าก่อนออกก่อน เราใช้ deque จาก collections เพราะมัน pop (ดึง) ของจากหัว queue ได้เร็ว O(1) หลักการคือ push (ใส่) node ที่จะเริ่มลง queue แล้ว iterate (วน) pop ออกจากหัว queue มาประมวลผล พร้อม append (ต่อท้าย) เพื่อนบ้านที่ยังไม่ visited (เคยเยือน) เข้าท้าย queue ทำจน queue หมด และเหมือน DFS เราต้องมี visited กันเดินซ้ำเสมอ" },
               { t: "code", lang: "python", c: `from collections import deque
 

@@ -247,6 +247,13 @@ while fast and fast.next:
           c: "การเปลี่ยนทิศทางจาก 1 → 2 → 3 ให้กลายเป็น 3 → 2 → 1 โดยไม่สร้างโหนดใหม่ — ใช้ตัวแปร 3 ตัวควบคุมการหมุนข้อต่อ:",
         },
         {
+          t: "image",
+          src: "/leetcode-75/linked-list-reverse.gif",
+          alt: "Linked list reverse: rewire next with prev/cur pointers",
+          caption:
+            "In-place reverse: เก็บ next ไว้ก่อน → หักข้อต่อชี้กลับ prev → เลื่อน prev/cur ไปข้างหน้า",
+        },
+        {
           t: "ul",
           c: [
             "prev — โหนดก่อนหน้า (เริ่มต้นเป็น None)",

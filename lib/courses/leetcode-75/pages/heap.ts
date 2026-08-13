@@ -12,6 +12,13 @@ export const heapPages: Record<string, Page> = {
 
               { t: "h2", c: "heap คืออะไร ทำไมถึงเร็ว" },
               { t: "p", c: "ลองนึกภาพว่าเรามีตัวเลขกองหนึ่ง แล้วต้อง pop ตัว minimum ออกไปเรื่อย ๆ ถ้าเราเก็บเป็น array (ลิสต์) ธรรมดา ทุกครั้งที่จะหาตัว minimum ต้อง iterate (วน) ดูทั้ง array เป็น O(n) และถ้าจะ sort (เรียง) ก่อนก็ O(n log n) แต่ heap ทำให้เรา pop ตัว minimum ออกได้ที่ O(log n) และ peek (แอบดูโดยไม่หยิบออก) ตัว minimum ได้ที่ O(1) นี่คือเหตุผลที่มันเร็วกว่ามากเมื่อต้องทำซ้ำหลายรอบ" },
+              {
+                t: "image",
+                src: "/leetcode-75/heap.gif",
+                alt: "Min-heap insert: append then bubble up until heap property holds",
+                caption:
+                  "Min-Heap: insert ท้ายแถว → bubble up สลับกับพ่อจนกว่า parent ≤ children · root = min เสมอ",
+              },
               { t: "p", c: "หน้าตาของ heap คือ binary tree (ต้นไม้สองแขนง) ที่ทุก node (โหนด) ต้อง น้อยกว่าหรือเท่ากับ child (ลูก) ของมันเสมอ (สำหรับ min-heap) ผลก็คือตัว minimum จะลอยขึ้นมาอยู่บนสุด (root/ราก) เสมอ ต้นไม้นี้ store (เก็บ) ใน array แบบแนวราบ ไม่ต้องมี pointer (ตัวชี้) จริง ๆ" },
               { t: "code", c: `           1          <- ราก = ตัวน้อยสุดเสมอ
          /   \\

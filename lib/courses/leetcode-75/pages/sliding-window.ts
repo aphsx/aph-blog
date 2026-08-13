@@ -83,9 +83,10 @@ best = 9 | บวก/ลบไปทั้งหมด 9 ครั้ง`,
               },
               {
                 t: "image",
-                src: "/leetcode-75/sliding-window-fixed.png",
+                src: "/leetcode-75/sliding-window-fixed.gif",
                 alt: "Fixed-size sliding window: เลื่อน window ยาว k โดยบวกตัวเข้าและลบตัวออก",
-                caption: "Fixed-size window: ความยาวกคงที่ ทุกครั้งที่เลื่อนแค่ drop ตัวซ้าย + add ตัวขวา ไม่ต้องบวกใหม่ทั้งก้อน",
+                caption:
+                  "Fixed-size window: ความยาว k คงที่ — ทุกครั้งที่เลื่อนแค่ drop ตัวซ้าย + add ตัวขวา (อัปเดต sum / best ทันที)",
               },
               {
                 t: "callout",
@@ -150,9 +151,10 @@ best = 9 | บวก/ลบไปทั้งหมด 9 ครั้ง`,
               },
               {
                 t: "image",
-                src: "/leetcode-75/sliding-window-variable.png",
+                src: "/leetcode-75/sliding-window-variable.gif",
                 alt: "Variable-size sliding window: expand right, shrink left while invalid, update best",
-                caption: "Variable-size window: วนซ้ำ Expand → Shrink while invalid → Update best ทุกครั้งที่ขยับ right",
+                caption:
+                  "Variable-size window: Expand ขวา → ถ้า invalid ให้ Shrink ซ้าย → อัปเดต best (ตัวอย่าง: substring ไม่มีตัวซ้ำ)",
               },
               {
                 t: "callout",

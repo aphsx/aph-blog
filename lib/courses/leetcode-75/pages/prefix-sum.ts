@@ -12,6 +12,13 @@ export const prefixSumPages: Record<string, Page> = {
 
               { t: "h2", c: "แนวคิดของหัวข้อนี้" },
               { t: "p", c: "สมมติเรามี array nums แล้วอยากรู้ผลรวมของ range nums[i..j] (รวมทั้งสองปลาย) ถ้าถามครั้งเดียวก็บวกตรง ๆ ได้ แต่ถ้าถูกถามหลาย ๆ range การบวกใหม่ทุกครั้งจะเสียเวลา O(n) ต่อ query (คำถาม) รวมแล้วช้า" },
+              {
+                t: "image",
+                src: "/leetcode-75/prefix-sum.gif",
+                alt: "Prefix sum: build cumulative array then answer a range query in O(1)",
+                caption:
+                  "สร้าง prefix ทีละช่อง แล้วตอบ sum(i..j) = P[j+1] − P[i] ได้ใน O(1)",
+              },
               { t: "p", c: "ทริกคือสร้าง array prefix ที่เก็บผลรวมสะสมตั้งแต่ต้นจนถึงแต่ละ index (ตำแหน่ง) โดยนิยมทำให้ prefix ยาวกว่า nums หนึ่งช่อง (มีช่อง 0 นำหน้า) เพื่อให้สูตรสวย: prefix[k] = ผลรวมของ nums[0..k-1]" },
               { t: "p", c: "ทำไมมันเร็วขึ้น? เพราะเราจ่ายเวลา O(n) แค่ครั้งเดียวตอน build (สร้าง) prefix จากนั้นทุก range query ตอบได้ในเวลา O(1) ด้วยการลบกันแค่ครั้งเดียว ผลรวม range = ผลรวมสะสมถึงปลายขวา ลบ ผลรวมสะสมก่อนถึงปลายซ้าย" },
               { t: "code", lang: "python", c: `nums = [3, 1, 4, 1, 5]

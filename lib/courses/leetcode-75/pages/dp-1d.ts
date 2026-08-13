@@ -12,6 +12,13 @@ export const dp1dPages: Record<string, Page> = {
 
               { t: "h2", c: "overlapping subproblems — สัญญาณว่าใช้ DP ได้" },
               { t: "p", c: "ลองดูตัวอย่างคลาสสิกที่สุด: เลข Fibonacci ที่ define (นิยาม) ว่า fib(n) = fib(n-1) + fib(n-2) โดย base case (กรณีฐาน) คือ fib(0) = 0 และ fib(1) = 1 ถ้าเขียนตรง ๆ ตามนิยามด้วย recursion (การเรียกตัวเอง) จะได้แบบนี้ ซึ่งช้ามาก:" },
+              {
+                t: "image",
+                src: "/leetcode-75/dp-1d.gif",
+                alt: "DP 1D bottom-up: fill fib array from base cases",
+                caption:
+                  "DP 1D bottom-up: เติม dp[i] จากของที่แก้แล้ว — ไม่คำนวณ subproblem ซ้ำ",
+              },
               { t: "code", lang: "python", c: `def fib(n):
             if n < 2:
                 return n
