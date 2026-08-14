@@ -43,8 +43,8 @@ export type Block =
   /** A code block paired with the output it prints (separate panel). */
   | { t: "codeout"; code: string; out: string; lang?: string; label?: string }
   /**
-   * Collapsed answer fold. Closed by default — teaching stays outside;
-   * inside is usually: one-line idea → codeout → short “จุดที่ต้องเห็น” → Time/Space.
+   * Collapsed answer fold. Closed by default.
+   * Inside: teach from zero (ขออะไร → มือ → วิธีทำ → Interactive) then class Solution + Time/Space.
    */
   | { t: "solution"; summary?: string; c: Block[] };
 

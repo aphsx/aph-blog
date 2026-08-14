@@ -22,6 +22,11 @@ import {
   type LoopStep,
   type NestedStep,
 } from "@/lib/viz/array-string";
+import {
+  MERGE_ALT_CODE,
+  buildMergeAltSteps,
+  type MergeAltStep,
+} from "@/lib/viz/merge-alternately";
 
 const W = 720;
 const GOLD = "#F7B700";
@@ -733,6 +738,87 @@ export function ArrayConcatViz() {
       message={step.msg}
       diagram={<ConcatDiagram step={step} />}
       lines={CONCAT_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+function MergeAltDiagram({ step }: { step: MergeAltStep }) {
+  const cell = 48;
+  const gap = 10;
+  const h = 42;
+  const y1 = 40;
+  const y2 = 110;
+  const origin = 90;
+  const xOf = (k: number) => origin + k * (cell + gap);
+
+  const drawRow = (s: string, y: number, cursor: number, name: string, color: string, pickThis: boolean) => (
+    <g>
+      <Label x={16} y={y + 28} text={name} color={color} />
+      {[...s].map((ch, k) => {
+        const taken = k < cursor;
+        const on = pickThis && k === cursor;
+        const leftover = step.pick === "tail" && k >= cursor;
+        return (
+          <g key={`${name}-${k}`}>
+            {on && (
+              <text x={xOf(k) + cell / 2} y={y - 8} textAnchor="middle" fill={color} fontSize={14}>
+                ▼
+              </text>
+            )}
+            <Cell
+              x={xOf(k)}
+              y={y}
+              w={cell}
+              h={h}
+              value={ch}
+              fill={on ? color : leftover ? GOLD : taken ? "#1a1e28" : "#1e2433"}
+              stroke={on || leftover ? GOLD : "#3a4050"}
+              ring={on || leftover ? GOLD : undefined}
+              dim={taken && !on}
+              size={18}
+            />
+            <Idx x={xOf(k) + cell / 2} y={y + h + 18} n={k} />
+          </g>
+        );
+      })}
+    </g>
+  );
+
+  return (
+    <svg viewBox={`0 0 ${W} 248`} className="w-full" aria-hidden>
+      {drawRow(step.w1, y1, step.i, "word1", TEAL, step.pick === "w1")}
+      {drawRow(step.w2, y2, step.j, "word2", ORANGE, step.pick === "w2")}
+      <Label x={W / 2} y={192} text={`i = ${step.i}   j = ${step.j}`} color={MUTED} anchor="middle" />
+      <text x={W / 2} y={228} textAnchor="middle" fill={GOLD} fontSize={18} fontWeight={800} fontFamily={FONT}>
+        merged = {step.merged ? `"${step.merged}"` : '""'}
+      </text>
+    </svg>
+  );
+}
+
+export function MergeAlternatelyViz() {
+  const steps = useMemo(() => buildMergeAltSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title='MERGE · word1 = "ab"  word2 = "pqrs"'
+      pills={[
+        { label: "word1", color: "#03A69B" },
+        { label: "word2", color: "#D55D00" },
+      ]}
+      message={step.msg}
+      diagram={<MergeAltDiagram step={step} />}
+      lines={MERGE_ALT_CODE}
       line={step.line}
       idx={play.idx}
       stepCount={steps.length}

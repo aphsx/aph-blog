@@ -269,7 +269,7 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block font-bold text-[#1c1e21]">
-                {b.summary ?? "เฉลยโค้ด · ซ่อนไว้ให้ลองเองก่อน"}
+                {b.summary ?? "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน"}
               </span>
               <span className="mt-0.5 block text-[0.8em] text-muted group-open/sol:hidden">
                 พับไว้ด้านใน — คลิกเมื่อพร้อมดู

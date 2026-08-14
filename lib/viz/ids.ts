@@ -32,6 +32,7 @@ export const VIZ_IDS = [
   "array-index",
   "array-loop",
   "array-nested",
+  "merge-alternately",
   "slide-fixed",
   "slide-variable",
   "hash-scan",

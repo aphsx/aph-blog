@@ -7,7 +7,7 @@ import { MaxLevelSumViz, RightSideViewViz } from "@/components/viz/TreeBfsViz";
 import { CasesBstViz, DeleteBstViz, GrowBstViz, HeightBstViz, RuleBstViz, SearchBstViz } from "@/components/viz/BstViz";
 import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/PrefixSumViz";
 import { OppositeEndsViz, SlowFastViz } from "@/components/viz/TwoPointersViz";
-import { ArrayAliasViz, ArrayConcatViz, ArrayInsertViz, ArrayIndexViz, ArrayLoopViz, ArrayNestedViz } from "@/components/viz/ArrayStringViz";
+import { ArrayAliasViz, ArrayConcatViz, ArrayInsertViz, ArrayIndexViz, ArrayLoopViz, ArrayNestedViz, MergeAlternatelyViz } from "@/components/viz/ArrayStringViz";
 import { SlideFixedViz, SlideVariableViz } from "@/components/viz/SlidingWindowViz";
 import {
   HashCloseViz,
@@ -45,6 +45,7 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "array-index": ArrayIndexViz,
   "array-loop": ArrayLoopViz,
   "array-nested": ArrayNestedViz,
+  "merge-alternately": MergeAlternatelyViz,
   "slide-fixed": SlideFixedViz,
   "slide-variable": SlideVariableViz,
   "hash-scan": HashScanViz,
