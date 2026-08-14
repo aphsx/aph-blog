@@ -26,6 +26,9 @@ export const VIZ_IDS = [
   "prefix-pivot",
   "two-ptr-opposite",
   "two-ptr-slow-fast",
+  "array-alias",
+  "array-insert-shift",
+  "array-concat-join",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];
