@@ -9,6 +9,15 @@ import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/Pre
 import { OppositeEndsViz, SlowFastViz } from "@/components/viz/TwoPointersViz";
 import { ArrayAliasViz, ArrayConcatViz, ArrayInsertViz } from "@/components/viz/ArrayStringViz";
 import { SlideFixedViz, SlideVariableViz } from "@/components/viz/SlidingWindowViz";
+import {
+  HashCloseViz,
+  HashDiffViz,
+  HashFreqViz,
+  HashPairsViz,
+  HashScanViz,
+  HashSeenViz,
+  HashSlotViz,
+} from "@/components/viz/HashMapViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -35,6 +44,13 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "array-concat-join": ArrayConcatViz,
   "slide-fixed": SlideFixedViz,
   "slide-variable": SlideVariableViz,
+  "hash-scan": HashScanViz,
+  "hash-slot": HashSlotViz,
+  "hash-seen": HashSeenViz,
+  "hash-diff": HashDiffViz,
+  "hash-freq": HashFreqViz,
+  "hash-close": HashCloseViz,
+  "hash-pairs": HashPairsViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {

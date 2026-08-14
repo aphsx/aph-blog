@@ -31,6 +31,13 @@ export const VIZ_IDS = [
   "array-concat-join",
   "slide-fixed",
   "slide-variable",
+  "hash-scan",
+  "hash-slot",
+  "hash-seen",
+  "hash-diff",
+  "hash-freq",
+  "hash-close",
+  "hash-pairs",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

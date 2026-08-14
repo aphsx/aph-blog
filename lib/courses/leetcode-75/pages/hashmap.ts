@@ -70,6 +70,15 @@ set  : [8, 3] | เทียบ 6 ครั้ง`,
                 c: 'ถ้าในลูปมีการถามว่า "ตัวนี้อยู่ในกองนั้นไหม" หรือ "ตัวนี้เคยเจอมาก่อนไหม" ให้สงสัยทันทีว่ากองนั้นควรเป็น set หรือ dict ไม่ใช่ list — นี่คือสัญญาณที่พบบ่อยที่สุดของหมวดนี้',
               },
               {
+                t: "h3",
+                c: "ดูทีละขั้น (Interactive)",
+              },
+              {
+                t: "p",
+                c: "กด **Next ▶** ไล่ b = [9, 4, 9, 8, 4, 3] ถามว่ามีใน a = [4, 9, 5, 2, 7] ไหม · เฟสแรก list ไล่ a ใหม่ทุกตัว (ทอง = ช่วงที่เทียบ) · เฟสหลังแปลงเป็น set แล้วแต่ละตัวใน b ก้าวเดียว — นับจำนวนครั้งที่เทียบให้ทันว่าทำไม set ถึงคุ้ม",
+              },
+              { t: "viz", id: "hash-scan" },
+              {
                 t: "image",
                 src: "/leetcode-75/hashmap-lookup.gif",
                 alt: "Hash map two-sum style: store seen values, lookup complement in O(1)",
@@ -122,6 +131,15 @@ key 100  hash = 100  -> ช่องที่ 4`,
                 t: "p",
                 c: "และนี่คือเหตุผลที่ทุกตารางเขียนว่า O(1) เฉลี่ย ไม่ใช่ O(1) เฉย ๆ Python คุมให้เฉลี่ยแล้วเร็วด้วยการขยายจำนวนช่องอัตโนมัติเมื่อของเริ่มแน่น (resize) เพื่อให้ยังมีที่ว่างเหลือเยอะ โอกาสชนจึงต่ำและโซ่การชนสั้น",
               },
+              {
+                t: "h3",
+                c: "ดูทีละขั้น (Interactive)",
+              },
+              {
+                t: "p",
+                c: "กด **Next ▶** ใส่ 42, 100, 7, 15 ลงตาราง 8 ช่อง แล้วค้น 15 กับ 42 · ลูกศรทอง = ช่องที่สูตรชี้ · ส้ม = กำลังเขียน / ชนแล้วเดินต่อ · เขียว = เจอ — ดูจังหวะที่ 15 ชนช่อง 7 แล้วไปอยู่ช่อง 0 แต่ตอนค้นยังเริ่มที่ช่อง 7 ตามสูตรเดิม",
+              },
+              { t: "viz", id: "hash-slot" },
 
               { t: "h3", c: "worst case O(n) หน้าตาเป็นยังไง" },
               {
@@ -570,6 +588,15 @@ i=1 x=9 | ต้องการคู่ 3 | seen={3: 0} -> เคยเจอ�
 คำตอบ index: (0, 1)`,
               },
               {
+                t: "h3",
+                c: "ดูทีละขั้น (Interactive)",
+              },
+              {
+                t: "p",
+                c: "กด **Next ▶** ไล่ nums = [3, 9, 4, 1] เป้า 12 · ทอง = ตัวที่กำลังยืน · เขียวใน seen = ค่าที่ need กำลังถาม · วงแหวนเขียว = คู่ที่เจอ — สังเกตว่าถามก่อน แล้วค่อยจด เลยไม่จับคู่กับตัวเอง",
+              },
+              { t: "viz", id: "hash-seen" },
+              {
                 t: "callout",
                 title: "แบบที่ 5 · สรุป",
                 warn: true,
@@ -813,6 +840,15 @@ set  : [8, 3] | compared 6 times`,
       title: "One sentence to remember from this part",
       c: 'If a loop asks "is this in that pile?" or "have I seen this before?", immediately suspect that pile should be a set or dict, not a list — the most common signal in this section.',
     },
+    {
+      t: "h3",
+      c: "Step through (Interactive)",
+    },
+    {
+      t: "p",
+      c: "Hit **Next ▶** and ask whether each value in b = [9, 4, 9, 8, 4, 3] sits in a = [4, 9, 5, 2, 7]. Phase 1 scans the list (gold = cells compared). Phase 2 converts to a set, then each query is one hop — watch the comparison count to see why the set pays for itself.",
+    },
+    { t: "viz", id: "hash-scan" },
 
     { t: "h2", c: "Part 2 · How it finds things without scanning" },
     {
@@ -859,6 +895,15 @@ key 100  hash = 100  -> slot 4`,
       t: "p",
       c: "That is why every table says average O(1), not plain O(1). Python keeps the average fast by resizing (growing the table) when it gets full, so plenty of empty slots remain, collisions stay rare, and probe chains stay short.",
     },
+    {
+      t: "h3",
+      c: "Step through (Interactive)",
+    },
+    {
+      t: "p",
+      c: "Hit **Next ▶** and insert 42, 100, 7, 15 into an 8-slot table, then look up 15 and 42. Gold arrow = computed slot. Orange = write / collision probe. Green = found. Watch 15 collide on slot 7, land in slot 0, then lookup still starts at slot 7 using the same formula.",
+    },
+    { t: "viz", id: "hash-slot" },
 
     { t: "h3", c: "What worst-case O(n) looks like" },
     {
@@ -1307,6 +1352,15 @@ i=1 x=9 | need 3 | seen={3: 0} -> seen? True
 answer indices: (0, 1)`,
     },
     {
+      t: "h3",
+      c: "Step through (Interactive)",
+    },
+    {
+      t: "p",
+      c: "Hit **Next ▶** on nums = [3, 9, 4, 1], target 12. Gold = current value. Green in seen = the need we are asking for. Green rings = the pair. Notice we ask first, then record — so a value never pairs with itself.",
+    },
+    { t: "viz", id: "hash-seen" },
+    {
       t: "callout",
       title: "Pattern 5 · summary",
       warn: true,
@@ -1517,7 +1571,12 @@ dict.fromkeys     : 36960 bytes`,
         },
         { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าลืมว่าต้องทำ difference ทั้ง สองทิศทาง (s1-s2 และ s2-s1) คนละค่ากัน และเพราะโจทย์บอกว่าลำดับไม่สำคัญ จึงไม่ต้องกังวลว่า list(set) จะเรียงยังไง" },
 
-        { t: "h2", c: "ไล่ทีละสเต็ป — nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]" },
+        { t: "h2", c: "ดูทีละขั้น (Interactive)" },
+        {
+          t: "p",
+          c: "กด **Next ▶** แปลง nums1 = [1, 2, 3, 3] กับ nums2 = [1, 1, 2, 2] เป็น set ทีละตัว · ส้ม = กำลังใส่ · ช่องจาง = ตัวซ้ำที่ถูกยุบ · เขียว = รอดจาก difference — ต้องลบสองทิศ คนละคำตอบ",
+        },
+        { t: "viz", id: "hash-diff" },
         {
           t: "ol",
           c: [
@@ -1623,7 +1682,12 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
           c: "Don’t forget difference in both directions (s1-s2 and s2-s1) — they are different. And because order does not matter, you don’t need to worry about how list(set(...)) is ordered.",
         },
 
-        { t: "h2", c: "Walkthrough — nums1 = [1, 2, 3, 3], nums2 = [1, 1, 2, 2]" },
+        { t: "h2", c: "Step through (Interactive)" },
+        {
+          t: "p",
+          c: "Hit **Next ▶** and convert nums1 = [1, 2, 3, 3] and nums2 = [1, 1, 2, 2] into sets one value at a time. Orange = inserting. Dim = collapsed duplicate. Green = survived the difference. Difference is two directions, two different answers.",
+        },
+        { t: "viz", id: "hash-diff" },
         {
           t: "ol",
           c: [
@@ -1746,7 +1810,12 @@ print(find_difference([1, 2, 3, 3], [1, 1, 2, 2]))  # [[3], []]`,
         },
         { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าเผลอเอา key (ตัวค่า) ไปเช็คแทน occurrences ต้องใช้ .values() ซึ่งเป็น occurrences ไม่ใช่ .keys() เพราะ key ย่อมไม่ซ้ำกันอยู่แล้วโดยธรรมชาติของ dict" },
 
-        { t: "h2", c: "ไล่ทีละสเต็ป — arr = [1, 2, 2, 1, 1, 3]" },
+        { t: "h2", c: "ดูทีละขั้น (Interactive)" },
+        {
+          t: "p",
+          c: "กด **Next ▶** นับ arr = [1, 2, 2, 1, 1, 3] ทีละช่อง · แท่งเขียว = จำนวนครั้งของแต่ละค่า · แล้วหยิบ .values() ไปใส่ set — ถ้าความยาวยังเท่าเดิม แปลว่าไม่มีจำนวนครั้งซ้ำ",
+        },
+        { t: "viz", id: "hash-freq" },
         {
           t: "ol",
           c: [
@@ -1852,7 +1921,12 @@ True`,
           c: "Don’t check the keys (the values themselves) instead of the occurrence counts. Use .values(), not .keys() — keys are unique by definition of a dict.",
         },
 
-        { t: "h2", c: "Walkthrough — arr = [1, 2, 2, 1, 1, 3]" },
+        { t: "h2", c: "Step through (Interactive)" },
+        {
+          t: "p",
+          c: "Hit **Next ▶** and count arr = [1, 2, 2, 1, 1, 3] cell by cell. Green bars = occurrence counts. Then take .values() into a set — if the length stays the same, no two values share a count.",
+        },
+        { t: "viz", id: "hash-freq" },
         {
           t: "ol",
           c: [
@@ -1997,7 +2071,12 @@ Operation 2: เปลี่ยนทุกตำแหน่งที่เก�
         },
         { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าข้าม Gate 2 ถ้าเช็คแค่ frequency เรียงเท่ากัน cabbba กับ aabbss จะถูกตอบผิดเป็น True ทั้งที่ตัว s ไม่มีใน word1 เลย — op 2 เสกมันขึ้นมาไม่ได้" },
 
-        { t: "h2", c: 'ไล่ทีละสเต็ป — word1 = "cabbba", word2 = "abbccc"' },
+        { t: "h2", c: "ดูทีละขั้น (Interactive)" },
+        {
+          t: "p",
+          c: 'กด **Next ▶** ไล่สามด่านกับ word1 = "cabbba", word2 = "abbccc" · เขียว = ด่านผ่าน · Gate 2 คือชุดตัวอักษร (เสกตัวใหม่ไม่ได้) · Gate 3 คือกองจำนวนหลังเรียง (ย้ายกองได้) — สองอย่างนี้คนละเรื่อง',
+        },
+        { t: "viz", id: "hash-close" },
         { t: "p", c: "ไล่สามด่านกับตัวอย่างหลัก:" },
         {
           t: "ol",
@@ -2143,7 +2222,12 @@ False`,
           c: "Don’t skip Gate 2. If you only check sorted frequencies, cabbba vs aabbss wrongly returns True even though s never appears in word1 — op 2 cannot invent it.",
         },
 
-        { t: "h2", c: 'Walkthrough — word1 = "cabbba", word2 = "abbccc"' },
+        { t: "h2", c: "Step through (Interactive)" },
+        {
+          t: "p",
+          c: 'Hit **Next ▶** and run three gates on word1 = "cabbba", word2 = "abbccc". Green = gate passed. Gate 2 is the character set (cannot invent letters). Gate 3 is the sorted frequency bag (counts can move). Those are different checks.',
+        },
+        { t: "viz", id: "hash-close" },
         { t: "p", c: "Run all three gates on the main example:" },
         {
           t: "ol",
@@ -2310,7 +2394,12 @@ Col: (3, 1, 2), (2, 7, 7), (1, 6, 7)
         },
         { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ต้อง บวกจำนวน row_count[col] ไม่ใช่บวกทีละหนึ่ง เพราะ row ที่เหมือนกันหลายแถวจับคู่กับ column นี้ได้ทุกแถว ข้อดีของ Counter คือถ้า key ไม่มีจะคืน 0 ให้เอง ไม่ error" },
 
-        { t: "h2", c: "ไล่ทีละสเต็ป — สมุดบัญชีกับคอลัมน์" },
+        { t: "h2", c: "ดูทีละขั้น (Interactive)" },
+        {
+          t: "p",
+          c: "กด **Next ▶** เฟส 1 จดแถวลง ledger เป็น tuple · เฟส 2 ประกอบคอลัมน์ทีละเส้นไปถาม · ทอง = แถว/คอลัมน์ที่กำลังดู · เขียว = คู่ที่หน้าตาตรงกัน — สังเกตว่าบวกด้วยจำนวนครั้งในบัญชี ไม่ใช่บวก 1",
+        },
+        { t: "viz", id: "hash-pairs" },
         { t: "p", c: "หลังเฟส 1 สมุดบัญชีได้ {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1} จากนั้นลูป for j in range(n) ประกอบคอลัมน์ทีละเส้น:" },
         {
           t: "table",
@@ -2454,7 +2543,12 @@ Bottom row (2, 7, 7) = middle column (2, 7, 7) → 1 pair`,
           c: "Add row_count[col], not just +1 — duplicate rows each pair with this column. Counter returns 0 for missing keys, so you won’t get a KeyError.",
         },
 
-        { t: "h2", c: "Walkthrough — ledger and columns" },
+        { t: "h2", c: "Step through (Interactive)" },
+        {
+          t: "p",
+          c: "Hit **Next ▶**. Phase 1 ledgers each row as a tuple. Phase 2 builds columns and queries. Gold = the row/column in play. Green = a matching pair. Add the ledger count, not +1.",
+        },
+        { t: "viz", id: "hash-pairs" },
         {
           t: "p",
           c: "After phase 1 the ledger is {(3, 2, 1): 1, (1, 7, 6): 1, (2, 7, 7): 1}. Then for j in range(n) build each column:",
