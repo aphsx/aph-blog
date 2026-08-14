@@ -11,7 +11,12 @@ export type BstStep = {
   hidden: string[];
   vals: Record<string, number>;
   links: Record<string, { left: string | null; right: string | null }>;
+  ghost: string | null;
+  error: string | null;
+  inorder: number[];
 };
+
+export type BstFrame = Omit<BstStep, "line" | "msg">;
 
 export const SEARCH_CODE = [
   "def searchBST(root, val):",
@@ -73,7 +78,7 @@ function subtreeIds(nodes: Record<string, TreeNodeDef>, id: string | null): stri
   return [id, ...subtreeIds(nodes, n.left), ...subtreeIds(nodes, n.right)];
 }
 
-function linksOf(nodes: Record<string, TreeNodeDef>): BstStep["links"] {
+export function linksOf(nodes: Record<string, TreeNodeDef>): BstStep["links"] {
   const out: BstStep["links"] = {};
   for (const id of Object.keys(nodes)) {
     out[id] = { left: nodes[id].left, right: nodes[id].right };
@@ -81,19 +86,22 @@ function linksOf(nodes: Record<string, TreeNodeDef>): BstStep["links"] {
   return out;
 }
 
-function valsOf(nodes: Record<string, TreeNodeDef>): Record<string, number> {
+export function valsOf(nodes: Record<string, TreeNodeDef>): Record<string, number> {
   const out: Record<string, number> = {};
   for (const id of Object.keys(nodes)) out[id] = nodes[id].val;
   return out;
 }
 
-function snap(
+export function snap(
   base: Omit<BstStep, "line" | "msg">,
   line: number,
   msg: string,
 ): BstStep {
   return {
     ...base,
+    ghost: base.ghost ?? null,
+    error: base.error ?? null,
+    inorder: [...(base.inorder ?? [])],
     path: [...base.path],
     offside: [...base.offside],
     hidden: [...base.hidden],
@@ -117,6 +125,9 @@ export function buildSearchSteps(): BstStep[] {
     hidden: [],
     vals: valsOf(nodes),
     links: linksOf(nodes),
+    ghost: null,
+    error: null,
+    inorder: [],
   };
   const steps: BstStep[] = [];
   const st = { ...empty, path: [] as string[], offside: [] as string[] };
@@ -150,6 +161,9 @@ export function buildDeleteSteps(): BstStep[] {
     hidden: [],
     vals: valsOf(nodes),
     links: linksOf(nodes),
+    ghost: null,
+    error: null,
+    inorder: [],
   };
   const steps: BstStep[] = [];
 

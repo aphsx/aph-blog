@@ -6,7 +6,8 @@
  *   2. Put step data in `lib/viz/<id>.ts` (pure, no React).
  *   3. Put the player UI in `components/viz/<Name>.tsx` and register it
  *      in `components/viz/catalog.tsx` (TypeScript will fail until you do).
- *   4. Drop `{ t: "viz", id: "<id>" }` in the *problem page*, not the intro.
+ *   4. Drop `{ t: "viz", id: "<id>" }` on the problem page (solution walkthrough)
+ *      or the intro page (concept workshop — different story, same chrome).
  *
  * Article.tsx never learns about individual viz — it only renders <VizBlock>.
  */
@@ -14,6 +15,10 @@ export const VIZ_IDS = [
   "reverse-linked-list",
   "tree-bfs-right-view",
   "tree-bfs-level-sum",
+  "bst-rule",
+  "bst-grow",
+  "bst-cases",
+  "bst-height",
   "bst-search",
   "bst-delete",
 ] as const;
