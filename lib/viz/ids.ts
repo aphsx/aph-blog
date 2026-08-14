@@ -14,6 +14,8 @@ export const VIZ_IDS = [
   "reverse-linked-list",
   "tree-bfs-right-view",
   "tree-bfs-level-sum",
+  "bst-search",
+  "bst-delete",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

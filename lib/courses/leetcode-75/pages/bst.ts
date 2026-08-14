@@ -3,60 +3,346 @@ import type { Page } from "@/lib/types";
 export const bstPages: Record<string, Page> = {
   "lc75-intro-bst": {
     slug: "lc75-intro-bst",
-    title: { th: "Binary Search Tree — พื้นฐาน & แนวคิด", en: "" },
-    lead: { th: "tree (ต้นไม้) ที่จัดค่าไว้เป็นระเบียบ ซ้ายเล็กกว่า ขวาใหญ่กว่า จึง search แทรก ลบ ได้เร็ว O(h)", en: "" },
+    title: {
+      th: "Binary Search Tree — จากกฎเดียวจนพร้อมลุย LeetCode",
+      en: "",
+    },
+    lead: {
+      th: "ต้นไม้ที่จัดค่าไว้เป็นระเบียบ: ซ้ายเล็กกว่า ขวาใหญ่กว่า — search / insert / delete ได้ใน O(h) โดยไม่ต้องไล่ทุกโหนด",
+      en: "",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "หมวดนี้ว่าด้วย Binary Search Tree (BST) หรือต้นไม้ค้นหาแบบทวิภาค เป็น data structure (โครงสร้างข้อมูล) ที่ออกแบบมาเพื่อ search (ค้นหา) insert (แทรก) และ delete (ลบ) ค่าได้เร็ว เจอบ่อยเวลาต้องเก็บข้อมูลที่ต้องค้นหาซ้ำ ๆ และอยากได้ความเร็วดีกว่า array (ลิสต์) ธรรมดา ถ้าคุณรู้จัก binary search ใน array ที่ sort (เรียง) แล้วมาก่อน BST ก็คือไอเดียเดียวกันแต่ทำบน tree (ต้นไม้)" },
+        {
+          t: "p",
+          c: "หมวด Tree DFS เราเดินต้นไม้แบบดิ่งกิ่ง — ไม่สนว่าค่าในโหนดเรียงกันหรือไม่ หมวดนี้ต้นไม้มีกฎพิเศษข้อเดียวที่เปลี่ยนทุกอย่าง: ค่าถูกจัดไว้แล้ว เหมือนพจนานุกรมที่เปิดกลางเล่มแล้วรู้ทันทีว่าจะพลิกซ้ายหรือขวา",
+        },
+        {
+          t: "p",
+          c: "โครงสร้างนี้ชื่อ Binary Search Tree (BST) หรือต้นไม้ค้นหาแบบทวิภาค เจอในสัมภาษณ์บ่อยเพราะมันเชื่อม binary search บน array เข้ากับ tree — หมวดนี้มี 2 ข้อ: ค้นหา (LC700) กับลบโหนด (LC450) หน้านี้ปูให้ครบก่อนลงมือ",
+        },
 
-              { t: "h2", c: "BST คืออะไร" },
-              { t: "p", c: "BST เป็น tree ที่แต่ละ node (โหนด) มี child (ลูก) ได้มากสุด 2 ตัว (ซ้ายกับขวา) แต่จุดเด่นที่ทำให้มันพิเศษกว่า tree ทั่วไปคือ มันจัดเรียงค่าไว้เป็นระเบียบตามกฎ ทำให้เรา search ค่าได้เร็วเหมือนตอนเปิดพจนานุกรม คือเปิดกลาง ๆ แล้วตัดสินใจว่าจะไปซ้ายหรือขวา ไม่ต้องไล่ดูทุก node" },
-              {
-                t: "image",
-                src: "/leetcode-75/bst-search.gif",
-                alt: "BST search: compare with node then go left or right",
-                caption:
-                  "BST Search: ค่าน้อยกว่าโหนด → ไปซ้าย · มากกว่า → ไปขวา — ตัดครึ่งทิ้งทุกก้าว",
-              },
-              { t: "p", c: "BST มีกฎเดียวที่ต้องจำ สำหรับทุก node ค่าใน subtree (ต้นไม้ย่อย) ทางซ้ายทั้งหมดต้อง น้อยกว่า ค่าของ node นั้น และค่าใน subtree ทางขวาทั้งหมดต้อง มากกว่า ค่าของ node นั้น พูดสั้น ๆ คือ left < node < right และกฎนี้เป็นจริงทุก node ไม่ใช่แค่ root (ราก) ต้นเดียว" },
-              { t: "code", lang: "python", c: `# BST หน้าตาแบบนี้ (root = 5)
-        #         5
-        #        / \\
-        #       3   8
-        #      / \\   \\
-        #     2   4   9
-        #
-        # ทางซ้ายของ 5 (คือ 3,2,4) น้อยกว่า 5 ทั้งหมด
-        # ทางขวาของ 5 (คือ 8,9) มากกว่า 5 ทั้งหมด
-        # และกฎนี้จริงกับทุก node เช่น 3 มีซ้าย 2 (< 3) ขวา 4 (> 3)` },
-              { t: "p", c: "เพราะมีกฎนี้ เวลาจะ search ค่าสักตัว เราเริ่มที่ root แล้ว compare (เทียบ) ถ้าค่าที่หาน้อยกว่า node ปัจจุบัน แปลว่ามันต้องอยู่ทางซ้าย (ทางขวาใหญ่กว่าหมดอยู่แล้ว ไม่ต้องดู) ถ้ามากกว่าก็ไปทางขวา ทำแบบนี้ไปเรื่อย ๆ แต่ละก้าวเราตัดครึ่งที่ต้องดูทิ้งไปเลย จึงใช้เวลาเท่ากับ height (ความสูง) ของ tree ไม่ใช่จำนวน node ทั้งหมด" },
+        { t: "h2", c: "1. ปลดล็อกไอเดีย: พจนานุกรม ไม่ใช่ตู้ลิ้นชัก" },
+        {
+          t: "p",
+          c: "ลองนึกว่ามีกล่องตัวเลขกองหนึ่ง อยากรู้ว่ามีเลข 7 ไหม",
+        },
+        {
+          t: "ul",
+          c: [
+            "Array ธรรมดา / binary tree ทั่วไป = เปิดทีละกล่องจนหมด — O(n)",
+            "Array ที่เรียงแล้ว + binary search = เปิดกลางแถว แล้วทิ้งครึ่งที่ไม่เกี่ยว — O(log n)",
+            "BST = ไอเดีย binary search แต่เก็บเป็นต้นไม้ ไม่ต้องเลื่อนช่องเวลาแทรก/ลบ",
+          ],
+        },
+        {
+          t: "p",
+          c: "ข้อดีของต้นไม้เหนือ array เรียง: แทรกและลบไม่ต้องเบียดคนทั้งแถว — แค่เกี่ยวกิ่งใหม่ ข้อแลกคือถ้าต้นเอียงเป็นเส้นตรง ความเร็วจะพังกลับไป O(n) เราจะกลับมาเรื่องนี้ท้ายหน้า",
+        },
 
-              { t: "h2", c: "นิยาม node และ Big-O" },
-              { t: "code", lang: "python", c: `# นิยาม node ของต้นไม้ (LeetCode ให้มาแบบนี้)
-class TreeNode:
+        { t: "h2", c: "2. ศัพท์ที่ต้องจำให้ขึ้นใจ" },
+        {
+          t: "ul",
+          c: [
+            "BST (Binary Search Tree) — binary tree ที่จัดค่าตามกฎ left < node < right ทุกโหนด",
+            "BST property — กฎนั้นเอง: ค่าใน subtree ซ้ายทั้งหมดน้อยกว่าโหนดนี้ · ค่าใน subtree ขวาทั้งหมดมากกว่า",
+            "search (ค้นหา) — เดินลงต้น เทียบค่าแล้วเลือกซ้ายหรือขวาทีละก้าว",
+            "insert (แทรก) — เดินแบบ search จนตกขอบ แล้วแขวนโหนดใหม่ตรงนั้น",
+            "delete (ลบ) — หาโหนดแล้วต่อกิ่งใหม่ให้กฎ BST ยังอยู่ แยก 3 กรณี",
+            "successor (ตัวถัดไป) — ค่าที่มากกว่าโหนดนี้น้อยที่สุด = ค่าน้อยสุดในฝั่งขวา",
+            "predecessor (ตัวก่อนหน้า) — ค่าที่น้อยกว่าโหนดนี้มากที่สุด = ค่ามากสุดในฝั่งซ้าย",
+            "height h — จำนวนชั้นจาก root ลงถึงใบที่ไกลสุด · ความเร็วของ BST คือ O(h) ไม่ใช่ O(n)",
+            "balanced (สมดุล) — ซ้าย-ขวาสูงไล่เลี่ยกัน → h ≈ log n",
+            "skewed (เอียง) — ต้นกลายเป็นเส้นตรง → h = n",
+            "in-order traversal — เดินซ้าย → ตัวเอง → ขวา บน BST จะได้ค่าเรียงจากน้อยไปมากเสมอ",
+          ],
+        },
+
+        { t: "h2", c: "3. กฎเหล็กข้อเดียว: left < node < right" },
+        {
+          t: "p",
+          c: "จำแค่นี้ก็เดิน BST ได้ทั้งหมวด — และกฎนี้ต้องจริงกับทุกโหนด ไม่ใช่แค่ root",
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `ถูกต้อง                          ผิด (ดูที่ 5)
+        5                              5
+       / \\                            / \\
+      3   8                          3   8
+     / \\   \\                        / \\   \\
+    2   4   9                      2   6   9
+                                     ↑
+                              6 อยู่ซ้ายของ 5 แต่ 6 > 5
+                              แม้ 6 > 3 ก็ตาม — กฎพังที่บรรพบุรุษ`,
+        },
+        {
+          t: "callout",
+          title: "กับดัก: เช็กแค่ลูกชั้นเดียวไม่พอ",
+          warn: true,
+          c: "หลายคนคิดว่าแค่ left.val < node.val < right.val ก็พอ — ไม่ใช่ ค่าทั้งก้อนของ subtree ซ้ายต้องน้อยกว่า และทั้งก้อนของ subtree ขวาต้องมากกว่า ตัวอย่างขวามือ 6 เป็นลูกขวาของ 3 (ถูกชั้นนั้น) แต่ไปโผล่ในฝั่งซ้ายของ 5 ซึ่งผิดกฎของ 5",
+        },
+        {
+          t: "p",
+          c: "นิยามโหนดเหมือน binary tree ทุกประการ — LeetCode ให้คลาสนี้มาให้แล้ว:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "TreeNode — พิมพ์เขียวเดียวกับหมวด DFS",
+          c: `class TreeNode:
     def __init__(self, val=0, left=None, right=None):
         self.val = val
         self.left = left
-        self.right = right` },
-              { t: "table", head: ["operation", "เฉลี่ย (สมดุล)", "แย่สุด (เอียง)"], rows: [
-                ["search (ค้นหา)", "O(log n)", "O(n)"],
-                ["insert (แทรก)", "O(log n)", "O(n)"],
-                ["delete (ลบ)", "O(log n)", "O(n)"],
-              ] },
-              { t: "code", lang: "python", c: `# template ค้นหาค่า target ใน BST แบบวนลูป — จำโครงนี้ไว้ใช้ได้
-def search(root, target):
+        self.right = right`,
+        },
+
+        { t: "h2", c: "4. [Workshop] ปลูกต้นด้วยมือ — insert ทีละใบ" },
+        {
+          t: "p",
+          c: "อย่าท่องรูปสำเร็จรูป มาปลูกเองจากลิสต์ [5, 3, 8, 2, 4, 9] จะเห็นกฎทำงานทีละก้าว",
+        },
+        {
+          t: "p",
+          c: "ขั้นที่ 1: ใบแรกเป็น root เสมอ",
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `ใส่ 5
+
+        5`,
+        },
+        {
+          t: "p",
+          c: "ขั้นที่ 2: 3 < 5 → แขวนซ้าย",
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `ใส่ 3
+
+        5
+       /
+      3`,
+        },
+        {
+          t: "p",
+          c: "ขั้นที่ 3: 8 > 5 → แขวนขวา · แล้ว 2 < 5 จึงลงซ้าย ต่อด้วย 2 < 3 จึงแขวนซ้ายของ 3",
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `ใส่ 8 แล้ว 2
+
+        5
+       / \\
+      3   8
+     /
+    2`,
+        },
+        {
+          t: "p",
+          c: "ขั้นที่ 4: 4 อยู่ระหว่าง 3 กับ 5 → ลงซ้ายที่ 5 แล้วไปขวาของ 3 · 9 > 5 และ > 8 → แขวนขวาของ 8",
+        },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "ประกอบต้น [5, 3, 8, 2, 4, 9] ด้วยมือ",
+          code: `class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+root = TreeNode(5)
+root.left = TreeNode(3, TreeNode(2), TreeNode(4))
+root.right = TreeNode(8, None, TreeNode(9))
+
+print(root.val)            # 5
+print(root.left.right.val) # 4  (ขวาของ 3)
+print(root.right.right.val)# 9`,
+          out: `5
+4
+9`,
+        },
+
+        { t: "h2", c: "5. ของแถมฟรี: in-order ของ BST = ค่าเรียงน้อย→มาก" },
+        {
+          t: "p",
+          c: "เดินซ้ายให้สุด แล้วแตะตัวเอง แล้วไปขวา — เพราะค่าน้อยอยู่ซ้าย ค่ามากอยู่ขวา ลำดับที่ได้จึงเรียงเองโดยไม่ต้อง sort",
+        },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "in-order บน BST ที่ปลูกไว้",
+          code: `class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def inorder(node):
+    if node is None:
+        return []
+    return inorder(node.left) + [node.val] + inorder(node.right)
+
+root = TreeNode(5)
+root.left = TreeNode(3, TreeNode(2), TreeNode(4))
+root.right = TreeNode(8, None, TreeNode(9))
+print(inorder(root))`,
+          out: `[2, 3, 4, 5, 8, 9]`,
+        },
+        {
+          t: "callout",
+          title: "ใช้ตรวจ BST ได้",
+          c: "ถ้า in-order ไม่ออกมาเรียงจากน้อยไปมาก ต้นนั้นไม่ใช่ BST — เคล็ดนี้โผล่ในโจทย์ Validate BST ด้วย",
+        },
+
+        { t: "h2", c: "6. Search — ตัดครึ่งทิ้งทุกก้าว" },
+        {
+          t: "p",
+          c: "เริ่มที่ root เทียบกับค่าที่หา เล็กกว่า → ไปซ้าย (ฝั่งขวาใหญ่กว่าหมด ทิ้งได้) ใหญ่กว่า → ไปขวา เท่ากัน → เจอ ตกขอบ → ไม่มี",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "template ค้นหาแบบวนลูป — ท่องไว้ใช้ทั้งหมวด",
+          c: `def search(root, target):
     node = root
     while node:
         if target == node.val:
-            return node          # เจอแล้ว
-        elif target < node.val:
-            node = node.left     # ค่าเล็กกว่า ไปซ้าย
+            return node          # เจอแล้ว คืนโหนดนั้นทั้งก้อน
+        if target < node.val:
+            node = node.left     # ทิ้งฝั่งขวา
         else:
-            node = node.right    # ค่าใหญ่กว่า ไปขวา
-    return None                  # หาไม่เจอ` },
-              { t: "callout", title: "ทำไม O(h) ไม่ใช่ O(n)", c: "h คือ height ของ tree (จำนวนชั้น) แต่ละก้าวเราลงลึกไปหนึ่งชั้นเสมอ ไม่เคยย้อนกลับ ถ้า tree สมดุลดี h ประมาณ log n การ search จึงเร็วมาก แต่ถ้า tree เอียงเป็นเส้นตรง (เช่น insert ค่าเรียงจากน้อยไปมาก) h จะกลายเป็น n และช้าลงเท่ากับ array ธรรมดา" },
-              { t: "callout", c: "หมวดนี้มี 2 ข้อ search ใน BST และ delete node ใน BST พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
+            node = node.right    # ทิ้งฝั่งซ้าย
+    return None                  # ตกขอบ = ไม่มี`,
+        },
+        {
+          t: "p",
+          c: "แต่ละก้าวลงลึกหนึ่งชั้น ไม่เคยย้อน — เวลาจึงเป็น O(h) ถ้าต้นสมดุล h ≈ log n ถ้าเอียง h = n",
+        },
+
+        { t: "h2", c: "7. Insert — search จนตกขอบ แล้วแขวนใบใหม่" },
+        {
+          t: "p",
+          c: "แทรกคือค้นหาตำแหน่งที่ค่าควรอยู่ พอเดินจนโหนดกลายเป็น None นั่นแหละที่แขวน เขียนแบบ recursion จะต่อกิ่งกลับขึ้นมาให้อัตโนมัติ:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "insert คืน root ของต้นหลังแทรก",
+          c: `def insert(root, val):
+    if root is None:
+        return TreeNode(val)          # ตกขอบแล้ว — ปลูกใบใหม่ตรงนี้
+    if val < root.val:
+        root.left = insert(root.left, val)
+    elif val > root.val:
+        root.right = insert(root.right, val)
+    return root                       # ค่าซ้ำ: ไม่ทำอะไร (โจทย์นี้ค่าไม่ซ้ำ)`,
+        },
+        {
+          t: "callout",
+          title: "ทำไมต้อง root.left = insert(...) ?",
+          c: "ถ้าลืมเอาค่าที่คืนมาต่อกลับ กิ่งใหม่จะลอยไม่ผูกกับต้น เทคนิคนี้ข้อ 42 (ลบโหนด) ใช้เหมือนกันทุกประการ",
+        },
+
+        { t: "h2", c: "8. Delete — แยก 3 กรณี (พรีวิวข้อ 42)" },
+        {
+          t: "p",
+          c: "ลบยากกว่าค้นเพราะต้องคงกฎ BST ไว้ เจอโหนดแล้วดูว่ามีลูกกี่ตัว",
+        },
+        {
+          t: "table",
+          head: ["กรณี", "ลูก", "ทำอะไร"],
+          rows: [
+            ["ใบ (leaf)", "0", "ตัดทิ้ง — คืน None ขึ้นไปแทน"],
+            ["ลูกเดียว", "1", "ยกลูกที่มีอยู่ขึ้นมาแทนตำแหน่งนี้"],
+            ["ลูกสองตัว", "2", "ห้ามตัดตรง ๆ — เอา successor (ค่าน้อยสุดฝั่งขวา) มาแทนค่า แล้วไปลบ successor ตัวเดิม ซึ่งจะกลายเป็นกรณีง่าย"],
+          ],
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `ลบ 3 จากต้นนี้ (กรณีลูกสองตัว)
+
+        5                              5
+       / \\                            / \\
+      3   6         ⇒                4   6
+     / \\   \\                        /     \\
+    2   4   7                      2       7
+
+successor ของ 3 = 4 (น้อยสุดฝั่งขวาของ 3)
+เอา 4 มาเขียนทับ 3 แล้วตัด 4 เดิมทิ้ง`,
+        },
+        {
+          t: "p",
+          c: "ทำไม 4 ถึงมาแทน 3 ได้? เพราะ 4 มากกว่าทุกตัวในฝั่งซ้ายของ 3 และน้อยกว่าทุกตัวที่เหลือในฝั่งขวา — วางแทนแล้วกฎ left < node < right ยังอยู่ ข้อ 42 จะไล่โค้ดนี้ทีละบรรทัด",
+        },
+
+        { t: "h2", c: "9. ทำไมบางที O(log n) บางที O(n)" },
+        {
+          t: "p",
+          c: "ความเร็วของ search / insert / delete ทั้งหมดผูกกับ height ไม่ใช่จำนวนโหนด",
+        },
+        {
+          t: "code",
+          lang: "text",
+          c: `สมดุล (h ≈ log n)                 เอียง (h = n)
+ใส่ 4, 2, 6, 1, 3                  ใส่ 1, 2, 3, 4 ตามลำดับ
+
+        4                                1
+       / \\                                \\
+      2   6                                2
+     / \\                                    \\
+    1   3                                    3
+                                               \\
+                                                4
+
+ค้น 3: ลง 2 ชั้น                         ค้น 4: ลง 4 ชั้น = ไล่ทั้งเส้น`,
+        },
+        {
+          t: "table",
+          head: ["operation", "เฉลี่ย (สมดุล)", "แย่สุด (เอียง)"],
+          rows: [
+            ["search", "O(log n)", "O(n)"],
+            ["insert", "O(log n)", "O(n)"],
+            ["delete", "O(log n)", "O(n)"],
+          ],
+        },
+        {
+          t: "callout",
+          title: "LeetCode 75 ไม่บังคับให้บาลานซ์",
+          c: "AVL / Red-Black tree คือ BST ที่หมุนต้นให้สมดุลอัตโนมัติ — นอกขอบเขตหมวดนี้ ข้อในคอร์สรับประกันแค่ว่าต้นเป็น BST และวัดความเร็วเป็น O(h)",
+        },
+
+        { t: "h2", c: "10. สัญญาณว่าโจทย์ข้อนี้เล่นกับ BST" },
+        {
+          t: "ul",
+          c: [
+            "โจทย์บอกตรง ๆ ว่า input เป็น BST / binary search tree",
+            "ถามค้นค่า / แทรก / ลบ โดยยังคงลำดับไว้",
+            "in-order แล้วได้ค่าเรียง — ใช้เป็น invariant ได้",
+            "อย่าสับสนกับ binary tree ทั่วไป: ถ้าไม่มีกฎเรียงค่า ให้ใช้ DFS/BFS ตามหมวดก่อน ไม่ใช่ท่าตัดครึ่งนี้",
+          ],
+        },
+        {
+          t: "callout",
+          title: "ประโยคท่องจำก่อนลุยโจทย์",
+          c: "เล็กกว่าไปซ้าย ใหญ่กว่าไปขวา — ลบโหนดที่มีลูกสองตัว ห้ามตัดทิ้ง ต้องยืม successor มาแทน",
+        },
+        {
+          t: "links",
+          c: [
+            {
+              title: "ถัดไป: ข้อ 41 · Search in a BST →",
+              slug: "lc75-p41",
+              desc: "ใช้กฎ left < node < right เดินลงต้น ตัดครึ่งที่ไม่เกี่ยวทิ้งทุกก้าว",
+            },
+          ],
+        },
       ],
       en: [],
     },
@@ -65,84 +351,181 @@ def search(root, target):
   "lc75-p41": {
     slug: "lc75-p41",
     title: { th: "ข้อ 41 · LC700 Search in a Binary Search Tree (ค้นหาใน BST) 🟢", en: "" },
-    lead: { th: "ใช้กฎ left < node < right เดินลงต้นไม้ ตัดครึ่งที่ไม่เกี่ยวทิ้งทุกก้าว หาเจอใน O(h)", en: "" },
+    lead: {
+      th: "เดินลงต้นด้วยกฎ left < node < right เจอแล้วคืนทั้ง subtree — ไม่ต้องไล่ทุกโหนด",
+      en: "",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC700): กำหนด root ของ binary search tree (BST) และเลขจำนวนเต็ม val ให้หา node ใน BST ที่มีค่าเท่ากับ val แล้ว return subtree ที่มี node นั้นเป็น root (คืนตัว node นั้นทั้งก้อน รวม child ทั้งหลายของมัน) ถ้าไม่มี node แบบนั้นให้ return null" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "root = [4,2,7,1,3], val = 2",
-                    output: "[2,1,3]",
-                    explain: "คืน subtree ที่ root คือ node 2 ซึ่งมี child ซ้าย 1 และ child ขวา 3",
-                  },
-                  {
-                    input: "root = [4,2,7,1,3], val = 5",
-                    output: "[]",
-                    explain: "ไม่มีค่า 5 อยู่ใน BST นี้เลย จึง return null",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "จำนวน node อยู่ระหว่าง 1 ถึง 5000",
-                "1 <= Node.val <= 10^7",
-                "1 <= val <= 10^7",
-                "root เป็น BST จริง (รับประกันโดยโจทย์)",
-                ],
-              },
+        {
+          t: "p",
+          c: "กำหนด root ของ Binary Search Tree และเลขจำนวนเต็ม val ให้หาโหนดที่ค่าเท่ากับ val แล้ว return subtree ที่มีโหนดนั้นเป็น root (คืนโหนดนั้นทั้งก้อน รวมลูกทั้งหมด) ถ้าไม่มีให้ return null",
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "root = [4,2,7,1,3], val = 2",
+              output: "[2,1,3]",
+              explain: "เจอโหนด 2 ซึ่งมีลูกซ้าย 1 และลูกขวา 3 — คืนทั้งก้อนนี้ ไม่ใช่แค่ตัวเลข 2",
+            },
+            {
+              input: "root = [4,2,7,1,3], val = 5",
+              output: "[]",
+              explain: "เดิน 4 → 7 แล้วตกขอบขวา ไม่มี 5 ในต้น",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "จำนวนโหนดอยู่ในช่วง [1, 5000]",
+            "1 <= Node.val <= 10^7",
+            "1 <= val <= 10^7",
+            "root เป็น BST จริง (โจทย์การันตี)",
+          ],
+        },
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "data structure ที่ใช้คือ BST เอง และเทคนิคคือ traverse (เดินไล่) ลง tree (ต้นไม้) โดยอาศัยกฎ left < node < right เลือกใช้วิธีนี้เพราะโจทย์การันตีว่าค่าถูก sort (เรียง) ไว้แล้ว เราจึงไม่ต้องเสียแรงดูทุก node" },
-              { t: "p", c: "วิธีช้าแบบ brute force คือ iterate (วน) ดูทุก node ใน tree (traversal ธรรมดา) จนกว่าจะเจอค่า ซึ่งเป็น O(n) แต่มันไม่ใช้ประโยชน์จากการที่ค่า sort อยู่แล้วเลย ทั้งที่ทุกครั้งที่ compare (เทียบ) ค่าเราตัดครึ่งของ tree ที่เป็นไปไม่ได้ทิ้งได้ทันที นั่นนำไปสู่วิธีเดินลงข้างเดียวที่เร็วกว่ามาก" },
-              { t: "ol", c: [
-                "ตั้ง pointer (ตัวชี้) node ไว้ที่ root",
-                "ถ้า node ยังไม่หลุดขอบ (ไม่ใช่ None) ให้ compare ค่า",
-                "ถ้า val เท่ากับค่า node ปัจจุบัน เจอแล้ว คืน node นั้นทั้งก้อน",
-                "ถ้า val น้อยกว่า ให้ขยับ node ไป child ซ้าย (ค่าเล็กกว่าอยู่ฝั่งซ้ายเสมอ)",
-                "ถ้า val มากกว่า ให้ขยับ node ไป child ขวา",
-                "ถ้าเดินจนหลุดขอบ tree (node เป็น None) แปลว่าไม่มี คืน None",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมคืน None ตอนเดินจนตกขอบ (node กลายเป็น None) ทำให้โปรแกรม error โครงลูป while node จัดการให้แล้วเพราะมันหยุดเองเมื่อ node เป็น None" },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            {
+              t: "p",
+              c: 'ข้อนี้ตรงกับประโยคท่องจำ: "เล็กกว่าไปซ้าย ใหญ่กว่าไปขวา"',
+            },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
+            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            {
+              t: "p",
+              c: "วิธีช้าคือ DFS/BFS ไล่ทุกโหนดจนเจอ — ถูกแต่ O(n) และทิ้งของฟรีที่โจทย์ให้มา คือต้นนี้เรียงค่าไว้แล้ว",
+            },
+            {
+              t: "p",
+              c: "หัวใจ: ทุกครั้งที่เทียบค่า เราทิ้งได้ทั้งกิ่งที่ไม่เกี่ยว เหมือน binary search บน array แต่เดินลง pointer แทนการกระโดด index",
+            },
+            {
+              t: "p",
+              c: "โจทย์ขอ subtree ไม่ใช่แค่ค่า — พอเจอโหนด ให้ return โหนดนั้นเลย ลูกของมันติดมาเอง",
+            },
 
+            { t: "h3", c: "2. กฎเหล็ก (The Logic)" },
+            {
+              t: "ol",
+              c: [
+                "ตั้ง node = root",
+                "ตราบใดที่ node ยังไม่เป็น None — เทียบ val กับ node.val",
+                "เท่ากัน → return node (ทั้งก้อน)",
+                "val เล็กกว่า → node = node.left (ฝั่งขวาทิ้ง)",
+                "val ใหญ่กว่า → node = node.right (ฝั่งซ้ายทิ้ง)",
+                "หลุดลูป = ตกขอบ → return None",
+              ],
+            },
 
+            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            {
+              t: "code",
+              lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
+              c: `# Definition for a binary tree node.
 # class TreeNode:
-#     def __init__(self, val=0, left=None, right=None): ...
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
-def search_bst(root, val):
-    node = root                  # เริ่มที่ราก
-    while node:                  # ยังไม่หลุดขอบต้นไม้
-        if val == node.val:
-            return node          # เจอ node ที่ต้องการ คืนทั้ง subtree
-        elif val < node.val:
-            node = node.left     # ค่าที่หาเล็กกว่า ต้องอยู่ทางซ้าย
-        else:
-            node = node.right    # ค่าที่หาใหญ่กว่า ต้องอยู่ทางขวา
-    return None                  # เดินจนตกขอบต้นไม้ แปลว่าไม่มี
+class Solution:
+    def searchBST(self, root: Optional[TreeNode], val: int) -> Optional[TreeNode]:
+        node = root
+        while node:
+            if val == node.val:
+                return node
+            if val < node.val:
+                node = node.left
+            else:
+                node = node.right
+        return None`,
+            },
+            {
+              t: "p",
+              c: "แบบ recursion ก็ได้ ผลเหมือนกัน แต่กิน call stack O(h) — แบบลูปใช้ตัวแปรเดียว",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "อีกแบบ · recursion",
+              c: `def searchBST(self, root, val):
+    if root is None or root.val == val:
+        return root
+    if val < root.val:
+        return self.searchBST(root.left, val)
+    return self.searchBST(root.right, val)`,
+            },
 
-# BST [4, 2, 7, 1, 3]
-root = TreeNode(4, TreeNode(2, TreeNode(1), TreeNode(3)), TreeNode(7))
-found = search_bst(root, 2)
-print(found.val, found.left.val, found.right.val)   # ได้ subtree ที่มีราก 2
-print(search_bst(root, 5))                          # ไม่มีค่า 5 ใน BST นี้`, out: `2 1 3
-None` },
-                { t: "p", c: "ข้อนี้คือการนำกฎ BST มาใช้ตรง ๆ แทนที่จะ iterate ดูทุก node แบบ tree ทั่วไป (ซึ่งจะเป็น O(n)) เราใช้ความจริงที่ว่าค่าถูก sort ไว้แล้ว ทุกครั้งที่ compare เราตัดทิ้งครึ่งหนึ่งของ tree ที่เป็นไปไม่ได้ทันที เช่นถ้า val น้อยกว่า node ปัจจุบัน เราไม่มีทางเจอมันในฝั่งขวา (ฝั่งขวาใหญ่กว่าหมด) จึงไปซ้ายอย่างเดียว" },
-                { t: "p", c: "จะเขียนแบบ recursion (การเรียกตัวเอง) ก็ได้ ผลเหมือนกัน แต่แบบ loop (วน) ประหยัด memory กว่าเพราะไม่ต้องใช้ call stack ถ้าเปลี่ยนเป็น recursion โค้ดจะสั้นลงแต่กิน memory เพิ่มตาม height (ความสูง)" },
-                { t: "p", c: "Time O(h) traverse ลงจาก root ถึง leaf (ใบ) มากสุดเท่า height h · Space O(1) แบบ loop ใช้ตัวแปรเดียว (ถ้าเขียน recursion จะเป็น O(h) จาก call stack)" },
-              ] },
+            { t: "h3", c: "3.5 ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** ไล่ค้น val = 2 จากต้น [4, 2, 7, 1, 3] · โหนดจาง = กิ่งที่ตัดทิ้งแล้ว · วงแหวนเขียว = เจอแล้วคืนทั้งก้อน",
+            },
+            { t: "viz", id: "bst-search" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "เมื่อโจทย์ให้ BST มา ให้คิดถึงการ traverse ลง tree โดย compare ค่าแล้วเลือกทิศ วิธีนี้ตัดปัญหาลงครึ่งทุกก้าว เอาไปใช้กับ search insert และ delete ใน BST ได้ทั้งหมด" },
+            { t: "h3", c: "4. จำลองการทำงาน — หา 2 จาก [4,2,7,1,3]" },
+            {
+              t: "code",
+              lang: "text",
+              c: `        4
+       / \\
+      2   7
+     / \\
+    1   3`,
+            },
+            {
+              t: "table",
+              head: ["ก้าว", "node", "เทียบ", "ทิศ", "กิ่งที่ทิ้ง"],
+              rows: [
+                ["เริ่ม", "4", "2 == 4? ไม่", "2 < 4 → ซ้าย", "ทั้งฝั่ง 7"],
+                ["2", "2", "2 == 2? ใช่", "เจอแล้ว", "—"],
+                ["คืน", "2", "ทั้งก้อน", "[2, 1, 3]", "—"],
+              ],
+            },
+            {
+              t: "p",
+              c: "เคสหา 5: 4 → 7 (5 > 4) → 7 ไม่มีลูกซ้ายที่ใช่ (5 < 7 แต่ left เป็น None) → return None",
+            },
+
+            { t: "h3", c: "5. จุดระวังตกหลุมพราง" },
+            {
+              t: "ul",
+              c: [
+                "คืน node.val แทน node — โจทย์อยากได้ subtree ไม่ใช่ตัวเลข",
+                "เขียน if val < node.val: node.left โดยไม่ใส่ node = ... — pointer ไม่ขยับ ลูปค้าง",
+                "ลืม return None ตอนตกขอบ — แบบ while node: หลุดลูปแล้วต้องคืนเอง",
+              ],
+            },
+            {
+              t: "callout",
+              title: "อย่า DFS ทั้งต้น",
+              warn: true,
+              c: "ถ้าเขียน stack/queue ไล่ทุกโหนด คำตอบถูกแต่ช้า และ interviewer จะถามทันทีว่าทำไมไม่ใช้ความเป็น BST",
+            },
+
+            { t: "h3", c: "6. Time & Space Complexity" },
+            {
+              t: "ul",
+              c: [
+                "Time O(h) — ลงหนึ่งชั้นต่อก้าว สูงสุดเท่าความสูง",
+                "Space O(1) แบบลูป · O(h) แบบ recursion จาก call stack",
+              ],
+            },
+
+            {
+              t: "callout",
+              title: "💡 สรุป pattern",
+              c: "เมื่อโจทย์ให้ BST มา ให้คิดถึงการเดินลงต้น เทียบแล้วเลือกทิศ — ท่านี้ใช้ซ้ำกับ insert และเป็นขั้นแรกของ delete ในข้อถัดไป",
+            },
+          ],
+        },
       ],
       en: [],
     },
@@ -151,119 +534,204 @@ None` },
   "lc75-p42": {
     slug: "lc75-p42",
     title: { th: "ข้อ 42 · LC450 Delete Node in a BST (ลบโหนดใน BST) 🟡", en: "" },
-    lead: { th: "delete node แล้วยังคงกฎ BST แยกจัดการ 3 กรณี ไม่มี child มี child ตัวเดียว และมี child สองตัว", en: "" },
+    lead: {
+      th: "ลบโหนดแล้วยังคงกฎ BST — ใบตัดทิ้ง ลูกเดียวยกขึ้น ลูกสองตัวยืม successor มาแทน",
+      en: "",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC450): กำหนด root ของ binary search tree (BST) และค่า key ให้ delete node ที่มีค่าเท่ากับ key ออกจาก BST โดยต้องคง property ของ BST ไว้ (left < node < right) แล้ว return root reference ของต้นไม้หลัง delete ถ้าไม่พบ key ใน tree ให้ return root ของ tree เดิม" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "root = [5,3,6,2,4,null,7], key = 3",
-                    output: "[5,4,6,2,null,null,7]",
-                    explain: "node 3 มี child สองตัว จึงเอา successor (ค่าน้อยสุดฝั่งขวาของ 3 คือ 4) ขึ้นมาแทน ได้ tree ที่ยังเป็น BST ถูกต้อง (คำตอบอื่นที่ยังตรงกฎ BST ก็ยอมรับได้)",
-                  },
-                  {
-                    input: "root = [5,3,6,2,4,null,7], key = 0",
-                    output: "[5,3,6,2,4,null,7]",
-                    explain: "ไม่มีค่า 0 อยู่ใน tree เลย จึง return tree เดิมโดยไม่เปลี่ยนแปลง",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "จำนวน node อยู่ระหว่าง 0 ถึง 10^4",
-                "-10^5 <= Node.val <= 10^5",
-                "ค่าใน node ไม่ซ้ำกัน",
-                "root เป็น BST จริง",
-                "-10^5 <= key <= 10^5",
-                ],
-              },
-              { t: "callout", c: "การ delete มี 3 กรณีที่ต้องคิดให้ครบ ไม่มี child (ลูก) เลย มี child ตัวเดียว และมี child สองตัว แต่ละกรณีจัดการต่างกัน" },
+        {
+          t: "p",
+          c: "กำหนด root ของ BST และค่า key ให้ลบโหนดที่ค่าเท่ากับ key ออก โดยต้องคง property ของ BST (left < node < right) แล้ว return root ของต้นหลังลบ ถ้าไม่พบ key ให้คืนต้นเดิม",
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "root = [5,3,6,2,4,null,7], key = 3",
+              output: "[5,4,6,2,null,null,7]",
+              explain: "โหนด 3 มีลูกสองตัว จึงเอา successor (ค่าน้อยสุดฝั่งขวา = 4) มาแทน คำตอบอื่นที่ยังเป็น BST ก็ยอมรับได้",
+            },
+            {
+              input: "root = [5,3,6,2,4,null,7], key = 0",
+              output: "[5,3,6,2,4,null,7]",
+              explain: "ไม่มี 0 ในต้น — ไม่เปลี่ยนอะไร",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "จำนวนโหนดอยู่ในช่วง [0, 10^4]",
+            "-10^5 <= Node.val <= 10^5",
+            "ค่าในโหนดไม่ซ้ำกัน",
+            "root เป็น BST จริง",
+            "-10^5 <= key <= 10^5",
+          ],
+        },
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "ใช้ BST + recursion (การเรียกตัวเอง) traverse (เดินไล่) หา node ที่จะ delete แล้วต่อ subtree (ต้นไม้ย่อย) กลับด้วยการเขียน root.left = delete(root.left, key) เทคนิคนี้ทำให้การเชื่อม node ใหม่หลัง delete เกิดขึ้นเองอัตโนมัติ ไม่ต้องเก็บ pointer (ตัวชี้) ของ parent node (node พ่อ) ไว้เอง" },
-              { t: "p", c: "หัวใจอยู่ที่กรณี node มี child สองตัว ถ้า delete ตรง ๆ จะเหลือ child กำพร้าสองก้อนซ่อม tree ไม่ได้ เราจึงไม่ delete node นั้นจริง แต่หา successor คือค่าที่น้อยที่สุดในฝั่งขวา (เดินขวาหนึ่งก้าวแล้วเดินซ้ายจนสุด) เอาค่ามันมาแทน แล้วไป delete successor ตัวเดิมออกจากฝั่งขวาแทน ซึ่งจะกลายเป็นกรณีง่ายเพราะ successor ไม่มี child ซ้ายแน่นอน" },
-              { t: "ol", c: [
-                "ถ้า tree ว่าง (root เป็น None) ไม่มีอะไรให้ delete คืน None",
-                "ถ้า key น้อยกว่าค่า root เข้าไป delete ในฝั่งซ้าย แล้วรับผลกลับมาต่อกับ root.left",
-                "ถ้า key มากกว่าค่า root เข้าไป delete ในฝั่งขวา แล้วต่อกับ root.right",
-                "ถ้า key เท่ากับค่า root คือเจอ node ที่จะ delete แยก 3 กรณี",
-                "ไม่มี child ซ้าย คืน child ขวาขึ้นไปแทน (ถ้าไม่มี child เลย child ขวาก็เป็น None พอดี เท่ากับ delete ทิ้ง)",
-                "ไม่มี child ขวา คืน child ซ้ายขึ้นไปแทน",
-                "มี child สองตัว หา successor ในฝั่งขวา เอาค่ามาแทนค่า root แล้ว delete successor ออกจากฝั่งขวาต่อ",
-                "คืน root กลับขึ้นไปให้ชั้นบนต่อ node",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืม update (อัปเดต) การเชื่อม node กลับ (ลืม root.left = ... หรือ root.right = ...) ทำให้ tree ไม่เปลี่ยน อีกจุดคือกรณีสอง child แล้วลืม delete successor ตัวเดิมออก ทำให้เกิดค่าซ้ำใน tree" },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            {
+              t: "p",
+              c: 'ข้อนี้ต่อจากประโยคท่องจำข้อที่สอง: "ลบโหนดที่มีลูกสองตัว ห้ามตัดทิ้ง — ต้องยืม successor มาแทน"',
+            },
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "delete key = 3 จาก root = [5,3,6,2,4,null,7] (node 3 มี child สองตัวคือ 2 กับ 4)" },
-              { t: "table", head: ["ขั้น", "node ปัจจุบัน", "ทำอะไร"], rows: [
-                ["1", "5", "3 < 5 ลงไป delete ในฝั่งซ้าย"],
-                ["2", "3", "เจอ key มี child สองตัว หา successor ในฝั่งขวา"],
-                ["3", "4", "เดินขวาจาก 3 ได้ 4 ไม่มี child ซ้าย → successor = 4"],
-                ["4", "3", "เอาค่า 4 มาแทน (node กลายเป็น 4) แล้ว delete 4 เดิมออกจากฝั่งขวา"],
-                ["5", "4 (ตัวเดิม)", "ไม่มี child คืน None เท่ากับ delete ทิ้ง เชื่อมกลับเสร็จ"],
-              ] },
+            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            {
+              t: "p",
+              c: "ค้นหาโหนดเหมือนข้อ 41 แต่พอเจอแล้วทิ้งไม่ได้ทันที — ต้องต่อกิ่งใหม่ให้ต้นไม่ขาดและกฎเรียงค่ายังอยู่",
+            },
+            {
+              t: "p",
+              c: "เคล็ด recursion: เขียน `root.left = delete(root.left, key)` แล้วรับโหนดที่ควรมาแทนตำแหน่งนั้นกลับขึ้นมา — ไม่ต้องเก็บ pointer ของแม่ไว้เอง",
+            },
+            {
+              t: "p",
+              c: "กรณีลูกสองตัวคือกับดัก: ตัด 3 ทิ้งจะเหลือ 2 กับ 4 กำพร้าสองก้อน ต่อไม่ถูก วิธีแก้คือไม่ลบกล่อง 3 จริง แค่เปลี่ยนค่าในกล่องเป็น successor แล้วไปลบกล่อง successor ตัวเดิม ซึ่งไม่มีลูกซ้ายแน่นอน จึงตกกรณีง่าย",
+            },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
+            { t: "h3", c: "2. สามกรณีบนกระดาน" },
+            {
+              t: "code",
+              lang: "text",
+              c: `กรณี A — ใบ (ลูก 0)
+ลบ 7                          ลบแล้ว
+    6                             6
+     \\
+      7   →  คืน None ขึ้นไปแทน
 
+กรณี B — ลูกเดียว
+ลบ 6                          ลบแล้ว
+    5                             5
+     \\                             \\
+      6                             7
+       \\
+        7  →  ยก 7 ขึ้นมาแทน 6
 
+กรณี C — ลูกสองตัว (ของโจทย์)
+ลบ 3                          ยืม 4 มาแทน แล้วตัด 4 เดิม
+        5                             5
+       / \\                           / \\
+      3   6                         4   6
+     / \\   \\                       /     \\
+    2   4   7                     2       7`,
+            },
+            {
+              t: "p",
+              c: "successor = เดินขวาหนึ่งก้าว แล้วเดินซ้ายจนสุด — ค่าแรกที่มากกว่าโหนดนี้ใน in-order",
+            },
+
+            { t: "h3", c: "3. กฎเหล็ก (The Logic)" },
+            {
+              t: "ol",
+              c: [
+                "ถ้า root เป็น None → ไม่มีอะไรให้ลบ คืน None",
+                "key < root.val → ลบในฝั่งซ้าย แล้วต่อกลับ root.left",
+                "key > root.val → ลบในฝั่งขวา แล้วต่อกลับ root.right",
+                "key == root.val → เจอแล้ว แยก 3 กรณีด้านบน",
+                "ไม่มีซ้าย → คืนลูกขวาขึ้นมาแทน (ไม่มีลูกเลยก็เข้าเคสนี้ คืน None)",
+                "ไม่มีขวา → คืนลูกซ้ายขึ้นมาแทน",
+                "มีสองลูก → หา successor · คัดลอกค่า · ลบ successor ออกจากฝั่งขวา",
+                "คืน root ขึ้นไปให้ชั้นบนต่อกิ่ง",
+              ],
+            },
+
+            { t: "h3", c: "4. โค้ด Python (LeetCode Ready)" },
+            {
+              t: "code",
+              lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
+              c: `# Definition for a binary tree node.
 # class TreeNode:
-#     def __init__(self, val=0, left=None, right=None): ...
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
-def delete_node(root, key):
-    if not root:
-        return None                      # ต้นไม้ว่าง ไม่มีอะไรให้ลบ
+class Solution:
+    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:
+        if root is None:
+            return None
 
-    if key < root.val:
-        root.left = delete_node(root.left, key)   # key อยู่ฝั่งซ้าย
-    elif key > root.val:
-        root.right = delete_node(root.right, key) # key อยู่ฝั่งขวา
-    else:
-        # เจอ node ที่จะลบแล้ว แยก 3 กรณี
-        if not root.left:
-            return root.right            # ไม่มีลูกซ้าย ยกลูกขวาขึ้นมาแทน
-        if not root.right:
-            return root.left             # ไม่มีลูกขวา ยกลูกซ้ายขึ้นมาแทน
+        if key < root.val:
+            root.left = self.deleteNode(root.left, key)
+        elif key > root.val:
+            root.right = self.deleteNode(root.right, key)
+        else:
+            if root.left is None:
+                return root.right
+            if root.right is None:
+                return root.left
 
-        # กรณีมีลูกสองตัว หาตัวที่น้อยสุดในฝั่งขวา (successor)
-        succ = root.right
-        while succ.left:
-            succ = succ.left
-        root.val = succ.val              # เอาค่า successor มาแทนค่าปัจจุบัน
-        # แล้วลบ successor ออกจาก subtree ขวา
-        root.right = delete_node(root.right, succ.val)
+            succ = root.right
+            while succ.left:
+                succ = succ.left
+            root.val = succ.val
+            root.right = self.deleteNode(root.right, succ.val)
 
-    return root
+        return root`,
+            },
 
-def inorder(node):
-    """ไล่อ่าน BST แบบ in-order จะได้ค่าเรียงจากน้อยไปมากเสมอ"""
-    if node is None:
-        return []
-    return inorder(node.left) + [node.val] + inorder(node.right)
+            { t: "h3", c: "4.5 ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** ไล่ลบ key = 3 จากต้นตัวอย่าง · วงแหวนเขียวบน successor · จากนั้นค่า 3 ถูกเขียนทับเป็น 4 และใบ 4 เดิมหายไป",
+            },
+            { t: "viz", id: "bst-delete" },
 
+            { t: "h3", c: "5. จำลองการทำงาน — ลบ 3" },
+            {
+              t: "table",
+              head: ["ขั้น", "ยืนที่", "ทำอะไร", "ต้นตอนนี้"],
+              rows: [
+                ["1", "5", "3 < 5 → ลงซ้าย", "ยังเท่าเดิม"],
+                ["2", "3", "เจอ key · มีลูกสองตัว", "2 และ 4 กำพร้าถ้าตัดทิ้ง"],
+                ["3", "4", "succ = ขวาของ 3 แล้วไม่มีซ้าย", "successor = 4"],
+                ["4", "3", "คัดลอก 4 มาทับค่า 3", "โหนดนี้แสดง 4 แต่ใบ 4 เดิมยังอยู่"],
+                ["5", "4 เดิม", "ลบใบ → คืน None", "5 / 4,6 / 2, 7"],
+              ],
+            },
+            {
+              t: "p",
+              c: "ตรวจด้วย in-order: ก่อนลบ [2, 3, 4, 5, 6, 7] · หลังลบ [2, 4, 5, 6, 7] — เรียงอยู่ แปลว่ายังเป็น BST",
+            },
 
-# BST [5, 3, 6, 2, 4, null, 7]
-root = TreeNode(5, TreeNode(3, TreeNode(2), TreeNode(4)), TreeNode(6, None, TreeNode(7)))
-print(inorder(root))
-root = delete_node(root, 3)          # ลบ 3 ซึ่งมีลูกสองข้าง
-print(inorder(root))`, out: `[2, 3, 4, 5, 6, 7]
-[2, 4, 5, 6, 7]` },
-                { t: "p", c: "ขั้นแรกเราต้อง traverse ไปหา node ที่จะ delete ก่อน โดยใช้กฎ BST เหมือน search ถ้า key น้อยกว่า root ปัจจุบันก็เข้าไป delete ในฝั่งซ้าย (แล้วรับผลลัพธ์กลับมาต่อกับ root.left) ถ้ามากกว่าก็ทำกับฝั่งขวา เทคนิคการเขียน root.left = delete_node(root.left, key) ช่วยให้การเชื่อม node ใหม่หลัง delete เกิดขึ้นเองอัตโนมัติ ไม่ต้องเก็บ pointer ตัวพ่อไว้เอง" },
-                { t: "p", c: "พอเจอ node ที่จะ delete (key == root.val) แยกเป็น 3 กรณี กรณีไม่มี child หรือมี child ตัวเดียว จัดการง่าย แค่คืน child อีกฝั่งขึ้นไปแทนตำแหน่งของมัน (ถ้าไม่มี child เลย ฝั่งที่คืนก็เป็น None พอดี เท่ากับ delete ทิ้ง) กรณียากคือมี child สองตัว เรา delete ตรง ๆ ไม่ได้เพราะจะเหลือ child กำพร้าสองก้อน วิธีแก้คือหา successor คือค่าที่น้อยที่สุดในฝั่งขวา (เดินขวาหนึ่งก้าวแล้วเดินซ้ายจนสุด) ค่านี้มากกว่าทุกตัวในฝั่งซ้าย และน้อยกว่าทุกตัวที่เหลือในฝั่งขวา จึงเอามาแทนที่แล้ว tree ยังเป็น BST อยู่ จากนั้น delete successor ตัวเดิมออก (ซึ่งจะเข้ากรณีง่ายเพราะ successor ไม่มี child ซ้ายแน่นอน)" },
-                { t: "p", c: "Time O(h) traverse หา node แล้วเดินหา successor รวมแล้วไม่เกิน height (ความสูง) · Space O(h) จาก call stack ของ recursion เท่า height" },
-              ] },
+            { t: "h3", c: "6. จุดระวังตกหลุมพราง" },
+            {
+              t: "ul",
+              c: [
+                    "ลืม root.left = ... / root.right = ... — ลบในต้นย่อยแต่ไม่ต่อกลับ ต้นบนไม่เปลี่ยน",
+                    "ลบโหนดสองลูกแล้วยกซ้ายขึ้นมาโดยไม่จัดการขวา — กิ่งขวาหลุด",
+                    "คัดลอกค่า successor แล้วลืมไปลบ successor ตัวเดิม → ค่าซ้ำในต้น",
+                    "หา successor ผิดทาง (เดินซ้ายก่อน) จะได้ predecessor ซึ่งใช้ได้เหมือนกันแต่ต้องลบฝั่งซ้าย ไม่ใช่ฝั่งขวา — อย่าปน",
+              ],
+            },
+            {
+              t: "callout",
+              title: "จะใช้ predecessor ก็ได้",
+              c: "ค่ามากสุดฝั่งซ้ายก็แทนได้เช่นกัน โจทย์รับทั้งสองแบบ — เลือกฝั่งเดียวแล้วทำให้ครบดีกว่าสลับไปมา",
+            },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "การ delete ใน BST = traverse หา node ด้วยกฎ BST แล้วต่อ subtree กลับด้วย root.child = recurse(...) เทคนิคแทนที่ด้วย successor (ค่าน้อยสุดฝั่งขวา) เป็นลูกเล่นที่ใช้ได้ทุกครั้งที่ต้อง delete node ที่มี child สองตัว" },
+            { t: "h3", c: "7. Time & Space Complexity" },
+            {
+              t: "ul",
+              c: [
+                "Time O(h) — เดินหาโหนด + เดินหา successor รวมไม่เกินความสูง",
+                "Space O(h) — call stack ของ recursion",
+              ],
+            },
+
+            {
+              t: "callout",
+              title: "💡 สรุป pattern",
+              c: "delete ใน BST = search ลงต้น + ต่อกิ่งด้วย root.child = recurse(...) · ลูกสองตัว = ยืม successor แล้วลบมันด้วยกรณีง่าย ท่านี้เจอซ้ำทุกครั้งที่ต้องถอนโหนดออกจากต้นเรียง",
+            },
+          ],
+        },
       ],
       en: [],
     },

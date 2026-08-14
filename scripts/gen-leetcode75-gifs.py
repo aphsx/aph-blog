@@ -570,80 +570,6 @@ def gif_binary_search() -> None:
 
 
 # ══════════════════════════════════════════════════════════════════════
-# 9. BST search
-# ══════════════════════════════════════════════════════════════════════
-
-def gif_bst_search() -> None:
-    title, sub = "BST · Search", "left < node < right · discard a half"
-    accent = ACCENT["green"]
-    #         5
-    #        / \
-    #       3   8
-    #      / \   \
-    #     2   4   9
-    children = {
-        5: (3, 8),
-        3: (2, 4),
-        8: (None, 9),
-        2: (None, None),
-        4: (None, None),
-        9: (None, None),
-    }
-    pos = {
-        5: (240, 50),
-        3: (140, 120),
-        8: (340, 120),
-        2: (90, 190),
-        4: (190, 190),
-        9: (390, 190),
-    }
-    target = 4
-    frames: list[tuple[Image.Image, int]] = []
-
-    def frame(path: list[int], current: int | None, note: str, result: str) -> Image.Image:
-        im = Image.new("RGB", (W, H), BG)
-        d = ImageDraw.Draw(im)
-        r = 18
-        for p, (L, R) in children.items():
-            x0, y0 = pos[p]
-            for c in (L, R):
-                if c is None:
-                    continue
-                x1, y1 = pos[c]
-                d.line([(x0, y0 + r), (x1, y1 - r)], fill=EDGE, width=2)
-        fn = F(14, True)
-        for v, (x, y) in pos.items():
-            if v == current:
-                fill = CURRENT
-            elif v in path:
-                fill = DONE
-            else:
-                fill = PENDING
-            d.ellipse([x - r, y - r, x + r, y + r], fill=fill, outline=WHITE)
-            tw = fn.getlength(str(v))
-            d.text((x - tw / 2, y - 8), str(v), fill=DARK, font=fn)
-        d.text((14, 230), note, fill=WHITE, font=F(12, True))
-        footer(d, title, sub, f"TARGET  {target}", accent, result)
-        return im
-
-    frames.append((frame([], None, f"search {target}", "[ ]"), HOLD_MS // 2))
-    node: int | None = 5
-    path: list[int] = []
-    while node is not None:
-        path.append(node)
-        if node == target:
-            frames.append((frame(path, node, f"{node} == {target} ✓", f"found {target}"), HOLD_MS))
-            break
-        if target < node:
-            frames.append((frame(path, node, f"{target} < {node} → go left", "searching…"), STEP_MS))
-            node = children[node][0]
-        else:
-            frames.append((frame(path, node, f"{target} > {node} → go right", "searching…"), STEP_MS))
-            node = children[node][1]
-    save(frames, "bst-search.gif")
-
-
-# ══════════════════════════════════════════════════════════════════════
 # 10. Graph DFS
 # ══════════════════════════════════════════════════════════════════════
 
@@ -1177,7 +1103,7 @@ def main() -> None:
     gif_queue()
     # linked-list-reverse.gif → scripts/gen-reverse-linked-list-gif.py
     gif_binary_search()
-    gif_bst_search()
+    # bst-search.gif removed — interactive viz in components/viz/BstViz.tsx
     gif_graph_dfs()
     gif_graph_bfs()
     gif_dp_1d()
