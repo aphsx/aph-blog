@@ -4,6 +4,7 @@ import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
 import { highlightCode } from "@/lib/highlight";
 import VizBlock from "@/components/viz/catalog";
+import CopyButton from "@/components/CopyButton";
 
 /* parse **bold** only (backticks already stripped/handled by renderInline) */
 function renderBold(text: string): ReactNode {
@@ -49,29 +50,31 @@ const prose =
   "text-base leading-[1.75] text-[#1c1e21] min-[768px]:text-[18px] [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-[0.35em] [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-[0.5rem] [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
 
 /**
- * Header strip for a highlighted code panel: window dots + optional label on
- * the left, language badge on the right. Purely decorative "this is code"
- * framing — the actual syntax colors come from `highlightCode`.
+ * Header strip for a highlighted code panel. Dark editor look — matches the
+ * interactive viz players (see components/viz/VizFrame.tsx) so every code
+ * surface on the page reads as one family. Left: accent dot + snippet label.
+ * Right: language badge + copy button.
  */
-function CodeChrome({ label, lang }: { label?: string; lang?: string }) {
+function CodeChrome({ label, lang, code }: { label?: string; lang?: string; code: string }) {
   const showLang = lang && lang !== "text";
   return (
-    <div className="flex items-center gap-2.5 rounded-t-md border border-b-0 border-border bg-surface-soft px-4 py-2">
-      <div className="flex shrink-0 gap-1.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f56]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#ffbd2e]" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#27c93f]" />
-      </div>
-      {label && (
-        <span className="truncate text-[0.8em] font-semibold text-subtle">
+    <div className="flex items-center gap-2.5 bg-[#121620] px-4 py-2">
+      <span className="h-2 w-2 shrink-0 rounded-[3px] bg-[#6565d5]" />
+      {label ? (
+        <span className="truncate text-[0.8em] font-semibold text-[#dcdce6]">
           {label}
         </span>
+      ) : (
+        <span className="text-[0.8em] font-medium text-[#8a90a0]">code</span>
       )}
-      {showLang && (
-        <span className="ml-auto shrink-0 rounded border border-border bg-white px-2 py-0.5 text-[0.7em] font-bold uppercase tracking-wide text-muted">
-          {lang}
-        </span>
-      )}
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        {showLang && (
+          <span className="rounded border border-[#3a4050] bg-[#1a1e2a] px-2 py-0.5 font-mono text-[0.7em] font-bold uppercase tracking-wide text-[#8a90a0]">
+            {lang}
+          </span>
+        )}
+        <CopyButton code={code} />
+      </div>
     </div>
   );
 }
@@ -94,15 +97,17 @@ async function CodePanel({
   // sequence of statements, so it stays gutter-free.
   const numbered = Boolean(lang && lang !== "text");
   return (
-    <>
-      <CodeChrome label={label} lang={lang} />
+    <div
+      className={`overflow-hidden border border-[#2a3040] bg-[#0c0e16] ${
+        roundBottom ? "rounded-lg shadow-sm" : "rounded-t-lg"
+      }`}
+    >
+      <CodeChrome label={label} lang={lang} code={code} />
       <div
-        className={`overflow-hidden border border-border ${roundBottom ? "rounded-b-md" : ""} ${
-          numbered ? "shiki-numbered" : ""
-        }`}
+        className={`border-t border-[#2a3040] ${numbered ? "shiki-numbered" : ""}`}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-    </>
+    </div>
   );
 }
 
@@ -235,11 +240,14 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       return (
         <div key={i} className="my-5">
           <CodePanel code={b.code} lang={b.lang} label={b.label} roundBottom={false} />
-          <div className="rounded-b-md border border-t-0 border-border bg-surface-soft/50 px-4 py-3">
-            <div className="mb-1 text-[0.75em] font-bold uppercase tracking-wide text-muted">
-              Output
+          <div className="rounded-b-lg border border-t-0 border-[#2a3040] bg-[#121620] px-4 py-3">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="rounded border border-[#3a8868] bg-[#142820] px-2 py-0.5 font-mono text-[0.7em] font-bold uppercase tracking-wider text-[#8cffb8]">
+                ▶ Output
+              </span>
+              <span className="h-px flex-1 bg-[#2a3040]" />
             </div>
-            <pre className="m-0 overflow-x-auto whitespace-pre-wrap font-mono text-[0.85em] leading-relaxed">
+            <pre className="m-0 overflow-x-auto whitespace-pre-wrap font-mono text-[0.85em] leading-relaxed text-[#dcdce6]">
               <code>{b.out}</code>
             </pre>
           </div>

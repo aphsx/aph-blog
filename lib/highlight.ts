@@ -3,7 +3,7 @@
 // highlighter JS ever reaches the client bundle.
 import { createHighlighter, type Highlighter } from "shiki";
 
-const THEME = "github-light";
+const THEME = "github-dark-default";
 
 // Every `lang` value actually used across lib/courses, kept in sync manually —
 // grep for `lang: "` if a new language shows up in content.

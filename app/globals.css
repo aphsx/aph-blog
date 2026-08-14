@@ -42,9 +42,11 @@ html {
 
 /*
  * Shiki-highlighted code panels (components/Article.tsx `code` / `codeout`).
- * Shiki emits its own inline background/color on <pre class="shiki">; the
- * !important below is what lets it lose to the site's card background so
- * highlighted blocks still match the surrounding doc chrome.
+ * Dark editor look, tuned to match the interactive viz players
+ * (components/viz/VizFrame.tsx: panels #0c0e16, chrome #121620, borders
+ * #2a3040). Shiki emits its own inline background/color on <pre class="shiki">;
+ * the !important below is what lets it lose to the panel background so
+ * highlighted blocks stay one family with the surrounding chrome.
  */
 .shiki {
   margin: 0;
@@ -53,7 +55,7 @@ html {
   font-family: var(--font-mono);
   font-size: 0.875em;
   line-height: 1.7;
-  background-color: var(--color-code) !important;
+  background-color: #0c0e16 !important;
 }
 
 /*
@@ -76,10 +78,9 @@ html {
   width: 1.75em;
   margin-right: 1em;
   padding-right: 1em;
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid #2a3040;
   text-align: right;
-  color: var(--color-muted);
-  opacity: 0.7;
+  color: #6a7080;
   user-select: none;
 }
 
