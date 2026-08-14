@@ -24,6 +24,8 @@ export const VIZ_IDS = [
   "prefix-build-query",
   "prefix-altitude",
   "prefix-pivot",
+  "two-ptr-opposite",
+  "two-ptr-slow-fast",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

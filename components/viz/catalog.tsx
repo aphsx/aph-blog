@@ -6,6 +6,7 @@ import ReverseLinkedListViz from "@/components/viz/ReverseLinkedListViz";
 import { MaxLevelSumViz, RightSideViewViz } from "@/components/viz/TreeBfsViz";
 import { CasesBstViz, DeleteBstViz, GrowBstViz, HeightBstViz, RuleBstViz, SearchBstViz } from "@/components/viz/BstViz";
 import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/PrefixSumViz";
+import { OppositeEndsViz, SlowFastViz } from "@/components/viz/TwoPointersViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -25,6 +26,8 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "prefix-build-query": PrefixBuildViz,
   "prefix-altitude": AltitudeViz,
   "prefix-pivot": PivotIndexViz,
+  "two-ptr-opposite": OppositeEndsViz,
+  "two-ptr-slow-fast": SlowFastViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {
