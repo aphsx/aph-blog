@@ -1,11 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Heading } from "@/lib/content";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import TocDesktop from "./Toc";
 import Footer from "./Footer";
+
+/** Open ancestor <details> so TOC links into a folded solution still land. */
+function revealHashTarget() {
+  const raw = window.location.hash.slice(1);
+  if (!raw) return;
+  const el = document.getElementById(decodeURIComponent(raw));
+  if (!el) return;
+  let node: HTMLElement | null = el;
+  while (node) {
+    if (node instanceof HTMLDetailsElement) node.open = true;
+    node = node.parentElement;
+  }
+  el.scrollIntoView({ block: "start" });
+}
 
 export default function Shell({
   children,
@@ -16,6 +30,12 @@ export default function Shell({
 }) {
   const [open, setOpen] = useState(false);
   const hasToc = toc.length > 0;
+
+  useEffect(() => {
+    revealHashTarget();
+    window.addEventListener("hashchange", revealHashTarget);
+    return () => window.removeEventListener("hashchange", revealHashTarget);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col">

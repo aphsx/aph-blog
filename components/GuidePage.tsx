@@ -30,7 +30,7 @@ export default async function GuidePage({ slug }: { slug: string }) {
     ? resolvePage(course.pages[nextSlug], locale)
     : null;
 
-  const toc = extractHeadings(resolved.blocks);
+  const toc = extractHeadings(resolved.blocks, locale);
   const category = getCategoryForSlug(page.slug);
 
   return (

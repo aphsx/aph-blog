@@ -111,15 +111,20 @@ async function CodePanel({
   );
 }
 
-async function renderBlock(b: Block, i: number): Promise<ReactNode> {
+async function renderBlock(
+  b: Block,
+  i: number,
+  prefix = "h",
+): Promise<ReactNode> {
+  const id = `${prefix}-${i}`;
   switch (b.t) {
     case "p":
-      return <p key={i}>{renderText(b.c)}</p>;
+      return <p key={id}>{renderText(b.c)}</p>;
     case "h2":
       return (
         <h2
-          key={i}
-          id={`h-${i}`}
+          key={id}
+          id={id}
           className="mb-2 mt-8 scroll-mt-28 text-[1.375em] font-bold tracking-tight min-[768px]:mt-[2em] min-[768px]:text-[1.5em]"
         >
           {b.c}
@@ -128,8 +133,8 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
     case "h3":
       return (
         <h3
-          key={i}
-          id={`h-${i}`}
+          key={id}
+          id={id}
           className="mb-2 mt-[1.8em] scroll-mt-28 text-[1.25em] font-semibold"
         >
           {b.c}
@@ -137,7 +142,7 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       );
     case "ul":
       return (
-        <ul key={i}>
+        <ul key={id}>
           {b.c.map((x, j) => (
             <li key={j}>{renderText(x)}</li>
           ))}
@@ -145,7 +150,7 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       );
     case "ol":
       return (
-        <ol key={i} start={b.start}>
+        <ol key={id} start={b.start}>
           {b.c.map((x, j) => (
             <li key={j}>{renderText(x)}</li>
           ))}
@@ -153,14 +158,14 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       );
     case "code":
       return (
-        <div key={i} className="my-5">
+        <div key={id} className="my-5">
           <CodePanel code={b.c} lang={b.lang} label={b.label} />
         </div>
       );
     case "callout":
       return (
         <div
-          key={i}
+          key={id}
           className={`my-5 rounded-md border border-[#444950] p-[14px_18px] text-base ${
             b.warn
               ? "border-l-4 border-l-[#d9822b] bg-[#fff8f0]"
@@ -173,7 +178,7 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       );
     case "example":
       return (
-        <div key={i} className="my-5 grid gap-3">
+        <div key={id} id={id} className="my-5 grid scroll-mt-28 gap-3">
           {b.c.map((ex, j) => (
             <div
               key={j}
@@ -205,8 +210,9 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
     case "constraints":
       return (
         <div
-          key={i}
-          className="my-5 rounded-md border border-border border-l-4 border-l-[#8a8f98] bg-surface-soft/30 px-4 py-3"
+          key={id}
+          id={id}
+          className="my-5 scroll-mt-28 rounded-md border border-border border-l-4 border-l-[#8a8f98] bg-surface-soft/30 px-4 py-3"
         >
           <div className="mb-1 font-bold">Constraints (ข้อจำกัด)</div>
           <ul className="m-0 list-disc pl-5 font-mono text-[0.85em] [&_li]:my-1">
@@ -218,27 +224,33 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
       );
     case "hints":
       return (
-        <div key={i} className="my-5 grid gap-2">
+        <div key={id} className="my-5 grid gap-2">
           {await Promise.all(
-            b.c.map(async (h, j) => (
-              <details
-                key={j}
-                className="rounded-md border border-dashed border-primary/60 bg-primary-soft/25 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
-              >
-                <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
-                  {h.title}
-                </summary>
-                <div className="mt-3">
-                  {await Promise.all(h.c.map((bb, k) => renderBlock(bb, k)))}
-                </div>
-              </details>
-            )),
+            b.c.map(async (h, j) => {
+              const hid = `${id}-${j}`;
+              return (
+                <details
+                  key={hid}
+                  id={hid}
+                  className="scroll-mt-28 rounded-md border border-dashed border-primary/60 bg-primary-soft/25 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+                >
+                  <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
+                    {h.title}
+                  </summary>
+                  <div className="mt-3">
+                    {await Promise.all(
+                      h.c.map((bb, k) => renderBlock(bb, k, hid)),
+                    )}
+                  </div>
+                </details>
+              );
+            }),
           )}
         </div>
       );
     case "codeout":
       return (
-        <div key={i} className="my-5">
+        <div key={id} className="my-5">
           <CodePanel code={b.code} lang={b.lang} label={b.label} roundBottom={false} />
           <div className="rounded-b-lg border border-t-0 border-[#2a3040] bg-[#121620] px-4 py-3">
             <div className="mb-2 flex items-center gap-2">
@@ -256,8 +268,9 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
     case "solution":
       return (
         <details
-          key={i}
-          className="group/sol my-8 overflow-hidden rounded-lg border border-border bg-surface-soft/40 open:bg-white [&_p]:my-2 [&_pre]:my-3 [&_h3]:mt-5 [&_h3]:mb-2"
+          key={id}
+          id={id}
+          className="group/sol my-8 scroll-mt-28 overflow-hidden rounded-lg border border-border bg-surface-soft/40 open:bg-white [&_p]:my-2 [&_pre]:my-3 [&_h3]:mt-5 [&_h3]:mb-2"
         >
           <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 select-none [&::-webkit-details-marker]:hidden">
             <span
@@ -286,21 +299,22 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
             </span>
           </summary>
           <div className="border-t border-dashed border-border px-4 pb-5 pt-2">
-            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j)))}
+            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j, id)))}
           </div>
         </details>
       );
     case "details":
       return (
         <details
-          key={i}
-          className="my-4 rounded-md border border-border bg-surface-soft/40 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
+          key={id}
+          id={id}
+          className="my-4 scroll-mt-28 rounded-md border border-border bg-surface-soft/40 px-4 py-3 [&_p]:my-2 [&_pre]:my-3"
         >
           <summary className="cursor-pointer font-semibold text-primary marker:text-primary">
             {b.summary}
           </summary>
           <div className="mt-3">
-            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j)))}
+            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j, id)))}
           </div>
         </details>
       );
