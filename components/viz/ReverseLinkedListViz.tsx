@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  DIAGRAM_H,
+  DIAGRAM_W,
   REVERSE_CODE,
   REVERSE_VALUES,
   buildReverseSteps,
@@ -112,14 +114,34 @@ function Diagram({ step }: { step: ReverseStep }) {
   const ln = leftNullNode(step, values);
   const rn = rightNullNode(step, values);
 
-  const ptrs = [
-    { name: "prev", val: step.prev, fill: "#64b4ff", dy: -52 },
-    { name: "curr", val: step.curr, fill: "#ffd23c", dy: -72 },
-    { name: "next", val: step.nxt, fill: "#5ce698", dy: -32 },
-  ];
+  type Side = "above" | "below";
+  const ptrs: { name: string; val: number | null; fill: string; side: Side }[] = [];
+  if (step.curr !== null) {
+    ptrs.push({ name: "curr", val: step.curr, fill: "#ffd23c", side: "above" });
+  }
+  if (step.prev !== null) {
+    ptrs.push({
+      name: "prev",
+      val: step.prev,
+      fill: "#64b4ff",
+      side: step.prev === step.curr ? "below" : "above",
+    });
+  }
+  if (step.nxt !== null) {
+    const nextSharesBelow = step.prev !== null && step.prev === step.nxt && step.prev === step.curr;
+    ptrs.push({
+      name: "next",
+      val: step.nxt,
+      fill: "#5ce698",
+      side: nextSharesBelow ? "above" : "below",
+    });
+  }
+
+  const LABEL_H = 22;
+  const STEM = 18;
 
   return (
-    <svg viewBox="0 0 760 200" className="w-full" aria-hidden>
+    <svg viewBox={`0 0 ${DIAGRAM_W} ${DIAGRAM_H}`} className="w-full" aria-hidden>
       {links.map((a) => (
         <Arrow key={a.key} x1={a.x1} y={y} x2={a.x2} color={a.color} thick={a.thick} />
       ))}
@@ -155,25 +177,28 @@ function Diagram({ step }: { step: ReverseStep }) {
         );
       })}
 
-      {ptrs.map(({ name, val, fill, dy }) => {
+      {ptrs.map(({ name, val, fill, side }) => {
         if (val === null || !(val in pos)) return null;
         const { x } = pos[val];
-        const ly = y + dy;
-        const lw = name.length * 7 + 16;
+        const lw = name.length * 7.5 + 18;
+        const ly =
+          side === "above" ? y - r - STEM - LABEL_H : y + r + STEM;
+        const stemFrom = side === "above" ? ly + LABEL_H : ly;
+        const stemTo = side === "above" ? y - r - 4 : y + r + 4;
         return (
           <g key={name}>
-            <rect x={x - lw / 2} y={ly} width={lw} height={20} rx={6} fill={fill} />
+            <rect x={x - lw / 2} y={ly} width={lw} height={LABEL_H} rx={6} fill={fill} />
             <text
               x={x}
-              y={ly + 14}
+              y={ly + 15}
               textAnchor="middle"
               fill="#0e1016"
-              fontSize={11}
+              fontSize={12}
               fontWeight={700}
             >
               {name}
             </text>
-            <line x1={x} y1={ly + 20} x2={x} y2={y - r - 4} stroke={fill} strokeWidth={2} />
+            <line x1={x} y1={stemFrom} x2={x} y2={stemTo} stroke={fill} strokeWidth={2} />
           </g>
         );
       })}

@@ -138,13 +138,16 @@ export function buildReverseSteps(values: readonly number[]): ReverseStep[] {
   return steps;
 }
 
+export const DIAGRAM_W = 920;
+export const DIAGRAM_H = 280;
+
 export function nodeLayout(values: readonly number[]) {
   const r = 26;
-  const gap = 24;
+  const gap = 48;
   const n = values.length;
   const total = n * (2 * r) + (n - 1) * gap;
-  const x0 = (760 - total) / 2 + r;
-  const y = 100;
+  const x0 = (DIAGRAM_W - total) / 2 + r;
+  const y = 128;
   const pos: Record<number, { x: number; y: number }> = {};
   values.forEach((v, i) => {
     pos[v] = { x: x0 + i * (2 * r + gap), y };
