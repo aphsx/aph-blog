@@ -21,6 +21,9 @@ export const VIZ_IDS = [
   "bst-height",
   "bst-search",
   "bst-delete",
+  "prefix-build-query",
+  "prefix-altitude",
+  "prefix-pivot",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

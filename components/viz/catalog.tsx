@@ -5,6 +5,7 @@ import type { VizId } from "@/lib/viz/ids";
 import ReverseLinkedListViz from "@/components/viz/ReverseLinkedListViz";
 import { MaxLevelSumViz, RightSideViewViz } from "@/components/viz/TreeBfsViz";
 import { CasesBstViz, DeleteBstViz, GrowBstViz, HeightBstViz, RuleBstViz, SearchBstViz } from "@/components/viz/BstViz";
+import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/PrefixSumViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -21,6 +22,9 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "bst-height": HeightBstViz,
   "bst-search": SearchBstViz,
   "bst-delete": DeleteBstViz,
+  "prefix-build-query": PrefixBuildViz,
+  "prefix-altitude": AltitudeViz,
+  "prefix-pivot": PivotIndexViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {
