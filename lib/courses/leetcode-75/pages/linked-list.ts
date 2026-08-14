@@ -247,13 +247,6 @@ while fast and fast.next:
           c: "การเปลี่ยนทิศทางจาก 1 → 2 → 3 ให้กลายเป็น 3 → 2 → 1 โดยไม่สร้างโหนดใหม่ — ใช้ตัวแปร 3 ตัวควบคุมการหมุนข้อต่อ:",
         },
         {
-          t: "image",
-          src: "/leetcode-75/linked-list-reverse.gif",
-          alt: "Reverse linked list step-by-step: diagram synced with code line highlighting",
-          caption:
-            "GIF 7 โหนด — ลูกศรอยู่ในช่องว่างระหว่าง node (ไม่ทับวงกลม) · เขียว ← พลิกแล้ว · ส้ม → ยังไม่แตะ · ขาว = กำลังพลิก",
-        },
-        {
           t: "ul",
           c: [
             "prev — โหนดก่อนหน้า (เริ่มต้นเป็น None)",
@@ -1291,6 +1284,19 @@ class Solution:
         return prev                 # จบ loop prev คือ head ตัวใหม่`,
             },
 
+            { t: "h3", c: "3.5 ดูทีละขั้น (Step-by-Step GIF)" },
+            {
+              t: "p",
+              c: "GIF ด้านล่างไล่ทีละบรรทัดพร้อม diagram — prev / curr / next ขยับตามโค้ดจริง:",
+            },
+            {
+              t: "image",
+              src: "/leetcode-75/linked-list-reverse.gif",
+              alt: "Reverse linked list step-by-step: diagram synced with code line highlighting",
+              caption:
+                "7 โหนด · ลูกศรในช่องว่างระหว่าง node · เขียว ← พลิกแล้ว · ส้ม → ยังไม่แตะ · ขาว = กำลังพลิก",
+            },
+
             { t: "h3", c: "4. จำลองการทำงาน — 1 → 2 → 3" },
             {
               t: "table",
@@ -1446,6 +1452,19 @@ class Solution:
             cur = nxt               # 4) advance cur to the saved node
 
         return prev                 # after the loop, prev is the new head`,
+            },
+
+            { t: "h3", c: "3.5 Step-by-Step GIF" },
+            {
+              t: "p",
+              c: "The GIF below walks through each line with a synced diagram — watch prev / curr / next move with the code:",
+            },
+            {
+              t: "image",
+              src: "/leetcode-75/linked-list-reverse.gif",
+              alt: "Reverse linked list step-by-step: diagram synced with code line highlighting",
+              caption:
+                "7 nodes · arrows in gaps between nodes · cyan ← reversed · orange → pending · white = flipping now",
             },
 
             { t: "h3", c: "4. Dry Run — 1 → 2 → 3" },
