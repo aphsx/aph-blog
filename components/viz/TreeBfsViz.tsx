@@ -219,7 +219,3 @@ export function MaxLevelSumViz() {
     />
   );
 }
-
-export default function TreeBfsViz({ kind }: { kind: "right-view" | "level-sum" }) {
-  return kind === "right-view" ? <RightSideViewViz /> : <MaxLevelSumViz />;
-}

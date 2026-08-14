@@ -1,6 +1,8 @@
 // Type definitions for the Aph's Blog content model (courses → pages → blocks).
 // Pure types only — no data, no logic.
 
+import type { VizId } from "@/lib/viz/ids";
+
 /**
  * A single renderable content block.
  * Rendering for each variant lives in components/Article.tsx.
@@ -22,7 +24,7 @@ export type Block =
   | { t: "details"; summary: string; c: Block[] }
   | { t: "image"; src: string; alt?: string; caption?: string }
   /** Interactive step-through visualizer (client component). */
-  | { t: "viz"; id: "reverse-linked-list" | "tree-bfs-right-view" | "tree-bfs-level-sum" }
+  | { t: "viz"; id: VizId }
   /**
    * LeetCode-style worked examples: Input / Output / Explanation.
    * Rendered as numbered example cards with monospace input/output.
