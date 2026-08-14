@@ -29,6 +29,8 @@ export const VIZ_IDS = [
   "array-alias",
   "array-insert-shift",
   "array-concat-join",
+  "slide-fixed",
+  "slide-variable",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

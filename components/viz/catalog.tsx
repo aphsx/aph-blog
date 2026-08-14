@@ -8,6 +8,7 @@ import { CasesBstViz, DeleteBstViz, GrowBstViz, HeightBstViz, RuleBstViz, Search
 import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/PrefixSumViz";
 import { OppositeEndsViz, SlowFastViz } from "@/components/viz/TwoPointersViz";
 import { ArrayAliasViz, ArrayConcatViz, ArrayInsertViz } from "@/components/viz/ArrayStringViz";
+import { SlideFixedViz, SlideVariableViz } from "@/components/viz/SlidingWindowViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -32,6 +33,8 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "array-alias": ArrayAliasViz,
   "array-insert-shift": ArrayInsertViz,
   "array-concat-join": ArrayConcatViz,
+  "slide-fixed": SlideFixedViz,
+  "slide-variable": SlideVariableViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {
