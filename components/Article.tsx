@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
 import { highlightCode } from "@/lib/highlight";
+import ReverseLinkedListViz from "@/components/viz/ReverseLinkedListViz";
 
 /* parse **bold** only (backticks already stripped/handled by renderInline) */
 function renderBold(text: string): ReactNode {
@@ -350,6 +351,11 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
         </div>
       );
     }
+    case "viz":
+      if (b.id === "reverse-linked-list") {
+        return <ReverseLinkedListViz key={i} />;
+      }
+      return null;
     case "image":
       return (
         <figure key={i} className="my-6">

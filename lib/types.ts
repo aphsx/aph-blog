@@ -21,6 +21,8 @@ export type Block =
   | { t: "linklist"; c: { title: string; slug: string }[]; ordered?: boolean }
   | { t: "details"; summary: string; c: Block[] }
   | { t: "image"; src: string; alt?: string; caption?: string }
+  /** Interactive step-through visualizer (client component). */
+  | { t: "viz"; id: "reverse-linked-list" }
   /**
    * LeetCode-style worked examples: Input / Output / Explanation.
    * Rendered as numbered example cards with monospace input/output.

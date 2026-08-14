@@ -1284,18 +1284,12 @@ class Solution:
         return prev                 # จบ loop prev คือ head ตัวใหม่`,
             },
 
-            { t: "h3", c: "3.5 ดูทีละขั้น (Step-by-Step GIF)" },
+            { t: "h3", c: "3.5 ดูทีละขั้น (Interactive)" },
             {
               t: "p",
-              c: "GIF ด้านล่างไล่ทีละบรรทัดพร้อม diagram — prev / curr / next ขยับตามโค้ดจริง:",
+              c: "กด **Next ▶** เพื่อไล่ทีละขั้น · **▶ Play** เล่นอัตโนมัติวนลูป · diagram กับโค้ดไฮไลต์ซิงค์กัน:",
             },
-            {
-              t: "image",
-              src: "/leetcode-75/linked-list-reverse.gif",
-              alt: "Reverse linked list step-by-step: diagram synced with code line highlighting",
-              caption:
-                "7 โหนด · ลูกศรในช่องว่างระหว่าง node · เขียว ← พลิกแล้ว · ส้ม → ยังไม่แตะ · ขาว = กำลังพลิก",
-            },
+            { t: "viz", id: "reverse-linked-list" },
 
             { t: "h3", c: "4. จำลองการทำงาน — 1 → 2 → 3" },
             {
@@ -1454,18 +1448,12 @@ class Solution:
         return prev                 # after the loop, prev is the new head`,
             },
 
-            { t: "h3", c: "3.5 Step-by-Step GIF" },
+            { t: "h3", c: "3.5 Step-by-Step (Interactive)" },
             {
               t: "p",
-              c: "The GIF below walks through each line with a synced diagram — watch prev / curr / next move with the code:",
+              c: "Press **Next ▶** to advance one step · **▶ Play** auto-plays in a loop · diagram and code highlight stay in sync:",
             },
-            {
-              t: "image",
-              src: "/leetcode-75/linked-list-reverse.gif",
-              alt: "Reverse linked list step-by-step: diagram synced with code line highlighting",
-              caption:
-                "7 nodes · arrows in gaps between nodes · cyan ← reversed · orange → pending · white = flipping now",
-            },
+            { t: "viz", id: "reverse-linked-list" },
 
             { t: "h3", c: "4. Dry Run — 1 → 2 → 3" },
             {
