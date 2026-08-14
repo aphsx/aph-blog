@@ -205,6 +205,157 @@ export function buildInsertSteps(): InsertStep[] {
   return steps;
 }
 
+export type IndexStep = {
+  line: number;
+  msg: string;
+  nums: number[];
+  hi: number | null;
+};
+
+export type LoopStep = {
+  line: number;
+  msg: string;
+  nums: number[];
+  hi: number | null;
+  i: number | null;
+  x: number | null;
+  phase: "for" | "while" | "range";
+};
+
+export type NestedStep = {
+  line: number;
+  msg: string;
+  grid: number[][];
+  r: number | null;
+  c: number | null;
+};
+
+export const INDEX_CODE = [
+  "nums = [10, 20, 30]",
+  "print(nums[0])",
+  "print(nums[1])",
+  "print(nums[2])",
+  "print(nums[-1])",
+];
+
+export const LOOP_CODE = [
+  "nums = [10, 20, 30]",
+  "for x in nums:",
+  "    print(x)",
+  "",
+  "i = 0",
+  "while i < len(nums):",
+  "    print(nums[i])",
+  "    i += 1",
+  "",
+  "for i in range(len(nums)):",
+  "    print(i, nums[i])",
+];
+
+export const NESTED_CODE = [
+  "grid = [",
+  "    [1, 2, 3],",
+  "    [4, 5, 6],",
+  "]",
+  "for r in range(len(grid)):",
+  "    for c in range(len(grid[r])):",
+  "        print(grid[r][c])",
+];
+
+export function buildIndexSteps(): IndexStep[] {
+  const nums = [10, 20, 30];
+  const steps: IndexStep[] = [];
+  const snap = (line: number, msg: string, hi: number | null = null) => {
+    steps.push({ line, msg, nums: [...nums], hi });
+  };
+
+  snap(1, "nums = [10, 20, 30]  · ตู้ 3 ช่อง เลขช่องติดไว้ใต้ตู้ เริ่มที่ 0");
+  snap(2, "nums[0] → 10  · ช่องแรกคือระยะ 0 ก้าวจากหัวแถว", 0);
+  snap(3, "nums[1] → 20  · เดินหนึ่งก้าวจากหัวแถว", 1);
+  snap(4, "nums[2] → 30  · ช่องสุดท้ายของแถวยาว 3 คือเลข 2 ไม่ใช่ 3", 2);
+  snap(5, "nums[-1] → 30  · ลบหนึ่ง = นับจากท้าย ช่องสุดท้ายช่องเดียวกับ nums[2]", 2);
+
+  return steps;
+}
+
+export function buildLoopSteps(): LoopStep[] {
+  const nums = [10, 20, 30];
+  const steps: LoopStep[] = [];
+  const snap = (
+    line: number,
+    msg: string,
+    extra: Partial<Pick<LoopStep, "hi" | "i" | "x" | "phase">> = {},
+  ) => {
+    steps.push({
+      line,
+      msg,
+      nums: [...nums],
+      hi: extra.hi ?? null,
+      i: extra.i ?? null,
+      x: extra.x ?? null,
+      phase: extra.phase ?? "for",
+    });
+  };
+
+  snap(1, "nums = [10, 20, 30]  · จะเดินแถวนี้สามแบบ");
+
+  snap(2, "for x in nums:  · Python หยิบของมาให้ทีละชิ้น ไม่ต้องถือเลขช่อง", { phase: "for" });
+  snap(3, "รอบที่ 1  · x = 10", { phase: "for", hi: 0, x: 10 });
+  snap(3, "รอบที่ 2  · x = 20", { phase: "for", hi: 1, x: 20 });
+  snap(3, "รอบที่ 3  · x = 30  แล้วจบ เพราะของหมด", { phase: "for", hi: 2, x: 30 });
+
+  snap(5, "i = 0  · แบบ while เราถือเลขช่องเอง จุดเริ่มต้นคือ 0", { phase: "while", i: 0, hi: 0 });
+  snap(6, "i < len(nums) → 0 < 3  จริง  · เข้าลูป", { phase: "while", i: 0, hi: 0 });
+  snap(7, "print(nums[0]) → 10", { phase: "while", i: 0, hi: 0, x: 10 });
+  snap(8, "i += 1  · i กลายเป็น 1  ถ้าบรรทัดนี้หาย ลูปจะพิมพ์ 10 ไม่สิ้นสุด", {
+    phase: "while",
+    i: 1,
+    hi: 1,
+  });
+  snap(7, "print(nums[1]) → 20", { phase: "while", i: 1, hi: 1, x: 20 });
+  snap(8, "i += 1  · i = 2", { phase: "while", i: 2, hi: 2 });
+  snap(7, "print(nums[2]) → 30", { phase: "while", i: 2, hi: 2, x: 30 });
+  snap(8, "i += 1  · i = 3  แล้ว 3 < 3 เป็นเท็จ ลูปหยุด", { phase: "while", i: 3 });
+
+  snap(10, "for i in range(len(nums)):  · ได้เลขช่องเหมือน while แต่ Python ขยับ i ให้", {
+    phase: "range",
+  });
+  snap(11, "i = 0  · ช่อง 0 มี 10  แบบนี้แก้ nums[i] ได้ เพราะมีเลขช่อง", {
+    phase: "range",
+    i: 0,
+    hi: 0,
+    x: 10,
+  });
+  snap(11, "i = 1  · ช่อง 1 มี 20", { phase: "range", i: 1, hi: 1, x: 20 });
+  snap(11, "i = 2  · ช่อง 2 มี 30", { phase: "range", i: 2, hi: 2, x: 30 });
+
+  return steps;
+}
+
+export function buildNestedSteps(): NestedStep[] {
+  const grid = [
+    [1, 2, 3],
+    [4, 5, 6],
+  ];
+  const steps: NestedStep[] = [];
+  const snap = (line: number, msg: string, r: number | null = null, c: number | null = null) => {
+    steps.push({ line, msg, grid: grid.map((row) => [...row]), r, c });
+  };
+
+  snap(1, "grid มี 2 แถว แถวละ 3 ช่อง  · เข้าถึงด้วย grid[แถว][ช่อง]");
+  snap(5, "r = 0  · ลูปนอกเลือกแถวบน", 0, null);
+  snap(6, "c = 0  · ลูปในเดินช่องในแถวนั้น", 0, 0);
+  snap(7, "print(grid[0][0]) → 1", 0, 0);
+  snap(7, "print(grid[0][1]) → 2", 0, 1);
+  snap(7, "print(grid[0][2]) → 3  แถวบนหมด ลูปในจบ", 0, 2);
+  snap(5, "r = 1  · ลูปนอกลงแถวล่าง ลูปในเริ่มใหม่ที่ช่อง 0", 1, null);
+  snap(7, "print(grid[1][0]) → 4", 1, 0);
+  snap(7, "print(grid[1][1]) → 5", 1, 1);
+  snap(7, "print(grid[1][2]) → 6", 1, 2);
+
+  return steps;
+}
+
 export function buildConcatSteps(): ConcatStep[] {
   const chars = ["a", "b", "c", "d"];
   const steps: ConcatStep[] = [];

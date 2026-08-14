@@ -6,12 +6,21 @@ import {
   ALIAS_CODE,
   CONCAT_CODE,
   INSERT_CODE,
+  INDEX_CODE,
+  LOOP_CODE,
+  NESTED_CODE,
   buildAliasSteps,
   buildConcatSteps,
   buildInsertSteps,
+  buildIndexSteps,
+  buildLoopSteps,
+  buildNestedSteps,
   type AliasStep,
   type ConcatStep,
   type InsertStep,
+  type IndexStep,
+  type LoopStep,
+  type NestedStep,
 } from "@/lib/viz/array-string";
 
 const W = 720;
@@ -429,6 +438,230 @@ function ConcatDiagram({ step }: { step: ConcatStep }) {
           : `คัดลอกรวม ${step.copiedTotal}`}
       </text>
     </svg>
+  );
+}
+
+function IndexDiagram({ step }: { step: IndexStep }) {
+  const cell = 64;
+  const gap = 14;
+  const h = 52;
+  const n = step.nums.length;
+  const rowW = n * cell + (n - 1) * gap;
+  const origin = (W - rowW) / 2;
+  const y = 72;
+  const xOf = (i: number) => origin + i * (cell + gap);
+
+  return (
+    <svg viewBox={`0 0 ${W} 200`} className="w-full" aria-hidden>
+      <Label x={W / 2} y={28} text="เลขช่อง (index) เริ่มที่ 0" color={MUTED} anchor="middle" />
+      {step.nums.map((v, i) => {
+        const on = step.hi === i;
+        return (
+          <g key={i}>
+            {on && (
+              <text x={xOf(i) + cell / 2} y={58} textAnchor="middle" fill={TEAL} fontSize={16}>
+                ▼
+              </text>
+            )}
+            <Cell
+              x={xOf(i)}
+              y={y}
+              w={cell}
+              h={h}
+              value={v}
+              fill={on ? TEAL : "#1e2433"}
+              stroke={on ? GOLD : "#3a4050"}
+              ring={on ? GOLD : undefined}
+              size={18}
+            />
+            <Idx x={xOf(i) + cell / 2} y={y + h + 22} n={i} />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function LoopDiagram({ step }: { step: LoopStep }) {
+  const cell = 64;
+  const gap = 14;
+  const h = 52;
+  const n = step.nums.length;
+  const rowW = n * cell + (n - 1) * gap;
+  const origin = (W - rowW) / 2;
+  const y = 80;
+  const xOf = (i: number) => origin + i * (cell + gap);
+  const phaseLabel =
+    step.phase === "for" ? "for x in nums" : step.phase === "while" ? "while + i" : "for i in range";
+  const phaseColor = step.phase === "for" ? TEAL : step.phase === "while" ? ORANGE : BLUE;
+
+  return (
+    <svg viewBox={`0 0 ${W} 220`} className="w-full" aria-hidden>
+      <Label x={W / 2} y={24} text={phaseLabel} color={phaseColor} anchor="middle" />
+      {step.i !== null && (
+        <Label x={W / 2} y={44} text={`i = ${step.i}`} color={GOLD} anchor="middle" />
+      )}
+      {step.nums.map((v, i) => {
+        const on = step.hi === i;
+        return (
+          <g key={i}>
+            {on && (
+              <text x={xOf(i) + cell / 2} y={66} textAnchor="middle" fill={phaseColor} fontSize={16}>
+                ▼
+              </text>
+            )}
+            <Cell
+              x={xOf(i)}
+              y={y}
+              w={cell}
+              h={h}
+              value={v}
+              fill={on ? phaseColor : "#1e2433"}
+              stroke={on ? GOLD : "#3a4050"}
+              ring={on ? GOLD : undefined}
+              size={18}
+              dim={!on && step.hi !== null}
+            />
+            <Idx x={xOf(i) + cell / 2} y={y + h + 22} n={i} />
+          </g>
+        );
+      })}
+      {step.x !== null && (
+        <Label
+          x={W / 2}
+          y={208}
+          text={step.phase === "for" ? `x = ${step.x}` : `nums[i] = ${step.x}`}
+          color={GOLD}
+          anchor="middle"
+        />
+      )}
+    </svg>
+  );
+}
+
+function NestedDiagram({ step }: { step: NestedStep }) {
+  const cell = 56;
+  const gap = 12;
+  const h = 48;
+  const cols = 3;
+  const rowW = cols * cell + (cols - 1) * gap;
+  const origin = (W - rowW) / 2;
+  const y0 = 48;
+
+  return (
+    <svg viewBox={`0 0 ${W} 220`} className="w-full" aria-hidden>
+      <Label x={W / 2} y={24} text="grid[r][c]" color={MUTED} anchor="middle" />
+      {step.grid.map((row, r) =>
+        row.map((v, c) => {
+          const x = origin + c * (cell + gap);
+          const y = y0 + r * (h + 28);
+          const rowOn = step.r === r && step.c === null;
+          const on = step.r === r && step.c === c;
+          return (
+            <g key={`${r}-${c}`}>
+              <Cell
+                x={x}
+                y={y}
+                w={cell}
+                h={h}
+                value={v}
+                fill={on ? TEAL : rowOn ? "#1a3a34" : "#1e2433"}
+                stroke={on ? GOLD : rowOn ? TEAL : "#3a4050"}
+                ring={on ? GOLD : undefined}
+                size={18}
+                dim={step.r !== null && step.r !== r}
+              />
+              <text
+                x={x + cell / 2}
+                y={y + h + 16}
+                textAnchor="middle"
+                fill={DIM}
+                fontSize={10}
+                fontFamily={FONT}
+              >
+                [{r}][{c}]
+              </text>
+            </g>
+          );
+        }),
+      )}
+    </svg>
+  );
+}
+
+export function ArrayIndexViz() {
+  const steps = useMemo(() => buildIndexSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="INDEX · เลขช่องเริ่มที่ 0"
+      pills={[{ label: "INDEX 0", color: "#03A69B" }]}
+      message={step.msg}
+      diagram={<IndexDiagram step={step} />}
+      lines={INDEX_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayLoopViz() {
+  const steps = useMemo(() => buildLoopSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="LOOP · for / while / range"
+      pills={[
+        { label: "FOR", color: "#03A69B" },
+        { label: "WHILE", color: "#D55D00" },
+        { label: "RANGE", color: "#64b4ff" },
+      ]}
+      message={step.msg}
+      diagram={<LoopDiagram step={step} />}
+      lines={LOOP_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayNestedViz() {
+  const steps = useMemo(() => buildNestedSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="แถวสองชั้น · ลูปนอก × ลูปใน"
+      pills={[{ label: "NESTED", color: "#03A69B" }]}
+      message={step.msg}
+      diagram={<NestedDiagram step={step} />}
+      lines={NESTED_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
   );
 }
 
