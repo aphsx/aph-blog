@@ -4,6 +4,7 @@ import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
 import { highlightCode } from "@/lib/highlight";
 import ReverseLinkedListViz from "@/components/viz/ReverseLinkedListViz";
+import TreeBfsViz from "@/components/viz/TreeBfsViz";
 
 /* parse **bold** only (backticks already stripped/handled by renderInline) */
 function renderBold(text: string): ReactNode {
@@ -354,6 +355,12 @@ async function renderBlock(b: Block, i: number): Promise<ReactNode> {
     case "viz":
       if (b.id === "reverse-linked-list") {
         return <ReverseLinkedListViz key={i} />;
+      }
+      if (b.id === "tree-bfs-right-view") {
+        return <TreeBfsViz key={i} kind="right-view" />;
+      }
+      if (b.id === "tree-bfs-level-sum") {
+        return <TreeBfsViz key={i} kind="level-sum" />;
       }
       return null;
     case "image":

@@ -22,7 +22,7 @@ export type Block =
   | { t: "details"; summary: string; c: Block[] }
   | { t: "image"; src: string; alt?: string; caption?: string }
   /** Interactive step-through visualizer (client component). */
-  | { t: "viz"; id: "reverse-linked-list" }
+  | { t: "viz"; id: "reverse-linked-list" | "tree-bfs-right-view" | "tree-bfs-level-sum" }
   /**
    * LeetCode-style worked examples: Input / Output / Explanation.
    * Rendered as numbered example cards with monospace input/output.
