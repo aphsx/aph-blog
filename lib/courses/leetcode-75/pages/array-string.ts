@@ -29,24 +29,8 @@ export const arrayStringPages: Record<string, Page> = {
           c: "นึกภาพ list เป็นตู้ล็อกเกอร์เรียงกันเป็นแถว แต่ละช่องมีเลขติดไว้ เลขนั้นเรียกว่า index (ตำแหน่ง) ของชิ้นแรกไม่ใช่ 1 แต่เป็น 0 เพราะมันนับเป็นระยะทางจากหัวแถว ช่องแรกเดิน 0 ก้าว",
         },
         {
-          t: "codeout",
-          lang: "python",
-          label: "เลขช่องเริ่มที่ 0",
-          code: `nums = [10, 20, 30]
-print("จำนวนช่อง len(nums) =", len(nums))
-print("ช่อง 0:", nums[0])
-print("ช่อง 1:", nums[1])
-print("ช่อง 2:", nums[2])
-print("ช่องสุดท้าย nums[-1]:", nums[-1])`,
-          out: `จำนวนช่อง len(nums) = 3
-ช่อง 0: 10
-ช่อง 1: 20
-ช่อง 2: 30
-ช่องสุดท้าย nums[-1]: 30`,
-        },
-        {
           t: "p",
-          c: "len(nums) คือจำนวนช่อง จึงเป็น 3 ช่องสุดท้ายจึงเป็น nums[2] ไม่ใช่ nums[3] ส่วน nums[-1] คือทางลัดว่านับจากท้ายหนึ่งช่อง ได้ค่าเดียวกับช่องสุดท้าย",
+          c: "len(nums) คือจำนวนช่อง แถวยาว 3 ช่องสุดท้ายจึงเป็น nums[2] ไม่ใช่ nums[3] ส่วน nums[-1] นับจากท้ายหนึ่งช่อง ได้ค่าเดียวกับช่องสุดท้าย",
         },
         { t: "h3", c: "ดูทีละขั้น (Interactive)" },
         {
@@ -65,51 +49,27 @@ print("ช่องสุดท้าย nums[-1]:", nums[-1])`,
           c: "for ใช้เมื่อทราบขอบเขตหรือจำนวนรอบที่แน่นอน เหมาะกับการไล่อ่านของในแถวจากซ้ายไปขวาทีละตัว",
         },
         {
-          t: "codeout",
+          t: "code",
           lang: "python",
-          label: "for — หยิบของมาให้ทีละชิ้น",
-          code: `nums = [10, 20, 30]
+          c: `nums = [10, 20, 30]
 for x in nums:
     print(x)  # รอบที่ 1: 10, รอบที่ 2: 20, รอบที่ 3: 30`,
-          out: `10
-20
-30`,
         },
         {
           t: "p",
           c: "while ใช้เมื่อจำนวนรอบขึ้นอยู่กับเงื่อนไข ต้องมีสามอย่างเสมอ: จุดเริ่มต้น → เงื่อนไข → การขยับตำแหน่ง",
         },
         {
-          t: "codeout",
+          t: "code",
           lang: "python",
-          label: "while — ถือเลขช่องเอง",
-          code: `nums = [10, 20, 30]
-i = 0                 # 1. จุดเริ่มต้น (index เริ่มที่ 0)
-while i < len(nums):  # 2. เงื่อนไข (ทำตราบใดที่ยังไม่เกินจำนวนช่อง)
+          c: `i = 0                 # 1. จุดเริ่มต้น (index เริ่มที่ 0)
+while i < len(nums):  # 2. เงื่อนไข
     print(nums[i])
-    i += 1            # 3. ขยับ — ถ้าขาดบรรทัดนี้จะวนไม่สิ้นสุด`,
-          out: `10
-20
-30`,
+    i += 1            # 3. ขยับ — ถ้าขาด วนไม่สิ้นสุด`,
         },
         {
           t: "p",
-          c: "สองแบบพิมพ์ของชุดเดียวกัน แต่ while ให้เราถือเลขช่อง i ไว้ในมือ จึงอ่าน nums[i] และขยับ i เองได้",
-        },
-        {
-          t: "p",
-          c: "ถ้าต้องการเลขช่องแต่ไม่อยากเขียน while มีทางที่ Python ขยับ i ให้: for i in range(len(nums)) ได้ทั้งเลขช่องและของในช่อง จึงแก้ nums[i] ได้ ซึ่ง for x in nums ทำไม่ได้เพราะ x เป็นแค่สำเนาค่า ไม่ใช่ช่อง",
-        },
-        {
-          t: "codeout",
-          lang: "python",
-          label: "for i in range — ได้เลขช่อง",
-          code: `nums = [10, 20, 30]
-for i in range(len(nums)):
-    print("ช่อง", i, "มี", nums[i])`,
-          out: `ช่อง 0 มี 10
-ช่อง 1 มี 20
-ช่อง 2 มี 30`,
+          c: "สองแบบเดินแถวเดียวกัน แต่ while ถือเลขช่อง i ไว้ในมือ จึงอ่าน nums[i] ได้ ถ้าต้องการเลขช่องแต่ไม่เขียน while เอง ใช้ for i in range(len(nums)) — Python ขยับ i ให้ และแก้ nums[i] ได้ ซึ่ง for x in nums ทำไม่ได้เพราะ x เป็นแค่สำเนาค่า ไม่ใช่ช่อง",
         },
         { t: "h3", c: "ดูทีละขั้น (Interactive)" },
         {
@@ -126,20 +86,16 @@ for i in range(len(nums)):
         {
           t: "codeout",
           lang: "python",
-          label: "slice ได้ช่วง และได้สำเนาใหม่",
+          label: "slice ไม่รวมปลาย และได้สำเนา",
           code: `nums = [10, 20, 30, 40, 50]
-print("nums[1:3] :", nums[1:3])
-print("nums[:3]  :", nums[:3])
-print("nums[3:]  :", nums[3:])
+print(nums[1:3])
 part = nums[1:3]
 part.append(99)
-print("part      :", part)
-print("nums เดิม :", nums)`,
-          out: `nums[1:3] : [20, 30]
-nums[:3]  : [10, 20, 30]
-nums[3:]  : [40, 50]
-part      : [20, 30, 99]
-nums เดิม : [10, 20, 30, 40, 50]`,
+print("part", part)
+print("nums", nums)`,
+          out: `[20, 30]
+part [20, 30, 99]
+nums [10, 20, 30, 40, 50]`,
         },
         {
           t: "p",
@@ -195,20 +151,10 @@ pop ท้าย: 40
         {
           t: "codeout",
           lang: "python",
-          label: "string เดินได้ แก้ช่องไม่ได้",
+          label: "แก้ช่องของ string ไม่ได้",
           code: `s = "cat"
-print(s[0], s[1], s[2])
-for c in s:
-    print(c)
-try:
-    s[0] = "C"
-except TypeError as e:
-    print(type(e).__name__ + ":", e)`,
-          out: `c a t
-c
-a
-t
-TypeError: 'str' object does not support item assignment`,
+s[0] = "C"`,
+          out: `TypeError: 'str' object does not support item assignment`,
         },
         {
           t: "p",
@@ -226,16 +172,6 @@ TypeError: 'str' object does not support item assignment`,
           t: "p",
           c: "เพราะ string แก้ในที่เดิมไม่ได้ บรรทัด s = s + c จึงสลักป้ายใหม่ทั้งป้ายทุกรอบ รอบหลัง ๆ ต้องคัดลอกของเก่าทั้งหมดอีก ทางที่คัดลอกแต่ละตัวครั้งเดียวคือเก็บชิ้นส่วนใน list แล้ว \"\".join ตอนท้าย",
         },
-        {
-          t: "codeout",
-          lang: "python",
-          label: "join คัดลอกครั้งเดียว",
-          code: `parts = ["ab", "cd", "ef"]
-print("".join(parts))
-print("-".join(parts))`,
-          out: `abcdef
-ab-cd-ef`,
-        },
         { t: "h3", c: "ดูทีละขั้น (Interactive)" },
         {
           t: "p",
@@ -246,24 +182,7 @@ ab-cd-ef`,
         { t: "h2", c: "ส่วนที่ 7 · ลูปซ้อน และแถวสองชั้น" },
         {
           t: "p",
-          c: "ลูปซ้อนคือลูปในลูป ลูปนอกเดินหนึ่งก้าว ลูปในทำงานครบรอบของมัน ตารางหรือ list ที่ข้างในเป็น list อีกชั้น เข้าถึงด้วย grid[แถว][ช่อง]",
-        },
-        {
-          t: "codeout",
-          lang: "python",
-          label: "grid[r][c] และลูปสองชั้น",
-          code: `grid = [
-    [1, 2, 3],
-    [4, 5, 6],
-]
-print("grid[1][2] =", grid[1][2])
-for r in range(len(grid)):
-    for c in range(len(grid[r])):
-        print(grid[r][c], end=" ")
-    print()`,
-          out: `grid[1][2] = 6
-1 2 3 
-4 5 6 `,
+          c: "ลูปซ้อนคือลูปในลูป ลูปนอกเดินหนึ่งก้าว ลูปในทำงานครบรอบของมัน ตารางหรือ list ที่ข้างในเป็น list อีกชั้น เข้าถึงด้วย grid[แถว][ช่อง] เช่น grid[1][2] คือแถวที่ 1 ช่องที่ 2",
         },
         {
           t: "p",
