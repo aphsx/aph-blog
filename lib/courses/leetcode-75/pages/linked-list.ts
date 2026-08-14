@@ -249,9 +249,9 @@ while fast and fast.next:
         {
           t: "image",
           src: "/leetcode-75/linked-list-reverse.gif",
-          alt: "Linked list reverse: rewire next with prev/cur pointers",
+          alt: "Reverse linked list step-by-step: diagram synced with code line highlighting",
           caption:
-            "In-place reverse: เก็บ next ไว้ก่อน → หักข้อต่อชี้กลับ prev → เลื่อน prev/cur ไปข้างหน้า",
+            "GIF 7 โหนด — ลูกศรอยู่ในช่องว่างระหว่าง node (ไม่ทับวงกลม) · เขียว ← พลิกแล้ว · ส้ม → ยังไม่แตะ · ขาว = กำลังพลิก",
         },
         {
           t: "ul",

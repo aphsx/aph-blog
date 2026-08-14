@@ -1175,7 +1175,7 @@ def main() -> None:
     gif_prefix_sum()
     gif_stack()
     gif_queue()
-    gif_linked_list_reverse()
+    # linked-list-reverse.gif → scripts/gen-reverse-linked-list-gif.py
     gif_binary_search()
     gif_bst_search()
     gif_graph_dfs()
