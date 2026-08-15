@@ -138,29 +138,101 @@ function GraphNode({
   );
 }
 
-function AdjPanel({ adj, highlight }: { adj: Record<number, number[]>; highlight: number | null }) {
+function AdjPanel({
+  adj,
+  highlight,
+  justAdded,
+}: {
+  adj: Record<number, number[]>;
+  highlight: number | null;
+  justAdded: { node: number; value: number } | null;
+}) {
+  const keys = Object.keys(adj)
+    .map(Number)
+    .sort((a, b) => a - b);
+
   return (
     <g>
-      <text x={480} y={36} fill={MUTED} fontSize={12} fontWeight={700} fontFamily={FONT}>
-        adjacency list
+      <text x={480} y={28} fill={MUTED} fontSize={12} fontWeight={700} fontFamily={FONT}>
+        graph (adjacency list)
       </text>
-      {ADJ_NODES.map((n, i) => {
-        const y = 58 + i * 36;
-        const on = highlight === n;
+      {keys.length === 0 ? (
+        <>
+          <rect x={480} y={40} width={200} height={36} rx={6} fill="#121620" stroke="#2a3040" />
+          <text x={492} y={64} fill={DIM} fontSize={13} fontFamily={FONT}>
+            {"{}  ว่าง — ยังไม่มี key"}
+          </text>
+        </>
+      ) : (
+        keys.map((n, i) => {
+          const y = 48 + i * 34;
+          const on = highlight === n;
+          const vals = adj[n];
+          return (
+            <g key={n}>
+              <rect
+                x={480}
+                y={y - 14}
+                width={200}
+                height={28}
+                rx={6}
+                fill={on ? "#1a2838" : "#121620"}
+                stroke={on ? TEAL : "#2a3040"}
+                strokeWidth={on ? 2 : 1}
+              />
+              <text x={492} y={y + 5} fill={on ? TEAL : DIM} fontSize={13} fontFamily={FONT}>
+                {n}: [
+                {vals.map((v, vi) => {
+                  const isNew =
+                    justAdded && justAdded.node === n && justAdded.value === v && vi === vals.length - 1;
+                  return (
+                    <tspan key={`${n}-${vi}`} fill={isNew ? GOLD : on ? TEAL : "#dcdce6"}>
+                      {vi > 0 ? ", " : ""}
+                      {v}
+                    </tspan>
+                  );
+                })}
+                ]
+              </text>
+            </g>
+          );
+        })
+      )}
+    </g>
+  );
+}
+
+function EdgesPanel({ edgeIdx }: { edgeIdx: number }) {
+  return (
+    <g>
+      <text x={20} y={340} fill={MUTED} fontSize={11} fontWeight={700} fontFamily={FONT}>
+        edges (แหล่งที่มาของคู่)
+      </text>
+      {ADJ_EDGES.map(([a, b], i) => {
+        const x = 20 + i * 88;
+        const on = i === edgeIdx;
+        const past = edgeIdx >= 0 && i < edgeIdx;
         return (
-          <g key={n}>
+          <g key={i}>
             <rect
-              x={480}
-              y={y - 16}
-              width={200}
-              height={30}
-              rx={6}
-              fill={on ? "#1a2838" : "#121620"}
-              stroke={on ? TEAL : "#2a3040"}
+              x={x}
+              y={348}
+              width={80}
+              height={24}
+              rx={5}
+              fill={on ? "#2a3a28" : "#121620"}
+              stroke={on ? GOLD : past ? TEAL : "#2a3040"}
               strokeWidth={on ? 2 : 1}
             />
-            <text x={492} y={y + 4} fill={on ? TEAL : DIM} fontSize={13} fontFamily={FONT}>
-              {n}: [{adj[n].join(", ")}]
+            <text
+              x={x + 40}
+              y={365}
+              textAnchor="middle"
+              fill={on ? GOLD : past ? TEAL : DIM}
+              fontSize={12}
+              fontFamily={FONT}
+            >
+              ({a}, {b})
             </text>
           </g>
         );
@@ -177,11 +249,33 @@ function AdjDiagram({ step }: { step: AdjBuildStep }) {
         ? step.edge[1]
         : null;
 
+  const justAdded =
+    step.writing === "forward" && step.edge
+      ? { node: step.edge[0], value: step.edge[1] }
+      : step.writing === "back" && step.edge
+        ? { node: step.edge[1], value: step.edge[0] }
+        : null;
+
+  /** Only edges already written + the one being processed. */
+  const visible: [number, number][] = [
+    ...step.done,
+    ...(step.edge && !step.done.some(([x, y]) => edgeKey(x, y) === edgeKey(step.edge![0], step.edge![1]))
+      ? [step.edge]
+      : []),
+  ];
+
+  /** Nodes that appear once they have a key or are on the current edge. */
+  const shownNodes = new Set<number>([
+    ...Object.keys(step.adj).map(Number),
+    ...(step.edge ? step.edge : []),
+  ]);
+
   return (
-    <svg viewBox={`0 0 ${W} 360`} className="mx-auto block w-full max-w-[720px]">
-      <GraphEdges edges={ADJ_EDGES} pos={POS} active={step.edge} />
+    <svg viewBox={`0 0 ${W} 380`} className="mx-auto block w-full max-w-[720px]">
+      <GraphEdges edges={visible} pos={POS} active={step.edge} />
       {ADJ_NODES.map((n) => {
         const p = POS[n];
+        const known = shownNodes.has(n);
         const inEdge = step.edge && (step.edge[0] === n || step.edge[1] === n);
         return (
           <GraphNode
@@ -189,13 +283,14 @@ function AdjDiagram({ step }: { step: AdjBuildStep }) {
             id={n}
             x={p.x}
             y={p.y}
-            fill={inEdge ? "#2a3a28" : "#1a1e2a"}
-            stroke={inEdge ? TEAL : "#4a5060"}
+            fill={!known ? "#0c0e16" : inEdge ? "#2a3a28" : "#1a1e2a"}
+            stroke={!known ? "#2a3040" : inEdge ? TEAL : "#4a5060"}
             ring={highlight === n ? GOLD : undefined}
           />
         );
       })}
-      <AdjPanel adj={step.adj} highlight={highlight} />
+      <AdjPanel adj={step.adj} highlight={highlight} justAdded={justAdded} />
+      <EdgesPanel edgeIdx={step.edgeIdx} />
     </svg>
   );
 }

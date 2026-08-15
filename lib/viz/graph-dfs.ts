@@ -3,12 +3,16 @@
 export type AdjBuildStep = {
   line: number;
   msg: string;
-  /** Current adjacency list: node → neighbors. */
+  /** Current adjacency list — only keys that exist (defaultdict grows). */
   adj: Record<number, number[]>;
   /** Edge currently being processed (both ends). */
   edge: [number, number] | null;
   /** Which undirected write just happened. */
   writing: "forward" | "back" | null;
+  /** Edges already written both ways. */
+  done: [number, number][];
+  /** Index into ADJ_EDGES of the pair being processed (-1 = none). */
+  edgeIdx: number;
 };
 
 export type DfsWalkStep = {
@@ -52,7 +56,8 @@ export const ADJ_EDGES: [number, number][] = [
 export const ADJ_NODES = [0, 1, 2, 3, 4];
 
 export const ADJ_CODE = [
-  "graph = {0: [], 1: [], 2: [], 3: [], 4: []}",
+  "edges = [(0,1), (0,2), (1,3), (2,3), (3,4)]",
+  "graph = defaultdict(list)  # เริ่มว่าง {}",
   "for a, b in edges:",
   "    graph[a].append(b)",
   "    graph[b].append(a)  # ไม่มีทิศ ใส่สองทาง",
@@ -110,36 +115,69 @@ export const DFS_GRAPH: Record<number, number[]> = {
 
 export function buildAdjBuildSteps(): AdjBuildStep[] {
   const steps: AdjBuildStep[] = [];
-  const adj: Record<number, number[]> = {
-    0: [],
-    1: [],
-    2: [],
-    3: [],
-    4: [],
-  };
+  const adj: Record<number, number[]> = {};
+  const done: [number, number][] = [];
 
   const snap = (
     line: number,
     msg: string,
     edge: [number, number] | null,
     writing: AdjBuildStep["writing"],
+    edgeIdx: number,
   ) => {
     const copy: Record<number, number[]> = {};
-    for (const k of ADJ_NODES) copy[k] = [...adj[k]];
-    steps.push({ line, msg, adj: copy, edge, writing });
+    for (const k of Object.keys(adj)) {
+      const n = Number(k);
+      copy[n] = [...adj[n]];
+    }
+    steps.push({
+      line,
+      msg,
+      adj: copy,
+      edge,
+      writing,
+      done: done.map(([x, y]) => [x, y]),
+      edgeIdx,
+    });
   };
 
-  snap(1, "เริ่มด้วย dict ว่าง — แต่ละโหนดมี list เพื่อนบ้านว่าง", null, null);
+  snap(1, "edges = รายการเส้นที่จะใส่ · ยังไม่ได้แตะ graph", null, null, -1);
+  snap(2, "graph = defaultdict(list)  · ว่างเปล่า {} ยังไม่มี key", null, null, -1);
 
-  for (const [a, b] of ADJ_EDGES) {
-    snap(2, `หยิบเส้น (${a}, ${b}) จาก edges`, [a, b], null);
+  ADJ_EDGES.forEach(([a, b], edgeIdx) => {
+    snap(3, `for: หยิบ edges[${edgeIdx}] = (${a}, ${b})`, [a, b], null, edgeIdx);
+
+    if (!adj[a]) adj[a] = [];
     adj[a] = [...adj[a], b];
-    snap(3, `graph[${a}].append(${b})  · ${a} เดินไป ${b} ได้`, [a, b], "forward");
-    adj[b] = [...adj[b], a];
-    snap(4, `graph[${b}].append(${a})  · ไม่มีทิศ ต้องใส่ทางกลับด้วย`, [a, b], "back");
-  }
+    snap(
+      4,
+      `graph[${a}].append(${b})  · key ${a} ${adj[a].length === 1 ? "ถูกสร้างเป็น [] แล้ว" : "มีอยู่แล้ว"} ได้ ${b}`,
+      [a, b],
+      "forward",
+      edgeIdx,
+    );
 
-  snap(1, "เสร็จแล้ว · เช่น graph[0]=[1,2] และ graph[3]=[1,2,4]", null, null);
+    if (!adj[b]) adj[b] = [];
+    adj[b] = [...adj[b], a];
+    snap(
+      5,
+      `graph[${b}].append(${a})  · ไม่มีทิศ ใส่ทางกลับ · ตอนนี้ ${a}:[${adj[a].join(",")}]  ${b}:[${adj[b].join(",")}]`,
+      [a, b],
+      "back",
+      edgeIdx,
+    );
+    done.push([a, b]);
+  });
+
+  snap(
+    2,
+    `เสร็จ · dict(graph) = {${Object.keys(adj)
+      .map((k) => `${k}:[${adj[Number(k)].join(",")}]`)
+      .join(", ")}}`,
+    null,
+    null,
+    -1,
+  );
   return steps;
 }
 
