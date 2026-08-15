@@ -4,17 +4,27 @@ import { useMemo } from "react";
 import { VizFrameView, useVizPlayback } from "@/components/viz/VizFrame";
 import {
   ALIAS_CODE,
+  APPEND_CODE,
   CONCAT_CODE,
   INSERT_CODE,
   INDEX_CODE,
-  LOOP_CODE,
+  JOIN_CODE,
+  FOR_LOOP_CODE,
+  WHILE_LOOP_CODE,
+  RANGE_LOOP_CODE,
   NESTED_CODE,
+  STR_REBIND_CODE,
   buildAliasSteps,
+  buildAppendSteps,
   buildConcatSteps,
   buildInsertSteps,
   buildIndexSteps,
-  buildLoopSteps,
+  buildJoinSteps,
+  buildForLoopSteps,
+  buildWhileLoopSteps,
+  buildRangeLoopSteps,
   buildNestedSteps,
+  buildStrRebindSteps,
   type AliasStep,
   type ConcatStep,
   type InsertStep,
@@ -142,12 +152,13 @@ function AliasDiagram({ step }: { step: AliasStep }) {
   const gap = 10;
   const h = 40;
   const listX = 120;
-  const listY = 36;
+  const listY = 56;
 
   const strCell = 34;
   const strGap = 5;
   const strH = 34;
   const strX = 120;
+  const strY = 56;
 
   const listRowW = Math.max(step.list.length, 1) * cell + Math.max(step.list.length - 1, 0) * gap;
 
@@ -155,85 +166,68 @@ function AliasDiagram({ step }: { step: AliasStep }) {
   const sChars = charsOf(step.s);
   const tChars = charsOf(step.t);
   const showTRow = step.t !== null && !step.stSame;
-  const strY = showTRow ? 148 : 168;
+
+  if (step.listFocus) {
+    return (
+      <svg viewBox={`0 0 ${W} 160`} className="w-full" aria-hidden>
+        <Label x={16} y={28} text="list" color={TEAL} />
+        {step.aOn && <NameChip x={16} y={listY + 10} name="a" color={TEAL} />}
+        {step.bOn && <NameChip x={16} y={listY + 34} name="b" color={BLUE} />}
+        {step.aOn && (
+          <line x1={44} y1={listY + 20} x2={listX - 6} y2={listY + h / 2} stroke={TEAL} strokeWidth={2} />
+        )}
+        {step.bOn && (
+          <line
+            x1={44}
+            y1={listY + 44}
+            x2={listX - 6}
+            y2={listY + h / 2 + 8}
+            stroke={BLUE}
+            strokeWidth={2}
+          />
+        )}
+        {step.list.map((v, i) => {
+          const x = listX + i * (cell + gap);
+          const isNew = step.newCell && i === step.list.length - 1;
+          return (
+            <g key={`l-${i}`}>
+              <Idx x={x + cell / 2} y={listY - 6} n={i} />
+              <Cell
+                x={x}
+                y={listY}
+                w={cell}
+                h={h}
+                value={v}
+                fill={isNew ? ORANGE : "#196860"}
+                stroke={isNew ? GOLD : TEAL}
+                ring={isNew ? GOLD : undefined}
+              />
+            </g>
+          );
+        })}
+        {step.aOn && step.bOn && (
+          <Label x={listX + listRowW + 12} y={listY + 26} text="ก้อนเดียวกัน" color={TEAL} />
+        )}
+      </svg>
+    );
+  }
+
+  const tY = showTRow ? strY + strH + 18 : strY;
 
   return (
-    <svg viewBox={`0 0 ${W} 268`} className="w-full" aria-hidden>
-      <Label x={16} y={24} text="list" color={step.listFocus ? TEAL : DIM} />
-      {step.aOn && <NameChip x={16} y={listY + 10} name="a" color={TEAL} />}
-      {step.bOn && <NameChip x={16} y={listY + 34} name="b" color={BLUE} />}
-
-      {step.aOn && (
-        <line
-          x1={44}
-          y1={listY + 20}
-          x2={listX - 6}
-          y2={listY + h / 2}
-          stroke={TEAL}
-          strokeWidth={2}
-        />
-      )}
-      {step.bOn && (
-        <line
-          x1={44}
-          y1={listY + 44}
-          x2={listX - 6}
-          y2={listY + h / 2 + 8}
-          stroke={BLUE}
-          strokeWidth={2}
-        />
-      )}
-
-      {step.list.length === 0 && (
-        <text x={listX} y={listY + 28} fill={DIM} fontSize={13} fontFamily={FONT}>
-          (ยังว่าง)
-        </text>
-      )}
-      {step.list.map((v, i) => {
-        const x = listX + i * (cell + gap);
-        const isNew = step.newCell && i === step.list.length - 1;
-        return (
-          <g key={`l-${i}`}>
-            <Idx x={x + cell / 2} y={listY - 6} n={i} />
-            <Cell
-              x={x}
-              y={listY}
-              w={cell}
-              h={h}
-              value={v}
-              fill={isNew ? ORANGE : "#196860"}
-              stroke={isNew ? GOLD : TEAL}
-              ring={isNew ? GOLD : undefined}
-            />
-          </g>
-        );
-      })}
-      {step.aOn && step.bOn && (
-        <Label x={listX + listRowW + 12} y={listY + 26} text="ก้อนเดียวกัน" color={TEAL} />
-      )}
-
-      <line x1={16} y1={118} x2={W - 16} y2={118} stroke="#2a3040" strokeWidth={1} />
-
-      <Label x={16} y={136} text="str" color={!step.listFocus ? GOLD : DIM} />
+    <svg viewBox={`0 0 ${W} 180`} className="w-full" aria-hidden>
+      <Label x={16} y={28} text="str" color={GOLD} />
       {step.s !== null && <NameChip x={16} y={strY + 7} name="s" color={GOLD} />}
       {step.t !== null && (
         <NameChip
           x={16}
-          y={showTRow ? strY + strH + 22 : strY + 31}
+          y={showTRow ? tY + 7 : strY + 31}
           name="t"
           color={step.stSame ? GOLD : ORANGE}
         />
       )}
-
       {step.s !== null && (
-        <line
-          x1={44}
-          y1={strY + 17}
-          x2={strX - 6}
-          y2={strY + strH / 2}
-          stroke={GOLD}
-          strokeWidth={2}
-        />
+        <line x1={44} y1={strY + 17} x2={strX - 6} y2={strY + strH / 2} stroke={GOLD} strokeWidth={2} />
       )}
       {step.t !== null && !showTRow && (
         <line
@@ -248,14 +242,13 @@ function AliasDiagram({ step }: { step: AliasStep }) {
       {showTRow && (
         <line
           x1={44}
-          y1={strY + strH + 32}
+          y1={tY + 17}
           x2={strX - 6}
-          y2={strY + strH + 18 + strH / 2}
+          y2={tY + strH / 2}
           stroke={ORANGE}
           strokeWidth={2}
         />
       )}
-
       {sChars.map((ch, i) => {
         const x = strX + i * (strCell + strGap);
         return (
@@ -280,7 +273,6 @@ function AliasDiagram({ step }: { step: AliasStep }) {
           color={GOLD}
         />
       )}
-
       {showTRow &&
         tChars.map((ch, i) => {
           const x = strX + i * (strCell + strGap);
@@ -289,7 +281,7 @@ function AliasDiagram({ step }: { step: AliasStep }) {
             <Cell
               key={`t-${i}`}
               x={x}
-              y={strY + strH + 18}
+              y={tY}
               w={strCell}
               h={strH}
               value={ch}
@@ -303,7 +295,7 @@ function AliasDiagram({ step }: { step: AliasStep }) {
       {showTRow && (
         <Label
           x={strX + tChars.length * (strCell + strGap) + 8}
-          y={strY + strH + 40}
+          y={tY + 22}
           text="ป้ายใหม่"
           color={ORANGE}
         />
@@ -497,8 +489,8 @@ function LoopDiagram({ step }: { step: LoopStep }) {
   const y = 80;
   const xOf = (i: number) => origin + i * (cell + gap);
   const phaseLabel =
-    step.phase === "for" ? "for x in nums" : step.phase === "while" ? "while + i" : "for i in range";
-  const phaseColor = step.phase === "for" ? TEAL : step.phase === "while" ? ORANGE : BLUE;
+    step.kind === "for" ? "for x in nums" : step.kind === "while" ? "while + i" : "for i in range";
+  const phaseColor = step.kind === "for" ? TEAL : step.kind === "while" ? ORANGE : BLUE;
 
   return (
     <svg viewBox={`0 0 ${W} 220`} className="w-full" aria-hidden>
@@ -535,7 +527,7 @@ function LoopDiagram({ step }: { step: LoopStep }) {
         <Label
           x={W / 2}
           y={208}
-          text={step.phase === "for" ? `x = ${step.x}` : `nums[i] = ${step.x}`}
+          text={step.kind === "for" ? `x = ${step.x}` : `nums[i] = ${step.x}`}
           color={GOLD}
           anchor="middle"
         />
@@ -618,21 +610,65 @@ export function ArrayIndexViz() {
   );
 }
 
-export function ArrayLoopViz() {
-  const steps = useMemo(() => buildLoopSteps(), []);
+export function ArrayLoopForViz() {
+  const steps = useMemo(() => buildForLoopSteps(), []);
   const play = useVizPlayback(steps.length);
   const step = steps[play.idx];
   return (
     <VizFrameView
-      title="LOOP · for / while / range"
-      pills={[
-        { label: "FOR", color: "#03A69B" },
-        { label: "WHILE", color: "#D55D00" },
-        { label: "RANGE", color: "#64b4ff" },
-      ]}
+      title='FOR · for x in nums'
+      pills={[{ label: "FOR", color: "#03A69B" }]}
       message={step.msg}
       diagram={<LoopDiagram step={step} />}
-      lines={LOOP_CODE}
+      lines={FOR_LOOP_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayLoopWhileViz() {
+  const steps = useMemo(() => buildWhileLoopSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="WHILE · จุดเริ่ม · เงื่อนไข · ขยับ"
+      pills={[{ label: "WHILE", color: "#D55D00" }]}
+      message={step.msg}
+      diagram={<LoopDiagram step={step} />}
+      lines={WHILE_LOOP_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayLoopRangeViz() {
+  const steps = useMemo(() => buildRangeLoopSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="RANGE · for i in range"
+      pills={[{ label: "RANGE", color: "#64b4ff" }]}
+      message={step.msg}
+      diagram={<LoopDiagram step={step} />}
+      lines={RANGE_LOOP_CODE}
       line={step.line}
       idx={play.idx}
       stepCount={steps.length}
@@ -676,14 +712,35 @@ export function ArrayAliasViz() {
   const step = steps[play.idx];
   return (
     <VizFrameView
-      title="LIST vs STRING · ก้อนเดิม หรือ ป้ายใหม่"
-      pills={[
-        { label: "MUTABLE", color: "#03A69B" },
-        { label: "IMMUTABLE", color: "#D55D00" },
-      ]}
+      title="LIST · สองชื่อชี้ก้อนเดียว"
+      pills={[{ label: "ALIAS", color: "#03A69B" }]}
       message={step.msg}
       diagram={<AliasDiagram step={step} />}
       lines={ALIAS_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayStrRebindViz() {
+  const steps = useMemo(() => buildStrRebindSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title='STRING · ต่อแล้วได้ป้ายใหม่'
+      pills={[{ label: "REBIND", color: "#D55D00" }]}
+      message={step.msg}
+      diagram={<AliasDiagram step={step} />}
+      lines={STR_REBIND_CODE}
       line={step.line}
       idx={play.idx}
       stepCount={steps.length}
@@ -703,14 +760,35 @@ export function ArrayInsertViz() {
   const step = steps[play.idx];
   return (
     <VizFrameView
-      title="INSERT(0) vs APPEND · ทำไมราคาต่างกัน"
-      pills={[
-        { label: "INSERT  O(n)", color: "#D55D00" },
-        { label: "APPEND  O(1)", color: "#03A69B" },
-      ]}
+      title="INSERT(0) · ต้องถอยของทุกตัว"
+      pills={[{ label: "INSERT  O(n)", color: "#D55D00" }]}
       message={step.msg}
       diagram={<InsertDiagram step={step} />}
       lines={INSERT_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayAppendViz() {
+  const steps = useMemo(() => buildAppendSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="APPEND · วางท้ายไม่ขยับใคร"
+      pills={[{ label: "APPEND  O(1)", color: "#03A69B" }]}
+      message={step.msg}
+      diagram={<InsertDiagram step={step} />}
+      lines={APPEND_CODE}
       line={step.line}
       idx={play.idx}
       stepCount={steps.length}
@@ -730,14 +808,35 @@ export function ArrayConcatViz() {
   const step = steps[play.idx];
   return (
     <VizFrameView
-      title="STRING +=  vs  JOIN · นับการคัดลอก"
-      pills={[
-        { label: "+=  O(n²)", color: "#D55D00" },
-        { label: "JOIN  O(n)", color: "#03A69B" },
-      ]}
+      title="STRING += · นับการคัดลอก"
+      pills={[{ label: "+=  O(n²)", color: "#D55D00" }]}
       message={step.msg}
       diagram={<ConcatDiagram step={step} />}
       lines={CONCAT_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function ArrayJoinViz() {
+  const steps = useMemo(() => buildJoinSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="JOIN · คัดลอกครั้งเดียว"
+      pills={[{ label: "JOIN  O(n)", color: "#03A69B" }]}
+      message={step.msg}
+      diagram={<ConcatDiagram step={step} />}
+      lines={JOIN_CODE}
       line={step.line}
       idx={play.idx}
       stepCount={steps.length}

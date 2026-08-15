@@ -43,7 +43,9 @@ export const ALIAS_CODE = [
   "b = a",
   "b.append(4)",
   "# a is b  →  True",
-  "",
+];
+
+export const STR_REBIND_CODE = [
   's = "hello"',
   "t = s",
   't = t + " world"',
@@ -53,30 +55,27 @@ export const ALIAS_CODE = [
 export const INSERT_CODE = [
   "nums = [10, 20, 30]",
   "nums.insert(0, 99)",
-  "",
+];
+
+export const APPEND_CODE = [
   "nums = [10, 20, 30]",
   "nums.append(99)",
 ];
 
 export const CONCAT_CODE = [
   's = ""',
-  "for c in \"abcd\":",
+  'for c in "abcd":',
   "    s = s + c",
-  "",
-  '"".join(["a", "b", "c", "d"])',
 ];
+
+export const JOIN_CODE = ['"".join(["a", "b", "c", "d"])'];
 
 export function buildAliasSteps(): AliasStep[] {
   const steps: AliasStep[] = [];
   let list: number[] = [];
   let aOn = false;
   let bOn = false;
-  let s: string | null = null;
-  let t: string | null = null;
-  let stSame = false;
-  let listFocus = true;
   let newCell = false;
-  let newStr = false;
 
   const snap = (line: number, msg: string) => {
     steps.push({
@@ -85,16 +84,14 @@ export function buildAliasSteps(): AliasStep[] {
       list: [...list],
       aOn,
       bOn,
-      s,
-      t,
-      stSame,
-      listFocus,
+      s: null,
+      t: null,
+      stSame: false,
+      listFocus: true,
       newCell,
-      newStr,
+      newStr: false,
     });
   };
-
-  snap(1, "list กับ string คนละชนิด  · เริ่มจากตู้ล็อกเกอร์ (list) ก่อน");
 
   list = [1, 2, 3];
   aOn = true;
@@ -110,25 +107,46 @@ export function buildAliasSteps(): AliasStep[] {
   newCell = false;
   snap(4, "a is b → True  · สองชื่อ หนึ่งก้อน ใครแก้ อีกชื่อก็เห็น");
 
-  listFocus = false;
-  snap(6, 'ต่อไปฝั่งป้ายสลัก (string)');
+  return steps;
+}
+
+export function buildStrRebindSteps(): AliasStep[] {
+  const steps: AliasStep[] = [];
+  let s: string | null = null;
+  let t: string | null = null;
+  let stSame = false;
+  let newStr = false;
+
+  const snap = (line: number, msg: string) => {
+    steps.push({
+      line,
+      msg,
+      list: [],
+      aOn: false,
+      bOn: false,
+      s,
+      t,
+      stSame,
+      listFocus: false,
+      newCell: false,
+      newStr,
+    });
+  };
 
   s = "hello";
-  t = null;
-  stSame = false;
-  snap(6, 's = "hello"  · ชื่อ s ชี้ป้ายนี้');
+  snap(1, 's = "hello"  · ชื่อ s ชี้ป้ายนี้');
 
   t = "hello";
   stSame = true;
-  snap(7, "t = s  · ตอนนี้ยังก้อนเดียวกัน เหมือน b = a เมื่อกี้");
+  snap(2, "t = s  · ตอนนี้ยังก้อนเดียวกัน");
 
   t = "hello world";
   stSame = false;
   newStr = true;
-  snap(8, 't = t + " world"  · ไม่ได้แก้ป้ายเดิม สลักป้ายใหม่ทั้งป้าย แล้วย้ายชื่อ t ไปชี้');
+  snap(3, 't = t + " world"  · ไม่ได้แก้ป้ายเดิม สลักป้ายใหม่ทั้งป้าย แล้วย้ายชื่อ t ไปชี้');
 
   newStr = false;
-  snap(9, 's is t → False  · s ยังเป็น "hello" ป้ายเก่ายังอยู่ แค่ไม่มีชื่อ t แล้ว');
+  snap(4, 's is t → False  · s ยังเป็น "hello" ป้ายเก่ายังอยู่');
 
   return steps;
 }
@@ -190,17 +208,38 @@ export function buildInsertSteps(): InsertStep[] {
   snap(2, "วาง 99 ที่ช่อง 0  · ขยับ 3 ตัว เพื่อแทรก 1 ตัว นี่คือ O(n)");
 
   writing = null;
-  shifts = 0;
-  mode = "append";
+  snap(2, "ขยับ 3 ตัว เพื่อแทรก 1 ตัว  · นี่คือ O(n) — อย่าเขียน insert(0, x) ในลูป");
+
+  return steps;
+}
+
+export function buildAppendSteps(): InsertStep[] {
+  const steps: InsertStep[] = [];
+  let cells: (number | null)[] = [];
+  let writing: number | null = null;
+
+  const snap = (line: number, msg: string) => {
+    steps.push({
+      line,
+      msg,
+      cells: [...cells],
+      from: null,
+      to: null,
+      writing,
+      shifts: 0,
+      mode: "append",
+    });
+  };
+
   cells = [10, 20, 30];
-  snap(4, "รีเซ็ต [10, 20, 30]  · คราวนี้ต่อท้ายด้วย append");
+  snap(1, "nums = [10, 20, 30]  · ต่อท้ายไม่ต้องถอยของใคร");
 
   cells = [10, 20, 30, 99];
   writing = 3;
-  snap(5, "append(99)  · วางท้ายแถวได้เลย ไม่รบกวนใคร ขยับ 0 ตัว");
+  snap(2, "append(99)  · วางท้ายแถวได้เลย ขยับ 0 ตัว · O(1) เฉลี่ย");
 
   writing = null;
-  snap(5, "ขยับ 0 ตัว  · O(1) เฉลี่ย  — อย่าเขียน insert(0, x) ในลูป");
+  snap(2, "จบ  · เทียบกับ insert ที่หัวแถวที่ต้องขยับทั้งแถว");
 
   return steps;
 }
@@ -219,7 +258,7 @@ export type LoopStep = {
   hi: number | null;
   i: number | null;
   x: number | null;
-  phase: "for" | "while" | "range";
+  kind: "for" | "while" | "range";
 };
 
 export type NestedStep = {
@@ -238,16 +277,22 @@ export const INDEX_CODE = [
   "print(nums[-1])",
 ];
 
-export const LOOP_CODE = [
+export const FOR_LOOP_CODE = [
   "nums = [10, 20, 30]",
   "for x in nums:",
   "    print(x)",
-  "",
+];
+
+export const WHILE_LOOP_CODE = [
+  "nums = [10, 20, 30]",
   "i = 0",
   "while i < len(nums):",
   "    print(nums[i])",
   "    i += 1",
-  "",
+];
+
+export const RANGE_LOOP_CODE = [
+  "nums = [10, 20, 30]",
   "for i in range(len(nums)):",
   "    print(i, nums[i])",
 ];
@@ -278,13 +323,13 @@ export function buildIndexSteps(): IndexStep[] {
   return steps;
 }
 
-export function buildLoopSteps(): LoopStep[] {
+export function buildForLoopSteps(): LoopStep[] {
   const nums = [10, 20, 30];
   const steps: LoopStep[] = [];
   const snap = (
     line: number,
     msg: string,
-    extra: Partial<Pick<LoopStep, "hi" | "i" | "x" | "phase">> = {},
+    extra: Partial<Pick<LoopStep, "hi" | "i" | "x">> = {},
   ) => {
     steps.push({
       line,
@@ -293,41 +338,82 @@ export function buildLoopSteps(): LoopStep[] {
       hi: extra.hi ?? null,
       i: extra.i ?? null,
       x: extra.x ?? null,
-      phase: extra.phase ?? "for",
+      kind: "for",
     });
   };
 
-  snap(1, "nums = [10, 20, 30]  · จะเดินแถวนี้สามแบบ");
+  snap(1, "nums = [10, 20, 30]  · เดินแถวนี้ด้วย for");
+  snap(2, "for x in nums:  · Python หยิบของมาให้ทีละชิ้น ไม่ต้องถือเลขช่อง");
+  snap(3, "รอบที่ 1  · x = 10", { hi: 0, x: 10 });
+  snap(3, "รอบที่ 2  · x = 20", { hi: 1, x: 20 });
+  snap(3, "รอบที่ 3  · x = 30  แล้วจบ เพราะของหมด", { hi: 2, x: 30 });
 
-  snap(2, "for x in nums:  · Python หยิบของมาให้ทีละชิ้น ไม่ต้องถือเลขช่อง", { phase: "for" });
-  snap(3, "รอบที่ 1  · x = 10", { phase: "for", hi: 0, x: 10 });
-  snap(3, "รอบที่ 2  · x = 20", { phase: "for", hi: 1, x: 20 });
-  snap(3, "รอบที่ 3  · x = 30  แล้วจบ เพราะของหมด", { phase: "for", hi: 2, x: 30 });
+  return steps;
+}
 
-  snap(5, "i = 0  · แบบ while เราถือเลขช่องเอง จุดเริ่มต้นคือ 0", { phase: "while", i: 0, hi: 0 });
-  snap(6, "i < len(nums) → 0 < 3  จริง  · เข้าลูป", { phase: "while", i: 0, hi: 0 });
-  snap(7, "print(nums[0]) → 10", { phase: "while", i: 0, hi: 0, x: 10 });
-  snap(8, "i += 1  · i กลายเป็น 1  ถ้าบรรทัดนี้หาย ลูปจะพิมพ์ 10 ไม่สิ้นสุด", {
-    phase: "while",
+export function buildWhileLoopSteps(): LoopStep[] {
+  const nums = [10, 20, 30];
+  const steps: LoopStep[] = [];
+  const snap = (
+    line: number,
+    msg: string,
+    extra: Partial<Pick<LoopStep, "hi" | "i" | "x">> = {},
+  ) => {
+    steps.push({
+      line,
+      msg,
+      nums: [...nums],
+      hi: extra.hi ?? null,
+      i: extra.i ?? null,
+      x: extra.x ?? null,
+      kind: "while",
+    });
+  };
+
+  snap(1, "nums = [10, 20, 30]  · เดินแถวนี้ด้วย while");
+  snap(2, "i = 0  · เราถือเลขช่องเอง จุดเริ่มต้นคือ 0", { i: 0, hi: 0 });
+  snap(3, "i < len(nums) → 0 < 3  จริง  · เข้าลูป", { i: 0, hi: 0 });
+  snap(4, "print(nums[0]) → 10", { i: 0, hi: 0, x: 10 });
+  snap(5, "i += 1  · i กลายเป็น 1  ถ้าบรรทัดนี้หาย ลูปจะพิมพ์ 10 ไม่สิ้นสุด", {
     i: 1,
     hi: 1,
   });
-  snap(7, "print(nums[1]) → 20", { phase: "while", i: 1, hi: 1, x: 20 });
-  snap(8, "i += 1  · i = 2", { phase: "while", i: 2, hi: 2 });
-  snap(7, "print(nums[2]) → 30", { phase: "while", i: 2, hi: 2, x: 30 });
-  snap(8, "i += 1  · i = 3  แล้ว 3 < 3 เป็นเท็จ ลูปหยุด", { phase: "while", i: 3 });
+  snap(4, "print(nums[1]) → 20", { i: 1, hi: 1, x: 20 });
+  snap(5, "i += 1  · i = 2", { i: 2, hi: 2 });
+  snap(4, "print(nums[2]) → 30", { i: 2, hi: 2, x: 30 });
+  snap(5, "i += 1  · i = 3  แล้ว 3 < 3 เป็นเท็จ ลูปหยุด", { i: 3 });
 
-  snap(10, "for i in range(len(nums)):  · ได้เลขช่องเหมือน while แต่ Python ขยับ i ให้", {
-    phase: "range",
-  });
-  snap(11, "i = 0  · ช่อง 0 มี 10  แบบนี้แก้ nums[i] ได้ เพราะมีเลขช่อง", {
-    phase: "range",
+  return steps;
+}
+
+export function buildRangeLoopSteps(): LoopStep[] {
+  const nums = [10, 20, 30];
+  const steps: LoopStep[] = [];
+  const snap = (
+    line: number,
+    msg: string,
+    extra: Partial<Pick<LoopStep, "hi" | "i" | "x">> = {},
+  ) => {
+    steps.push({
+      line,
+      msg,
+      nums: [...nums],
+      hi: extra.hi ?? null,
+      i: extra.i ?? null,
+      x: extra.x ?? null,
+      kind: "range",
+    });
+  };
+
+  snap(1, "nums = [10, 20, 30]  · ได้เลขช่องเหมือน while แต่ Python ขยับ i ให้");
+  snap(2, "for i in range(len(nums)):  · range สร้าง 0, 1, 2 ตามความยาวแถว");
+  snap(3, "i = 0  · ช่อง 0 มี 10  แบบนี้แก้ nums[i] ได้ เพราะมีเลขช่อง", {
     i: 0,
     hi: 0,
     x: 10,
   });
-  snap(11, "i = 1  · ช่อง 1 มี 20", { phase: "range", i: 1, hi: 1, x: 20 });
-  snap(11, "i = 2  · ช่อง 2 มี 30", { phase: "range", i: 2, hi: 2, x: 30 });
+  snap(3, "i = 1  · ช่อง 1 มี 20", { i: 1, hi: 1, x: 20 });
+  snap(3, "i = 2  · ช่อง 2 มี 30", { i: 2, hi: 2, x: 30 });
 
   return steps;
 }
@@ -365,7 +451,7 @@ export function buildConcatSteps(): ConcatStep[] {
   const snap = (
     line: number,
     msg: string,
-    extra: Partial<Pick<ConcatStep, "copiedNow" | "phase" | "adding">> = {},
+    extra: Partial<Pick<ConcatStep, "copiedNow" | "adding">> = {},
   ) => {
     steps.push({
       line,
@@ -373,7 +459,7 @@ export function buildConcatSteps(): ConcatStep[] {
       s,
       copiedNow: extra.copiedNow ?? 0,
       copiedTotal,
-      phase: extra.phase ?? "concat",
+      phase: "concat",
       adding: extra.adding ?? null,
     });
   };
@@ -396,17 +482,25 @@ export function buildConcatSteps(): ConcatStep[] {
     `จบลูป  คัดลอกรวม ${copiedTotal} ครั้ง  · ความยาวแค่ ${chars.length} แต่คัดลอกไปแล้ว ${copiedTotal}`,
   );
 
-  s = "abcd";
-  copiedTotal = 4;
-  snap(5, '"".join(...) เห็นชิ้นส่วนทั้งหมดตั้งแต่แรก  · สลักป้ายเดียว คัดลอกแต่ละตัวครั้งเดียว = 4', {
-    phase: "join",
-    copiedNow: 4,
-  });
+  return steps;
+}
 
-  snap(5, "concat ทีละครั้ง = 10  · join = 4  · n ใหญ่ขึ้นช่องว่างนี้ถ่างแบบไม่มีเพดาน", {
-    phase: "join",
-    copiedNow: 4,
-  });
+export function buildJoinSteps(): ConcatStep[] {
+  const steps: ConcatStep[] = [];
+  const snap = (line: number, msg: string, copiedNow = 0) => {
+    steps.push({
+      line,
+      msg,
+      s: "abcd",
+      copiedNow,
+      copiedTotal: 4,
+      phase: "join",
+      adding: null,
+    });
+  };
+
+  snap(1, '"".join(["a","b","c","d"])  · เห็นชิ้นส่วนทั้งหมดตั้งแต่แรก');
+  snap(1, "สลักป้ายเดียว คัดลอกแต่ละตัวครั้งเดียว = 4  · ไม่โตแบบ += ในลูป", 4);
 
   return steps;
 }
