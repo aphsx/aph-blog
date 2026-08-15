@@ -18,6 +18,7 @@ export const KEYS_ROOMS = [[1], [2], [3], []] as const;
 export const KEYS_N = 4;
 
 export const KEYS_CODE = [
+  "rooms = [[1], [2], [3], []]",
   "visited = set()",
   "def dfs(room):",
   "    visited.add(room)",
@@ -49,32 +50,33 @@ export function buildKeysRoomsSteps(): KeysRoomsStep[] {
     });
   };
 
-  snap(1, "visited ว่าง · เริ่มจากห้อง 0 (ห้องเดียวที่เปิดอยู่)");
+  snap(1, "Example 1 · rooms = [[1],[2],[3],[]] · เปิดได้แค่ห้อง 0");
+  snap(2, "visited ว่าง · เตรียมจำห้องที่เข้าแล้ว");
 
   const dfs = (room: number) => {
-    snap(2, `เข้า dfs(${room})`, { current: room });
+    snap(3, `เข้า dfs(${room})`, { current: room });
     visited.add(room);
-    snap(3, `visited.add(${room})  · เข้าห้องนี้แล้ว`, { current: room });
+    snap(4, `visited.add(${room})  · เข้าห้องนี้แล้ว`, { current: room });
     for (const key of KEYS_ROOMS[room]) {
-      snap(4, `ในห้อง ${room} เจอกุญแจ ${key}`, { current: room, key });
+      snap(5, `ในห้อง ${room} เจอกุญแจ ${key}`, { current: room, key });
       if (visited.has(key)) {
-        snap(5, `ห้อง ${key} เข้าไปแล้ว — ข้าม`, { current: room, key, target: key });
+        snap(6, `ห้อง ${key} เข้าไปแล้ว — ข้าม`, { current: room, key, target: key });
         continue;
       }
-      snap(6, `ยังไม่เคยเข้า ${key} → เปิดแล้ว dfs(${key})`, {
+      snap(7, `ยังไม่เคยเข้า ${key} → เปิดแล้ว dfs(${key})`, {
         current: room,
         key,
         target: key,
       });
       dfs(key);
-      snap(4, `ถอยกลับมาห้อง ${room}`, { current: room });
     }
+    snap(5, `ถอยกลับมาห้อง ${room}`, { current: room });
   };
 
-  snap(7, "เรียก dfs(0)", { current: 0 });
+  snap(8, "เรียก dfs(0)", { current: 0 });
   dfs(0);
   const ok = visited.size === KEYS_N;
-  snap(8, `len(visited)=${visited.size} เทียบ len(rooms)=${KEYS_N} → ${ok}`, {
+  snap(9, `len(visited)=${visited.size} เทียบ len(rooms)=${KEYS_N} → ${ok}`, {
     done: true,
     answer: ok,
   });
@@ -103,6 +105,8 @@ export const PROV_MATRIX = [
 export const PROV_N = 3;
 
 export const PROV_CODE = [
+  "isConnected = [[1,1,0],[1,1,0],[0,0,1]]",
+  "n = 3",
   "visited = set()",
   "provinces = 0",
   "def dfs(city):",
@@ -141,19 +145,22 @@ export function buildProvincesSteps(): ProvincesStep[] {
     });
   };
 
-  snap(1, "visited ว่าง · provinces = 0");
+  snap(1, "Example 1 · ตาราง 3×3 · เมือง 0 เชื่อม 1 · เมือง 2 อยู่คนเดียว");
+  snap(2, "n = 3");
+  snap(3, "visited ว่าง");
+  snap(4, "provinces = 0");
 
   const dfs = (city: number) => {
     visited.add(city);
     compOf[city] = active;
-    snap(4, `mark เมือง ${city} อยู่ในแคว้นที่ ${active}`, { current: city });
+    snap(6, `mark เมือง ${city} อยู่ในแคว้นที่ ${active}`, { current: city });
     for (let other = 0; other < PROV_N; other++) {
-      snap(5, `ดู isConnected[${city}][${other}] = ${PROV_MATRIX[city][other]}`, {
+      snap(7, `ดู isConnected[${city}][${other}] = ${PROV_MATRIX[city][other]}`, {
         current: city,
         other,
       });
       if (PROV_MATRIX[city][other] === 1 && !visited.has(other)) {
-        snap(7, `เชื่อมกับ ${other} และยังไม่เคยไป → dfs(${other})`, {
+        snap(9, `เชื่อมกับ ${other} และยังไม่เคยไป → dfs(${other})`, {
           current: city,
           other,
         });
@@ -163,19 +170,19 @@ export function buildProvincesSteps(): ProvincesStep[] {
   };
 
   for (let city = 0; city < PROV_N; city++) {
-    snap(8, `loop นอก city = ${city}`, { scan: city });
+    snap(10, `loop นอก city = ${city}`, { scan: city });
     if (visited.has(city)) {
-      snap(9, `${city} ถูกกวาดไปแล้ว — ข้าม`, { scan: city });
+      snap(11, `${city} ถูกกวาดไปแล้ว — ข้าม`, { scan: city });
       continue;
     }
     provinces += 1;
     active = provinces;
-    snap(10, `เจอเมืองใหม่ → provinces = ${provinces}`, { scan: city });
-    snap(11, `dfs(${city}) กวาดทั้งแคว้น`, { scan: city });
+    snap(12, `เจอเมืองใหม่ → provinces = ${provinces}`, { scan: city });
+    snap(13, `dfs(${city}) กวาดทั้งแคว้น`, { scan: city });
     dfs(city);
   }
 
-  snap(12, `คืน provinces = ${provinces}`);
+  snap(14, `คืน provinces = ${provinces}`);
   return steps;
 }
 
@@ -225,7 +232,9 @@ export const REORDER_GRAPH: Record<number, [number, number][]> = {
 };
 
 export const REORDER_CODE = [
-  "# graph[a] มี (b,1) และ graph[b] มี (a,0) สำหรับทุก [a,b]",
+  "n = 6",
+  "connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]",
+  "# แต่ละ [a,b] → graph[a]+= (b,1) และ graph[b]+= (a,0)",
   "visited = set()",
   "changes = 0",
   "def dfs(city):",
@@ -261,38 +270,41 @@ export function buildReorderSteps(): ReorderStep[] {
     });
   };
 
-  snap(1, "สร้างกราฟสองทิศพร้อมป้าย cost แล้วเริ่มจากเมือง 0");
-  snap(2, "visited ว่าง · changes = 0");
+  snap(1, "Example 1 · n = 6");
+  snap(2, "connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]");
+  snap(3, "สร้างกราฟสองทิศพร้อมป้าย cost แล้ว");
+  snap(4, "visited ว่าง");
+  snap(5, "changes = 0");
 
   const dfs = (city: number) => {
     visited.add(city);
-    snap(5, `mark เมือง ${city}`, { current: city });
+    snap(7, `mark เมือง ${city}`, { current: city });
     for (const [nxt, cost] of REORDER_GRAPH[city]) {
-      snap(6, `จาก ${city} ไป ${nxt} (cost=${cost})`, { current: city, nxt, cost });
+      snap(8, `จาก ${city} ไป ${nxt} (cost=${cost})`, { current: city, nxt, cost });
       if (visited.has(nxt)) continue;
       if (cost === 1) {
         changes += 1;
         flipped.push([city, nxt]);
-        snap(8, `cost 1 = ถนนทิศจริงชี้ออกจาก 0 → ต้องกลับทิศ · changes=${changes}`, {
+        snap(10, `cost 1 = ถนนทิศจริงชี้ออกจากฝั่ง 0 → ต้องกลับ · changes=${changes}`, {
           current: city,
           nxt,
           cost,
         });
       } else {
-        snap(8, `cost 0 = ทางที่เราเติมเพื่อเดิน · ไม่ต้องกลับ`, {
+        snap(10, `cost 0 = ทางที่เราเติมเพื่อเดิน · ไม่ต้องกลับ`, {
           current: city,
           nxt,
           cost,
         });
       }
-      snap(9, `dfs(${nxt})`, { current: city, nxt, cost });
+      snap(11, `dfs(${nxt})`, { current: city, nxt, cost });
       dfs(nxt);
     }
   };
 
-  snap(10, "เรียก dfs(0) เดินออกจากเมืองหลวง");
+  snap(12, "เรียก dfs(0) เดินออกจากเมืองหลวง");
   dfs(0);
-  snap(11, `คืน changes = ${changes}`);
+  snap(13, `คืน changes = ${changes}`);
   return steps;
 }
 
@@ -328,6 +340,10 @@ export const EVAL_GRAPH: Record<string, [string, number][]> = {
 };
 
 export const EVAL_CODE = [
+  'equations = [["a","b"],["b","c"]]',
+  "values = [2.0, 3.0]",
+  "# graph: a→b=2, b→a=0.5, b→c=3, c→b=1/3",
+  "# query: a / c",
   "def dfs(src, dst, visited):",
   "    if src not in graph or dst not in graph: return -1.0",
   "    if src == dst: return 1.0",
@@ -337,7 +353,6 @@ export const EVAL_CODE = [
   "        r = dfs(nbr, dst, visited)",
   "        if r != -1.0: return w * r",
   "    return -1.0",
-  "# query: a / c",
 ];
 
 export function buildEvalDivSteps(): EvalDivStep[] {
@@ -366,31 +381,34 @@ export function buildEvalDivSteps(): EvalDivStep[] {
     });
   };
 
-  snap(10, "query a/c · จะเดินจาก a ไป c แล้วคูณน้ำหนักตลอดทาง", { src: "a" });
+  snap(1, 'Example 1 · equations = [["a","b"],["b","c"]], values = [2.0, 3.0]');
+  snap(2, "values จับคู่สมการทีละคู่");
+  snap(3, "สร้างกราฟสองทิศพร้อมน้ำหนักแล้ว");
+  snap(4, "query แรก: a / c · จะเดินจาก a ไป c แล้วคูณน้ำหนัก", { src: "a" });
 
   const dfs = (src: string): number => {
-    snap(1, `dfs("${src}", "${dst}")`, { src, current: src });
+    snap(5, `dfs("${src}", "${dst}")`, { src, current: src });
     if (!(src in EVAL_GRAPH) || !(dst in EVAL_GRAPH)) {
-      snap(2, "มีตัวแปรที่ไม่รู้จัก → -1.0", { src, current: src, answer: -1 });
+      snap(6, "มีตัวแปรที่ไม่รู้จัก → -1.0", { src, current: src, answer: -1 });
       return -1;
     }
     if (src === dst) {
-      snap(3, `"${src}" == "${dst}" → คืน 1.0`, { src, current: src, product: 1, answer: 1 });
+      snap(7, `"${src}" == "${dst}" → คืน 1.0`, { src, current: src, product: 1, answer: 1 });
       return 1;
     }
     visited.add(src);
-    snap(4, `visited.add("${src}")`, { src, current: src });
+    snap(8, `visited.add("${src}")`, { src, current: src });
     for (const [nbr, w] of EVAL_GRAPH[src]) {
-      snap(5, `เพื่อนบ้าน "${nbr}" น้ำหนัก ${w}`, { src, current: src, nbr, weight: w });
+      snap(9, `เพื่อนบ้าน "${nbr}" น้ำหนัก ${w}`, { src, current: src, nbr, weight: w });
       if (visited.has(nbr)) {
-        snap(6, `"${nbr}" เคยไปแล้ว — ข้าม`, { src, current: src, nbr, weight: w });
+        snap(10, `"${nbr}" เคยไปแล้ว — ข้าม`, { src, current: src, nbr, weight: w });
         continue;
       }
-      snap(7, `ลอง dfs("${nbr}", "${dst}")`, { src, current: src, nbr, weight: w });
+      snap(11, `ลอง dfs("${nbr}", "${dst}")`, { src, current: src, nbr, weight: w });
       const r = dfs(nbr);
       if (r !== -1) {
         const product = w * r;
-        snap(8, `เจอทาง · คืน ${w} × ${r} = ${product}`, {
+        snap(12, `เจอทาง · คืน ${w} × ${r} = ${product}`, {
           src,
           current: src,
           nbr,
@@ -401,11 +419,11 @@ export function buildEvalDivSteps(): EvalDivStep[] {
         return product;
       }
     }
-    snap(9, `จาก "${src}" ไม่มีทางถึง "${dst}" → -1.0`, { src, current: src, answer: -1 });
+    snap(13, `จาก "${src}" ไม่มีทางถึง "${dst}" → -1.0`, { src, current: src, answer: -1 });
     return -1;
   };
 
   const ans = dfs("a");
-  snap(10, `คำตอบ a/c = ${ans}`, { src: "a", answer: ans, product: ans });
+  snap(4, `คำตอบ a/c = ${ans}`, { src: "a", answer: ans, product: ans });
   return steps;
 }
