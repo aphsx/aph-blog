@@ -36,13 +36,12 @@ export type PivotStep = {
 export const BUILD_NUMS = [3, 1, 4, 1, 5];
 
 export const BUILD_CODE = [
-  "prefix = [0] * (len(nums) + 1)",
+  "nums = [3, 1, 4, 1, 5]",
+  "prefix = [0] * (len(nums) + 1)  # ช่อง 0 = 0",
   "for i in range(len(nums)):",
   "    prefix[i + 1] = prefix[i] + nums[i]",
-  "",
-  "# sum(i..j) = prefix[j+1] - prefix[i]",
   "i, j = 1, 3",
-  "print(prefix[j + 1] - prefix[i])",
+  "print(prefix[j + 1] - prefix[i])  # sum(1..3)",
 ];
 
 export const ALT_GAIN = [-5, 1, 5, 0, -7];
@@ -91,20 +90,25 @@ export function buildQuerySteps(): BuildStep[] {
     });
   };
 
-  push(1, "nums = [3, 1, 4, 1, 5]  · prefix ยาว n+1 เพื่อให้สูตรไม่ต้องแยก i = 0");
+  push(1, "nums = [3, 1, 4, 1, 5]  · ของต้นทางที่เราจะสะสม");
+  push(2, "prefix ยาว n+1 ช่อง  · ยังเป็น [None,…] ก่อนใส่ค่า");
   prefix[0] = 0;
-  push(1, "prefix[0] = 0  · ผลรวมของช่วงว่าง ช่องนี้ยื่นออกทางซ้าย");
+  push(2, "prefix[0] = 0  · ผลรวมของช่วงว่าง (ยังไม่กิน nums ตัวไหน)");
 
   for (let i = 0; i < nums.length; i++) {
-    push(2, `for i = ${i}  · nums[${i}] = ${nums[i]}`, { buildI: i });
+    push(3, `for i = ${i}  · หยิบ nums[${i}] = ${nums[i]}`, { buildI: i });
     prefix[i + 1] = (prefix[i] as number) + nums[i];
-    push(3, `prefix[${i + 1}] = prefix[${i}] + ${nums[i]}  →  ${prefix[i + 1]}`, { buildI: i });
+    push(
+      4,
+      `prefix[${i + 1}] = prefix[${i}] + ${nums[i]}  →  ${prefix[i + 1]}  · กิน nums[0..${i}]`,
+      { buildI: i },
+    );
   }
 
-  push(5, "สร้างเสร็จ  prefix = [0, 3, 4, 8, 9, 14]  · จ่าย O(n) ครั้งเดียว");
-  push(6, "ถาม sum(nums[1..3])  · i = 1, j = 3", { query: { i: 1, j: 3 } });
-  push(7, "prefix[4] − prefix[1] = 9 − 3 = 6", { query: { i: 1, j: 3 }, result: 6 });
-  push(7, "ตรวจ: 1 + 4 + 1 = 6  · จากนี้ทุกช่วงตอบได้ใน O(1)", {
+  push(4, "สร้างเสร็จ  prefix = [0, 3, 4, 8, 9, 14]  · จ่าย O(n) ครั้งเดียว");
+  push(5, "ถาม sum(nums[1..3])  · i = 1, j = 3", { query: { i: 1, j: 3 } });
+  push(6, "prefix[4] − prefix[1] = 9 − 3 = 6", { query: { i: 1, j: 3 }, result: 6 });
+  push(6, "ตรวจ: 1 + 4 + 1 = 6  · จากนี้ทุกช่วงตอบได้ใน O(1)", {
     query: { i: 1, j: 3 },
     result: 6,
   });
