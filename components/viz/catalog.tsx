@@ -24,6 +24,7 @@ import {
   GraphDfsWalkViz,
   GraphDirectedViz,
   GraphOverviewViz,
+  GraphTwoComponentsViz,
 } from "@/components/viz/GraphDfsViz";
 import {
   EvaluateDivisionViz,
@@ -75,6 +76,7 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "hash-pairs": HashPairsViz,
   "graph-overview": GraphOverviewViz,
   "graph-directed": GraphDirectedViz,
+  "graph-two-components": GraphTwoComponentsViz,
   "graph-adj-build": GraphAdjBuildViz,
   "graph-dfs-walk": GraphDfsWalkViz,
   "graph-components": GraphComponentsViz,

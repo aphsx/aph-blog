@@ -461,6 +461,50 @@ function DirNode({
   );
 }
 
+/** Static: two disconnected clumps before the components walkthrough. */
+export function GraphTwoComponentsViz() {
+  const left = new Set([0, 1, 2]);
+  return (
+    <VizStaticFrame
+      title="สองก้อนที่ไม่เชื่อมกัน"
+      pills={[
+        { label: "ก้อน 1 · 0-1-2", color: "#6565d5" },
+        { label: "ก้อน 2 · 3-4", color: TEAL },
+      ]}
+      caption="dfs(0) แตะได้แค่ก้อนซ้าย · ก้อนขวาต้องเริ่ม dfs ใหม่จาก 3"
+      diagram={
+        <svg viewBox="60 40 540 220" className="w-full" aria-hidden>
+          {COMP_EDGES.map(([a, b]) => {
+            const pa = COMP_POS[a];
+            const pb = COMP_POS[b];
+            return (
+              <line
+                key={edgeKey(a, b)}
+                x1={pa.x}
+                y1={pa.y}
+                x2={pb.x}
+                y2={pb.y}
+                stroke="#4a5060"
+                strokeWidth={2.5}
+              />
+            );
+          })}
+          {COMP_NODES.map((id) => (
+            <GraphNode
+              key={id}
+              id={id}
+              x={COMP_POS[id].x}
+              y={COMP_POS[id].y}
+              fill="#1a2838"
+              stroke={left.has(id) ? "#6565d5" : TEAL}
+            />
+          ))}
+        </svg>
+      }
+    />
+  );
+}
+
 /** Static: undirected vs directed edge — one picture, two panels. */
 export function GraphDirectedViz() {
   return (

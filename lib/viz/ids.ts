@@ -50,6 +50,7 @@ export const VIZ_IDS = [
   "hash-pairs",
   "graph-overview",
   "graph-directed",
+  "graph-two-components",
   "graph-adj-build",
   "graph-dfs-walk",
   "graph-components",
