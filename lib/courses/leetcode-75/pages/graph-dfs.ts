@@ -236,339 +236,790 @@ visited: [0, 1, 2, 3, 4]`,
       en: [],
     },
   },
-
   "lc75-p43": {
     slug: "lc75-p43",
-    title: { th: "ข้อ 43 · LC841 Keys and Rooms (กุญแจกับห้อง) 🟡", en: "" },
-    lead: { th: "มองห้องเป็น node กุญแจเป็น edge ทำ DFS จากห้อง 0 แล้วเช็คว่า visited ครบทุกห้องไหม", en: "" },
+    title: {
+      th: "ข้อ 43 · LC841 Keys and Rooms 🟡",
+      en: "43 · LC841 Keys and Rooms 🟡",
+    },
+    lead: {
+      th: "มี n ห้อง เปิดได้แค่ห้อง 0 ตอนเริ่ม — เข้าห้องแล้วได้กุญแจไปเปิดห้องอื่น จงตอบว่าเข้าครบทุกห้องได้หรือไม่",
+      en: "There are n rooms; only room 0 starts unlocked. Visiting a room gives keys to others. Return whether you can visit every room.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC841): มี n ห้องเลข 0 ถึง n-1 ทุกห้องล็อกอยู่ ยกเว้นห้อง 0 เป้าหมายคือเข้าให้ครบทุกห้อง แต่ห้ามเข้าห้องที่ล็อกโดยไม่มีกุญแจ เมื่อเข้าห้องใดห้องหนึ่งแล้วอาจพบกุญแจชุดหนึ่งอยู่ในห้องนั้น กุญแจแต่ละดอกมีเลขกำกับว่าไขห้องไหนได้ และหยิบเก็บไปใช้เปิดห้องอื่นต่อได้ กำหนด array rooms โดย rooms[i] คือชุดกุญแจที่จะได้ถ้าเข้าห้อง i ให้ return true ถ้าสามารถเข้าได้ครบทุกห้อง ไม่งั้น return false" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "rooms = [[1],[2],[3],[]]",
-                    output: "true",
-                    explain: "เริ่มห้อง 0 หยิบกุญแจ 1 ไปเปิดห้อง 1 หยิบกุญแจ 2 ไปเปิดห้อง 2 หยิบกุญแจ 3 ไปเปิดห้อง 3 — เข้าครบทุกห้อง",
-                  },
-                  {
-                    input: "rooms = [[1,3],[3,0,1],[2],[0]]",
-                    output: "false",
-                    explain: "ไม่มีกุญแจห้อง 2 อยู่ในห้องใดที่เข้าถึงได้เลย จึงไม่สามารถเข้าห้อง 2 ได้",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "n == rooms.length",
-                "2 <= n <= 1000",
-                "0 <= rooms[i].length <= 1000",
-                "1 <= ผลรวมความยาวของ rooms[i] ทั้งหมด <= 3000",
-                "0 <= rooms[i][j] < n",
-                "ค่ากุญแจใน rooms[i] แต่ละห้องไม่ซ้ำกัน",
-                ],
-              },
-              { t: "callout", c: "rooms เป็น adjacency list (ลิสต์เพื่อนบ้าน) ของ directed graph (กราฟมีทิศ) อยู่แล้ว ไม่ต้องแปลงอะไร" },
+        {
+          t: "p",
+          c: `มี n ห้องติดป้ายจาก 0 ถึง n - 1 และห้องทุกห้องถูกล็อกไว้ยกเว้นห้อง 0 เป้าหมายของคุณคือเข้าชมทุกห้อง อย่างไรก็ตาม คุณไม่สามารถเข้าห้องที่ล็อกอยู่ได้หากไม่มีกุญแจของห้องนั้น
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "ใช้ DFS บน directed graph (กราฟมีทิศ) มองห้องเป็น node (โหนด) และกุญแจในห้องเป็น edge (เส้นเชื่อม) ที่ชี้ไปยังห้องที่มันเปิดได้ โจทย์นี้จริง ๆ คือการถามว่า graph เชื่อมถึงกันหมดจากจุดเริ่มไหม (reachability) เลือก DFS เพราะเราแค่ต้อง traverse (เดินไล่) ให้ทั่วทุกที่ที่ไปถึงได้ ไม่ได้สนใจระยะทาง" },
-              { t: "p", c: "ไอเดียคือ DFS จากห้อง 0 เก็บทุกห้องที่ไปถึงลง set visited (เคยเยือน) แล้วสุดท้าย compare (เทียบ) จำนวนห้องที่ visited ได้กับจำนวนห้องทั้งหมด ถ้าเท่ากันแปลว่าเข้าครบ" },
-              { t: "ol", c: [
-                "สร้าง set visited ว่าง ๆ ไว้จำห้องที่เข้าแล้ว",
-                "เขียนฟังก์ชัน dfs(room) ที่ mark room ลง visited",
-                "ในนั้น iterate (วน) กุญแจทุกดอกในห้องนี้ ถ้ากุญแจชี้ไปห้องที่ยังไม่ visited ให้ dfs เข้าไปต่อ",
-                "เรียก dfs(0) เพื่อเริ่มจากห้อง 0",
-                "คืนผลว่าจำนวนห้องใน visited เท่ากับจำนวนห้องทั้งหมด (len(rooms)) หรือไม่",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมเช็ค if key not in visited ก่อนเรียก dfs ทำให้ recursion (การเรียกตัวเอง) วนไม่จบเมื่อกุญแจชี้วนกลับกัน (บางห้องมีกุญแจชี้กลับไปห้องเดิม)" },
+เมื่อคุณเข้าชมห้องหนึ่ง คุณอาจพบชุดกุญแจที่แตกต่างกันอยู่ในนั้น กุญแจแต่ละดอกมีตัวเลขกำกับ บอกว่าไขห้องหมายเลขใดได้ และคุณสามารถนำกุญแจทั้งหมดไปด้วยเพื่อไขห้องอื่น ๆ
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def can_visit_all_rooms(rooms):
-    visited = set()
+กำหนด array rooms โดยที่ rooms[i] คือชุดกุญแจที่คุณจะได้ถ้าเข้าชมห้อง i ให้ return true หากคุณสามารถเข้าชมทุกห้องได้ หรือ false หากทำไม่ได้`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "rooms = [[1],[2],[3],[]]",
+              output: "true",
+              explain: `เราเข้าห้อง 0 แล้วเก็บกุญแจ 1
+จากนั้นเข้าห้อง 1 แล้วเก็บกุญแจ 2
+จากนั้นเข้าห้อง 2 แล้วเก็บกุญแจ 3
+จากนั้นเข้าห้อง 3
+เนื่องจากเข้าชมได้ทุกห้อง จึง return true`,
+            },
+            {
+              input: "rooms = [[1,3],[3,0,1],[2],[0]]",
+              output: "false",
+              explain:
+                "เราไม่สามารถเข้าห้องหมายเลข 2 ได้ เพราะกุญแจเดียวที่ไขห้องนั้นได้อยู่ในห้องนั้นเอง",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == rooms.length",
+            "2 <= n <= 1000",
+            "0 <= rooms[i].length <= 1000",
+            "1 <= sum(rooms[i].length) <= 3000",
+            "0 <= rooms[i][j] < n",
+            "ค่าทั้งหมดใน rooms[i] ไม่ซ้ำกัน",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "อ่านโจทย์กับตัวอย่างให้ครบ แล้วลองเขียนเองก่อน ถ้าติดค่อยเปิดเฉลย",
+        },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "เริ่มที่ห้อง 0 เท่านั้นที่เปิดได้ พอเข้าห้องหนึ่งจะได้กุญแจไปเปิดห้องอื่นต่อ ถามว่าสุดท้ายเข้าครบทุกห้องไหม — ไม่ถามเส้นทางสั้นสุด แค่ถามว่าไปถึงครบหรือไม่",
+            },
 
-    def dfs(room):
-        visited.add(room)              # เข้าห้องนี้แล้ว
-        for key in rooms[room]:        # กุญแจแต่ละดอกในห้องนี้
-            if key not in visited:     # ถ้ายังไม่เคยเข้าห้องนั้น
-                dfs(key)               # เข้าไปเลย
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "ตัวอย่าง rooms = [[1],[2],[3],[]]",
+            },
+            {
+              t: "ul",
+              c: [
+                "ห้อง 0 → ได้กุญแจ 1 → เข้า 1",
+                "ห้อง 1 → ได้กุญแจ 2 → เข้า 2",
+                "ห้อง 2 → ได้กุญแจ 3 → เข้า 3",
+                "ห้อง 3 → ไม่มีกุญแจ · เข้าครบ 4 ห้อง",
+              ],
+            },
+            {
+              t: "p",
+              c: "ตัวอย่าง rooms = [[1,3],[3,0,1],[2],[0]] — จาก 0 ได้กุญแจ 1 กับ 3 เข้าได้ห้อง 0,1,3 แต่กุญแจห้อง 2 อยู่ในห้อง 2 เอง จึงเข้า 2 ไม่ได้",
+            },
 
-    dfs(0)                             # เริ่มจากห้อง 0
-    return len(visited) == len(rooms)  # เข้าครบทุกห้องไหม
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "rooms เองคือ adjacency list ของกราฟมีทิศอยู่แล้ว: โหนดคือห้อง เส้นจากห้อง i ชี้ไปห้องที่กุญแจใน rooms[i] ไขได้",
+            },
+            {
+              t: "p",
+              c: "ใช้ DFS จากห้อง 0 ตามที่หน้าแนวคิดสอน — mark visited ทันทีที่เข้า แล้วลองกุญแจทีละดอก ตัวไหนยังไม่เคยเข้าค่อย dfs ต่อ สุดท้ายเทียบจำนวนห้องใน visited กับจำนวนห้องทั้งหมด",
+            },
 
-print(can_visit_all_rooms([[1], [2], [3], []]))          # True
-print(can_visit_all_rooms([[1, 3], [3, 0, 1], [2], [0]]))  # False`, out: `True
-False` },
-                { t: "p", c: "โจทย์นี้จริง ๆ คือการถามว่า graph เชื่อมถึงกันหมดจากจุดเริ่มไหม (reachability) เรามองห้องเป็น node และกุญแจในห้องเป็น edge แบบ directed ที่ชี้ไปยังห้องที่มันเปิดได้ rooms เองก็เป็น adjacency list อยู่แล้ว ไม่ต้องแปลงอะไร ทำ DFS จากห้อง 0 เก็บทุกห้องที่ไปถึงลง visited แล้วสุดท้าย compare จำนวนห้องที่ visited กับจำนวนห้องทั้งหมด" },
-                { t: "p", c: "set visited ทำสองหน้าที่พร้อมกัน ทั้งกันเดินวนซ้ำ และใช้ count (นับ) จำนวนห้องที่เข้าได้ ถ้าไม่มีการเช็ค visited โปรแกรมจะ error จาก recursion ลึกไม่จบเมื่อกุญแจชี้วนกัน" },
-                { t: "p", c: "Time O(V + E) traverse ทุก node หนึ่งครั้งและไล่ทุก edge หนึ่งครั้ง V คือจำนวนห้อง E คือจำนวนกุญแจทั้งหมด · Space O(V) จาก visited และความลึกของ call stack" },
-              ] },
+            { t: "h3", c: "ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** บน rooms = [[1],[2],[3],[]] · ทอง = ห้องที่อยู่ใน dfs · เขียว = อยู่ใน visited · ส้ม = เป้าหมายของกุญแจที่กำลังดู · ลูกศรคือกุญแจ (กราฟมีทิศ)",
+            },
+            { t: "viz", id: "keys-and-rooms" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "โจทย์แนว เข้าถึงทุกจุดจากจุดเริ่มไหม / เชื่อมกันหมดไหม คือ reachability ยิง DFS จากจุดเริ่ม เก็บ visited แล้ว compare จำนวนที่ visited ได้กับจำนวนทั้งหมด" },
+            { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
+              c: `class Solution:
+    def canVisitAllRooms(self, rooms: list[list[int]]) -> bool:
+        visited: set[int] = set()
+
+        def dfs(room: int) -> None:
+            visited.add(room)
+            for key in rooms[room]:
+                if key not in visited:
+                    dfs(key)
+
+        dfs(0)
+        return len(visited) == len(rooms)`,
+            },
+
+            { t: "h3", c: "อ่านโค้ดทีละส่วน" },
+            {
+              t: "ol",
+              c: [
+                "visited จำห้องที่เข้าแล้ว กันวนเมื่อกุญแจชี้กลับห้องเดิม",
+                "dfs(room) mark ห้องนี้ แล้วลองกุญแจทุกดอกใน rooms[room]",
+                "กุญแจชี้ไปห้องที่ยังไม่ visited ค่อยเรียก dfs ต่อ",
+                "เริ่มที่ dfs(0) เพราะเปิดได้แค่ห้อง 0",
+                "คืน True เมื่อจำนวนที่เข้าได้เท่ากับจำนวนห้องทั้งหมด",
+              ],
+            },
+            { t: "h3", c: "ต้นทุน" },
+            {
+              t: "p",
+              c: "เวลา O(V + E) เยี่ยมแต่ละห้องและแต่ละกุญแจอย่างมากครั้งเดียว · หน่วยความจำ O(V) จาก visited และความลึก call stack",
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `There are n rooms labeled from 0 to n - 1 and all the rooms are locked except for room 0. Your goal is to visit all the rooms. However, you cannot enter a locked room without having its key.
+
+When you visit a room, you may find a set of distinct keys in it. Each key has a number on it, denoting which room it unlocks, and you can take all of them with you to unlock the other rooms.
+
+Given an array rooms where rooms[i] is the set of keys that you can obtain if you visited room i, return true if you can visit all the rooms, or false otherwise.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "rooms = [[1],[2],[3],[]]",
+              output: "true",
+              explain: `We visit room 0 and pick up key 1.
+We then visit room 1 and pick up key 2.
+We then visit room 2 and pick up key 3.
+We then visit room 3.
+Since we were able to visit every room, we return true.`,
+            },
+            {
+              input: "rooms = [[1,3],[3,0,1],[2],[0]]",
+              output: "false",
+              explain:
+                "We can not enter room number 2 since the only key that unlocks it is in that room.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == rooms.length",
+            "2 <= n <= 1000",
+            "0 <= rooms[i].length <= 1000",
+            "1 <= sum(rooms[i].length) <= 3000",
+            "0 <= rooms[i][j] < n",
+            "All the values of rooms[i] are unique.",
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p44": {
     slug: "lc75-p44",
-    title: { th: "ข้อ 44 · LC547 Number of Provinces (นับจำนวนจังหวัด) 🟡", en: "" },
-    lead: { th: "นับ connected components iterate node ทุกตัว เจอตัวที่ยังไม่ visited คือแคว้นใหม่ แล้ว DFS กวาดให้หมด", en: "" },
+    title: {
+      th: "ข้อ 44 · LC547 Number of Provinces 🟡",
+      en: "44 · LC547 Number of Provinces 🟡",
+    },
+    lead: {
+      th: "มี n เมือง บางคู่เชื่อมกันโดยตรง จงนับจำนวนแคว้น — กลุ่มเมืองที่เชื่อมถึงกันได้ทั้งทางตรงและทางอ้อม",
+      en: "There are n cities; some pairs are directly connected. Count provinces — groups of cities connected directly or indirectly.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC547): มี n เมือง บางเมืองเชื่อมกันโดยตรง บางเมืองไม่เชื่อม กำหนด n x n matrix ชื่อ isConnected โดย isConnected[i][j] = 1 หมายถึงเมือง i กับเมือง j เชื่อมกันโดยตรง และ isConnected[i][j] = 0 หมายถึงไม่เชื่อม province คือกลุ่มของเมืองที่เชื่อมถึงกันได้ทั้งทางตรงและทางอ้อม ให้ return จำนวน province ทั้งหมด" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "isConnected = [[1,1,0],[1,1,0],[0,0,1]]",
-                    output: "2",
-                    explain: "เมือง 0 กับ 1 เชื่อมกันโดยตรงเป็นแคว้นเดียว เมือง 2 ไม่เชื่อมกับใครเลย อยู่คนเดียวอีกแคว้น",
-                  },
-                  {
-                    input: "isConnected = [[1,0,0],[0,1,0],[0,0,1]]",
-                    output: "3",
-                    explain: "ไม่มีเมืองไหนเชื่อมกันเลย แต่ละเมืองจึงเป็นแคว้นของตัวเอง",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= n <= 200",
-                "n == isConnected.length == isConnected[i].length",
-                "isConnected[i][j] เป็น 0 หรือ 1",
-                "isConnected[i][i] == 1 และ isConnected[i][j] == isConnected[j][i]",
-                ],
-              },
-              { t: "callout", c: "graph ให้มาในรูป adjacency matrix (ตาราง) ไม่ใช่ list เพื่อนบ้าน (neighbor) ของเมือง i คือช่องที่เป็น 1 ในแถว i" },
+        {
+          t: "p",
+          c: `มี n เมือง บางเมืองเชื่อมต่อกัน บางเมืองไม่เชื่อม ถ้าเมือง a เชื่อมโดยตรงกับเมือง b และเมือง b เชื่อมโดยตรงกับเมือง c แล้วเมือง a ก็ถือว่าเชื่อมทางอ้อมกับเมือง c
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "นี่คือการนับ connected components คือกลุ่มก้อนของ node (โหนด) ที่เชื่อมถึงกันได้ใน undirected graph (กราฟไม่มีทิศ) ใช้ DFS traverse (เดินไล่) กวาดแต่ละกลุ่ม เลือก DFS เพราะเราแค่ต้องกวาดให้ทั่วทั้งกลุ่มเพื่อ mark ว่าเมืองพวกนี้อยู่แคว้นเดียวกันแล้ว" },
-              { t: "p", c: "เทคนิคนับกลุ่มคือ iterate (วน) node ทุกตัวจากข้างนอก ถ้าเจอตัวที่ยังไม่ visited (เคยเยือน) แสดงว่าเราเพิ่งสะดุดเข้าแคว้นใหม่ที่ยังไม่เคยแตะ บวกตัวนับหนึ่ง แล้วยิง DFS เข้าไปกวาดทุกเมืองในแคว้นนั้นให้ visited จนหมด พอ loop (วน) นอกเดินต่อ เมืองที่อยู่แคว้นเดิมจะถูก visited แล้วจึงไม่ถูก count (นับ) ซ้ำ" },
-              { t: "ol", c: [
-                "อ่านจำนวนเมือง n จากขนาดตาราง แล้วสร้าง set visited",
-                "เขียน dfs(city) ที่ mark city แล้ว iterate ดูทุกเมือง other ในแถวนั้น",
-                "ถ้า isConnected[city][other] เป็น 1 และ other ยังไม่ visited ให้ dfs(other) ต่อ",
-                "ตั้งตัวนับ provinces = 0 แล้ว iterate city ทุกเมืองจากข้างนอก",
-                "ถ้า city ยังไม่ visited บวก provinces หนึ่ง แล้ว dfs(city) กวาดทั้งแคว้น",
-                "คืน provinces",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "count province ทุกครั้งที่เข้า dfs ซึ่งจะเกิน ต้อง count เฉพาะตอนเริ่มแคว้นใหม่ใน loop นอกเท่านั้น (ตอนเจอเมืองที่ยังไม่ visited)" },
+province (แคว้น) คือกลุ่มของเมืองที่เชื่อมถึงกันได้ทั้งทางตรงหรือทางอ้อม และไม่มีเมืองนอกกลุ่มนั้นอยู่ในกลุ่มเดียวกัน
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "รันบน isConnected = [[1,1,0],[1,1,0],[0,0,1]] (loop นอก iterate city 0,1,2)" },
-              { t: "table", head: ["city", "visited แล้ว?", "ทำอะไร", "provinces"], rows: [
-                ["0", "ยัง", "แคว้นใหม่ +1, dfs(0) กวาดถึง 1 ด้วย", "1"],
-                ["1", "แล้ว (จาก dfs 0)", "ข้าม", "1"],
-                ["2", "ยัง", "แคว้นใหม่ +1, dfs(2) อยู่คนเดียว", "2"],
-              ] },
+กำหนดตาราง n x n ชื่อ isConnected โดย isConnected[i][j] = 1 ถ้าเมืองที่ i เชื่อมโดยตรงกับเมืองที่ j และเป็น 0 ถ้าไม่เชื่อม
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_circle_num(is_connected):
-    n = len(is_connected)
-    visited = set()
+ให้ return จำนวน province ทั้งหมด`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "isConnected = [[1,1,0],[1,1,0],[0,0,1]]",
+              output: "2",
+              explain: "",
+            },
+            {
+              input: "isConnected = [[1,0,0],[0,1,0],[0,0,1]]",
+              output: "3",
+              explain: "",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= n <= 200",
+            "n == isConnected.length",
+            "n == isConnected[i].length",
+            "isConnected[i][j] เป็น 1 หรือ 0",
+            "isConnected[i][i] == 1",
+            "isConnected[i][j] == isConnected[j][i]",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "อ่านโจทย์กับตัวอย่างให้ครบ แล้วลองเขียนเองก่อน ถ้าติดค่อยเปิดเฉลย",
+        },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "นับว่าเมืองทั้งหมดแยกเป็นกี่ก้อน ที่ภายในก้อนเดินถึงกันได้ (ทางตรงหรือผ่านเมืองกลาง) แต่ระหว่างก้อนเดินข้ามไม่ได้",
+            },
 
-    def dfs(city):
-        visited.add(city)
-        for other in range(n):
-            # เชื่อมกันโดยตรง และยังไม่เคยไป
-            if is_connected[city][other] == 1 and other not in visited:
-                dfs(other)
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "isConnected = [[1,1,0],[1,1,0],[0,0,1]]",
+            },
+            {
+              t: "ul",
+              c: [
+                "เมือง 0 เชื่อมกับ 1 (และตัวเอง) · เมือง 1 เชื่อมกับ 0",
+                "เมือง 2 เชื่อมแค่ตัวเอง",
+                "ก้อนที่ 1: {0, 1} · ก้อนที่ 2: {2} → ได้ 2 แคว้น",
+              ],
+            },
 
-    provinces = 0
-    for city in range(n):
-        if city not in visited:        # เจอเมืองที่ยังไม่อยู่แคว้นไหน
-            provinces += 1             # นับเป็นแคว้นใหม่
-            dfs(city)                  # กวาดทุกเมืองในแคว้นนี้
-    return provinces
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "กราฟมาในรูปตาราง (adjacency matrix) ไม่ใช่ list — เพื่อนบ้านของเมือง i คือคอลัมน์ j ที่ isConnected[i][j] เป็น 1",
+            },
+            {
+              t: "p",
+              c: "ใช้โครงเดียวกับส่วนก้อนหลายก้อนในหน้าแนวคิด: วนเมืองทุกตัวจากนอก เจอตัวที่ยังไม่ visited คือแคว้นใหม่ บวกหนึ่ง แล้ว DFS กวาดทุกเมืองที่เชื่อมถึงในแคว้นนั้นให้ mark จบ",
+            },
 
-print(find_circle_num([[1, 1, 0], [1, 1, 0], [0, 0, 1]]))  # 2
-print(find_circle_num([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))  # 3`, out: `2
-3` },
-                { t: "p", c: "connected components คือ กลุ่มก้อน ของ node ที่เชื่อมถึงกันได้ใน undirected graph โจทย์นี้ให้ graph มาในรูปตาราง (adjacency matrix) แทน list โดย is_connected[i][j] บอกว่าเมือง i กับ j เชื่อมกันไหม เราจึงหาเพื่อนบ้านของเมืองด้วยการไล่ทั้งแถวดูว่าช่องไหนเป็น 1" },
-                { t: "p", c: "เทคนิคนับกลุ่มคือ iterate node ทุกตัวจากนอก ถ้าเจอตัวที่ยังไม่ visited แสดงว่าเราเพิ่งสะดุดเข้าแคว้นใหม่ที่ยังไม่เคยแตะ บวกตัวนับหนึ่ง แล้วยิง DFS เข้าไปกวาดทุกเมืองในแคว้นนั้นให้ visited จนหมด พอ loop นอกเดินต่อ เมืองที่อยู่แคว้นเดิมจะถูก visited แล้วจึงไม่ถูก count ซ้ำ" },
-                { t: "p", c: "Time O(n^2) เพราะต้อง iterate ตาราง n x n · Space O(n) จาก visited และ call stack" },
-              ] },
+            { t: "h3", c: "ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** บนตัวอย่างแรก · ทอง = เมืองที่กำลังดู · สีม่วง/เขียว = แคว้นที่ 1 / 2 · ตารางขวาไฮไลต์ช่อง isConnected ที่กำลังเช็ค",
+            },
+            { t: "viz", id: "number-of-provinces" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "นับกลุ่ม / เกาะ / แคว้น = นับ connected components iterate node ทุกตัว เจอตัวที่ยังไม่ visited คือกลุ่มใหม่ +1 แล้ว DFS กวาดทั้งกลุ่ม ใช้ได้กับโจทย์ number of islands และเพื่อน ๆ ทั้งหมด" },
+            { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
+              c: `class Solution:
+    def findCircleNum(self, isConnected: list[list[int]]) -> int:
+        n = len(isConnected)
+        visited: set[int] = set()
+
+        def dfs(city: int) -> None:
+            visited.add(city)
+            for other in range(n):
+                if isConnected[city][other] == 1 and other not in visited:
+                    dfs(other)
+
+        provinces = 0
+        for city in range(n):
+            if city not in visited:
+                provinces += 1
+                dfs(city)
+        return provinces`,
+            },
+
+            { t: "h3", c: "อ่านโค้ดทีละส่วน" },
+            {
+              t: "ol",
+              c: [
+                "dfs(city) mark เมืองนี้ แล้วไล่ทั้งแถวหาเมืองที่เชื่อมโดยตรงและยังไม่เคยไป",
+                "loop นอกไล่ city ทุกตัว",
+                "เจอตัวที่ยังไม่ visited = แคว้นใหม่ → provinces += 1 แล้วค่อย dfs กวาด",
+                "เมืองในแคว้นเดิมจะถูก mark ไปแล้ว จึงไม่ถูกนับซ้ำ",
+              ],
+            },
+            { t: "h3", c: "ต้นทุน" },
+            {
+              t: "p",
+              c: "เวลา O(n²) เพราะแต่ละครั้งที่ dfs อาจไล่ทั้งแถวของตาราง n x n · หน่วยความจำ O(n) จาก visited และ call stack",
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `There are n cities. Some of them are connected, while some are not. If city a is connected directly with city b, and city b is connected directly with city c, then city a is connected indirectly with city c.
+
+A province is a group of directly or indirectly connected cities and no other cities outside of the group.
+
+You are given an n x n matrix isConnected where isConnected[i][j] = 1 if the ith city and the jth city are directly connected, and isConnected[i][j] = 0 otherwise.
+
+Return the total number of provinces.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "isConnected = [[1,1,0],[1,1,0],[0,0,1]]",
+              output: "2",
+              explain: "",
+            },
+            {
+              input: "isConnected = [[1,0,0],[0,1,0],[0,0,1]]",
+              output: "3",
+              explain: "",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= n <= 200",
+            "n == isConnected.length",
+            "n == isConnected[i].length",
+            "isConnected[i][j] is 1 or 0.",
+            "isConnected[i][i] == 1",
+            "isConnected[i][j] == isConnected[j][i]",
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p45": {
     slug: "lc75-p45",
-    title: { th: "ข้อ 45 · LC1466 Reorder Routes to Make All Paths Lead to the City Zero (กลับทิศถนนไปเมือง 0) 🟡", en: "" },
-    lead: { th: "คิดกลับด้าน เดิน DFS จากเมือง 0 ออกไป edge ไหนชี้ตามทางที่เราเดินออก คือ edge ที่ต้องกลับทิศ", en: "" },
+    title: {
+      th: "ข้อ 45 · LC1466 Reorder Routes to Make All Paths Lead to the City Zero 🟡",
+      en: "45 · LC1466 Reorder Routes to Make All Paths Lead to the City Zero 🟡",
+    },
+    lead: {
+      th: "ถนนทุกเส้นเป็นทางเดียว จงกลับทิศให้น้อยที่สุดเพื่อให้ทุกเมืองเดินทางไปเมือง 0 ได้",
+      en: "Roads are one-way. Reorient the minimum number of roads so every city can reach city 0.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1466): มี n เมืองเลข 0 ถึง n-1 และถนน n-1 เส้น ซึ่งเชื่อมทุกเมืองเป็นรูปแบบ tree (เดินทางระหว่างเมืองสองเมืองใดก็มีเส้นทางเดียวเท่านั้น) กระทรวงคมนาคมตัดสินใจกำหนดทิศทางเดินรถทางเดียวให้ถนนทุกเส้นเพราะถนนแคบเกินไป ถนนแทนด้วย connections โดย connections[i] = [ai, bi] หมายถึงถนนจากเมือง ai ไปเมือง bi ปีนี้จะมีงานใหญ่ที่เมืองหลวง (เมือง 0) และมีคนอยากเดินทางไปที่นั่นจำนวนมาก งานของคุณคือกลับทิศถนนบางเส้นเพื่อให้ทุกเมืองสามารถเดินทางไปเมือง 0 ได้ ให้ return จำนวนถนนน้อยที่สุดที่ต้องเปลี่ยนทิศทาง" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]",
-                    output: "3",
-                    explain: "ต้องกลับทิศถนน 0→1, 1→3, 4→5 เพื่อให้ทุกเมืองไปถึงเมือง 0 ได้",
-                  },
-                  {
-                    input: "n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]",
-                    output: "2",
-                  },
-                  {
-                    input: "n = 3, connections = [[1,0],[2,0]]",
-                    output: "0",
-                    explain: "ถนนทุกเส้นชี้เข้าหาเมือง 0 อยู่แล้วตั้งแต่ต้น ไม่ต้องกลับทิศเลยสักเส้น",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "2 <= n <= 5 × 10^4",
-                "connections.length == n - 1 (เป็นต้นไม้ ไม่มีวงรอบ)",
-                ],
-              },
+        {
+          t: "p",
+          c: `มี n เมืองหมายเลข 0 ถึง n - 1 และถนน n - 1 เส้น โดยมีเส้นทางเดินทางระหว่างเมืองสองเมืองใดก็ได้เพียงเส้นทางเดียวเท่านั้น (โครงข่ายนี้เป็นต้นไม้) ปีที่แล้วกระทรวงคมนาคมกำหนดทิศทางให้ถนนเป็นทางเดียวเพราะถนนแคบเกินไป
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "ใช้ DFS บน graph ที่เก็บทั้งสองทิศแต่ติดป้าย cost (น้ำหนัก) กุญแจของข้อนี้คือ มองกลับด้าน เราอยากให้ทุกเมืองไปถึงเมือง 0 แต่คิดแบบนั้นตรง ๆ ยาก จึงกลับมุมเป็น ถ้าเราออกเดินจากเมือง 0 ไปหาทุกเมือง ถนนเส้นไหนที่เราเดินสวนทิศของมัน เส้นนั้นแหละที่ต้องกลับทิศ เพราะในสภาพจริงเมืองปลายทางจะเดินย้อนกลับมาหาเมือง 0 ไม่ได้" },
-              { t: "p", c: "ถ้าเก็บ graph ตามทิศจริงอย่างเดียว DFS จากเมือง 0 จะเดินไปไม่ทั่วเพราะบางถนนชี้เข้าหา 0 ทริกคือใส่ทั้งสอง edge (แบบ undirected ไม่มีทิศ) เพื่อให้ traverse (เดินไล่) ได้ทั่ว tree แต่ติดป้าย cost ไว้ edge ทิศจริง (a→b ตามที่โจทย์ให้) ติด cost 1 ส่วน edge ปลอมที่เราเติมเพื่อเดินย้อน (b→a) ติด cost 0" },
-              { t: "ol", c: [
-                "สร้าง graph สำหรับแต่ละ [a,b] เพิ่ม (b, 1) ให้ a และเพิ่ม (a, 0) ให้ b",
-                "ตั้ง visited (เคยเยือน) และตัวนับ changes = 0",
-                "เขียน dfs(city) mark city แล้ว iterate (วน) เพื่อนบ้าน (neighbor) (nxt, cost)",
-                "ถ้า nxt ยังไม่ visited บวก changes ด้วย cost (ถ้าเป็น edge ทิศจริงจะบวก 1) แล้ว dfs(nxt) ต่อ",
-                "เรียก dfs(0) เริ่มเดินจากเมือง 0 ออกไปทุกทิศ",
-                "คืน changes",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมใส่ edge ย้อนกลับ (cost 0) ทำให้ DFS เดินไปไม่ทั่วเพราะ graph มีทิศ อีกจุดคือสับสนว่าจะ count (นับ) cost ของ edge ไหน จำง่าย ๆ ว่านับเฉพาะ edge ที่ชี้ ออกจาก ต้นทาง (ทิศเดียวกับที่เราเดินออกจากเมือง 0)" },
+ถนนแทนด้วย connections โดยที่ connections[i] = [ai, bi] หมายถึงถนนจากเมือง ai ไปเมือง bi
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import defaultdict
+ปีนี้จะมีงานใหญ่ที่เมืองหลวง (เมือง 0) และมีคนจำนวนมากอยากเดินทางไปเมืองนี้
 
-def min_reorder(n, connections):
-    graph = defaultdict(list)
-    for a, b in connections:
-        graph[a].append((b, 1))   # ทิศจริง a->b : ถ้าเดินทางนี้จาก 0 ออกไป ต้องกลับ (cost 1)
-        graph[b].append((a, 0))   # ทิศปลอมเพิ่มเข้ามาเพื่อเดินได้ทั่ว (cost 0)
+งานของคุณคือกลับทิศถนนบางเส้นเพื่อให้ทุกเมืองสามารถเดินทางไปเมือง 0 ได้ ให้ return จำนวนขอบ (edge) น้อยที่สุดที่ต้องเปลี่ยน
 
-    visited = set()
-    changes = 0
+รับประกันว่าหลังกลับทิศแล้ว ทุกเมืองสามารถไปถึงเมือง 0 ได้`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]",
+              output: "3",
+              explain:
+                "เปลี่ยนทิศของขอบที่แสดงเป็นสีแดงในรูป เพื่อให้ทุกโหนดไปถึงโหนด 0 (เมืองหลวง) ได้",
+            },
+            {
+              input: "n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]",
+              output: "2",
+              explain:
+                "เปลี่ยนทิศของขอบที่แสดงเป็นสีแดงในรูป เพื่อให้ทุกโหนดไปถึงโหนด 0 (เมืองหลวง) ได้",
+            },
+            {
+              input: "n = 3, connections = [[1,0],[2,0]]",
+              output: "0",
+              explain: "",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "2 <= n <= 5 * 10^4",
+            "connections.length == n - 1",
+            "connections[i].length == 2",
+            "0 <= ai, bi <= n - 1",
+            "ai != bi",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "อ่านโจทย์กับตัวอย่างให้ครบ แล้วลองเขียนเองก่อน ถ้าติดค่อยเปิดเฉลย",
+        },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "ถนนเป็นทางเดียวหมด อยากให้ทุกเมืองไปถึงเมือง 0 ได้ โดยกลับทิศให้น้อยที่สุด — ไม่ถามเส้นทางจริง แค่นับว่าต้องพลิกกี่เส้น",
+            },
 
-    def dfs(city):
-        nonlocal changes
-        visited.add(city)
-        for nxt, cost in graph[city]:
-            if nxt not in visited:
-                changes += cost    # ถ้า edge นี้เป็นทิศจริง (ชี้ออกจาก 0) ต้องกลับ
-                dfs(nxt)
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]",
+            },
+            {
+              t: "ul",
+              c: [
+                "ถ้าคิดจากเมืองนอกเข้าหา 0 ตรง ๆ จะงงเพราะบางถนนชี้ผิดทาง",
+                "ลองคิดกลับ: เดินออกจาก 0 ไปหาทุกเมือง — ถนนเส้นไหนที่เราเดินตามทิศจริงออกจากฝั่ง 0 เส้นนั้นต้องกลับทิศ (เมืองปลายจะเดินย้อนเข้า 0 ไม่ได้)",
+                "เส้นที่ต้องกลับ: 0→1, 1→3, 4→5 รวม 3 เส้น",
+              ],
+            },
 
-    dfs(0)                         # เริ่มเดินจากเมือง 0 ออกไปทุกทิศ
-    return changes
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "เก็บกราฟแบบเดินได้สองทางเพื่อให้ DFS จาก 0 ไปทั่วต้นไม้ได้ แต่ติดป้าย cost: ทิศจริงตามโจทย์ (a→b) ติด cost 1 · ทิศปลอมที่เติมเพื่อเดินย้อน (b→a) ติด cost 0",
+            },
+            {
+              t: "p",
+              c: "DFS จาก 0 ออกไปทุกเมือง เวลาเดินไปเพื่อนบ้านที่ยังไม่ visited ให้บวก cost เข้า changes — cost 1 คือเจอถนนที่ต้องกลับทิศ",
+            },
 
-print(min_reorder(6, [[0, 1], [1, 3], [2, 3], [4, 0], [4, 5]]))  # 3
-print(min_reorder(5, [[1, 0], [1, 2], [3, 2], [3, 4]]))          # 2`, out: `3
-2` },
-                { t: "p", c: "กุญแจของข้อนี้คือ มองกลับด้าน เราอยากให้ทุกเมืองไปถึงเมือง 0 แต่คิดแบบนั้นตรง ๆ ยาก จึงกลับมุมเป็น ถ้าเราออกเดินจากเมือง 0 ไปหาทุกเมือง ถนนเส้นไหนที่เราเดินสวนทิศของมัน เส้นนั้นแหละที่ต้องกลับทิศ เพราะในสภาพจริงเมืองปลายทางจะเดินย้อนกลับมาหาเมือง 0 ไม่ได้" },
-                { t: "p", c: "ทริกในการเก็บ graph คือ ใส่ทั้งสอง edge แบบ undirected เพื่อให้ DFS traverse ได้ทั่ว tree แต่ติดป้าย cost ไว้ด้วย edge ทิศจริง (a->b ตามที่โจทย์ให้) ติด cost 1 ส่วน edge ปลอมที่เราเติมเพื่อเดินย้อน (b->a) ติด cost 0 พอ DFS ออกจากเมือง 0 ถ้าเราวิ่งไปตาม edge cost 1 แปลว่ากำลังเดินตามทิศที่ชี้ออกจากเมือง 0 ซึ่งจริง ๆ เมืองนั้นควรชี้เข้าหา 0 จึงต้องกลับทิศ บวก changes" },
-                { t: "p", c: "Time O(n) traverse ทุกเมืองและ edge หนึ่งครั้ง (edge มี n-1 เส้น) · Space O(n) จาก graph visited และ call stack" },
-              ] },
+            { t: "h3", c: "ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** บนตัวอย่างแรก · ทอง = เมืองปัจจุบัน · ส้ม = ถนนทิศจริงที่ถูกนับว่าต้องกลับ · changes สะสมทางขวาล่าง",
+            },
+            { t: "viz", id: "reorder-routes" },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "เมื่อโจทย์ถามเรื่องทิศทางไปหาจุดหนึ่ง ลองคิดกลับด้าน เดินออกจากจุดนั้นแทน และเก็บ graph สองทิศพร้อมติด cost ต่าง edge จริงกับ edge ที่เติมเพื่อเดิน เป็นทริกที่ใช้ได้ในโจทย์ directed graph หลายข้อ" },
+            { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
+              c: `from collections import defaultdict
+
+class Solution:
+    def minReorder(self, n: int, connections: list[list[int]]) -> int:
+        graph: dict[int, list[tuple[int, int]]] = defaultdict(list)
+        for a, b in connections:
+            graph[a].append((b, 1))  # ทิศจริง — เดินทางนี้จาก 0 ออกไป = ต้องกลับ
+            graph[b].append((a, 0))  # ทิศปลอม — เติมเพื่อเดินได้ทั่ว
+
+        visited: set[int] = set()
+        changes = 0
+
+        def dfs(city: int) -> None:
+            nonlocal changes
+            visited.add(city)
+            for nxt, cost in graph[city]:
+                if nxt not in visited:
+                    changes += cost
+                    dfs(nxt)
+
+        dfs(0)
+        return changes`,
+            },
+
+            { t: "h3", c: "อ่านโค้ดทีละส่วน" },
+            {
+              t: "ol",
+              c: [
+                "แต่ละ connections [a,b] ใส่ (b,1) ให้ a และ (a,0) ให้ b",
+                "dfs จาก 0 mark แล้วไล่เพื่อนบ้าน",
+                "ยังไม่ visited → บวก cost แล้ว dfs ต่อ",
+                "changes คือจำนวนครั้งที่เดินบนทิศจริงออกจากฝั่ง 0 = จำนวนเส้นที่ต้องกลับ",
+              ],
+            },
+            { t: "h3", c: "ต้นทุน" },
+            {
+              t: "p",
+              c: "เวลา O(n) เยี่ยมทุกเมืองและทุกเส้นหนึ่งครั้ง (มี n-1 เส้น) · หน่วยความจำ O(n) จากกราฟ visited และ call stack",
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `There are n cities numbered from 0 to n - 1 and n - 1 roads such that there is only one way to travel between two different cities (this network form a tree). Last year, The ministry of transport decided to orient the roads in one direction because they are too narrow.
+
+Roads are represented by connections where connections[i] = [ai, bi] represents a road from city ai to city bi.
+
+This year, there will be a big event in the capital (city 0), and many people want to travel to this city.
+
+Your task consists of reorienting some roads such that each city can visit the city 0. Return the minimum number of edges changed.
+
+It's guaranteed that each city can reach city 0 after reorder.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]",
+              output: "3",
+              explain:
+                "Change the direction of edges show in red such that each node can reach the node 0 (capital).",
+            },
+            {
+              input: "n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]",
+              output: "2",
+              explain:
+                "Change the direction of edges show in red such that each node can reach the node 0 (capital).",
+            },
+            {
+              input: "n = 3, connections = [[1,0],[2,0]]",
+              output: "0",
+              explain: "",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "2 <= n <= 5 * 10^4",
+            "connections.length == n - 1",
+            "connections[i].length == 2",
+            "0 <= ai, bi <= n - 1",
+            "ai != bi",
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p46": {
     slug: "lc75-p46",
-    title: { th: "ข้อ 46 · LC399 Evaluate Division (คำนวณการหาร) 🟡", en: "" },
-    lead: { th: "weighted graph แต่ละตัวแปรเป็น node สมการเป็น edge ที่มีค่า หา x/y ด้วย DFS คูณน้ำหนักตลอดทาง", en: "" },
+    title: {
+      th: "ข้อ 46 · LC399 Evaluate Division 🟡",
+      en: "46 · LC399 Evaluate Division 🟡",
+    },
+    lead: {
+      th: "จากสมการหารระหว่างตัวแปร จงตอบคำถาม Cj / Dj แต่ละข้อ — หาไม่ได้ให้ตอบ -1.0",
+      en: "Given division equations between variables, answer each Cj / Dj query — or -1.0 if unknown.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC399): กำหนด array ของคู่ตัวแปร equations และ array ของจำนวนจริง values โดย equations[i] = [Ai, Bi] และ values[i] แทนสมการ Ai / Bi = values[i] กำหนด queries มาด้วย โดย queries[j] = [Cj, Dj] แทนคำถามที่ j ว่า Cj / Dj มีค่าเท่าไร ให้ return คำตอบของทุก query ถ้า query ไหนหาคำตอบไม่ได้ (ตัวแปรไม่รู้จัก หรือไม่เชื่อมถึงกัน) ให้ตอบ -1.0 สำหรับ query นั้น" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: 'equations = [["a","b"],["b","c"]], values = [2.0, 3.0], queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]',
-                    output: "[6.0, 0.5, -1.0, 1.0, -1.0]",
-                    explain: "a/c = a/b × b/c = 2 × 3 = 6.0 · b/a คือส่วนกลับ = 0.5 · a/e หาไม่ได้เพราะไม่มี e · a/a = 1.0 เพราะ a รู้จัก · x/x = -1.0 เพราะไม่รู้จัก x เลย",
-                  },
-                  {
-                    input: 'equations = [["a","b"]], values = [0.5], queries = [["a","b"],["b","a"]]',
-                    output: "[0.5, 2.0]",
-                    explain: "a/b = 0.5 ตามสมการโดยตรง ส่วน b/a คือส่วนกลับของ a/b เท่ากับ 1/0.5 = 2.0",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= equations.length <= 20",
-                "0.0 < values[i] <= 20.0",
-                "1 <= queries.length <= 20",
-                ],
-              },
+        {
+          t: "p",
+          c: `กำหนด array ของคู่ตัวแปร equations และ array ของจำนวนจริง values โดยที่ equations[i] = [Ai, Bi] และ values[i] แทนสมการ Ai / Bi = values[i] แต่ละ Ai หรือ Bi เป็นสตริงที่แทนตัวแปรหนึ่งตัว
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "ใช้ DFS บน weighted graph (กราฟถ่วงน้ำหนัก) คือ edge (เส้นเชื่อม) มีตัวเลขกำกับ ไอเดียคือแต่ละตัวแปรเป็น node (โหนด) สมการ a/b = 2.0 บอกว่าจาก a เดินไป b คูณ 2.0 และเพราะ b/a เท่ากับ 1/(a/b) เราจึงเพิ่ม edge ย้อนกลับจาก b ไป a คูณ 1/2.0 ด้วย ทำให้เดินได้สองทาง" },
-              { t: "p", c: "การหาคำตอบ x/y คือ traverse (เดินไล่) จาก x ไป y แล้วคูณ weight (น้ำหนัก) ของ edge ที่ผ่านทั้งหมดสะสมกันไป DFS ที่นี่ต่างจากข้อก่อน ๆ ตรงที่มันต้อง return (คืนค่า) ผลคูณสะสมกลับขึ้นมา ไม่ใช่แค่ mark เมื่อเดินไปเจอ dst เราคืน 1.0 แล้วระหว่างถอย recursion (การเรียกตัวเอง) กลับ แต่ละชั้นคูณ weight ของ edge ตัวเองเข้าไป" },
-              { t: "ol", c: [
-                "สร้าง graph graph[a][b] = val และ graph[b][a] = 1/val สำหรับทุกสมการ",
-                "เขียน dfs(src, dst, visited) ถ้า src หรือ dst ไม่มีใน graph คืน -1.0 (ไม่รู้จัก)",
-                "ถ้า src == dst คืน 1.0 (เจอปลายทางแล้ว หรือ x/x)",
-                "mark src แล้ว iterate (วน) เพื่อนบ้าน (neighbor) (nbr, weight) ที่ยังไม่ visited",
-                "เรียก dfs(nbr, dst) ถ้าผลไม่ใช่ -1.0 (มีทางถึง) คืน weight × result",
-                "ถ้าลองทุกทางแล้วไปไม่ถึง คืน -1.0 ทำ dfs แยกทีละ query",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมเช็คว่าตัวแปรรู้จักก่อนเช็ค src == dst ทำให้ x/x ตอบ 1.0 ทั้งที่ x ไม่มีในสมการ (ต้องตอบ -1.0) โค้ดจึงเช็ค src not in graph ก่อนแล้วค่อยเช็ค src == dst" },
+กำหนด queries มาด้วย โดยที่ queries[j] = [Cj, Dj] แทนคำถามที่ j ว่า Cj / Dj = ?
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `from collections import defaultdict
+ให้ return คำตอบของทุก query หากคำตอบใดหาไม่ได้ ให้ return -1.0 สำหรับ query นั้น
 
-def calc_equation(equations, values, queries):
-    graph = defaultdict(dict)
-    for (a, b), val in zip(equations, values):
-        graph[a][b] = val          # a/b = val
-        graph[b][a] = 1 / val      # b/a = 1/val
+หมายเหตุ: อินพุตถูกต้องเสมอ คุณอาจสมมติว่าการประเมินคำถามจะไม่เกิดการหารด้วยศูนย์ และไม่มีความขัดแย้ง
 
-    def dfs(src, dst, visited):
-        if src not in graph or dst not in graph:
-            return -1.0            # มีตัวแปรที่ไม่รู้จัก
-        if src == dst:
-            return 1.0             # x/x = 1 (ต้องรู้จัก x ด้วย)
-        visited.add(src)
-        for nbr, weight in graph[src].items():
-            if nbr not in visited:
+หมายเหตุ: ตัวแปรที่ไม่มีในรายการสมการถือว่าไม่นิยาม ดังนั้นคำตอบสำหรับตัวแปรเหล่านั้นหาไม่ได้`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input:
+                'equations = [["a","b"],["b","c"]], values = [2.0,3.0], queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]',
+              output: "[6.00000,0.50000,-1.00000,1.00000,-1.00000]",
+              explain: `กำหนด: a / b = 2.0, b / c = 3.0
+คำถาม: a / c = ?, b / a = ?, a / e = ?, a / a = ?, x / x = ?
+คำตอบ: [6.0, 0.5, -1.0, 1.0, -1.0]
+หมายเหตุ: x ไม่นิยาม → -1.0`,
+            },
+            {
+              input:
+                'equations = [["a","b"],["b","c"],["bc","cd"]], values = [1.5,2.5,5.0], queries = [["a","c"],["c","b"],["bc","cd"],["cd","bc"]]',
+              output: "[3.75000,0.40000,5.00000,0.20000]",
+              explain: "",
+            },
+            {
+              input:
+                'equations = [["a","b"]], values = [0.5], queries = [["a","b"],["b","a"],["a","c"],["x","y"]]',
+              output: "[0.50000,2.00000,-1.00000,-1.00000]",
+              explain: "",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= equations.length <= 20",
+            "equations[i].length == 2",
+            "1 <= Ai.length, Bi.length <= 5",
+            "values.length == equations.length",
+            "0.0 < values[i] <= 20.0",
+            "1 <= queries.length <= 20",
+            "queries[i].length == 2",
+            "1 <= Cj.length, Dj.length <= 5",
+            "Ai, Bi, Cj, Dj ประกอบด้วยตัวอักษรอังกฤษพิมพ์เล็กและตัวเลข",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "อ่านโจทย์กับตัวอย่างให้ครบ แล้วลองเขียนเองก่อน ถ้าติดค่อยเปิดเฉลย",
+        },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "มีสมการแบบ a/b = ตัวเลข หลายอัน แล้วมีคำถามว่า x/y เท่าไร — ถ้าหาจากสมการที่มีไม่ได้ หรือตัวแปรไม่รู้จัก ให้ตอบ -1.0",
+            },
+
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "a/b = 2 และ b/c = 3",
+            },
+            {
+              t: "ul",
+              c: [
+                "a/c = (a/b)×(b/c) = 2×3 = 6",
+                "b/a = 1/(a/b) = 0.5",
+                "a/e หาไม่ได้เพราะไม่มี e",
+                "a/a = 1 เพราะรู้จัก a",
+                "x/x = -1 เพราะไม่รู้จัก x เลย (ต่างจาก a/a)",
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "มองตัวแปรเป็นโหนด สมการเป็นเส้นที่มีตัวเลขกำกับ (weighted): a/b = 2 แปลว่าจาก a ไป b คูณ 2 และจาก b ไป a คูณ 0.5",
+            },
+            {
+              t: "p",
+              c: "หา x/y คือเดิน DFS จาก x ไป y แล้วคูณน้ำหนักตลอดทาง — พอเจอปลายทางคืน 1.0 แล้วระหว่างถอยกลับแต่ละชั้นคูณน้ำหนักของเส้นตัวเอง ถ้าตัวแปรไม่อยู่ในกราฟเลยคืน -1.0 ก่อนเช็ค x==y",
+            },
+
+            { t: "h3", c: "ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** เดิน query a/c · ทอง = โหนดปัจจุบัน · เส้นทอง = กำลังลองทางนั้น · product สะสมผลคูณตอนถอยกลับ",
+            },
+            { t: "viz", id: "evaluate-division" },
+
+            { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              label: "คำตอบสำหรับวางใน LeetCode",
+              c: `from collections import defaultdict
+
+class Solution:
+    def calcEquation(
+        self,
+        equations: list[list[str]],
+        values: list[float],
+        queries: list[list[str]],
+    ) -> list[float]:
+        graph: dict[str, dict[str, float]] = defaultdict(dict)
+        for (a, b), val in zip(equations, values):
+            graph[a][b] = val
+            graph[b][a] = 1 / val
+
+        def dfs(src: str, dst: str, visited: set[str]) -> float:
+            if src not in graph or dst not in graph:
+                return -1.0
+            if src == dst:
+                return 1.0
+            visited.add(src)
+            for nbr, weight in graph[src].items():
+                if nbr in visited:
+                    continue
                 result = dfs(nbr, dst, visited)
-                if result != -1.0:        # เจอทางถึง dst
-                    return weight * result  # คูณน้ำหนักสะสม
-        return -1.0                # ลองทุกทางแล้วไปไม่ถึง
+                if result != -1.0:
+                    return weight * result
+            return -1.0
 
-    answers = []
-    for a, b in queries:
-        answers.append(dfs(a, b, set()))
-    return answers
+        return [dfs(a, b, set()) for a, b in queries]`,
+            },
 
-eq = [["a", "b"], ["b", "c"]]
-vals = [2.0, 3.0]
-q = [["a", "c"], ["b", "a"], ["a", "e"], ["a", "a"], ["x", "x"]]
-print(calc_equation(eq, vals, q))  # [6.0, 0.5, -1.0, 1.0, -1.0]`, out: `[6.0, 0.5, -1.0, 1.0, -1.0]` },
-                { t: "p", c: "ข้อนี้สอน weighted graph (กราฟถ่วงน้ำหนัก) คือ edge มีตัวเลขกำกับ ไอเดียคือแต่ละตัวแปรเป็น node สมการ a/b = 2.0 บอกว่าจาก a เดินไป b คูณ 2.0 และเพราะ b/a = 1/(a/b) เราจึงเพิ่ม edge ย้อนกลับจาก b ไป a คูณ 1/2.0 ด้วย ทำให้เดินได้สองทาง การหาคำตอบ x/y คือ traverse จาก x ไป y แล้วคูณ weight ของ edge ที่ผ่านทั้งหมดสะสมกันไป" },
-                { t: "p", c: "DFS ที่นี่ต่างจากข้อก่อน ๆ ตรงที่มันต้อง return ผลคูณสะสมกลับขึ้นมา ไม่ใช่แค่ mark เมื่อเดินไปเจอ dst เราคืน 1.0 แล้วระหว่างถอย recursion กลับ แต่ละชั้นคูณ weight ของ edge ตัวเองเข้าไป ผลลัพธ์ที่โผล่กลับมาถึงจุดเริ่มจึงเป็นผลคูณตลอดเส้นทางพอดี ถ้าลองทุกเพื่อนบ้านแล้วไม่มีทางไหนถึง dst ก็คืน -1.0" },
-                { t: "p", c: "edge case ที่ต้องระวังคือ ตัวแปรที่ไม่มีในสมการเลย (เช็ค src not in graph หรือ dst not in graph คืน -1.0) และกรณี a/a ที่ต้องคืน 1.0 เฉพาะเมื่อ a รู้จัก · Time O(Q × (V + E)) แต่ละ query ทำ DFS หนึ่งครั้ง Q คือจำนวน query · Space O(V + E) จาก graph และ visited" },
-              ] },
-
-              { t: "callout", title: "💡 สรุป pattern", c: "ความสัมพันธ์เชิงอัตราส่วน / การแปลงหน่วยต่อเนื่อง มองเป็น weighted graph แล้ว DFS สะสมผลคูณตลอดเส้นทาง อย่าลืม edge ย้อนกลับที่เป็นส่วนกลับของ weight" },
+            { t: "h3", c: "อ่านโค้ดทีละส่วน" },
+            {
+              t: "ol",
+              c: [
+                "สร้างกราฟสองทิศ: a→b = val และ b→a = 1/val",
+                "แต่ละ query เรียก dfs คนละ visited",
+                "เช็คไม่รู้จักก่อน แล้วค่อยเช็ค src == dst (กัน x/x ของ x ที่ไม่มี)",
+                "ลองเพื่อนบ้าน ถ้าทางนั้นถึงได้ คืน weight × ผลจากลูก",
+                "ลองครบแล้วยังไม่ถึง → -1.0",
+              ],
+            },
+            { t: "h3", c: "ต้นทุน" },
+            {
+              t: "p",
+              c: "เวลา O(Q · (V + E)) แต่ละ query เดินกราฟหนึ่งครั้ง · หน่วยความจำ O(V + E) จากกราฟและ visited",
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `You are given an array of variable pairs equations and an array of real numbers values, where equations[i] = [Ai, Bi] and values[i] represent the equation Ai / Bi = values[i]. Each Ai or Bi is a string that represents a single variable.
+
+You are also given some queries, where queries[j] = [Cj, Dj] represents the jth query where you must find the answer for Cj / Dj = ?.
+
+Return the answers to all queries. If a single answer cannot be determined, return -1.0.
+
+Note: The input is always valid. You may assume that evaluating the queries will not result in division by zero and that there is no contradiction.
+
+Note: The variables that do not occur in the list of equations are undefined, so the answer cannot be determined for them.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input:
+                'equations = [["a","b"],["b","c"]], values = [2.0,3.0], queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]',
+              output: "[6.00000,0.50000,-1.00000,1.00000,-1.00000]",
+              explain: `Given: a / b = 2.0, b / c = 3.0
+queries are: a / c = ?, b / a = ?, a / e = ?, a / a = ?, x / x = ?
+return: [6.0, 0.5, -1.0, 1.0, -1.0]
+note: x is undefined => -1.0`,
+            },
+            {
+              input:
+                'equations = [["a","b"],["b","c"],["bc","cd"]], values = [1.5,2.5,5.0], queries = [["a","c"],["c","b"],["bc","cd"],["cd","bc"]]',
+              output: "[3.75000,0.40000,5.00000,0.20000]",
+              explain: "",
+            },
+            {
+              input:
+                'equations = [["a","b"]], values = [0.5], queries = [["a","b"],["b","a"],["a","c"],["x","y"]]',
+              output: "[0.50000,2.00000,-1.00000,-1.00000]",
+              explain: "",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= equations.length <= 20",
+            "equations[i].length == 2",
+            "1 <= Ai.length, Bi.length <= 5",
+            "values.length == equations.length",
+            "0.0 < values[i] <= 20.0",
+            "1 <= queries.length <= 20",
+            "queries[i].length == 2",
+            "1 <= Cj.length, Dj.length <= 5",
+            "Ai, Bi, Cj, Dj consist of lower case English letters and digits.",
+          ],
+        },
+      ],
     },
   },
 };

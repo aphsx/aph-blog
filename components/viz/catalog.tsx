@@ -22,7 +22,15 @@ import {
   GraphAdjBuildViz,
   GraphComponentsViz,
   GraphDfsWalkViz,
+  GraphDirectedViz,
+  GraphOverviewViz,
 } from "@/components/viz/GraphDfsViz";
+import {
+  EvaluateDivisionViz,
+  KeysAndRoomsViz,
+  NumberOfProvincesViz,
+  ReorderRoutesViz,
+} from "@/components/viz/GraphDfsProblemsViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -65,9 +73,15 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "hash-freq": HashFreqViz,
   "hash-close": HashCloseViz,
   "hash-pairs": HashPairsViz,
+  "graph-overview": GraphOverviewViz,
+  "graph-directed": GraphDirectedViz,
   "graph-adj-build": GraphAdjBuildViz,
   "graph-dfs-walk": GraphDfsWalkViz,
   "graph-components": GraphComponentsViz,
+  "keys-and-rooms": KeysAndRoomsViz,
+  "number-of-provinces": NumberOfProvincesViz,
+  "reorder-routes": ReorderRoutesViz,
+  "evaluate-division": EvaluateDivisionViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {

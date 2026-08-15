@@ -3,9 +3,10 @@
  *
  * Adding a new interactive viz (any LeetCode 75 problem):
  *   1. Append the id here.
- *   2. Put step data in `lib/viz/<id>.ts` (pure, no React).
+ *   2. Put step data in `lib/viz/<id>.ts` (pure, no React) — skip for static figures.
  *   3. Put the player UI in `components/viz/<Name>.tsx` and register it
  *      in `components/viz/catalog.tsx` (TypeScript will fail until you do).
+ *      Static structure pictures use `VizStaticFrame` (no Next/Play) — same chrome, no ASCII.
  *   4. Drop `{ t: "viz", id: "<id>" }` on the problem page (solution walkthrough)
  *      or the intro page (concept workshop — different story, same chrome).
  *
@@ -47,9 +48,15 @@ export const VIZ_IDS = [
   "hash-freq",
   "hash-close",
   "hash-pairs",
+  "graph-overview",
+  "graph-directed",
   "graph-adj-build",
   "graph-dfs-walk",
   "graph-components",
+  "keys-and-rooms",
+  "number-of-provinces",
+  "reorder-routes",
+  "evaluate-division",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

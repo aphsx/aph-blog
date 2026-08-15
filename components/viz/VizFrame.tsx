@@ -169,3 +169,45 @@ export function VizFrameView({
     </figure>
   );
 }
+
+/** Static diagram chrome — same look as Interactive, no playback / code panel. */
+export function VizStaticFrame({
+  title,
+  pills,
+  caption,
+  diagram,
+}: {
+  title: string;
+  pills?: { label: string; color: string }[];
+  caption: string;
+  diagram: ReactNode;
+}) {
+  return (
+    <figure className="my-6 overflow-hidden rounded-lg border border-[#2a3040] bg-[#0c0e16] text-[#dcdce6] shadow-sm">
+      <div className="border-b border-[#2a3040] px-4 py-3">
+        <div className="text-center text-sm font-bold tracking-wide text-white sm:text-base">
+          {title}
+        </div>
+        {pills && pills.length > 0 && (
+          <div className="mt-2 flex justify-center gap-2">
+            {pills.map((p) => (
+              <span
+                key={p.label}
+                className="rounded-full px-3 py-0.5 text-[0.7rem] font-bold text-white"
+                style={{ background: p.color }}
+              >
+                {p.label}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="px-2 py-3 sm:px-4">
+        {diagram}
+        <p className="mx-2 mt-2 rounded-md border border-[#3a8868] bg-[#142820] px-3 py-2 text-center text-[0.8rem] font-semibold text-[#8cffb8] sm:text-sm">
+          {caption}
+        </p>
+      </div>
+    </figure>
+  );
+}

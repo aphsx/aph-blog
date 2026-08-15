@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { VizFrameView, useVizPlayback } from "@/components/viz/VizFrame";
+import { VizFrameView, VizStaticFrame, useVizPlayback } from "@/components/viz/VizFrame";
 import {
   ADJ_CODE,
   ADJ_EDGES,
@@ -381,6 +381,143 @@ export function GraphComponentsViz() {
       onPrev={play.prev}
       onNext={play.next}
       onToggle={play.toggle}
+    />
+  );
+}
+
+/** Static overview of the undirected 5-node teaching graph (no playback). */
+export function GraphOverviewViz() {
+  const cycle = new Set(["0-1", "1-3", "2-3", "0-2"]);
+  return (
+    <VizStaticFrame
+      title="GRAPH · ห้าโหนด ไม่มีทิศ — ใช้ภาพนี้ทั้งหน้า"
+      pills={[
+        { label: "node", color: TEAL },
+        { label: "edge", color: "#4a5060" },
+        { label: "cycle", color: GOLD },
+      ]}
+      caption="โหนด 0–4 · เส้นทอง = วง 0-1-3-2-0 · โหนด 4 แขวนจาก 3"
+      diagram={
+        <svg viewBox="100 30 280 320" className="mx-auto w-full max-w-md" aria-hidden>
+          {ADJ_EDGES.map(([a, b]) => {
+            const pa = POS[a];
+            const pb = POS[b];
+            const key = edgeKey(a, b);
+            const onCycle = cycle.has(key);
+            return (
+              <line
+                key={key}
+                x1={pa.x}
+                y1={pa.y}
+                x2={pb.x}
+                y2={pb.y}
+                stroke={onCycle ? GOLD : "#4a5060"}
+                strokeWidth={onCycle ? 3.5 : 2.5}
+              />
+            );
+          })}
+          {ADJ_NODES.map((id) => (
+            <GraphNode
+              key={id}
+              id={id}
+              x={POS[id].x}
+              y={POS[id].y}
+              fill="#1a2838"
+              stroke={TEAL}
+            />
+          ))}
+        </svg>
+      }
+    />
+  );
+}
+
+function DirNode({
+  x,
+  y,
+  label,
+  color,
+}: {
+  x: number;
+  y: number;
+  label: string;
+  color: string;
+}) {
+  return (
+    <g>
+      <circle cx={x} cy={y} r={22} fill="#1a2838" stroke={color} strokeWidth={2.5} />
+      <text
+        x={x}
+        y={y + 5}
+        textAnchor="middle"
+        fill="#f5f5fa"
+        fontSize={16}
+        fontWeight={800}
+        fontFamily={FONT}
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+/** Static: undirected vs directed edge — one picture, two panels. */
+export function GraphDirectedViz() {
+  return (
+    <VizStaticFrame
+      title="ไม่มีทิศ vs มีทิศ"
+      pills={[
+        { label: "undirected", color: TEAL },
+        { label: "directed", color: ORANGE },
+      ]}
+      caption="ซ้ายเดินได้สองทาง · ขวาเดินได้ทางเดียวตามหัวลูกศร"
+      diagram={
+        <svg viewBox="0 0 720 200" className="w-full" aria-hidden>
+          <defs>
+            <marker
+              id="graph-dir-arrow"
+              viewBox="0 0 10 10"
+              refX={9}
+              refY={5}
+              markerWidth={7}
+              markerHeight={7}
+              orient="auto-start-reverse"
+            >
+              <path d="M 0 0 L 10 5 L 0 10 z" fill={ORANGE} />
+            </marker>
+          </defs>
+
+          <text x={180} y={28} textAnchor="middle" fill={TEAL} fontSize={13} fontWeight={700} fontFamily={FONT}>
+            undirected · A — B
+          </text>
+          <line x1={110} y1={100} x2={250} y2={100} stroke={TEAL} strokeWidth={3.5} />
+          <DirNode x={110} y={100} label="A" color={TEAL} />
+          <DirNode x={250} y={100} label="B" color={TEAL} />
+          <text x={180} y={160} textAnchor="middle" fill={MUTED} fontSize={12} fontFamily={FONT}>
+            เก็บ A→B และ B→A
+          </text>
+
+          <line x1={360} y1={40} x2={360} y2={170} stroke="#2a3040" strokeWidth={1} />
+
+          <text x={540} y={28} textAnchor="middle" fill={ORANGE} fontSize={13} fontWeight={700} fontFamily={FONT}>
+            directed · A → B
+          </text>
+          <line
+            x1={492}
+            y1={100}
+            x2={588}
+            y2={100}
+            stroke={ORANGE}
+            strokeWidth={3.5}
+            markerEnd="url(#graph-dir-arrow)"
+          />
+          <DirNode x={470} y={100} label="A" color={ORANGE} />
+          <DirNode x={610} y={100} label="B" color={ORANGE} />
+          <text x={540} y={160} textAnchor="middle" fill={MUTED} fontSize={12} fontFamily={FONT}>
+            เก็บ A→B อย่างเดียว
+          </text>
+        </svg>
+      }
     />
   );
 }

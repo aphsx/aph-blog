@@ -116,7 +116,9 @@ Interactive ไม่ใช่ข้อเลือก — หน้าราย
 
 ห้ามย่อ ห้ามแต่ง ห้ามตัดตัวอย่าง ห้ามเปลี่ยนตัวเลข
 
-รูปประกอบใช้ได้เฉพาะไฟล์ที่มีใน repo (`/leetcode-75/...`) ถ้ายังไม่มี ให้คง explanation เป็นข้อความ/ASCII ตามต้นฉบับ
+รูปประกอบของ**ต้นฉบับ LeetCode** ใช้ได้เฉพาะไฟล์ที่มีใน repo (`/leetcode-75/...`) ถ้ายังไม่มี ให้คง explanation เป็นข้อความตามต้นฉบับได้
+
+ใน**โซนสอน** ห้ามวาดโครงสร้างด้วย ASCII ใน `code` — สร้างรูปด้วย `viz` (Interactive หรือ `VizStaticFrame` ภาพนิ่ง) ออกแบบให้เข้าข้อนั้น
 
 ### เขียน `blocks.en` ของโซนโจทย์ให้จบก่อน
 
@@ -212,13 +214,16 @@ player เดินตัวอย่างของข้อนี้ ให้
 
 สเต็ปขนานกับบรรทัดโค้ดที่ไฮไลต์ ข้อความใต้รูปบอกว่าเกิดอะไรในรอบนี้
 
-#### สร้าง player ใหม่ (เมื่อของเดิมไม่เข้าข้อนี้)
+#### สร้าง player / ภาพนิ่งใหม่ (เมื่อของเดิมไม่เข้าข้อนี้)
 
-Chrome มีให้แล้วใน `components/viz/VizFrame.tsx` (`VizFrameView` + `useVizPlayback`): ไดอะแกรม + ข้อความสเต็ป + โค้ดไฮไลต์ + Reset / Prev / Play / Next
+Chrome มีให้แล้วใน `components/viz/VizFrame.tsx`:
+
+- `VizFrameView` + `useVizPlayback` — Interactive
+- `VizStaticFrame` — ภาพโครงสร้างเดี่ยว (ไม่มี Next) เมื่อแค่ต้องเห็นรูป ไม่ต้องเดินทีละขั้น
 
 1. เพิ่ม id ใน `lib/viz/ids.ts`
-2. ข้อมูลสเต็ปบริสุทธิ์ใน `lib/viz/<topic>.ts` — ไม่มี React
-3. UI ใน `components/viz/<Name>.tsx`
+2. Interactive: ข้อมูลสเต็ปใน `lib/viz/<topic>.ts` — ไม่มี React
+3. UI ใน `components/viz/<Name>.tsx` (SVG/CSS โทนเดียวกับ Interactive — ห้าม ASCII ใน code)
 4. ลงทะเบียนใน `components/viz/catalog.tsx` (build จะพังจนกว่าจะครบ)
 5. วาง `{ t: "viz", id: "..." }` ในกล่องเฉลย
 
@@ -235,6 +240,7 @@ Chrome มีให้แล้วใน `components/viz/VizFrame.tsx` (`VizFram
 - หัวข้อภาษาอังกฤษปนในกล่องเฉลยไทย ใช้ `ขั้นที่ N · …` เสมอ
 - `blocks.en` ของโซนสอนในรอบนี้ — อย่าแปลสอนเป็นอังกฤษจนกว่าผู้ใช้จะสั่ง
 - แปะ player คนละเรื่อง / หน้าไม่มี Interactive โดยไม่มีเหตุผลในแผน
+- วาดโครงสร้าง (กราฟ/ต้นไม้/แถว) ด้วย ASCII ใน code แทนรูป `viz`
 
 ---
 
