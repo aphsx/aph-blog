@@ -47,6 +47,9 @@ export const VIZ_IDS = [
   "hash-freq",
   "hash-close",
   "hash-pairs",
+  "graph-adj-build",
+  "graph-dfs-walk",
+  "graph-components",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];
