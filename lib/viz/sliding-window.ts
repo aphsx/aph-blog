@@ -1,4 +1,4 @@
-/** Interactive sliding-window walkthroughs: fixed k + variable (no-repeat). */
+/** Interactive sliding-window walkthroughs: fixed k + variable expand/shrink. */
 
 export type FixedStep = {
   line: number;
@@ -16,7 +16,7 @@ export type VarStep = {
   msg: string;
   left: number;
   right: number | null;
-  seen: string[];
+  zeros: number;
   best: number;
   shrinking: boolean;
   adding: boolean;
@@ -33,15 +33,17 @@ export const FIXED_CODE = [
   "    best = max(best, window)",
 ];
 
-export const VAR_S = "abcabcbb";
+/** Contiguous ones; at most k zeros allowed inside the window. */
+export const VAR_NUMS = [1, 1, 0, 1, 1, 0, 1];
+export const VAR_K = 1;
 
 export const VAR_CODE = [
-  "left, seen, best = 0, set(), 0",
-  "for right, ch in enumerate(s):",
-  "    while ch in seen:",
-  "        seen.remove(s[left])",
+  "left, zeros, best = 0, 0, 0",
+  "for right in range(len(nums)):",
+  "    if nums[right] == 0: zeros += 1",
+  "    while zeros > k:",
+  "        if nums[left] == 0: zeros -= 1",
   "        left += 1",
-  "    seen.add(ch)",
   "    best = max(best, right - left + 1)",
 ];
 
@@ -92,11 +94,12 @@ export function buildFixedSteps(): FixedStep[] {
 }
 
 export function buildVarSteps(): VarStep[] {
-  const s = VAR_S;
+  const nums = VAR_NUMS;
+  const k = VAR_K;
   const steps: VarStep[] = [];
   let left = 0;
   let right: number | null = null;
-  const seen: string[] = [];
+  let zeros = 0;
   let best = 0;
   let shrinking = false;
   let adding = false;
@@ -107,43 +110,57 @@ export function buildVarSteps(): VarStep[] {
       msg,
       left,
       right,
-      seen: [...seen],
+      zeros,
       best,
       shrinking,
       adding,
     });
   };
 
-  snap(1, 's = "abcabcbb"  · invariant: ห้ามมีตัวซ้ำในหน้าต่าง  ยาว = right − left + 1');
+  snap(
+    1,
+    `nums = [${nums.join(", ")}]  · อนุญาต 0 ในหน้าต่างได้ไม่เกิน k = ${k}  · หาช่วงยาวสุด`,
+  );
 
-  for (let r = 0; r < s.length; r++) {
-    const ch = s[r];
+  for (let r = 0; r < nums.length; r++) {
     right = r;
     shrinking = false;
     adding = false;
-    snap(2, `right = ${r}  รับ '${ch}'  · ตอนนี้ยาว ${r - left + 1} ช่อง`);
+    snap(2, `right = ${r}  รับ ${nums[r]}  · ขยายขอบขวา`);
 
-    while (seen.includes(ch)) {
+    if (nums[r] === 0) {
+      zeros += 1;
+      adding = true;
+      snap(3, `เจอ 0  · zeros = ${zeros}`);
+    } else {
+      adding = true;
+      snap(3, `เจอ 1  · zeros ยังเป็น ${zeros}`);
+    }
+
+    while (zeros > k) {
       shrinking = true;
       adding = false;
-      snap(3, `'${ch}' ซ้ำในหน้าต่าง  · หดซ้าย เอา '${s[left]}' ออก`);
-      seen.splice(seen.indexOf(s[left]), 1);
+      snap(4, `zeros = ${zeros} > k  · หดซ้าย เอา nums[${left}] = ${nums[left]} ออก`);
+      if (nums[left] === 0) {
+        zeros -= 1;
+      }
       left += 1;
-      snap(4, `left = ${left}  · เหลือ "${s.slice(left, r)}"  ยาว ${r - left} ช่อง  ยังซ้ำอยู่ไหม: ${seen.includes(ch) ? "ยัง" : "ไม่แล้ว"}`);
+      snap(5, `left = ${left}  · zeros = ${zeros}  ยาวตอนนี้ ${r - left + 1}`);
     }
 
     shrinking = false;
-    adding = true;
-    seen.push(ch);
-    snap(5, `รับ '${ch}' เข้า  window = "${s.slice(left, r + 1)}"  ยาว ${r - left + 1}`);
-
     adding = false;
     const len = r - left + 1;
     const grew = len > best;
     best = Math.max(best, len);
-    snap(6, grew ? `best = ${best}  · ยาวสุดใหม่` : `best ค้างที่ ${best}  · ช่วงนี้ยาว ${len}`);
+    snap(
+      7,
+      grew
+        ? `ช่วง valid  · ยาว ${len}  best = ${best}`
+        : `ช่วง valid  · ยาว ${len}  best ค้างที่ ${best}`,
+    );
   }
 
-  snap(6, 'จบ  best = 3 จาก "abc"  · หน้าต่างยืด-หดตามเงื่อนไข ไม่ล็อกความยาว');
+  snap(7, `จบ  best = ${best}  · หน้าต่างยืด-หดตามจำนวน 0 ไม่ล็อกความยาว`);
   return steps;
 }

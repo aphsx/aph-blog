@@ -7,7 +7,8 @@ import {
   FIXED_K,
   FIXED_NUMS,
   VAR_CODE,
-  VAR_S,
+  VAR_K,
+  VAR_NUMS,
   buildFixedSteps,
   buildVarSteps,
   type FixedStep,
@@ -248,13 +249,12 @@ function FixedDiagram({ step }: { step: FixedStep }) {
 }
 
 function VarDiagram({ step }: { step: VarStep }) {
-  const s = VAR_S;
-  const chars = [...s];
+  const nums = VAR_NUMS;
   const cell = 48;
-  const gap = 8;
+  const gap = 10;
   const h = 44;
   const y = 56;
-  const { origin, xOf } = layout(chars.length, cell, gap);
+  const { origin, xOf } = layout(nums.length, cell, gap);
   const right = step.right;
   const inWin = (i: number) => right !== null && i >= step.left && i <= right;
   const winLen = right !== null ? right - step.left + 1 : 0;
@@ -272,7 +272,7 @@ function VarDiagram({ step }: { step: VarStep }) {
         />
       )}
 
-      {chars.map((ch, i) => {
+      {nums.map((v, i) => {
         const x = xOf(i);
         const inside = inWin(i);
         const isRight = right === i;
@@ -285,7 +285,7 @@ function VarDiagram({ step }: { step: VarStep }) {
               y={y}
               w={cell}
               h={h}
-              value={ch}
+              value={v}
               fill={
                 step.adding && isRight
                   ? ORANGE
@@ -321,7 +321,12 @@ function VarDiagram({ step }: { step: VarStep }) {
         </>
       )}
 
-      <Label x={origin} y={228} text={`seen = { ${step.seen.join(" ")} }`} color={MUTED} />
+      <Label
+        x={origin}
+        y={228}
+        text={`zeros = ${step.zeros}  (อนุญาต ≤ ${VAR_K})`}
+        color={MUTED}
+      />
       <text x={W - origin} y={228} textAnchor="end" fill={TEAL} fontSize={13} fontWeight={700} fontFamily={FONT}>
         {`best = ${step.best}`}
       </text>
