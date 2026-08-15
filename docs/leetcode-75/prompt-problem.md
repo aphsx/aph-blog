@@ -134,7 +134,7 @@ Interactive ไม่ใช่ข้อเลือก — หน้าราย
 
 `title.th`: `"ข้อ N · LCxxxx Name 🟢"` ชื่อข้อคงอังกฤษ (`🟡` ถ้า Medium)  
 `title.en`: `"N · LCxxxx Name 🟢"`  
-`lead` สรุปโจทย์ 1 ประโยค ไม่ใบ้วิธีทำ — มีทั้ง th และ en
+`lead`: ว่าง `""` ทั้ง th และ en — หน้ารายข้อมีโจทย์เต็มด้านล่างแล้ว ห้ามใส่สรุปซ้ำโจทย์ (ถ้าใส่จะทับ description)
 
 ---
 
@@ -257,7 +257,7 @@ Chrome มีให้แล้วใน `components/viz/VizFrame.tsx`:
 "lc75-pXX": {
   slug: "lc75-pXX",
   title: { th: "ข้อ N · LCxxxx Name 🟢", en: "N · LCxxxx Name 🟢" },
-  lead: { th: "...", en: "..." },
+  lead: { th: "", en: "" },
   group: "LeetCode 75",
   blocks: {
     th: [ /* โจทย์ + เฉลย */ ],

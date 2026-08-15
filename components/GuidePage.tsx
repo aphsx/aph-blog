@@ -55,9 +55,11 @@ export default async function GuidePage({ slug }: { slug: string }) {
 
           <Shoutout />
 
-          <p className="mb-6 italic leading-relaxed text-[#1c1e21]">
-            {resolved.lead}
-          </p>
+          {resolved.lead ? (
+            <p className="mb-6 italic leading-relaxed text-[#1c1e21]">
+              {resolved.lead}
+            </p>
+          ) : null}
 
           {/* Article stays an async Server Component — passed as children of client Shell */}
           <Article blocks={resolved.blocks} />
