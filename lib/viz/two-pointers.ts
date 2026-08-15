@@ -28,6 +28,26 @@ export type SlowFastStep = {
   done: boolean;
 };
 
+export type ReverseStep = {
+  line: number;
+  msg: string;
+  nums: number[];
+  left: number | null;
+  right: number | null;
+  swapping: boolean;
+  done: boolean;
+};
+
+export type TwoSeqStep = {
+  line: number;
+  msg: string;
+  i: number;
+  j: number;
+  merged: number[];
+  picking: "a" | "b" | null;
+  done: boolean;
+};
+
 export const OPPOSITE_NUMS = [1, 3, 4, 6, 8, 11];
 export const OPPOSITE_TARGET = 14;
 
@@ -52,6 +72,29 @@ export const SLOWFAST_CODE = [
   "        nums[slow] = nums[fast]",
   "        slow += 1",
   "# ผลคือ nums[:slow]",
+];
+
+export const REVERSE_NUMS = [10, 20, 30, 40, 50];
+
+export const REVERSE_CODE = [
+  "left, right = 0, len(nums) - 1",
+  "while left < right:",
+  "    nums[left], nums[right] = nums[right], nums[left]",
+  "    left += 1",
+  "    right -= 1",
+];
+
+export const TWO_SEQ_A = [1, 4, 7];
+export const TWO_SEQ_B = [2, 3, 9];
+
+export const TWO_SEQ_CODE = [
+  "i = j = 0",
+  "while i < len(a) and j < len(b):",
+  "    if a[i] <= b[j]:",
+  "        merged.append(a[i]); i += 1",
+  "    else:",
+  "        merged.append(b[j]); j += 1",
+  "merged += a[i:] + b[j:]",
 ];
 
 export function buildOppositeSteps(): OppositeStep[] {
@@ -82,7 +125,7 @@ export function buildOppositeSteps(): OppositeStep[] {
     });
   };
 
-  snap(1, "nums = [1, 3, 4, 6, 8, 11]  เป้า 14  · เรียงแล้ว เลยตัดคู่ทิ้งเป็นชุดได้");
+  snap(1, "nums = [1, 3, 4, 6, 8, 11]  เป้า 14  · แถวเรียงแล้ว จึงตัดสินใจขยับจากผลรวมได้");
 
   left = 0;
   right = nums.length - 1;
@@ -96,7 +139,7 @@ export function buildOppositeSteps(): OppositeStep[] {
     if (left >= right) {
       snap(
         2,
-        `while ${left} < ${right} เป็นเท็จ  · จบ เทียบ ${compares} ครั้ง เจอ ${found.length} คู่ (brute force ต้อง 15)`,
+        `while ${left} < ${right} เป็นเท็จ  · จบ เทียบ ${compares} ครั้ง เจอ ${found.length} คู่`,
       );
       break;
     }
@@ -114,7 +157,7 @@ export function buildOppositeSteps(): OppositeStep[] {
     if (cmp === "eq") {
       found = [...found, [left, right]];
       moving = "both";
-      snap(4, `เจอคู่ (${lv}, ${rv})  · ขยับทั้งสองตัวไปหาคู่ถัดไป`);
+      snap(4, `เจอคู่ (${lv}, ${rv})  · ขยับทั้งสองตัวไปดูคู่ถัดไป`);
       left += 1;
       right -= 1;
       snap(5, `left += 1 และ right -= 1  · ไปต่อที่ index ${left} กับ ${right}`);
@@ -202,5 +245,104 @@ export function buildSlowFastSteps(): SlowFastStep[] {
     6,
     `จบ  ผลลัพธ์ = [${nums.slice(0, slow).join(", ")}]  · ขยะท้ายแถว = [${nums.slice(slow).join(", ")}] ไม่ต้องล้าง`,
   );
+  return steps;
+}
+
+export function buildReverseSteps(): ReverseStep[] {
+  const nums = [...REVERSE_NUMS];
+  const steps: ReverseStep[] = [];
+  let left: number | null = null;
+  let right: number | null = null;
+  let swapping = false;
+  let done = false;
+
+  const snap = (line: number, msg: string) => {
+    steps.push({
+      line,
+      msg,
+      nums: [...nums],
+      left,
+      right,
+      swapping,
+      done,
+    });
+  };
+
+  snap(1, "nums = [10, 20, 30, 40, 50]  · จะกลับลำดับด้วยการสลับหัวกับท้าย");
+  left = 0;
+  right = nums.length - 1;
+  snap(1, "left = 0 ชี้หัว  ·  right = 4 ชี้ท้าย");
+
+  while (left !== null && right !== null && left < right) {
+    swapping = false;
+    snap(2, `while ${left} < ${right}  · ยังไม่ชนกัน สลับต่อ`);
+    swapping = true;
+    snap(3, `สลับ nums[${left}]=${nums[left]} กับ nums[${right}]=${nums[right]}`);
+    const tmp = nums[left];
+    nums[left] = nums[right];
+    nums[right] = tmp;
+    snap(3, `หลังสลับ: [${nums.join(", ")}]`);
+    swapping = false;
+    left += 1;
+    snap(4, `left += 1 → ${left}`);
+    right -= 1;
+    snap(5, `right -= 1 → ${right}`);
+  }
+
+  swapping = false;
+  done = true;
+  snap(2, `while ${left} < ${right} เป็นเท็จ  · จบ แถวกลับเป็น [${nums.join(", ")}]`);
+  return steps;
+}
+
+export function buildTwoSeqSteps(): TwoSeqStep[] {
+  const a = TWO_SEQ_A;
+  const b = TWO_SEQ_B;
+  const steps: TwoSeqStep[] = [];
+  let i = 0;
+  let j = 0;
+  let merged: number[] = [];
+  let picking: TwoSeqStep["picking"] = null;
+  let done = false;
+
+  const snap = (line: number, msg: string) => {
+    steps.push({
+      line,
+      msg,
+      i,
+      j,
+      merged: [...merged],
+      picking,
+      done,
+    });
+  };
+
+  snap(1, "a = [1, 4, 7]  ·  b = [2, 3, 9]  · รวมให้ยังเรียงอยู่");
+  i = 0;
+  j = 0;
+  snap(1, "i = 0 ชี้หัวของ a  ·  j = 0 ชี้หัวของ b");
+
+  while (i < a.length && j < b.length) {
+    picking = null;
+    snap(2, `while i=${i} < ${a.length} และ j=${j} < ${b.length}  · เทียบหัวสองแถว`);
+    if (a[i] <= b[j]) {
+      picking = "a";
+      snap(3, `${a[i]} ≤ ${b[j]}  · หยิบจาก a แล้วขยับ i`);
+      merged = [...merged, a[i]];
+      i += 1;
+      snap(4, `merged = [${merged.join(", ")}]  · i → ${i}`);
+    } else {
+      picking = "b";
+      snap(5, `${a[i]} > ${b[j]}  · หยิบจาก b แล้วขยับ j`);
+      merged = [...merged, b[j]];
+      j += 1;
+      snap(6, `merged = [${merged.join(", ")}]  · j → ${j}`);
+    }
+  }
+
+  picking = null;
+  merged = [...merged, ...a.slice(i), ...b.slice(j)];
+  done = true;
+  snap(7, `ลูปจบ ต่อเศษที่เหลือ → merged = [${merged.join(", ")}]`);
   return steps;
 }

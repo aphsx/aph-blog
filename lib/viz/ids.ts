@@ -27,6 +27,8 @@ export const VIZ_IDS = [
   "prefix-pivot",
   "two-ptr-opposite",
   "two-ptr-slow-fast",
+  "two-ptr-reverse",
+  "two-ptr-two-seq",
   "array-alias",
   "array-str-rebind",
   "array-insert-shift",

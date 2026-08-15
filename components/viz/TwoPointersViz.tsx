@@ -6,11 +6,19 @@ import {
   OPPOSITE_CODE,
   OPPOSITE_NUMS,
   OPPOSITE_TARGET,
+  REVERSE_CODE,
   SLOWFAST_CODE,
+  TWO_SEQ_A,
+  TWO_SEQ_B,
+  TWO_SEQ_CODE,
   buildOppositeSteps,
+  buildReverseSteps,
   buildSlowFastSteps,
+  buildTwoSeqSteps,
   type OppositeStep,
+  type ReverseStep,
   type SlowFastStep,
+  type TwoSeqStep,
 } from "@/lib/viz/two-pointers";
 
 const W = 720;
@@ -388,6 +396,208 @@ export function SlowFastViz() {
       message={step.msg}
       diagram={<SlowFastDiagram step={step} />}
       lines={SLOWFAST_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+function ReverseDiagram({ step }: { step: ReverseStep }) {
+  const cell = 56;
+  const gap = 14;
+  const h = 48;
+  const n = step.nums.length;
+  const rowW = n * cell + (n - 1) * gap;
+  const origin = (W - rowW) / 2;
+  const y = 52;
+  const xOf = (i: number) => origin + i * (cell + gap);
+
+  const fillOf = (i: number) => {
+    if (step.swapping && (i === step.left || i === step.right)) return ORANGE;
+    if (step.left === i) return "#196860";
+    if (step.right === i) return "#5a3a20";
+    return "#2a3550";
+  };
+  const strokeOf = (i: number) => {
+    if (step.swapping && (i === step.left || i === step.right)) return GOLD;
+    if (step.left === i) return TEAL;
+    if (step.right === i) return GOLD;
+    return "#5a8fd8";
+  };
+
+  return (
+    <svg viewBox={`0 0 ${W} 248`} className="w-full" aria-hidden>
+      {step.nums.map((v, i) => {
+        const x = xOf(i);
+        return (
+          <g key={i}>
+            <Idx x={x + cell / 2} y={42} n={i} />
+            <Cell
+              x={x}
+              y={y}
+              w={cell}
+              h={h}
+              value={v}
+              fill={fillOf(i)}
+              stroke={strokeOf(i)}
+              ring={
+                step.left === i ? TEAL : step.right === i ? GOLD : undefined
+              }
+            />
+          </g>
+        );
+      })}
+      {step.left !== null && !step.done && (
+        <Pointer
+          cx={xOf(step.left) + cell / 2}
+          tipY={y + h + 6}
+          label="L"
+          color={TEAL}
+          from="below"
+        />
+      )}
+      {step.right !== null && !step.done && (
+        <Pointer
+          cx={xOf(step.right) + cell / 2}
+          tipY={y + h + 6}
+          label="R"
+          color={GOLD}
+          from="below"
+        />
+      )}
+      {step.done && (
+        <text x={W / 2} y={220} textAnchor="middle" fill={TEAL} fontSize={13} fontWeight={700} fontFamily={FONT}>
+          {`กลับแล้ว: [${step.nums.join(", ")}]`}
+        </text>
+      )}
+    </svg>
+  );
+}
+
+function TwoSeqDiagram({ step }: { step: TwoSeqStep }) {
+  const cell = 48;
+  const gap = 10;
+  const h = 40;
+  const a = TWO_SEQ_A;
+  const b = TWO_SEQ_B;
+  const row = (vals: number[], y: number, active: number, side: "a" | "b") => {
+    const rowW = vals.length * cell + (vals.length - 1) * gap;
+    const origin = 80;
+    return (
+      <g>
+        <Label x={24} y={y + h / 2 + 4} text={side} color={MUTED} />
+        {vals.map((v, idx) => {
+          const x = origin + idx * (cell + gap);
+          const on = idx === active && !step.done;
+          const picking = on && step.picking === side;
+          return (
+            <g key={`${side}-${idx}`}>
+              <Cell
+                x={x}
+                y={y}
+                w={cell}
+                h={h}
+                value={v}
+                fill={picking ? ORANGE : on ? "#196860" : "#2a3550"}
+                stroke={picking ? GOLD : on ? TEAL : "#5a8fd8"}
+                ring={on ? (picking ? GOLD : TEAL) : undefined}
+                dim={idx < active}
+              />
+              <Idx x={x + cell / 2} y={y + h + 16} n={idx} />
+            </g>
+          );
+        })}
+        <text x={origin + rowW + 16} y={y + h / 2 + 4} fill={DIM} fontSize={11} fontFamily={FONT}>
+          {side === "a" ? `i=${step.i}` : `j=${step.j}`}
+        </text>
+      </g>
+    );
+  };
+
+  const m = step.merged;
+  const mW = m.length === 0 ? 0 : m.length * cell + (m.length - 1) * gap;
+  const mOrigin = (W - Math.max(mW, 40)) / 2;
+
+  return (
+    <svg viewBox={`0 0 ${W} 280`} className="w-full" aria-hidden>
+      {row(a, 28, step.i, "a")}
+      {row(b, 100, step.j, "b")}
+      <Label x={W / 2} y={178} text="merged" color={MUTED} anchor="middle" />
+      {m.length === 0 ? (
+        <text x={W / 2} y={210} textAnchor="middle" fill={DIM} fontSize={12} fontFamily={FONT}>
+          (ว่าง)
+        </text>
+      ) : (
+        m.map((v, idx) => (
+          <Cell
+            key={`m-${idx}`}
+            x={mOrigin + idx * (cell + gap)}
+            y={188}
+            w={cell}
+            h={h}
+            value={v}
+            fill="#196860"
+            stroke={TEAL}
+          />
+        ))
+      )}
+      {step.done && (
+        <text x={W / 2} y={260} textAnchor="middle" fill={TEAL} fontSize={13} fontWeight={700} fontFamily={FONT}>
+          {`ผลลัพธ์ [${m.join(", ")}]`}
+        </text>
+      )}
+    </svg>
+  );
+}
+
+export function ReverseEndsViz() {
+  const steps = useMemo(() => buildReverseSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="TWO POINTERS · สลับหัวกับท้าย"
+      pills={[
+        { label: "เข้าหากัน", color: "#03A69B" },
+        { label: "SPACE  O(1)", color: "#f05a96" },
+      ]}
+      message={step.msg}
+      diagram={<ReverseDiagram step={step} />}
+      lines={REVERSE_CODE}
+      line={step.line}
+      idx={play.idx}
+      stepCount={steps.length}
+      playing={play.playing}
+      atStart={play.atStart}
+      onReset={play.reset}
+      onPrev={play.prev}
+      onNext={play.next}
+      onToggle={play.toggle}
+    />
+  );
+}
+
+export function TwoSeqViz() {
+  const steps = useMemo(() => buildTwoSeqSteps(), []);
+  const play = useVizPlayback(steps.length);
+  const step = steps[play.idx];
+  return (
+    <VizFrameView
+      title="TWO POINTERS · สองแถวทางเดียวกัน"
+      pills={[
+        { label: "คนละแถว", color: "#3c78f0" },
+        { label: "TIME  O(n+m)", color: "#03A69B" },
+      ]}
+      message={step.msg}
+      diagram={<TwoSeqDiagram step={step} />}
+      lines={TWO_SEQ_CODE}
       line={step.line}
       idx={play.idx}
       stepCount={steps.length}

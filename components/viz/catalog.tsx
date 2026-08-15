@@ -6,7 +6,7 @@ import ReverseLinkedListViz from "@/components/viz/ReverseLinkedListViz";
 import { MaxLevelSumViz, RightSideViewViz } from "@/components/viz/TreeBfsViz";
 import { CasesBstViz, DeleteBstViz, GrowBstViz, HeightBstViz, RuleBstViz, SearchBstViz } from "@/components/viz/BstViz";
 import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/PrefixSumViz";
-import { OppositeEndsViz, SlowFastViz } from "@/components/viz/TwoPointersViz";
+import { OppositeEndsViz, ReverseEndsViz, SlowFastViz, TwoSeqViz } from "@/components/viz/TwoPointersViz";
 import { ArrayAliasViz, ArrayAppendViz, ArrayConcatViz, ArrayInsertViz, ArrayIndexViz, ArrayJoinViz, ArrayLoopForViz, ArrayLoopRangeViz, ArrayLoopWhileViz, ArrayNestedViz, ArrayStrRebindViz, MergeAlternatelyViz } from "@/components/viz/ArrayStringViz";
 import { SlideFixedViz, SlideVariableViz } from "@/components/viz/SlidingWindowViz";
 import {
@@ -53,6 +53,8 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "prefix-pivot": PivotIndexViz,
   "two-ptr-opposite": OppositeEndsViz,
   "two-ptr-slow-fast": SlowFastViz,
+  "two-ptr-reverse": ReverseEndsViz,
+  "two-ptr-two-seq": TwoSeqViz,
   "array-alias": ArrayAliasViz,
   "array-str-rebind": ArrayStrRebindViz,
   "array-insert-shift": ArrayInsertViz,
