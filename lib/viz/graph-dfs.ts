@@ -56,7 +56,7 @@ export const ADJ_EDGES: [number, number][] = [
 export const ADJ_NODES = [0, 1, 2, 3, 4];
 
 export const ADJ_CODE = [
-  "edges = [(0,1), (0,2), (1,3), (2,3), (3,4)]",
+  "edges = [(0, 1), (0, 2), (1, 3), (2, 3), (3, 4)]",
   "graph = defaultdict(list)  # เริ่มว่าง {}",
   "for a, b in edges:",
   "    graph[a].append(b)",
@@ -64,28 +64,28 @@ export const ADJ_CODE = [
 ];
 
 export const DFS_CODE = [
+  "graph = {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2,4], 4:[3]}",
+  "visited = set()",
   "def dfs(node):",
   "    visited.add(node)",
   "    for nxt in graph[node]:",
   "        if nxt not in visited:",
   "            dfs(nxt)",
-  "",
-  "visited = set()",
   "dfs(0)",
 ];
 
 export const COMP_CODE = [
-  "visited = set()",
-  "count = 0",
+  "edges = [(0,1), (0,2), (3,4)]  # สองก้อน",
+  "graph = {0:[1,2], 1:[0], 2:[0], 3:[4], 4:[3]}",
+  "n, visited, count = 5, set(), 0",
   "def dfs(node):",
   "    visited.add(node)",
   "    for nxt in graph[node]:",
-  "        if nxt not in visited:",
-  "            dfs(nxt)",
+  "        if nxt not in visited: dfs(nxt)",
   "for city in range(n):",
   "    if city not in visited:",
   "        count += 1",
-  "        dfs(city)  # กวาดทั้งก้อน",
+  "        dfs(city)",
 ];
 
 /** Tiny undirected graph: two clumps {0,1,2} and {3,4}. */
@@ -206,20 +206,21 @@ export function buildDfsWalkSteps(): DfsWalkStep[] {
     });
   };
 
-  snap(7, "สร้าง visited ว่าง แล้วยิง dfs(0)", null, null, null);
+  snap(1, "graph = ตัวอย่างเดียวกับส่วนที่ 3 · edges [(0,1),(0,2),(1,3),(2,3),(3,4)]", null, null, null);
+  snap(2, "visited = set()  · ว่าง {} ยังไม่เคยไปโหนดไหน", null, null, null);
 
   const dfs = (node: number) => {
     stack.push(node);
-    snap(1, `เข้า dfs(${node})`, node, null, null);
+    snap(3, `เข้า dfs(${node})`, node, null, null);
     visited.add(node);
     order.push(node);
-    snap(2, `visited.add(${node})  · ทำเครื่องหมายทันทีที่มาถึง`, node, null, null);
+    snap(4, `visited.add(${node})  · mark ทันทีที่มาถึง · visited={${[...visited].join(",")}}`, node, null, null);
 
     for (const nxt of DFS_GRAPH[node]) {
-      snap(3, `ดูเพื่อนบ้าน nxt = ${nxt}`, node, [node, nxt], null);
+      snap(5, `ดูเพื่อนบ้าน nxt = ${nxt} จาก graph[${node}]`, node, [node, nxt], null);
       if (visited.has(nxt)) {
         snap(
-          4,
+          6,
           `${nxt} อยู่ใน visited แล้ว — ข้าม (กันวนกลับ)`,
           node,
           [node, nxt],
@@ -227,15 +228,16 @@ export function buildDfsWalkSteps(): DfsWalkStep[] {
         );
         continue;
       }
-      snap(5, `${nxt} ยังไม่เคยไป → เรียก dfs(${nxt}) ลุยลึกต่อ`, node, [node, nxt], null);
+      snap(7, `${nxt} ยังไม่เคยไป → เรียก dfs(${nxt}) ลุยลึกต่อ`, node, [node, nxt], null);
       dfs(nxt);
-      snap(3, `ถอยกลับมาที่ ${node} แล้วดูเพื่อนบ้านตัวถัดไป`, node, null, null);
+      snap(5, `ถอยกลับมาที่ ${node} แล้วดูเพื่อนบ้านตัวถัดไป`, node, null, null);
     }
 
     stack.pop();
-    snap(1, `dfs(${node}) จบ — ถอยขึ้น call stack`, stack[stack.length - 1] ?? null, null, null);
+    snap(3, `dfs(${node}) จบ — ถอยขึ้นกองการเรียก`, stack[stack.length - 1] ?? null, null, null);
   };
 
+  snap(8, "ยิง dfs(0) จากโหนดเริ่ม", null, null, null);
   dfs(0);
   snap(8, `จบแล้ว ลำดับที่ mark: [${order.join(", ")}]`, null, null, null);
   return steps;
@@ -273,19 +275,21 @@ export function buildComponentsSteps(): ComponentsStep[] {
     });
   };
 
-  snap(1, "visited ว่าง · count = 0 · จะไล่ city ทุกตัวจากนอก", null, null, null);
+  snap(1, "edges = [(0,1),(0,2),(3,4)]  · ก้อนซ้าย 0-1-2 · ก้อนขวา 3-4", null, null, null);
+  snap(2, "graph พร้อมแล้ว · นับก้อนด้วย loop นอก + dfs", null, null, null);
+  snap(3, "n=5 · visited ว่าง · count = 0", null, null, null);
 
   const dfs = (node: number) => {
     visited.add(node);
     compOf[node] = activeComp;
-    snap(4, `dfs: mark ${node} อยู่ในก้อนที่ ${activeComp}`, node, null, null);
+    snap(5, `dfs: mark ${node} อยู่ในก้อนที่ ${activeComp}`, node, null, null);
     for (const nxt of COMP_GRAPH[node]) {
-      snap(5, `ดูเพื่อนบ้าน nxt = ${nxt}`, node, [node, nxt], null);
+      snap(6, `ดูเพื่อนบ้าน nxt = ${nxt}`, node, [node, nxt], null);
       if (!visited.has(nxt)) {
         snap(7, `จาก ${node} ไป ${nxt} ในก้อนเดียวกัน`, node, [node, nxt], null);
         dfs(nxt);
       } else {
-        snap(6, `${nxt} ถูก mark แล้ว — ข้าม`, node, [node, nxt], null);
+        snap(7, `${nxt} ถูก mark แล้ว — ข้าม`, node, [node, nxt], null);
       }
     }
   };
@@ -304,6 +308,6 @@ export function buildComponentsSteps(): ComponentsStep[] {
     snap(8, `ก้อนที่ ${count} กวาดครบแล้ว เดิน loop นอกต่อ`, null, null, null);
   }
 
-  snap(2, `จบ · มี ${count} ก้อน ที่ไม่เชื่อมถึงกัน`, null, null, null);
+  snap(3, `จบ · มี ${count} ก้อน ที่ไม่เชื่อมถึงกัน`, null, null, null);
   return steps;
 }

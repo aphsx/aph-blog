@@ -348,7 +348,7 @@ function DfsDiagram({ step }: { step: DfsWalkStep }) {
       </text>
 
       <text x={480} y={200} fill={MUTED} fontSize={12} fontWeight={700} fontFamily={FONT}>
-        call stack
+        กองการเรียก
       </text>
       <rect x={480} y={210} width={200} height={36} rx={6} fill="#121620" stroke="#2a3040" />
       <text x={492} y={234} fill={GOLD} fontSize={13} fontFamily={FONT}>
@@ -357,7 +357,7 @@ function DfsDiagram({ step }: { step: DfsWalkStep }) {
 
       {/* Keep DFS_GRAPH referenced so layout stays tied to walk graph */}
       <text x={20} y={360} fill={DIM} fontSize={11} fontFamily={FONT}>
-        neighbors: 0→[{DFS_GRAPH[0].join(",")}] · ลุยลึกก่อนถอย
+        graph เดียวกับส่วนที่ 3 · 0→[{DFS_GRAPH[0].join(",")}] · ลุยลึกก่อนถอย
       </text>
     </svg>
   );
@@ -491,7 +491,7 @@ export function GraphOverviewViz() {
         { label: "edge", color: "#4a5060" },
         { label: "cycle", color: GOLD },
       ]}
-      caption="โหนด 0–4 · เส้นทอง = วง 0-1-3-2-0 · โหนด 4 แขวนจาก 3"
+      caption="edges = [(0,1), (0,2), (1,3), (2,3), (3,4)] · เส้นทอง = วง 0-1-3-2-0 · โหนด 4 แขวนจาก 3"
       diagram={
         <svg viewBox="100 30 280 320" className="mx-auto w-full max-w-md" aria-hidden>
           {ADJ_EDGES.map(([a, b]) => {
@@ -566,7 +566,7 @@ export function GraphTwoComponentsViz() {
         { label: "ก้อน 1 · 0-1-2", color: "#6565d5" },
         { label: "ก้อน 2 · 3-4", color: TEAL },
       ]}
-      caption="dfs(0) แตะได้แค่ก้อนซ้าย · ก้อนขวาต้องเริ่ม dfs ใหม่จาก 3"
+      caption="edges = [(0,1), (0,2), (3,4)] · dfs(0) แตะได้แค่ก้อนซ้าย 0-1-2 · ก้อนขวา 3-4 ต้องเริ่ม dfs ใหม่จาก 3"
       diagram={
         <svg viewBox="60 40 540 220" className="w-full" aria-hidden>
           {COMP_EDGES.map(([a, b]) => {
