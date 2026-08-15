@@ -910,7 +910,7 @@ export function MergeAlternatelyViz() {
   const step = steps[play.idx];
   return (
     <VizFrameView
-      title='MERGE · word1 = "ab"  word2 = "pqrs"'
+      title='Example 2 · word1 = "ab"  word2 = "pqrs"'
       pills={[
         { label: "word1", color: "#03A69B" },
         { label: "word2", color: "#D55D00" },

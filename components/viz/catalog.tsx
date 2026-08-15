@@ -8,6 +8,16 @@ import { CasesBstViz, DeleteBstViz, GrowBstViz, HeightBstViz, RuleBstViz, Search
 import { AltitudeViz, PivotIndexViz, PrefixBuildViz } from "@/components/viz/PrefixSumViz";
 import { OppositeEndsViz, ReverseEndsViz, SlowFastViz, TwoSeqViz } from "@/components/viz/TwoPointersViz";
 import { ArrayAliasViz, ArrayAppendViz, ArrayConcatViz, ArrayInsertViz, ArrayIndexViz, ArrayJoinViz, ArrayLoopForViz, ArrayLoopRangeViz, ArrayLoopWhileViz, ArrayNestedViz, ArrayStrRebindViz, MergeAlternatelyViz } from "@/components/viz/ArrayStringViz";
+import {
+  CanPlaceFlowersViz,
+  GcdOfStringsViz,
+  IncreasingTripletViz,
+  KidsCandiesViz,
+  ProductExceptSelfViz,
+  ReverseVowelsViz,
+  ReverseWordsViz,
+  StringCompressionViz,
+} from "@/components/viz/ArrayStringProblemsViz";
 import { SlideFixedViz, SlideVariableViz } from "@/components/viz/SlidingWindowViz";
 import {
   HashCloseViz,
@@ -67,6 +77,14 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "array-loop-range": ArrayLoopRangeViz,
   "array-nested": ArrayNestedViz,
   "merge-alternately": MergeAlternatelyViz,
+  "gcd-of-strings": GcdOfStringsViz,
+  "kids-candies": KidsCandiesViz,
+  "can-place-flowers": CanPlaceFlowersViz,
+  "reverse-vowels": ReverseVowelsViz,
+  "reverse-words": ReverseWordsViz,
+  "product-except-self": ProductExceptSelfViz,
+  "increasing-triplet": IncreasingTripletViz,
+  "string-compression": StringCompressionViz,
   "slide-fixed": SlideFixedViz,
   "slide-variable": SlideVariableViz,
   "hash-scan": HashScanViz,
