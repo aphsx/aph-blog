@@ -48,6 +48,7 @@ import {
   GraphBfsWalkViz,
   GraphGridAsGraphViz,
 } from "@/components/viz/GraphBfsViz";
+import { NearestExitViz, RottingOrangesViz } from "@/components/viz/GraphBfsProblemsViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -114,6 +115,8 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "graph-bfs-grid-static": GraphGridAsGraphViz,
   "graph-bfs-grid": GraphBfsGridViz,
   "graph-bfs-multi": GraphBfsMultiViz,
+  "nearest-exit": NearestExitViz,
+  "rotting-oranges": RottingOrangesViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {

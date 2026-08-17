@@ -72,6 +72,8 @@ export const VIZ_IDS = [
   "graph-bfs-grid-static",
   "graph-bfs-grid",
   "graph-bfs-multi",
+  "nearest-exit",
+  "rotting-oranges",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];
