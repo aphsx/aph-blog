@@ -1003,25 +1003,23 @@ dfs(0)`,
               c: `from collections import defaultdict
 
 class Solution:
-    def minReorder(self, n: int, connections: list[list[int]]) -> int:
-        graph: dict[int, list[tuple[int, int]]] = defaultdict(list)
+    def minReorder(self, n: int, connections: List[List[int]]) -> int:
+        graph = defaultdict(list)
         for a, b in connections:
-            graph[a].append((b, 1))  # ทิศจริง — เดินทางนี้จาก 0 ออกไป = ต้องกลับ
-            graph[b].append((a, 0))  # ทางที่เติมเพื่อเดินได้ทั่ว
+            graph[a].append((b, 1))
+            graph[b].append((a, 0))
 
-        visited: set[int] = set()
-        changes = 0
+        visit = set()
 
-        def dfs(city: int) -> None:
-            nonlocal changes
-            visited.add(city)
-            for nxt, cost in graph[city]:
-                if nxt not in visited:
-                    changes += cost
-                    dfs(nxt)
+        def dfs(node):
+            visit.add(node)
+            change = 0
+            for nei, cost in graph[node]:
+                if nei not in visit:
+                    change += cost + dfs(nei)
+            return change
 
-        dfs(0)
-        return changes`,
+        return dfs(0)`,
             },
 
             { t: "h3", c: "อ่านโค้ดทีละส่วน" },
