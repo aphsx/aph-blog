@@ -68,6 +68,10 @@ export const VIZ_IDS = [
   "number-of-provinces",
   "reorder-routes",
   "evaluate-division",
+  "graph-bfs-walk",
+  "graph-bfs-grid-static",
+  "graph-bfs-grid",
+  "graph-bfs-multi",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

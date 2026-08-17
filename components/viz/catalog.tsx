@@ -42,6 +42,12 @@ import {
   NumberOfProvincesViz,
   ReorderRoutesViz,
 } from "@/components/viz/GraphDfsProblemsViz";
+import {
+  GraphBfsGridViz,
+  GraphBfsMultiViz,
+  GraphBfsWalkViz,
+  GraphGridAsGraphViz,
+} from "@/components/viz/GraphBfsViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -104,6 +110,10 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "number-of-provinces": NumberOfProvincesViz,
   "reorder-routes": ReorderRoutesViz,
   "evaluate-division": EvaluateDivisionViz,
+  "graph-bfs-walk": GraphBfsWalkViz,
+  "graph-bfs-grid-static": GraphGridAsGraphViz,
+  "graph-bfs-grid": GraphBfsGridViz,
+  "graph-bfs-multi": GraphBfsMultiViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {
