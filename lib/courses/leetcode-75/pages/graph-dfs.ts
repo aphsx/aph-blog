@@ -1004,19 +1004,19 @@ dfs(0)`,
 
 class Solution:
     def minReorder(self, n: int, connections: List[List[int]]) -> int:
-        graph = defaultdict(list)
+        graph = defaultdict(list)  # เมือง → [(เพื่อนบ้าน, cost)]
         for a, b in connections:
-            graph[a].append((b, 1))
-            graph[b].append((a, 0))
+            graph[a].append((b, 1))  # ทิศจริง a→b
+            graph[b].append((a, 0))  # ทางกลับที่เติม เพื่อเดินจาก 0 ได้ทั่ว
 
         visit = set()
 
         def dfs(node):
-            visit.add(node)
+            visit.add(node)  # mark ว่าเข้าเมืองนี้แล้ว
             change = 0
             for nei, cost in graph[node]:
                 if nei not in visit:
-                    change += cost + dfs(nei)
+                    change += cost + dfs(nei)  # cost 1 = ต้องกลับทิศ · 0 = ไม่กลับ
             return change
 
         return dfs(0)`,
