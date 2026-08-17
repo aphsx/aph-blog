@@ -309,8 +309,11 @@ function ReorderDiagram({ step }: { step: ReorderStep }) {
         const pa = REORDER_POS[a];
         const pb = REORDER_POS[b];
         const isFlip = flipped.has(`${a}-${b}`);
-        const isActive = step.current === a && step.nxt === b && step.cost === 1;
-        const stroke = isActive || isFlip ? ORANGE : "#4a5060";
+        const isForward = step.current === a && step.nxt === b && step.cost === 1;
+        const isAgainst = step.current === b && step.nxt === a && step.cost === 0;
+        const isActive = isForward || isAgainst;
+        const stroke = isForward || isFlip ? ORANGE : isAgainst ? BLUE : "#4a5060";
+        const marker = isForward || isFlip ? "url(#arr-orange)" : isAgainst ? "url(#arr-gold)" : "url(#arr-muted)";
         return (
           <line
             key={`${a}-${b}`}
@@ -320,7 +323,7 @@ function ReorderDiagram({ step }: { step: ReorderStep }) {
             y2={pb.y}
             stroke={stroke}
             strokeWidth={isActive || isFlip ? 3.5 : 2}
-            markerEnd={isActive || isFlip ? "url(#arr-orange)" : "url(#arr-muted)"}
+            markerEnd={marker}
           />
         );
       })}
@@ -359,7 +362,7 @@ function ReorderDiagram({ step }: { step: ReorderStep }) {
         changes = {step.changes}
       </text>
       <text x={400} y={324} fill={DIM} fontSize={11} fontFamily={FONT}>
-        ส้ม = ถนนที่ต้องกลับทิศ
+        ส้ม = ต้องกลับทิศ · ฟ้า = เดินย้อนลูกศร
       </text>
     </svg>
   );

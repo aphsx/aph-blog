@@ -281,17 +281,20 @@ export function buildReorderSteps(): ReorderStep[] {
     snap(7, `mark เมือง ${city}`, { current: city });
     for (const [nxt, cost] of REORDER_GRAPH[city]) {
       snap(8, `จาก ${city} ไป ${nxt} (cost=${cost})`, { current: city, nxt, cost });
-      if (visited.has(nxt)) continue;
+      if (visited.has(nxt)) {
+        snap(9, `${nxt} อยู่ใน visited แล้ว — ข้าม`, { current: city, nxt, cost });
+        continue;
+      }
       if (cost === 1) {
         changes += 1;
         flipped.push([city, nxt]);
-        snap(10, `cost 1 = ถนนทิศจริงชี้ออกจากฝั่ง 0 → ต้องกลับ · changes=${changes}`, {
+        snap(10, `cost 1 = ตามทิศจริงออกจากฝั่ง 0 → ต้องกลับ · changes=${changes}`, {
           current: city,
           nxt,
           cost,
         });
       } else {
-        snap(10, `cost 0 = ทางที่เราเติมเพื่อเดิน · ไม่ต้องกลับ`, {
+        snap(10, `cost 0 = เดินย้อนลูกศร · ไม่ต้องกลับ`, {
           current: city,
           nxt,
           cost,
