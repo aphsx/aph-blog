@@ -69,6 +69,7 @@ export const VIZ_IDS = [
   "reorder-routes",
   "evaluate-division",
   "graph-bfs-walk",
+  "graph-bfs-shape",
   "graph-bfs-grid-static",
   "graph-bfs-grid",
   "graph-bfs-multi",

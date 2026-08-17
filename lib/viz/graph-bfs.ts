@@ -1,36 +1,24 @@
-/** Interactive Graphs — BFS walkthroughs for the intro workshop. */
-
-import { ADJ_EDGES, ADJ_NODES, DFS_GRAPH } from "@/lib/viz/graph-dfs";
-
-export { ADJ_EDGES, ADJ_NODES, DFS_GRAPH };
+/** Graphs — BFS intro workshop. Own teaching graph — not borrowed from DFS. */
 
 export type BfsWalkStep = {
   line: number;
   msg: string;
-  /** Node just popped / being processed. */
   current: number | null;
-  /** Edge being considered (from → to). */
   edge: [number, number] | null;
   queue: number[];
   visited: number[];
-  /** Distance from start for each visited node. */
   dist: Record<number, number>;
-  /** Neighbor skipped because already visited. */
   skipped: number | null;
 };
 
 export type GridBfsStep = {
   line: number;
   msg: string;
-  /** Cell being processed [r, c]. */
   current: [number, number] | null;
-  /** Neighbor being considered. */
   looking: [number, number] | null;
   queue: [number, number][];
   visited: string[];
-  /** steps to each visited cell "r,c" → steps */
   dist: Record<string, number>;
-  /** Cell just marked as wall/blocked skip. */
   blocked: [number, number] | null;
 };
 
@@ -41,14 +29,40 @@ export type MultiBfsStep = {
   edge: [number, number] | null;
   queue: number[];
   visited: number[];
-  /** Which source "wave" first reached this node (0 or 4). */
   from: Record<number, number>;
   skipped: number | null;
 };
 
+/** Two routes from 0 to 4: short 0-3-4, long 0-1-2-4. */
+export const TEACH_EDGES: [number, number][] = [
+  [0, 1],
+  [1, 2],
+  [0, 3],
+  [3, 4],
+  [2, 4],
+];
+
+export const TEACH_NODES = [0, 1, 2, 3, 4];
+
+export const TEACH_GRAPH: Record<number, number[]> = {
+  0: [1, 3],
+  1: [0, 2],
+  2: [1, 4],
+  3: [0, 4],
+  4: [3, 2],
+};
+
+export const TEACH_POS: Record<number, { x: number; y: number }> = {
+  0: { x: 140, y: 70 },
+  1: { x: 300, y: 70 },
+  2: { x: 460, y: 70 },
+  3: { x: 140, y: 220 },
+  4: { x: 300, y: 220 },
+};
+
 export const BFS_CODE = [
   "from collections import deque",
-  "graph = {0:[1,2], 1:[0,3], 2:[0,3], 3:[1,2,4], 4:[3]}",
+  "graph = {0:[1,3], 1:[0,2], 2:[1,4], 3:[0,4], 4:[3,2]}",
   "start = 0",
   "queue = deque([start])",
   "visited = {start}",
@@ -68,10 +82,9 @@ export const GRID = [
   [0, 1, 0],
   [0, 0, 0],
 ];
-
 export const GRID_ROWS = 3;
 export const GRID_COLS = 3;
-export const GRID_START: [number, number] = [1, 0];
+export const GRID_START: [number, number] = [0, 0];
 export const GRID_DIRS: [number, number][] = [
   [-1, 0],
   [1, 0],
@@ -82,7 +95,7 @@ export const GRID_DIRS: [number, number][] = [
 export const GRID_CODE = [
   "from collections import deque",
   "grid = [[0,0,0],[0,1,0],[0,0,0]]  # 1 = กำแพง",
-  "start = (1, 0)",
+  "start = (0, 0)",
   "dirs = [(-1,0),(1,0),(0,-1),(0,1)]",
   "queue = deque([start])",
   "visited = {start}",
@@ -96,31 +109,14 @@ export const GRID_CODE = [
   "                visited.add((nr, nc))",
   "                dist[(nr,nc)] = dist[(r,c)] + 1",
   "                queue.append((nr, nc))",
-  "print(dict(dist))",
+  "print(dict(sorted(dist.items())))",
 ];
-
-export const MULTI_GRAPH: Record<number, number[]> = {
-  0: [1],
-  1: [0, 2],
-  2: [1, 3],
-  3: [2, 4],
-  4: [3],
-};
-
-export const MULTI_EDGES: [number, number][] = [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [3, 4],
-];
-
-export const MULTI_NODES = [0, 1, 2, 3, 4];
 
 export const MULTI_CODE = [
   "from collections import deque",
-  "graph = {0:[1], 1:[0,2], 2:[1,3], 3:[2,4], 4:[3]}",
-  "queue = deque([0, 4])   # สองจุดเริ่มพร้อมกัน",
-  "visited = {0, 4}",
+  "graph = {0:[1,3], 1:[0,2], 2:[1,4], 3:[0,4], 4:[3,2]}",
+  "queue = deque([0, 2])   # สองจุดเริ่มพร้อมกัน",
+  "visited = {0, 2}",
   "while queue:",
   "    node = queue.popleft()",
   "    for nxt in graph[node]:",
@@ -159,66 +155,40 @@ export function buildGraphBfsWalkSteps(): BfsWalkStep[] {
     });
   };
 
-  snap(2, "graph = ตัวอย่างเดียวกับหมวด Graphs — DFS · ห้าโหนดไม่มีทิศ", null, null, null);
-  snap(3, "start = 0 · จะแผ่คลื่นออกจากโหนดนี้", null, null, null);
+  snap(2, "graph ของหน้านี้ · จาก 0 ไป 4 มีสองทาง ความยาวไม่เท่ากัน", null, null, null);
+  snap(3, "start = 0 · คลื่นเริ่มที่นี่", null, null, null);
 
   queue.push(0);
   visited.add(0);
   dist[0] = 0;
-  snap(4, "queue = deque([0]) · ใส่จุดเริ่มเข้าคิวก่อน", null, null, null);
-  snap(5, "visited = {0} · mark ทันทีที่ใส่คิว (กันใส่ซ้ำ)", null, null, null);
-  snap(6, "dist[0] = 0 · จุดเริ่มห่างตัวเอง 0 ก้าว", null, null, null);
+  snap(4, "queue = deque([0])", null, null, null);
+  snap(5, "visited = {0} · mark ตอนใส่คิว", null, null, null);
+  snap(6, "dist[0] = 0", null, null, null);
 
   while (queue.length > 0) {
-    snap(7, `while queue: ยังมี ${queue.length} ตัวในคิว`, null, null, null);
+    snap(7, `while queue: เหลือ [${queue.join(", ")}]`, null, null, null);
     const node = queue.shift()!;
-    snap(8, `node = queue.popleft() → ได้ ${node} · dist=${dist[node]}`, node, null, null);
+    snap(8, `popleft → ${node} · dist=${dist[node]}`, node, null, null);
 
-    for (const nxt of DFS_GRAPH[node]) {
+    for (const nxt of TEACH_GRAPH[node]) {
       snap(9, `ดูเพื่อนบ้าน nxt = ${nxt} จาก graph[${node}]`, node, [node, nxt], null);
       if (visited.has(nxt)) {
-        snap(
-          10,
-          `${nxt} อยู่ใน visited แล้ว — ข้าม (เคยถูกคลื่นแตะก่อนแล้ว)`,
-          node,
-          [node, nxt],
-          nxt,
-        );
+        snap(10, `${nxt} อยู่ใน visited แล้ว — ข้าม`, node, [node, nxt], nxt);
         continue;
       }
       visited.add(nxt);
       dist[nxt] = dist[node] + 1;
       queue.push(nxt);
-      snap(
-        11,
-        `visited.add(${nxt}) · mark ตอนใส่คิว`,
-        node,
-        [node, nxt],
-        null,
-      );
-      snap(
-        12,
-        `dist[${nxt}] = dist[${node}] + 1 = ${dist[nxt]} · ห่างจุดเริ่ม ${dist[nxt]} ก้าว`,
-        node,
-        [node, nxt],
-        null,
-      );
-      snap(
-        13,
-        `queue.append(${nxt}) · คิวตอนนี้ = [${queue.join(", ")}]`,
-        node,
-        [node, nxt],
-        null,
-      );
+      snap(11, `visited.add(${nxt})`, node, [node, nxt], null);
+      snap(12, `dist[${nxt}] = dist[${node}] + 1 = ${dist[nxt]}`, node, [node, nxt], null);
+      snap(13, `queue.append(${nxt}) · คิว = [${queue.join(", ")}]`, node, [node, nxt], null);
     }
   }
 
-  const distStr = Object.keys(dist)
-    .map(Number)
-    .sort((a, b) => a - b)
+  const distStr = TEACH_NODES.filter((k) => k in dist)
     .map((k) => `${k}: ${dist[k]}`)
     .join(", ");
-  snap(14, `จบ · print(dist) → {${distStr}}`, null, null, null);
+  snap(14, `จบ · print(dist) → {${distStr}} · โหนด 4 ได้ 2 ไม่ใช่ 3`, null, null, null);
   return steps;
 }
 
@@ -247,61 +217,39 @@ export function buildGridBfsSteps(): GridBfsStep[] {
     });
   };
 
-  snap(2, "grid 3×3 · ช่องกลาง (1,1) เป็นกำแพง (1) ที่เหลือเดินได้ (0)", null, null, null);
-  snap(3, "start = (1, 0) · เริ่มแถวกลางคอลัมน์ซ้าย", null, null, null);
-  snap(4, "dirs = บน ล่าง ซ้าย ขวา · เพื่อนบ้านคำนวณสด ไม่สร้าง adjacency list", null, null, null);
+  snap(2, "grid 3×3 · กำแพงที่ (1,1) · ที่เหลือเดินได้", null, null, null);
+  snap(3, "start = (0, 0) · มุมบนซ้าย", null, null, null);
+  snap(4, "dirs = บน ล่าง ซ้าย ขวา · คำนวณพิกัดสด ไม่สร้าง adjacency list", null, null, null);
 
   const start = GRID_START;
   queue.push(start);
   visited.add(cellKey(start[0], start[1]));
   dist[cellKey(start[0], start[1])] = 0;
-  snap(5, "queue = deque([(1, 0)])", null, null, null);
-  snap(6, "visited = {(1, 0)} · mark ตอนใส่คิว", null, null, null);
-  snap(7, "dist[(1, 0)] = 0", null, null, null);
+  snap(5, "queue = deque([(0, 0)])", null, null, null);
+  snap(6, "visited = {(0, 0)}", null, null, null);
+  snap(7, "dist[(0, 0)] = 0", null, null, null);
 
   while (queue.length > 0) {
-    snap(8, `while queue: เหลือ ${queue.length} ช่องในคิว`, null, null, null);
+    snap(8, `while queue: เหลือ ${queue.length} ช่อง`, null, null, null);
     const [r, c] = queue.shift()!;
     snap(9, `popleft → (${r}, ${c}) · dist=${dist[cellKey(r, c)]}`, [r, c], null, null);
 
     for (const [dr, dc] of GRID_DIRS) {
       const nr = r + dr;
       const nc = c + dc;
-
       if (!(nr >= 0 && nr < GRID_ROWS && nc >= 0 && nc < GRID_COLS)) {
-        snap(
-          12,
-          `ทิศ (${dr},${dc}) → (${nr}, ${nc}) หลุดขอบ — ข้าม`,
-          [r, c],
-          [nr, nc],
-          [nr, nc],
-        );
+        snap(12, `ทิศ (${dr},${dc}) → (${nr}, ${nc}) หลุดขอบ — ข้าม`, [r, c], [nr, nc], [nr, nc]);
         continue;
       }
-
       if (GRID[nr][nc] !== 0) {
-        snap(
-          13,
-          `ทิศ (${dr},${dc}) → (${nr}, ${nc}) เป็นกำแพง — ข้าม`,
-          [r, c],
-          [nr, nc],
-          [nr, nc],
-        );
+        snap(13, `ทิศ (${dr},${dc}) → (${nr}, ${nc}) เป็นกำแพง — ข้าม`, [r, c], [nr, nc], [nr, nc]);
         continue;
       }
-
       const key = cellKey(nr, nc);
       if (visited.has(key)) {
-        snap(
-          13,
-          `ทิศ (${dr},${dc}) → (${nr}, ${nc}) เคยเยือนแล้ว — ข้าม`,
-          [r, c],
-          [nr, nc],
-          null,
-        );
+        snap(13, `ทิศ (${dr},${dc}) → (${nr}, ${nc}) เคยเยือนแล้ว — ข้าม`, [r, c], [nr, nc], null);
         continue;
       }
-
       visited.add(key);
       dist[key] = dist[cellKey(r, c)] + 1;
       queue.push([nr, nc]);
@@ -315,7 +263,7 @@ export function buildGridBfsSteps(): GridBfsStep[] {
     }
   }
 
-  snap(17, "จบ · print(dict(dist)) · ทุกช่องเดินได้มีระยะจากจุดเริ่ม", null, null, null);
+  snap(17, "จบ · ทุกช่องเดินได้มีระยะจาก (0, 0) · กำแพงไม่ถูกแตะ", null, null, null);
   return steps;
 }
 
@@ -344,53 +292,41 @@ export function buildMultiSourceSteps(): MultiBfsStep[] {
     });
   };
 
-  snap(2, "graph เป็นสายโซ่ 0—1—2—3—4 · ใช้โชว์คลื่นสองด้าน", null, null, null);
+  snap(2, "กราฟเดียวกับส่วนที่ 4 · คราวนี้เริ่มสองจุดพร้อมกัน", null, null, null);
 
-  queue.push(0, 4);
+  queue.push(0, 2);
   visited.add(0);
-  visited.add(4);
+  visited.add(2);
   from[0] = 0;
-  from[4] = 4;
-  snap(3, "queue = deque([0, 4]) · โยนจุดเริ่มทั้งสองเข้าคิวพร้อมกัน", null, null, null);
-  snap(4, "visited = {0, 4} · mark ทั้งคู่ตั้งแต่ต้น", null, null, null);
+  from[2] = 2;
+  snap(3, "queue = deque([0, 2]) · โยนทั้งคู่เข้าคิวก่อน while", null, null, null);
+  snap(4, "visited = {0, 2} · mark ทั้งคู่ตั้งแต่ต้น", null, null, null);
 
   while (queue.length > 0) {
     snap(5, `while queue: เหลือ [${queue.join(", ")}]`, null, null, null);
     const node = queue.shift()!;
     snap(6, `popleft → ${node} (คลื่นจากต้นตอ ${from[node]})`, node, null, null);
 
-    for (const nxt of MULTI_GRAPH[node]) {
+    for (const nxt of TEACH_GRAPH[node]) {
       snap(7, `ดูเพื่อนบ้าน nxt = ${nxt}`, node, [node, nxt], null);
       if (visited.has(nxt)) {
-        snap(
-          8,
-          `${nxt} ถูกคลื่นอื่นแตะก่อนแล้ว — ข้าม`,
-          node,
-          [node, nxt],
-          nxt,
-        );
+        snap(8, `${nxt} ถูกคลื่นอื่นแตะก่อนแล้ว — ข้าม`, node, [node, nxt], nxt);
         continue;
       }
       visited.add(nxt);
       from[nxt] = from[node];
       queue.push(nxt);
-      snap(
-        9,
-        `visited.add(${nxt}) · รับคลื่นจากต้นตอ ${from[nxt]}`,
-        node,
-        [node, nxt],
-        null,
-      );
-      snap(
-        10,
-        `queue.append(${nxt}) · คิว = [${queue.join(", ")}]`,
-        node,
-        [node, nxt],
-        null,
-      );
+      snap(9, `visited.add(${nxt}) · รับคลื่นจากต้นตอ ${from[nxt]}`, node, [node, nxt], null);
+      snap(10, `queue.append(${nxt}) · คิว = [${queue.join(", ")}]`, node, [node, nxt], null);
     }
   }
 
-  snap(11, `จบ · visited = {${[...visited].sort((a, b) => a - b).join(", ")}} · คลื่นสองด้านเจอกันที่กลาง`, null, null, null);
+  snap(
+    11,
+    `จบ · visited = {${[...visited].sort((a, b) => a - b).join(", ")}} · คลื่นจาก 0 และ 2 แบ่งกราฟกัน`,
+    null,
+    null,
+    null,
+  );
   return steps;
 }

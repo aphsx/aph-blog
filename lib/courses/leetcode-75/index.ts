@@ -15,7 +15,6 @@ import { treeBfsPages } from "./pages/tree-bfs";
 import { bstPages } from "./pages/bst";
 import { graphDfsPages } from "./pages/graph-dfs";
 import { graphBfsPages } from "./pages/graph-bfs";
-import { graphBfsProblemPages } from "./pages/graph-bfs-problems";
 import { heapPages } from "./pages/heap";
 import { binarySearchPages } from "./pages/binary-search";
 import { backtrackingPages } from "./pages/backtracking";
@@ -42,7 +41,6 @@ const pages: Record<string, Page> = {
   ...bstPages,
   ...graphDfsPages,
   ...graphBfsPages,
-  ...graphBfsProblemPages,
   ...heapPages,
   ...binarySearchPages,
   ...backtrackingPages,

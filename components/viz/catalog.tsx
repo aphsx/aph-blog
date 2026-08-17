@@ -45,6 +45,7 @@ import {
 import {
   GraphBfsGridViz,
   GraphBfsMultiViz,
+  GraphBfsShapeViz,
   GraphBfsWalkViz,
   GraphGridAsGraphViz,
 } from "@/components/viz/GraphBfsViz";
@@ -112,6 +113,7 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "reorder-routes": ReorderRoutesViz,
   "evaluate-division": EvaluateDivisionViz,
   "graph-bfs-walk": GraphBfsWalkViz,
+  "graph-bfs-shape": GraphBfsShapeViz,
   "graph-bfs-grid-static": GraphGridAsGraphViz,
   "graph-bfs-grid": GraphBfsGridViz,
   "graph-bfs-multi": GraphBfsMultiViz,
