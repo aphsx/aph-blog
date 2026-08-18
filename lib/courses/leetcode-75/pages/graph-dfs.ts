@@ -1110,7 +1110,7 @@ print(dfs(0))`,
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `from collections import defaultdict
+              c: `# from collections import defaultdict  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
 
 class Solution:
     def minReorder(self, n: int, connections: List[List[int]]) -> int:
@@ -1318,12 +1318,7 @@ return: [6.0, 0.5, -1.0, 1.0, -1.0]
               lang: "python",
               label: "ลายเซ็นที่ editor ใส่ให้ — ยังไม่มีคำตอบข้างใน",
               c: `class Solution:
-    def calcEquation(
-        self,
-        equations: List[List[str]],
-        values: List[float],
-        queries: List[List[str]],
-    ) -> List[float]:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
         ...`,
             },
             {
@@ -1507,18 +1502,17 @@ print(answers)`,
 
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
+              t: "p",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def calcEquation(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบนให้เห็นชัดว่าโค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+            },
+            {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `from collections import defaultdict
+              c: `# from collections import defaultdict  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
 
 class Solution:
-    def calcEquation(
-        self,
-        equations: List[List[str]],
-        values: List[float],
-        queries: List[List[str]],
-    ) -> List[float]:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
         graph = defaultdict(dict)  # ตัวแปร → {เพื่อนบ้าน: ตัวคูณ}
         for (a, b), val in zip(equations, values):
             graph[a][b] = val      # a/b = val → เดิน a→b คูณ val
