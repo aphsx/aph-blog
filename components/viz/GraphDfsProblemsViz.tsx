@@ -505,7 +505,7 @@ function EvalDivDiagram({ step }: { step: EvalDivStep }) {
           product = {step.product}
         </text>
       )}
-      {step.answer !== null && step.line === 10 && (
+      {step.answer !== null && step.line === 12 && (
         <text x={560} y={240} fill={ORANGE} fontSize={16} fontWeight={800} fontFamily={FONT}>
           → {step.answer}
         </text>
