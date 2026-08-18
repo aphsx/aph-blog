@@ -486,14 +486,18 @@ visited: [0, 1, 2, 3, 4]`,
 
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
+              t: "p",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def canVisitAllRooms(...)` หนึ่งบรรทัด · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+            },
+            {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `class Solution:
-    def canVisitAllRooms(self, rooms: list[list[int]]) -> bool:
-        visited: set[int] = set()
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+        visited = set()
 
-        def dfs(room: int) -> None:
+        def dfs(room):
             visited.add(room)
             for key in rooms[room]:
                 if key not in visited:
@@ -768,15 +772,19 @@ for city in range(n):
 
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
+              t: "p",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def findCircleNum(...)` หนึ่งบรรทัด · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+            },
+            {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `class Solution:
-    def findCircleNum(self, isConnected: list[list[int]]) -> int:
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
         n = len(isConnected)
-        visited: set[int] = set()
+        visited = set()
 
-        def dfs(city: int) -> None:
+        def dfs(city):
             visited.add(city)
             for other in range(n):  # ไล่ทุกช่องในแถว city
                 if isConnected[city][other] == 1 and other not in visited:
@@ -1106,6 +1114,10 @@ print(dfs(0))`,
             { t: "viz", id: "reorder-routes" },
 
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "p",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def minReorder(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+            },
             {
               t: "code",
               lang: "python",

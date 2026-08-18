@@ -756,10 +756,14 @@ for dr, dc in dirs:
 
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
+              t: "p",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def nearestExit(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+            },
+            {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `from collections import deque
+              c: `# from collections import deque  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
 
 class Solution:
     def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
@@ -1095,15 +1099,19 @@ while queue and fresh > 0:
 
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
+              t: "p",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def orangesRotting(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+            },
+            {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `from collections import deque
+              c: `# from collections import deque  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
 
 class Solution:
-    def orangesRotting(self, grid: list[list[int]]) -> int:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
         rows, cols = len(grid), len(grid[0])
-        queue: deque[tuple[int, int]] = deque()
+        queue = deque()
         fresh = 0
         dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
