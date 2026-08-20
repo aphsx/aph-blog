@@ -487,13 +487,15 @@ visited: [0, 1, 2, 3, 4]`,
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
               t: "p",
-              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def canVisitAllRooms(...)` หนึ่งบรรทัด · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def canVisitAllRooms(...)` หนึ่งบรรทัด ใช้ `List[...]` ตาม template (LeetCode import ให้แล้ว) · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `class Solution:
+              c: `# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
+
+class Solution:
     def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
         visited = set()
 
@@ -773,13 +775,15 @@ for city in range(n):
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
               t: "p",
-              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def findCircleNum(...)` หนึ่งบรรทัด · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def findCircleNum(...)` หนึ่งบรรทัด ใช้ `List[...]` ตาม template (LeetCode import ให้แล้ว) · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
-              c: `class Solution:
+              c: `# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
+
+class Solution:
     def findCircleNum(self, isConnected: List[List[int]]) -> int:
         n = len(isConnected)
         visited = set()
@@ -1116,13 +1120,14 @@ print(dfs(0))`,
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
               t: "p",
-              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def minReorder(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def minReorder(...)` หนึ่งบรรทัด ใช้ `List[...]` ตาม template · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `# from collections import defaultdict  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
+# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
 
 class Solution:
     def minReorder(self, n: int, connections: List[List[int]]) -> int:
@@ -1515,13 +1520,14 @@ print(answers)`,
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
               t: "p",
-              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def calcEquation(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบนให้เห็นชัดว่าโค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def calcEquation(...)` หนึ่งบรรทัด ใช้ `List[...]` ตาม template · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `# from collections import defaultdict  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
+# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
 
 class Solution:
     def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:

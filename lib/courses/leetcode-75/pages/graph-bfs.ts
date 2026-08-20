@@ -757,13 +757,14 @@ for dr, dc in dirs:
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
               t: "p",
-              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def nearestExit(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def nearestExit(...)` หนึ่งบรรทัด ใช้ `List[...]` ตาม template · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `# from collections import deque  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
+# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
 
 class Solution:
     def nearestExit(self, maze: List[List[str]], entrance: List[int]) -> int:
@@ -1100,13 +1101,14 @@ while queue and fresh > 0:
             { t: "h3", c: "โค้ดสำหรับวางใน LeetCode" },
             {
               t: "p",
-              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def orangesRotting(...)` หนึ่งบรรทัด · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
+              c: "บล็อกด้านล่างจัดหน้าตาให้ตรง editor ของ LeetCode: ลายเซ็น `def orangesRotting(...)` หนึ่งบรรทัด ใช้ `List[...]` ตาม template · สิ่งที่ template ไม่โชว์ (เช่น `import`) comment ไว้ด้านบน · โค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`",
             },
             {
               t: "code",
               lang: "python",
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `# from collections import deque  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
+# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
 
 class Solution:
     def orangesRotting(self, grid: List[List[int]]) -> int:

@@ -214,15 +214,19 @@ player เดินตัวอย่างของข้อนี้ ให้
 
 ท่าต้องเป็นของมาตรฐานของข้อนั้น ไม่ใช่เวอร์ชันสอนที่คิดเองแล้วรันผ่าน:
 
-1. **ดึงลายเซ็นจากโจทย์** — ชื่อเมธอดและ type ตาม editor ของ LeetCode เช่น `def minReorder(self, n: int, connections: List[List[int]]) -> int` · **หนึ่งบรรทัด** แบบที่ LeetCode แสดง ห้ามแตกหลายบรรทัด ห้ามเปลี่ยนเป็น `list[list[int]]` หรือชื่อเมธอดเอง
+1. **ดึงลายเซ็นจากโจทย์** — ชื่อเมธอดและ type ตาม editor ของ LeetCode เช่น `def minReorder(self, n: int, connections: List[List[int]]) -> int` · **หนึ่งบรรทัด** แบบที่ LeetCode แสดง · ใช้ `List` (ตัว L ใหญ่) ตาม template ห้ามเปลี่ยนเป็น `list[list[int]]` หรือแตกหลายบรรทัด
 2. **ดึงท่ามาตรฐาน** — เปิดเฉลยที่ยอมรับกันทั่วไปของข้อนั้น (editorial / เฉลยที่คนส่งจริง) แล้วเขียนตามกลไกนั้น ห้ามยัด type hint ในตัวแปรท้องถิ่น ห้าม `self.xxx` แทนตัวสะสมธรรมดา ห้าม `print`
-3. **import / ของที่ LeetCode ไม่โชว์ใน template** — เช่น `from collections import defaultdict` ให้ **comment ไว้บรรทัดบน** พร้อมข้อความว่า LeetCode ไม่โชว์ ให้เห็นชัดว่าสิ่งที่ผู้ใช้ต้องเขียนจริง ๆ เริ่มที่ `class Solution:` · บน LeetCode มักรันได้โดยไม่ต้อง import เอง แต่รันบนเครื่องต้อง uncomment
+3. **import / ของที่ LeetCode ไม่โชว์ใน template** — comment ไว้บรรทัดบนให้เห็นชัดว่าโค้ดที่ต้องเขียนจริงเริ่มที่ `class Solution:`:
+   - `from collections import defaultdict` / `deque` — ถ้าโค้ดใช้
+   - `List` ในลายเซ็น — LeetCode import `typing.List` ให้แล้ว ไม่ต้องพิมพ์ `from typing import List` ใน editor
+   - บน LeetCode มักรันได้โดยไม่ต้อง import เอง แต่รันบนเครื่องต้อง uncomment บรรทัดที่จำเป็น
 4. **คอมเมนต์ไทย = บอกว่าของคืออะไร** ไม่ใช่บรรยายอัลกอริทึมทั้งก้อน และไม่ใช่ dry-run ทีละรอบ (อันนั้นอยู่ในขั้นที่ 2–4 แล้ว) ตัวอย่างโทนที่ถูก: `# เมือง → [(เพื่อนบ้าน, cost)]` · `# cost 1 = ทิศจริง ต้องกลับ` · `# mark ว่าเข้าเมืองนี้แล้ว`
 
 แบบอย่างโทน (เอารูปแบบ ไม่เอารายละเอียดข้อ):
 
 ```
 # from collections import defaultdict  # LeetCode ไม่โชว์ใน template — ใส่เองถ้ารันบนเครื่อง
+# List ในลายเซ็น — LeetCode import ให้แล้ว ไม่ต้องพิมพ์ from typing import List
 
 class Solution:
     def minReorder(self, n: int, connections: List[List[int]]) -> int:
@@ -386,5 +390,5 @@ block ที่ใช้ได้: `p`, `h3`, `ul`, `ol`, `code`, `codeout`, `ca
 - [ ] ไม่มีประโยคเปิดด้วยชื่อ pattern
 - [ ] `blocks.en` ไม่มีใบ้/สอน/เฉลย ในรอบนี้
 - [ ] ไม่มี `links` ท้ายหน้า
-- [ ] ขั้นที่ 5 เป็นท่ามาตรฐานของข้อนั้น ลายเซ็นตรง editor ของ LeetCode คอมเมนต์ไทยบอกว่าของคืออะไร ไม่มี `print` debug
+- [ ] ขั้นที่ 5 เป็นท่ามาตรฐานของข้อนั้น ลายเซ็นตรง editor ของ LeetCode (หนึ่งบรรทัด · `List[...]` ไม่ใช่ `list[...]`) · import ที่ template ไม่โชว์ comment ไว้ด้านบน · คอมเมนต์ไทยบอกว่าของคืออะไร ไม่มี `print` debug
 - [ ] ทุกอย่างที่โผล่ในโค้ดวาง (`self`, `class`, `dfs`, `dict`/`defaultdict`, `set`, ทูเพิล, type hint ลายเซ็น ฯลฯ) มีชิ้นในขั้นที่ 3 บอกว่าคืออะไรและทำไมข้อนี้ต้องใช้ — ไม่ใช่แค่สั่งให้ใช้
