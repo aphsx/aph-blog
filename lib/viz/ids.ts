@@ -75,6 +75,8 @@ export const VIZ_IDS = [
   "graph-bfs-multi",
   "nearest-exit",
   "rotting-oranges",
+  "heap-shape",
+  "heap-push-pop",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

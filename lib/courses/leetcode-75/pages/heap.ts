@@ -4,78 +4,246 @@ export const heapPages: Record<string, Page> = {
   "lc75-intro-heap": {
     slug: "lc75-intro-heap",
     title: { th: "Heap / Priority Queue — พื้นฐาน & แนวคิด", en: "" },
-    lead: { th: "data structure (โครงสร้างข้อมูล) ที่ pop ตัว minimum (น้อยสุด) หรือ maximum (มากสุด) ออกมาได้เร็ว O(log n) เหมาะกับโจทย์ที่ต้องเลือก top-k หรือค่าสุดขั้วซ้ำ ๆ", en: "" },
+    lead: {
+      th: "กองที่เก็บให้ root เป็นค่าน้อยสุดเสมอ — ใส่และหยิบสุดขั้วได้เร็ว โดยไม่ต้องเรียงทั้งแถวทุกครั้ง",
+      en: "",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "Heap (ฮีป) หรือที่มักเรียกว่า Priority Queue (คิวลำดับความสำคัญ) คือ data structure ที่ออกแบบมาเพื่อตอบคำถามเดียวให้เร็วที่สุด นั่นคือ ตอนนี้ตัว minimum (น้อยสุด) หรือ maximum (มากสุด) คือตัวไหน แล้ว pop (หยิบออก) มันไป โจทย์จำนวนมากบน LeetCode ที่ต้องคอยเลือกค่าสุดขั้วซ้ำ ๆ เช่น หา Kth largest (ค่ามากอันดับ k), จ้างคนที่ถูกที่สุด, หรือ process ตาม priority (ลำดับความสำคัญ) จะแก้ได้สวยงามด้วย heap" },
+        {
+          t: "p",
+          c: "ในโปรแกรมจริง บางงานต้องถามซ้ำ ๆ ว่า \"ตอนนี้ตัวที่น้อยที่สุด (หรือมากที่สุด) คือตัวไหน แล้วหยิบมันออก\" เช่น คิวงานที่เรียงตามความเร่งด่วน ตารางคะแนนที่อยากรู้คนนำตลอด หรือกองงานที่ต้องหยิบชิ้นถูกสุดก่อน — ถ้าเก็บแค่ list ธรรมดา ทุกครั้งที่หาตัวน้อยสุดต้องไล่ทั้งแถว",
+        },
+        {
+          t: "p",
+          c: "หมวด Binary Tree คุณเห็นต้นไม้สองแขนงแล้ว หน้านี้เอาโครงต้นไม้มาใช้แบบพิเศษ: ไม่สนใจลำดับซ้าย-ขวาแบบ BST แต่บังคับกฎว่าพ่อต้องไม่แย่กว่าลูก (สำหรับ min-heap) เพื่อให้ค่าน้อยสุดอยู่ที่รากเสมอ — ชื่อ heap (ฮีป) หรือ priority queue (คิวลำดับความสำคัญ)",
+        },
 
-              { t: "h2", c: "heap คืออะไร ทำไมถึงเร็ว" },
-              { t: "p", c: "ลองนึกภาพว่าเรามีตัวเลขกองหนึ่ง แล้วต้อง pop ตัว minimum ออกไปเรื่อย ๆ ถ้าเราเก็บเป็น array (ลิสต์) ธรรมดา ทุกครั้งที่จะหาตัว minimum ต้อง iterate (วน) ดูทั้ง array เป็น O(n) และถ้าจะ sort (เรียง) ก่อนก็ O(n log n) แต่ heap ทำให้เรา pop ตัว minimum ออกได้ที่ O(log n) และ peek (แอบดูโดยไม่หยิบออก) ตัว minimum ได้ที่ O(1) นี่คือเหตุผลที่มันเร็วกว่ามากเมื่อต้องทำซ้ำหลายรอบ" },
-              {
-                t: "image",
-                src: "/leetcode-75/heap.gif",
-                alt: "Min-heap insert: append then bubble up until heap property holds",
-                caption:
-                  "Min-Heap: insert ท้ายแถว → bubble up สลับกับพ่อจนกว่า parent ≤ children · root = min เสมอ",
-              },
-              { t: "p", c: "หน้าตาของ heap คือ binary tree (ต้นไม้สองแขนง) ที่ทุก node (โหนด) ต้อง น้อยกว่าหรือเท่ากับ child (ลูก) ของมันเสมอ (สำหรับ min-heap) ผลก็คือตัว minimum จะลอยขึ้นมาอยู่บนสุด (root/ราก) เสมอ ต้นไม้นี้ store (เก็บ) ใน array แบบแนวราบ ไม่ต้องมี pointer (ตัวชี้) จริง ๆ" },
-              { t: "code", c: `           1          <- ราก = ตัวน้อยสุดเสมอ
-         /   \\
-        3     2
-       / \\   /
-      7   4 5
+        { t: "h2", c: "ส่วนที่ 1 · Heap คืออะไร ทำไมต้องมี" },
+        {
+          t: "p",
+          c: "heap คือโครงสร้างที่ออกแบบมาเพื่อตอบคำถามเดียวให้เร็ว: ค่าสุดขั้วตอนนี้คืออะไร แล้วหยิบออกได้โดยไม่ทำลายกฎของกอง",
+        },
+        {
+          t: "ul",
+          c: [
+            "ถ้าเก็บ list แล้วหา `min` ทุกครั้ง = O(n) ต่อครั้ง · ทำซ้ำหลายรอบแพง",
+            "ถ้า `sorted` ทั้งแถวทุกครั้งที่ข้อมูลเปลี่ยน = O(n log n) ต่อรอบ · แพงกว่าเมื่อเปลี่ยนทีละตัว",
+            "heap ทำให้ peek (แอบดูโดยไม่หยิบ) ค่าน้อยสุดได้ O(1) และ push/pop ได้ประมาณ O(log n)",
+          ],
+        },
+        {
+          t: "callout",
+          title: "ศัพท์ที่จะใช้ต่อ",
+          c: "min-heap = กองที่รากคือน้อยสุด · max-heap = กองที่รากคือมากสุด · root (ราก) = โหนดบนสุด · parent / child = พ่อ / ลูก · bubble up = ตัวใหม่ลอยขึ้นเทียบพ่อ · sift down = ตัวบนจมลงเทียบลูก",
+        },
 
-# เก็บในอาร์เรย์: [1, 3, 2, 7, 4, 5]
-# ลูกของ index i อยู่ที่ 2*i+1 และ 2*i+2` },
+        { t: "h2", c: "ส่วนที่ 2 · กฏ heap + เก็บใน list" },
+        {
+          t: "p",
+          c: "ภาพในหัวของ min-heap คือ binary tree (ต้นไม้สองแขนง) ที่ทุกโหนดต้องเป็นไปตามกฏ: ค่าของพ่อ ≤ ค่าของลูกทั้งสอง · ผลคือ root เป็นค่าน้อยสุดของทั้งกองเสมอ",
+        },
+        {
+          t: "ul",
+          c: [
+            "ไม่ต้องมี pointer แยก — เก็บเป็น `list` แถวเดียวตามลำดับชั้น (level-order)",
+            "ลูกซ้ายของช่อง i อยู่ที่ index `2*i + 1`",
+            "ลูกขวาอยู่ที่ `2*i + 2`",
+            "พ่อของช่อง i อยู่ที่ `(i - 1) // 2`",
+          ],
+        },
+        {
+          t: "p",
+          c: "ตัวอย่างทั้งหน้า (ภาพนิ่ง): arr = [1, 3, 2, 7, 4, 5] · root = 1 · ทุกพ่อ ≤ ลูก",
+        },
+        { t: "viz", id: "heap-shape" },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "อ่าน list แล้วหาลูกจาก index",
+          code: `arr = [1, 3, 2, 7, 4, 5]
+print("root:", arr[0])
 
-              { t: "h2", c: "module heapq ใน Python" },
-              { t: "p", c: "ใน Python เราไม่ต้องเขียน heap เองจากศูนย์ มี module ชื่อ heapq ในไลบรารีมาตรฐาน ที่ทำงานบน array ธรรมดาโดยตรง (มันมอง array ตัวนั้นเป็น min-heap) operation หลักมีดังนี้:" },
-              { t: "table", head: ["operation", "ความหมาย", "Big-O"], rows: [
-                ["heapq.heappush(h, x)", "push ค่า x เข้า heap", "O(log n)"],
-                ["heapq.heappop(h)", "pop ตัว minimum ออกแล้ว return", "O(log n)"],
-                ["h[0]", "peek ตัว minimum (ไม่ pop ออก)", "O(1)"],
-                ["heapq.heapify(list)", "heapify แปลงทั้ง array เป็น heap in-place (ในที่เดิม)", "O(n)"],
-                ["len(h)", "จำนวน element (สมาชิก) ใน heap", "O(1)"],
-              ] },
-              { t: "code", lang: "python", c: `import heapq
+i = 0
+left = 2 * i + 1
+right = 2 * i + 2
+print("ลูกของ root:", arr[left], arr[right])
+
+j = 3  # ค่า 7
+parent = (j - 1) // 2
+print("พ่อของ 7 คือ index", parent, "ค่า =", arr[parent])`,
+          out: `root: 1
+ลูกของ root: 3 2
+พ่อของ 7 คือ index 1 ค่า = 3`,
+        },
+
+        { t: "h2", c: "ส่วนที่ 3 · heapq ใน Python — เครื่องมือทีละชิ้น" },
+        {
+          t: "p",
+          c: "Python มีโมดูลมาตรฐาน `heapq` ที่มอง `list` เป็น min-heap ให้เลย — ไม่ต้องเขียน bubble/sift เองในหมวดนี้ แต่ต้องรู้ว่าแต่ละคำสั่งทำอะไรกับกอง",
+        },
+        {
+          t: "ul",
+          c: [
+            "`import heapq` — ยืมโมดูลเข้ามาใช้",
+            "`h = []` — กองเริ่มว่าง (list เปล่า)",
+            "`heapq.heappush(h, x)` — ใส่ x ท้ายแล้วจัดให้กฏ heap ยังถูก · O(log n)",
+            "`h[0]` — แอบดู root (ค่าน้อยสุด) โดยไม่หยิบออก · O(1)",
+            "`heapq.heappop(h)` — หยิบ root ออก แล้วจัดกองใหม่ · O(log n)",
+            "`heapq.heapify(nums)` — แปลง list ทั้งก้อนเป็น heap ในที่เดิม · O(n) เร็วกว่า push ทีละตัว",
+          ],
+        },
+        {
+          t: "p",
+          c: "ชิ้นที่ 1 · ว่าง → push ทีละตัว → peek → pop สองครั้ง — ตัวอย่างเดียวกับ Interactive ด้านล่าง",
+        },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "push / peek / pop บน min-heap",
+          code: `import heapq
 
 h = []
 heapq.heappush(h, 5)
 heapq.heappush(h, 1)
 heapq.heappush(h, 3)
-print(h[0])            # 1  (แอบดูตัวน้อยสุด O(1))
-print(heapq.heappop(h))  # 1  (หยิบตัวน้อยสุดออก)
-print(heapq.heappop(h))  # 3
+print("หลัง push:", h)
+print("peek root:", h[0])
+print("pop:", heapq.heappop(h))
+print("pop:", heapq.heappop(h))
+print("เหลือ:", h)`,
+          out: `หลัง push: [1, 5, 3]
+peek root: 1
+pop: 1
+pop: 3
+เหลือ: [5]`,
+        },
+        {
+          t: "ul",
+          c: [
+            "หลัง push ครบ list ไม่จำเป็นเรียงจากน้อยไปมากทั้งแถว — สำคัญแค่ `h[0]` เป็นน้อยสุด และทุกพ่อ ≤ ลูก",
+            "ตอน `heappush(1)` เข้าไปใน `[5]` ระบบใส่ท้ายแล้ว bubble up สลับกับพ่อจน root เป็น 1",
+            "`heappop` หยิบ 1 ออก แล้วย้ายตัวท้ายขึ้น root แล้ว sift down ให้กฏกลับมาถูกต้อง",
+          ],
+        },
+        { t: "h3", c: "ดูทีละขั้น (Interactive)" },
+        {
+          t: "p",
+          c: "กด **Next ▶** ตัวอย่างเดียวกับโค้ดด้านบน: push 5, 1, 3 แล้ว peek / pop · ทอง = โฟกัส · เขียว = พ่อ · ส้ม = ลูกตอนเทียบ · แถบล่าง = list ที่เก็บ heap",
+        },
+        { t: "viz", id: "heap-push-pop" },
 
-# แปลงลิสต์ที่มีอยู่แล้วให้เป็น heap ทันที (เร็วกว่า push ทีละตัว)
+        {
+          t: "p",
+          c: "ชิ้นที่ 2 · `heapify` — มี list พร้อมแล้ว อยากให้เป็น heap ทั้งก้อนโดยไม่ push ทีละตัว",
+        },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "heapify list ทั้งก้อน",
+          code: `import heapq
+
 nums = [9, 4, 7, 1, 2]
-heapq.heapify(nums)    # O(n)
-print(heapq.heappop(nums))  # 1` },
+heapq.heapify(nums)  # จัดในที่เดิม · O(n)
+print("หลัง heapify:", nums)
+print("pop ครั้งแรก:", heapq.heappop(nums))`,
+          out: `หลัง heapify: [1, 2, 7, 4, 9]
+pop ครั้งแรก: 1`,
+        },
+        {
+          t: "p",
+          c: "หน้าตาหลัง `heapify` อาจไม่เหมือนตอน push ทีละตัว แต่กฏพ่อ ≤ ลูกยังครบ และ `nums[0]` ยังเป็นน้อยสุดเสมอ",
+        },
 
-              { t: "h2", c: "อยากได้ max-heap ต้องใช้ค่าลบ" },
-              { t: "callout", title: "จุดสำคัญ: heapq เป็น min-heap เท่านั้น", c: "Python มีแค่ min-heap (pop ตัว minimum) ถ้าอยากได้ max-heap (pop ตัว maximum) ให้ใช้ทริก push ค่า negative (ติดลบ) เข้าไปแทน แล้วตอน pop ออกค่อย negate กลับ เพราะตัว minimum ของค่า negative ก็คือตัว maximum ของค่าจริงนั่นเอง" },
-              { t: "code", lang: "python", c: `import heapq
+        { t: "h2", c: "ส่วนที่ 4 · อยากได้ max-heap ใช้ค่าติดลบ" },
+        {
+          t: "p",
+          c: "`heapq` ใน Python เป็น min-heap อย่างเดียว — pop ได้แค่น้อยสุด ถ้าต้องการมากสุด ให้เก็บค่าติดลบ: ตัวที่มากที่สุดของค่าจริง จะกลายเป็นตัวที่น้อยที่สุดของค่าลบ",
+        },
+        {
+          t: "ul",
+          c: [
+            "`heapq.heappush(max_heap, -x)` — ใส่ค่าลบแทนค่าจริง",
+            "`-heapq.heappop(max_heap)` — หยิบออกแล้วคูณ −1 กลับ เป็นค่าจริง",
+          ],
+        },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "จำลอง max-heap ด้วยค่าลบ",
+          code: `import heapq
 
-# จำลอง max-heap ด้วยการเก็บค่าติดลบ
 max_heap = []
 for x in [5, 1, 8, 3]:
-    heapq.heappush(max_heap, -x)   # ใส่ค่าลบ
+    heapq.heappush(max_heap, -x)
 
-biggest = -heapq.heappop(max_heap)  # หยิบออกแล้วใส่ลบกลับ
-print(biggest)   # 8` },
-              { t: "p", c: "นอกจากนี้ heapq ยังมีฟังก์ชันสำเร็จรูป nlargest และ nsmallest ที่ return k ตัวที่มาก/น้อยที่สุดจาก iterable ได้ทันที เหมาะเวลาต้องการ top-k แบบง่าย ๆ" },
-              { t: "code", lang: "python", c: `import heapq
+print("ในกอง (ค่าลบ):", max_heap)
+print("peek แบบค่าจริง:", -max_heap[0])
+biggest = -heapq.heappop(max_heap)
+print("pop มากสุด:", biggest)`,
+          out: `ในกอง (ค่าลบ): [-8, -3, -5, -1]
+peek แบบค่าจริง: 8
+pop มากสุด: 8`,
+        },
+
+        { t: "h2", c: "ส่วนที่ 5 · nlargest / nsmallest (ตัวช่วยสั้น)" },
+        {
+          t: "p",
+          c: "ถ้าต้องการแค่ k ตัวมากสุดหรือน้อยสุดจากข้อมูลที่จบแล้ว (ไม่ต้องอัปเดตทีละตัว) `heapq` มีตัวช่วยสำเร็จรูป — ข้างในใช้ heap ให้ แต่เรียกบรรทัดเดียว",
+        },
+        {
+          t: "codeout",
+          lang: "python",
+          label: "nlargest / nsmallest",
+          code: `import heapq
 
 nums = [4, 10, 1, 7, 3, 9]
-print(heapq.nlargest(3, nums))   # [10, 9, 7]  (3 ตัวมากสุด)
-print(heapq.nsmallest(2, nums))  # [1, 3]      (2 ตัวน้อยสุด)
+print(heapq.nlargest(3, nums))
+print(heapq.nsmallest(2, nums))
 
-# ใช้ key ได้ด้วย เหมือน sorted
 words = ["apple", "kiwi", "banana"]
-print(heapq.nlargest(1, words, key=len))  # ['banana']` },
+print(heapq.nlargest(1, words, key=len))`,
+          out: `[10, 9, 7]
+[1, 3]
+['banana']`,
+        },
 
-              { t: "callout", title: "หมวดนี้มี 4 ข้อ", c: "ถ้าโจทย์มีคำว่า Kth (อันดับ k), maximum/minimum (มาก/น้อยที่สุด), top-k, หรือ ต้อง select (เลือก) ตัวสุดขั้วออกไปเรื่อย ๆ ในขณะที่ข้อมูลเปลี่ยนไปด้วย — heap มักเป็นคำตอบ พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
+        { t: "h2", c: "ส่วนที่ 6 · สรุป operation และราคา" },
+        {
+          t: "table",
+          head: ["สิ่งที่ทำ", "คำสั่ง", "เวลาโดยประมาณ"],
+          rows: [
+            ["สร้างกองว่าง", "`h = []`", "O(1)"],
+            ["ใส่ค่า", "`heapq.heappush(h, x)`", "O(log n)"],
+            ["แอบดูน้อยสุด", "`h[0]`", "O(1)"],
+            ["หยิบน้อยสุดออก", "`heapq.heappop(h)`", "O(log n)"],
+            ["แปลง list ทั้งก้อน", "`heapq.heapify(nums)`", "O(n)"],
+            ["หา min จาก list ธรรมดา", "`min(nums)`", "O(n)"],
+          ],
+        },
+        {
+          t: "p",
+          c: "n = จำนวนสมาชิกในกอง — อ้างอิง Big-O เพิ่มได้ที่หน้า lc75-bigo · เลือก heap เมื่อต้องหยิบ/ใส่ค่าสุดขั้วซ้ำ ๆ โดยที่ข้อมูลเปลี่ยนทีละชิ้น",
+        },
+        {
+          t: "table",
+          head: ["มิติ", "list + min ทุกครั้ง", "heap (min-heap)"],
+          rows: [
+            ["ดูค่าน้อยสุด", "O(n) ไล่ทั้งแถว", "O(1) ที่ root"],
+            ["ใส่ค่าใหม่แล้วอยากรู้ min", "ใส่ O(1) แต่หาใหม่ O(n)", "push O(log n) แล้ว peek O(1)"],
+            ["เรียงทั้งก้อน", "`sorted` O(n log n)", "ไม่เรียงทั้งก้อน — จัดแค่กฏพ่อ-ลูก"],
+          ],
+        },
+        {
+          t: "callout",
+          title: "ของที่ยังไม่สอนในหน้านี้",
+          c: "เส้นทางสั้นสุดบนกราฟที่มีน้ำหนักไม่เท่ากัน (เช่น Dijkstra) และการสร้างต้นไม้ Huffman → ยังไม่ต้องใน intro นี้",
+        },
+        {
+          t: "p",
+          c: "พร้อมแล้วไปข้อแรกของหมวดได้จากแถบนำทางด้านล่าง",
+        },
       ],
       en: [],
     },
