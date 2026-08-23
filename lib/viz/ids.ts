@@ -77,6 +77,7 @@ export const VIZ_IDS = [
   "rotting-oranges",
   "heap-shape",
   "heap-push-pop",
+  "kth-largest",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

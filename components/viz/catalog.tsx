@@ -50,7 +50,7 @@ import {
   GraphGridAsGraphViz,
 } from "@/components/viz/GraphBfsViz";
 import { NearestExitViz, RottingOrangesViz } from "@/components/viz/GraphBfsProblemsViz";
-import { HeapPushPopViz, HeapShapeViz } from "@/components/viz/HeapViz";
+import { HeapPushPopViz, HeapShapeViz, KthLargestViz } from "@/components/viz/HeapViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -122,6 +122,7 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "rotting-oranges": RottingOrangesViz,
   "heap-shape": HeapShapeViz,
   "heap-push-pop": HeapPushPopViz,
+  "kth-largest": KthLargestViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {

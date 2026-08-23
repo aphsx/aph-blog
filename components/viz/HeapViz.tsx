@@ -5,11 +5,15 @@ import { VizFrameView, VizStaticFrame, useVizPlayback } from "@/components/viz/V
 import {
   PUSH_POP_CODE,
   SHAPE_ARR,
+  KTH_CODE,
+  KTH_NUMS,
   buildHeapPushPopSteps,
+  buildKthLargestSteps,
   layoutHeap,
   leftOf,
   rightOf,
   type HeapStep,
+  type KthStep,
 } from "@/lib/viz/heap";
 
 const W = 720;
@@ -333,6 +337,94 @@ export function HeapPushPopViz() {
       message={step.msg}
       diagram={<HeapDiagram step={step} />}
       lines={PUSH_POP_CODE}
+      line={step.line}
+      idx={pb.idx}
+      stepCount={steps.length}
+      playing={pb.playing}
+      atStart={pb.atStart}
+      onReset={pb.reset}
+      onPrev={pb.prev}
+      onNext={pb.next}
+      onToggle={pb.toggle}
+    />
+  );
+}
+
+function KthDiagram({ step }: { step: KthStep }) {
+  const cell = 44;
+  const gap = 6;
+  const numsTotal = KTH_NUMS.length * cell + (KTH_NUMS.length - 1) * gap;
+  const nx0 = (W - numsTotal) / 2;
+
+  return (
+    <svg viewBox={`0 0 ${W} 360`} className="mx-auto block w-full max-w-[720px]">
+      <text x={24} y={22} fill={MUTED} fontSize={12} fontWeight={700} fontFamily={FONT}>
+        nums · k = 2
+      </text>
+      {KTH_NUMS.map((v, i) => {
+        const x = nx0 + i * (cell + gap);
+        const on = step.i === i;
+        return (
+          <g key={i}>
+            <rect
+              x={x}
+              y={32}
+              width={cell}
+              height={34}
+              rx={6}
+              fill={on ? "#2a3a28" : "#121620"}
+              stroke={on ? GOLD : "#2a3040"}
+              strokeWidth={on ? 2 : 1}
+            />
+            <text
+              x={x + cell / 2}
+              y={54}
+              textAnchor="middle"
+              fill={on ? GOLD : "#dcdce6"}
+              fontSize={14}
+              fontWeight={700}
+              fontFamily={FONT}
+            >
+              {v}
+            </text>
+          </g>
+        );
+      })}
+      <text x={24} y={100} fill={MUTED} fontSize={12} fontWeight={700} fontFamily={FONT}>
+        min-heap (ยาว ≤ k)
+      </text>
+      {step.popped !== null && (
+        <text x={520} y={100} fill={ORANGE} fontSize={13} fontWeight={700} fontFamily={FONT}>
+          ทิ้ง: {step.popped}
+        </text>
+      )}
+      <HeapTree
+        arr={step.heap}
+        focus={step.focus}
+        parent={null}
+        child={null}
+        top={120}
+      />
+      <ArrayRow arr={step.heap} focus={step.focus} y={280} />
+    </svg>
+  );
+}
+
+export function KthLargestViz() {
+  const steps = useMemo(() => buildKthLargestSteps(), []);
+  const pb = useVizPlayback(steps.length);
+  const step = steps[pb.idx];
+
+  return (
+    <VizFrameView
+      title="KTH LARGEST · min-heap ขนาด k"
+      pills={[
+        { label: "ทอง = กำลังดู", color: GOLD },
+        { label: "ส้ม = ถูกทิ้ง", color: ORANGE },
+      ]}
+      message={step.msg}
+      diagram={<KthDiagram step={step} />}
+      lines={KTH_CODE}
       line={step.line}
       idx={pb.idx}
       stepCount={steps.length}

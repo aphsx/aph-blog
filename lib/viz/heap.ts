@@ -161,3 +161,95 @@ export function buildHeapPushPopSteps(): HeapStep[] {
 
   return steps;
 }
+
+/** Example 1 of LC215 — min-heap of size k = 2. */
+export const KTH_NUMS = [3, 2, 1, 5, 6, 4];
+export const KTH_K = 2; // Example 1
+
+export const KTH_CODE = [
+  "import heapq",
+  "nums = [3, 2, 1, 5, 6, 4]",
+  "k = 2",
+  "heap = []",
+  "for x in nums:",
+  "    heapq.heappush(heap, x)",
+  "    if len(heap) > k:",
+  "        heapq.heappop(heap)",
+  "print(heap[0])",
+];
+
+export type KthStep = {
+  line: number;
+  msg: string;
+  /** Index in nums being processed, or null when done. */
+  i: number | null;
+  heap: number[];
+  focus: number | null;
+  popped: number | null;
+};
+
+export function buildKthLargestSteps(): KthStep[] {
+  const steps: KthStep[] = [];
+  let heap: number[] = [];
+
+  const snap = (
+    line: number,
+    msg: string,
+    i: number | null,
+    extra: Partial<KthStep> = {},
+  ) => {
+    steps.push({
+      line,
+      msg,
+      i,
+      heap: [...heap],
+      focus: null,
+      popped: null,
+      ...extra,
+    });
+  };
+
+  snap(2, "Example 1 · nums = [3, 2, 1, 5, 6, 4], k = 2 · อยากได้ตัวมากอันดับ 2", null);
+  snap(4, "heap = [] · min-heap ว่าง จะเก็บไม่เกิน k ตัว", null);
+
+  // i=0, x=3
+  heap = [3];
+  snap(6, "x = 3 · push → heap = [3] · ยาว 1 ≤ k ไม่ pop", 0, { focus: 0 });
+
+  // i=1, x=2
+  heap = [2, 3];
+  snap(6, "x = 2 · push → heap = [2, 3] · ยาว 2 ≤ k ไม่ pop", 1, { focus: 0 });
+
+  // i=2, x=1 → push then pop
+  heap = [1, 3, 2];
+  snap(6, "x = 1 · push → heap = [1, 3, 2] · ยาว 3 > k", 2, { focus: 0 });
+  heap = [2, 3];
+  snap(8, "heappop ทิ้ง 1 · เหลือ [2, 3] · เก็บแค่ 2 ตัวใหญ่สุดเท่าที่มีมา", 2, {
+    focus: 0,
+    popped: 1,
+  });
+
+  // i=3, x=5
+  heap = [2, 3, 5];
+  snap(6, "x = 5 · push → [2, 3, 5] · ยาว > k", 3, { focus: 0 });
+  heap = [3, 5];
+  snap(8, "pop ทิ้ง 2 · เหลือ [3, 5]", 3, { focus: 0, popped: 2 });
+
+  // i=4, x=6
+  heap = [3, 5, 6];
+  snap(6, "x = 6 · push → [3, 5, 6] · ยาว > k", 4, { focus: 0 });
+  heap = [5, 6];
+  snap(8, "pop ทิ้ง 3 · เหลือ [5, 6]", 4, { focus: 0, popped: 3 });
+
+  // i=5, x=4
+  heap = [4, 6, 5];
+  snap(6, "x = 4 · push → [4, 6, 5] · ยาว > k", 5, { focus: 0 });
+  heap = [5, 6];
+  snap(8, "pop ทิ้ง 4 · เหลือ [5, 6] · top-2 สุดท้าย", 5, { focus: 0, popped: 4 });
+
+  snap(9, "จบ loop · heap[0] = 5 คือตัวน้อยสุดใน top-2 = อันดับ 2 ของทั้งแถว", null, {
+    focus: 0,
+  });
+
+  return steps;
+}
