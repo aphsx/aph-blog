@@ -5,6 +5,7 @@ import { intermediateProgramming } from "./intermediate-programming";
 import { practiceProblems } from "./practice-problems";
 import { thirtyDaysPython } from "./30-days-python";
 import { leetcode75 } from "./leetcode-75";
+import { dsaCourse } from "./dsa";
 
 /** Every course "Aph's Blog" hosts, in catalog order. Add a course here. */
 export const COURSES: Course[] = [
@@ -14,6 +15,7 @@ export const COURSES: Course[] = [
   practiceProblems,
   thirtyDaysPython,
   leetcode75,
+  dsaCourse,
 ];
 
 /** Course lookup by id. */
