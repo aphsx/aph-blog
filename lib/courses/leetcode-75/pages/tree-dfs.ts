@@ -5,11 +5,11 @@ export const treeDfsPages: Record<string, Page> = {
     slug: "lc75-intro-tree-dfs",
     title: {
       th: "Binary Tree — DFS: ปูพื้นฐานจากศูนย์จนพร้อมลุย LeetCode",
-      en: "",
+      en: "Binary Tree — DFS: Fundamentals & Recursion Patterns",
     },
     lead: {
       th: "รู้จัก TreeNode แล้วจับ pattern ของ DFS — traversal orders, top-down state passing, bottom-up return values และการใช้ recursion อย่างเป็นระบบ",
-      en: "",
+      en: "Master TreeNode and core DFS patterns: preorder, inorder, postorder traversals, top-down state passing, and bottom-up divide-and-conquer.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -361,7 +361,55 @@ Post-order: 4 -> 5 -> 2 -> 3 -> 1`,
           c: "หมวดนี้มี 6 ข้อ (LC104, LC872, LC1448, LC437, LC1372, LC236) ไล่จากง่ายไปยาก — กดถัดไปเริ่มข้อแรกได้เลยครับ",
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "A **Binary Tree** is a hierarchical data structure where each node has at most two children, referred to as the left child and the right child. Unlike linear arrays, trees require recursive traversal to explore branch pathways.",
+        },
+        {
+          t: "h2",
+          c: "Part 1 · Core Terminology",
+        },
+        {
+          t: "ul",
+          c: [
+            "**Root:** Topmost node of the tree, entry point for all operations.",
+            "**Node:** Container storing a payload value (`val`) and references to `left` and `right` children.",
+            "**Leaf:** A node with no children (`left is None` and `right is None`).",
+            "**Depth / Height:** Distance from the root to the deepest leaf node.",
+            "**DFS (Depth-First Search):** Recursively explores deep down one subtree before backtracking.",
+          ],
+        },
+        {
+          t: "h2",
+          c: "Part 2 · The Three Classic DFS Traversals",
+        },
+        {
+          t: "table",
+          head: ["Traversal", "Order of Evaluation", "Primary Use Case"],
+          rows: [
+            ["Preorder", "Root → Left → Right", "Top-down processing, copying/serializing trees"],
+            ["Inorder", "Left → Root → Right", "Processes Binary Search Trees in strictly sorted order"],
+            ["Postorder", "Left → Right → Root", "Bottom-up divide-and-conquer, subtree heights, post-cleanup"],
+          ],
+        },
+        {
+          t: "h2",
+          c: "Part 3 · The Two Fundamental Recursive Paradigms",
+        },
+        {
+          t: "p",
+          c: "1. **Top-Down (Passing State Downwards):** Information flows from root to leaves via function parameters (e.g., current path sum, maximum ancestor value seen so far).\n2. **Bottom-Up (Returning Values Upwards):** Each child computes its result and returns it up to the parent (e.g., subtree height, count of matching nodes).",
+        },
+        {
+          t: "h2",
+          c: "Part 4 · Complexity Analysis",
+        },
+        {
+          t: "p",
+          c: "- **Time Complexity:** $O(N)$ visiting all $N$ nodes exactly once.\n- **Space Complexity:** $O(H)$ call stack space where $H$ is the tree height ($O(\log N)$ for balanced trees, $O(N)$ for skewed linear trees).",
+        },
+      ],
     },
   },
 

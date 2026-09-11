@@ -5,11 +5,11 @@ export const twoPointersPages: Record<string, Page> = {
     slug: "lc75-intro-two-pointers",
     title: {
       th: "Two Pointers — พื้นฐาน & แนวคิด",
-      en: "",
+      en: "Two Pointers — Fundamentals & Mental Models",
     },
     lead: {
       th: "pointer คือตัวแปรที่เก็บเลขช่องแล้วขยับเอง — หน้านี้สอนทำไมใช้สองนิ้ว ขยับตามเงื่อนไข และสองวิธีเดิน: เข้าหากัน กับทางเดียวกัน",
-      en: "",
+      en: "Pointers are indices you manipulate explicitly. Learn opposite-direction (converging) and same-direction (slow/fast) pointer patterns.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -297,7 +297,88 @@ i=3 j=2 merged=[1, 2, 3, 4, 7]
           c: "พร้อมแล้วไปข้อแรกของหมวดได้จากแถบนำทางด้านล่าง",
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "When processing sequences, we often need to inspect or coordinate two positions simultaneously—such as swapping opposite ends, comparing symmetric characters, or filtering elements in-place.",
+        },
+        {
+          t: "h2",
+          c: "Part 1 · What is a Pointer?",
+        },
+        {
+          t: "p",
+          c: "In Python and high-level programming, a 'pointer' is simply an integer variable that holds an index (e.g., `left = 0`). Moving the pointer means incrementing or decrementing that index variable.",
+        },
+        {
+          t: "h2",
+          c: "Part 2 · Why Two Pointers?",
+        },
+        {
+          t: "p",
+          c: "A single pointer moves linearly. Two pointers let us exploit sorted order or invariants to eliminate entire sets of pairs in a single step, reducing quadratic $O(n^2)$ nested iterations to linear $O(n)$ single-pass traversals.",
+        },
+        {
+          t: "h2",
+          c: "Part 3 · Converging Pointers (Opposite Ends)",
+        },
+        {
+          t: "p",
+          c: "Start `left = 0` and `right = len(nums) - 1`. Move towards each other while `left < right`. Perfect for reversing arrays, checking palindromes, and 2-sum on sorted arrays.",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Reverse Array with Two Pointers",
+          c: `def reverse_list(nums):
+    left, right = 0, len(nums) - 1
+    while left < right:
+        nums[left], nums[right] = nums[right], nums[left]
+        left += 1
+        right -= 1
+    return nums`,
+        },
+        {
+          t: "viz",
+          id: "two-ptr-reverse",
+        },
+        {
+          t: "h2",
+          c: "Part 4 · Conditional Two-Pointer Movement",
+        },
+        {
+          t: "p",
+          c: "On sorted arrays, if `nums[left] + nums[right] < target`, we need a larger sum, so we advance `left += 1`. If `> target`, we decrease `right -= 1`.",
+        },
+        {
+          t: "viz",
+          id: "two-ptr-opposite",
+        },
+        {
+          t: "h2",
+          c: "Part 5 · Same-Direction Pointers (Slow & Fast)",
+        },
+        {
+          t: "p",
+          c: "`fast` scans every element, while `slow` writes retained elements in-place. Since `slow <= fast` always holds, in-place modification never overwrites unread elements.",
+        },
+        {
+          t: "viz",
+          id: "two-ptr-slow-fast",
+        },
+        {
+          t: "h2",
+          c: "Part 6 · Pointers Across Two Sequences",
+        },
+        {
+          t: "p",
+          c: "One pointer per sequence for merging two sorted lists in $O(n + m)$ time.",
+        },
+        {
+          t: "viz",
+          id: "two-ptr-two-seq",
+        },
+      ],
     },
   },
 

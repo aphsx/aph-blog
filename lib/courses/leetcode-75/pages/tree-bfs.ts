@@ -3,425 +3,711 @@ import type { Page } from "@/lib/types";
 export const treeBfsPages: Record<string, Page> = {
   "lc75-intro-tree-bfs": {
     slug: "lc75-intro-tree-bfs",
-    title: { th: "Binary Tree — BFS (ลุยเป็นชั้น)", en: "" },
-    lead: { th: "traverse (เดินไล่) ต้นไม้ทีละ level (ชั้น) จากบนลงล่างด้วย queue (คิว) แบบ level-order — เครื่องมือคู่หูของ DFS สำหรับโจทย์ที่ถามเป็นชั้น ๆ", en: "" },
+    title: {
+      th: "Binary Tree — BFS (ลุยเป็นชั้น)",
+      en: "Binary Tree — BFS (Level-by-Level Exploration)",
+    },
+    lead: {
+      th: "เดินสำรวจต้นไม้ทีละชั้นจากบนลงล่างด้วย Queue (FIFO) — รูปแบบการเดินคู่หูของ DFS สำหรับโจทย์ที่ถามความสัมพันธ์แนวราบ",
+      en: "Traverse a binary tree level by level using a FIFO Queue — the horizontal counterpart of DFS for layer-based problems.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "หมวดที่แล้วเราใช้ DFS ลุยดิ่งลงกิ่งเดียวให้สุดก่อน หมวดนี้เราจะเจอวิธี traverse ต้นไม้อีกแบบที่ตรงข้ามกันเลย คือไล่ทีละ level จากบนลงล่าง ซ้ายไปขวา เรียกว่า BFS มันเหมาะกับโจทย์ที่ถามอะไรที่เป็น \"level\" เช่น ค่าของแต่ละ level หรือ node ขวาสุดของแต่ละ level" },
+        {
+          t: "p",
+          c: "ถ้า DFS คือการดำดิ่งลงไปตามกิ่งเดียวให้ลึกที่สุดก่อนถอยกลับ... BFS (Breadth-First Search) คือการเดินกวาดแนวราบทีละชั้นจากบนลงล่าง จากซ้ายไปขวา เหมือนการกวาดเรดาร์หรือคลื่นน้ำที่แผ่ออกไป!",
+        },
+        {
+          t: "h2",
+          c: "ส่วนที่ 1 · Pattern Recognition (วิธีมองโจทย์ BFS ให้ออก)",
+        },
+        {
+          t: "p",
+          c: "เมื่อไหร่ที่ควรเลือก BFS แทน DFS? ให้สังเกตคีย์เวิร์ดในโจทย์:",
+        },
+        {
+          t: "ul",
+          c: [
+            '"Level" / "ชั้น" — ถามหาค่าเฉลี่ย, ผลรวม, หรือจำนวนโหนดในแต่ละชั้น',
+            '"Right side / Left side view" — มองจากด้านข้างแล้วเห็นโหนดไหนบ้างในแต่ละชั้น',
+            '"Shortest path" — ทางที่สั้นที่สุดในกราฟหรือต้นไม้ที่ไม่ถ่วงน้ำหนัก',
+          ],
+        },
+        {
+          t: "image",
+          src: "/leetcode-75/bfs-search.gif",
+          alt: "BFS animation: visit level by level using queue",
+          caption:
+            "BFS: ไล่ทีละชั้นจากบนลงล่างโดยใช้ Queue (FIFO) — เข้าก่อนออกก่อน",
+        },
 
-              { t: "h2", c: "1. Pattern Recognition (วิธีมองโจทย์ BFS ให้ออก)" },
-              { t: "p", c: "การเดินทางใน Binary Tree มี 2 รูปแบบหลัก:" },
-              { t: "ul", c: [
-                "**DFS (Depth-First Search):** เดินพุ่งลงไปลึกสุดกิ่งก่อน แล้วค่อยถอยกลับ (ใช้ Stack / Recursion)",
-                "**BFS (Breadth-First Search):** เดินกวาดเป็น **\"แนวราบทีละชั้น\" (Level by Level)** จากบนลงล่าง และจากซ้ายไปขวา",
-              ] },
-              {
-                t: "image",
-                src: "/leetcode-75/bfs-search.gif",
-                alt: "BFS animation: visit level by level A → B → C → D… using QUEUE · FIFO",
-                caption:
-                  "BFS: ไล่ทีละชั้น A → B, C → D, E, F, G → H, I — ใช้ QUEUE · FIFO · โหนด teal = เยี่ยมแล้ว · ส้ม = กำลังเยี่ยม · ทอง = ยังไม่ถึง",
-              },
-              { t: "code", lang: "text", c: `                  1               <-- ชั้นที่ 0 (Level 0)
-                /   \\
-               2     3            <-- ชั้นที่ 1 (Level 1)
-              / \\   / \\
-             4   5 6   7          <-- ชั้นที่ 2 (Level 2)
+        {
+          t: "h2",
+          c: "ส่วนที่ 2 · หัวใจของ BFS: collections.deque",
+        },
+        {
+          t: "p",
+          c: "ทำไมต้องใช้ `deque` จากไลบรารี `collections`? เพราะ `list.pop(0)` ใน Python ต้องขยับสมาชิกที่เหลือทั้งลิสต์ เสียเวลา O(N) ในขณะที่ `deque.popleft()` ใช้เวลา O(1) ทันที!",
+        },
+        {
+          t: "table",
+          head: ["โครงสร้าง", "คำสั่งดึงหัวแถว", "Big-O"],
+          rows: [
+            ["Python List ปกติ", "list.pop(0)", "O(N) (ช้ามาก ห้ามใช้)"],
+            ["collections.deque", "q.popleft()", "O(1) (เร็วที่สุด แนะนำ)"],
+          ],
+        },
 
-ลำดับการเดินแบบ BFS: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7` },
-
-              { t: "h2", c: "2. โครงสร้างข้อมูลที่ต้องใช้: Queue (คิว)" },
-              { t: "p", c: "การจะกวาดข้อมูลทีละชั้นได้ โปรแกรมต้องจำได้ว่า *\"ใครมาก่อน ต้องได้ประมวลผลก่อน\"* เราจึงใช้ **Queue (คิว)** ที่มีหลักการ **FIFO (First-In, First-Out: มาก่อน ออกก่อน)**" },
-              { t: "h3", c: "ทำไมใน Python ต้องใช้ `collections.deque`?" },
-              { t: "ul", c: [
-                "**ใช้ List ปกติ (`list`):** เวลาเอาข้อมูลหน้าสุดออกด้วย `list.pop(0)` โปรแกรมต้องคอยขยับข้อมูลที่เหลือทั้งหมดไปทางซ้าย ใช้เวลา **O(N)** (ช้ามากเมื่อข้อมูลเยอะ)",
-                "**ใช้ `deque` (Double-Ended Queue):** คำสั่ง `queue.popleft()` ใช้เวลาแค่ **O(1)** ทำงานได้รวดเร็วทันที",
-              ] },
-
-              { t: "h2", c: "3. โครงสร้างโค้ดมาตรฐาน (Standard BFS Template)" },
-              { t: "code", lang: "python", c: `from collections import deque
+        {
+          t: "h2",
+          c: "ส่วนที่ 3 · แม่แบบ 2 ลูปซ้อน (Standard BFS Template)",
+        },
+        {
+          t: "p",
+          c: "จุดสำคัญที่สุดของ BFS บนต้นไม้คือการใช้ 2 ลูปซ้อนกัน: ลูปนอก `while q:` คุมทั้งต้นไม้ และลูปใน `for _ in range(level_size):` คุมเฉพาะชั้นปัจจุบัน",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "แม่แบบมาตรฐาน BFS",
+          c: `from collections import deque
 
 class Solution:
     def bfsTemplate(self, root: Optional[TreeNode]):
-        # 1. Edge Case: ถ้าไม่มีโหนดเลยตั้งแต่แรก ให้จบการทำงานทันที
         if not root:
             return []
 
-        # 2. ตั้งต้นสร้าง Queue โดยใส่ Root เข้าไปเป็นตัวแรก
-        queue = deque([root])
+        q = deque([root])
         result = []
 
-        # 3. ลูปนอก: ทำงานตราบใดที่ยังมีโหนดอยู่ใน Queue (คุมภาพรวมทั้งต้นไม้)
-        while queue:
-            # ล็อกจำนวนโหนดของ "ชั้นปัจจุบัน" ไว้ก่อน
-            level_size = len(queue)
+        while q:
+            # สำคัญมาก: ล็อกขนาดของชั้นปัจจุบันไว้ก่อน
+            level_size = len(q)
             current_level = []
 
-            # 4. ลูปใน: ดึงโหนดเฉพาะของชั้นปัจจุบันมาทำงานให้ครบตามจำนวน level_size
             for _ in range(level_size):
-                # ดึงโหนดหน้าสุดออก
-                node = queue.popleft()
+                node = q.popleft()
                 current_level.append(node.val)
 
-                # ดักเช็กก่อนใส่: ถ้ามีลูกซ้าย/ขวา ค่อยใส่ต่อท้ายคิวไว้ทำในชั้นถัดไป
+                # นำลูกของชั้นถัดไปเข้าคิว (จะถูกดันไปอยู่หลัง level_size)
                 if node.left:
-                    queue.append(node.left)
+                    q.append(node.left)
                 if node.right:
-                    queue.append(node.right)
+                    q.append(node.right)
 
-            # บันทึกข้อมูลของชั้นนี้เข้าผลลัพธ์รวม
             result.append(current_level)
 
-        return result` },
-
-              { t: "h2", c: "4. ชำแหละตรรกะและจุดที่ต้องระวัง (Line-by-Line Deep Dive)" },
-              { t: "h3", c: "1. `queue = deque([root])`" },
-              { t: "callout", title: "ทำไมต้องครอบด้วยก้ามปู `[root]`?", c: "เพราะ `deque()` รับข้อมูลตั้งต้นเป็นประเภท Iterable (List) การเขียน `[root]` คือการบอกว่า *\"เริ่มต้นสร้างคิว โดยนำโหนด root ยัดใส่เป็นสมาชิกตัวที่ 1 ของคิว\"*" },
-
-              { t: "h3", c: "2. ทำไมต้องมี 2 ลูปซ้อนกัน? (`while` + `for`)" },
-              { t: "ul", c: [
-                "**`while queue:` (ลูปนอก):** คุม **ภาพรวมทั้งต้นไม้** ตราบใดที่ยังมีโหนดอยู่ในคิว (ไม่ว่าจะชั้นไหน) จะทำต่อไปเรื่อยๆ จนกว่าต้นไม้จะหมด",
-                "**`for _ in range(level_size):` (ลูปใน):** คุม **เฉพาะชั้นปัจจุบัน** ดึงโหนดออกมาประมวลผลให้ครบตามจำนวนที่มีอยู่ในชั้นนั้น",
-              ] },
-
-              { t: "h3", c: "3. ทำไมต้องล็อกค่า `level_size = len(queue)` ก่อนเข้าลูป `for`?" },
-              { t: "p", c: "นี่คือ **หัวใจที่สำคัญที่สุดของ BFS**" },
-              { t: "ul", c: [
-                "ในขณะที่ลูป `for` ดึงโหนดชั้นปัจจุบันออกมา เราจะมีการสั่ง `queue.append(node.left)` ยัดโหนดของ **\"ชั้นลูก\"** เพิ่มเข้าไปในคิวด้วยเรื่อยๆ",
-                "หากเราไม่นับแล้วล็อกค่า `level_size` ใส่ตัวแปรก่อน แต่ไปเขียน `for _ in range(len(queue)):` ตรงๆ รอบของลูปจะขยายไปเรื่อยๆ ตามโหนดลูกที่ยัดเข้ามาใหม่ ทำให้โปรแกรมแยกไม่ออกว่าโหนดไหนอยู่ชั้นไหน",
-                "**การแช่แข็งค่า `level_size`:** ช่วยการันตีว่า ลูป `for` จะดึงเฉพาะโหนดของ **ชั้นปัจจุบัน** ออกมาทำจนหมดพอดี แล้วปล่อยให้โหนดลูกที่พึ่งยัดเข้าไปใหม่ รอทำในลูป `while` รอบถัดไป",
-              ] },
-
-              { t: "h3", c: "4. ทำไม `popleft()` ถึงไม่เผลอดึงโหนดลูกที่เพิ่ง `append` เข้าไป?" },
-              { t: "ul", c: [
-                "เพราะ Queue มีกลไก **FIFO (First-In, First-Out)**",
-                "โหนดลูกที่สั่ง `append` เข้าไปใหม่จะถูกดันไปอยู่ **\"ท้ายแถว\"**",
-                "ในขณะที่ `popleft()` จะดึงโหนดที่อยู่ **\"หน้าสุดของแถว\"** ออกมา ซึ่งเป็นโหนดของชั้นปัจจุบันที่มารอคิวอยู่ก่อนแล้วเสมอ",
-              ] },
-
-              { t: "h3", c: "5. ทำไมไม่ต้องเขียน `if not node:` ดักจับ `None` ด้านในลูปเหมือน DFS?" },
-              { t: "ul", c: [
-                "เพราะดักไว้ตั้งแต่ก่อนยัดเข้าคิวด้วย `if node.left:` และ `if node.right:` แล้ว",
-                "โหนดที่จะลงไปอยู่ใน Queue ได้จึงการันตีว่าเป็นโหนดที่มีอยู่จริงแน่นอน ทำให้ในคิวไม่มีทางมีค่า `None` หลุดเข้าไปให้ต้องเช็กซ้ำ",
-              ] },
-
-              { t: "h2", c: "5. Step-by-Step Walkthrough (จำลองการทำงาน)" },
-              { t: "p", c: "กำหนดต้นไม้ตัวอย่าง:" },
-              { t: "code", lang: "text", c: `        1 (Root)
-       / \\
-      2   3` },
-              { t: "ol", c: [
-                "**เริ่มต้น:** `queue = deque([Node 1])`",
-                "**ลูปนอก รอบที่ 1 (ชั้นที่ 0):** `level_size = len(queue)` → ได้ค่า **1** · **ลูปใน รัน 1 รอบ:** `node = queue.popleft()` → ดึง **Node 1** ออกมา · มีลูกซ้ายสั่ง `queue.append(Node 2)` · มีลูกขวาสั่ง `queue.append(Node 3)` · **จบชั้นที่ 0:** สภาพคิวปัจจุบันคือ `deque([Node 2, Node 3])`",
-                "**ลูปนอก รอบที่ 2 (ชั้นที่ 1):** `level_size = len(queue)` → แช่แข็งค่าได้ **2** · **ลูปใน รัน 2 รอบ:** (รอบที่ 1) ดึง **Node 2** ออกมาจากหน้าคิว · (รอบที่ 2) ดึง **Node 3** ออกมาจากหน้าคิว · **จบชั้นที่ 1:** สภาพคิวปัจจุบันคือ `deque([])` (ว่างเปล่า)",
-                "**ตรวจสอบ `while queue`:** คิวว่างเปล่าแล้ว → จบการทำงาน",
-              ] },
-
-              { t: "h2", c: "6. Complexity Analysis (วิเคราะห์ประสิทธิภาพ)" },
-              { t: "ul", c: [
-                "**Time Complexity: O(N)** — เพราะ BFS เดินเข้าถึงและประมวลผลทุกโหนด (N) ในต้นไม้เพียงครั้งเดียว",
-                "**Space Complexity: O(W)** — โดยที่ W คือความกว้างที่สุดของต้นไม้ (Maximum Width of Tree) กรณีที่แย่ที่สุด (Complete Binary Tree) คิวจะต้องถือโหนดในชั้นล่างสุดพร้อมกันสูงสุดประมาณ N/2 โหนด คิดเป็น O(N)",
-              ] },
-
-              { t: "callout", title: "พร้อมลุยแล้ว", c: "หมวดนี้มี 2 ข้อ (LC199, LC1161) ทั้งคู่ใช้ template วนทีละชั้นด้านบนเป็นแกน พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
+        return result`,
+        },
+        {
+          t: "callout",
+          title: "ทำไมต้องล็อก level_size = len(q)?",
+          c: "เพราะในขณะที่ลูป `for` กำลังดึงโหนดของชั้นปัจจุบันออก เราจะมีการ `append` ลูกชั้นถัดไปใส่เข้ามาในคิวด้วย หากไม่ล็อกค่าไว้ ลูปจะขยายขนาดไปเรื่อยๆ จนแยกไม่ออกว่าโหนดไหนอยู่ชั้นไหน!",
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "While Depth-First Search (DFS) dives deeply down a single branch before backtracking, Breadth-First Search (BFS) sweeps horizontally, visiting every node at the current depth before descending to the next layer.",
+        },
+        {
+          t: "h2",
+          c: "Part 1 · Pattern Recognition",
+        },
+        {
+          t: "ul",
+          c: [
+            'Level-by-level aggregates (sum, average, count per depth level).',
+            'Side views (viewing from the right or left edge of the tree).',
+            'Shortest path in unweighted graphs or trees.',
+          ],
+        },
+        {
+          t: "h2",
+          c: "Part 2 · The 2-Loop Queue Template",
+        },
+        {
+          t: "p",
+          c: "The golden formula for level-order traversal relies on snapshotting `level_size = len(q)` before the inner loop, ensuring children enqueued during the current round wait for the next level.",
+        },
+      ],
     },
   },
 
   "lc75-p39": {
     slug: "lc75-p39",
-    title: { th: "ข้อ 39 · LC199 Binary Tree Right Side View (มุมมองด้านขวา) 🟡", en: "" },
-    lead: { th: "ยืนทางขวาของต้นไม้แล้วมองเข้ามา — คำตอบคือโหนดขวาสุดของแต่ละชั้น ไม่ใช่การเดินลงกิ่งขวาอย่างเดียว", en: "" },
+    title: {
+      th: "ข้อ 39 · LC199 Binary Tree Right Side View (มองต้นไม้จากด้านขวา) 🟡",
+      en: "LC199 Binary Tree Right Side View 🟡",
+    },
+    lead: {
+      th: "โจทย์ BFS ทีละชั้น — ในแต่ละระดับชั้น ดึงโหนดตัวขวาสุด (ตัวสุดท้ายของชั้น) มาตอบ",
+      en: "Level-order BFS — capture the rightmost node at each depth level.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC199): กำหนด root ของ binary tree มาให้ ให้จินตนาการว่ายืนอยู่ทางด้านขวาของต้นไม้ แล้วมองเข้ามา ให้ return ค่าของโหนดที่มองเห็นได้ เรียงจากบนลงล่าง" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "root = [1,2,3,null,5,null,4]",
-                    output: "[1,3,4]",
-                    explain: "เห็น 1 ที่ชั้นบนสุด เห็น 3 ที่ชั้นถัดไป (บัง 2 ไว้) เห็น 4 ที่ชั้นล่างสุด (บัง 5 ไว้)",
-                  },
-                  {
-                    input: "root = [1,2,3,4]",
-                    output: "[1,3,4]",
-                    explain: "ชั้นล่างสุดมีแค่โหนด 4 ซึ่งเป็นลูกซ้ายของ 2 เพราะโหนด 3 ไม่มีลูก สายตาจึงมองทะลุไปเห็น 4",
-                  },
-                  {
-                    input: "root = [1,2,3,4,null,null,null,5]",
-                    output: "[1,3,4,5]",
-                    explain: "ชั้นของ 4 มีแค่ตัวเดียว ชั้นถัดไปมีแค่ 5 ซึ่งเป็นลูกซ้ายของ 4 แต่เป็นตัวเดียวในชั้นจึงมองเห็น",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "จำนวนโหนดอยู่ระหว่าง 0 ถึง 100",
-                "-100 <= Node.val <= 100",
-                ],
-              },
+        {
+          t: "p",
+          c: `Given the \`root\` of a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.`,
+        },
+        {
+          t: "p",
+          c: `กำหนด \`root\` ของ binary tree มาให้ ลองจินตนาการว่าคุณยืนอยู่ทางด้านขวาของต้นไม้ จงส่งคืนลิสต์ของค่าในโหนดที่คุณสามารถมองเห็นได้ เรียงลำดับจากบนลงล่าง`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "root = [1,2,3,null,5,null,4]",
+              output: "[1,3,4]",
+              explain:
+                "ชั้น 0: มองเห็นโหนด 1\nชั้น 1: โหนด 3 บังโหนด 2 จึงเห็น 3\nชั้น 2: โหนด 4 อยู่ขวาสุด จึงเห็น 4\nคำตอบคือ [1, 3, 4]",
+            },
+            {
+              input: "root = [1,null,3]",
+              output: "[1,3]",
+              explain: "มองเห็น 1 และ 3",
+            },
+            {
+              input: "root = []",
+              output: "[]",
+              explain: "ต้นไม้ว่างเปล่า มองไม่เห็นอะไรเลย",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "The number of nodes in the tree is in the range [0, 100].",
+            "-100 <= Node.val <= 100",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ถ้าเรายืนมองจากขวามือ โหนดที่เราเห็นในแต่ละชั้นคือโหนดลำดับที่เท่าไรของชั้นนั้น?",
+        },
 
-              {
-                t: "solution",
-                summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
-                c: [
-                  { t: "p", c: "ข้อนี้โจทย์พูดถึง มุมมอง แต่แก่นจริง ๆ คือเรื่องของชั้น (level) เมื่อไหร่ที่โจทย์พูดถึงชั้น เครื่องมือแรกที่ต้องนึกถึงคือ BFS มาชำแหละกันทีละชั้น (พอดีเลย)" },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "โจทย์ให้หาโหนดที่ 'มองเห็นจากขอบขวามือ' เรียงจากชั้นบนสุดลงไปชั้นล่างสุด ซึ่งก็คือ **โหนดตัวขวาสุดของแต่ละชั้น (ระดับความลึก)** นั่นเอง!",
+            },
+            {
+              t: "callout",
+              title: "กับดักที่พบบ่อย",
+              warn: true,
+              c: "อย่าหลงทางด้วยการเดินแค่ `root.right.right...` เพราะถ้ากิ่งขวาตัน แต่กิ่งซ้ายยังยาวลงไปเรื่อยๆ โหนดฝั่งซ้ายที่อยู่ลึกกว่าจะโผล่มาให้เรามองเห็นจากด้านขวาด้วยเช่นกัน!",
+            },
 
-                  { t: "h3", c: "1. Problem Decoding (แปลโจทย์ภาษาคน)" },
-                  { t: "p", c: "สมมติว่าเรายืนอยู่ทางฝั่งขวาสุดของต้นไม้แล้วมองเข้ามา โหนดที่ถูกบังจะหายไปจากสายตา เหลือแค่ตัวที่อยู่ขวาสุดของแต่ละชั้น โจทย์อยากได้ค่าของโหนดที่มองเห็น เรียงจากบนลงล่าง" },
-                  { t: "code", lang: "text", c: `                  1  <-- มองเห็น 1
-                /   \\
-               2     3  <-- มองเห็น 3 (บัง 2 ไว้)
-                \\     \\
-                 5     4  <-- มองเห็น 4 (บัง 5 ไว้)
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "ลองไล่ดูทีละชั้นด้วย BFS:",
+            },
+            {
+              t: "ul",
+              c: [
+                "ชั้นที่ 0: มี [1] -> ตัวสุดท้ายของชั้นคือ 1 -> บันทึก [1]",
+                "ชั้นที่ 1: มี [2, 3] -> ตัวสุดท้ายของชั้นคือ 3 -> บันทึก [1, 3]",
+                "ชั้นที่ 2: มี [5, 4] -> ตัวสุดท้ายของชั้นคือ 4 -> บันทึก [1, 3, 4]",
+              ],
+            },
 
-คำตอบ: [1, 3, 4]` },
-                  { t: "p", c: "จุดที่คนส่วนใหญ่งง: หลายคนคิดว่า \"มองฝั่งขวาก็แค่เดินลง `root.right.right...` ก็จบ\" — ความจริงไม่ใช่" },
-                  { t: "code", lang: "text", c: `                  1  <-- มองเห็น 1
-                /   \\
-               2     3  <-- มองเห็น 3
-              /
-             4  <-- มองเห็น 4 (เพราะฝั่งขวาหมดแค่นี้)` },
-                  { t: "p", c: "ชั้นล่างสุดกิ่งขวาไม่มีโหนด สายตาจึงมองทะลุไปเห็นโหนด 4 ที่อยู่ฝั่งซ้าย" },
-                  { t: "callout", title: "ถอดโจทย์ใหม่ให้ชัด", c: "\"มองจากฝั่งขวาแล้วเห็นอะไร\" คือการหาโหนดขวาสุดของแต่ละชั้น เมื่อโจทย์พูดถึงชั้น (level) เครื่องมือแรกที่ควรนึกถึงคือ BFS" },
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "ภาพรวม: ใช้ BFS ระดับชั้น (Level-Order Traversal) เดินทีละชั้น และหยิบค่าของโหนดตัวสุดท้ายในแต่ละชั้นมาเก็บใส่ผลลัพธ์",
+            },
+            {
+              t: "p",
+              c: "ขั้นตอนการทำงาน:",
+            },
+            {
+              t: "ol",
+              c: [
+                "ถ้า `root is None` ให้คืนค่า `[]` ทันที",
+                "เริ่มต้นด้วย `q = deque([root])`",
+                "ในแต่ละรอบของลูป `while q:` นับขนาด `level_size = len(q)`",
+                "วนลูป `for i in range(level_size):` ดึงโหนดออกมา",
+                "ถ้า `i == level_size - 1` (แปลว่าเป็นตัวสุดท้ายของชั้นนี้) ให้เอาค่านั้นใส่ในผลลัพธ์ `res.append(node.val)`",
+                "ยัดลูกซ้ายและลูกขวา (ถ้ามี) ต่อท้ายคิวเพื่อประมวลผลในชั้นถัดไป",
+              ],
+            },
 
-                  { t: "h3", c: "2. Mental Model (สร้างภาพจำ)" },
-                  { t: "p", c: "ใช้ BFS กวาดทีละชั้นจากซ้ายไปขวาด้วย Queue (`collections.deque`) ในแต่ละชั้น โหนดที่ถูกดึงออกเป็นตัวสุดท้ายคือโหนดขวาสุดที่ต้องการพอดี ไม่ต้องเดินลงกิ่งขวาเองเลย" },
-                  { t: "table", head: ["ชั้น", "โหนดในชั้น (ซ้าย→ขวา)", "ตัวขวาสุดที่เก็บ"], rows: [
-                    ["0", "[1]", "1"],
-                    ["1", "[2, 3]", "3"],
-                    ["2", "[5, 4]", "4"],
-                  ] },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** เพื่อดูการเดินสำรวจทีละชั้น และสังเกตโหนดขวาสุดที่ถูกเลือกเข้าผลลัพธ์:",
+            },
+            { t: "viz", id: "tree-bfs-right-view" },
 
-                  { t: "h3", c: "3. Logic-to-Code Mapping (ชำแหละแก่นโค้ด)" },
-                  { t: "p", c: "โค้ดคือ template BFS วนทีละชั้นตรง ๆ แต่งเพิ่มแค่เงื่อนไขเก็บตัวสุดท้ายของชั้น แบ่งเป็น 3 ส่วนหลัก" },
-
-                  { t: "h3", c: "ส่วนที่ 1: ดักต้นไม้ว่าง แล้วตั้งคิว" },
-                  { t: "code", lang: "python", label: "ส่วนที่ 1", c: `if root is None:
-    return []
-queue = deque([root])` },
-                  { t: "callout", title: "ทำไมต้องเขียน (The Why)", c: "ถ้าต้นไม้ว่างแล้วใส่ `deque([root])` ไปเลย คิวจะมีสมาชิกเป็น `None` หนึ่งตัว โปรแกรมจะเข้า `while` แล้วไปอ่าน `node.val` จนเกิด `AttributeError`" },
-                  { t: "callout", title: "ถ้าไม่เขียน (What If)", warn: true, c: "โค้ดจะพังบน input ต้นไม้ว่าง (root = None) ทันที เพราะ `None` ไม่มี `.val` หรือ `.left` ให้อ่าน — และโจทย์ข้อนี้อนุญาตให้ต้นไม้ว่างได้ (constraints เริ่มที่ 0 โหนด)" },
-
-                  { t: "h3", c: "ส่วนที่ 2: ล็อกขนาดชั้น แล้วหยิบตัวสุดท้าย (จุดตัดคนผ่าน/ไม่ผ่าน)" },
-                  { t: "code", lang: "python", label: "ส่วนที่ 2", c: `level_size = len(queue)
-for i in range(level_size):
-    node = queue.popleft()
-    if i == level_size - 1:      # ตัวสุดท้ายของชั้น = ขวาสุด
-        result.append(node.val)` },
-                  { t: "callout", title: "ทำไมต้องเขียน (The Why)", c: "สมมติชั้นนี้มี 3 โหนด (`level_size = 3`) ลูป `for i in range(3)` จะได้ `i = 0, 1, 2` — `i = 0` คือโหนดซ้ายสุด ส่วน `i = 2` ตรงกับ `i == 3 - 1` คือตัวขวาสุด ต้องลบ 1 เพราะ index ของ Python เริ่มที่ 0 ตัวสุดท้ายของช่วงยาว `n` จึงอยู่ที่ตำแหน่ง `n - 1`" },
-                  { t: "callout", title: "ถ้าไม่ล็อกขนาดชั้น (What If)", warn: true, c: "ถ้าไปวัด `len(queue)` สด ๆ ระหว่างลูป (เช่นเช็ค `i == len(queue) - 1`) ค่าจะเพี้ยนทันที เพราะคิวโตขึ้นเรื่อย ๆ จากลูกที่ยัดเข้ามาระหว่างทาง จุดสิ้นสุดของชั้นจึงเลื่อนไปเรื่อย ๆ จนไม่รู้ว่าตัวไหนคือตัวสุดท้ายของชั้นแท้ ๆ" },
-
-                  { t: "h3", c: "ส่วนที่ 3: ใส่ลูกซ้ายก่อนลูกขวา" },
-                  { t: "code", lang: "python", label: "ส่วนที่ 3", c: `if node.left:
-    queue.append(node.left)
-if node.right:
-    queue.append(node.right)` },
-                  { t: "callout", title: "ทำไมต้องเขียน (The Why)", c: "การใส่ซ้ายก่อนขวาทำให้โหนดในคิวเรียงจากซ้ายไปขวา ตัวที่ออกท้ายสุดของชั้นจึงเป็นตัวขวาสุดเสมอ" },
-                  { t: "callout", title: "เขียนสลับก็ได้", c: "ถ้าใส่ลูกขวาก่อนลูกซ้าย ตัวแรกของชั้น (`i == 0`) จะเป็นตัวขวาสุดแทน เขียนได้ทั้งสองแบบ แต่ใส่ซ้ายก่อนขวาจะตรงกับ template BFS มาตรฐานมากกว่า" },
-
-                  { t: "h3", c: "4. Step-by-Step Walkthrough (จำลองการทำงาน)" },
-                  { t: "p", c: "จำลองบนต้น `[1,2,3,null,5,null,4]`" },
-                  { t: "code", lang: "text", c: `        1 (Root)
-       / \\
-      2   3
-       \\   \\
-        5   4` },
-                  { t: "ol", c: [
-                    "**เริ่มต้น:** `queue = deque([Node 1])`, `result = []`",
-                    "**ชั้นที่ 0:** `level_size = 1` · `i = 0` ตรงกับตัวสุดท้าย ดึง Node 1 แล้วเก็บ `result = [1]` · ใส่ลูก 2 แล้ว 3 · จบชั้นนี้คิวเป็น `[2, 3]`",
-                    "**ชั้นที่ 1:** `level_size = 2` · `i = 0` ดึง Node 2 (ไม่เก็บ) แล้วใส่ลูก 5 · `i = 1` เป็นตัวสุดท้าย ดึง Node 3 แล้วเก็บ `result = [1, 3]` แล้วใส่ลูก 4 · จบชั้นนี้คิวเป็น `[5, 4]`",
-                    "**ชั้นที่ 2:** `level_size = 2` · `i = 0` ดึง Node 5 (ไม่เก็บ) · `i = 1` ดึง Node 4 แล้วเก็บ `result = [1, 3, 4]` · คิวว่าง",
-                    "**จบ:** คิวว่างแล้ว คืน `[1, 3, 4]`",
-                  ] },
-                  { t: "p", c: "กด **Next ▶** เพื่อไล่ BFS ทีละชั้น · วงแหวนเขียว = โหนดที่มองเห็นจากขวา · กล่องล่าง = คิว FIFO:" },
-                  { t: "viz", id: "tree-bfs-right-view" },
-
-                  { t: "h3", c: "5. Clean Code (โค้ดฉบับสมบูรณ์)" },
-                  { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              c: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
 from collections import deque
 
-def rightSideView(root):
-    if root is None:
-        return []
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        if not root:
+            return []
 
-    queue = deque([root])
-    result = []
+        q = deque([root])
+        res = []
 
-    while queue:
-        level_size = len(queue)
-        for i in range(level_size):
-            node = queue.popleft()
-            if i == level_size - 1:      # ตัวสุดท้ายของชั้น = ขวาสุด
-                result.append(node.val)
-            if node.left:
-                queue.append(node.left)  # ใส่ซ้ายก่อนขวา
-            if node.right:
-                queue.append(node.right)
+        while q:
+            level_size = len(q)
+            for i in range(level_size):
+                node = q.popleft()
 
-    return result
+                # ถ้าเป็นโหนดตัวสุดท้ายของชั้นนี้ บันทึกเข้าคำตอบ
+                if i == level_size - 1:
+                    res.append(node.val)
 
-# ต้นไม้ [1, 2, 3, null, 5, null, 4]
-root = TreeNode(1, TreeNode(2, None, TreeNode(5)), TreeNode(3, None, TreeNode(4)))
-print(rightSideView(root))`, out: `[1, 3, 4]` },
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
 
-                  { t: "h3", c: "6. Complexity Analysis (วิเคราะห์ Big O)" },
-                  { t: "ul", c: [
-                    "**Time Complexity: O(N)** — ดึงทุกโหนดออกจากคิวครั้งเดียว",
-                    "**Space Complexity: O(W)** — W คือความกว้างสูงสุดของต้นไม้ กรณีแย่สุดคิวถือโหนดชั้นล่างสุดพร้อมกันราว N/2 จึงคิดเป็น O(N)",
-                  ] },
+        return res`,
+            },
 
-                  { t: "callout", title: "💡 สรุป pattern", c: "เมื่อโจทย์ถามมุมมองต่อชั้น ให้ใช้ BFS ล็อก `level_size = len(queue)` แล้วเลือกโหนดตามตำแหน่งในชั้น ตัวสุดท้ายคือขวาสุด ตัวแรกคือซ้ายสุด" },
-                ],
-              },
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
+            {
+              t: "table",
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
+              rows: [
+                ["if not root: return []", "ดักกรณีต้นไม้ว่างเปล่า", "root=None -> []"],
+                ["q = deque([root])", "สร้าง Queue ใส่ root ตัวแรก", "q=[1]"],
+                ["level_size = len(q)", "ล็อกจำนวนโหนดของชั้นปัจจุบัน", "ชั้น 1 มี 2 โหนด (level_size=2)"],
+                ["if i == level_size - 1: res.append(node.val)", "เลือกเฉพาะตัวขวาสุดของแต่ละชั้น", "ตัวที่ i=1 จาก [2, 3] คือ 3"],
+                ["return res", "ส่งคืนโหนดมุมมองขวาทั้งหมด", "[1, 3, 4]"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
+            {
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N)", "เยี่ยมชมโหนดทุกโหนดในต้นไม้อย่างละ 1 ครั้ง"],
+                ["Space (หน่วยความจำ)", "O(D)", "Queue เก็บโหนดไม่เกินความกว้างสูงสุดของชั้นในต้นไม้ (D <= N)"],
+              ],
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given the \`root\` of a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "root = [1,2,3,null,5,null,4]",
+              output: "[1,3,4]",
+              explain: "Rightmost nodes at each depth: 1, 3, 4.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "The number of nodes in the tree is in the range [0, 100].",
+            "-100 <= Node.val <= 100",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full Solution",
+          c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
+            {
+              t: "p",
+              c: "Return the rightmost node at every level of the tree from top to bottom.",
+            },
+
+            { t: "h3", c: "Step 2 · Manual Trace" },
+            {
+              t: "p",
+              c: "At level 0: [1] -> pick 1. Level 1: [2, 3] -> pick 3. Level 2: [5, 4] -> pick 4. Answer: [1, 3, 4].",
+            },
+
+            { t: "h3", c: "Step 3 · Methodology" },
+            {
+              t: "p",
+              c: "Perform standard BFS level-order traversal. For each level, append the value of the last node (`i == level_size - 1`) to the result list.",
+            },
+
+            { t: "h3", c: "Step 4 · Interactive Walkthrough" },
+            { t: "viz", id: "tree-bfs-right-view" },
+
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
+            {
+              t: "code",
+              lang: "python",
+              c: `from collections import deque
+
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        if not root:
+            return []
+
+        q = deque([root])
+        res = []
+
+        while q:
+            level_size = len(q)
+            for i in range(level_size):
+                node = q.popleft()
+                if i == level_size - 1:
+                    res.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+
+        return res`,
+            },
+
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
+            {
+              t: "table",
+              head: ["Line", "Purpose", "Example"],
+              rows: [
+                ["if not root: return []", "Handle empty tree", "root=None -> []"],
+                ["level_size = len(q)", "Snapshot current level's node count", "level_size=2"],
+                ["if i == level_size - 1:", "Identify the rightmost node", "i=1 is the last item"],
+                ["return res", "Return view values", "return [1, 3, 4]"],
+              ],
+            },
+
+            { t: "h3", c: "Step 7 · Complexity" },
+            {
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N)", "Every node visited exactly once."],
+                ["Space", "O(D)", "Queue holds at most the maximum level width."],
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p40": {
     slug: "lc75-p40",
-    title: { th: "ข้อ 40 · LC1161 Maximum Level Sum of a Binary Tree (ชั้นผลรวมมากสุด) 🟡", en: "" },
-    lead: { th: "หาเลขชั้นที่ผลรวมค่ามากที่สุด ด้วย BFS วนทีละชั้นแล้วบวกและเทียบ", en: "" },
+    title: {
+      th: "ข้อ 40 · LC1161 Maximum Level Sum of a Binary Tree (ผลรวมชั้นมากสุด) 🟡",
+      en: "LC1161 Maximum Level Sum of a Binary Tree 🟡",
+    },
+    lead: {
+      th: "โจทย์ BFS หาผลรวมแต่ละชั้น — คำนวณ sum ของแต่ละ level แล้วจำหมายเลขชั้นที่ได้คะแนนสูงสุด",
+      en: "Level-order BFS — sum each tree level and track the depth level with the maximal sum.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC1161): กำหนด root ของ binary tree มาให้ โดยกำหนดว่า level ของ root คือ 1, level ของ child คือ 2 ไล่ลงไปเรื่อย ๆ ให้ return เลข level x ที่น้อยที่สุด ซึ่งผลรวมค่าของ node ทั้งหมดใน level x นั้นมากที่สุด (ค่าติดลบมีได้)" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "root = [1,7,0,7,-8,null,null]",
-                    output: "2",
-                    explain: "ชั้น 1 = 1, ชั้น 2 = 7 + 0 = 7, ชั้น 3 = 7 + (-8) = -1 — ชั้นที่ผลรวมมากที่สุดคือชั้น 2",
-                  },
-                  {
-                    input: "root = [989,null,10250,98693,-89388,null,null,null,-32127]",
-                    output: "2",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "จำนวน node อยู่ระหว่าง 1 ถึง 10^4",
-                "-10^5 <= Node.val <= 10^5",
-                ],
-              },
+        {
+          t: "p",
+          c: `Given the \`root\` of a binary tree, the level of its root is \`1\`, the level of its children is \`2\`, and so on.
 
-              {
-                t: "solution",
-                summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
-                c: [
-                  { t: "p", c: "ข้อนี้คือ BFS วนทีละชั้นแบบตรง ๆ บวกตัวสะสมต่อชั้นแล้วเทียบแชมป์ จุดที่ต้องระวังมีแค่สองจุด คือค่าติดลบ กับการนับชั้นเริ่มที่ 1" },
+Return the smallest level \`x\` such that the sum of all the values of nodes at level \`x\` is maximal.`,
+        },
+        {
+          t: "p",
+          c: `กำหนด \`root\` ของ binary tree มาให้ โดยกำหนดให้ระดับของ root คือชั้นที่ \`1\`, ระดับของลูกคือชั้นที่ \`2\` เป็นต้นไป
 
-                  { t: "h3", c: "1. Problem Decoding (แปลโจทย์ภาษาคน)" },
-                  { t: "p", c: "โจทย์นับ level ของต้นไม้เริ่มที่ root = 1 ลูกของ root = 2 ไล่ลงไปเรื่อย ๆ ภารกิจคือบวกค่า node ทุกตัวในแต่ละ level แล้วบอกว่า level ไหนผลรวมมากที่สุด ถ้าผลรวมเสมอกันให้ตอบ level ที่น้อยกว่า และระวัง ค่า node ติดลบได้ ทำให้ชั้นที่ดีที่สุดอาจเป็นชั้นที่ติดลบน้อยสุดก็ได้" },
+จงส่งคืน "หมายเลขชั้นที่น้อยที่สุด" ที่มีผลรวมของค่าในโหนดทั้งหมดในชั้นนั้นมากที่สุด (maximal level sum)`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "root = [1,7,0,7,-8,null,null]",
+              output: "2",
+              explain:
+                "ชั้น 1: ผลรวม = 1\nชั้น 2: ผลรวม = 7 + 0 = 7\nชั้น 3: ผลรวม = 7 + (-8) = -1\nผลรวมสูงสุดคือ 7 ซึ่งเกิดขึ้นที่ชั้น 2 จึงตอบ 2",
+            },
+            {
+              input: "root = [989,null,10250,98694,-34387,null,null,-89387,null]",
+              output: "2",
+              explain: "ผลรวมสูงสุดอยู่ที่ชั้น 2",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "The number of nodes in the tree is in the range [1, 10^4].",
+            "-10^5 <= Node.val <= 10^5",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ถ้ามีหลายชั้นที่มีผลรวมเท่ากันและเป็นค่าสูงสุด โจทย์ให้ตอบชั้นไหน? ระวังค่าเริ่มต้นของ max_sum ในกรณีที่ค่าในโหนดทั้งหมดติดลบ!",
+        },
 
-                  { t: "h3", c: "2. Mental Model (สร้างภาพจำ)" },
-                  { t: "p", c: "โจทย์พูดถึง ชั้น ตรง ๆ จึงเข้ากับ BFS อย่างเป็นธรรมชาติ วนทีละ level ตาม template แล้วสะสมผลรวมของทุก node ในชั้นเป็น total เมื่อจบชั้นก็ compare กับผลรวมมากสุดที่เคยเจอ (โจทย์นี้ DFS พก level ลงไปสะสมผลรวมต่อชั้นก็ทำได้ แต่ BFS กำหนดขอบเขตของแต่ละชั้นได้ชัดเจนด้วย size มากกว่า)" },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "โจทย์ให้หาว่าชั้นไหน (เริ่มนับที่ชั้น 1) มีผลบวกของค่าในโหนดทั้งหมดสูงที่สุด หากมีหลายชั้นที่ผลรวมเท่ากัน ให้ส่งคืนหมายเลขชั้นที่น้อยที่สุด (ชั้นที่อยู่ตื้นกว่า)",
+            },
+            {
+              t: "callout",
+              title: "กับดักเรื่องค่าติดลบ",
+              warn: true,
+              c: "ห้ามตั้ง `max_sum = 0` เด็ดขาด! เพราะค่าของโหนดสามารถติดลบได้ (เช่น ทุกชั้นรวมกันได้ -10, -50) ถ้าตั้ง 0 ค่าจะไม่ถูกอัปเดต ให้ตั้งต้น `max_sum = float('-inf')` เสมอ",
+            },
 
-                  { t: "h3", c: "3. Logic-to-Code Mapping (ชำแหละแก่นโค้ด)" },
-                  { t: "p", c: "โค้ดแบ่งเป็น 3 ส่วนหลัก ตั้งตัวแปรแชมป์ → วนทีละชั้นบวก total → เทียบแชมป์หลังจบชั้น" },
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "คำนวณผลรวมทีละชั้นสำหรับ root = [1, 7, 0, 7, -8]:",
+            },
+            {
+              t: "ul",
+              c: [
+                "ชั้น 1: มี [1] -> ผลรวม = 1 -> ดีที่สุดตอนนี้ (max_sum = 1, best_level = 1)",
+                "ชั้น 2: มี [7, 0] -> ผลรวม = 7 -> 7 > 1 (ดีกว่าเดิม!) -> อัปเดต (max_sum = 7, best_level = 2)",
+                "ชั้น 3: มี [7, -8] -> ผลรวม = -1 -> -1 ไม่มากกว่า 7 -> คงเดิม",
+                "สรุปตอบชั้น 2",
+              ],
+            },
 
-                  { t: "h3", c: "ส่วนที่ 1: ตั้งตัวแปรแชมป์" },
-                  { t: "code", lang: "python", label: "ส่วนที่ 1", c: `best_sum = float('-inf')   # ผลรวมมากสุดที่เคยเจอ
-best_level = 1             # เลขชั้นที่ให้ผลรวมมากสุด
-level = 0
-queue = deque([root])` },
-                  { t: "callout", title: "ทำไมต้องเขียน (The Why)", c: "ต้องเริ่ม best_sum ด้วย float('-inf') เพราะค่า node ติดลบได้ ค่าเริ่มต้นต้องเล็กกว่าผลรวมที่เป็นไปได้ทั้งหมด ชั้นแรกจึงจะชนะแชมป์เสมอไม่ว่าผลรวมจะเป็นอะไร" },
-                  { t: "callout", title: "ถ้าเริ่มด้วย 0 (What If)", warn: true, c: "พังทันทีเมื่อทุก level ผลรวมติดลบ เพราะไม่มีชั้นไหนมากกว่า 0 เลย best_level จะค้างที่ค่าเริ่มต้นโดยไม่เคยอัปเดต" },
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "ภาพรวม: ใช้ Level-order BFS คำนวณผลรวม `level_sum` ในแต่ละชั้น และรักษาตัวแปร `best_level` ไว้อัปเดต",
+            },
+            {
+              t: "p",
+              c: "เครื่องมือและตัวแปรที่ต้องใช้:",
+            },
+            {
+              t: "ol",
+              c: [
+                "`max_sum = float('-inf')`: เก็บผลรวมสูงสุดที่เคยเจอ",
+                "`best_level = 1`: เก็บหมายเลขชั้นที่ดีที่สุด",
+                "`current_level = 1`: ตัวนับหมายเลขชั้นปัจจุบัน (เริ่มที่ 1 ตามโจทย์)",
+                "`q = deque([root])`: คิวสำหรับ BFS",
+                "ในแต่ละชั้น: รวมค่าโหนดทั้งหมดในชั้นนั้นเป็น `level_sum`",
+                "ตรวจสอบ: ถ้า `level_sum > max_sum` ให้ตั้ง `max_sum = level_sum` และ `best_level = current_level` (ใช้ `>` อย่างเคร่งครัด เพื่อให้ชั้นที่น้อยกว่าชนะเมื่อเสมอกัน)",
+              ],
+            },
 
-                  { t: "h3", c: "ส่วนที่ 2: วนทีละชั้น บวก total" },
-                  { t: "code", lang: "python", label: "ส่วนที่ 2", c: `while queue:
-    level += 1            # ขึ้นชั้นใหม่ (โจทย์นับเริ่มที่ 1)
-    size = len(queue)
-    total = 0
-    for _ in range(size):
-        node = queue.popleft()
-        total += node.val         # บวกทุก node ในชั้นนี้
-        if node.left:
-            queue.append(node.left)
-        if node.right:
-            queue.append(node.right)` },
-                  { t: "callout", title: "ทำไมต้องเขียน (The Why)", c: "level += 1 ตอนขึ้นชั้นใหม่ทำให้ชั้นแรกได้เลข 1 ตรงกับโจทย์ (ไม่ใช่ 0) ส่วนการล็อก size = len(queue) ก่อนเข้าลูปใน ทำให้ total บวกครบเฉพาะ node ของชั้นนี้พอดี ลูกที่ยัดเข้ามาระหว่างลูปจะถูกเก็บไว้ชั้นถัดไป" },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น (Interactive)" },
+            {
+              t: "p",
+              c: "กด **Next ▶** เพื่อดูการคำนวณผลรวมทีละชั้น และการอัปเดตชั้นที่ดีที่สุด:",
+            },
+            { t: "viz", id: "tree-bfs-level-sum" },
 
-                  { t: "h3", c: "ส่วนที่ 3: เทียบแชมป์ด้วย > หลังจบชั้น (จุดตัดคนผ่าน/ไม่ผ่าน)" },
-                  { t: "code", lang: "python", label: "ส่วนที่ 3", c: `if total > best_sum:      # เจอชั้นที่รวมมากกว่าเดิม
-    best_sum = total
-    best_level = level` },
-                  { t: "callout", title: "ทำไมต้องเขียน (The Why)", c: "ใช้ > (มากกว่าเท่านั้น ไม่ใช่ >=) เพื่อให้เมื่อผลรวมเสมอกัน เราเก็บชั้นแรก (เลขน้อยกว่า) ไว้ตามที่โจทย์สั่ง และต้องเช็คหลังจบชั้นเสมอ เพราะตอนนั้น total ของชั้นนั้นครบแล้ว" },
-                  { t: "callout", title: "ถ้าใช้ >= (What If)", warn: true, c: "เมื่อผลรวมเสมอกัน ชั้นล่าง (เลขมากกว่า) จะมาทับแชมป์เดิม คำตอบจะเป็น level ที่มากสุดแทนที่จะเป็นน้อยสุด ผิดตรงโจทย์พอดี" },
-
-                  { t: "h3", c: "4. Step-by-Step Walkthrough (จำลองการทำงาน)" },
-                  { t: "p", c: "จำลองบนต้น [1,7,0,7,-8,null,null]" },
-                  { t: "table", head: ["level", "node ใน level", "total", "best_sum / best_level หลัง level นี้"], rows: [
-                    ["1", "[1]", "1", "1 / 1"],
-                    ["2", "[7, 0]", "7", "7 / 2"],
-                    ["3", "[7, -8]", "-1", "7 / 2 (ไม่อัปเดต)"],
-                  ] },
-                  { t: "p", c: "กด **Next ▶** เพื่อไล่บวกทีละชั้น · วงแหวนเขียว = ชั้นที่เป็นแชมป์ผลรวมตอนนี้:" },
-                  { t: "viz", id: "tree-bfs-level-sum" },
-
-                  { t: "h3", c: "5. Clean Code (โค้ดฉบับสมบูรณ์)" },
-                  { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ class นี้มาให้แล้ว ที่เขียนไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              c: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
 from collections import deque
 
-def maxLevelSum(root):
-    best_sum = float('-inf')   # ผลรวมมากสุดที่เจอ (เริ่ม -inf กันค่าติดลบ)
-    best_level = 1             # เลขชั้นที่ให้ผลรวมมากสุด
-    level = 0
-    queue = deque([root])
-    while queue:
-        level += 1            # ขึ้นชั้นใหม่
-        size = len(queue)
-        total = 0
-        for _ in range(size):
-            node = queue.popleft()
-            total += node.val         # บวกทุก node ในชั้นนี้
-            if node.left:
-                queue.append(node.left)
-            if node.right:
-                queue.append(node.right)
-        if total > best_sum:          # เจอชั้นที่รวมมากกว่าเดิม
-            best_sum = total
-            best_level = level
-    return best_level
+class Solution:
+    def maxLevelSum(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 1
 
-# ต้นไม้ [1, 7, 0, 7, -8, null, null]
-root = TreeNode(1, TreeNode(7, TreeNode(7), TreeNode(-8)), TreeNode(0))
-print(maxLevelSum(root))`, out: `2` },
+        q = deque([root])
+        max_sum = float('-inf')   # กันเคสค่าติดลบทั้งหมด
+        best_level = 1
+        curr_level = 1
 
-                  { t: "h3", c: "6. Complexity Analysis (วิเคราะห์ Big O)" },
-                  { t: "ul", c: [
-                    "**Time Complexity: O(n)** — แตะทุก node ครั้งเดียว",
-                    "**Space Complexity: O(w)** — w คือความกว้างมากสุดของต้นไม้ (จำนวน node มากสุดในคิวพร้อมกัน)",
-                  ] },
+        while q:
+            level_size = len(q)
+            level_sum = 0
 
-                  { t: "callout", title: "💡 สรุป pattern", c: "BFS + ตัวสะสมต่อชั้น (ผลรวม/จำนวน/max) แล้วเทียบข้ามชั้น: เมื่อโจทย์ถามหา \"ชั้นที่ดีที่สุด\" ใช้ level counter + ตัวแปรเก็บแชมป์ ด้วยเงื่อนไข > เพื่อรักษาชั้นแรกเมื่อเสมอ" },
-                ],
-              },
+            # คำนวณผลรวมเฉพาะโหนดในชั้นปัจจุบัน
+            for _ in range(level_size):
+                node = q.popleft()
+                level_sum += node.val
+
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+
+            # อัปเดตเมื่อเจอผลรวมที่มากกว่าเดิมอย่างเคร่งครัด
+            if level_sum > max_sum:
+                max_sum = level_sum
+                best_level = curr_level
+
+            curr_level += 1
+
+        return best_level`,
+            },
+
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
+            {
+              t: "table",
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
+              rows: [
+                ["max_sum = float('-inf')", "กำหนดค่าลบอนันต์เพื่อรองรับโหนดติดลบ", "max_sum = -inf"],
+                ["level_sum += node.val", "สะสมผลรวมของทุกโหนดในชั้นนี้", "ชั้น 2: 7 + 0 = 7"],
+                ["if level_sum > max_sum:", "เช็คว่าทำลายสถิติผลรวมเดิมไหม (ไม่ใช้ >= เพื่อคงชั้นที่น้อยกว่า)", "7 > 1 -> อัปเดต"],
+                ["curr_level += 1", "ก้าวเข้าสู่ชั้นถัดไป", "1 -> 2 -> 3"],
+                ["return best_level", "ส่งคืนหมายเลขชั้นที่มีผลรวมสูงสุด", "return 2"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
+            {
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N)", "ผ่านทุกโหนดในต้นไม้อย่างละ 1 ครั้ง"],
+                ["Space (หน่วยความจำ)", "O(D)", "Queue เก็บโหนดสูงสุดเท่ากับความกว้างของชั้นที่กว้างที่สุด"],
+              ],
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Given the \`root\` of a binary tree, the level of its root is \`1\`, the level of its children is \`2\`, and so on. Return the smallest level \`x\` such that the sum of all the values of nodes at level \`x\` is maximal.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "root = [1,7,0,7,-8,null,null]",
+              output: "2",
+              explain: "Level 1 sum = 1, Level 2 sum = 7, Level 3 sum = -1. Max sum is at level 2.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "The number of nodes in the tree is in the range [1, 10^4].",
+            "-10^5 <= Node.val <= 10^5",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full Solution",
+          c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
+            {
+              t: "p",
+              c: "Find the 1-based level index with the maximum node value sum. In case of a tie, return the smallest level number.",
+            },
+
+            { t: "h3", c: "Step 2 · Manual Trace" },
+            {
+              t: "p",
+              c: "Level 1: 1 (max=1, best=1). Level 2: 7+0=7 (7 > 1 -> max=7, best=2). Level 3: 7+(-8)=-1. Return 2.",
+            },
+
+            { t: "h3", c: "Step 3 · Methodology" },
+            {
+              t: "p",
+              c: "Use BFS level-order traversal. Initialize `max_sum = float('-inf')` to handle negative sums. Use strict `>` comparison to favor smaller level numbers on ties.",
+            },
+
+            { t: "h3", c: "Step 4 · Interactive Walkthrough" },
+            { t: "viz", id: "tree-bfs-level-sum" },
+
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
+            {
+              t: "code",
+              lang: "python",
+              c: `from collections import deque
+
+class Solution:
+    def maxLevelSum(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 1
+
+        q = deque([root])
+        max_sum = float('-inf')
+        best_level = 1
+        curr_level = 1
+
+        while q:
+            level_size = len(q)
+            level_sum = 0
+
+            for _ in range(level_size):
+                node = q.popleft()
+                level_sum += node.val
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+
+            if level_sum > max_sum:
+                max_sum = level_sum
+                best_level = curr_level
+
+            curr_level += 1
+
+        return best_level`,
+            },
+
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
+            {
+              t: "table",
+              head: ["Line", "Purpose", "Example"],
+              rows: [
+                ["max_sum = float('-inf')", "Initialize with negative infinity", "Handles all-negative nodes"],
+                ["level_sum += node.val", "Sum all nodes at current depth", "7 + 0 = 7"],
+                ["if level_sum > max_sum:", "Update only on strict improvement", "Tie favors smaller level"],
+                ["return best_level", "Return best level index", "return 2"],
+              ],
+            },
+
+            { t: "h3", c: "Step 7 · Complexity" },
+            {
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N)", "Every tree node visited once."],
+                ["Space", "O(D)", "Queue holds at most the maximum level width."],
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
 };

@@ -3,403 +3,1192 @@ import type { Page } from "@/lib/types";
 export const binarySearchPages: Record<string, Page> = {
   "lc75-intro-binary-search": {
     slug: "lc75-intro-binary-search",
-    title: { th: "Binary Search — พื้นฐาน & แนวคิด", en: "" },
-    lead: { th: "เทคนิค halve (ตัดครึ่ง) search space (ช่วงค้นหา) ทุกก้าว ลดเวลาจาก O(n) เหลือ O(log n) และต่อยอดเป็น binary search on answer (ค้นบนช่วงคำตอบ) เพื่อเดาคำตอบ", en: "" },
+    title: {
+      th: "Binary Search — พื้นฐาน & แนวคิด",
+      en: "Binary Search — Fundamentals & Mental Models",
+    },
+    lead: {
+      th: "เทคนิคตัดครึ่งช่วงค้นหา (Halving Search Space) ทุกก้าว ลดเวลาจาก O(N) เหลือ O(log N) และต่อยอดเป็น Binary Search on Answer",
+      en: "Halving search space at every step to cut runtime from O(N) to O(log N), extending into Binary Search on Answer.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "Binary Search (ค้นหาแบบแบ่งครึ่ง) คือหนึ่งในเทคนิคที่คุ้มค่าที่สุดที่ควรมีติดตัว ไอเดียเรียบง่ายมาก: ถ้าของ sorted (เรียงลำดับ) อยู่แล้ว ทุกครั้งที่ guess (เดา) เราสามารถ eliminate (ตัดทิ้ง) ตัวเลือกไปครึ่งหนึ่งได้ทันที ทำให้ search (ค้นหา) ของใน array (ลิสต์) ล้านตัวได้ในราว 20 ก้าวเท่านั้น หน้านี้จะปูตั้งแต่ binary search แบบพื้นฐาน ไปจนถึงเทคนิคขั้นสูงที่เรียกว่า binary search on answer" },
+        {
+          t: "p",
+          c: "Binary Search (ค้นหาแบบแบ่งครึ่ง) คือหนึ่งในอัลกอริทึมที่ทรงพลังที่สุดในโลกคอมพิวเตอร์ ไอเดียเรียบง่ายแต่เฉียบขาด: ถ้าข้อมูลเรียงลำดับ (Sorted) ไว้อยู่แล้ว ทุกครั้งที่เราตรวจค่าตรงกลาง เราสามารถตัดตัวเลือกที่ไม่เกี่ยวข้องทิ้งไปได้ครึ่งหนึ่งทันที!",
+        },
+        {
+          t: "h2",
+          c: "ส่วนที่ 1 · ปลดล็อกไอเดีย: เปิดพจนานุกรม ไม่ใช่ไล่อ่านทีละหน้า",
+        },
+        {
+          t: "p",
+          c: 'นึกถึงเวลาเราเปิดพจนานุกรมหาคำว่า "Monkey" — เราไม่เคยเปิดตั้งแต่หน้า 1 ไล่ไปหน้า 2, 3... แต่เราจะเปิด "กลางเล่ม" ก่อน ถ้าพบคำที่ขึ้นต้นด้วยตัว P แปลว่า M ต้องอยู่ครึ่งซ้ายแน่นอน เราก็ตัดครึ่งขวาทิ้งทั้งก้อน แล้วทำซ้ำ!',
+        },
+        {
+          t: "image",
+          src: "/leetcode-75/binary-search.gif",
+          alt: "Binary search: lo/hi/mid halving until target found",
+          caption: "Binary Search: ดู mid → ตัดครึ่งที่ไม่เกี่ยวทิ้ง → เหลือช่วงเล็กลงครึ่งหนึ่งทุกก้าว",
+        },
+        {
+          t: "callout",
+          title: "ความเร็วระดับ O(log N)",
+          c: "ข้อมูล 1,000,000 ตัว แทนที่จะต้องเดินตรวจ 1,000,000 ครั้งแบบ Linear Search O(N) ตัว Binary Search ใช้การตัดครึ่งเพียงประมาณ 20 ครั้งเท่านั้นก็เจอ!",
+        },
 
-              { t: "h2", c: "แนวคิดพื้นฐาน & template lo/hi/mid" },
-              { t: "p", c: "ลองนึกถึงการเปิด dictionary (พจนานุกรม) หาคำ เราไม่ได้เปิดทีละหน้าจากหน้าแรก แต่เปิดกลางเล่มก่อน ถ้าคำที่หาอยู่ก่อนหน้านั้นก็ตัดครึ่งหลังทิ้ง ถ้าอยู่หลังก็ตัดครึ่งแรกทิ้ง แล้วทำซ้ำกับครึ่งที่เหลือ นี่คือ binary search เป๊ะ ๆ เงื่อนไขสำคัญคือ ของต้อง sorted แล้ว เท่านั้นเราถึงจะรู้ว่าควร eliminate ครึ่งไหน" },
-              {
-                t: "image",
-                src: "/leetcode-75/binary-search.gif",
-                alt: "Binary search: lo/hi/mid halving until target found",
-                caption:
-                  "Binary Search: ดู mid → ตัดครึ่งที่ไม่เกี่ยวทิ้ง → เหลือช่วงเล็กลงครึ่งหนึ่งทุกก้าว",
-              },
-              { t: "p", c: "ทำไมมันเร็ว? เพราะทุกก้าวเรา halve (ลดครึ่ง) ขนาดปัญหา array n ตัว จะแบ่งครึ่งได้ราว log2(n) ครั้งก่อนเหลือตัวเดียว เช่น n = 1,000,000 ใช้แค่ประมาณ 20 ก้าว เทียบกับการ iterate (ไล่วน) ทีละตัว O(n) ที่ต้องดูถึงล้านครั้ง นี่คือความต่างระหว่าง O(log n) กับ O(n)" },
-              { t: "code", lang: "python", c: `def binary_search(nums, target):
-    lo, hi = 0, len(nums) - 1        # ขอบเขตซ้าย-ขวาของช่วงที่ยังต้องค้น
+        {
+          t: "h2",
+          c: "ส่วนที่ 2 · แม่แบบมาตรฐาน: lo, hi, mid",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Standard Binary Search Template",
+          c: `def binary_search(nums, target):
+    lo, hi = 0, len(nums) - 1
+
     while lo <= hi:
-        mid = (lo + hi) // 2         # จุดกึ่งกลาง
-        if nums[mid] == target:
-            return mid               # เจอแล้ว
-        elif nums[mid] < target:
-            lo = mid + 1             # target อยู่ครึ่งขวา ตัดครึ่งซ้ายทิ้ง
-        else:
-            hi = mid - 1             # target อยู่ครึ่งซ้าย ตัดครึ่งขวาทิ้ง
-    return -1                        # ไม่เจอ
-
-print(binary_search([1, 3, 5, 7, 9, 11], 7))  # 3
-print(binary_search([1, 3, 5, 7, 9, 11], 4))  # -1` },
-              { t: "callout", title: "จุดพลาดที่พบบ่อยของ template นี้", c: "ใช้ mid = (lo + hi) // 2 และเงื่อนไข while lo <= hi (มีเท่ากับ) การขยับ lo = mid + 1 หรือ hi = mid - 1 ต้อง +1/-1 เสมอ ไม่งั้นจะ infinite loop (วนไม่รู้จบ) เมื่อเหลือช่วงแค่ตัวเดียว" },
-
-              { t: "h2", c: "เทคนิคขั้นสูง: Binary Search on Answer" },
-              { t: "p", c: "นี่คือแนวคิดที่ทำให้ binary search ทรงพลังกว่าที่คิดมาก แทนที่จะ search ค่า ใน array ที่ sorted ไว้ เรากลับ search คำตอบ ใน answer space (ช่วงของคำตอบที่เป็นไปได้ทั้งหมด) หลักการคือ ถ้าเรา guess คำตอบเป็นตัวเลข x แล้วมี function (ฟังก์ชัน) check ได้ว่า x นี้ feasible (ใช้ได้) ไหม และคำตอบมีลักษณะ monotonic (ยิ่งมากยิ่งง่าย หรือยิ่งน้อยยิ่งง่าย) แบบขั้นบันได เราก็ binary search หา boundary (จุดพลิก) ได้เลย" },
-              { t: "p", c: "ตัวอย่างที่ชัดคือ LC875 (Koko Eating Bananas / โกโกะกินกล้วย) ที่จะเจอเป็นข้อสุดท้าย speed (ความเร็ว) กินยิ่งมาก ยิ่งกินทันแน่ ๆ speed ยิ่งน้อยยิ่งเสี่ยงไม่ทัน เงื่อนไข กินทันไหม จึงเป็นขั้นบันได true-false ที่เรียงตัว เราจึง binary search บนช่วง speed 1 ถึง max เพื่อหา speed น้อยสุดที่ยัง feasible" },
-              { t: "code", lang: "python", c: `# template ของ binary search on answer (หาค่าน้อยสุดที่ feasible)
-def search_on_answer(lo, hi, feasible):
-    while lo < hi:
         mid = (lo + hi) // 2
-        if feasible(mid):
-            hi = mid          # mid ใช้ได้ ลองหาค่าที่น้อยกว่านี้ต่อ (เก็บ mid ไว้)
-        else:
-            lo = mid + 1      # mid ใช้ไม่ได้ ต้องมากขึ้น
-    return lo                 # จุดพลิกจาก ใช้ไม่ได้ -> ใช้ได้` },
 
-              { t: "callout", title: "หมวดนี้มี 4 ข้อ", c: "ถ้าโจทย์ถามหา minimum/maximum (ค่าน้อยที่สุด/มากที่สุด) ที่ทำให้ condition (เงื่อนไข) บางอย่างเป็นจริง และถ้าค่านั้น feasible แล้วค่าที่มากกว่า (หรือน้อยกว่า) ก็ feasible ตามด้วยเสมอ นั่นคือสัญญาณว่า binary search บน answer space ได้ พร้อมแล้วกดถัดไปเริ่มข้อแรกได้เลย" },
+        if nums[mid] == target:
+            return mid               # เจอเป้าหมายแล้ว!
+        elif nums[mid] < target:
+            lo = mid + 1             # เป้าหมายอยู่ฝั่งขวา ตัดฝั่งซ้ายทิ้ง
+        else:
+            hi = mid - 1             # เป้าหมายอยู่ฝั่งซ้าย ตัดฝั่งขวาทิ้ง
+
+    return -1                        # ตกขอบ ไม่พบเป้าหมาย`,
+        },
+
+        {
+          t: "h2",
+          c: "ส่วนที่ 3 · เทคนิคขั้นสูง: Binary Search on Answer",
+        },
+        {
+          t: "p",
+          c: 'โจทย์ระดับ Medium หลายข้อไม่ได้ให้ array ที่เรียงแล้วมาค้นหา แต่ให้เรา "เดาคำตอบที่เป็นตัวเลข" เช่น ความเร็วการกินกล้วยของ Koko (LC875) ถ้าเงื่อนไขมีลักษณะเป็นขั้นบันได (Monotonic) เช่น "ถ้าความเร็ว 5 กินทัน ความเร็วที่มากกว่า 5 ก็ย่อมกินทันเสมอ" เราสามารถรัน Binary Search บนช่วงคำตอบที่เป็นไปได้ (1 ถึง Max) เพื่อหาคำตอบที่ดีที่สุดได้!',
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "Binary search eliminates half of the remaining search space with each comparison. On sorted data, it turns an O(N) linear scan into an ultra-fast O(log N) algorithm.",
+        },
+        {
+          t: "h2",
+          c: "Part 1 · The Dictionary Intuition",
+        },
+        {
+          t: "p",
+          c: "When looking up a word in a printed dictionary, you flip open the middle. Depending on whether the word comes before or after, you discard an entire half of the volume.",
+        },
+        {
+          t: "h2",
+          c: "Part 2 · Binary Search on Answer",
+        },
+        {
+          t: "p",
+          c: "Instead of searching for a value inside a sorted list, we can binary search across the range of possible answers whenever feasibility is monotonic (e.g. true for all x >= threshold).",
+        },
+      ],
     },
   },
 
   "lc75-p53": {
     slug: "lc75-p53",
-    title: { th: "ข้อ 53 · LC374 Guess Number Higher or Lower (ทายเลขสูงต่ำ) 🟢", en: "" },
-    lead: { th: "binary search แบบตำราเป๊ะ ๆ เพียงเปลี่ยนจาก compare (เทียบ) ค่าใน array เป็นถาม API guess() ว่าควรไปซ้ายหรือขวา", en: "" },
+    title: {
+      th: "ข้อ 53 · LC374 Guess Number Higher or Lower (ทายเลขสูงต่ำ) 🟢",
+      en: "LC374 Guess Number Higher or Lower 🟢",
+    },
+    lead: {
+      th: "โจทย์แม่แบบ Binary Search ตำราแท้ — เดาตัวเลขตรงกลางแล้วปรับขอบเขตตามคำใบ้ API",
+      en: "Textbook binary search — guess the midpoint and narrow boundaries based on API feedback.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC374): กำลังเล่นเกม Guess Game ที่มีการสุ่มเลขจำนวนเต็มหนึ่งตัวไว้ล่วงหน้าในช่วง 1 ถึง n ทุกครั้งที่เดา (guess) ผิด เกมจะบอกว่าตัวเลขที่สุ่มไว้มากกว่าหรือน้อยกว่าตัวที่เดา ให้เรียกใช้ API ที่มีให้อยู่แล้วคือ int guess(int num) ซึ่ง return -1 ถ้า num ที่เดามากกว่าตัวเลขที่สุ่มไว้ (เดาสูงไป), return 1 ถ้า num น้อยกว่า (เดาต่ำไป), และ return 0 ถ้าเดาถูก ให้ return ตัวเลขที่ระบบสุ่มไว้" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "n = 10, pick = 6",
-                    output: "6",
-                    explain: "ทายด้วย binary search: mid = 5 ได้ guess(5) = 1 (น้อยไป), mid = 8 ได้ guess(8) = -1 (มากไป), mid = 6 ได้ guess(6) = 0 (ถูก) จึงคืน 6",
-                  },
-                  {
-                    input: "n = 1, pick = 1",
-                    output: "1",
-                    explain: "ช่วงมีตัวเดียวคือ 1 guess(1) คืน 0 ทันที",
-                  },
-                  {
-                    input: "n = 2, pick = 1",
-                    output: "1",
-                    explain: "mid = (1+2)//2 = 1 guess(1) คืน 0 ทันทีตั้งแต่ก้าวแรก",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= n <= 2^31 - 1",
-                "1 <= pick <= n",
-                "n ใหญ่ระดับสองพันล้าน → ไล่ทีละเลขไม่ได้เด็ดขาด ต้องตัดครึ่ง",
-                ],
-              },
+        {
+          t: "p",
+          c: `We are playing the Guess Game. The game will pick a secret number from \`1\` to \`n\`. You have to guess which number was picked.
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "โครงสร้างที่ใช้: binary search พื้นฐานตรง ๆ answer space (ช่วงคำตอบ) sorted อยู่แล้ว (1 ถึง n) และ guess() ทำหน้าที่เหมือนการ compare nums[mid] กับ target แค่มันบอก direction (ทิศทาง) ให้เราแทน" },
-              { t: "p", c: "คิดแบบง่าย/ช้าก่อน: ถ้า guess ไล่จาก 1, 2, 3, ... จะเป็น O(n) ซึ่งช้ามากเมื่อ n ใหญ่ แต่เพราะ guess บอก direction ได้ เรา halve (ตัดครึ่ง) ช่วงที่เป็นไปได้ทุกครั้ง เหลือ O(log n)" },
-              { t: "ol", c: [
-                "initialize lo = 1, hi = n",
-                "ระหว่าง lo <= hi: compute mid แล้วเรียก res = guess(mid)",
-                "ถ้า res == 0 ทายถูก return mid",
-                "ถ้า res < 0 (mid มากไป) เลขจริงอยู่ครึ่งซ้าย ตั้ง hi = mid - 1; ถ้า res > 0 (mid น้อยไป) ตั้ง lo = mid + 1",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "อย่าเผลอสลับทิศ res < 0 หมายถึงเลขที่เราทาย มากเกินไป ดังนั้นเลขจริงอยู่ทางซ้าย ต้องขยับ hi ลง ไม่ใช่ขยับ lo ขึ้น" },
+Every time you guess wrong, the game tells you whether the number is higher or lower than your guess.
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "จำลอง n = 10, เลขจริง = 6:" },
-              { t: "table", head: ["lo", "hi", "mid", "guess(mid)", "ทำอะไรต่อ"], rows: [
-                ["1", "10", "5", "1 (น้อยไป)", "lo = 6"],
-                ["6", "10", "8", "-1 (มากไป)", "hi = 7"],
-                ["6", "7", "6", "0 (ถูก)", "คืน 6"],
-              ] },
+You call a pre-defined API \`int guess(int num)\`, which returns three possible results:
+• \`-1\`: Your guess is higher than the number I picked (i.e. \`num > pick\`).
+• \`1\`: Your guess is lower than the number I picked (i.e. \`num < pick\`).
+• \`0\`: your guess is equal to the number I picked (i.e. \`num == pick\`).
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `# LeetCode ให้ API guess() มาให้แล้ว ที่จำลองไว้ตรงนี้เพื่อให้บล็อกนี้รันได้เองทั้งก้อน
-SECRET = 6
+Return the number that I picked.`,
+        },
+        {
+          t: "p",
+          c: `เรากำลังเล่นเกมทายตัวเลข โดยระบบได้สุ่มเลือกเลขลับตัวหนึ่งไว้ในช่วง \`1\` ถึง \`n\`
+ทุกครั้งที่คุณทาย ระบบจะมี API \`int guess(int num)\` ให้เรียก ซึ่งส่งคืนค่า:
+• \`-1\`: ตัวเลขที่คุณทายสูงเกินไป (เลขลับมีค่าน้อยกว่า \`num\`)
+• \`1\`: ตัวเลขที่คุณทายต่ำเกินไป (เลขลับมีค่ามากกว่า \`num\`)
+• \`0\`: ยินดีด้วย คุณทายถูกแล้ว (เลขลับมีค่าเท่ากับ \`num\`)
 
-def guess(num):
-    if num > SECRET:
-        return -1          # ทายมากไป
-    if num < SECRET:
-        return 1           # ทายน้อยไป
-    return 0               # ทายถูก
+จงหาว่าเลขลับที่ถูกสุ่มไว้คือเลขใด`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "n = 10, pick = 6",
+              output: "6",
+              explain: "ทาย 5 ได้ 1 (ต่ำไป) -> ทาย 8 ได้ -1 (สูงไป) -> ทาย 6 ได้ 0 (ถูกต้อง)",
+            },
+            {
+              input: "n = 1, pick = 1",
+              output: "1",
+              explain: "มีเลขเดียวคือ 1 ทาย 1 ได้ 0 ทันที",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= n <= 2^31 - 1",
+            "1 <= pick <= n",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ค่า n อาจใหญ่ถึง 2 พันล้าน (2^31 - 1)! ถ้าไล่ทายทีละเลข 1, 2, 3... จะหมดเวลาแน่นอน เราจะใช้การเดาเลขตรงกลางเพื่อตัดตัวเลขทิ้งทีละครึ่งได้อย่างไร?",
+        },
 
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "โจทย์ให้ค้นหาเลขลับที่อยู่ในช่วง [1, n] โดยทุกครั้งที่เราทาย `mid` ฟังก์ชัน `guess(mid)` จะบอกทิศทางอย่างชัดเจนว่าเลขลับอยู่ทางซ้าย (-1) หรืออยู่ทางขวา (+1) หรือคือตัวนี้เลย (0)",
+            },
 
-# กำหนดให้มี API guess(num) อยู่แล้ว:
-#   guess(num) -> -1 ถ้า num มากไป, 1 ถ้า num น้อยไป, 0 ถ้าถูก
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "จำลอง n = 10, pick = 6:",
+            },
+            {
+              t: "ul",
+              c: [
+                "ช่วงเริ่มต้น: lo = 1, hi = 10",
+                "รอบที่ 1: mid = (1 + 10) // 2 = 5 -> เรียก guess(5) ได้ผลลัพธ์ +1 (ต่ำไป! แปลว่าคำตอบอยู่ขวา) -> ขยับ lo = 6",
+                "รอบที่ 2: ช่วงเหลือ [6, 10] -> mid = (6 + 10) // 2 = 8 -> เรียก guess(8) ได้ -1 (สูงไป! คำตอบอยู่ซ้าย) -> ขยับ hi = 7",
+                "รอบที่ 3: ช่วงเหลือ [6, 7] -> mid = (6 + 7) // 2 = 6 -> เรียก guess(6) ได้ 0 (ทายถูก!) -> ส่งคืน 6 ทันที",
+              ],
+            },
 
-def guessNumber(n):
-    lo, hi = 1, n
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        res = guess(mid)
-        if res == 0:
-            return mid          # ทายถูก
-        elif res < 0:
-            hi = mid - 1        # mid มากไป เลขจริงอยู่ครึ่งซ้าย
-        else:
-            lo = mid + 1        # mid น้อยไป เลขจริงอยู่ครึ่งขวา
-    return -1  # ไม่ควรมาถึงตรงนี้
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "ภาพรวม: Binary Search มาตรฐานบนช่วงตัวเลข 1 ถึง n",
+            },
+            {
+              t: "p",
+              c: "ขั้นตอนตรรกะ:",
+            },
+            {
+              t: "ol",
+              c: [
+                "ตั้ง `lo = 1`, `hi = n`",
+                "วนลูป `while lo <= hi:`",
+                "คำนวณ `mid = (lo + hi) // 2`",
+                "เรียก `res = guess(mid)`",
+                "ถ้า `res == 0`: ตอบ `mid`",
+                "ถ้า `res == -1` (ทายสูงไป): ปรับ `hi = mid - 1`",
+                "ถ้า `res == 1` (ทายต่ำไป): ปรับ `lo = mid + 1`",
+              ],
+            },
 
-print(guessNumber(10))     # เลขลับคือ 6`, out: `6` },
-                { t: "p", c: "โจทย์นี้คือ binary search แบบตำราเป๊ะ ๆ เพียงแต่แทนที่จะ compare กับค่าใน array เราถามผลจาก function guess ที่คอยบอก direction ค่าที่ guess return มามีสามกรณี: 0 คือถูก, negative (ลบ) คือทายมากไป (ต้องลด hi), positive (บวก) คือทายน้อยไป (ต้องเพิ่ม lo)" },
-                { t: "p", c: "จุดสำคัญคืออย่าเผลอสลับทิศ res < 0 หมายถึงเลขที่เราทายมากเกินไป ดังนั้นเลขจริงอยู่ทางซ้าย ต้องขยับ hi ลง ถ้าสลับ condition สองอันนี้จะ halve ผิดข้างและหาไม่เจอ" },
-                { t: "p", c: "Time O(log n) halve ช่วงทุกก้าว · Space O(1) ใช้ตัวแปรไม่กี่ตัว ไม่มีโครงสร้างเสริม" },
-              ] },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
+            {
+              t: "table",
+              head: ["รอบ", "lo", "hi", "mid", "guess(mid)", "การปรับขอบเขต"],
+              rows: [
+                ["1", "1", "10", "5", "+1 (ต่ำไป)", "lo = mid + 1 = 6"],
+                ["2", "6", "10", "8", "-1 (สูงไป)", "hi = mid - 1 = 7"],
+                ["3", "6", "7", "6", "0 (ถูกต้อง!)", "คืนค่า 6 จบการทำงาน"],
+              ],
+            },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "binary search ไม่จำเป็นต้องมี array จริง ขอแค่มีช่วงที่ sorted และมีวิธีบอก direction (compare ค่า/เรียก API/check condition) ว่าคำตอบอยู่ครึ่งไหน ก็ halve ได้แล้ว" },
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              c: `# The guess API is already defined for you.
+# @param num, your guess
+# @return -1 if num is higher than the picked number
+#          1 if num is lower than the picked number
+#          otherwise return 0
+# def guess(num: int) -> int:
+
+class Solution:
+    def guessNumber(self, n: int) -> int:
+        lo = 1
+        hi = n
+
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            res = guess(mid)
+
+            if res == 0:
+                return mid
+            elif res == -1:
+                # ทายสูงไป เลขจริงอยู่ฝั่งซ้าย
+                hi = mid - 1
+            else:
+                # ทายต่ำไป เลขจริงอยู่ฝั่งขวา
+                lo = mid + 1
+
+        return lo`,
+            },
+
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
+            {
+              t: "table",
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
+              rows: [
+                ["lo = 1; hi = n", "ตั้งขอบเขตการค้นหาเริ่มต้น", "lo=1, hi=10"],
+                ["mid = (lo + hi) // 2", "หาจุดกึ่งกลางของช่วง", "mid = 5"],
+                ["res = guess(mid)", "ถาม API เกมทายตัวเลข", "guess(5) = 1"],
+                ["elif res == -1: hi = mid - 1", "ตัดช่วงครึ่งขวาทิ้ง", "hi = 4"],
+                ["else: lo = mid + 1", "ตัดช่วงครึ่งซ้ายทิ้ง", "lo = 6"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
+            {
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(log N)", "ตัดช่วงการค้นหาทิ้งทีละครึ่งหนึ่งทุกรอบ สูงสุดไม่เกิน 31 รอบสำหรับ N = 2^31"],
+                ["Space (หน่วยความจำ)", "O(1)", "ใช้ตัวแปรตัวชี้ `lo`, `hi`, `mid` คงที่ ไม่ใช้หน่วยความจำเพิ่ม"],
+              ],
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Guess a picked secret number from \`1\` to \`n\` using the \`guess(num)\` API which returns -1, 1, or 0.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "n = 10, pick = 6",
+              output: "6",
+              explain: "guess(5)=1 -> guess(8)=-1 -> guess(6)=0.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= n <= 2^31 - 1",
+            "1 <= pick <= n",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full Solution",
+          c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
+            {
+              t: "p",
+              c: "Find the secret integer in [1, n] using binary search guided by the `guess()` API.",
+            },
+
+            { t: "h3", c: "Step 2 · Manual Trace" },
+            {
+              t: "p",
+              c: "n=10, pick=6: mid=5 -> +1 (lo=6). mid=8 -> -1 (hi=7). mid=6 -> 0 (found!).",
+            },
+
+            { t: "h3", c: "Step 3 · Methodology" },
+            {
+              t: "p",
+              c: "Standard binary search with `lo <= hi`. Branch left on `guess() == -1` and right on `guess() == 1`.",
+            },
+
+            { t: "h3", c: "Step 4 · Simulation Table" },
+            {
+              t: "table",
+              head: ["Step", "lo", "hi", "mid", "Result"],
+              rows: [
+                ["1", "1", "10", "5", "+1 -> lo=6"],
+                ["2", "6", "10", "8", "-1 -> hi=7"],
+                ["3", "6", "7", "6", "0 -> return 6"],
+              ],
+            },
+
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
+            {
+              t: "code",
+              lang: "python",
+              c: `class Solution:
+    def guessNumber(self, n: int) -> int:
+        lo, hi = 1, n
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            res = guess(mid)
+            if res == 0:
+                return mid
+            elif res == -1:
+                hi = mid - 1
+            else:
+                lo = mid + 1
+        return lo`,
+            },
+
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
+            {
+              t: "table",
+              head: ["Line", "Purpose", "Example"],
+              rows: [
+                ["lo, hi = 1, n", "Search boundary", "1 to n"],
+                ["mid = (lo + hi) // 2", "Midpoint", "mid = 5"],
+                ["if res == 0: return mid", "Target found", "return 6"],
+              ],
+            },
+
+            { t: "h3", c: "Step 7 · Complexity" },
+            {
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(log N)", "Halves the interval in every round."],
+                ["Space", "O(1)", "Only integer boundary pointers."],
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p54": {
     slug: "lc75-p54",
-    title: { th: "ข้อ 54 · LC2300 Successful Pairs of Spells and Potions (คู่คาถากับยา) 🟡", en: "" },
-    lead: { th: "sort (เรียง) potions แล้วสำหรับแต่ละ spell ใช้ bisect หา boundary (จุดเริ่ม) ของ potion ที่แรงพอ แล้ว count (นับ) ส่วนที่เหลือ", en: "" },
+    title: {
+      th: "ข้อ 54 · LC2300 Successful Pairs of Spells and Potions (จับคู่คาถากับยา) 🟡",
+      en: "LC2300 Successful Pairs of Spells and Potions 🟡",
+    },
+    lead: {
+      th: "เรียง array ยา potions แล้วใช้ Binary Search หาตำแหน่งแรกที่คูณแล้วผ่านเกณฑ์ success",
+      en: "Sort potions array and use binary search (bisect_left) to count valid pairings in O(M log M + N log M).",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC2300): กำหนด array จำนวนเต็มบวกสองชุดคือ spells (ความแรงคาถา ยาว n) และ potions (ความแรงยา ยาว m) พร้อมจำนวนเต็ม success คู่ของคาถา i กับยา j จะสำเร็จ (successful) ก็ต่อเมื่อผลคูณ spells[i] * potions[j] มีค่ามากกว่าหรือเท่ากับ success ให้ return array pairs ความยาว n โดย pairs[i] คือจำนวนยาที่จับคู่กับคาถาตัวที่ i แล้วสำเร็จ" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "spells = [5, 1, 3], potions = [1, 2, 3, 4, 5], success = 7",
-                    output: "[4, 0, 3]",
-                    explain: "คาถา 5 คูณ [1,2,3,4,5] = [5,10,15,20,25] สำเร็จ 4 คู่ (ตั้งแต่ 10 ขึ้นไป) · คาถา 1 คูณได้ [1,2,3,4,5] ไม่ถึง 7 เลยสักคู่ · คาถา 3 คูณได้ [3,6,9,12,15] สำเร็จ 3 คู่",
-                  },
-                  {
-                    input: "spells = [3, 1, 2], potions = [8, 5, 8], success = 16",
-                    output: "[2, 0, 2]",
-                    explain: "คาถา 3 คูณ [8,5,8] = [24,15,24] สำเร็จ 2 คู่ · คาถา 1 คูณได้ [8,5,8] ไม่ถึง 16 เลย · คาถา 2 คูณได้ [16,10,16] สำเร็จ 2 คู่",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "n == spells.length และ m == potions.length",
-                "1 <= n, m <= 10^5",
-                "1 <= spells[i], potions[i] <= 10^5",
-                "1 <= success <= 10^10",
-                ],
-              },
+        {
+          t: "p",
+          c: `You are given two positive integer arrays \`spells\` and \`potions\`, of length \`n\` and \`m\` respectively, where \`spells[i]\` represents the strength of the \`i\`-th spell and \`potions[j]\` represents the strength of the \`j\`-th potion.
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "โครงสร้างที่ใช้: sort (เรียง) + binary search (bisect) ถ้า sort potions ไว้ก่อน สำหรับ spell แต่ละตัว potion ที่แรงพอจะเป็น suffix (ท่อนหลัง) ที่ต่อเนื่องกันเสมอ (potion ยิ่งแรงยิ่งผ่าน) จึงหา boundary ของท่อนนั้นด้วย binary search แล้ว count จำนวนที่เหลือได้เลย" },
-              { t: "p", c: "คิดแบบง่าย/ช้าก่อน: วิธี naive คือคูณ spell ทุกตัวกับ potion ทุกตัวเป็น O(n*m) ซึ่งช้าเมื่อทั้งสอง array ใหญ่ พอ sort potions แล้ว potion ที่ผ่าน threshold (เกณฑ์) จะเป็นช่วงต่อเนื่องด้านขวาสุดเสมอ เราจึงแค่หา boundary ของช่วงนั้น ลดเหลือ O((n+m) log m)" },
-              { t: "ol", c: [
-                "sort potions จากน้อยไปมาก",
-                "สำหรับ spell s แต่ละตัว: potion ที่ทำให้สำเร็จคือ potion >= success / s",
-                "compute threshold เป็น integer (จำนวนเต็ม) ปัดขึ้นด้วย need = (success + s - 1) // s เพื่อเลี่ยงปัญหา float",
-                "ใช้ bisect_left(potions, need) หา index แรกที่ potion >= need แล้ว count ที่ผ่าน = m - idx",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "การหารด้วย float (ทศนิยม) success / s แล้วเจอ floating-point error (ความคลาดเคลื่อน) เลี่ยงด้วย integer ล้วน สูตร (success + s - 1) // s และถ้าไม่ sort potions ก่อนก็จะ binary search ไม่ได้เพราะช่วงจะไม่ sorted" },
+You are also given an integer \`success\`. A spell and potion pair is considered successful if the product of their strengths is at least \`success\`.
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "จำลอง spells = [5,1,3], potions sort แล้ว = [1,2,3,4,5], success = 7:" },
-              { t: "table", head: ["คาถา s", "need = ceil(7/s)", "idx (bisect_left)", "m - idx"], rows: [
+Return an integer array \`pairs\` of length \`n\` where \`pairs[i]\` is the number of potions that will form a successful pair with the \`i\`-th spell.`,
+        },
+        {
+          t: "p",
+          c: `กำหนด array จำนวนเต็มบวก \`spells\` และ \`potions\` ยาว \`n\` และ \`m\` ตามลำดับ โดย \`spells[i]\` คือพลังของคาถา และ \`potions[j]\` คือพลังของยา
+และกำหนดจำนวนเต็ม \`success\`
+
+คู่คาถากับยาจะถือว่า "สำเร็จ" (successful) หากผลคูณของพลัง \`spells[i] * potions[j] >= success\`
+
+จงส่งคืน array \`pairs\` ยาว \`n\` โดยที่ \`pairs[i]\` คือ "จำนวนยา" ทั้งหมดที่จับคู่กับคาถาที่ \`i\` แล้วสำเร็จ`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "spells = [5,1,3], potions = [1,2,3,4,5], success = 7",
+              output: "[4,0,3]",
+              explain:
+                "• คาถา 5: จับคู่กับ potions [2,3,4,5] ให้ผลคูณ 10,15,20,25 >= 7 ได้ 4 คู่\n• คาถา 1: จับคู่ตัวไหนก็คูณได้ไม่ถึง 7 ได้ 0 คู่\n• คาถา 3: จับคู่กับ [3,4,5] ให้ผลคูณ 9,12,15 >= 7 ได้ 3 คู่\nตอบ [4, 0, 3]",
+            },
+            {
+              input: "spells = [3,1,2], potions = [8,5,8], success = 16",
+              output: "[2,0,2]",
+              explain: "spells 3 คู่กับ [8,8] ได้ 2, spells 1 ได้ 0, spells 2 คู่กับ [8,8] ได้ 2",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "n == spells.length",
+            "m == potions.length",
+            "1 <= n, m <= 10^5",
+            "1 <= spells[i], potions[i] <= 10^5",
+            "1 <= success <= 10^10",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ถ้าเรานำคาถาแต่ละตัวมาคูณกับยาทุกขวด จะเสียเวลา O(N * M) ซึ่งสูงถึง 10^10 (Time Limit Exceeded)! ถ้าเรา sort ขวดยาไว้ก่อน เราจะหาจำนวนยาที่ผ่านเกณฑ์ได้ในเสี้ยววินาทีอย่างไร?",
+        },
+
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "สำหรับคาถาแต่ละตัวที่มีพลัง `s` เราต้องหายาที่มีพลัง `p` ซึ่งทำให้ `s * p >= success` หรือจัดรูปใหม่ได้เป็น `p >= ceil(success / s)`",
+            },
+
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "สมมติ success = 7, potions = [1, 2, 3, 4, 5]:",
+            },
+            {
+              t: "ul",
+              c: [
+                "เรียงยาจากน้อยไปมาก: [1, 2, 3, 4, 5] (ความยาว m = 5)",
+                "สำหรับคาถาพลัง 5: เราต้องการยาที่มีพลัง >= ceil(7 / 5) = 2",
+                "ใช้ Binary Search หาตำแหน่งแรกที่ค่า >= 2 -> เจอที่ index 1 (ค่า 2)",
+                "เนื่องจากยาเรียงลำดับอยู่แล้ว ยาทุกขวดตั้งแต่ index 1 ถึงตัวสุดท้าย ย่อมผ่านเกณฑ์ทั้งหมด!",
+                "จำนวนยาที่ผ่านคือ m - index = 5 - 1 = 4 ขวดทันที!",
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "ภาพรวม: Sort `potions` 1 ครั้ง (O(M log M)) จากนั้นสำหรับแต่ละคาถาใน `spells` ใช้ `bisect_left` หาตำแหน่งแรกที่ยาผ่านเกณฑ์ (O(log M))",
+            },
+            {
+              t: "p",
+              c: "เคล็ดลับการคำนวณเพดาน (Ceiling) โดยไม่ใช้ทศนิยม:",
+            },
+            {
+              t: "code",
+              lang: "python",
+              label: "สูตรปัดเศษขึ้นด้วยจำนวนเต็มล้วน",
+              c: `need = (success + s - 1) // s   # เท่ากับ math.ceil(success / s) แต่ไม่มี floating error`,
+            },
+
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
+            {
+              t: "table",
+              head: ["คาถา (s)", "เกณฑ์ขั้นต่ำ (need)", "index แรกที่ >= need", "จำนวนที่ผ่าน (m - idx)"],
+              rows: [
+                ["5", "(7 + 4) // 5 = 2", "idx = 1 (potions[1]=2)", "5 - 1 = 4"],
+                ["1", "(7 + 0) // 1 = 7", "idx = 5 (เกินขอบ)", "5 - 5 = 0"],
+                ["3", "(7 + 2) // 3 = 3", "idx = 2 (potions[2]=3)", "5 - 2 = 3"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              c: `import bisect
+
+class Solution:
+    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:
+        # 1. เรียงลำดับยาจากน้อยไปมาก
+        potions.sort()
+        m = len(potions)
+        res = []
+
+        # 2. หาจำนวนยาที่ผ่านเกณฑ์สำหรับคาถาแต่ละตัว
+        for s in spells:
+            # คำนวณพลังยาขั้นต่ำที่ต้องการ: p >= ceil(success / s)
+            min_potion = (success + s - 1) // s
+
+            # Binary Search หา index แรกที่ potions[idx] >= min_potion
+            idx = bisect.bisect_left(potions, min_potion)
+
+            # ยาทุกขวดตั้งแต่ idx เป็นต้นไปล้วนผ่านเกณฑ์
+            res.append(m - idx)
+
+        return res`,
+            },
+
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
+            {
+              t: "table",
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
+              rows: [
+                ["potions.sort()", "เรียงยาให้เป็นระเบียบเพื่อให้ Binary Search ได้", "potions=[1, 2, 3, 4, 5]"],
+                ["min_potion = (success + s - 1) // s", "คำนวณพลังยาขั้นต่ำแบบปัดเศษขึ้น", "s=5, success=7 -> min_potion=2"],
+                ["idx = bisect.bisect_left(potions, min_potion)", "หาตำแหน่งแรกที่ค่ายาถึงเกณฑ์", "idx = 1"],
+                ["res.append(m - idx)", "นับจำนวนขวดยาตั้งแต่จุดที่เจอจนถึงขวดสุดท้าย", "5 - 1 = 4"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
+            {
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O((M + N) log M)", "Sort potions ใช้ O(M log M) และ Binary Search สำหรับ N คาถา ใช้ O(N log M)"],
+                ["Space (หน่วยความจำ)", "O(1)", "Sort potions แบบ in-place ไม่ใช้โครงสร้างข้อมูลเสริม (ไม่นับ array คำตอบ)"],
+              ],
+            },
+          ],
+        },
+      ],
+      en: [
+        {
+          t: "p",
+          c: `Count how many potions form a successful pair with each spell such that \`spells[i] * potions[j] >= success\`.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "spells = [5,1,3], potions = [1,2,3,4,5], success = 7",
+              output: "[4,0,3]",
+              explain: "Spell 5 pairs with [2,3,4,5], spell 1 with none, spell 3 with [3,4,5].",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= n, m <= 10^5",
+            "1 <= spells[i], potions[i] <= 10^5",
+            "1 <= success <= 10^10",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full Solution",
+          c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
+            {
+              t: "p",
+              c: "For each spell `s`, find how many potions satisfy `p >= ceil(success / s)`.",
+            },
+
+            { t: "h3", c: "Step 2 · Manual Trace" },
+            {
+              t: "p",
+              c: "Sort potions. For `s = 5, success = 7`, need `p >= 2`. In `[1, 2, 3, 4, 5]`, index of 2 is 1. Number of valid potions is `5 - 1 = 4`.",
+            },
+
+            { t: "h3", c: "Step 3 · Methodology" },
+            {
+              t: "p",
+              c: "Sort potions, then use `bisect_left` with integer ceiling formula `(success + s - 1) // s`.",
+            },
+
+            { t: "h3", c: "Step 4 · Simulation Table" },
+            {
+              t: "table",
+              head: ["Spell s", "Min Potion Needed", "bisect_left index", "Count (m - idx)"],
+              rows: [
                 ["5", "2", "1", "4"],
                 ["1", "7", "5", "0"],
                 ["3", "3", "2", "3"],
-              ] },
-              { t: "p", c: "ผลลัพธ์ [4, 0, 3]" },
+              ],
+            },
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import bisect
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
+            {
+              t: "code",
+              lang: "python",
+              c: `import bisect
 
-def successful_pairs(spells, potions, success):
-    potions.sort()                 # เรียงยาจากน้อยไปมาก
-    m = len(potions)
-    res = []
-    for s in spells:
-        # ต้องการ potion ที่ s * potion >= success  =>  potion >= success / s
-        # หา index แรกที่ potion >= เกณฑ์ ด้วย binary search
-        need = (success + s - 1) // s   # เพดานของ success / s (ปัดขึ้น)
-        idx = bisect.bisect_left(potions, need)
-        res.append(m - idx)             # จำนวน potion ตั้งแต่ idx จนจบ คือที่สำเร็จ
-    return res
+class Solution:
+    def successfulPairs(self, spells: List[int], potions: List[int], success: int) -> List[int]:
+        potions.sort()
+        m = len(potions)
+        res = []
 
-print(successful_pairs([5, 1, 3], [1, 2, 3, 4, 5], 7))  # [4, 0, 3]
-print(successful_pairs([3, 1, 2], [8, 5, 8], 16))       # [2, 0, 2]`, out: `[4, 0, 3]
-[2, 0, 2]` },
-                { t: "p", c: "หัวใจคือการมองว่า สำหรับ spell แรง s หนึ่งตัว potion ที่ทำให้สำเร็จคือ potion ที่มากกว่าหรือเท่ากับ success / s พอเรา sort potions แล้ว potion ที่ผ่าน threshold จะเป็นช่วงต่อเนื่องด้านขวาสุดเสมอ เราจึงแค่หา boundary ของช่วงนั้นด้วย bisect_left แล้ว count ที่ผ่านก็คือ ความยาวทั้งหมด ลบ index จุดเริ่ม" },
-                { t: "p", c: "จุดพลาดที่พบบ่อยคือการหารด้วย float success / s แล้วเจอปัญหา floating-point error เราเลี่ยงด้วย integer ล้วน โดย compute ceiling (เพดาน ปัดขึ้น) ด้วยสูตร (success + s - 1) // s ซึ่งให้ค่าน้อยที่สุดของ potion ที่ยังทำให้ s * potion มากกว่าหรือเท่ากับ success พอดี ปลอดภัยกว่าใช้ float มาก" },
-                { t: "p", c: "Time O((n + m) log m) sort potions เป็น O(m log m) แล้ว iterate spell n ตัว แต่ละตัว binary search เป็น O(log m) · Space O(1) นอกจาก array คำตอบ (sort potions in-place/ในที่เดิม)" },
-              ] },
+        for s in spells:
+            min_potion = (success + s - 1) // s
+            idx = bisect.bisect_left(potions, min_potion)
+            res.append(m - idx)
 
-              { t: "callout", title: "💡 สรุป pattern", c: "เมื่อต้อง count จำนวนที่ผ่าน threshold ใน array ให้ sort ก่อนแล้วช่วงที่ผ่านจะต่อเนื่อง ใช้ bisect หา boundary ของช่วงแทนการ count ทีละตัว และ compute threshold ปัดขึ้นด้วย integer เพื่อเลี่ยง float" },
+        return res`,
+            },
+
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
+            {
+              t: "table",
+              head: ["Line", "Purpose", "Example"],
+              rows: [
+                ["potions.sort()", "Sort potions array", "[1, 2, 3, 4, 5]"],
+                ["min_potion = (success + s - 1) // s", "Compute required minimum potion strength", "ceil(7/5) = 2"],
+                ["res.append(m - idx)", "Count valid potions to the right", "5 - 1 = 4"],
+              ],
+            },
+
+            { t: "h3", c: "Step 7 · Complexity" },
+            {
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O((M + N) log M)", "O(M log M) sort + N * O(log M) binary search."],
+                ["Space", "O(1)", "In-place sorting auxiliary space."],
+              ],
+            },
+          ],
+        },
       ],
-      en: [],
     },
   },
 
   "lc75-p55": {
     slug: "lc75-p55",
-    title: { th: "ข้อ 55 · LC162 Find Peak Element (หายอด peak) 🟡", en: "" },
-    lead: { th: "binary search บน array ที่ไม่ได้ sort ดูทิศชันจาก nums[mid] เทียบ nums[mid+1] เดินไปทางที่สูงขึ้นเสมอ", en: "" },
+    title: {
+      th: "ข้อ 55 · LC162 Find Peak Element (หายอดแหลม) 🟡",
+      en: "LC162 Find Peak Element 🟡",
+    },
+    lead: {
+      th: "Binary Search บน Array ที่ไม่ได้เรียงลำดับ — เดินไต่ระดับความชันไปทางที่สูงกว่าเสมอใน O(log N)",
+      en: "Binary search on an unsorted array — climb the slope toward higher ground in O(log N).",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC162): peak element (สมาชิกที่เป็นยอด) คือสมาชิกที่มีค่ามากกว่า neighbor (เพื่อนบ้าน) ทั้งสองข้าง กำหนด array จำนวนเต็ม nums แบบ 0-indexed ที่ nums[i] ไม่เท่ากับ nums[i+1] เสมอ ให้หา index ของ peak element ใด ๆ แล้ว return index นั้น โดยถือว่าขอบนอกของ array ทั้งสองฝั่งมีค่าเท่ากับลบอนันต์ (nums[-1] = nums[n] = -∞) ถ้ามีหลาย peak ให้ return index ของตัวไหนก็ได้ ต้องเขียนอัลกอริทึมที่รันด้วยเวลา O(log n)" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "nums = [1, 2, 3, 1]",
-                    output: "2",
-                    explain: "index 2 (ค่า 3) มากกว่า neighbor ทั้งสองข้าง (2 และ 1) จึงเป็น peak",
-                  },
-                  {
-                    input: "nums = [1, 2, 1, 3, 5, 6, 4]",
-                    output: "1 หรือ 5",
-                    explain: "index 1 (ค่า 2) เป็น peak เพราะมากกว่า 1 ทั้งสองข้าง และ index 5 (ค่า 6) ก็เป็น peak เช่นกัน เพราะมากกว่า 5 และ 4 — คืน index ไหนก็ถูกต้อง",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= nums.length <= 1000",
-                "-2^31 <= nums[i] <= 2^31 - 1",
-                "nums[i] != nums[i + 1] สำหรับทุก i (ไม่มีค่าเท่ากันติดกัน)",
-                "ท้าทาย: ต้องทำให้เป็น O(log n)",
-                ],
-              },
-              { t: "callout", title: "เงื่อนไขสำคัญ", c: "ต้องทำใน O(log n) แปลว่า iterate ทีละตัวไม่ได้ ต้องใช้ binary search ทั้งที่ array ไม่ได้ sort" },
+        {
+          t: "p",
+          c: `A peak element is an element that is strictly greater than its neighbors.
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "โครงสร้างที่ใช้: binary search แบบดูทิศชัน แม้ array ไม่ได้ sort แต่ยังใช้ binary search ได้ compare (เทียบ) nums[mid] กับ nums[mid+1] ถ้ากำลังขาขึ้น (mid น้อยกว่า mid+1) peak อยู่ทางขวาแน่ ๆ ถ้ากำลังขาลง peak อยู่ทางซ้าย (รวม mid เอง)" },
-              { t: "p", c: "คิดแบบง่าย/ช้าก่อน: วิธี naive คือ iterate (วน) ทุกตัวหาจุดที่มากกว่า neighbor ทั้งสอง เป็น O(n) แต่โจทย์บังคับ O(log n) เพราะขอบนอกเป็นลบอนันต์ การเดินขึ้นเนินไปเรื่อย ๆ ต้องเจอ peak เสมอ เราจึงตัดครึ่งไปทางที่ชันขึ้นได้" },
-              { t: "ol", c: [
-                "initialize (ตั้งค่าเริ่มต้น) lo = 0, hi = len(nums) - 1",
-                "ระหว่าง lo < hi: compute mid",
-                "ถ้า nums[mid] < nums[mid+1] กำลังขาขึ้น peak อยู่ทางขวา ตั้ง lo = mid + 1 (mid ไม่ใช่ peak แน่)",
-                "ไม่งั้น (ขาลงหรือเท่า) peak อยู่ทางซ้ายรวม mid เอง ตั้ง hi = mid; จบ loop lo == hi คือตำแหน่ง peak",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ใช้ while lo <= hi กับ hi = mid จะวนไม่รู้จบ ต้องใช้ while lo < hi คู่กับ hi = mid เสมอ อีกจุดคือการเข้าถึง nums[mid+1] ปลอดภัยเพราะเมื่อ lo < hi จะมี mid < hi ทำให้ mid+1 ไม่เกินขอบ array" },
+Given a 0-indexed integer array \`nums\`, find a peak element, and return its index. If the array contains multiple peaks, return the index to any of the peaks.
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "จำลอง nums = [1,2,1,3,5,6,4]:" },
-              { t: "table", head: ["lo", "hi", "mid", "nums[mid] vs nums[mid+1]", "ทำอะไรต่อ"], rows: [
-                ["0", "6", "3", "3 < 5 (ขาขึ้น)", "lo = 4"],
-                ["4", "6", "5", "6 > 4 (ขาลง)", "hi = 5"],
-                ["4", "5", "4", "5 < 6 (ขาขึ้น)", "lo = 5"],
-                ["5", "5", "-", "lo == hi", "คืน 5"],
-              ] },
+You may imagine that \`nums[-1] = nums[n] = -∞\`. In other words, an element is always considered to be strictly greater than a neighbor that is outside the array.
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `def find_peak_element(nums):
-    lo, hi = 0, len(nums) - 1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if nums[mid] < nums[mid + 1]:
-            # กำลังขาขึ้น ยอดต้องอยู่ทางขวา (mid ไม่ใช่ยอดแน่)
-            lo = mid + 1
-        else:
-            # กำลังขาลงหรือเท่า ยอดอยู่ทางซ้าย รวม mid ด้วย
-            hi = mid
-    return lo   # lo == hi คือตำแหน่งยอด
+You must write an algorithm that runs in \`O(log n)\` time.`,
+        },
+        {
+          t: "p",
+          c: `ยอดแหลม (peak element) คือสมาชิกที่มีค่ามากกว่าเพื่อนบ้านข้างเคียงทั้งสองข้างอย่างเคร่งครัด
+กำหนด array \`nums\` จงหา index ของยอดแหลมตัวใดก็ได้แล้วส่งคืน index นั้น
+โดยสมมติว่าสมาชิกนอกขอบทั้งสองฝั่งมีค่าเป็นลบอนันต์ (\`nums[-1] = nums[n] = -∞\`)
 
-print(find_peak_element([1, 2, 3, 1]))         # 2
-print(find_peak_element([1, 2, 1, 3, 5, 6, 4]))  # 5`, out: `2
-5` },
-                { t: "p", c: "หลายคนแปลกใจว่าทำไม binary search ใช้กับ array ที่ไม่ได้ sort ได้ กุญแจอยู่ที่การ compare nums[mid] กับ nums[mid+1] ถ้า nums[mid] น้อยกว่า nums[mid+1] แปลว่าตรงนี้เป็น ทางขึ้น เดินขึ้นไปเรื่อย ๆ ทางขวาต้องเจอ peak สักจุด (อย่างช้าสุดคือปลายขวา เพราะขอบนอกเป็นลบอนันต์) เราจึงตัดครึ่งซ้ายทิ้ง ในทางกลับกันถ้าเป็นทางลง peak อยู่ทางซ้าย (รวม mid เองที่อาจเป็น peak) เราจึงตั้ง hi = mid ไม่ใช่ mid - 1" },
-                { t: "p", c: "จุดพลาดที่พบบ่อยคือใช้ while lo <= hi กับ hi = mid ซึ่งจะวนไม่รู้จบ ต้องใช้ while lo < hi คู่กับ hi = mid เสมอ อีกจุดคือการเข้าถึง nums[mid+1] ปลอดภัยเพราะเมื่อ lo < hi จะมี mid < hi ทำให้ mid+1 ไม่เกินขอบ array เมื่อ loop จบ lo กับ hi ชนกันที่ตำแหน่ง peak พอดี" },
-                { t: "p", c: "Time O(log n) ตัดครึ่งช่วงทุกก้าวตามที่โจทย์บังคับ · Space O(1) ใช้แค่ pointer (ตัวชี้) lo กับ hi" },
-              ] },
+เงื่อนไขบังคับ: อัลกอริทึมต้องทำงานด้วยเวลา \`O(log n)\``,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,2,3,1]",
+              output: "2",
+              explain: "index 2 (ค่า 3) มากกว่าเพื่อนบ้านทั้งสองข้าง (2 และ 1) จึงเป็นยอดแหลม",
+            },
+            {
+              input: "nums = [1,2,1,3,5,6,4]",
+              output: "5",
+              explain: "index 5 (ค่า 6) มากกว่า 5 และ 4 จึงเป็นยอดแหลม (ตอบ index 1 ค่า 2 ก็ถูกต้องเช่นกัน)",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 1000",
+            "-2^31 <= nums[i] <= 2^31 - 1",
+            "nums[i] != nums[i + 1] สำหรับทุก i (ไม่มีตัวติดกันที่เท่ากัน)",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "Array ข้อนี้ไม่ได้เรียงลำดับ (Unsorted)! ทำไม Binary Search ถึงยังใช้หา Peak Element ได้?",
+        },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "binary search ใช้ได้แม้ข้อมูลไม่ sort ขอแค่มี direction (ทิศทาง) ที่การันตีว่าคำตอบอยู่ครึ่งไหน (ที่นี่คือความชันขึ้น/ลง) การจับคู่ while lo < hi กับ hi = mid เป็น template มาตรฐานของการหา boundary (จุดพลิก)" },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "หาตำแหน่ง index ของโหนดที่เป็นยอดเขา (มากกว่าตัวซ้ายและตัวขวา) โดยมีข้อบังคับว่าต้องทำในเวลา O(log N) ซึ่งบีบให้เราต้องใช้ Binary Search แม้ array จะไม่ได้เรียงลำดับก็ตาม!",
+            },
+
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "หัวใจสำคัญ: **หลักการปีนเขา (Slope Property)**",
+            },
+            {
+              t: "ul",
+              c: [
+                "ลองมองจุดกึ่งกลาง `mid` และตัวถัดไป `mid + 1`:",
+                "ถ้า `nums[mid] < nums[mid + 1]`: แปลว่าทางข้างหน้าเป็น **ขาขึ้น (Uphill)** แสดงว่าถ้าเราเดินต่อไปทางขวา เราจะต้องเจอยอดเขาอย่างแน่นอน (เพราะขอบขวาสุดเป็นเหวลบอนันต์ อย่างแย่ที่สุดคือตัวสุดท้ายก็เป็นยอดเขา) -> ตัดครึ่งซ้ายทิ้ง!",
+                "ถ้า `nums[mid] > nums[mid + 1]`: แปลว่าทางข้างหน้าเป็น **ขาลง (Downhill)** แสดงว่ายอดเขาต้องอยู่ทางฝั่งซ้าย (หรืออาจเป็นตัว `mid` เอง) -> บีบขอบขวาเข้ามา `hi = mid`!",
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "ภาพรวม: ใช้ Binary Search แบบ `while lo < hi:` เดินตามความชันขึ้นไปหายอดเขา",
+            },
+            {
+              t: "p",
+              c: "ขั้นตอนตรรกะ:",
+            },
+            {
+              t: "ol",
+              c: [
+                "ตั้ง `lo = 0`, `hi = len(nums) - 1`",
+                "วนลูป `while lo < hi:`",
+                "คำนวณ `mid = (lo + hi) // 2`",
+                "ถ้า `nums[mid] < nums[mid + 1]`: ขาขึ้น ยอดอยู่ขวา -> `lo = mid + 1`",
+                "มิฉะนั้น: ขาลง ยอดอยู่ซ้ายหรือคือ mid -> `hi = mid`",
+                "เมื่อ `lo == hi` ตัวชี้จะมาบรรจบกันที่ยอดเขาพอดี -> `return lo`",
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
+            {
+              t: "table",
+              head: ["lo", "hi", "mid", "nums[mid] vs nums[mid+1]", "ความหมาย", "การปรับ"],
+              rows: [
+                ["0", "6", "3", "nums[3]=3 < nums[4]=5", "ขาขึ้น -> ยอดอยู่ขวา", "lo = mid + 1 = 4"],
+                ["4", "6", "5", "nums[5]=6 > nums[6]=4", "ขาลง -> ยอดอยู่ซ้าย/mid", "hi = mid = 5"],
+                ["4", "5", "4", "nums[4]=5 < nums[5]=6", "ขาขึ้น -> ยอดอยู่ขวา", "lo = mid + 1 = 5"],
+                ["5", "5", "—", "lo == hi", "เจอยอดแล้ว!", "คืนค่า index 5"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              c: `class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+        lo = 0
+        hi = len(nums) - 1
+
+        # ใช้ lo < hi เพื่อให้หยุดเมื่อ lo ชน hi พอดี
+        while lo < hi:
+            mid = (lo + hi) // 2
+
+            # ตรวจสอบความชัน
+            if nums[mid] < nums[mid + 1]:
+                # กำลังเดินขึ้นเขา ยอดเขาต้องอยู่ทางขวาแน่นอน
+                lo = mid + 1
+            else:
+                # กำลังเดินลงเขา ยอดเขาอยู่ทางซ้าย (รวม mid ตัวนี้ด้วย)
+                hi = mid
+
+        return lo`,
+            },
+
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
+            {
+              t: "table",
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
+              rows: [
+                ["while lo < hi:", "บีบช่วงเข้าหากันจนกว่าจะเหลือ 1 จุด", "lo และ hi ขยับเข้าหากัน"],
+                ["if nums[mid] < nums[mid + 1]: lo = mid + 1", "ปีนขึ้นเขาไปทางขวา", "nums[3]=3 < nums[4]=5 -> lo=4"],
+                ["else: hi = mid", "ยอดเขาอยู่ฝั่งซ้ายหรือคือ mid", "nums[5]=6 > nums[6]=4 -> hi=5"],
+                ["return lo", "จุดที่ lo และ hi บรรจบกันคือยอดแหลม", "return 5 (ค่า 6)"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
+            {
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(log N)", "ตัดช่วงการค้นหาทิ้งครึ่งหนึ่งในทุกรอบ"],
+                ["Space (หน่วยความจำ)", "O(1)", "ใช้เพียงตัวแปร pointer `lo`, `hi`, `mid`"],
+              ],
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `A peak element is strictly greater than its neighbors. Find a peak element index in \`O(log n)\` time.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "nums = [1,2,3,1]",
+              output: "2",
+              explain: "Index 2 (value 3) is a peak.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= nums.length <= 1000",
+            "-2^31 <= nums[i] <= 2^31 - 1",
+            "nums[i] != nums[i + 1] for all valid i.",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full Solution",
+          c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
+            {
+              t: "p",
+              c: "Find any local peak in an unsorted array in O(log N) time.",
+            },
+
+            { t: "h3", c: "Step 2 · Manual Trace" },
+            {
+              t: "p",
+              c: "Compare `nums[mid]` with `nums[mid+1]`. If ascending, a peak must exist to the right. If descending, a peak exists to the left or at `mid`.",
+            },
+
+            { t: "h3", c: "Step 3 · Methodology" },
+            {
+              t: "p",
+              c: "Binary search on slopes: `lo = mid + 1` if `nums[mid] < nums[mid+1]`, else `hi = mid`.",
+            },
+
+            { t: "h3", c: "Step 4 · Simulation Table" },
+            {
+              t: "table",
+              head: ["lo", "hi", "mid", "nums[mid] vs nums[mid+1]", "Action"],
+              rows: [
+                ["0", "6", "3", "3 < 5", "lo = 4"],
+                ["4", "6", "5", "6 > 4", "hi = 5"],
+                ["4", "5", "4", "5 < 6", "lo = 5"],
+                ["5", "5", "—", "converged", "return 5"],
+              ],
+            },
+
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
+            {
+              t: "code",
+              lang: "python",
+              c: `class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+        lo, hi = 0, len(nums) - 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if nums[mid] < nums[mid + 1]:
+                lo = mid + 1
+            else:
+                hi = mid
+        return lo`,
+            },
+
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
+            {
+              t: "table",
+              head: ["Line", "Purpose", "Example"],
+              rows: [
+                ["while lo < hi:", "Converge to single peak index", "stops when lo == hi"],
+                ["if nums[mid] < nums[mid + 1]:", "Check uphill slope", "climb right"],
+                ["else: hi = mid", "Check downhill slope", "peak is at mid or left"],
+              ],
+            },
+
+            { t: "h3", c: "Step 7 · Complexity" },
+            {
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(log N)", "Binary search halving space each step."],
+                ["Space", "O(1)", "Constant auxiliary space."],
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p56": {
     slug: "lc75-p56",
-    title: { th: "ข้อ 56 · LC875 Koko Eating Bananas (โกโกะกินกล้วย) 🟡", en: "" },
-    lead: { th: "ตัวอย่างคลาสสิกของ binary search on answer — guess (เดา) speed แล้ว check ว่ากินทันไหม หา speed น้อยสุดที่ยังทัน", en: "" },
+    title: {
+      th: "ข้อ 56 · LC875 Koko Eating Bananas (โกโกะกินกล้วย) 🟡",
+      en: "LC875 Koko Eating Bananas 🟡",
+    },
+    lead: {
+      th: "โจทย์ระดับตำนานของ Binary Search on Answer — เดาความเร็ว k แล้วเช็คว่ากินทันภายใน h ชั่วโมงไหม",
+      en: "The classic Binary Search on Answer problem — search the minimum eating speed k that finishes all bananas within h hours.",
+    },
     group: "LeetCode 75",
     blocks: {
       th: [
-              { t: "p", c: "โจทย์ (LC875): โกโกะมีกล้วย n กอง โดยกองที่ i มี piles[i] ลูก ยามจะกลับมาใน h ชั่วโมง โกโกะเลือกความเร็วในการกิน k (กล้วยต่อชั่วโมง) แต่ละชั่วโมงเลือกกินจากกองใดกองหนึ่งได้สูงสุด k ลูก ถ้ากองนั้นมีน้อยกว่า k ลูก โกโกะจะกินหมดกองแล้วไม่กินกองอื่นต่อในชั่วโมงนั้น ให้หาความเร็ว k ที่น้อยที่สุดที่ทำให้กินกล้วยหมดทุกกองได้ภายใน h ชั่วโมง" },
-              {
-                t: "example",
-                c: [
-                  {
-                    input: "piles = [3, 6, 7, 11], h = 8",
-                    output: "4",
-                    explain: "ที่ความเร็ว 4 ใช้เวลา ceil(3/4)+ceil(6/4)+ceil(7/4)+ceil(11/4) = 1+2+2+3 = 8 ชั่วโมง พอดี h = 8 และเป็นความเร็วน้อยสุดที่ยังทัน",
-                  },
-                  {
-                    input: "piles = [30, 11, 23, 4, 20], h = 5",
-                    output: "30",
-                    explain: "เหลือเวลาแค่ 5 ชั่วโมงสำหรับ 5 กอง เท่ากับกินได้กองละ 1 ชั่วโมงเท่านั้น จึงต้องเร็วพอจะกินกองใหญ่สุด (30 ลูก) ให้หมดภายในชั่วโมงเดียว",
-                  },
-                  {
-                    input: "piles = [30, 11, 23, 4, 20], h = 6",
-                    output: "23",
-                    explain: "มีเวลาเพิ่มมาอีก 1 ชั่วโมง (6 ชั่วโมงสำหรับ 5 กอง) ทำให้กองใหญ่สุดใช้ 2 ชั่วโมงได้ ความเร็ว 23 จึงเพียงพอและน้อยกว่าความเร็ว 30 ในตัวอย่างก่อนหน้า",
-                  },
-                ],
-              },
-              {
-                t: "constraints",
-                c: [
-                "1 <= piles.length <= 10^4",
-                "piles.length <= h <= 10^9",
-                "1 <= piles[i] <= 10^9",
-                ],
-              },
+        {
+          t: "p",
+          c: `Koko loves to eat bananas. There are \`n\` piles of bananas, the \`i\`-th pile has \`piles[i]\` bananas. The guards have gone and will come back in \`h\` hours.
 
-              { t: "h2", c: "แนวทาง — ต้องใช้อะไร & คิดยังไง" },
-              { t: "p", c: "โครงสร้างที่ใช้: binary search on answer (ค้นบนช่วงคำตอบ) เราไม่ได้ search (ค้นหา) ใน array แต่ค้นบน answer space (ช่วงคำตอบ) คือ speed k ที่เป็นไปได้ speed k ยิ่งมากยิ่งกินทันแน่ ๆ (monotonic เท็จ-จริง แบบขั้นบันได) จึง binary search หา speed น้อยสุดที่ทัน" },
-              { t: "p", c: "คิดแบบง่าย/ช้าก่อน: วิธี naive คือ iterate (วน) ลอง k = 1, 2, 3, ... จนกว่าจะทัน เป็น O(max(piles) * n) เพราะความสัมพันธ์เป็นขั้นบันได (ถ้า k ทันแล้ว k ที่มากกว่าก็ทัน) เราจึง binary search หา boundary (จุดพลิก) จากไม่ทันเป็นทัน เหลือ O(n log(max))" },
-              { t: "ol", c: [
-                "เขียน function (ฟังก์ชัน) hours_needed(k) = ผลรวมของ ceil(pile / k) ทุกกอง (ปัดขึ้นเพราะกินข้ามกองไม่ได้)",
-                "ตั้ง answer space lo = 1, hi = max(piles) (เร็วสุดที่จำเป็น)",
-                "ระหว่าง lo < hi: compute mid ถ้า hours_needed(mid) <= h แสดงว่า feasible (ทัน) ลองช้าลงอีก ตั้ง hi = mid",
-                "ไม่งั้น mid ช้าไป กินไม่ทัน ตั้ง lo = mid + 1; จบ loop return lo คือ speed น้อยสุดที่ทัน",
-              ] },
-              { t: "callout", title: "จุดพลาดที่พบบ่อย", c: "ลืมปัดขึ้น (ใช้หารปกติจะได้เวลาน้อยกว่าจริงเพราะเศษกล้วยก็ยังต้องใช้อีกหนึ่งชั่วโมง) หรือใช้ while lo <= hi กับ hi = mid ทำให้วนไม่จบ ต้องใช้ while lo < hi คู่กับ hi = mid" },
+Koko can decide her bananas-per-hour eating speed of \`k\`. Each hour, she chooses some pile of bananas and eats \`k\` bananas from that pile. If the pile has less than \`k\` bananas, she eats all of them instead and will not eat any more bananas during this hour.
 
-              { t: "h2", c: "ไล่ทีละสเต็ป" },
-              { t: "p", c: "จำลอง piles = [3,6,7,11], h = 8 ช่วง lo = 1, hi = 11:" },
-              { t: "table", head: ["lo", "hi", "mid", "hours_needed(mid)", "<= 8?", "ทำอะไรต่อ"], rows: [
-                ["1", "11", "6", "1+1+2+2 = 6", "ทัน", "hi = 6"],
-                ["1", "6", "3", "1+2+3+4 = 10", "ไม่ทัน", "lo = 4"],
-                ["4", "6", "5", "1+2+2+3 = 8", "ทัน", "hi = 5"],
-                ["4", "5", "4", "1+2+2+3 = 8", "ทัน", "hi = 4"],
-                ["4", "4", "-", "-", "-", "return 4"],
-              ] },
+Koko likes to eat slowly but still wants to finish eating all the bananas before the guards return.
 
-              { t: "details", summary: "▶ เฉลยละเอียด (ลองเองก่อนนะ)", c: [
-                { t: "codeout", lang: "python", label: "เฉลย (Python) — โค้ดนี้รันได้จริง", code: `import math
+Return the minimum integer \`k\` such that she can eat all the bananas within \`h\` hours.`,
+        },
+        {
+          t: "p",
+          c: `โกโกะชอบกินกล้วย มีกล้วยอยู่ \`n\` กอง โดยกองที่ \`i\` มีกล้วย \`piles[i]\` ลูก ยามจะกลับมาในอีก \`h\` ชั่วโมง
+โกโกะสามารถเลือกความเร็วในการกิน \`k\` ลูกต่อชั่วโมง โดยในแต่ละชั่วโมง เธอจะเลือกกินจากกองใดกองหนึ่งได้สูงสุด \`k\` ลูก (ถ้ากองนั้นมีน้อยกว่า \`k\` ลูก เธอก็จะกินจนหมดกองแล้วหยุดพัก ไม่กินกองอื่นต่อในชั่วโมงนั้น)
 
-def min_eating_speed(piles, h):
-    def hours_needed(k):
-        # ที่ความเร็ว k แต่ละกองใช้เวลา ceil(pile / k) ชั่วโมง
-        return sum(math.ceil(pile / k) for pile in piles)
+โกโกะอยากกินให้ช้าที่สุดเท่าที่จะเป็นไปได้ แต่ยังต้องกินกล้วยหมดทุกกองก่อนยามกลับมา
 
-    lo, hi = 1, max(piles)     # ช่วงความเร็วที่เป็นไปได้
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if hours_needed(mid) <= h:
-            hi = mid           # เร็ว mid ก็ทัน ลองช้าลงอีก (เก็บ mid ไว้)
-        else:
-            lo = mid + 1       # mid ช้าไป กินไม่ทัน ต้องเร็วขึ้น
-    return lo                  # ความเร็วน้อยสุดที่ยังทัน
+จงหาค่าความเร็ว \`k\` (จำนวนเต็ม) ที่ "น้อยที่สุด" ที่ทำให้กินกล้วยหมดทุกกองได้ทันภายใน \`h\` ชั่วโมง`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "piles = [3,6,7,11], h = 8",
+              output: "4",
+              explain:
+                "ที่ความเร็ว k = 4:\n• กอง 3 ใช้ ceil(3/4) = 1 ชม.\n• กอง 6 ใช้ ceil(6/4) = 2 ชม.\n• กอง 7 ใช้ ceil(7/4) = 2 ชม.\n• กอง 11 ใช้ ceil(11/4) = 3 ชม.\nเวลารวม = 1 + 2 + 2 + 3 = 8 ชม. ทันกำหนด h = 8 พอดี และเป็นความเร็วต่ำสุดที่ทำได้",
+            },
+            {
+              input: "piles = [30,11,23,4,20], h = 5",
+              output: "30",
+              explain: "มี 5 กองและมีเวลาแค่ 5 ชั่วโมง ต้องกินกองละ 1 ชม. จึงต้องกินด้วยความเร็วเท่ากองใหญ่สุด คือ 30",
+            },
+            {
+              input: "piles = [30,11,23,4,20], h = 6",
+              output: "23",
+              explain: "ความเร็ว 23 กินหมดใน 6 ชั่วโมง",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= piles.length <= 10^4",
+            "piles.length <= h <= 10^9",
+            "1 <= piles[i] <= 10^9",
+          ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ช่วงความเร็วที่เป็นไปได้ของ k คือเท่าไรถึงเท่าไร? (ช้าสุดเท่าไร เร็วสุดเท่าไร?) และถ้าความเร็ว k กินทัน ความเร็ว k + 1 จะกินทันด้วยไหม?",
+        },
 
-print(min_eating_speed([3, 6, 7, 11], 8))        # 4
-print(min_eating_speed([30, 11, 23, 4, 20], 5))  # 30`, out: `4
-30` },
-                { t: "p", c: "แทนที่จะ search ใน array เราค้นบน answer space คือ speed k ที่เป็นไปได้ตั้งแต่ 1 (ช้าสุดที่มีความหมาย) ถึง max(piles) (เร็วสุดที่จำเป็น เพราะเร็วกว่านี้ก็กินกองใหญ่สุดได้ในชั่วโมงเดียวอยู่แล้ว) กุญแจคือความสัมพันธ์แบบ monotonic (ขั้นบันได): ยิ่ง k มากยิ่งใช้เวลาน้อย ดังนั้นถ้า k ตัวหนึ่ง feasible (กินทัน เวลา <= h) แล้ว k ที่มากกว่าก็ทันด้วยเสมอ เราจึง binary search หา boundary จาก ไม่ทัน เป็น ทัน ตัวแรก" },
-                { t: "p", c: "function hours_needed compute (คำนวณ) เวลาที่ต้องใช้ที่ speed k โดยแต่ละกองใช้ ceil(pile / k) ชั่วโมง (ต้องปัดขึ้นเพราะเศษกล้วยก็ยังต้องใช้อีกหนึ่งชั่วโมง และกินข้ามกองไม่ได้) เมื่อ mid ทำเวลาได้ <= h เราเก็บ mid ไว้แล้วลองหาที่ช้ากว่า (hi = mid) ถ้าไม่ทันก็ต้องเร็วขึ้น (lo = mid + 1) ถ้าลืมปัดขึ้นจะได้เวลาน้อยกว่าจริงและตอบ speed ผิดต่ำเกินไป" },
-                { t: "p", c: "Time O(n log(max(piles))) binary search ราว log(max) รอบ แต่ละรอบเรียก hours_needed ที่ iterate ทุกกอง O(n) · Space O(1) ไม่มีโครงสร้างเสริม" },
-              ] },
+        {
+          t: "solution",
+          summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+          c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
+            {
+              t: "p",
+              c: "โจทย์ให้หาความเร็ว `k` ที่ต่ำที่สุดที่ทำให้กินกล้วยทุกกองเสร็จภายในเวลา `<= h` ชั่วโมง โดยในแต่ละกอง ถ้ามีเศษกล้วยเหลือ ก็ยังต้องปัดขึ้นเป็น 1 ชั่วโมงเต็ม (`ceil(pile / k)`)",
+            },
 
-              { t: "callout", title: "💡 สรุป pattern", c: "ถ้าโจทย์ถามหา minimum/maximum (ค่าน้อยสุด/มากสุด) ที่ยังทำ condition (เงื่อนไข) ได้ และเงื่อนไขมีลักษณะ monotonic (ขั้นบันได พอผ่านแล้วผ่านตลอด) ให้ binary search บน answer space โดยเขียน function feasible() check แต่ละค่าที่ guess นี่คือหัวใจของ binary search on answer" },
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
+            {
+              t: "p",
+              c: "วิเคราะห์ช่วงของคำตอบ (Answer Space):",
+            },
+            {
+              t: "ul",
+              c: [
+                "ความเร็วช้าสุดที่เป็นไปได้: `lo = 1` (กินชั่วโมงละ 1 ลูก)",
+                "ความเร็วเร็วสุดที่จำเป็น: `hi = max(piles)` (กินกองใหญ่สุดหมดใน 1 ชั่วโมง ไม่มีความจำเป็นต้องเร็วกว่านี้)",
+                "คุณสมบัติ Monotonic (ขั้นบันได): ถ้ากินด้วยความเร็ว 4 ทัน... ความเร็ว 5, 6, 7 ย่อมกินทันอย่างแน่นอน!",
+                "ในทางกลับกัน ถ้าความเร็ว 3 กินไม่ทัน... ความเร็ว 2, 1 ก็ไม่มีทางทันเด็ดขาด!",
+                "ดังนั้น เราสามารถรัน Binary Search บนช่วง [1, max(piles)] เพื่อหาจุดตัดความเร็วที่น้อยที่สุดที่กินทันได้!",
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
+            {
+              t: "p",
+              c: "ภาพรวม: Binary Search on Answer โดยมีฟังก์ชันตรวจสอบว่าความเร็ว `mid` ใช้เวลารวมเกิน `h` หรือไม่",
+            },
+            {
+              t: "p",
+              c: "ขั้นตอนตรรกะ:",
+            },
+            {
+              t: "ol",
+              c: [
+                "ตั้ง `lo = 1`, `hi = max(piles)`",
+                "วนลูป `while lo < hi:`",
+                "คำนวณความเร็วทดสอบ `mid = (lo + hi) // 2`",
+                "คำนวณเวลารวมที่ต้องใช้: `hours = sum((pile + mid - 1) // mid for pile in piles)`",
+                "ถ้า `hours <= h`: กินทัน! แปลว่าความเร็ว `mid` ใช้ได้ ลองหาความเร็วที่ช้ากว่านี้ดู -> บีบ `hi = mid`",
+                "ถ้า `hours > h`: กินไม่ทัน! แปลว่าช้าเกินไป ต้องเพิ่มความเร็ว -> บีบ `lo = mid + 1`",
+                "เมื่อจบการค้นหา `lo` จะชี้ที่ความเร็วน้อยที่สุดที่ยังกินทันพอดี -> `return lo`",
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
+            {
+              t: "table",
+              head: ["รอบ", "lo", "hi", "ความเร็วทดสอบ (mid)", "เวลารวมที่ใช้ (ชม.)", "ทันไหม (<= 8)?", "การปรับช่วง"],
+              rows: [
+                ["1", "1", "11", "6", "1 + 1 + 2 + 2 = 6", "ทัน (6 <= 8)", "hi = mid = 6"],
+                ["2", "1", "6", "3", "1 + 2 + 3 + 4 = 10", "ไม่ทัน (10 > 8)", "lo = mid + 1 = 4"],
+                ["3", "4", "6", "5", "1 + 2 + 2 + 3 = 8", "ทัน (8 <= 8)", "hi = mid = 5"],
+                ["4", "4", "5", "4", "1 + 2 + 2 + 3 = 8", "ทัน (8 <= 8)", "hi = mid = 4"],
+                ["จบ", "4", "4", "—", "lo == hi", "จบการค้นหา", "ตอบ k = 4"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
+            {
+              t: "code",
+              lang: "python",
+              c: `class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        lo = 1
+        hi = max(piles)
+
+        while lo < hi:
+            mid = (lo + hi) // 2
+
+            # คำนวณชั่วโมงรวมที่ต้องใช้ที่ความเร็ว mid
+            # (pile + mid - 1) // mid คือการหารปัดเศษขึ้น (ceil)
+            hours = sum((p + mid - 1) // mid for p in piles)
+
+            if hours <= h:
+                # กินทัน ลองหาความเร็วที่น้อยกว่านี้
+                hi = mid
+            else:
+                # กินไม่ทัน ต้องเพิ่มความเร็ว
+                lo = mid + 1
+
+        return lo`,
+            },
+
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
+            {
+              t: "table",
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
+              rows: [
+                ["lo = 1; hi = max(piles)", "กำหนดขอบเขตความเร็วต่ำสุดและสูงสุด", "lo=1, hi=11"],
+                ["hours = sum((p + mid - 1) // mid for p in piles)", "รวมเวลาที่กินทุกกองที่ความเร็ว mid", "mid=4 -> hours = 1+2+2+3 = 8"],
+                ["if hours <= h: hi = mid", "ถ้าทัน เก็บ mid ไว้และลองหาที่ช้าลง", "8 <= 8 -> hi = 4"],
+                ["else: lo = mid + 1", "ถ้าไม่ทัน บังคับเพิ่มความเร็ว", "10 > 8 -> lo = 4"],
+                ["return lo", "ส่งคืนความเร็วต่ำสุดที่ทำสำเร็จ", "return 4"],
+              ],
+            },
+
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
+            {
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N log M)", "โดย M = max(piles) และ N คือจำนวนกองกล้วย — รัน Binary Search log(M) รอบ แต่ละรอบวนบวกเวลา N กอง"],
+                ["Space (หน่วยความจำ)", "O(1)", "ใช้พื้นที่ตัวแปรคงที่ ไม่มีการสร้าง array ใหม่"],
+              ],
+            },
+          ],
+        },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: `Find the minimum integer eating speed \`k\` such that Koko can eat all bananas across piles within \`h\` hours.`,
+        },
+        {
+          t: "example",
+          c: [
+            {
+              input: "piles = [3,6,7,11], h = 8",
+              output: "4",
+              explain: "Speed 4 takes 1+2+2+3 = 8 hours.",
+            },
+          ],
+        },
+        {
+          t: "constraints",
+          c: [
+            "1 <= piles.length <= 10^4",
+            "piles.length <= h <= 10^9",
+            "1 <= piles[i] <= 10^9",
+          ],
+        },
+
+        {
+          t: "solution",
+          summary: "Full Solution",
+          c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
+            {
+              t: "p",
+              c: "Find minimum eating speed `k` such that `sum(ceil(p / k)) <= h`.",
+            },
+
+            { t: "h3", c: "Step 2 · Manual Trace" },
+            {
+              t: "p",
+              c: "Search range is [1, max(piles)]. Feasibility is monotonic: higher speeds always finish faster. Binary search for the first speed that finishes within `h`.",
+            },
+
+            { t: "h3", c: "Step 3 · Methodology" },
+            {
+              t: "p",
+              c: "Binary search on answer `[1, max(piles)]` with integer ceiling formula `(p + mid - 1) // mid`.",
+            },
+
+            { t: "h3", c: "Step 4 · Simulation Table" },
+            {
+              t: "table",
+              head: ["lo", "hi", "mid", "Hours Needed", "Feasible?", "Action"],
+              rows: [
+                ["1", "11", "6", "6", "Yes (<= 8)", "hi = 6"],
+                ["1", "6", "3", "10", "No (> 8)", "lo = 4"],
+                ["4", "6", "5", "8", "Yes", "hi = 5"],
+                ["4", "5", "4", "8", "Yes", "hi = 4"],
+                ["4", "4", "—", "converged", "return 4"],
+              ],
+            },
+
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
+            {
+              t: "code",
+              lang: "python",
+              c: `class Solution:
+    def minEatingSpeed(self, piles: List[int], h: int) -> int:
+        lo, hi = 1, max(piles)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            hours = sum((p + mid - 1) // mid for p in piles)
+            if hours <= h:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo`,
+            },
+
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
+            {
+              t: "table",
+              head: ["Line", "Purpose", "Example"],
+              rows: [
+                ["lo, hi = 1, max(piles)", "Speed boundaries", "1 to 11"],
+                ["hours = sum((p + mid - 1) // mid ...)", "Compute total hours at speed mid", "ceil(pile / mid)"],
+                ["if hours <= h: hi = mid", "Feasible: try lower speeds", "shrink right boundary"],
+                ["else: lo = mid + 1", "Too slow: increase speed", "shrink left boundary"],
+              ],
+            },
+
+            { t: "h3", c: "Step 7 · Complexity" },
+            {
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N log(max(piles)))", "log(max(piles)) binary search iterations, each taking O(N)."],
+                ["Space", "O(1)", "Constant auxiliary space."],
+              ],
+            },
+          ],
+        },
+      ],
     },
   },
 };

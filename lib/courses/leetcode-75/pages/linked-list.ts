@@ -5,11 +5,11 @@ export const linkedListPages: Record<string, Page> = {
     slug: "lc75-intro-linked-list",
     title: {
       th: "Linked List — จากศูนย์จนพร้อมลุย LeetCode",
-      en: "",
+      en: "Linked List — From Zero to LeetCode Ready",
     },
     lead: {
       th: "ทิ้งภาพโรงหนัง มาสร้างขบวนรถไฟ — ปูพื้นฐานจาก Absolute Zero ไล่ถึง 5 patterns ที่ใช้ลุยโจทย์ได้จริง",
-      en: "",
+      en: "Leave the cinema behind and build a train — fundamentals from absolute zero up to 5 battle-tested patterns.",
     },
     group: "LeetCode 75",
     blocks: {
@@ -31,8 +31,8 @@ export const linkedListPages: Record<string, Page> = {
         {
           t: "ul",
           c: [
-            "ข้อดี: ถ้าอยากเรียกคนนั่งเก้าอี้เบอร์ 5 ก็ชี้ตัวได้ทันที",
-            'ข้อเสีย: ถ้ามีคนอยากมาแทรกตรงกลาง คุณต้องสั่งให้คนที่นั่งอยู่ "ขยับถอยไปทีละเก้าอี้" ทั้งแถว! วุ่นวายสุด ๆ',
+            "ข้อดี: ถ้าอยากเรียกคนนั่งเก้าอี้เบอร์ 5 ก็ชี้ตัวได้ทันที (arr[5] ในเวลา O(1))",
+            'ข้อเสีย: ถ้ามีคนอยากมาแทรกตรงกลาง คุณต้องสั่งให้คนที่นั่งอยู่ "ขยับถอยไปทีละเก้าอี้" ทั้งแถว! วุ่นวายและช้า O(N)',
           ],
         },
         {
@@ -43,8 +43,8 @@ export const linkedListPages: Record<string, Page> = {
           t: "table",
           head: ["คุณสมบัติ", "Array (ที่นั่งโรงหนัง)", "Linked List (ขบวนรถไฟ)"],
           rows: [
-            ["การแทรกของตรงกลาง", "ช้า (ต้องขยับคนอื่นทั้งแถว)", "เร็วมาก! (แค่ปลดโซ่แล้วเกี่ยวใหม่)"],
-            ["การหาของตู้ที่ 5", "เร็วมาก! (ชี้ตัวได้เลย)", "ช้า (ต้องเดินไล่ตั้งแต่หัวขบวน)"],
+            ["การแทรกของตรงกลาง", "ช้า O(N) (ต้องขยับคนอื่นทั้งแถว)", "เร็วมาก O(1) (แค่ปลดโซ่แล้วเกี่ยวใหม่)"],
+            ["การหาของตู้ที่ 5", "เร็วมาก O(1) (ชี้ตัวได้เลย)", "ช้า O(N) (ต้องเดินไล่ตั้งแต่หัวขบวน)"],
           ],
         },
 
@@ -68,7 +68,7 @@ export const linkedListPages: Record<string, Page> = {
           t: "ul",
           c: [
             "Head (หัวขบวน) — ตู้แรกสุดของขบวน (ถ้ารักษา Head ไว้ไม่ได้ คุณจะหาตู้ที่เหลือไม่เจออีกเลย!)",
-            "None (จบขบวน) — ตู้สุดท้ายจะต้องชี้ข้อต่อ next ไปหาความว่างเปล่า เพื่อบอกว่าสิ้นสุดขบวนแล้ว",
+            "None (จบขบวน) — ตู้สุดท้ายจะต้องชี้ข้อต่อ next ไปหาความว่างเปล่า (None) เพื่อบอกว่าสิ้นสุดขบวนแล้ว",
           ],
         },
 
@@ -86,8 +86,8 @@ export const linkedListPages: Record<string, Page> = {
           lang: "python",
           label: "พิมพ์เขียว ListNode",
           c: `class ListNode:
-    def __init__(self, value=0, next=None):
-        self.val = value     # เก็บของลงกล่อง
+    def __init__(self, val=0, next=None):
+        self.val = val       # เก็บของลงกล่อง
         self.next = next     # โซ่ชี้ไปตู้ถัดไป (ตอนเพิ่งสร้างเสร็จยังไม่เกี่ยวใคร = None)`,
         },
         {
@@ -119,8 +119,8 @@ nodeB = ListNode(20)`,
           lang: "python",
           label: "พิสูจน์ว่าโซ่เกี่ยวกันจริง",
           code: `class ListNode:
-    def __init__(self, value=0, next=None):
-        self.val = value
+    def __init__(self, val=0, next=None):
+        self.val = val
         self.next = next
 
 nodeA = ListNode(10)
@@ -145,250 +145,98 @@ print(nodeA.next.val)     # ยืนอยู่ตู้ A -> เดินต�
           c: "ใน LeetCode คุณจะไม่ได้มีรถไฟแค่ 2 ตู้ แต่มาเป็นสิบเป็นร้อยตู้ ท่ามาตรฐานที่คุณต้องพิมพ์ให้ชินมือคือ การใช้ while loop เดินตรวจรถไฟตั้งแต่หัวยันท้ายขบวน ครับ",
         },
         {
-          t: "p",
-          c: "สมมติเรามีขบวน head = [10] -> [20] -> [30]",
-        },
-        {
           t: "codeout",
           lang: "python",
-          label: "Traversal — เดินตรวจขบวนตั้งแต่หัวยันท้าย",
-          code: `class ListNode:
-    def __init__(self, value=0, next=None):
-        self.val = value
-        self.next = next
-
-# สร้างขบวน [10] -> [20] -> [30]
-head = ListNode(10)
-head.next = ListNode(20)
-head.next.next = ListNode(30)
-
-curr = head           # 1. ตั้งชื่อตัวแทนเดินตรวจว่า curr เริ่มยืนที่หัวขบวน
-
-while curr:           # 2. ตราบใดที่ curr ยังยืนอยู่บนตู้ (ยังไม่ตกขบวนไปเจอ None)
-    print(curr.val)   # 3. ดูว่าตู้ที่ยืนอยู่มีของอะไร
-    curr = curr.next  # 4. เดินก้าวไปตู้ถัดไปตามโซ่! (ขาดบรรทัดนี้ลูปจะค้าง)`,
-          out: `10
-20
-30`,
-        },
-
-        { t: "h2", c: '5. สัญญาณเตือนว่าโจทย์ข้อนี้ "เล่นกับ Linked List"' },
-        {
-          t: "p",
-          c: "เวลาทำ LeetCode ถ้าฟังก์ชันรับค่าตัวแปรประเภท ListNode เข้ามา เตรียมงัดแพทเทิร์นยอดฮิตเหล่านี้มาใช้ได้เลย:",
-        },
-        {
-          t: "ul",
-          c: [
-            'การเดิน 2 จังหวะ (Fast & Slow Pointers) — ให้คนนึงเดินทีละก้าว อีกคนวิ่งทีละ 2 ก้าว เอาไว้หา "จุดกึ่งกลางขบวน" หรือจับผิดว่า "รถไฟวิ่งวนเป็นวงกลมไหม"',
-            "การสลับสาย (Reverse) — สั่งให้หันข้อต่อโซ่กลับหลังหันทั้งขบวน (เช่น จาก 1→2→3 เปลี่ยนเป็น 3→2→1)",
-            "การเย็บผ้า (Merge) — เอาขบวนรถไฟ 2 ขบวนมารูดซิปสลับตู้กันให้กลายเป็นขบวนเดียว",
-          ],
-        },
-        {
-          t: "callout",
-          title: "ประโยคท่องจำก่อนลุยโจทย์",
-          c: "ระวัง Head หาย! ก่อนจะเปลี่ยนโซ่ไปเกี่ยวตู้ใหม่ ต้องแน่ใจเสมอว่าเราไม่ได้ทิ้งตู้เก่าให้ลอยเคว้งกลางอวกาศ",
-        },
-
-        {
-          t: "p",
-          c: "พื้นฐานแน่นแล้ว! ต่อไปคือ 5 เทคนิคที่โจทย์ Linked List ใน LeetCode เกือบ 90% ใช้ผสมผสานกัน — อ่านต่อให้จบ แล้วพร้อมลุยได้เลยครับ",
-        },
-
-        { t: "h2", c: "6. 5 เทคนิคระดับเทวดา (Must-Know Patterns for LeetCode)" },
-
-        { t: "h3", c: "Pattern 1: Dummy Head (โหนดหลอกแก้ Edge Case)" },
-        {
-          t: "ul",
-          c: [
-            "ปัญหา: เวลาโจทย์ให้ ลบ, สลับ, หรือ เพิ่ม โหนดที่ตำแหน่งแรกสุด (Head) คำตอบของ Head จะเปลี่ยนไป ทำให้เราต้องเขียน if-else เช็คกรณีหัวขบวนซับซ้อนมาก",
-            "วิธีแก้: สร้างโหนดหลอกขึ้นมา 1 ตัว แปะไว้หน้า Head เสมอ แล้วส่งคืน dummy.next เป็นคำตอบตอนจบ",
-          ],
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "โครงร่างการใช้ Dummy Head",
-          c: `dummy = ListNode(0)   # สร้างโหนดหลอก ค่าอะไรก็ได้
-dummy.next = head     # เอาโหนดหลอกต่อเข้ากับ Head เดิม
-curr = dummy          # ใช้ curr เดินทำงาน
-
-# ... จัดการเปลี่ยนข้อต่อต่างๆ ...
-
-return dummy.next     # คำตอบที่แท้จริงคือตัวที่อยู่หลัง Dummy`,
-        },
-
-        { t: "h3", c: "Pattern 2: Fast & Slow Pointers (สองเข็มความเร็วต่างกัน)" },
-        {
-          t: "p",
-          c: "เทคนิคนี้ใช้กระต่าย (Fast) วิ่งเร็วกว่าเต่า (Slow) 2 เท่า เอาไว้แก้โจทย์ 2 สไตล์หลัก:",
-        },
-        {
-          t: "ol",
-          c: [
-            "หาจุดกึ่งกลางของ List — slow เดินทีละ 1 ก้าว (slow = slow.next) · fast เดินทีละ 2 ก้าว (fast = fast.next.next) · เมื่อ fast ถึงปลายทาง slow จะยืนอยู่ตรงจุดกึ่งกลางพอดีเป๊ะ!",
-            "เช็คว่ามีวงวน (Cycle) หรือไม่ — ถ้าวิ่งไปเรื่อย ๆ แล้ว fast == slow แปลว่าวิ่งวนกลับมาชนกัน มี Cycle แน่นอน (Floyd's Cycle Finding Algorithm)",
-          ],
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "โครงร่าง Fast & Slow",
-          c: `slow = fast = head
-while fast and fast.next:
-    slow = slow.next          # เดิน 1 ก้าว
-    fast = fast.next.next     # เดิน 2 ก้าว`,
-        },
-
-        { t: "h3", c: "Pattern 3: In-Place Reversal (การกลับทิศลิงก์ลิสต์)" },
-        {
-          t: "p",
-          c: "การเปลี่ยนทิศทางจาก 1 → 2 → 3 ให้กลายเป็น 3 → 2 → 1 โดยไม่สร้างโหนดใหม่ — ใช้ตัวแปร 3 ตัวควบคุมการหมุนข้อต่อ:",
-        },
-        {
-          t: "ul",
-          c: [
-            "prev — โหนดก่อนหน้า (เริ่มต้นเป็น None)",
-            "curr — โหนดปัจจุบันที่กำลังตัดข้อต่อ (เริ่มต้นเป็น head)",
-            "nxt — โหนดถัดไป (เอาไว้เซฟทางไปต่อ ไม่ให้หลุดขบวน)",
-          ],
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "โครงร่าง In-Place Reversal",
-          c: `prev = None
-curr = head
-
+          label: "แม่แบบการเดินตรวจ Linked List",
+          code: `curr = nodeA
 while curr:
-    nxt = curr.next   # 1. จำทางไปต่อไว้ก่อน
-    curr.next = prev  # 2. หักข้อต่อกลับหลังชี้หา prev
-    prev = curr       # 3. เขยิบ prev ตามมา
-    curr = nxt        # 4. เขยิบ curr ไปโหนดถัดไป
-
-return prev           # prev จะกลายเป็น Head ตัวใหม่`,
+    print(curr.val, end=" -> ")
+    curr = curr.next
+print("None")`,
+          out: `10 -> 20 -> None`,
         },
 
-        { t: "h3", c: "Pattern 4: Pointer Cutting & Re-linking (การตัด-ต่อข้อต่อ)" },
-        {
-          t: "p",
-          c: "เวลาต้องการลบโหนด B ออกจากขบวน A → B → C — เราไม่ต้องลบ B ทิ้งจริง ๆ ในหน่วยความจำ แค่สั่งให้ A ข้ามไปชี้ C แทน:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "ตัดข้อต่อข้ามโหนดที่ต้องการลบ",
-          c: `A.next = A.next.next`,
-        },
-
-        { t: "h3", c: "Pattern 5: Boundary Check (การตั้งเงื่อนไขลูปไม่ให้โค้ดพัง)" },
-        {
-          t: "p",
-          c: "ก่อนจะขยับ Pointer ต้องตั้งเงื่อนไข while ให้ครอบคลุมเสมอ:",
-        },
-        {
-          t: "table",
-          head: ["สถานการณ์", "เงื่อนไขใน while"],
-          rows: [
-            ["เดินเช็คทีละ 1 โหนด จนสุดสาย", "while curr:"],
-            ["เช็คโหนดถัดไป (ต้องการหยุดที่โหนดสุดท้าย)", "while curr and curr.next:"],
-            ["กระโดดทีละ 2 ก้าว (fast.next.next)", "while fast and fast.next:"],
-          ],
-        },
-
-        { t: "h2", c: "7. ตะลุยโจทย์จริง: LC206 — Reverse Linked List" },
-        {
-          t: "p",
-          c: "ลองเอา Pattern 3 (In-Place Reversal) มาเขียนใส่ฟังก์ชันจริงส่ง LeetCode:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "คำตอบสำหรับวางใน LeetCode",
-          c: `class Solution:
-    def reverseList(self, head: ListNode) -> ListNode:
-        prev = None
-        curr = head
-
-        while curr:
-            nxt = curr.next   # เซฟโหนดถัดไป
-            curr.next = prev  # กลับทิศชี้หาตัวหน้า
-            prev = curr       # เลื่อน prev
-            curr = nxt        # เลื่อน curr
-
-        return prev  # คืนค่าหัวขบวนใหม่`,
-        },
-
-        { t: "h3", c: "จำลองขั้นตอนการทำงาน (Walkthrough)" },
-        {
-          t: "p",
-          c: "สมมติ input คือ 1 → 2 → 3 → None",
-        },
-        {
-          t: "table",
-          head: [
-            "รอบที่",
-            "prev",
-            "curr",
-            "nxt (เซฟไว้)",
-            "Action: curr.next = prev",
-            "list ตอนนี้",
-          ],
-          rows: [
-            ["เริ่ม", "None", "1", "—", "—", "1 → 2 → 3"],
-            ["1", "1", "2", "2", "1.next = None", "None ← 1  |  2 → 3"],
-            ["2", "2", "3", "3", "2.next = 1", "None ← 1 ← 2  |  3"],
-            ["3", "3", "None", "None", "3.next = 2", "None ← 1 ← 2 ← 3"],
-            ["จบ", "3 = head ใหม่", "None", "—", "—", "3 → 2 → 1"],
-          ],
-        },
-        {
-          t: "p",
-          c: "สัญลักษณ์ | แยกสองชิ้น: ซ้าย = ส่วนที่พลิกแล้ว · ขวา = ส่วนที่ยังไม่แตะ พอลูปจบ curr เป็น None แล้วคืน prev (= โหนด 3) เป็น Head ใหม่ ได้ 3 → 2 → 1 — O(N) Time / O(1) Space!",
-        },
-
-        { t: "h2", c: "8. Checklist เช็คโค้ดก่อนกด Submit" },
-        {
-          t: "p",
-          c: "ก่อนกดปุ่ม Submit ใน LeetCode ให้เช็ค 4 ข้อนี้เสมอ:",
-        },
+        { t: "h2", c: "5. อาวุธ 5 ท่าไม้ตายสำหรับแก้โจทย์ Linked List" },
         {
           t: "ol",
           c: [
-            "Empty List — ถ้า head == None โค้ดพังไหม?",
-            "Single Node — ถ้า List มีโหนดเดียว (head.next == None) โค้ดทำงานถูกต้องไหม?",
-            "Two Nodes — ถ้า List มีแค่ 2 โหนด วนลูปหลุดไหม?",
-            "Cycle Hazard — มีตรงไหนเขียนชี้กลับหาตัวเองจนเกิด Infinite Loop หรือเปล่า?",
+            "Dummy Head (หัวขบวนหลอก) — สร้างโหนดเก๊ขึ้นมาอยู่หน้า head ตัวจริง เพื่อป้องกันบั๊กกรณีต้องลบหัวหรือเปลี่ยนหัว",
+            "Fast & Slow Pointers (สองเข็มความเร็วต่างกัน) — slow เดินทีละ 1, fast เดินทีละ 2 พอ fast ถึงปลาย slow จะอยู่ที่จุดกึ่งกลางพอดี!",
+            "In-Place Reversal (กลับทิศขบวนรถไฟ) — สลับทิศโซ่ให้ชี้กลับหลังจากขวามาซ้าย",
+            "Pointer Cutting & Re-linking (การปลดโซ่แล้วเกี่ยวใหม่) — การข้ามโหนดเพื่อลบทิ้ง: `prev.next = curr.next`",
+            "Boundary Check (ตรวจทางตัน) — เช็ค `while fast and fast.next:` เสมอเพื่อไม่ให้ชนขอบ None",
           ],
-        },
-        {
-          t: "callout",
-          title: "เตรียมตัวต่อ",
-          c: "หมวดนี้มี 4 ข้อ: Delete Middle · Odd Even · Reverse · Twin Sum — เอา 5 patterns ข้างบนไปผสมกันได้เลย!",
         },
       ],
-      en: [],
+      en: [
+        {
+          t: "p",
+          c: "Many developers feel intimidated by Linked Lists because elements are not placed contiguously in memory like arrays. But once you internalize the mental model of train cars and chain links, manipulating pointers becomes an enjoyable and powerful skill.",
+        },
+        {
+          t: "h2",
+          c: "Part 1 · The Mental Model: Train Cars Instead of Cinema Seats",
+        },
+        {
+          t: "p",
+          c: "In an Array / Python list, items sit side-by-side in contiguous memory like numbered cinema seats: instant O(1) random lookup (`arr[i]`), but inserting in the middle requires shifting everyone (O(N)). In a Linked List, items (nodes) live scattered in memory, connected only by next pointers (chains). Inserting or deleting in the middle requires simply unlinking and re-linking pointers (O(1)), but finding the k-th node requires traversing from the head (O(N)).",
+        },
+        {
+          t: "h2",
+          c: "Part 2 · The Anatomy of a Node",
+        },
+        {
+          t: "p",
+          c: "Every `ListNode` holds two attributes: `val` (the payload) and `next` (a reference to the subsequent node, or `None` at the tail).",
+        },
+        {
+          t: "h2",
+          c: "Part 3 · 5 Core Patterns for Linked Lists",
+        },
+        {
+          t: "ul",
+          c: [
+            "**Dummy Head:** Create a sentinel node before `head` to simplify edge cases where the head itself might be deleted or modified.",
+            "**Fast & Slow Pointers:** Slow moves 1 step, Fast moves 2 steps. When Fast hits the end, Slow is exactly at the middle.",
+            "**In-Place Reversal:** Reverse arrow directions using `prev`, `curr`, `nxt` without creating any new nodes.",
+            "**Unlink & Bypass:** Delete a node by routing around it: `prev.next = curr.next`.",
+            "**Safety Checks:** Always guard loops with `while fast and fast.next:` to avoid `NoneType` errors.",
+          ],
+        },
+      ],
     },
   },
 
   "lc75-p29": {
     slug: "lc75-p29",
-    title: { th: "ข้อ 29 · LC2095 Delete the Middle Node of a Linked List (ลบโหนดกลาง) 🟡", en: "LC2095 Delete the Middle Node of a Linked List 🟡" },
+    title: {
+      th: "ข้อ 29 · LC2095 Delete the Middle Node of a Linked List (ลบโหนดกลาง) 🟡",
+      en: "LC2095 Delete the Middle Node of a Linked List 🟡",
+    },
     lead: {
       th: "โจทย์ Fast & Slow — หาตู้กลางของขบวนในรอบเดียว แล้วปลดโซ่ให้กระโดดข้ามมันทิ้ง",
-      en: "Fast & Slow — find the middle car in one pass, then unlink it.",
+      en: "Fast & Slow pointers — locate the middle node in a single pass, then bypass and unlink it.",
     },
     group: "LeetCode 75",
     blocks: {
       th: [
         {
           t: "p",
-          c: `กำหนด head ของ linked list มาให้ ให้ลบ middle node ออก แล้ว return head ของ linked list ที่แก้ไขแล้ว
+          c: `You are given the \`head\` of a linked list. Delete the middle node, and return the \`head\` of the modified linked list.
 
-middle node ของ linked list ขนาด n คือ node ลำดับที่ ⌊n / 2⌋ นับจากจุดเริ่มต้นแบบ 0-based indexing โดย ⌊x⌋ หมายถึงจำนวนเต็มที่มากที่สุดที่น้อยกว่าหรือเท่ากับ x
+The middle node of a linked list of size \`n\` is the \`⌊n / 2⌋\`-th node from the start using 0-based indexing, where \`⌊x⌋\` denotes the largest integer less than or equal to \`x\`.
 
-- สำหรับ n = 1, 2, 3, 4 และ 5 middle node อยู่ที่ index 0, 1, 1, 2 และ 2 ตามลำดับ`,
+• For \`n = 1, 2, 3, 4\`, and \`5\`, the middle nodes are \`0, 1, 1, 2\`, and \`2\`, respectively.`,
+        },
+        {
+          t: "p",
+          c: `กำหนด \`head\` ของ linked list มาให้ จงลบ "โหนดกึ่งกลาง" (middle node) ออก แล้วส่งคืน \`head\` ของ linked list หลังการแก้ไข
+
+โหนดกึ่งกลางของ linked list ขนาด \`n\` คือโหนดที่ index \`⌊n / 2⌋\` (นับจาก 0)
+• เช่น n = 1 -> index 0
+• n = 2 -> index 1
+• n = 4 -> index 2
+• n = 7 -> index 3`,
         },
         {
           t: "example",
@@ -396,83 +244,103 @@ middle node ของ linked list ขนาด n คือ node ลำดับ�
             {
               input: "head = [1,3,4,7,1,2,6]",
               output: "[1,3,4,1,2,6]",
-              explain: `Explanation:
-รูปด้านบนคือ linked list ที่ให้มา ดัชนีของแต่ละ node เขียนไว้ด้านล่าง
-เนื่องจาก n = 7 node ที่ index 3 ค่า 7 คือ middle node (ทำเครื่องหมายสีแดง)
-เรา return list ใหม่หลังลบ node นี้ออก`,
+              explain:
+                "ความยาว n = 7 ดังนั้นโหนดกึ่งกลางคือ index 7 // 2 = 3 ซึ่งมีค่า 7 เมื่อลบออกจะได้ [1,3,4,1,2,6]",
             },
             {
               input: "head = [1,2,3,4]",
               output: "[1,2,4]",
-              explain: `Explanation:
-รูปด้านบนคือ linked list ที่ให้มา
-สำหรับ n = 4 node ที่ index 2 ค่า 3 คือ middle node (ทำเครื่องหมายสีแดง)`,
+              explain:
+                "ความยาว n = 4 โหนดกึ่งกลางคือ index 4 // 2 = 2 (ค่า 3) เมื่อลบออกจะได้ [1,2,4]",
             },
             {
               input: "head = [2,1]",
               output: "[2]",
-              explain: `Explanation:
-รูปด้านบนคือ linked list ที่ให้มา
-สำหรับ n = 2 node ที่ index 1 ค่า 1 คือ middle node (ทำเครื่องหมายสีแดง)
-เหลือแค่ node ที่ index 0 ค่า 2 หลังลบ node ที่ 1 ออก`,
+              explain:
+                "ความยาว n = 2 โหนดกึ่งกลางคือ index 2 // 2 = 1 (ค่า 1) เมื่อลบออกจะได้ [2]",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node ใน list อยู่ในช่วง [1, 10^5]",
+            "The number of nodes in the list is in the range [1, 10^5].",
             "1 <= Node.val <= 10^5",
           ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ถ้ามีขบวนรถไฟยาวๆ แล้วเราต้องการหยุดตรงกลางขบวนพอดีโดยไม่ต้องนับจำนวนตู้ทั้งหมดก่อนสองรอบ เราจะใช้เข็มความเร็วต่างกันอย่างไร?",
         },
 
         {
           t: "solution",
           summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
           c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับสัญญาณของหมวด: "การเดิน 2 จังหวะ (Fast & Slow Pointers)" — หาตู้กลางแล้วปลดโซ่ข้ามมันทิ้ง',
+              c: "โจทย์ต้องการให้เราลบโหนดกึ่งกลาง (ตำแหน่ง ⌊n/2⌋) ออกจาก linked list โดยต้องคงลำดับโหนดที่เหลือทั้งหมดไว้เหมือนเดิม และส่งคืน head ของขบวนที่แก้ไขแล้ว",
+            },
+            {
+              t: "p",
+              c: "กรณีพิเศษที่ต้องระวัง: ถ้าขบวนมีแค่โหนดเดียว (n = 1) โหนดนั้นคือโหนดกึ่งกลาง เมื่อลบออก ขบวนจะกลายเป็นว่างเปล่าทันที ต้องคืนค่า `None`",
             },
 
-            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
             {
               t: "p",
-              c: "วิธีง่ายคือเดินรอบแรกนับว่าขบวนมีกี่ตู้ (ได้ n) แล้วเดินรอบสองไปหยุดที่ตู้ ⌊n/2⌋ เพื่อปลดโซ่ — ถูกแต่ต้อง traverse สองรอบ",
+              c: "ลองดูตัวอย่าง: head = [1, 3, 4, 7, 1, 2, 6] (n = 7)",
             },
             {
-              t: "p",
-              c: "หัวใจสำคัญ: ใช้ Fast & Slow — ให้ slow เดินทีละ 1 ตู้ · fast เดินทีละ 2 ตู้ พอ fast วิ่งถึงปลายขบวน slow จะหยุดพอดีที่ตู้กลาง จบในรอบเดียว!",
-            },
-            {
-              t: "p",
-              c: "แต่แค่รู้ว่าตู้ไหนเป็นกลางยังลบไม่ได้ — ต้องมี prev (ตู้ก่อนหน้า) เพื่อสั่งปลดโซ่: prev.next = slow.next ให้กระโดดข้ามตู้กลางทิ้ง",
+              t: "ul",
+              c: [
+                "โหนดกลางคือตัวที่ 3 (ค่า 7)",
+                "เราต้องการให้โหนดก่อนหน้า (ค่า 4) ปลดโซ่ที่เคยชี้ไปหา 7 แล้วข้ามไปเกี่ยวเข้ากับโหนด 1 แทน!",
+                "นั่นหมายความว่า เราจำเป็นต้องรู้ 2 โหนด: โหนดกลาง (slow) และโหนดก่อนหน้าโหนดกลาง (prev)",
+                "เมื่อเจอแล้ว สั่งเพียงบรรทัดเดียว: `prev.next = slow.next`",
+              ],
             },
 
-            { t: "h3", c: "2. กฎเหล็ก 4 ข้อ (The Logic)" },
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
             {
               t: "p",
-              c: "เปิดตัวชี้สามตัว แล้วเดินจนกว่า fast จะหมดทาง:",
+              c: "ภาพรวม: ใช้เทคนิค **Fast & Slow Pointers** (เต่ากับกระต่าย) ร่วมกับตัวชี้ `prev` เพื่อหาโหนดกลางและตัดต่อโซ่ในรอบเดียว (One Pass)",
+            },
+            {
+              t: "p",
+              c: "เครื่องมือและตัวแปรที่ต้องใช้:",
             },
             {
               t: "ol",
               c: [
-                "ดักเคสพิเศษ — ถ้าขบวนมีตู้เดียว (head.next เป็น None) ลบแล้วเหลือว่าง → return None",
-                "เตรียมตัวชี้ — prev = None · slow = head · fast = head",
-                "เดินคู่ — ตราบใดที่ fast และ fast.next ยังมีอยู่: prev = slow แล้ว slow ขยับ 1 · fast ขยับ 2",
-                "ปลดโซ่ — prev.next = slow.next แล้ว return head",
+                "ดัก Edge Case: ถ้า `head.next is None` (มีโหนดเดียว) ลบแล้วหมดเกลี้ยง -> `return None`",
+                "`slow = head`: เดินก้าวละ 1 โหนด",
+                "`fast = head`: เดินก้าวละ 2 โหนด (เร็วกว่า slow สองเท่า)",
+                "`prev = None`: คอยตามหลัง slow อยู่ 1 ก้าวเสมอ เพื่อจำว่าใครอยู่หน้า slow",
+                "เมื่อ fast เดินถึงปลายขบวน (`fast is None` หรือ `fast.next is None`) ตัว slow จะหยุดอยู่ที่โหนดกึ่งกลางพอดี!",
+                "ปลดโซ่: สั่ง `prev.next = slow.next` เพื่อให้โหนดก่อนหน้ากระโดดข้าม slow ไปหาโหนดถัดไป",
               ],
             },
 
-            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
             {
-              t: "p",
-              c: "โค้ดข้อนี้สั้นและตรงไปตรงมา:",
+              t: "table",
+              head: ["รอบ", "prev", "slow (1 ก้าว)", "fast (2 ก้าว)", "คำอธิบาย"],
+              rows: [
+                ["เริ่ม", "None", "1", "1", "fast และ slow อยู่ที่จุดเริ่มต้น"],
+                ["1", "1", "3", "4", "prev จำ 1, slow ไป 3, fast กระโดดไป 4"],
+                ["2", "3", "4", "1", "prev จำ 3, slow ไป 4, fast กระโดดไป 1"],
+                ["3", "4", "7", "6", "prev จำ 4, slow ไป 7 (กลาง!), fast กระโดดไป 6"],
+                ["จบ", "4", "7", "6", "fast.next คือ None -> หยุดลูป! สั่ง prev.next = slow.next (4 ชี้ไป 1)"],
+              ],
             },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
             {
               t: "code",
               lang: "python",
-              label: "คำตอบสำหรับวางใน LeetCode",
               c: `# Definition for singly-linked list.
 # class ListNode:
 #     def __init__(self, val=0, next=None):
@@ -481,116 +349,47 @@ middle node ของ linked list ขนาด n คือ node ลำดับ�
 
 class Solution:
     def deleteMiddle(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        # กฎข้อ 1: มีตู้เดียว ลบแล้วเหลือว่าง
-        if head.next is None:
+        # 1. กรณีพิเศษ: มีโหนดเดียว ลบแล้วไม่เหลืออะไร
+        if head is None or head.next is None:
             return None
 
-        prev = None                 # ตู้ก่อนหน้าตัวกลาง
-        slow = head                 # เดินทีละ 1 ตู้ -> จบที่ตัวกลาง
-        fast = head                 # เดินทีละ 2 ตู้
+        prev = None
+        slow = head
+        fast = head
 
-        # กฎข้อ 3: เดินคู่จนกว่า fast จะหมดทาง
+        # 2. เดินกระต่ายกับเต่า: fast เดิน 2 ก้าว, slow เดิน 1 ก้าว
         while fast and fast.next:
             prev = slow
-            slow = slow.next        # slow ขยับ 1
-            fast = fast.next.next   # fast ขยับ 2
+            slow = slow.next
+            fast = fast.next.next
 
-        # กฎข้อ 4: ปลดโซ่ข้ามตู้กลางทิ้ง
+        # 3. ปลดโซ่ข้ามโหนดกึ่งกลาง (slow)
         prev.next = slow.next
+
         return head`,
             },
 
-            { t: "h3", c: "4. จำลองการทำงาน — 1 → 3 → 4 → 7 → 1 → 2 → 6" },
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
             {
               t: "table",
-              head: [
-                "รอบ",
-                "prev (ค่า)",
-                "slow (ค่า)",
-                "fast (ค่า)",
-                "หมายเหตุ",
-                "list ตอนนี้",
-              ],
+              head: ["บรรทัดโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
               rows: [
-                [
-                  "ก่อนลูป",
-                  "None",
-                  "1",
-                  "1",
-                  "fast.next มี → เข้าลูป",
-                  "1 → 3 → 4 → 7 → 1 → 2 → 6",
-                ],
-                [
-                  "รอบ 1",
-                  "1",
-                  "3",
-                  "4",
-                  "fast.next มี",
-                  "1  |  3 → 4 → 7 → 1 → 2 → 6",
-                ],
-                [
-                  "รอบ 2",
-                  "3",
-                  "4",
-                  "1",
-                  "fast.next มี",
-                  "1 → 3  |  4 → 7 → 1 → 2 → 6",
-                ],
-                [
-                  "รอบ 3",
-                  "4",
-                  "7",
-                  "6",
-                  "fast.next ไม่มี → หยุด",
-                  "1 → 3 → 4  |  7 → 1 → 2 → 6",
-                ],
-                [
-                  "หลังลูป",
-                  "4",
-                  "7 (ตัวกลาง)",
-                  "6",
-                  "ปลดโซ่: 4.next ชี้ไป 1 (ข้าม 7)",
-                  "1 → 3 → 4 → 1 → 2 → 6",
-                ],
-              ],
-            },
-            {
-              t: "p",
-              c: "สัญลักษณ์ | แยกสองชิ้น: ซ้าย = ถึง prev · ขวา = slow เป็นหัว (ตัวที่จะลบอยู่หัวขวา) — จบเกมได้ขบวน [1, 3, 4, 1, 2, 6]",
-            },
-
-            { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
-            {
-              t: "p",
-              c: 'เคส "ตู้เดียว" — ถ้าไม่ดักไว้:',
-            },
-            {
-              t: "ul",
-              c: [
-                "loop ไม่ทำงานเลย (fast.next เป็น None ตั้งแต่แรก)",
-                "prev ยังเป็น None → บรรทัด prev.next จะพัง (AttributeError)",
-              ],
-            },
-            {
-              t: "callout",
-              title: "เงื่อนไข while",
-              warn: true,
-              c: "ต้องเขียน while fast and fast.next — ถ้าเขียนแค่ while fast จะพังตอน fast.next.next เพราะไปอ้าง .next ของ None เมื่อ fast วิ่งเลยขอบขบวน",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — เดินผ่านขบวนรอบเดียว",
-                "Space O(1) — ใช้แค่ตัวชี้ไม่กี่ตัว ไม่สร้างขบวนใหม่",
+                ["if head is None or head.next is None:", "ตรวจว่ามี 0 หรือ 1 โหนดไหม", "ถ้ามีโหนดเดียว คืน None ทันที"],
+                ["slow = head; fast = head", "ตั้งจุดเริ่มต้นตัวชี้ทั้งสอง", "เริ่มที่โหนดแรก"],
+                ["prev = slow; slow = slow.next; fast = fast.next.next", "ขยับ 3 ตัวชี้พร้อมกันตามอัตราส่วน", "slow วิ่งครึ่งทางของ fast เสมอ"],
+                ["prev.next = slow.next", "ปลดโซ่ข้ามโหนด slow ทิ้ง", "โหนด 4 เชื่อมข้ามไปหาโหนด 1 (โหนด 7 หลุด)"],
+                ["return head", "ส่งคืนหัวขบวนเดิมที่ถูกตัดต่อแล้ว", "คืน head = 1"],
               ],
             },
 
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
             {
-              t: "callout",
-              title: "💡 สรุป pattern",
-              c: "Fast & Slow หาตู้กลางได้ในรอบเดียว และเวลาจะลบ/แก้ตู้ใน Linked List ต้องมีตัวชี้ไปที่ 'ตู้ก่อนหน้า' เสมอ — สองไอเดียนี้ใช้ซ้ำได้อีกหลายข้อ",
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N)", "วนลูปเพียงรอบเดียว (One-pass) โดย fast เดินไปถึงปลายขบวนใช้เวลา N/2 ก้าว = O(N)"],
+                ["Space (หน่วยความจำ)", "O(1)", "ใช้ตัวชี้คงที่เพียง 3 ตัว (`prev`, `slow`, `fast`) ไม่มีการสร้างโหนดหรืออาเรย์ใหม่"],
+              ],
             },
           ],
         },
@@ -598,11 +397,11 @@ class Solution:
       en: [
         {
           t: "p",
-          c: `You are given the head of a linked list. Delete the middle node, and return the head of the modified linked list.
+          c: `You are given the \`head\` of a linked list. Delete the middle node, and return the \`head\` of the modified linked list.
 
-The middle node of a linked list of size n is the ⌊n / 2⌋ᵗʰ node from the start using 0-based indexing, where ⌊x⌋ denotes the largest integer less than or equal to x.
+The middle node of a linked list of size \`n\` is the \`⌊n / 2⌋\`-th node from the start using 0-based indexing, where \`⌊x⌋\` denotes the largest integer less than or equal to \`x\`.
 
-- For n = 1, 2, 3, 4, and 5, the middle nodes are 0, 1, 1, 2, and 2, respectively.`,
+• For \`n = 1, 2, 3, 4\`, and \`5\`, the middle nodes are \`0, 1, 1, 2\`, and \`2\`, respectively.`,
         },
         {
           t: "example",
@@ -610,25 +409,8 @@ The middle node of a linked list of size n is the ⌊n / 2⌋ᵗʰ node from the
             {
               input: "head = [1,3,4,7,1,2,6]",
               output: "[1,3,4,1,2,6]",
-              explain: `Explanation:
-The figure above represents the given linked list. The indices of the nodes are written below.
-Since n = 7, node 3 with value 7 is the middle node, which is marked in red.
-We return the new list after removing this node.`,
-            },
-            {
-              input: "head = [1,2,3,4]",
-              output: "[1,2,4]",
-              explain: `Explanation:
-The figure above represents the given linked list.
-For n = 4, node 2 with value 3 is the middle node, which is marked in red.`,
-            },
-            {
-              input: "head = [2,1]",
-              output: "[2]",
-              explain: `Explanation:
-The figure above represents the given linked list.
-For n = 2, node 1 with value 1 is the middle node, which is marked in red.
-Node 0 with value 2 is the only node remaining after removing node 1.`,
+              explain:
+                "The middle node is node 3 with value 7. Removing it yields [1,3,4,1,2,6].",
             },
           ],
         },
@@ -642,169 +424,80 @@ Node 0 with value 2 is the only node remaining after removing node 1.`,
 
         {
           t: "solution",
-          summary: "Full solution · Try yourself first",
+          summary: "Full Solution",
           c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
             {
               t: "p",
-              c: 'This matches the section signal: "Two-speed walk (Fast & Slow Pointers)" — find the middle car, then unlink it.',
+              c: "Find and delete the middle node in-place. If the list has only 1 node, deleting it leaves an empty list, so return `None`.",
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
+            { t: "h3", c: "Step 2 · Manual Trace" },
             {
               t: "p",
-              c: "The naive way is one pass to count n, then a second pass to stop at ⌊n/2⌋ and unlink — correct, but two traversals.",
-            },
-            {
-              t: "p",
-              c: "Key insight: Fast & Slow — slow moves 1, fast moves 2. When fast reaches the end, slow sits on the middle. One pass!",
-            },
-            {
-              t: "p",
-              c: "Knowing the middle isn’t enough to delete — you need prev (the node before) so you can do prev.next = slow.next and skip the middle.",
+              c: "For [1, 3, 4, 7, 1, 2, 6], the middle is 7. To remove 7, have node 4 point directly to node 1: `prev.next = slow.next`.",
             },
 
-            { t: "h3", c: "2. The Logic — 4 Steps" },
+            { t: "h3", c: "Step 3 · Methodology" },
             {
               t: "p",
-              c: "Open three pointers, then walk until fast runs out:",
+              c: "Use Fast & Slow pointers: `slow` moves 1 step, `fast` moves 2 steps, and `prev` trails one step behind `slow`. When `fast` reaches the end, `slow` is at the middle.",
             },
+
+            { t: "h3", c: "Step 4 · Simulation Table" },
             {
-              t: "ol",
-              c: [
-                "Edge case — if the list has one node (head.next is None), deleting it leaves empty → return None",
-                "Prep pointers — prev = None · slow = head · fast = head",
-                "Walk together — while fast and fast.next: prev = slow, then slow += 1, fast += 2",
-                "Unlink — prev.next = slow.next, then return head",
+              t: "table",
+              head: ["Step", "prev", "slow (1 step)", "fast (2 steps)", "Notes"],
+              rows: [
+                ["Init", "None", "1", "1", "Both start at head"],
+                ["1", "1", "3", "4", "prev tracks 1, slow to 3, fast to 4"],
+                ["2", "3", "4", "1", "prev tracks 3, slow to 4, fast to 1"],
+                ["3", "4", "7", "6", "fast.next is None -> stop! prev.next = slow.next"],
               ],
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
-            {
-              t: "p",
-              c: "Short and straightforward:",
-            },
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
             {
               t: "code",
               lang: "python",
-              label: "Submit this on LeetCode",
-              c: `# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
-
-class Solution:
+              c: `class Solution:
     def deleteMiddle(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        # Step 1: single node → empty list
-        if head.next is None:
+        if head is None or head.next is None:
             return None
 
-        prev = None                 # node before the middle
-        slow = head                 # moves 1 → ends on middle
-        fast = head                 # moves 2
+        prev = None
+        slow = head
+        fast = head
 
-        # Step 3: walk until fast runs out
         while fast and fast.next:
             prev = slow
-            slow = slow.next        # slow +1
-            fast = fast.next.next   # fast +2
+            slow = slow.next
+            fast = fast.next.next
 
-        # Step 4: skip the middle
         prev.next = slow.next
         return head`,
             },
 
-            { t: "h3", c: "4. Dry Run — 1 → 3 → 4 → 7 → 1 → 2 → 6" },
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
             {
               t: "table",
-              head: [
-                "Step",
-                "prev (val)",
-                "slow (val)",
-                "fast (val)",
-                "Note",
-                "list now",
-              ],
+              head: ["Line", "Purpose", "Example"],
               rows: [
-                [
-                  "Before loop",
-                  "None",
-                  "1",
-                  "1",
-                  "fast.next exists → enter loop",
-                  "1 → 3 → 4 → 7 → 1 → 2 → 6",
-                ],
-                [
-                  "Round 1",
-                  "1",
-                  "3",
-                  "4",
-                  "fast.next exists",
-                  "1  |  3 → 4 → 7 → 1 → 2 → 6",
-                ],
-                [
-                  "Round 2",
-                  "3",
-                  "4",
-                  "1",
-                  "fast.next exists",
-                  "1 → 3  |  4 → 7 → 1 → 2 → 6",
-                ],
-                [
-                  "Round 3",
-                  "4",
-                  "7",
-                  "6",
-                  "fast.next gone → stop",
-                  "1 → 3 → 4  |  7 → 1 → 2 → 6",
-                ],
-                [
-                  "After loop",
-                  "4",
-                  "7 (middle)",
-                  "6",
-                  "Unlink: 4.next → 1 (skip 7)",
-                  "1 → 3 → 4 → 1 → 2 → 6",
-                ],
-              ],
-            },
-            {
-              t: "p",
-              c: "The | mark splits two pieces: left = up through prev · right = slow as head (the node to delete is at the right head) — final train [1, 3, 4, 1, 2, 6]",
-            },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
-            {
-              t: "p",
-              c: 'The "single node" case — if you skip the guard:',
-            },
-            {
-              t: "ul",
-              c: [
-                "The loop never runs (fast.next is None from the start)",
-                "prev is still None → prev.next crashes (AttributeError)",
-              ],
-            },
-            {
-              t: "callout",
-              title: "while condition",
-              warn: true,
-              c: "Write while fast and fast.next — if you only write while fast, fast.next.next blows up when fast lands past the end on None.",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — one pass through the list",
-                "Space O(1) — a few pointers, no new list",
+                ["if head is None or head.next is None:", "Guard single-node case", "head=[1] -> returns None"],
+                ["while fast and fast.next:", "Traverse until fast hits end", "slow lands on middle"],
+                ["prev.next = slow.next", "Bypass and unlink middle node", "4 links to 1"],
+                ["return head", "Return head of modified list", "return head"],
               ],
             },
 
+            { t: "h3", c: "Step 7 · Complexity" },
             {
-              t: "callout",
-              title: "💡 Pattern summary",
-              c: "Fast & Slow finds the middle in one pass, and deleting/editing a linked-list node always needs a pointer to the previous node — both ideas show up again and again.",
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N)", "Single pass; fast takes at most N/2 steps."],
+                ["Space", "O(1)", "Only three pointers used."],
+              ],
             },
           ],
         },
@@ -814,23 +507,35 @@ class Solution:
 
   "lc75-p30": {
     slug: "lc75-p30",
-    title: { th: "ข้อ 30 · LC328 Odd Even Linked List (จัดโหนดคี่-คู่) 🟡", en: "LC328 Odd Even Linked List 🟡" },
+    title: {
+      th: "ข้อ 30 · LC328 Odd Even Linked List (จัดโหนดคี่-คู่) 🟡",
+      en: "LC328 Odd Even Linked List 🟡",
+    },
     lead: {
-      th: "โจทย์เย็บผ้า — แยกขบวนเป็นสายคี่กับสายคู่ แล้วต่อหางคี่เข้าหัวคู่ โดยไม่สร้างตู้ใหม่",
-      en: "Relink in place — split into odd and even chains, then join odd’s tail to even’s head.",
+      th: "โจทย์จัดสายรถไฟ — แยกขบวนเป็นสายคี่กับสายคู่ แล้วต่อหางคี่เข้าหัวคู่ โดยไม่สร้างตู้ใหม่",
+      en: "Relink in place — split into odd and even chains, then join odd's tail to even's head.",
     },
     group: "LeetCode 75",
     blocks: {
       th: [
         {
           t: "p",
-          c: `กำหนด head ของ singly linked list มาให้ ให้ group node ที่มี odd indices ไว้ด้วยกัน ตามด้วย node ที่มี even indices แล้ว return list ที่จัดลำดับใหม่แล้ว
+          c: `Given the \`head\` of a singly linked list, group all the nodes with odd indices together followed by the nodes with even indices, and return the reordered list.
 
-node ตัวแรกถือว่าเป็น odd และตัวที่สองถือว่าเป็น even ไล่ไปเรื่อย ๆ
+The first node is considered odd, and the second node is even, and so on.
 
-หมายเหตุว่า relative order ภายในกลุ่ม even และกลุ่ม odd ต้องคงเดิมเหมือนใน input
+Note that the relative order inside both the even and odd groups should remain as it was in the input.
 
-คุณต้องแก้ปัญหาด้วย O(1) extra space complexity และ O(n) time complexity`,
+You must solve the problem in \`O(1)\` extra space complexity and \`O(n)\` time complexity.`,
+        },
+        {
+          t: "p",
+          c: `กำหนด \`head\` ของ singly linked list มาให้ จงจัดกลุ่มโหนดที่มี "ลำดับเป็นเลขคี่" (odd) ให้อยู่ข้างหน้าทั้งหมด แล้วตามด้วยโหนดที่มี "ลำดับเป็นเลขคู่" (even) แล้วส่งคืน linked list ที่จัดเรียงใหม่
+
+หมายเหตุ:
+• โหนดแรกนับเป็นโหนดที่ 1 (คี่), โหนดที่สองนับเป็นโหนดที่ 2 (คู่), โหนดที่สามนับเป็นโหนดที่ 3 (คี่)... (นับตามตำแหน่ง index ไม่ใช่ตามค่า val)
+• ลำดับสัมพันธ์ภายในกลุ่มคี่และคู่ต้องคงเดิม
+• ต้องแก้ด้วยหน่วยความจำส่วนเพิ่ม O(1) space และเวลา O(n) time`,
         },
         {
           t: "example",
@@ -838,64 +543,98 @@ node ตัวแรกถือว่าเป็น odd และตัวท�
             {
               input: "head = [1,2,3,4,5]",
               output: "[1,3,5,2,4]",
+              explain:
+                "โหนดตำแหน่งคี่: 1, 3, 5\nโหนดตำแหน่งคู่: 2, 4\nนำมาต่อกันได้ [1,3,5,2,4]",
             },
             {
               input: "head = [2,1,3,5,6,4,7]",
               output: "[2,3,6,7,1,5,4]",
+              explain:
+                "โหนดตำแหน่งคี่: 2, 3, 6, 7\nโหนดตำแหน่งคู่: 1, 5, 4\nนำมาต่อกันได้ [2,3,6,7,1,5,4]",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node ใน linked list อยู่ในช่วง [0, 10^4]",
+            "The number of nodes in the linked list is in the range [0, 10^4].",
             "-10^6 <= Node.val <= 10^6",
           ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ถ้ามีรางรถไฟสลับกัน 1->2->3->4->5 เราจะสับรางอย่างไรให้ 1 เชื่อมไป 3, 3 เชื่อมไป 5 ในขณะที่ 2 เชื่อมไป 4 พร้อมๆ กันได้?",
         },
 
         {
           t: "solution",
           summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
           c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับสัญญาณ "การเย็บผ้า (Merge)" — แต่คราวนี้เราเย็บขบวนเดิมให้เป็นสองสาย แล้วต่อกลับ โดยไม่สร้างตู้ใหม่ (Space O(1))',
+              c: "โจทย์ให้จัดเรียง linked list ใหม่โดยแยกโหนดตาม 'หมายเลขลำดับตำแหน่ง' (1st, 2nd, 3rd, ...) ไม่ใช่ตามตัวเลขในโหนด โดยเอาตำแหน่งคี่ทั้งหมดมาก่อน แล้วเอาตำแหน่งคู่ทั้งหมดมาต่อท้าย",
+            },
+            {
+              t: "p",
+              c: "กฎเหล็ก: ห้ามสร้างโหนดใหม่ (ต้องใช้ O(1) space) หมายความว่าเราต้องจับข้อต่อโซ่ของโหนดเดิมมาเกี่ยวสลับรางกันเอง!",
             },
 
-            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
             {
               t: "p",
-              c: "วิธีง่ายคือเก็บค่า index คี่ไว้ list หนึ่ง ค่าคู่ไว้อีก list แล้วต่อกัน — แต่ใช้ Space O(n) ผิดเงื่อนไขโจทย์!",
+              c: "ลองดูขบวน [1 -> 2 -> 3 -> 4 -> 5]:",
             },
             {
-              t: "p",
-              c: "หัวใจสำคัญ: ไม่ต้องสร้างตู้ใหม่ — ใช้ตัวชี้สองตัว odd กับ even สานข้อต่อสลับกันไป แยกเป็นสองขบวนย่อย แล้วเอาหางสายคี่ไปเกี่ยวหัวสายคู่",
+              t: "ul",
+              c: [
+                "สร้างหัวขบวนสองสาย: สายคี่เริ่มที่โหนด 1 (`odd = head`), สายคู่เริ่มที่โหนด 2 (`even = head.next`)",
+                "บันทึกหัวสายคู่ไว้ก่อน: `even_head = even` (เพราะเดี๋ยวเราต้องเอาหางสายคี่มาต่อหัวสายคู่นี้)",
+                "สับรางก้าวที่ 1: ให้ 1 ชี้ไป 3 (`odd.next = even.next`) แล้วขยับ odd ไปที่ 3",
+                "สับรางก้าวที่ 2: ให้ 2 ชี้ไป 4 (`even.next = odd.next`) แล้วขยับ even ไปที่ 4",
+                "ทำซ้ำจนหมดขบวน แล้วนำท้ายของ odd ไปต่อกับ `even_head`!",
+              ],
             },
 
-            { t: "h3", c: "2. กฎเหล็ก 4 ข้อ (The Logic)" },
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
             {
               t: "p",
-              c: "เปิดสองสาย แล้วเย็บไปจนหมด:",
+              c: "ภาพรวม: ใช้ Two Pointers (`odd` และ `even`) เดินสลับฟันปลาเพื่อแยก 1 ขบวนออกเป็น 2 ขบวนย่อย แล้วนำมาเชื่อมต่อกันในขั้นตอนสุดท้าย",
+            },
+            {
+              t: "p",
+              c: "เครื่องมือและตัวแปรที่ต้องใช้:",
             },
             {
               t: "ol",
               c: [
-                "ดักเคสพิเศษ — ขบวนว่างหรือมีตู้เดียว → return head เลย",
-                "เตรียมสาย — odd ชี้ตู้แรก · even ชี้ตู้ที่สอง · even_head จำหัวสายคู่ไว้ (สำคัญมาก!)",
-                "เย็บสลับ — ตราบใดที่ even และ even.next ยังมี: odd ข้ามไปเกี่ยวตู้คี่ถัดไป แล้ว even ข้ามไปเกี่ยวตู้คู่ถัดไป",
-                "ต่อสาย — odd.next = even_head แล้ว return head",
+                "ดัก Edge case: ถ้า `head is None` หรือ `head.next is None` (มี 0 หรือ 1 หรือ 2 โหนด) ขบวนเรียงถูกอยู่แล้ว -> `return head`",
+                "`odd = head`: ตัวชี้ท้ายสายคี่ปัจจุบัน",
+                "`even = head.next`: ตัวชี้ท้ายสายคู่ปัจจุบัน",
+                "`even_head = even`: จำหัวของสายคู่ไว้ ห้ามทำหาย",
+                "เงื่อนไขลูป: `while even and even.next:` (เพราะ even เดินนำหน้า odd เสมอ ถ้า even ยังมีตัวถัดไป แสดงว่ายังมีของให้ต่อ)",
+                "ในแต่ละรอบ: `odd.next = even.next; odd = odd.next` แล้ว `even.next = odd.next; even = even.next`",
+                "ปิดงาน: `odd.next = even_head` แล้วส่งคืน `head`",
               ],
             },
 
-            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
             {
-              t: "p",
-              c: "แปลงกฎสองสายเป็นโค้ด:",
+              t: "table",
+              head: ["รอบ", "สายคี่ (odd chain)", "สายคู่ (even chain)", "odd ชี้", "even ชี้"],
+              rows: [
+                ["เริ่ม", "1", "2", "1", "2"],
+                ["1", "1 -> 3", "2 -> 4", "3", "4"],
+                ["2", "1 -> 3 -> 5", "2 -> 4 -> None", "5", "None"],
+                ["จบ", "1 -> 3 -> 5 -> [ต่อเข้า even_head (2)]", "2 -> 4 -> None", "5", "None"],
+              ],
             },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
             {
               t: "code",
               lang: "python",
-              label: "คำตอบสำหรับวางใน LeetCode",
               c: `# Definition for singly-linked list.
 # class ListNode:
 #     def __init__(self, val=0, next=None):
@@ -904,96 +643,49 @@ node ตัวแรกถือว่าเป็น odd และตัวท�
 
 class Solution:
     def oddEvenList(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        # กฎข้อ 1: 0 หรือ 1 ตู้ ไม่ต้องทำอะไร
-        if head is None or head.next is None:
+        # 1. จัดการเคสว่าง หรือมีโหนดเดียว
+        if not head or not head.next:
             return head
 
-        odd = head                  # ตัวชี้สายตำแหน่งคี่
-        even = head.next            # ตัวชี้สายตำแหน่งคู่
-        even_head = even            # จำหัวสายคู่ไว้ เพื่อเอาไปต่อทีหลัง
+        odd = head               # หัวสายคี่
+        even = head.next         # หัวสายคู่
+        even_head = even         # จำหัวสายคู่ไว้สำหรับต่อท้ายสายคี่
 
-        # กฎข้อ 3: เย็บสลับจนหมด
+        # 2. เดินสลับราง: ตราบใดที่สายคู่ยังมีโหนดให้เดินต่อ
         while even and even.next:
-            odd.next = even.next    # คี่ข้ามไปเกี่ยวตู้คี่ถัดไป
-            odd = odd.next          # ขยับตัวชี้คี่
-            even.next = odd.next    # คู่ข้ามไปเกี่ยวตู้คู่ถัดไป
-            even = even.next        # ขยับตัวชี้คู่
+            odd.next = even.next
+            odd = odd.next
 
-        # กฎข้อ 4: ต่อหางสายคี่เข้ากับหัวสายคู่
+            even.next = odd.next
+            even = even.next
+
+        # 3. นำหางสายคี่ไปเชื่อมกับหัวสายคู่
         odd.next = even_head
+
         return head`,
             },
 
-            { t: "h3", c: "4. จำลองการทำงาน — 1 → 2 → 3 → 4 → 5" },
-            {
-              t: "p",
-              c: "even_head จำไว้ที่ค่า 2 ตั้งแต่ต้น",
-            },
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
             {
               t: "table",
-              head: ["รอบ", "odd (ค่า)", "even (ค่า)", "หมายเหตุ", "list ตอนนี้"],
+              head: ["บรรทัดโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
               rows: [
-                ["ก่อนลูป", "1", "2", "ยังไม่เย็บ", "1 → 2 → 3 → 4 → 5"],
-                [
-                  "รอบ 1",
-                  "3",
-                  "4",
-                  "คี่ข้ามไป 3 · คู่ข้ามไป 4",
-                  "คี่: 1 → 3 → 4 → 5  |  คู่: 2 → 4 → 5",
-                ],
-                [
-                  "รอบ 2",
-                  "5",
-                  "None",
-                  "คี่ข้ามไป 5 · คู่หมดทาง → หยุด",
-                  "คี่: 1 → 3 → 5  |  คู่: 2 → 4",
-                ],
-                [
-                  "หลังลูป",
-                  "5",
-                  "—",
-                  "odd.next = even_head",
-                  "1 → 3 → 5 → 2 → 4",
-                ],
-              ],
-            },
-            {
-              t: "p",
-              c: "สัญลักษณ์ | แยกสองชิ้น: ซ้าย = สายคี่ที่เย็บได้ · ขวา = สายคู่ที่เย็บได้ — จบเกมได้ขบวน [1, 3, 5, 2, 4]",
-            },
-
-            { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
-            {
-              t: "p",
-              c: 'เคส "ลืม even_head" — ความพลาดอันดับหนึ่งของข้อนี้:',
-            },
-            {
-              t: "ul",
-              c: [
-                "ระหว่าง loop ตัวชี้ของสายคู่ถูกขยับไปเรื่อย ๆ",
-                "ถ้าไม่จำหัวไว้ก่อน จะหาไม่เจอว่าหางสายคี่ต้องไปเกี่ยวตู้ไหน",
-              ],
-            },
-            {
-              t: "callout",
-              title: "ลำดับสี่บรรทัดใน loop สลับไม่ได้",
-              warn: true,
-              c: "ต้องขยับ odd ให้เสร็จก่อน ถึงจะใช้ odd.next มาหาตู้คู่ถัดไปได้ถูก — ถ้าสลับลำดับจะได้ข้อต่อผิดตู้ทันที!",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — เดินผ่านทุกตู้รอบเดียว",
-                "Space O(1) — แค่สานข้อต่อ ไม่สร้างขบวนใหม่",
+                ["odd = head; even = head.next", "ตั้งต้นหัวขบวนคี่และคู่", "odd=1, even=2"],
+                ["even_head = even", "บันทึกจุดเริ่มต้นของสายคู่", "even_head=2"],
+                ["odd.next = even.next; odd = odd.next", "ดึงโหนดคี่ถัดไปมาต่อสายคี่ แล้วขยับ pointer", "1.next = 3 -> odd อยู่ที่ 3"],
+                ["even.next = odd.next; even = even.next", "ดึงโหนดคู่ถัดไปมาต่อสายคู่ แล้วขยับ pointer", "2.next = 4 -> even อยู่ที่ 4"],
+                ["odd.next = even_head", "เชื่อมสองขบวนเข้าด้วยกัน", "5.next = 2 ได้ 1->3->5->2->4"],
               ],
             },
 
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
             {
-              t: "callout",
-              title: "💡 สรุป pattern",
-              c: "การแยกขบวนเป็นหลายสายในที่เดิมด้วยการสานข้อต่อสลับกัน แล้วค่อยต่อกลับ เป็น pattern ที่ประหยัด space มาก — กุญแจคือจำหัวของสายที่จะเอาไปต่อทีหลังไว้เสมอ",
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N)", "วนลูปครั้งเดียว ทุกโหนดถูกสลับสายเพียงครั้งเดียว"],
+                ["Space (หน่วยความจำ)", "O(1)", "สับเปลี่ยนเฉพาะ pointer ข้อต่อเดิม ไม่สร้างโหนดใหม่เลย"],
+              ],
             },
           ],
         },
@@ -1001,13 +693,11 @@ class Solution:
       en: [
         {
           t: "p",
-          c: `Given the head of a singly linked list, group all the nodes with odd indices together followed by the nodes with even indices, and return the reordered list.
+          c: `Given the \`head\` of a singly linked list, group all the nodes with odd indices together followed by the nodes with even indices, and return the reordered list.
 
 The first node is considered odd, and the second node is even, and so on.
 
-Note that the relative order inside both the even and odd groups should remain as it was in the input.
-
-You must solve the problem in O(1) extra space complexity and O(n) time complexity.`,
+You must solve the problem in \`O(1)\` extra space complexity and \`O(n)\` time complexity.`,
         },
         {
           t: "example",
@@ -1015,10 +705,7 @@ You must solve the problem in O(1) extra space complexity and O(n) time complexi
             {
               input: "head = [1,2,3,4,5]",
               output: "[1,3,5,2,4]",
-            },
-            {
-              input: "head = [2,1,3,5,6,4,7]",
-              output: "[2,3,6,7,1,5,4]",
+              explain: "Odd nodes [1, 3, 5] followed by even nodes [2, 4].",
             },
           ],
         },
@@ -1032,145 +719,82 @@ You must solve the problem in O(1) extra space complexity and O(n) time complexi
 
         {
           t: "solution",
-          summary: "Full solution · Try yourself first",
+          summary: "Full Solution",
           c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
             {
               t: "p",
-              c: 'This matches the "stitching (Merge)" signal — but here we split the same list into two chains, then join them back, without allocating new nodes (Space O(1)).',
+              c: "Group nodes by their 1-based index: all odd-positioned nodes first, followed by all even-positioned nodes. Must be done in-place with O(1) auxiliary space.",
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
+            { t: "h3", c: "Step 2 · Manual Trace" },
             {
               t: "p",
-              c: "The naive way is to collect odd-index values in one list and even-index values in another, then concatenate — but that uses Space O(n) and breaks the constraint!",
-            },
-            {
-              t: "p",
-              c: "Key insight: don’t build new nodes — use two pointers odd and even to rewire next links, forming two sub-chains, then attach the odd chain’s tail to the even chain’s head.",
+              c: "For [1, 2, 3, 4, 5]: link 1->3->5 and 2->4->None. Then link 5->2 (tail of odd to head of even).",
             },
 
-            { t: "h3", c: "2. The Logic — 4 Steps" },
+            { t: "h3", c: "Step 3 · Methodology" },
             {
               t: "p",
-              c: "Open two chains, then stitch until done:",
+              c: "Maintain `odd` and `even` pointers. In each iteration, leapfrog: `odd.next = even.next; odd = odd.next; even.next = odd.next; even = even.next`. Finally, set `odd.next = even_head`.",
             },
+
+            { t: "h3", c: "Step 4 · Simulation Table" },
             {
-              t: "ol",
-              c: [
-                "Edge case — empty or single node → return head",
-                "Prep chains — odd at first · even at second · even_head remembers the even head (critical!)",
-                "Stitch — while even and even.next: odd jumps to the next odd, then even jumps to the next even",
-                "Join — odd.next = even_head, then return head",
+              t: "table",
+              head: ["Iteration", "Odd Chain", "Even Chain", "odd pointer", "even pointer"],
+              rows: [
+                ["Init", "1", "2", "1", "2"],
+                ["1", "1 -> 3", "2 -> 4", "3", "4"],
+                ["2", "1 -> 3 -> 5", "2 -> 4 -> None", "5", "None"],
+                ["End", "1 -> 3 -> 5 -> 2 -> 4", "2 -> 4 -> None", "5", "None"],
               ],
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
-            {
-              t: "p",
-              c: "Turn the two-chain rules into code:",
-            },
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
             {
               t: "code",
               lang: "python",
-              label: "Submit this on LeetCode",
-              c: `# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
-
-class Solution:
+              c: `class Solution:
     def oddEvenList(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        # Step 1: 0 or 1 node — nothing to do
-        if head is None or head.next is None:
+        if not head or not head.next:
             return head
 
-        odd = head                  # odd-position pointer
-        even = head.next            # even-position pointer
-        even_head = even            # remember even head for the final join
+        odd = head
+        even = head.next
+        even_head = even
 
-        # Step 3: stitch until even runs out
         while even and even.next:
-            odd.next = even.next    # odd jumps to next odd
+            odd.next = even.next
             odd = odd.next
-            even.next = odd.next    # even jumps to next even
+            even.next = odd.next
             even = even.next
 
-        # Step 4: join odd tail to even head
         odd.next = even_head
         return head`,
             },
 
-            { t: "h3", c: "4. Dry Run — 1 → 2 → 3 → 4 → 5" },
-            {
-              t: "p",
-              c: "even_head is saved at value 2 from the start",
-            },
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
             {
               t: "table",
-              head: ["Step", "odd (val)", "even (val)", "Note", "list now"],
+              head: ["Line", "Purpose", "Example"],
               rows: [
-                ["Before loop", "1", "2", "not stitched yet", "1 → 2 → 3 → 4 → 5"],
-                [
-                  "Round 1",
-                  "3",
-                  "4",
-                  "odd → 3 · even → 4",
-                  "odd: 1 → 3 → 4 → 5  |  even: 2 → 4 → 5",
-                ],
-                [
-                  "Round 2",
-                  "5",
-                  "None",
-                  "odd → 5 · even done → stop",
-                  "odd: 1 → 3 → 5  |  even: 2 → 4",
-                ],
-                [
-                  "After loop",
-                  "5",
-                  "—",
-                  "odd.next = even_head",
-                  "1 → 3 → 5 → 2 → 4",
-                ],
-              ],
-            },
-            {
-              t: "p",
-              c: "The | mark splits two pieces: left = odd chain so far · right = even chain so far — final train [1, 3, 5, 2, 4]",
-            },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
-            {
-              t: "p",
-              c: 'The "forgot even_head" case — the #1 mistake on this problem:',
-            },
-            {
-              t: "ul",
-              c: [
-                "During the loop the even pointer keeps moving forward",
-                "If you didn’t save the head earlier, you won’t know where the odd tail should attach",
-              ],
-            },
-            {
-              t: "callout",
-              title: "The four lines inside the loop can’t be reordered",
-              warn: true,
-              c: "You must advance odd first before reading odd.next for the next even — swap the order and the links point at the wrong nodes!",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — one pass through every node",
-                "Space O(1) — only rewiring links, no new list",
+                ["odd = head; even = head.next", "Pointers for odd/even chains", "odd=1, even=2"],
+                ["even_head = even", "Remember even chain's head", "even_head=2"],
+                ["odd.next = even.next; odd = odd.next", "Connect next odd node", "1 -> 3"],
+                ["even.next = odd.next; even = even.next", "Connect next even node", "2 -> 4"],
+                ["odd.next = even_head", "Join odd tail to even head", "5 -> 2"],
               ],
             },
 
+            { t: "h3", c: "Step 7 · Complexity" },
             {
-              t: "callout",
-              title: "💡 Pattern summary",
-              c: "Splitting one list into several chains by rewiring next pointers in place, then joining them back, is a very space-cheap pattern — the key is always remembering the head of any chain you’ll attach later.",
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N)", "Single pass; each node visited once."],
+                ["Space", "O(1)", "Only pointer manipulation in-place."],
+              ],
             },
           ],
         },
@@ -1180,17 +804,24 @@ class Solution:
 
   "lc75-p31": {
     slug: "lc75-p31",
-    title: { th: "ข้อ 31 · LC206 Reverse Linked List (กลับ Linked List) 🟢", en: "LC206 Reverse Linked List 🟢" },
+    title: {
+      th: "ข้อ 31 · LC206 Reverse Linked List (กลับ Linked List) 🟢",
+      en: "LC206 Reverse Linked List 🟢",
+    },
     lead: {
-      th: "โจทย์สลับสาย — หันข้อต่อโซ่กลับหลังหันทั้งขบวน ด้วย prev / cur / nxt",
-      en: "In-place reverse — flip every next pointer with prev / cur / nxt.",
+      th: "โจทย์สลับสาย — หันข้อต่อโซ่กลับหลังหันทั้งขบวน ด้วย prev / curr / nxt",
+      en: "In-place reverse — flip every next pointer with prev / curr / nxt.",
     },
     group: "LeetCode 75",
     blocks: {
       th: [
         {
           t: "p",
-          c: "กำหนด head ของ singly linked list มาให้ ให้ reverse list แล้ว return list ที่ reverse แล้ว",
+          c: `Given the \`head\` of a singly linked list, reverse the list, and return the reversed list.`,
+        },
+        {
+          t: "p",
+          c: `กำหนด \`head\` ของ singly linked list มาให้ จงกลับทิศทางของ linked list ทั้งขบวน และส่งคืน \`head\` ของ list ที่กลับด้านแล้ว`,
         },
         {
           t: "example",
@@ -1198,72 +829,89 @@ class Solution:
             {
               input: "head = [1,2,3,4,5]",
               output: "[5,4,3,2,1]",
+              explain: "กลับทิศทางลูกศรทั้งหมด: 1 <- 2 <- 3 <- 4 <- 5 โดยมี 5 เป็นหัวขบวนใหม่",
             },
             {
               input: "head = [1,2]",
               output: "[2,1]",
+              explain: "กลับทิศลูกศร: 1 <- 2",
             },
             {
               input: "head = []",
               output: "[]",
+              explain: "list ว่างเปล่า ส่งคืน []",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node ใน list อยู่ในช่วง [0, 5000]",
+            "The number of nodes in the list is the range [0, 5000].",
             "-5000 <= Node.val <= 5000",
           ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ถ้าเรากำลังยืนอยู่ที่โหนดหนึ่ง แล้วเราจับลูกศรหันกลับไปข้างหลัง โหนดที่อยู่ข้างหน้าจะหลุดหายไปไหม? เราต้องทำอย่างไรเพื่อไม่ให้ทางข้างหน้าขาด?",
         },
 
         {
           t: "solution",
           summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
           c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
             {
               t: "p",
-              c: 'ข้อนี้ตรงกับสัญญาณ "การสลับสาย (Reverse)" — และตรงกับประโยคท่องจำ: "ก่อนเปลี่ยนโซ่ ต้องแน่ใจว่าไม่ได้ทิ้งตู้เก่าให้ลอยเคว้ง!"',
+              c: "โจทย์ต้องการให้เรากลับทิศลูกศร `.next` ของทุกโหนดใน linked list จากเดิมที่ชี้ไปข้างหน้า (1 -> 2 -> 3 -> None) ให้หันกลับมาชี้ข้างหลังทั้งหมด (None <- 1 <- 2 <- 3) และส่งคืนโหนดตัวสุดท้าย (3) เป็นหัวขบวนใหม่",
             },
 
-            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
             {
               t: "p",
-              c: "วิธีง่ายคือเก็บค่าทุกตู้ใส่ list แล้ว reverse สร้างขบวนใหม่ — ถูกแต่ใช้ Space O(n)",
+              c: "สมมติเรามีขบวน [1 -> 2 -> 3]:",
             },
             {
-              t: "p",
-              c: "หัวใจสำคัญ: ไม่ต้องย้ายของในตู้เลย — แค่เดินไปพลิกข้อต่อของแต่ละตู้ให้ชี้ย้อนหลังในที่เดิม (in-place) ด้วย prev กับ cur",
-            },
-            {
-              t: "p",
-              c: "นึกภาพว่ากำลังเดินข้ามสะพานแล้วพับสะพานข้างหลังทิ้ง — ต้องมองว่าก้าวต่อไปเหยียบตรงไหนให้เรียบร้อยก่อนพับ!",
+              t: "ul",
+              c: [
+                "ก่อนเริ่ม: ใครอยู่หน้า 1? ไม่มีเลย ดังนั้น `prev = None` และเรายืนอยู่ที่ `curr = 1`",
+                "ก้าวที่ 1: ก่อนจะหักลูกศรของ 1 กลับหลัง เราต้องจำโหนด 2 ไว้ก่อน! (`nxt = curr.next = 2`)",
+                "ก้าวที่ 2: หักลูกศรของ 1 กลับไปหา `prev` ทันที (`curr.next = prev` ทำให้ 1 ชี้ไป None)",
+                "ก้าวที่ 3: เดินไปข้างหน้า: `prev` เลื่อนมาเป็น 1, `curr` เลื่อนไปที่ `nxt` (คือ 2)",
+                "ทำวนไปเรื่อยๆ จนกระทั่ง `curr` หลุดออกไปเป็น `None` ตัว `prev` จะอยู่ที่โหนดสุดท้าย (3) ซึ่งก็คือ head ใหม่นั่นเอง!",
+              ],
             },
 
-            { t: "h3", c: "2. กฎเหล็ก 4 ข้อ (The Logic)" },
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
             {
               t: "p",
-              c: "เปิด prev/cur แล้วพลิกทีละตู้:",
+              c: "ภาพรวม: ใช้ 3 Pointers คือ `prev`, `curr`, `nxt` วนลูปกลับทิศทีละโหนดแบบ In-place O(1) space",
+            },
+            {
+              t: "p",
+              c: "สเต็ปการทำงาน 4 จังหวะในลูป:",
             },
             {
               t: "ol",
               c: [
-                "เตรียมตัวชี้ — prev = None · cur = head",
-                "จำทางไว้ก่อน — nxt = cur.next (กันหลุดขบวน!)",
-                "พลิกข้อต่อ — cur.next = prev แล้วขยับ prev ตามมาที่ cur · cur ไปที่ nxt",
-                "จบเกม — พอ cur เป็น None · prev คือ head ตัวใหม่ → return prev",
+                "`nxt = curr.next` — จำโหนดข้างหน้าไว้ก่อนกันหลงทาง",
+                "`curr.next = prev` — หักลูกศรหันกลับหลัง",
+                "`prev = curr` — ขยับ prev เดินหน้ามา 1 ก้าว",
+                "`curr = nxt` — ขยับ curr เดินหน้าไปทำโหนดถัดไป",
               ],
             },
 
-            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น (Interactive)" },
             {
               t: "p",
-              c: "สี่บรรทัดใน loop ท่องให้ขึ้นใจ — ท่านี้ใช้ซ้ำได้อีกหลายข้อ:",
+              c: "กด **Next ▶** เพื่อดูการกลับทิศลูกศรทีละโหนด สังเกตการใช้ pointer สามตัวในการรักษาเส้นทาง:",
             },
+            { t: "viz", id: "reverse-linked-list" },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
             {
               t: "code",
               lang: "python",
-              label: "คำตอบสำหรับวางใน LeetCode",
               c: `# Definition for singly-linked list.
 # class ListNode:
 #     def __init__(self, val=0, next=None):
@@ -1272,81 +920,40 @@ class Solution:
 
 class Solution:
     def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        prev = None                 # ข้างหลัง cur (ตอนแรกยังไม่มีอะไร)
-        cur = head                  # ตู้ที่กำลังพิจารณา
+        prev = None
+        curr = head
 
-        while cur:
-            nxt = cur.next          # 1) จำตู้ถัดไปไว้ก่อน (กันหลุดขบวน)
-            cur.next = prev         # 2) พลิกข้อต่อให้ชี้ย้อนกลับ
-            prev = cur              # 3) ขยับ prev ตามมา
-            cur = nxt               # 4) ขยับ cur ไปตู้ที่จำไว้
+        while curr:
+            nxt = curr.next     # 1. จำโหนดถัดไปไว้ก่อน
+            curr.next = prev    # 2. หันลูกศรกลับหลัง
+            prev = curr         # 3. เลื่อน prev มาข้างหน้า
+            curr = nxt          # 4. เลื่อน curr ไปทำตัวถัดไป
 
-        return prev                 # จบ loop prev คือ head ตัวใหม่`,
+        # เมื่อ curr หลุดเป็น None ตัว prev จะอยู่ที่หัวขบวนใหม่
+        return prev`,
             },
 
-            { t: "h3", c: "3.5 ดูทีละขั้น (Interactive)" },
-            {
-              t: "p",
-              c: "กด **Next ▶** เพื่อไล่ทีละขั้น · **▶ Play** เล่นอัตโนมัติวนลูป · diagram กับโค้ดไฮไลต์ซิงค์กัน:",
-            },
-            { t: "viz", id: "reverse-linked-list" },
-
-            { t: "h3", c: "4. จำลองการทำงาน — 1 → 2 → 3" },
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
             {
               t: "table",
-              head: [
-                "รอบ",
-                "cur (ค่า)",
-                "nxt (จำไว้)",
-                "หลังพลิก cur.next ชี้ไป",
-                "prev หลังรอบนี้",
-                "list ตอนนี้",
-              ],
+              head: ["บรรทัดโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
               rows: [
-                ["ก่อนลูป", "1", "—", "—", "None", "1 → 2 → 3"],
-                ["รอบ 1", "1", "2", "None", "1", "None ← 1  |  2 → 3"],
-                ["รอบ 2", "2", "3", "1", "2", "None ← 1 ← 2  |  3"],
-                ["รอบ 3", "3", "None", "2", "3", "None ← 1 ← 2 ← 3"],
-                ["หลังลูป", "None → หยุด", "—", "—", "3 = head ใหม่", "3 → 2 → 1"],
-              ],
-            },
-            {
-              t: "p",
-              c: "สัญลักษณ์ | แยกสองชิ้น: ซ้าย = ส่วนที่พลิกแล้ว · ขวา = ส่วนที่ยังไม่แตะ — จบเกมได้ขบวน [3, 2, 1]",
-            },
-
-            { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
-            {
-              t: "p",
-              c: 'เคส "ลืมจำ nxt ไว้ก่อน" — กับดักคลาสสิก:',
-            },
-            {
-              t: "ul",
-              c: [
-                "พอสั่ง cur.next = prev ปุ๊บ ข้อต่อเดิมที่ชี้ไปข้างหน้าหายทันที",
-                "เดินต่อไม่ได้ — ต้อง nxt = cur.next มาก่อนเสมอ",
-              ],
-            },
-            {
-              t: "callout",
-              title: "return อะไร?",
-              warn: true,
-              c: "ต้อง return prev ไม่ใช่ cur — ตอนจบ cur เป็น None ไปแล้ว (ตกขอบขบวน) ส่วน prev ค้างอยู่ที่ตู้สุดท้ายที่พลิก ซึ่งคือ head ตัวใหม่",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — เดินผ่านทุกตู้หนึ่งรอบ",
-                "Space O(1) — ใช้ตัวชี้ไม่กี่ตัว ไม่สร้างขบวนใหม่",
+                ["prev = None; curr = head", "ตั้งต้น: prev เป็นความว่างเปล่า, curr เริ่มที่หัว", "prev=None, curr=1"],
+                ["nxt = curr.next", "จำโหนดถัดไปไว้ไม่ให้ขาดการเชื่อมต่อ", "curr=1 -> nxt=2"],
+                ["curr.next = prev", "กลับทิศลูกศรชี้ไปหาโหนดก่อนหน้า", "1.next = None"],
+                ["prev = curr; curr = nxt", "ขยับตัวชี้ทั้งสองไปข้างหน้าพร้อมกัน", "prev=1, curr=2"],
+                ["return prev", "ส่งคืนหัวใหม่ของ linked list", "คืนโหนด 5"],
               ],
             },
 
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
             {
-              t: "callout",
-              title: "💡 สรุป pattern",
-              c: "การ reverse ด้วย prev/cur/nxt สี่บรรทัดคือท่ามาตรฐานที่ต้องท่องให้ขึ้นใจ — ข้อ 32 จะเอาไปใช้ reverse 'บางส่วน' ของขบวนต่อ",
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N)", "เดินตรวจและกลับทิศทางของโหนดทั้ง N ตัว ตัวละ 1 ครั้ง"],
+                ["Space (หน่วยความจำ)", "O(1)", "ใช้ตัวชี้ `prev`, `curr`, `nxt` เพียงสามตัว ไม่เปลืองหน่วยความจำเพิ่ม"],
+              ],
             },
           ],
         },
@@ -1354,7 +961,7 @@ class Solution:
       en: [
         {
           t: "p",
-          c: "Given the head of a singly linked list, reverse the list, and return the reversed list.",
+          c: `Given the \`head\` of a singly linked list, reverse the list, and return the reversed list.`,
         },
         {
           t: "example",
@@ -1362,14 +969,7 @@ class Solution:
             {
               input: "head = [1,2,3,4,5]",
               output: "[5,4,3,2,1]",
-            },
-            {
-              input: "head = [1,2]",
-              output: "[2,1]",
-            },
-            {
-              input: "head = []",
-              output: "[]",
+              explain: "Reverse all arrows: 1 <- 2 <- 3 <- 4 <- 5.",
             },
           ],
         },
@@ -1383,134 +983,68 @@ class Solution:
 
         {
           t: "solution",
-          summary: "Full solution · Try yourself first",
+          summary: "Full Solution",
           c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
             {
               t: "p",
-              c: 'This matches the "reverse the chain" signal — and the mantra: "Before you flip a link, make sure you haven’t stranded the rest of the train!"',
+              c: "Reverse the direction of every `next` pointer in the list in-place.",
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
+            { t: "h3", c: "Step 2 · Manual Trace" },
             {
               t: "p",
-              c: "The naive way is to copy every value into a list, reverse it, and build a new linked list — correct, but Space O(n).",
-            },
-            {
-              t: "p",
-              c: "Key insight: don’t move the cargo — just walk and flip each next pointer to point backward in place, using prev and cur.",
-            },
-            {
-              t: "p",
-              c: "Picture crossing a bridge and folding the planks behind you — you must know where the next step lands before you fold!",
+              c: "For [1, 2, 3]:\n• Save 2 (`nxt = curr.next`).\n• Reverse 1 -> None (`curr.next = prev`).\n• Advance: `prev = 1`, `curr = 2`.\n• Repeat until `curr` is `None`. `prev` is the new head.",
             },
 
-            { t: "h3", c: "2. The Logic — 4 Steps" },
+            { t: "h3", c: "Step 3 · Methodology" },
             {
               t: "p",
-              c: "Open prev/cur, then flip one node at a time:",
-            },
-            {
-              t: "ol",
-              c: [
-                "Prep pointers — prev = None · cur = head",
-                "Save the path — nxt = cur.next (don’t lose the train!)",
-                "Flip the link — cur.next = prev, then advance prev to cur · cur to nxt",
-                "Done — when cur is None, prev is the new head → return prev",
-              ],
+              c: "Use the classic 3-pointer pattern (`prev`, `curr`, `nxt`) to reverse each link in O(N) time and O(1) space.",
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
-            {
-              t: "p",
-              c: "Memorize the four lines in the loop — this move shows up in many problems:",
-            },
+            { t: "h3", c: "Step 4 · Interactive Walkthrough" },
+            { t: "viz", id: "reverse-linked-list" },
+
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
             {
               t: "code",
               lang: "python",
-              label: "Submit this on LeetCode",
-              c: `# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
-
-class Solution:
+              c: `class Solution:
     def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
-        prev = None                 # behind cur (nothing yet)
-        cur = head                  # node under consideration
+        prev = None
+        curr = head
 
-        while cur:
-            nxt = cur.next          # 1) save next (don’t lose the train)
-            cur.next = prev         # 2) flip the link backward
-            prev = cur              # 3) advance prev
-            cur = nxt               # 4) advance cur to the saved node
+        while curr:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
 
-        return prev                 # after the loop, prev is the new head`,
+        return prev`,
             },
 
-            { t: "h3", c: "3.5 Step-by-Step (Interactive)" },
-            {
-              t: "p",
-              c: "Press **Next ▶** to advance one step · **▶ Play** auto-plays in a loop · diagram and code highlight stay in sync:",
-            },
-            { t: "viz", id: "reverse-linked-list" },
-
-            { t: "h3", c: "4. Dry Run — 1 → 2 → 3" },
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
             {
               t: "table",
-              head: [
-                "Step",
-                "cur (val)",
-                "nxt (saved)",
-                "after flip cur.next →",
-                "prev after step",
-                "list now",
-              ],
+              head: ["Line", "Purpose", "Example"],
               rows: [
-                ["Before loop", "1", "—", "—", "None", "1 → 2 → 3"],
-                ["Round 1", "1", "2", "None", "1", "None ← 1  |  2 → 3"],
-                ["Round 2", "2", "3", "1", "2", "None ← 1 ← 2  |  3"],
-                ["Round 3", "3", "None", "2", "3", "None ← 1 ← 2 ← 3"],
-                ["After loop", "None → stop", "—", "—", "3 = new head", "3 → 2 → 1"],
-              ],
-            },
-            {
-              t: "p",
-              c: "The | mark splits two pieces: left = already flipped · right = not touched yet — final train [3, 2, 1]",
-            },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
-            {
-              t: "p",
-              c: 'The "forgot to save nxt first" case — classic trap:',
-            },
-            {
-              t: "ul",
-              c: [
-                "The moment you set cur.next = prev, the old forward link is gone",
-                "You can’t walk onward — always do nxt = cur.next first",
-              ],
-            },
-            {
-              t: "callout",
-              title: "What do you return?",
-              warn: true,
-              c: "Return prev, not cur — at the end cur is None (past the end), while prev sits on the last flipped node, which is the new head.",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — one pass through every node",
-                "Space O(1) — a few pointers, no new list",
+                ["prev = None; curr = head", "Initial state", "prev=None, curr=1"],
+                ["nxt = curr.next", "Save forward link", "nxt=2"],
+                ["curr.next = prev", "Reverse current link", "1 points to None"],
+                ["prev = curr; curr = nxt", "Advance pointers", "prev=1, curr=2"],
+                ["return prev", "New head of reversed list", "return 5"],
               ],
             },
 
+            { t: "h3", c: "Step 7 · Complexity" },
             {
-              t: "callout",
-              title: "💡 Pattern summary",
-              c: "The four-line prev/cur/nxt reverse is the standard move to memorize — problem 32 reuses it to reverse only part of the list.",
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N)", "Each node is visited once."],
+                ["Space", "O(1)", "In-place pointer reversal."],
+              ],
             },
           ],
         },
@@ -1520,7 +1054,10 @@ class Solution:
 
   "lc75-p32": {
     slug: "lc75-p32",
-    title: { th: "ข้อ 32 · LC2130 Maximum Twin Sum of a Linked List (ผลรวมคู่แฝดมากสุด) 🟡", en: "LC2130 Maximum Twin Sum of a Linked List 🟡" },
+    title: {
+      th: "ข้อ 32 · LC2130 Maximum Twin Sum of a Linked List (ผลรวมคู่แฝดมากสุด) 🟡",
+      en: "LC2130 Maximum Twin Sum of a Linked List 🟡",
+    },
     lead: {
       th: "ประกอบสามท่า: Fast & Slow หากลาง → Reverse ครึ่งหลัง → เดินสองสายบวกทีละคู่",
       en: "Compose three moves: Fast & Slow to the middle → reverse the second half → walk both halves and track the max twin sum.",
@@ -1530,13 +1067,21 @@ class Solution:
       th: [
         {
           t: "p",
-          c: `ใน linked list ขนาด n ที่ n เป็นเลขคู่ (even) node ลำดับที่ i (0-indexed) เรียกว่า twin ของ node ลำดับที่ (n-1-i) เมื่อ 0 <= i <= (n / 2) - 1
+          c: `In a linked list of size \`n\`, where \`n\` is even, the \`i\`-th node (0-indexed) of the linked list is known as the twin of the \`(n-1-i)\`-th node, if \`0 <= i <= (n / 2) - 1\`.
 
-- ตัวอย่างเช่น ถ้า n = 4 แล้ว node 0 คือ twin ของ node 3 และ node 1 คือ twin ของ node 2 นี่คือโหนดเดียวที่มี twin สำหรับ n = 4
+• For example, if \`n = 4\`, then node \`0\` is the twin of node \`3\`, and node \`1\` is the twin of node \`2\`. These are the only nodes with twins for \`n = 4\`.
 
-twin sum นิยามว่าคือผลรวมของค่า node หนึ่งกับ twin ของมัน
+The twin sum is defined as the sum of a node and its twin.
 
-กำหนด head ของ linked list ที่มีความยาวเป็นเลขคู่มาให้ ให้ return ค่า maximum twin sum ของ linked list`,
+Given the \`head\` of a linked list with even length, return the maximum twin sum of the linked list.`,
+        },
+        {
+          t: "p",
+          c: `ใน linked list ที่มีความยาว \`n\` เป็นเลขคู่ โหนดลำดับที่ \`i\` (นับจาก 0) จะเป็น "คู่แฝด" (twin) กับโหนดลำดับที่ \`n - 1 - i\` (คือตัวแรกคู่กับตัวสุดท้าย, ตัวที่สองคู่กับตัวรองสุดท้าย...)
+
+ผลรวมคู่แฝด (twin sum) คือผลบวกของค่าในโหนดกับค่าในคู่แฝดของมัน
+
+จงหาผลรวมคู่แฝดที่มีค่ามากที่สุดใน linked list`,
         },
         {
           t: "example",
@@ -1544,82 +1089,97 @@ twin sum นิยามว่าคือผลรวมของค่า node
             {
               input: "head = [5,4,2,1]",
               output: "6",
-              explain: `Explanation:
-node 0 และ 1 คือ twin ของ node 3 และ 2 ตามลำดับ ทุกคู่ได้ twin sum = 6
-ไม่มี node อื่นที่มี twin ใน linked list นี้อีก
-ดังนั้น maximum twin sum ของ linked list คือ 6`,
+              explain:
+                "คู่แฝดคือ:\n• โหนด 0 (ค่า 5) คู่กับโหนด 3 (ค่า 1) -> ผลรวม 5 + 1 = 6\n• โหนด 1 (ค่า 4) คู่กับโหนด 2 (ค่า 2) -> ผลรวม 4 + 2 = 6\nผลรวมคู่แฝดสูงสุดคือ 6",
             },
             {
               input: "head = [4,2,2,3]",
               output: "7",
-              explain: `Explanation:
-node ที่มี twin ใน linked list นี้คือ:
-- Node 0 คือ twin ของ node 3 ได้ twin sum = 4 + 3 = 7
-- Node 1 คือ twin ของ node 2 ได้ twin sum = 2 + 2 = 4
-ดังนั้น maximum twin sum คือ max(7, 4) = 7`,
+              explain:
+                "คู่แฝดคือ:\n• โหนด 0 (4) คู่กับโหนด 3 (3) -> 4 + 3 = 7\n• โหนด 1 (2) คู่กับโหนด 2 (2) -> 2 + 2 = 4\nผลรวมสูงสุดคือ 7",
             },
             {
               input: "head = [1,100000]",
               output: "100001",
-              explain: `Explanation:
-มีแค่คู่ twin เดียวใน linked list ได้ twin sum = 1 + 100000 = 100001`,
+              explain:
+                "มีคู่เดียวคือ 1 + 100000 = 100001",
             },
           ],
         },
         {
           t: "constraints",
           c: [
-            "จำนวน node ใน list เป็นเลขคู่เสมอ อยู่ในช่วง [2, 10^5]",
+            "The number of nodes in the list is an even integer in the range [2, 10^5].",
             "1 <= Node.val <= 10^5",
           ],
+        },
+        {
+          t: "callout",
+          title: "⏸ ลองเองก่อน",
+          c: "ใน Array เราจับคู่หัวท้ายได้ง่ายๆ ด้วย Two Pointers ซ้ายขวา แต่ใน Linked List เราเดินถอยหลังจากท้ายขบวนไม่ได้! จะทำอย่างไรให้เดินคู่กันได้?",
         },
 
         {
           t: "solution",
           summary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
           c: [
+            { t: "h3", c: "ขั้นที่ 1 · โจทย์นี้ขออะไร" },
             {
               t: "p",
-              c: "ข้อนี้คือบอสใหญ่ของหมวด — ประกอบร่างสามท่าจากข้อก่อนหน้า: Fast & Slow (ข้อ 29) + Reverse (ข้อ 31) + เดินสองสาย",
+              c: "โจทย์ให้หาผลบวกสูงสุดระหว่างโหนดสมมาตร (หัวกับท้าย, ตัวที่สองกับรองสุดท้าย...) ใน linked list ที่ยาวเป็นเลขคู่ โดยอุปสรรคสำคัญคือ linked list เดินถอยหลังจากขวาไปซ้ายไม่ได้",
             },
 
-            { t: "h3", c: "1. ปลดล็อกไอเดีย (Mindset Shift)" },
+            { t: "h3", c: "ขั้นที่ 2 · ทำให้ได้ด้วยมือ" },
             {
               t: "p",
-              c: "ปัญหาคือ Linked List เดินย้อนกลับไม่ได้ — อยากบวกตู้หน้ากับตู้หลัง (twin) จึงยากมาก",
+              c: "ลองดูตัวอย่าง: head = [5, 4, 2, 1]",
             },
             {
-              t: "p",
-              c: "หัวใจสำคัญ: หาจุดกลางด้วย Fast & Slow → พลิกข้อต่อครึ่งหลังให้หันมาทางเดียวกับครึ่งหน้า → เดินจากสองปลายเข้ามาบวกทีละคู่ เก็บค่ามากสุด",
-            },
-            {
-              t: "p",
-              c: "วิธีง่ายคือเก็บทุกค่าใส่ list แล้วบวก vals[i] + vals[n-1-i] — ถูกแต่ Space O(n) วิธีนี้ทำ in-place ได้ Space O(1)",
+              t: "ul",
+              c: [
+                "แบ่งครึ่งขบวน: ครึ่งแรกคือ [5 -> 4], ครึ่งหลังคือ [2 -> 1]",
+                "สังเกตว่า 5 ต้องบวกกับ 1, และ 4 ต้องบวกกับ 2",
+                "ถ้าเรา 'กลับทิศทาง' ของครึ่งหลัง จาก [2 -> 1] กลายเป็น [1 -> 2] ละก็...",
+                "เราจะได้หัวสองสาย: สายแรกเริ่มที่ 5, สายสองเริ่มที่ 1",
+                "ทีนี้ก็แค่เดินพร้อมกันทีละก้าว: คู่แรก (5 + 1 = 6), คู่สอง (4 + 2 = 6) ตอบ max = 6!",
+              ],
             },
 
-            { t: "h3", c: "2. กฎเหล็ก 3 ข้อ (The Logic)" },
+            { t: "h3", c: "ขั้นที่ 3 · วิธีทำ" },
             {
               t: "p",
-              c: "แบ่งงานเป็นสามขั้นชัด ๆ:",
+              c: "ภาพรวม: รวมร่าง 3 ท่าไม้ตายที่เรียนมาทั้งหมด ได้แก่ (1) Fast & Slow หากลาง -> (2) Reverse ครึ่งหลัง -> (3) Two Pointers เดินบวกหา Max",
+            },
+            {
+              t: "p",
+              c: "ขั้นตอน 3 สเต็ปอย่างละเอียด:",
             },
             {
               t: "ol",
               c: [
-                "หา middle — Fast & Slow เดิน พอ fast ตกขอบ slow หยุดที่หัวครึ่งหลัง (n เป็นเลขคู่เสมอ)",
-                "reverse ครึ่งหลัง — เอาท่าจากข้อ 31 มาพลิกจาก slow ได้ prev เป็นหัวใหม่ (ตู้สุดท้ายเดิมมาอยู่หน้าสุด)",
-                "บวกทีละคู่ — first ที่ head · second ที่ prev เดินพร้อมกัน first.val + second.val คือ twin sum คู่หนึ่ง เก็บ max",
+                "ท่าที่ 1 (หาจุดกึ่งกลาง): ใช้ `slow` เดิน 1 ก้าว และ `fast` เดิน 2 ก้าว พอ `fast` ถึงปลาย `slow` จะยืนอยู่ที่จุดเริ่มต้นของครึ่งหลังพอดี",
+                "ท่าที่ 2 (กลับทิศครึ่งหลัง): สั่ง Reverse Linked List ตั้งแต่ `slow` เป็นต้นไป จะได้หัวของครึ่งหลังที่กลับด้านแล้ว (`prev`)",
+                "ท่าที่ 3 (เดินคู่หา Max): ตั้ง `first = head` และ `second = prev` แล้ววนลูปบวกค่า `first.val + second.val` เทียบเก็บค่าสูงสุด `max_sum`",
               ],
             },
 
-            { t: "h3", c: "3. โค้ด Python (LeetCode Ready)" },
+            { t: "h3", c: "ขั้นที่ 4 · ดูทีละขั้น / จำลองการทำงาน" },
             {
-              t: "p",
-              c: "สามขั้นเรียงกันในฟังก์ชันเดียว:",
+              t: "table",
+              head: ["เฟส", "สิ่งที่ทำ", "สถานะของโหนด"],
+              rows: [
+                ["เฟส 1", "Fast & Slow", "head = 5 -> 4, slow เริ่มที่ 2 -> 1"],
+                ["เฟส 2", "Reverse ครึ่งหลัง", "ครึ่งแรก: 5 -> 4, ครึ่งหลังที่กลับแล้ว: 1 -> 2"],
+                ["เฟส 3", "ก้าวที่ 1", "first=5, second=1 -> ผลรวม = 6, max_sum = 6"],
+                ["เฟส 3", "ก้าวที่ 2", "first=4, second=2 -> ผลรวม = 6, max_sum = 6"],
+                ["จบ", "สรุปผล", "คืนค่า max_sum = 6"],
+              ],
             },
+
+            { t: "h3", c: "ขั้นที่ 5 · โค้ดสำหรับวางใน LeetCode" },
             {
               t: "code",
               lang: "python",
-              label: "คำตอบสำหรับวางใน LeetCode",
               c: `# Definition for singly-linked list.
 # class ListNode:
 #     def __init__(self, val=0, next=None):
@@ -1628,110 +1188,57 @@ node ที่มี twin ใน linked list นี้คือ:
 
 class Solution:
     def pairSum(self, head: Optional[ListNode]) -> int:
-        # ขั้นที่ 1: หาตัวกลางด้วย Fast & Slow
+        # 1. ท่าที่ 1: ใช้ Fast & Slow หาจุดกึ่งกลางของ list
         slow = head
         fast = head
         while fast and fast.next:
             slow = slow.next
             fast = fast.next.next
-        # ตอนนี้ slow อยู่ที่หัวของครึ่งหลังพอดี
 
-        # ขั้นที่ 2: พลิกข้อต่อครึ่งหลัง (ท่าจากข้อ 31)
+        # 2. ท่าที่ 2: กลับทิศทาง (Reverse) ของครึ่งหลัง
         prev = None
-        cur = slow
-        while cur:
-            nxt = cur.next
-            cur.next = prev
-            prev = cur
-            cur = nxt
-        # prev คือ head ของครึ่งหลังที่พลิกแล้ว
+        curr = slow
+        while curr:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
 
-        # ขั้นที่ 3: เดินสองสายพร้อมกัน บวกทีละคู่ เก็บค่ามากสุด
-        best = 0
+        # 3. ท่าที่ 3: เดินคู่จากหัวครึ่งแรกและหัวครึ่งหลังเพื่อหา max twin sum
+        max_sum = 0
         first = head
-        second = prev
-        while second:               # ครึ่งหลังสั้นเท่ากับครึ่งหน้าพอดี
-            best = max(best, first.val + second.val)
+        second = prev       # prev คือหัวของครึ่งหลังที่กลับทิศแล้ว
+        while second:
+            twin_sum = first.val + second.val
+            if twin_sum > max_sum:
+                max_sum = twin_sum
             first = first.next
             second = second.next
-        return best`,
+
+        return max_sum`,
             },
 
-            { t: "h3", c: "4. จำลองการทำงาน — 5 → 4 → 2 → 1" },
+            { t: "h3", c: "ขั้นที่ 6 · อ่านโค้ดทีละส่วน" },
             {
               t: "table",
-              head: ["ขั้นตอน", "สถานะ", "ผลลัพธ์", "list ตอนนี้"],
+              head: ["ส่วนของโค้ด", "หน้าที่ & ความหมาย", "ตัวอย่างค่าจริง"],
               rows: [
-                ["ก่อนเริ่ม", "—", "—", "5 → 4 → 2 → 1"],
-                [
-                  "หา middle",
-                  "fast เดินจนตกขอบ · slow หยุดที่ 2",
-                  "slow = หัวครึ่งหลัง",
-                  "5 → 4  |  2 → 1",
-                ],
-                [
-                  "reverse รอบ 1",
-                  "cur=2 · พลิก next → None",
-                  "prev=2",
-                  "5 → 4  |  None ← 2  |  1",
-                ],
-                [
-                  "reverse รอบ 2",
-                  "cur=1 · พลิก next → 2",
-                  "prev=1 = หัวใหม่",
-                  "5 → 4  |  1 → 2",
-                ],
-                [
-                  "บวกคู่ที่ 1",
-                  "first=5 · second=1",
-                  "5+1 = 6 · best = 6",
-                  "5 → 4  |  1 → 2",
-                ],
-                [
-                  "บวกคู่ที่ 2",
-                  "first=4 · second=2",
-                  "4+2 = 6 · best = 6",
-                  "4  |  2",
-                ],
-                ["จบ", "second เป็น None", "คืน best = 6", "คำตอบ = 6"],
-              ],
-            },
-            {
-              t: "p",
-              c: "สัญลักษณ์ | แยกชิ้น: ซ้าย = ครึ่งหน้า · ขวา = ครึ่งหลัง (ที่กำลังพลิก/เดินบวก) — จบเกมได้คำตอบ 6",
-            },
-
-            { t: "h3", c: "5. จุดระวังตกหลุมพราง (Edge Cases)" },
-            {
-              t: "p",
-              c: 'เคส "ข้อต่อไขว้ตรงรอยต่อกลาง":',
-            },
-            {
-              t: "ul",
-              c: [
-                "หลัง reverse ครึ่งหลัง ข้อต่อตรงรอยต่ออาจไขว้กันนิดหน่อย",
-                "ไม่กระทบ เพราะเราเดินแค่ n/2 ก้าวแล้วหยุดเมื่อ second เป็น None พอดี",
-              ],
-            },
-            {
-              t: "callout",
-              title: "เริ่ม best = 0 ได้ไหม?",
-              c: "ได้ เพราะโจทย์นี้ค่าในตู้เป็นบวกเสมอ — ถ้าโจทย์อนุญาตค่าติดลบควรเริ่มด้วยคู่แรกแทน",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — หากลาง + reverse ครึ่งหลัง + เดินบวก ล้วนเป็นเชิงเส้น",
-                "Space O(1) — แก้ข้อต่อในที่เดิม ไม่ได้ copy ค่าไปเก็บใน list ใหม่",
+                ["while fast and fast.next: slow = slow.next...", "พา slow ไปหยุดที่ต้นครึ่งหลัง", "slow หยุดที่โหนด 2"],
+                ["while curr: nxt = curr.next; curr.next = prev...", "กลับทิศครึ่งหลัง In-place", "2->1 กลายเป็น 1->2"],
+                ["second = prev", "prev ชี้หัวครึ่งหลังใหม่", "second เริ่มที่ 1"],
+                ["twin_sum = first.val + second.val", "บวกคู่แฝดทีละคู่", "5+1=6, 4+2=6"],
+                ["return max_sum", "ส่งคืนผลรวมคู่แฝดที่มากที่สุด", "return 6"],
               ],
             },
 
+            { t: "h3", c: "ขั้นที่ 7 · ต้นทุน (Complexity)" },
             {
-              t: "callout",
-              title: "💡 สรุป pattern",
-              c: "โจทย์ยาก ๆ ของ Linked List มักเป็นการประกอบร่างเทคนิคพื้นฐานหลายอันเข้าด้วยกัน (หากลาง + reverse + เดินสองสาย) — ถ้าท่าพื้นฐานแต่ละอันแม่น การต่อจิ๊กซอว์แบบนี้จะง่ายขึ้นมาก",
+              t: "table",
+              head: ["ทรัพยากร", "Big-O", "เหตุผล"],
+              rows: [
+                ["Time (เวลา)", "O(N)", "หากลางใช้ N/2 + กลับครึ่งหลังใช้ N/2 + เดินหาผลบวกใช้ N/2 รวมเป็น O(N) เท่านั้น"],
+                ["Space (หน่วยความจำ)", "O(1)", "ทำทุกอย่างบน pointer เดิม ไม่ต้องแปลงเป็น array หรือใช้ stack เพิ่ม"],
+              ],
             },
           ],
         },
@@ -1739,13 +1246,7 @@ class Solution:
       en: [
         {
           t: "p",
-          c: `In a linked list of size n, where n is even, the iᵗʰ node (0-indexed) of the linked list is known as the twin of the (n-1-i)ᵗʰ node, if 0 <= i <= (n / 2) - 1.
-
-- For example, if n = 4, then node 0 is the twin of node 3, and node 1 is the twin of node 2. These are the only nodes with twins for n = 4.
-
-The twin sum is defined as the sum of a node and its twin.
-
-Given the head of a linked list with even length, return the maximum twin sum of the linked list.`,
+          c: `In a linked list of size \`n\`, where \`n\` is even, the \`i\`-th node (0-indexed) is the twin of the \`(n-1-i)\`-th node. Return the maximum twin sum.`,
         },
         {
           t: "example",
@@ -1753,25 +1254,7 @@ Given the head of a linked list with even length, return the maximum twin sum of
             {
               input: "head = [5,4,2,1]",
               output: "6",
-              explain: `Explanation:
-Nodes 0 and 1 are the twins of nodes 3 and 2, respectively. All have twin sum = 6.
-There are no other nodes with twins in the linked list.
-Thus, the maximum twin sum of the linked list is 6.`,
-            },
-            {
-              input: "head = [4,2,2,3]",
-              output: "7",
-              explain: `Explanation:
-The nodes with twins present in this linked list are:
-- Node 0 is the twin of node 3 having a twin sum of 4 + 3 = 7.
-- Node 1 is the twin of node 2 having a twin sum of 2 + 2 = 4.
-Thus, the maximum twin sum of the linked list is max(7, 4) = 7.`,
-            },
-            {
-              input: "head = [1,100000]",
-              output: "100001",
-              explain: `Explanation:
-There is only one node with a twin in the linked list having twin sum of 1 + 100000 = 100001.`,
+              explain: "Twins: 5+1=6, 4+2=6. Maximum twin sum is 6.",
             },
           ],
         },
@@ -1785,162 +1268,90 @@ There is only one node with a twin in the linked list having twin sum of 1 + 100
 
         {
           t: "solution",
-          summary: "Full solution · Try yourself first",
+          summary: "Full Solution",
           c: [
+            { t: "h3", c: "Step 1 · Problem Understanding" },
             {
               t: "p",
-              c: "This is the boss fight of the section — compose three moves from earlier problems: Fast & Slow (p29) + Reverse (p31) + walk two chains.",
+              c: "Compute the maximum sum of paired symmetric nodes (first with last, second with second-to-last, etc.).",
             },
 
-            { t: "h3", c: "1. Mindset Shift" },
+            { t: "h3", c: "Step 2 · Manual Trace" },
             {
               t: "p",
-              c: "The hard part: a linked list can’t walk backward — adding a front node to its twin at the back is awkward.",
-            },
-            {
-              t: "p",
-              c: "Key insight: find the middle with Fast & Slow → reverse the second half so it faces the same way as the first → walk from both ends and track the max twin sum.",
-            },
-            {
-              t: "p",
-              c: "The easy way is dump every value into a list and add vals[i] + vals[n-1-i] — correct but Space O(n). This approach stays in-place at Space O(1).",
+              c: "For [5, 4, 2, 1]: split into [5, 4] and [2, 1]. Reverse the second half to get [1, 2]. Pairwise sum: (5+1=6, 4+2=6). Max = 6.",
             },
 
-            { t: "h3", c: "2. The Logic — 3 Steps" },
+            { t: "h3", c: "Step 3 · Methodology" },
             {
               t: "p",
-              c: "Split the work into three clear stages:",
+              c: "Combine three standard techniques:\n1. Fast & Slow pointers to locate the midpoint.\n2. Reverse the second half in-place.\n3. Two pointers to simultaneously traverse both halves and calculate the max sum.",
             },
+
+            { t: "h3", c: "Step 4 · Step-by-Step Simulation" },
             {
-              t: "ol",
-              c: [
-                "Find middle — Fast & Slow walk; when fast falls off, slow sits at the head of the second half (n is always even)",
-                "Reverse second half — reuse the p31 flip from slow; prev becomes the new head (the old last node moves to the front)",
-                "Pair and add — first at head · second at prev; walk together; first.val + second.val is one twin sum; keep the max",
+              t: "table",
+              head: ["Phase", "Action", "State"],
+              rows: [
+                ["1", "Fast & Slow", "Find middle node"],
+                ["2", "Reverse 2nd half", "Half 1: 5->4, Half 2 reversed: 1->2"],
+                ["3", "Pair sum", "5+1=6, 4+2=6 -> max = 6"],
               ],
             },
 
-            { t: "h3", c: "3. LeetCode-Ready Code" },
-            {
-              t: "p",
-              c: "Three stages lined up in one function:",
-            },
+            { t: "h3", c: "Step 5 · LeetCode Python Solution" },
             {
               t: "code",
               lang: "python",
-              label: "Submit this on LeetCode",
-              c: `# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
-
-class Solution:
+              c: `class Solution:
     def pairSum(self, head: Optional[ListNode]) -> int:
-        # Stage 1: find middle with Fast & Slow
         slow = head
         fast = head
         while fast and fast.next:
             slow = slow.next
             fast = fast.next.next
-        # slow is now the head of the second half
 
-        # Stage 2: reverse the second half (p31 move)
         prev = None
-        cur = slow
-        while cur:
-            nxt = cur.next
-            cur.next = prev
-            prev = cur
-            cur = nxt
-        # prev is the head of the reversed second half
+        curr = slow
+        while curr:
+            nxt = curr.next
+            curr.next = prev
+            prev = curr
+            curr = nxt
 
-        # Stage 3: walk both halves, track max twin sum
-        best = 0
+        max_sum = 0
         first = head
         second = prev
-        while second:               # halves are the same length
-            best = max(best, first.val + second.val)
+        while second:
+            twin_sum = first.val + second.val
+            if twin_sum > max_sum:
+                max_sum = twin_sum
             first = first.next
             second = second.next
-        return best`,
+
+        return max_sum`,
             },
 
-            { t: "h3", c: "4. Dry Run — 5 → 4 → 2 → 1" },
+            { t: "h3", c: "Step 6 · Line-by-Line Code Breakdown" },
             {
               t: "table",
-              head: ["Stage", "State", "Result", "list now"],
+              head: ["Line", "Purpose", "Example"],
               rows: [
-                ["Start", "—", "—", "5 → 4 → 2 → 1"],
-                [
-                  "Find middle",
-                  "fast falls off · slow stops at 2",
-                  "slow = second-half head",
-                  "5 → 4  |  2 → 1",
-                ],
-                [
-                  "Reverse round 1",
-                  "cur=2 · flip next → None",
-                  "prev=2",
-                  "5 → 4  |  None ← 2  |  1",
-                ],
-                [
-                  "Reverse round 2",
-                  "cur=1 · flip next → 2",
-                  "prev=1 = new head",
-                  "5 → 4  |  1 → 2",
-                ],
-                [
-                  "Pair 1",
-                  "first=5 · second=1",
-                  "5+1 = 6 · best = 6",
-                  "5 → 4  |  1 → 2",
-                ],
-                [
-                  "Pair 2",
-                  "first=4 · second=2",
-                  "4+2 = 6 · best = 6",
-                  "4  |  2",
-                ],
-                ["Done", "second is None", "return best = 6", "answer = 6"],
-              ],
-            },
-            {
-              t: "p",
-              c: "The | mark splits pieces: left = first half · right = second half (being reversed / paired) — final answer 6",
-            },
-
-            { t: "h3", c: "5. Edge Cases & Pitfalls" },
-            {
-              t: "p",
-              c: 'The "crossed link at the midpoint" case:',
-            },
-            {
-              t: "ul",
-              c: [
-                "After reversing the second half, the link at the midpoint may look a bit crossed",
-                "It doesn’t matter — we only walk n/2 steps and stop when second is None",
-              ],
-            },
-            {
-              t: "callout",
-              title: "Is best = 0 OK?",
-              c: "Yes — this problem guarantees positive node values. If negatives were allowed, start from the first pair instead.",
-            },
-
-            { t: "h3", c: "6. Time & Space Complexity" },
-            {
-              t: "ul",
-              c: [
-                "Time O(n) — find middle + reverse second half + pair walk are all linear",
-                "Space O(1) — rewire in place; no copy into a new list",
+                ["while fast and fast.next: slow = slow.next...", "Find midpoint", "slow stops at 2"],
+                ["while curr: nxt = curr.next; curr.next = prev...", "Reverse second half", "2->1 becomes 1->2"],
+                ["twin_sum = first.val + second.val", "Sum symmetric twins", "5+1=6, 4+2=6"],
+                ["return max_sum", "Max twin sum", "return 6"],
               ],
             },
 
+            { t: "h3", c: "Step 7 · Complexity" },
             {
-              t: "callout",
-              title: "💡 Pattern summary",
-              c: "Hard linked-list problems are often compositions of basic moves (find middle + reverse + walk two chains) — if each move is solid, assembling the puzzle gets much easier.",
+              t: "table",
+              head: ["Resource", "Big-O", "Justification"],
+              rows: [
+                ["Time", "O(N)", "N/2 to find mid, N/2 to reverse, N/2 to sum -> O(N)."],
+                ["Space", "O(1)", "In-place pointer traversal."],
+              ],
             },
           ],
         },
