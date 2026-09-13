@@ -4,174 +4,84 @@ export const overviewPages: Record<string, Page> = {
   "dsa-overview": {
     slug: "dsa-overview",
     title: {
-      th: "Data Structures & Algorithms (DSA) — ภาพรวม & แผนการเรียน",
-      en: "Data Structures & Algorithms (DSA) — Course Overview & Roadmap",
+      th: "DSA ฉบับวิศวกรซอฟต์แวร์: ภาพรวม & แผนที่การเรียนรู้สู่การทำงานจริง",
+      en: "DSA for Software Engineers: Overview & Job-Ready Roadmap",
     },
     lead: {
-      th: "เรียนรู้โครงสร้างข้อมูลและอัลกอริทึมครบวงจร 12 ตอน 49 บทเรียน ถอดรหัสโจทย์คลาสสิกสู่การเตรียมสัมภาษณ์งาน (LeetCode Patterns) ด้วย Python พร้อมเทียบเคียง C++",
-      en: "Master Data Structures & Algorithms across 12 chapters and 49 lessons, tailored for technical interviews with Python and C++ comparisons.",
+      th: "ยกระดับการเรียนรู้โครงสร้างข้อมูลและอัลกอริทึม 12 ตอน 49 บทเรียน ถอดรหัสวิธีคิดเชิงสถาปัตยกรรมสู่การทำงานจริงและการสัมภาษณ์งานระดับสากลด้วย Python และ C++",
+      en: "Master Data Structures & Algorithms across 12 chapters and 49 lessons, engineered for technical interviews and production software systems.",
     },
     group: "เริ่มต้นที่นี่",
     blocks: {
       th: [
         {
           t: "p",
-          c: "ยินดีต้อนรับสู่หลักสูตร **Data Structures & Algorithms (DSA)** ฉบับสมบูรณ์ ซึ่งนำเนื้อหาและแกนหลักจากหลักสูตรยอดนิยม *C++ Data Structure & Algorithm* โดย Mikelopster มาจัดวางใหม่ ยกระดับเนื้อหาให้เข้มข้นยิ่งขึ้น พร้อมปรับเปลี่ยนแนวทางการสอนให้ตอบโจทย์ **การเตรียมตัวสอบสัมภาษณ์งานด้านเทคนิค (Technical Coding Interview)** ในปัจจุบันอย่างแท้จริง",
+          c: "ยินดีต้อนรับสู่หลักสูตร **Data Structures & Algorithms (DSA) ฉบับสมบูรณ์ที่สุด** ซึ่งได้รับการออกแบบใหม่ทั้งหมดโดยถอดบทเรียนจากปัญหาจริงที่วิศวกรซอฟต์แวร์ต้องเผชิญ: *ทำไมคนที่จำโค้ดเก่งมักตกม้าตายในห้องสัมภาษณ์งาน?* และ *ทำไมการเรียน DSA ตามตำราวิชาการดั้งเดิมถึงนำมาใช้งานในระบบโปรดักชันจริงไม่ได้?*",
         },
         {
           t: "callout",
-          title: "💡 การจัดลำดับเนื้อหาเชิงการสอนที่ปรับปรุงให้ดีกว่าเดิม (Pedagogical Optimization)",
-          c: "ในหลักสูตรฉบับนี้ เราได้ปรับปรุงลำดับการเรียนรู้ให้เป็นไปตามหลักสูตรวิทยาการคอมพิวเตอร์ชั้นนำระดับโลก (เช่น MIT, Stanford และ NeetCode Roadmap):\n1. **ย้าย Big-O มาเรียนก่อน (บทที่ 2)**: เพื่อให้ผู้เรียนมี 'แว่นตาวัดประสิทธิภาพ' ติดตัวตั้งแต่แรก ทำให้เข้าใจทันทีว่าทำไมโครงสร้างข้อมูลในบทถัดๆ ไป (Array, Linked List, Stack, Queue) ถึงถูกเลือกใช้\n2. **รวม Hash Table เข้ากับ Linear Data Structures (บทที่ 5)**: เชื่อมโยงการแก้ Collision ด้วย Linked List และการทำ Two Sum ให้เห็นภาพชัดเจน\n3. **รวม Sorting Algorithms ครบวงจร (บทที่ 6)**: เห็นพัฒนาการจาก Basic O(n²) สู่ Advanced O(n log n)\n4. **รวม Graph Algorithms เป็นหมวดหมู่เดียว (บทที่ 12)**: ไม่แยกขาดกระจัดกระจาย ทำให้เข้าใจตั้งแต่ Representation -> Traversal (BFS/DFS) -> Dijkstra -> MST -> Topological Sort อย่างต่อเนื่อง",
+          title: "💡 ปรัชญาของหลักสูตร: คิดจากฮาร์ดแวร์ มองทะลุถึงบิสซิเนส",
+          c: "ในหลักสูตรนี้ เราไม่ได้สอนให้คุณ 'ท่องจำอัลกอริทึม' แต่เราจะฝึกให้คุณมี **Mental Model (ภาพจำลองในหัว)** ว่าทุกบรรทัดที่คุณเขียน ข้อมูลวิ่งผ่าน CPU Registers, Cache L1/L2/L3, และแผงวงจร RAM อย่างไร เพื่อให้คุณเลือกใช้โครงสร้างข้อมูลที่ถูกต้องได้ทันทีโดยไม่ต้องพึ่งดวง",
         },
-        { t: "h2", c: "โครงสร้างหลักสูตร (Optimized Curriculum 12 บทเรียน)" },
+        { t: "h2", c: "ทำไมต้องจัดเรียงเนื้อหาใหม่เป็น 4 ระยะ (4-Phase Learning Curve)" },
         {
           t: "p",
-          c: "หลักสูตรนี้จัดเรียงเนื้อหาจากพื้นฐานที่จำเป็น ก้าวสู่โครงสร้างข้อมูล และต่อยอดสู่กระบวนทัศน์อัลกอริทึมขั้นสูง:",
+          c: "หลักสูตร DSA ส่วนใหญ่ในอดีตมักเริ่มสอน Linked List, Tree หรือ Sorting ก่อนที่จะสอน Big-O หรือความเข้าใจในหน่วยความจำ RAM ซึ่งทำให้ผู้เรียนรู้สึก 'เข้าใจยากและคลุมเครือ' เพราะไม่รู้ว่าทำไมเราถึงต้องสร้าง Linked List ในเมื่อมี Array อยู่แล้ว? หรือทำไมต้องใช้ Heap ในเมื่อมี Array Sort อยู่แล้ว?\n\nเราจึงปรับโครงสร้างตามหลักสูตรสากลชั้นนำระดับโลก (MIT, Stanford, Berkeley และ NeetCode Roadmap) ดังนี้:",
         },
         {
           t: "table",
-          head: ["บทที่", "ชื่อบท / หมวดหมู่หลัก", "จำนวนหัวข้อ", "เป้าหมายการเรียนรู้"],
+          head: ["ระยะ (Phase)", "บทเรียนที่ครอบคลุม", "แกนความคิดหลัก (Core Mental Model)"],
           rows: [
             [
-              "บทที่ 1",
-              "Basic Programming (C++ & Python)",
-              "5",
-              "ไวยากรณ์พื้นฐาน, ตัวแปร, ชนิดข้อมูล, เงื่อนไข, Loop, ฟังก์ชัน",
+              "Phase 1: รากฐานและเข็มทิศ (The Compass)",
+              "บทที่ 1 – 3",
+              "เข้าใจว่าคอมพิวเตอร์ประมวลผลอย่างไร และติดตั้ง 'แว่นตา Big-O' ตั้งแต่ต้น เพื่อใช้วัดประสิทธิภาพของโค้ดตลอดชีวิตการทำงาน พร้อมฝึกแก้โจทย์เชิงตัวเลขและข้อความ",
             ],
             [
-              "บทที่ 2",
-              "การวัดประสิทธิภาพ & Big-O Notation",
-              "4",
-              "Asymptotic Analysis, Big-O Classes, Time/Space Rules, Constraints Cheat Sheet",
+              "Phase 2: หน่วยความจำ & โครงสร้างเชิงเส้น (Hardware & Linear)",
+              "บทที่ 4 – 6",
+              "ดำดิ่งสู่ RAM, Stack vs Heap, Pointer และสร้าง Linked List, Stack, Queue, Hash Table ด้วยมือตนเอง เข้าใจลึกซึ้งถึง Cache Locality และการค้นหาแบบ O(1)",
             ],
             [
-              "บทที่ 3",
-              "การฝึกแก้โจทย์ปัญหาเบื้องต้น",
-              "5",
-              "การแก้โจทย์ตัวเลข, อาร์เรย์, สตริง และ Edge Cases เช็คลิสต์",
+              "Phase 3: โครงสร้างลำดับชั้น (Hierarchical Thinking)",
+              "บทที่ 7 – 8",
+              "ทลายกรอบความคิดแบบเส้นตรงสู่ต้นไม้ (Trees), การเรียกตัวเอง (Recursion), และกลยุทธ์ Divide & Conquer ที่เปลี่ยนความเร็วการเรียงข้อมูลจาก O(n²) สู่ O(n log n)",
             ],
             [
-              "บทที่ 4",
-              "Memory, Pointer, Vector & OOP",
-              "5",
-              "Stack vs Heap, Pointer vs Reference, Dynamic Array, Class Node",
-            ],
-            [
-              "บทที่ 5",
-              "โครงสร้างข้อมูลเชิงเส้น (Linear Data Structures)",
-              "4",
-              "Linked List (Singly/Doubly/Circular), Stack (LIFO), Queue & Deque (FIFO)",
-            ],
-            [
-              "บทที่ 6",
-              "การค้นหา, การจัดเรียงพื้นฐาน & ตารางแฮช (Searching, Sorting & Hash Tables)",
-              "4",
-              "Linear Search, Binary Search Template, O(n²) Sorts, Hash Table & Two Sum O(1)",
-            ],
-            [
-              "บทที่ 7",
-              "การเรียกตัวเอง & โครงสร้างต้นไม้ (Recursion & Trees)",
-              "3",
-              "Recursion, Call Stack, Binary Tree, Binary Search Tree (BST), DFS/BFS Traversals",
-            ],
-            [
-              "บทที่ 8",
-              "การแบ่งแยกและเอาชนะ & การจัดเรียงขั้นสูง (Divide & Conquer & Fast Sorts)",
-              "3",
-              "Merge Sort, Quick Sort O(n log n), Master Theorem, Quickselect O(n), Fast Pow",
-            ],
-            [
-              "บทที่ 9",
-              "การค้นหาย้อนรอย (Backtracking)",
-              "4",
-              "State-Space Tree, Subsets, Permutations, N-Queens, Pruning",
-            ],
-            [
-              "บทที่ 10",
-              "ขั้นตอนวิธีแบบละโมบ (Greedy Algorithms)",
-              "3",
-              "Greedy-Choice Property, Canonical Coin Change, Activity Selection, Jump Game",
-            ],
-            [
-              "บทที่ 11",
-              "กำหนดการพลวัต (Dynamic Programming)",
-              "3",
-              "Memoization (Top-down) vs Tabulation (Bottom-up), Climbing Stairs, Knapsack, Coin Change",
-            ],
-            [
-              "บทที่ 12",
-              "กราฟและอัลกอริทึมโครงข่ายครบวงจร",
-              "5",
-              "Graph Adjacency List, BFS/DFS, Shortest Path (Dijkstra), MST (Kruskal/Prim), Course Schedule",
+              "Phase 4: สี่กระบวนทัศน์ขั้นสูง (The Interview Big 4)",
+              "บทที่ 9 – 12",
+              "สี่เสาหลักของการสอบสัมภาษณ์ระดับ Mid-Senior และระบบงานจริง: Backtracking, Greedy, Dynamic Programming, และ Graph Algorithms แบบครบวงจร",
             ],
           ],
         },
-        { t: "h2", c: "เปรียบเทียบการเรียน DSA ด้วย Python vs C++" },
-        {
-          t: "p",
-          c: "ตารางสรุปข้อแตกต่างในมุมมองการเรียนและการสัมภาษณ์งาน เพื่อช่วยให้คุณเลือกเครื่องมือได้เหมาะกับเป้าหมาย:",
-        },
+        { t: "h2", c: "สารบัญหลักสูตรเต็ม (Curriculum Matrix 12 บท 49 บทเรียน)" },
         {
           t: "table",
-          head: ["มิติการประเมิน", "Python 3", "C++ (Modern C++)"],
+          head: ["บทที่", "ชื่อบทเรียน", "จำนวนหัวข้อ", "ความรู้และทักษะที่จะได้รับ"],
           rows: [
-            [
-              "ความเร็วในการเขียนโค้ด (Coding Speed)",
-              "⚡ เร็วมาก โค้ดสั้น 15-20 บรรทัดเสร็จ",
-              "⚠️ ช้ากว่า ต้องเขียน struct, type, header",
-            ],
-            [
-              "ความเสี่ยงเรื่อง Memory Bug",
-              "🛡️ ปลอดภัย มี Garbage Collection อัตโนมัติ",
-              "⚠️ เสี่ยง Segfault, Null Pointer, Memory Leak",
-            ],
-            [
-              "ความเข้าใจระบบฮาร์ดแวร์ & Pointers",
-              "🔍 เป็น Object Reference แบบนามธรรม",
-              "🎯 ลึกซึ้ง เข้าใจ Address, Stack, Heap, Pointer `*`",
-            ],
-            [
-              "Standard Data Structures ในตัว",
-              "`list`, `dict`, `set`, `collections.deque`, `heapq`",
-              "`std::vector`, `std::unordered_map`, `std::priority_queue`",
-            ],
-            [
-              "ความนิยมในการสอบสัมภาษณ์งาน",
-              "🏆 นิยมอันดับ 1 ใน LeetCode / Big Tech",
-              "🏆 นิยมมากในสาย High Frequency Trading / Game Engine",
-            ],
+            ["บทที่ 1", "พื้นฐานการเขียนโปรแกรมเชิงระบบ", "5", "ฮาร์ดแวร์คอมพิวเตอร์, Compiler vs VM, ชนิดข้อมูลระดับบิต, Loop Invariants, Stack Frame"],
+            ["บทที่ 2", "เข็มทิศวัดประสิทธิภาพ (Big-O & Complexity)", "4", "Asymptotic Analysis, สเปกตรัม Big-O ทุกระดับ, Time/Space Rules, สูตรลัด Constraints 10⁸ ops/sec"],
+            ["บทที่ 3", "ศิลปะการแก้โจทย์ปัญหา (Problem Solving)", "5", "UMPIRE Framework, การแกะหลักตัวเลข (% 10), โจทย์อาร์เรย์, หลุมพราง String Immutability, Edge Cases"],
+            ["บทที่ 4", "หน่วยความจำ, พอยน์เตอร์, เวกเตอร์ & OOP", "5", "Stack vs Heap, Cache Locality, Pointer & Reference, Dynamic Array Reallocation Amortized O(1), Memory Alignment"],
+            ["บทที่ 5", "โครงสร้างข้อมูลเชิงเส้น (Linear Data Structures)", "4", "Linked List (Singly/Doubly/Circular), Music Playlist Project, Stack (Call Stack & Parentheses), Queue (Circular & Deque)"],
+            ["บทที่ 6", "การค้นหา, ตารางแฮช & การจัดเรียงพื้นฐาน", "4", "Linear vs Binary Search 3 แม่แบบ, O(n²) Sorts (Bubble, Selection, Insertion), Hash Table Collision Resolution, Two Sum O(1)"],
+            ["บทที่ 7", "การเรียกตัวเอง & โครงสร้างต้นไม้ (Recursion & Trees)", "3", "Recursion Leap of Faith, Call Stack Tracing, Binary Tree, Binary Search Tree (Insert, Search, Delete 3 เคส), DFS & BFS"],
+            ["บทที่ 8", "การแบ่งแยกและเอาชนะ & การจัดเรียงขั้นสูง", "3", "Divide & Conquer, Merge Sort (Stable), Quick Sort (Partition Schemes), Quickselect O(n) หา K-th Element"],
+            ["บทที่ 9", "การค้นหาย้อนรอย (Backtracking)", "4", "State-Space Tree, แม่แบบ Backtrack 4 สเต็ป, ปัญหา NP & Exhaustive Search, N-Queens & Word Search"],
+            ["บทที่ 10", "ขั้นตอนวิธีแบบละโมบ (Greedy Algorithms)", "3", "Greedy Choice Property, วิเคราะห์ Coin Change (เมื่อไหร่ใช้ได้ vs ล้มเหลว), Activity Selection, Jump Game"],
+            ["บทที่ 11", "กำหนดการพลวัต (Dynamic Programming)", "3", "Overlapping Subproblems, Memoization (Top-Down) vs Tabulation (Bottom-Up), Space Optimization, Knapsack & LCS"],
+            ["บทที่ 12", "กราฟและอัลกอริทึมโครงข่าย (Graph Theory & Networks)", "5", "Adjacency Matrix vs List, BFS/DFS, Shortest Path (Dijkstra, Bellman-Ford), MST (Prim, Kruskal / Union-Find), Topological Sort"],
           ],
         },
-        { t: "h2", c: "แนวทางการเรียนให้ประสบความสำเร็จ" },
+        { t: "h2", c: "ยุทธศาสตร์สองภาษา: ทำไมต้องเรียนทั้ง C++ และ Python?" },
         {
-          t: "ol",
-          c: [
-            "**เข้าใจภาพก่อนลงโค้ด**: วาดภาพการเชื่อมต่อของ Node, การเลื่อนของ Pointer หรือ Call Stack ในหัวก่อนเริ่มเขียนโค้ด",
-            "**วิเคราะห์ Big-O เสมอ**: ทุกครั้งที่เขียนอัลกอริทึม ให้ถามตัวเองเสมอว่า Time Complexity และ Space Complexity เป็นเท่าไร",
-            "**ลองเขียนทั้ง 2 ภาษา**: ใช้ Python ในการฝึกจับเวลาแก้โจทย์เร็ว และเปิดดูโค้ด C++ เทียบเคียงเพื่อดูว่าในระดับ Memory จัดการอย่างไร",
-            "**ทำโจทย์จริงใน LeetCode**: เชื่อมโยงแต่ละบทเรียนเข้ากับโจทย์จริง เพื่อสร้างกล้ามเนื้อ Pattern Recognition สำหรับวันสัมภาษณ์งาน",
-          ],
+          t: "p",
+          c: "ในการทำงานเป็นวิศวกรซอฟต์แวร์มืออาชีพ ไม่มีภาษาเดียวที่ตอบโจทย์ทุกอย่าง:\n- **C++ (มองทะลุฮาร์ดแวร์)**: สอนให้คุณเห็นภาพที่อยู่หน่วยความจำจริง (`*ptr`, `&val`), การจัดสรรหน่วยความจำ (`new`, `delete`), และความสำคัญของ Cache Locality ในระบบ High-Performance เช่น Game Engine, Database Kernel หรือ High-Frequency Trading\n- **Python (ความเร็วในการแก้โจทย์สัมภาษณ์)**: ช่วยให้คุณเขียนโค้ดแก้โจทย์อัลกอริทึมที่ซับซ้อน (เช่น Graph BFS หรือ Backtracking) ได้เสร็จภายใน 20-30 บรรทัด สื่อสารไอเดียกับผู้สัมภาษณ์ได้อย่างกระชับโดยไม่เสียเวลากับ Boilerplate Code",
         },
-        { t: "h2", c: "เริ่มต้นบทเรียนแรก" },
         {
-          t: "links",
-          c: [
-            {
-              title: "บทนำ: C++ สู่ Python สำหรับสัมภาษณ์งาน",
-              slug: "dsa-intro",
-              desc: "ทำความเข้าใจ Compiler vs Interpreter และพื้นฐาน Memory Model ที่สำคัญ",
-            },
-            {
-              title: "บทที่ 1: Basic Programming C++ & Python",
-              slug: "dsa-ch1-intro",
-              desc: "เริ่มต้นปูพื้นฐานไวยากรณ์ ตัวแปร เงื่อนไข และฟังก์ชัน",
-            },
-            {
-              title: "บทที่ 2: การวัดประสิทธิภาพ & Big-O",
-              slug: "dsa-ch7-intro",
-              desc: "เรียนรู้เครื่องมือวัดความเร็วและ Constraints Cheat Sheet สำหรับสัมภาษณ์งาน",
-            },
-          ],
+          t: "callout",
+          title: "🎯 คำแนะนำในการศึกษาแต่ละบทเรียน",
+          c: "1. อ่านและทำความเข้าใจ **Intuition (ทำไมต้องมีสิ่งนี้?)** และดูภาพจำลองใน RAM ให้เห็นภาพ\n2. เขียนโค้ดตามทั้งใน **Python และ C++** โดยสังเกตความแตกต่างในการบริหารหน่วยความจำ\n3. ดูโจทย์ตัวอย่างและพยายามแก้โจทย์ด้วยตนเองก่อนเปิดดูส่วน Solution\n4. เชื่อมโยงกลับสู่ **Use Case ในระบบโปรดักชันจริง** เช่น Redis, Git, Web Browsers เพื่อให้ความรู้อยู่ติดตัวอย่างยั่งยืน",
         },
       ],
       en: [],
@@ -181,136 +91,115 @@ export const overviewPages: Record<string, Page> = {
   "dsa-intro": {
     slug: "dsa-intro",
     title: {
-      th: "บทนำ: C++ สู่ Python สำหรับสัมภาษณ์งาน",
-      en: "Introduction: From C++ to Python for Technical Interviews",
+      th: "C++ สู่ Python: สองอาวุธคู่กายสำหรับงานระบบ & สัมภาษณ์งาน",
+      en: "C++ to Python: Dual-Weapon Strategy for Systems & Interviews",
     },
     lead: {
-      th: "ทำความเข้าใจกระบวนการทำงานของโปรแกรม ระบบ Compiler vs Interpreter และโมเดลหน่วยความจำ Pointer vs Reference",
-      en: "Understand how programs execute, compare Compilers vs Interpreters, and explore low-level memory vs Python object references.",
+      th: "เปรียบเทียบสองกระบวนทัศน์: C++ สำหรับการควบคุมหน่วยความจำระดับฮาร์ดแวร์ และ Python สำหรับความเร็วและพลังในการแก้โจทย์สัมภาษณ์งาน",
+      en: "Master the dual-language strategy: C++ for bare-metal memory mastery and Python for rapid interview problem-solving.",
     },
     group: "เริ่มต้นที่นี่",
     blocks: {
       th: [
         {
           t: "p",
-          c: "การเขียนโปรแกรม (**Programming**) คือกระบวนการออกแบบและสร้างชุดคำสั่งให้คอมพิวเตอร์ประมวลผลข้อมูลตามขั้นตอนที่กำหนด เพื่อแก้ปัญหาเฉพาะทางอย่างแม่นยำและมีประสิทธิภาพ การเรียนรู้ **Data Structures & Algorithms (DSA)** จึงเปรียบเสมือนการเรียนรู้วิธีเลือกกล่องเก็บของ (Data Structure) และวิธีหยิบจับของในกล่องนั้น (Algorithm) ให้ประหยัดเวลาและหน่วยความจำที่สุด",
+          c: "เมื่อเตรียมตัวสำหรับการสัมภาษณ์งานด้านเทคนิค (Technical Coding Interview) คำถามยอดนิยมคือ: *'ควรใช้ภาษาอะไรในการสอบสัมภาษณ์?'* คำตอบที่ชาญฉลาดที่สุดคือการเข้าใจ **ความสัมพันธ์ระหว่าง C++ และ Python** อย่างถ่องแท้",
         },
-        { t: "h2", c: "Compiler vs Interpreter: โค้ดทำงานได้อย่างไร" },
+        { t: "h2", c: "ตารางเปรียบเทียบ C++ STL กับ Python Built-ins / Collections" },
+        {
+          t: "table",
+          head: ["โครงสร้างข้อมูล (Data Structure)", "C++ Standard Template Library (STL)", "Python Built-in / Standard Library", "Time Complexity เฉลี่ย"],
+          rows: [
+            ["Dynamic Array", "`std::vector<T>`", "`list`", "Lookup: O(1), Append: O(1) Amortized"],
+            ["Linked List", "`std::list<T>` (Doubly)", "`collections.deque`", "Insert/Delete at ends: O(1)"],
+            ["Stack (LIFO)", "`std::stack<T>`", "`list` (`append` / `pop`)", "Push/Pop: O(1)"],
+            ["Queue (FIFO)", "`std::queue<T>`", "`collections.deque` (`append` / `popleft`)", "Enqueue/Dequeue: O(1)"],
+            ["Double-Ended Queue", "`std::deque<T>`", "`collections.deque`", "Push/Pop both ends: O(1)"],
+            ["Hash Map (Key-Value)", "`std::unordered_map<K, V>`", "`dict`", "Search / Insert / Delete: O(1)"],
+            ["Hash Set (Unique Keys)", "`std::unordered_set<T>`", "`set`", "Search / Insert / Delete: O(1)"],
+            ["Balanced BST Map (Sorted)", "`std::map<K, V>` (Red-Black Tree)", "`bisect` module หรือ `SortedDict`", "Search / Insert: O(log n)"],
+            ["Priority Queue / Min-Heap", "`std::priority_queue<T>` (Default: Max)", "`heapq` (Default: Min-Heap)", "Push / Pop: O(log n), Top: O(1)"],
+          ],
+        },
+        {
+          t: "callout",
+          title: "⚠️ กับดักร้ายแรงที่สุดใน Python: ห้ามใช้ list.pop(0) เป็นคิว!",
+          c: "ในภาษา Python การใช้ `list.pop(0)` เพื่อดึงตัวแรกออกจากลิสต์จะมี Time Complexity เป็น **O(n)** เสมอ เพราะต้องขยับข้อมูลที่เหลือทั้งหมดไปข้างหน้าหนึ่งช่อง! หากใช้ในโจทย์ BFS จะทำให้โค้ดตกเป็น Time Limit Exceeded ทันที\n\nให้จำไว้เสมอ: **ต้องการ Queue ให้ใช้ `from collections import deque` และเรียก `.popleft()` ซึ่งทำงานแบบ O(1)**",
+        },
+        { t: "h2", c: "โมเดลการบริหารหน่วยความจำ: Manual vs Reference Counting & GC" },
         {
           t: "p",
-          c: "คอมพิวเตอร์เข้าใจเฉพาะรหัสภาษาเครื่อง (Machine Code / 0 และ 1) เท่านั้น ภาษาที่เราเขียนทั้ง C++ และ Python จึงต้องผ่านตัวแปลงภาษา ซึ่งมี 2 รูปแบบหลัก:",
+          c: "ความแตกต่างสำคัญที่สุดระหว่าง C++ และ Python ไม่ใช่แค่เรื่อง Syntax แต่คือ **การจัดการหน่วยความจำ (Memory Management)**:",
         },
         {
           t: "table",
-          head: ["คุณสมบัติ", "Compiler (เช่น C++, Rust, Go)", "Interpreter (เช่น Python, JavaScript)"],
+          head: ["คุณลักษณะ", "C++ (Bare-Metal Control)", "Python (Managed Object Reference)"],
           rows: [
             [
-              "กระบวนการแปลง",
-              "แปลงโค้ดทั้งไฟล์เป็น Machine Code ครั้งเดียวก่อนรัน (Executable binary)",
-              "อ่านและตีความคำสั่งทีละบรรทัด (Interpret line-by-line / Bytecode)",
+              "การจองหน่วยความจำ",
+              "โปรแกรมเมอร์ควบคุมเองบน Stack หรือสั่ง `new` บน Heap",
+              "ทุกตัวแปรเป็น Object บน Heap จัดสรรให้อัตโนมัติผ่าน CPython Memory Allocator",
             ],
             [
-              "ความเร็วในการประมวลผล",
-              "⚡ เร็วมาก ทำงานระดับ Native Machine",
-              "🐢 ช้ากว่าในระดับ CPU Instruction แต่เพียงพอสำหรับโจทย์สัมภาษณ์",
+              "ตัวแปรเก็บอะไร?",
+              "ตัวแปรเก็บค่าข้อมูลจริง (Value) หรือหมายเลขที่อยู่ (Pointer/Address)",
+              "ตัวแปรเก็บตัวชี้ (Reference Pointer) ไปยัง `PyObject` เสมอ",
             ],
             [
-              "การตรวจจับ Error",
-              "เจอ Syntax & Type Error ทั้งหมดตอน Compile time ก่อนรัน",
-              "เจอ Runtime Error ทันทีที่คำสั่งบรรทัดนั้นถูกรัน",
+              "การคืนหน่วยความจำ",
+              "ต้องเรียก `delete` หรือใช้ Smart Pointers (`std::unique_ptr`)",
+              "มีระบบ **Reference Counting** ร่วมกับ **Generational Garbage Collector**",
             ],
             [
-              "ขั้นตอนการพัฒนา",
-              "Write -> Compile -> Link -> Run",
-              "Write -> Run ทันที (Interactive REPL ได้ง่าย)",
+              "ความเร็วในการรัน",
+              "⚡ เร็วระดับฮาร์ดแวร์ ไร้ Overhead",
+              "🐢 ช้ากว่าประมาณ 10–50 เท่าเนื่องจาก Dynamic Typing และ Indirection",
+            ],
+            [
+              "ความเร็วในการพิมพ์โค้ดสัมภาษณ์",
+              "🐢 ช้ากว่า โค้ดยาว ต้องระบุ Type ทุกจุด",
+              "⚡ เร็วกว่า 2–3 เท่า โค้ดสั้น กระชับ มี Built-ins ทรงพลัง",
             ],
           ],
         },
+        { t: "h2", c: "เปรียบเทียบโค้ดสร้าง Linked List Node" },
         {
           t: "code",
-          lang: "text",
-          label: "ขั้นตอนการคอมไพล์ของ C++ (C++ Compilation Pipeline)",
-          c: `Source Code (.cpp)
-       │
-       ▼ (Preprocessor: จัดการ #include, #define)
-Expanded Code
-       │
-       ▼ (Compiler: ตรวจสอบ Syntax & Type)
-Assembly Code (.s)
-       │
-       ▼ (Assembler: แปลงเป็นภาษาเครื่อง)
-Object Code (.o / .obj)
-       │
-       ▼ (Linker: รวม Library และ Object Files)
-Executable Binary (.exe / a.out)`,
-        },
-        {
-          t: "h2",
-          c: "Memory Model: Pointer ใน C++ เทียบกับ Object Reference ใน Python",
-        },
-        {
-          t: "p",
-          c: "สิ่งสำคัญที่สุดในการเรียน DSA คือการเข้าใจว่าข้อมูลถูกจัดเก็บบน RAM อย่างไร และตัวแปรชี้ไปยังข้อมูลนั้นอย่างไร:",
-        },
-        {
-          t: "ul",
-          c: [
-            "**ใน C++**: ตัวแปรสามารถเก็บค่าข้อมูลโดยตรงบน Stack หรือเก็บเป็น **Pointer (`*`)** ซึ่งคือตัวเลขที่อยู่หน่วยความจำ (Memory Address) บน Heap เช่น `int* ptr = new int(10);` เราต้องระมัดระวังการจอง (`new`) และคืนค่า (`delete`) เสมอ",
-            "**ใน Python**: **ทุกตัวแปรเป็น Object Reference ทั้งหมด!** ตัวแปร `x = [1, 2, 3]` ไม่ได้เก็บตัวอาร์เรย์ แต่เก็บลูกศรอ้างอิงไปยัง Object List บน Heap และมี Garbage Collector คอยคืนหน่วยความจำให้อัตโนมัติ",
-          ],
+          lang: "cpp",
+          label: "C++: Node struct พร้อม Pointer",
+          c: `struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+// การสร้างบน Heap และเชื่อมโยง
+ListNode* head = new ListNode(1);
+head->next = new ListNode(2);
+
+// ต้องระวังเรื่อง Memory Leak: อย่าลืม delete เมื่อใช้เสร็จ!
+delete head->next;
+delete head;`,
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Reference Model (ตัวแปรคือป้ายชื่อชี้ไปยัง Object)",
-          c: `# ใน Python ทุกตัวแปรคือ Reference
-a = [1, 2, 3]
-b = a  # b ชี้ไปยัง list เดียวกันกับ a (ไม่ได้ copy ข้อมูล)
+          label: "Python: Node class พร้อม Reference",
+          c: `class ListNode:
+    def __init__(self, val: int = 0, next: 'ListNode | None' = None):
+        self.val = val
+        self.next = next
 
-b.append(4)
-print("a:", a)  # ผลลัพธ์: a: [1, 2, 3, 4]
-print("id(a) == id(b):", id(a) == id(b))  # True (address เดียวกัน)`,
-        },
-        {
-          t: "code",
-          lang: "cpp",
-          label: "C++: Pointer vs Value Semantics",
-          c: `#include <iostream>
-#include <vector>
+# การสร้างและเชื่อมโยง
+head = ListNode(1)
+head.next = ListNode(2)
 
-int main() {
-    // ใน C++ หาก assign ตรงๆ จะเป็นการ Copy ข้อมูล (Value semantics)
-    std::vector<int> a = {1, 2, 3};
-    std::vector<int> b = a; // Copy ทั้ง array ทันที!
-    b.push_back(4);
-    
-    std::cout << "a size: " << a.size() << "\\n"; // ยังคงเป็น 3
-    std::cout << "b size: " << b.size() << "\\n"; // เป็น 4
-    
-    // หากต้องการให้ชี้ที่เดียวกัน ต้องใช้ Pointer หรือ Reference (&)
-    std::vector<int>* ptr = &a;
-    ptr->push_back(99);
-    std::cout << "a size after ptr: " << a.size() << "\\n"; // กลายเป็น 4
-    return 0;
-}`,
+# Garbage Collector จัดการคืนหน่วยความจำให้อัตโนมัติเมื่อไม่มีตัวแปรใดอ้างอิงถึงอีก`,
         },
         {
           t: "callout",
-          title: "จุดสำคัญสำหรับการสัมภาษณ์งาน",
-          c: "เมื่อเขียน Linked List หรือ Tree ในห้องสัมภาษณ์ด้วย Python การสั่ง `node.next = next_node` คือการย้าย Pointer 100% เสมือน `node->next = next_node` ใน C++ ทุกประการ แต่เราไม่ต้องพิมพ์ `->` หรือกังวลเรื่อง memory leak ทำให้เขียนโค้ดได้เร็วกว่า 3 เท่า!",
-        },
-        { t: "h2", c: "สภาพแวดล้อมที่ใช้เขียนโค้ด (Development Environment)" },
-        {
-          t: "p",
-          c: "สำหรับคอร์สนี้ คุณสามารถเลือกรันโค้ดได้ตามสะดวก:",
-        },
-        {
-          t: "ul",
-          c: [
-            "**Python 3.10+**: แนะนำติดตั้งผ่าน `python.org` หรือใช้ VS Code ร่วมกับ Extension Python",
-            "**C++ (GCC / Clang)**: ตรวจสอบด้วยคำสั่ง `g++ --version` (Mac มีมากับ Xcode Command Line Tools, Windows ใช้ MinGW หรือ WSL, Linux ใช้ `build-essential`)",
-            "**Online Playground**: สำหรับการทดลองแบบรวดเร็ว สามารถใช้ Replit, LeetCode Playground หรือ Compiler Explorer (godbolt.org)",
-          ],
+          title: "🎯 คำแนะนำในการใช้หลักสูตรนี้ให้เกิดประโยชน์สูงสุด",
+          c: "เราจะแสดงตัวอย่างโค้ดคู่กันทั้ง C++ และ Python ในเกือบทุกบทเรียน: ให้คุณอ่าน C++ เพื่อทำความเข้าใจกลไกการจองหน่วยความจำและการชี้ Pointer จากนั้นฝึกพิมพ์และแก้โจทย์ด้วย Python เพื่อสร้างความคล่องแคล่วในการสัมภาษณ์งาน!",
         },
       ],
       en: [],

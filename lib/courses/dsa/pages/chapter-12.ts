@@ -4,28 +4,111 @@ export const chapter12Pages: Record<string, Page> = {
   "dsa-ch12-intro": {
     slug: "dsa-ch12-intro",
     title: {
-      th: "Graph Algorithms: อัลกอริทึมบนกราฟขั้นสูง",
-      en: "Advanced Graph Algorithms: Overview & Applications",
+      th: "โลกความจริงคือกราฟ: Social Networks, Maps & Microservices",
+      en: "The World is a Graph: Networks, Maps & Distributed Topology",
     },
     lead: {
-      th: "ภาพรวมอัลกอริทึมกราฟขั้นสูง: การค้นหาเส้นทางที่สั้นที่สุด (Shortest Path), โครงข่ายเชื่อมโยงต่ำสุด (MST) และการจัดลำดับการทำงาน (Topological Sort)",
-      en: "Advanced graph foundations: shortest path families, minimum spanning trees, and topological dependencies.",
+      th: "ทำความเข้าใจโครงสร้างข้อมูลที่ยืดหยุ่นและทรงพลังที่สุดในโลกคอมพิวเตอร์: ทฤษฎีกราฟ, คำศัพท์พื้นฐาน และการเชื่อมโยงระบบจริง",
+      en: "Master the most versatile data structure: graph theory terminology, directed/undirected models, and real-world network architectures.",
     },
-    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graphs & Network Algorithms)",
+    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graph Theory & Networks)",
     blocks: {
       th: [
         {
           t: "p",
-          c: "กราฟเป็นโครงสร้างที่จำลองระบบในโลกจริงได้ครอบคลุมที่สุด เช่น โครงข่ายถนน GPS (Google Maps), เครือข่ายเพื่อนใน Facebook, ระบบ Router อินเทอร์เน็ต และการตรวจสอบการคอมไพล์โค้ดที่ขึ้นต่อกัน (Dependency Graph)",
+          c: "หากต้นไม้ (Tree) คือการจำลองความสัมพันธ์แบบแม่-ลูกที่เคร่งครัด **กราฟ (Graph)** ก็คือการจำลองความสัมพันธ์ของโลกแห่งความเป็นจริงที่ไม่มีขอบเขตจำกัด:\n- **Social Networks (Facebook, LinkedIn)**: ผู้ใช้งานคือโหนด (Vertices) ความเป็นเพื่อนคือเส้นเชื่อม (Edges)\n- **ระบบนำทาง (Google Maps, Grab)**: ทางแยกคือโหนด ถนนคือเส้นเชื่อมที่มีค่าน้ำหนัก (Weights) เป็นระยะทางหรือเวลา\n- **Microservices Architecture**: Service ต่างๆ คือโหนด การเรียก API ระหว่างกันคือเส้นเชื่อม",
         },
-        { t: "h2", c: "3 ปัญหาหลักของ Graph Algorithms" },
+        { t: "h2", c: "พจนานุกรมคำศัพท์ทฤษฎีกราฟ (Graph Terminology)" },
         {
-          t: "ul",
-          c: [
-            "**1. Shortest Path (เส้นทางที่สั้นที่สุด)**: หาเส้นทางที่มีผลรวมค่าน้ำหนักน้อยที่สุดจากจุด A ไป B",
-            "**2. Minimum Spanning Tree (MST)**: หาชุดของเส้นเชื่อมที่เชื่อมทุกโหนดเข้าด้วยกันโดยไม่มี Cycle และมีต้นทุนรวมต่ำที่สุด (เช่น การเดินสายเคเบิลหรือท่อประปา)",
-            "**3. Topological Sort (การจัดลำดับตามเงื่อนไขก่อนหลัง)**: การเรียงลำดับงานใน Directed Acyclic Graph (DAG) เช่น วิชาที่ต้องลงทะเบียนเรียนก่อน-หลัง",
+          t: "table",
+          head: ["คำศัพท์", "สัญลักษณ์", "คำอธิบายเชิงวิศวกรรม"],
+          rows: [
+            ["**Vertex (โหนด / จุดยอด)**", "$V$", "วัตถุหรือจุดในระบบ (เช่น บุคคล, เมือง, เซิร์ฟเวอร์)"],
+            ["**Edge (เส้นเชื่อม)**", "$E$", "ความสัมพันธ์ระหว่างคู่โหนด (เช่น ความเป็นเพื่อน, ถนน, ท่อส่งข้อมูล)"],
+            ["**Directed Graph (กราฟมีทิศทาง)**", "ลูกศร $\\to$", "เส้นทางวิ่งได้ทิศทางเดียว (เช่น การ Follow บน Twitter/Instagram)"],
+            ["**Undirected Graph (กราฟไม่มีทิศทาง)**", "เส้นตรง —", "เส้นทางวิ่งไปมาได้สองฝั่ง (เช่น ความเป็นเพื่อนบน Facebook)"],
+            ["**Weighted Graph (กราฟมีน้ำหนัก)**", "มีตัวเลขบน Edge", "เส้นเชื่อมมีค่าใช้จ่าย (Cost, Distance, Latency)"],
+            ["**Cycle (วงรอบ)**", "วนกลับมาจุดเดิม", "เส้นทางที่เริ่มจากโหนด A เดินผ่านโหนดอื่นแล้ววนกลับมาที่โหนด A ได้"],
           ],
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch12-representation": {
+    slug: "dsa-ch12-representation",
+    title: {
+      th: "Graph Representation & Traversals: Matrix/List, BFS & DFS",
+      en: "Graph Representations & Core Traversals: Matrix vs List, BFS & DFS",
+    },
+    lead: {
+      th: "เปรียบเทียบ Adjacency Matrix vs Adjacency List, การท่องกราฟด้วย BFS (Queue) และ DFS (Recursion), และการตรวจจับวงวน (Cycle Detection)",
+      en: "Compare Adjacency Matrix vs List trade-offs, master BFS/DFS traversals, and implement cycle detection in directed and undirected graphs.",
+    },
+    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graph Theory & Networks)",
+    blocks: {
+      th: [
+        { t: "h2", c: "Adjacency Matrix vs Adjacency List" },
+        {
+          t: "table",
+          head: ["คุณสมบัติ", "Adjacency Matrix (ตาราง 2 มิติ $V \\times V$)", "Adjacency List (Dictionary of Lists)"],
+          rows: [
+            ["Space Complexity", "🐢 $O(V^2)$ เปลือง RAM มากสำหรับกราฟขนาดใหญ่", "⚡ **$O(V + E)$** ประหยัดพื้นที่สูงสุด"],
+            ["หาว่ามีเส้นเชื่อม $u \\to v$ ไหม", "⚡ $O(1)$ ตรวจดู `matrix[u][v]`", "🐢 $O(\\text{degree}(u))$ ต้องสแกนหาในลิสต์"],
+            ["หาเพื่อนบ้านทั้งหมดของ $u$", "🐢 $O(V)$ ต้องวนลูปสแกนทั้งแถว", "⚡ **$O(\\text{degree}(u))$** อ่านเฉพาะตัวที่มีจริง"],
+            ["มาตรฐานในการสัมภาษณ์งาน", "ใช้เมื่อกราฟเป็น Dense Graph ($E \\approx V^2$)", "🔥 **ใช้ใน 95% ของโจทย์สัมภาษณ์งานทั้งหมด**"],
+          ],
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: การสร้าง Adjacency List และการท่องด้วย BFS / DFS",
+          c: `from collections import defaultdict, deque
+
+# 1. แปลงรายการเส้นเชื่อม (Edge List) เป็น Adjacency List
+edges = [[0, 1], [0, 2], [1, 2], [2, 0], [2, 3], [3, 3]]
+graph = defaultdict(list)
+for u, v in edges:
+    graph[u].append(v)
+
+# 2. Breadth-First Search (BFS) ด้วย Queue (ท่องทีละชั้นหาระยะสั้นสุด)
+def bfs(start_node: int) -> list[int]:
+    visited = {start_node}
+    queue = deque([start_node])
+    order = []
+    
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+    return order
+
+# 3. Depth-First Search (DFS) ด้วย Recursion (เดินลึกสุดทาง)
+def dfs(start_node: int) -> list[int]:
+    visited = set()
+    order = []
+    
+    def walk(node):
+        visited.add(node)
+        order.append(node)
+        for neighbor in graph[node]:
+            if neighbor not in visited:
+                walk(neighbor)
+                
+    walk(start_node)
+    return order
+
+print("BFS Traversal:", bfs(2)) # [2, 0, 3, 1]
+print("DFS Traversal:", dfs(2)) # [2, 0, 1, 3]`,
+        },
+        { t: "h2", c: "การตรวจจับวงวน (Cycle Detection)" },
+        {
+          t: "p",
+          c: "- **ในกราฟไม่มีทิศทาง (Undirected)**: ใช้ DFS และส่ง `parent` โหนดเข้าไปด้วย หากเจอเพื่อนบ้านที่เคย `visited` แล้ว และเพื่อนบ้านนั้นไม่ใช่ `parent` แปลว่ามี Cycle!\n- **ในกราฟมีทิศทาง (Directed)**: ใช้เทคนิค **3-Color State** (ขาว: ยังไม่เคยแตะ, เทา: อยู่ใน Call Stack ปัจจุบัน, ดำ: ตรวจเสร็จสิ้นแล้ว) หากเดินไปชนโหนดสีเทา แปลว่ามี Cycle วนกลับมาหาบรรพบุรุษ!",
         },
       ],
       en: [],
@@ -35,126 +118,66 @@ export const chapter12Pages: Record<string, Page> = {
   "dsa-ch12-shortest-path": {
     slug: "dsa-ch12-shortest-path",
     title: {
-      th: "Shortest Path: Dijkstra, Bellman-Ford & Floyd-Warshall",
-      en: "Shortest Path: Dijkstra, Bellman-Ford & Floyd-Warshall",
+      th: "Shortest Path: Unweighted BFS, Dijkstra & Bellman-Ford",
+      en: "Shortest Path Algorithms: BFS, Dijkstra's Min-Heap & Bellman-Ford",
     },
     lead: {
-      th: "พิชิต 3 ตระกูลเส้นทางที่สั้นที่สุด: Dijkstra (น้ำหนักบวก), Bellman-Ford (น้ำหนักลบ & ตรวจ Cycle ลบ) และ Floyd-Warshall (ทุกคู่จุด O(V³))",
-      en: "Master single-source and all-pairs shortest paths: Dijkstra, Bellman-Ford with negative cycles, and Floyd-Warshall dynamic programming.",
+      th: "เจาะลึก 3 อัลกอริทึมค้นหาเส้นทางที่สั้นที่สุด: BFS สำหรับกราฟไร้น้ำหนัก, Dijkstra ด้วย Priority Queue ใน O((V + E) log V), และ Bellman-Ford รับมือน้ำหนักติดลบ",
+      en: "Master single-source shortest path: unweighted BFS, Dijkstra's priority queue relaxation, and Bellman-Ford negative weight cycle detection.",
     },
-    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graphs & Network Algorithms)",
+    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graph Theory & Networks)",
     blocks: {
       th: [
-        { t: "h2", c: "1. Dijkstra's Algorithm (กราฟน้ำหนักไม่ติดลบ)" },
+        { t: "h2", c: "เลือกใช้อัลกอริทึม Shortest Path ตัวไหนดี?" },
         {
-          t: "p",
-          c: "Dijkstra อาศัยหลักการ Greedy ผสมกับ **Priority Queue (Min-Heap)** ขยายโหนดที่มีระยะทางสะสมน้อยที่สุดเรื่อยๆ (**Edge Relaxation**):",
+          t: "table",
+          head: ["สถานการณ์ของกราฟ", "อัลกอริทึมที่ควรใช้", "Time Complexity", "จุดเด่น"],
+          rows: [
+            ["กราฟไม่มีน้ำหนัก (Unweighted)", "**BFS (Breadth-First Search)**", "⚡ **O(V + E)**", "ง่ายและเร็วที่สุด ทุกเส้นมีน้ำหนักเท่ากับ 1"],
+            ["กราฟมีน้ำหนักที่เป็นบวกทั้งหมด", "**Dijkstra's Algorithm**", "🚀 **O((V + E) log V)**", "ใช้ Min-Heap ผ่อนคลายระยะทาง (Relaxation)"],
+            ["กราฟมีน้ำหนักติดลบ (Negative Weights)", "**Bellman-Ford Algorithm**", "🐢 **O(V × E)**", "สามารถตรวจจับ Negative Weight Cycle ได้"],
+          ],
         },
+        { t: "h2", c: "Dijkstra's Algorithm ฉบับสมบูรณ์ (Priority Queue)" },
         {
           t: "code",
           lang: "python",
-          label: "Python: Dijkstra's Algorithm ด้วย heapq (O((V + E) log V))",
+          label: "Python: Dijkstra's Algorithm ด้วย heapq",
           c: `import heapq
 
-def dijkstra(graph: dict[int, list[tuple[int, int]]], start: int) -> dict[int, int]:
-    distances = {node: float('inf') for node in graph}
-    distances[start] = 0
-    pq = [(0, start)]  # (distance, node)
-    
-    while pq:
-        curr_dist, u = heapq.heappop(pq)
+def dijkstra(n: int, edges: list[list[int]], start: int) -> dict[int, int]:
+    # 1. สร้าง Adjacency List พร้อมค่าน้ำหนัก: {u: [(v, weight), ...]}
+    graph = {i: [] for i in range(n)}
+    for u, v, w in edges:
+        graph[u].append((v, w))
+        graph[v].append((u, w)) # ถ้าเป็นกราฟไม่มีทิศทาง
         
+    # 2. เก็บระยะทางสั้นสุดจาก start: ค่าเริ่มต้นเป็น Infinity
+    distances = {i: float('inf') for i in range(n)}
+    distances[start] = 0
+    
+    # 3. Min-Heap เก็บ Tuple: (ระยะทางปัจจุบัน, โหนด)
+    min_heap = [(0, start)]
+    
+    while min_heap:
+        curr_dist, u = heapq.heappop(min_heap)
+        
+        # หากระยะทางที่ดึงออกมามากกว่าที่เคยบันทึกไว้ ให้ข้าม (Lazy Deletion)
         if curr_dist > distances[u]:
             continue
             
-        for v, weight in graph[u]:
-            distance = curr_dist + weight
-            if distance < distances[v]:
-                distances[v] = distance
-                heapq.heappush(pq, (distance, v))
+        for neighbor, weight in graph[u]:
+            new_dist = curr_dist + weight
+            # ขั้นตอน Relaxation: เจอเส้นทางที่สั้นกว่า!
+            if new_dist < distances[neighbor]:
+                distances[neighbor] = new_dist
+                heapq.heappush(min_heap, (new_dist, neighbor))
                 
     return distances
 
-graph_example = {
-    0: [(1, 4), (2, 1)],
-    1: [(3, 1)],
-    2: [(1, 2), (3, 5)],
-    3: []
-}
-print("ระยะทางสั้นสุดจาก 0:", dijkstra(graph_example, 0))  # {0: 0, 1: 3, 2: 1, 3: 4}`,
-        },
-        { t: "h2", c: "2. Bellman-Ford Algorithm (รองรับน้ำหนักลบ & ตรวจจับ Negative Cycle)" },
-        {
-          t: "p",
-          c: "หากกราฟมีน้ำหนักติดลบ Dijkstra จะให้คำตอบผิด! Bellman-Ford ทำการ Relax ขอบทั้งหมด $V - 1$ รอบ และถ้าทำรอบที่ $V$ แล้วระยะทางยังลดลงได้อีก แปลว่ามี **วงจรน้ำหนักลบ (Negative Weight Cycle)**:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Bellman-Ford Algorithm (O(V * E))",
-          c: `def bellman_ford(n: int, edges: list[tuple[int, int, int]], src: int) -> tuple[list[float], bool]:
-    """คืนค่า (distances, has_negative_cycle)"""
-    dist = [float('inf')] * n
-    dist[src] = 0
-    
-    # 1. Relax ทุก Edge ซ้ำ V - 1 รอบ
-    for _ in range(n - 1):
-        for u, v, w in edges:
-            if dist[u] != float('inf') and dist[u] + w < dist[v]:
-                dist[v] = dist[u] + w
-                
-    # 2. ตรวจสอบรอบที่ V: ถ้ายังลดค่าได้อีก แสดงว่ามี Negative Cycle
-    has_neg_cycle = False
-    for u, v, w in edges:
-        if dist[u] != float('inf') and dist[u] + w < dist[v]:
-            has_neg_cycle = True
-            break
-            
-    return dist, has_neg_cycle
-
-# ขอบ: (u, v, weight)
-sample_edges = [(0, 1, -1), (0, 2, 4), (1, 2, 3), (1, 3, 2), (1, 4, 2), (3, 2, 5), (3, 1, 1), (4, 3, -3)]
-dists, neg_cycle = bellman_ford(5, sample_edges, 0)
-print("ระยะทาง:", dists, "| มี Cycle ติดลบหรือไม่:", neg_cycle)`,
-        },
-        { t: "h2", c: "3. Floyd-Warshall Algorithm (All-Pairs Shortest Path O(V³))" },
-        {
-          t: "p",
-          c: "หาเส้นทางสั้นที่สุดระหว่าง **ทุกคู่จุดยอด (u, v)** ในกราฟด้วยแนวคิด Dynamic Programming โดยพิจารณาว่าการแวะผ่านจุดยอด $k$ จะทำให้ทางสั้นลงหรือไม่:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Floyd-Warshall O(V³)",
-          c: `def floyd_warshall(matrix: list[list[float]]) -> list[list[float]]:
-    V = len(matrix)
-    # dist[i][j] คือระยะทางสั้นสุดจาก i ไป j
-    dist = [row[:] for row in matrix]
-    
-    for k in range(V):          # จุดยอดคนกลางที่แวะผ่าน
-        for i in range(V):      # จุดต้นทาง
-            for j in range(V):  # จุดปลายทาง
-                if dist[i][k] + dist[k][j] < dist[i][j]:
-                    dist[i][j] = dist[i][k] + dist[k][j]
-                    
-    return dist
-
-INF = float('inf')
-adj_matrix = [
-    [0, 5, INF, 10],
-    [INF, 0, 3, INF],
-    [INF, INF, 0, 1],
-    [INF, INF, INF, 0]
-]
-shortest_matrix = floyd_warshall(adj_matrix)
-print("ระยะทางสั้นสุดระหว่างทุกคู่จุด:")
-for row in shortest_matrix:
-    print(row)`,
-        },
-        {
-          t: "callout",
-          title: "📌 ตารางสรุปการเลือกใช้อัลกอริทึม Shortest Path",
-          c: "- **กราฟไม่มีน้ำหนัก (Unweighted)**: ใช้ **BFS** (O(V + E))\\n- **กราฟน้ำหนักไม่ติดลบ (Non-negative)**: ใช้ **Dijkstra** (O((V + E) log V))\\n- **กราฟมีน้ำหนักติดลบ (Negative weights)**: ใช้ **Bellman-Ford** (O(V * E))\\n- **ต้องการระยะทางทุกคู่โหนด (All-pairs)**: ใช้ **Floyd-Warshall** (O(V³))",
+# ทดสอบ
+edges = [[0, 1, 4], [0, 2, 1], [2, 1, 2], [1, 3, 1], [2, 3, 5]]
+print(dijkstra(4, edges, 0)) # {0: 0, 1: 3, 2: 1, 3: 4}`,
         },
       ],
       en: [],
@@ -164,112 +187,72 @@ for row in shortest_matrix:
   "dsa-ch12-minimum-spanning-tree": {
     slug: "dsa-ch12-minimum-spanning-tree",
     title: {
-      th: "Minimum Spanning Tree: Prim & Kruskal",
-      en: "Minimum Spanning Tree: Kruskal's & Prim's Algorithms",
+      th: "Minimum Spanning Tree (MST): Prim vs Kruskal (Union-Find)",
+      en: "Minimum Spanning Trees: Kruskal's DSU & Prim's Cut Property",
     },
     lead: {
-      th: "การเชื่อมต่อทุกโหนดให้ครบด้วยต้นทุนรวมต่ำที่สุด: Kruskal (เรียงเส้นเชื่อม + Union-Find) เทียบกับ Prim (เติบโตจากจุดยอด + Min-Heap)",
-      en: "Connect all nodes with minimal cost: Kruskal's edge-based greedy and Prim's vertex-growing min-heap.",
+      th: "แก้ปัญหาการลากสายเคเบิลและโครงข่ายด้วยต้นไม้ทอดข้ามต่ำสุด: Kruskal's Algorithm ร่วมกับ Disjoint Set Union (Union-Find) และ Prim's Algorithm",
+      en: "Solve network topology optimization: Kruskal's algorithm with Disjoint Set Union (DSU / Union-Find) and Prim's cut property.",
     },
-    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graphs & Network Algorithms)",
+    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graph Theory & Networks)",
     blocks: {
       th: [
-        { t: "h2", c: "1. Kruskal's Algorithm (Edge-based Greedy + Union-Find)" },
+        { t: "h2", c: "Minimum Spanning Tree (MST) คืออะไร?" },
         {
           t: "p",
-          c: "เรียงเส้นเชื่อมทั้งหมดจากน้ำหนักน้อยไปมาก ทยอยหยิบเส้นเชื่อมมาใส่ในคำตอบ หากเส้นเชื่อมนั้น **ไม่ทำให้เกิด Cycle** (ตรวจสอบด้วยโครงสร้าง Disjoint Set Union / Union-Find):",
+          c: "สมมติคุณเป็นวิศวกรวางระบบเครือข่ายอินเทอร์เน็ตเชื่อมต่อเมือง $V$ เมือง คุณต้องการเชื่อมให้ทุกเมืองสามารถส่งข้อมูลหากันได้ทั้งหมด โดยใช้ **งบประมาณค่าสายเคเบิลรวมต่ำที่สุด**:\n- กราฟย่อยที่เชื่อมทุกโหนดเข้าด้วยกันโดย **ไม่มี Cycle** เรียกว่า **Spanning Tree** (มีเส้นเชื่อมพอดี $V - 1$ เส้น)\n- Spanning Tree ที่มีผลรวมค่าน้ำหนักเส้นเชื่อมน้อยที่สุด เรียกว่า **Minimum Spanning Tree (MST)**",
+        },
+        { t: "h2", c: "Kruskal's Algorithm & Disjoint Set Union (DSU / Union-Find)" },
+        {
+          t: "p",
+          c: "Kruskal ใช้หลักการ Greedy ที่สวยงามมาก:\n1. เรียงเส้นเชื่อมทั้งหมดตามน้ำหนักจากน้อยไปมาก\n2. หยิบเส้นเชื่อมที่สั้นที่สุดมาเชื่อมเข้าด้วยกันทีละเส้น โดยใช้ **Union-Find** ตรวจสอบว่าเส้นเชื่อมนี้จะทำให้เกิด Cycle หรือไม่ หากไม่เกิด Cycle ให้รวมร่างได้เลย!",
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Kruskal's Algorithm with Union-Find (O(E log E))",
+          label: "Python: Union-Find Class พร้อม Path Compression และ Union by Rank",
           c: `class UnionFind:
-    def __init__(self, size: int):
-        self.parent = list(range(size))
-        self.rank = [0] * size
+    def __init__(self, n: int):
+        self.parent = list(range(n))
+        self.rank = [0] * n
 
     def find(self, i: int) -> int:
+        # Path Compression: ปรับให้ชี้ตรงไปที่รากสูงสุดเพื่อความเร็วเกือบ O(1)
         if self.parent[i] != i:
             self.parent[i] = self.find(self.parent[i])
         return self.parent[i]
 
-    def union(self, x: int, y: int) -> bool:
-        root_x = self.find(x)
-        root_y = self.find(y)
-        if root_x == root_y:
-            return False
-        if self.rank[root_x] < self.rank[root_y]:
-            self.parent[root_x] = root_y
-        elif self.rank[root_x] > self.rank[root_y]:
-            self.parent[root_y] = root_x
+    def union(self, i: int, j: int) -> bool:
+        root_i = self.find(i)
+        root_j = self.find(j)
+        if root_i == root_j:
+            return False # อยู่กลุ่มเดียวกันอยู่แล้ว หากเชื่อมจะเกิด Cycle!
+            
+        # Union by Rank: เอากลุ่มที่เตี้ยกว่ามาต่อใต้กลุ่มที่สูงกว่า
+        if self.rank[root_i] < self.rank[root_j]:
+            self.parent[root_i] = root_j
+        elif self.rank[root_i] > self.rank[root_j]:
+            self.parent[root_j] = root_i
         else:
-            self.parent[root_y] = root_x
-            self.rank[root_x] += 1
+            self.parent[root_j] = root_i
+            self.rank[root_i] += 1
         return True
 
-def kruskal(n: int, edges: list[tuple[int, int, int]]) -> int:
-    """edges: (u, v, weight)"""
+def kruskal_mst(n: int, edges: list[list[int]]) -> int:
+    # 1. เรียงเส้นเชื่อมตามน้ำหนัก ascending: (u, v, weight)
     edges.sort(key=lambda x: x[2])
     uf = UnionFind(n)
-    total_cost = 0
-    count = 0
-
+    mst_weight = 0
+    edges_count = 0
+    
     for u, v, weight in edges:
         if uf.union(u, v):
-            total_cost += weight
-            count += 1
-            if count == n - 1:
+            mst_weight += weight
+            edges_count += 1
+            if edges_count == n - 1:
                 break
-    return total_cost
-
-sample_edges = [(0, 1, 10), (0, 2, 6), (0, 3, 5), (1, 3, 15), (2, 3, 4)]
-print("ต้นทุนต่ำสุด MST (Kruskal):", kruskal(4, sample_edges))  # 19`,
-        },
-        { t: "h2", c: "2. Prim's Algorithm (Vertex-growing Greedy + Min-Heap)" },
-        {
-          t: "p",
-          c: "เริ่มต้นจากจุดยอดใดจุดหนึ่ง ขยายต้นไม้ครอบคลุมโดยการหยิบเส้นเชื่อมที่มีน้ำหนักน้อยที่สุดที่เชื่อมจากต้นไม้ไปยังจุดยอดภายนอกเสมอ คล้ายกับ Dijkstra:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Prim's Algorithm ด้วย heapq (O((V + E) log V))",
-          c: `import heapq
-
-def prim(n: int, graph: dict[int, list[tuple[int, int]]]) -> int:
-    visited = [False] * n
-    min_heap = [(0, 0)]  # (cost, node)
-    total_cost = 0
-    edges_used = 0
-    
-    while min_heap and edges_used < n:
-        cost, u = heapq.heappop(min_heap)
-        
-        if visited[u]:
-            continue
-            
-        visited[u] = True
-        total_cost += cost
-        edges_used += 1
-        
-        for v, weight in graph[u]:
-            if not visited[v]:
-                heapq.heappush(min_heap, (weight, v))
                 
-    return total_cost
-
-graph_mst = {
-    0: [(1, 10), (2, 6), (3, 5)],
-    1: [(0, 10), (3, 15)],
-    2: [(0, 6), (3, 4)],
-    3: [(0, 5), (1, 15), (2, 4)]
-}
-print("ต้นทุนต่ำสุด MST (Prim):", prim(4, graph_mst))  # 19`,
-        },
-        {
-          t: "callout",
-          title: "⚖️ เปรียบเทียบ: Prim vs Kruskal เลือกใช้อะไรเมื่อไหร่?",
-          c: "- **Kruskal**: เหมาะกับ **Sparse Graph** (เส้นเชื่อมน้อย $E \\approx V$) เพราะการ sort ขอบใช้เวลาน้อย\\n- **Prim**: เหมาะกับ **Dense Graph** (เส้นเชื่อมหนาแน่น $E \\approx V^2$) เพราะวิ่งขยายโหนดได้เร็วกว่า",
+    return mst_weight`,
         },
       ],
       en: [],
@@ -279,132 +262,92 @@ print("ต้นทุนต่ำสุด MST (Prim):", prim(4, graph_mst))  #
   "dsa-ch12-leetcode": {
     slug: "dsa-ch12-leetcode",
     title: {
-      th: "Graph LeetCode: Course Schedule, Network Delay & Min Cost Points",
-      en: "Graph LeetCode Mastery: Course Schedule, Network Delay & Min Cost Points",
+      th: "โจทย์สัมภาษณ์กราฟขั้นสูง: Course Schedule & Number of Islands",
+      en: "Advanced Graph Interview Problems: Topological Sort & Grid Traversal",
     },
     lead: {
-      th: "3 มหาโจทย์กราฟระดับ Top Interview: Course Schedule (LeetCode 207), Network Delay Time (LeetCode 743) และ Min Cost to Connect All Points (LeetCode 1584)",
-      en: "Conquer staple interview questions: Topological sort, single-source shortest path, and minimum spanning trees.",
+      th: "พิชิตโจทย์สัมภาษณ์กราฟยอดนิยม: Topological Sort ด้วย Kahn's Algorithm (Course Schedule - LeetCode 207) และ Number of Islands (LeetCode 200)",
+      en: "Master DAG dependency resolution with Kahn's Topological Sort and 2D grid component counting in Number of Islands.",
     },
-    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graphs & Network Algorithms)",
+    group: "บทที่ 12: กราฟและอัลกอริทึมโครงข่าย (Graph Theory & Networks)",
     blocks: {
       th: [
-        { t: "h2", c: "1. Course Schedule: ตรวจสอบ Deadlock (LeetCode 207)" },
+        { t: "h2", c: "1. Topological Sort & Kahn's Algorithm (Course Schedule - LeetCode 207)" },
         {
           t: "p",
-          c: "มีวิชา 0 ถึง $n-1$ เงื่อนไข `[A, B]` คือต้องเรียน B ก่อน A จงตรวจสอบว่าสามารถเรียนครบทุกวิชาได้หรือไม่ (ปัญหาตรวจสอบว่า DAG มี Cycle หรือไม่ ด้วย Kahn's Topological Sort):",
+          c: "โจทย์ให้ตรวจสอบว่าเราสามารถลงทะเบียนเรียนวิชาทั้งหมดได้หรือไม่ โดยมีเงื่อนไขวิชาบังคับก่อน (Prerequisites):\n- ปัญหานี้คือการจัดเรียงลำดับใน **Directed Acyclic Graph (DAG)**\n- เราใช้ **Kahn's Algorithm (In-degree Queue)**: นับจำนวนวิชาที่ต้องเรียนก่อน (In-degree) วิชาใดที่มี In-degree เป็น 0 สามารถเรียนได้ทันที จากนั้นลด In-degree ของวิชาถัดไปลง!",
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Course Schedule ด้วย Kahn's BFS (O(V + E))",
-          c: `from collections import deque
+          label: "Python: Kahn's Algorithm สำหรับ Course Schedule O(V + E)",
+          c: `from collections import deque, defaultdict
 
-def can_finish(num_courses: int, prerequisites: list[list[int]]) -> bool:
-    adj = {i: [] for i in range(num_courses)}
+def can_finish_courses(num_courses: int, prerequisites: list[list[int]]) -> bool:
     in_degree = [0] * num_courses
+    adj = defaultdict(list)
     
-    for crs, pre in prerequisites:
-        adj[pre].append(crs)
-        in_degree[crs] += 1
+    for course, prereq in prerequisites:
+        adj[prereq].append(course)
+        in_degree[course] += 1
         
+    # คิวเก็บวิชาที่ไม่มีเงื่อนไขบังคับก่อน (In-degree == 0)
     queue = deque([i for i in range(num_courses) if in_degree[i] == 0])
-    completed = 0
+    completed_courses = 0
     
     while queue:
-        node = queue.popleft()
-        completed += 1
-        for neighbor in adj[node]:
+        curr = queue.popleft()
+        completed_courses += 1
+        
+        for neighbor in adj[curr]:
             in_degree[neighbor] -= 1
             if in_degree[neighbor] == 0:
                 queue.append(neighbor)
                 
-    return completed == num_courses
+    return completed_courses == num_courses
 
-print(can_finish(2, [[1, 0]]))          # True (เรียน 0 ก่อน 1)
-print(can_finish(2, [[1, 0], [0, 1]]))  # False (วงวน)`,
+print(can_finish_courses(2, [[1, 0]]))          # True (เรียน 0 ก่อน แล้วเรียน 1)
+print(can_finish_courses(2, [[1, 0], [0, 1]]))  # False (เกิด Cycle วนรอบ เรียนไม่ได้!)`,
         },
-        { t: "h2", c: "2. Network Delay Time: สัญญาณเครือข่าย (LeetCode 743)" },
+        { t: "h2", c: "2. Number of Islands บนตาราง 2 มิติ (LeetCode 200)" },
         {
           t: "p",
-          c: "มีโหนดเครือข่าย $n$ จุด ส่งสัญญาณจากโหนด $k$ โดยมีรายการเวลา `times[i] = (u, v, w)` จงหาเวลาที่น้อยที่สุดที่สัญญาณจะกระจายไปถึง **ทุกโหนด** (ถ้าไปไม่ครบส่งคืน -1):",
+          c: "นับจำนวนเกาะ ('1' = ดิน, '0' = น้ำ) โดยเกาะเชื่อมต่อกันในแนวตั้งและแนวนอน: เราท่องตารางทีละช่อง เมื่อเจอ '1' ให้เรียก BFS/DFS เพื่อ 'จมเกาะ' (Sinking the island เป็น '0') แล้วนับเกาะเพิ่ม 1:",
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Network Delay Time ด้วย Dijkstra (O(E log V))",
-          c: `import heapq
-
-def network_delay_time(times: list[list[int]], n: int, k: int) -> int:
-    adj = {i: [] for i in range(1, n + 1)}
-    for u, v, w in times:
-        adj[u].append((v, w))
+          label: "Python: Number of Islands ด้วย Grid DFS O(M × N)",
+          c: `def num_islands(grid: list[list[str]]) -> int:
+    if not grid:
+        return 0
         
-    min_heap = [(0, k)]
-    visited = {}
+    rows, cols = len(grid), len(grid[0])
+    islands_count = 0
     
-    while min_heap:
-        time, u = heapq.heappop(min_heap)
-        if u in visited:
-            continue
-        visited[u] = time
-        
-        for v, weight in adj[u]:
-            if v not in visited:
-                heapq.heappush(min_heap, (time + weight, v))
-                
-    return max(visited.values()) if len(visited) == n else -1
-
-print(network_delay_time([[2, 1, 1], [2, 3, 1], [3, 4, 1]], 4, 2))  # 2`,
-        },
-        { t: "h2", c: "3. Min Cost to Connect All Points (LeetCode 1584)" },
-        {
-          t: "p",
-          c: "กำหนดพิกัดจุด 2D `points` ค่าเชื่อมต่อระหว่างจุดคือระยะทางแมนฮัตตัน $|x_1 - x_2| + |y_1 - y_2|$ จงหาค่าใช้จ่ายต่ำที่สุดในการเชื่อมต่อทุกจุดเข้าด้วยกัน (แก้ด้วย Kruskal's MST):",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Min Cost to Connect Points ด้วย Kruskal (O(V² log V))",
-          c: `def min_cost_connect_points(points: list[list[int]]) -> int:
-    n = len(points)
-    edges = []
-    
-    # สร้างเส้นเชื่อมระหว่างทุกคู่จุด
-    for i in range(n):
-        for j in range(i + 1, n):
-            dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
-            edges.append((dist, i, j))
+    def dfs(r, c):
+        if r < 0 or r >= rows or c < 0 or c >= cols or grid[r][c] != '1':
+            return
             
-    edges.sort()
-    parent = list(range(n))
-    
-    def find(i: int) -> int:
-        if parent[i] != i:
-            parent[i] = find(parent[i])
-        return parent[i]
+        grid[r][c] = '0' # จมเกาะเพื่อไม่ให้วนซ้ำ
+        # ท่อง 4 ทิศทาง
+        dfs(r + 1, c)
+        dfs(r - 1, c)
+        dfs(r, c + 1)
+        dfs(r, c - 1)
         
-    cost = 0
-    edges_count = 0
-    
-    for dist, u, v in edges:
-        root_u = find(u)
-        root_v = find(v)
-        if root_u != root_v:
-            parent[root_u] = root_v
-            cost += dist
-            edges_count += 1
-            if edges_count == n - 1:
-                break
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                islands_count += 1
+                dfs(r, c) # จมเกาะนี้ทั้งหมด
                 
-    return cost
-
-print("ต้นทุนต่ำสุดในการเชื่อมจุด:", min_cost_connect_points([[0,0],[2,2],[3,10],[5,2],[7,0]]))  # 20`,
+    return islands_count`,
         },
         {
           t: "callout",
-          title: "🎉 ยินดีด้วย! คุณสำเร็จหลักสูตร Data Structures & Algorithms ครบถ้วน 100%",
-          c: "คุณได้เรียนรู้ตั้งแต่พื้นฐานไวยากรณ์, Memory & Pointers, Linear Data Structures, Trees, Hashing, Sorting, Big-O Analysis, Backtracking, Divide & Conquer, Greedy, Dynamic Programming, ไปจนถึง Advanced Network Graph Algorithms พร้อมทั้งแนวคิดทางทฤษฎีและโค้ดสำหรับตะลุยห้องสัมภาษณ์งาน!",
+          title: "🎉 ยินดีด้วย! คุณพิชิตหลักสูตร Data Structures & Algorithms ฉบับสมบูรณ์แล้ว",
+          c: "คุณได้เดินทางผ่านครบทั้ง 12 บทเรียน 49 หัวข้อย่อย ตั้งแต่รากฐานหน่วยความจำคอมพิวเตอร์ Big-O โครงสร้างเชิงเส้น ต้นไม้ และสี่กระบวนทัศน์อัลกอริทึมขั้นสูง บัดนี้คุณมีความพร้อมทั้งในด้านกรอบความคิดเชิงวิศวกรรม (Engineering Mindset) และความพร้อมในการสอบสัมภาษณ์งานระดับสากล!",
         },
       ],
       en: [],

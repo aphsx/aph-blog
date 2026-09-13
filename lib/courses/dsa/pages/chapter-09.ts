@@ -4,194 +4,331 @@ export const chapter09Pages: Record<string, Page> = {
   "dsa-ch9-intro": {
     slug: "dsa-ch9-intro",
     title: {
-      th: "Divide & Conquer: กลยุทธ์แบ่งแยกและเอาชนะ",
-      en: "Divide & Conquer: Paradigm & Recurrence Relations",
+      th: "Backtracking คืออะไร: State-Space Tree & Pruning",
+      en: "Backtracking Foundations: State-Space Trees & Pruning Mechanics",
     },
     lead: {
-      th: "กระบวนการ 3 ขั้นตอน: แบ่งปัญหาใหญ่ออกเป็นปัญหาย่อย -> แก้ปัญหาย่อย -> รวมคำตอบเข้าด้วยกัน",
-      en: "Master the 3-step paradigm: Divide into independent subproblems, Conquer recursively, and Combine.",
+      th: "เข้าใจหัวใจของการค้นหาทุกความเป็นไปได้แบบมีชั้นเชิง: การท่องต้นไม้แห่งการตัดสินใจ (Decision Tree) และการตัดกิ่ง (Pruning) ที่ช่วยประหยัดเวลาได้นับล้านรอบ",
+      en: "Master exhaustive search with pruning: navigate state-space decision trees and eliminate invalid branches early.",
     },
-    group: "บทที่ 8: การแบ่งแยกและเอาชนะ & การจัดเรียงขั้นสูง (Divide & Conquer & Fast Sorts)",
+    group: "บทที่ 9: การค้นหาย้อนรอย (Exhaustive Search & Backtracking)",
     blocks: {
       th: [
         {
           t: "p",
-          c: "**Divide and Conquer (การแบ่งแยกและเอาชนะ)** คือกระบวนทัศน์การออกแบบอัลกอริทึมที่ทรงพลังที่สุดอันหนึ่ง โดยแบ่งการทำงานออกเป็น 3 ขั้นตอนหลัก:",
+          c: "**การค้นหาย้อนรอย (Backtracking)** เปรียบเสมือน 'การเดินในเขาวงกต':\n- เมื่อคุณเจอทางแยก คุณจะเลือกเดินไปทางหนึ่งก่อน (**Choose**)\n- คุณเดินลึกเข้าไปเรื่อยๆ (**Explore**)\n- หากพบว่าเป็นทางตันหรือไม่สอดคล้องกับเงื่อนไข คุณจะ **'ถอยหลังกลับมาที่ทางแยกเดิม' (Backtrack / Unchoose)** แล้วลองเลือกเดินไปอีกทางหนึ่ง",
+        },
+        { t: "h2", c: "Brute Force vs Backtracking: พลังแห่งการ Pruning (ตัดกิ่ง)" },
+        {
+          t: "p",
+          c: "หากเป็น Pure Brute Force คอมพิวเตอร์จะทดลองจนสุดทางทุกกิ่งโดยไม่สนว่ากิ่งนั้นเป็นไปไม่ได้ตั้งแต่ก้าวแรก แต่ใน **Backtracking** เราจะมีเงื่อนไขการตัดกิ่ง (**Pruning / Bounding Function**) ที่ช่วยหยุดการเดินลงไปในกิ่งที่ผิดทันที:",
         },
         {
-          t: "ol",
-          c: [
-            "**1. Divide (แบ่ง)**: แบ่งปัญหาขนาดใหญ่ n ออกเป็นปัญหาย่อยๆ ที่มีรูปแบบเหมือนกันแต่มีขนาดเล็กลง (เช่น ตัดครึ่งซ้ายและขวา)",
-            "**2. Conquer (แก้)**: แก้ปัญหาย่อยเหล่านั้นด้วย Recursion จนกระทั่งถึง Base Case ที่สามารถตอบได้ทันที",
-            "**3. Combine (รวม)**: นำผลลัพธ์จากปัญหาย่อยมาผสานรวมกันเป็นคำตอบของปัญหาใหญ่ดั้งเดิม",
+          t: "code",
+          lang: "text",
+          label: "การตัดกิ่งไม้ที่ไร้ประโยชน์ (Pruning State-Space Tree)",
+          c: `                          [ จุดเริ่มต้น ]
+                         /               \\
+                 [ เลือก 1 ]            [ เลือก 2 ]
+                 /         \\                 │
+            [ เลือก 1,2 ] [ เลือก 1,3 ]      [ เลือก 2,3 ] (ผลรวมเกิน Target!)
+                 │              │            ▲
+              (สำเร็จ)      (สำเร็จ)          └── ตัดกิ่งทิ้งทันที! (Prune) 
+                                                 ไม่ต้องเดินลึกต่อให้เสียเวลา`,
+        },
+        { t: "h2", c: "แม่แบบมาตรฐาน 4 สเต็ปของ Backtracking (The Blueprint)" },
+        {
+          t: "p",
+          c: "โจทย์ Backtracking เกือบ 100% ในโลกสามารถเขียนด้วยโครงสร้าง 4 สเต็ปนี้ได้เสมอ:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: แม่แบบ Backtracking มาตรฐาน",
+          c: `def backtrack(path, choices):
+    # 1. Goal Check: ชนเป้าหมายหรือยัง?
+    if is_solution(path):
+        record_solution(path)
+        return
+
+    for choice in choices:
+        # 2. Prune / Constraint Check: ทางเลือกนี้ถูกต้องตามกฎหรือไม่?
+        if not is_valid(choice):
+            continue  # ตัดกิ่งทิ้ง!
+
+        # 3. Make Choice: เลือกลงไป
+        path.append(choice)
+
+        # 4. Explore: เดินลึกต่อไป
+        backtrack(path, new_choices)
+
+        # 5. Undo Choice (Backtrack!): ถอยหลังกลับมาคืนสภาพเดิม
+        path.pop()`,
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch9-backtrack": {
+    slug: "dsa-ch9-backtrack",
+    title: {
+      th: "แม่แบบ Backtracking 4 สเต็ป: Subsets, Permutations, Combination",
+      en: "The 3 Backtracking Archetypes: Subsets, Permutations & Combinations",
+    },
+    lead: {
+      th: "ฝึกฝน 3 รูปแบบมาตรฐานที่พบบ่อยที่สุดในห้องสอบสัมภาษณ์: Subsets (การเลือก/ไม่เลือก), Permutations (การสลับที่) และ Combination Sum (การใช้ซ้ำ)",
+      en: "Master the 3 canonical interview archetypes: Subsets (pick/skip), Permutations (visited tracking), and Combination Sum.",
+    },
+    group: "บทที่ 9: การค้นหาย้อนรอย (Exhaustive Search & Backtracking)",
+    blocks: {
+      th: [
+        { t: "h2", c: "Archetype 1: การสร้าง Subsets ทั้งหมด (LeetCode 78)" },
+        {
+          t: "p",
+          c: "สำหรับสมาชิกแต่ละตัว เรามีทางเลือก 2 ทางเสมอ: **'เลือกเอา'** หรือ **'ไม่เลือกเอา'** ทำให้เกิด Subsets ทั้งหมด $2^N$ แบบ:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Subsets O(2ⁿ)",
+          c: `def subsets(nums: list[int]) -> list[list[int]]:
+    result = []
+    
+    def backtrack(start_idx: int, current_path: list[int]):
+        # ทุกโหนดใน State-Space Tree ถือเป็น Subset ที่ถูกต้องเสมอ
+        result.append(list(current_path))
+        
+        for i in range(start_idx, len(nums)):
+            current_path.append(nums[i])      # 1. Choose
+            backtrack(i + 1, current_path)   # 2. Explore (ส่ง i + 1 ป้องกันใช้ซ้ำ)
+            current_path.pop()                # 3. Unchoose
+            
+    backtrack(0, [])
+    return result
+
+print(subsets([1, 2, 3])) # [], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]`,
+        },
+        { t: "h2", c: "Archetype 2: การจัดเรียงสับเปลี่ยน Permutations (LeetCode 46)" },
+        {
+          t: "p",
+          c: "ในการหา Permutations ลำดับมีความสำคัญ เราสามารถใช้ `visited` set หรือตรวจสอบว่าตัวเลขนั้นอยู่ใน path แล้วหรือไม่:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Permutations O(n!)",
+          c: `def permute(nums: list[int]) -> list[list[int]]:
+    result = []
+    
+    def backtrack(current_path: list[int], visited: set[int]):
+        if len(current_path) == len(nums):
+            result.append(list(current_path))
+            return
+            
+        for num in nums:
+            if num in visited:
+                continue # ข้ามตัวที่เคยใช้ไปแล้ว
+                
+            current_path.append(num)
+            visited.add(num)
+            
+            backtrack(current_path, visited)
+            
+            # ย้อนรอยคืนสถานะ
+            current_path.pop()
+            visited.remove(num)
+            
+    backtrack([], set())
+    return result
+
+print(permute([1, 2, 3])) # [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]`,
+        },
+        { t: "h2", c: "Archetype 3: Combination Sum (LeetCode 39)" },
+        {
+          t: "p",
+          c: "โจทย์ให้หาชุดตัวเลขที่บวกกันได้เท่ากับ `target` โดยสมาชิกแต่ละตัวสามารถ **หยิบซ้ำได้ไม่จำกัดครั้ง**:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Combination Sum พร้อมการ Pruning",
+          c: `def combination_sum(candidates: list[int], target: int) -> list[list[int]]:
+    result = []
+    candidates.sort() # เรียงข้อมูลก่อนเพื่อช่วยให้ Prune ได้ง่ายขึ้น
+    
+    def backtrack(start_idx: int, current_path: list[int], remaining_target: int):
+        if remaining_target == 0:
+            result.append(list(current_path))
+            return
+            
+        for i in range(start_idx, len(candidates)):
+            # Pruning: ถ้าตัวปัจจุบันเกินเป้า ตัวถัดๆ ไปย่อมเกินแน่นอน (เพราะเรียงแล้ว)
+            if candidates[i] > remaining_target:
+                break
+                
+            current_path.append(candidates[i])
+            # ส่ง i เดิมลงไป (ไม่ใช่ i + 1) เพราะอนุญาตให้ใช้ตัวเดิมซ้ำได้!
+            backtrack(i, current_path, remaining_target - candidates[i])
+            current_path.pop()
+            
+    backtrack(0, [], target)
+    return result
+
+print(combination_sum([2, 3, 6, 7], 7)) # [[2, 2, 3], [7]]`,
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch9-np-problem": {
+    slug: "dsa-ch9-np-problem",
+    title: {
+      th: "ปัญหาแบบ NP และ Exhaustive Search (เมื่อใดไม่มีทางลัด)",
+      en: "NP-Completeness & Exhaustive Search: When No Shortcuts Exist",
+    },
+    lead: {
+      th: "ทำความเข้าใจปัญหาตระกูล P vs NP, ปัญหา Traveling Salesperson, และทำไมการค้นหาทุกแบบ (Exhaustive Search) ถึงเป็นวิธีแก้ปัญหาเดียวที่การันตีคำตอบที่ดีที่สุด",
+      en: "Understand P vs NP complexity classes, NP-Complete challenges like Traveling Salesperson, and why exhaustive search remains indispensable.",
+    },
+    group: "บทที่ 9: การค้นหาย้อนรอย (Exhaustive Search & Backtracking)",
+    blocks: {
+      th: [
+        { t: "h2", c: "ปัญหาตระกูล P vs NP ในวิทยาการคอมพิวเตอร์" },
+        {
+          t: "p",
+          c: "ในวงการคอมพิวเตอร์ ปัญหาถูกจัดกลุ่มตามความยากในการหาคำตอบ:",
+        },
+        {
+          t: "table",
+          head: ["กลุ่มปัญหา (Complexity Class)", "ความหมาย", "ตัวอย่างปัญหา"],
+          rows: [
+            ["**P (Polynomial Time)**", "มีอัลกอริทึมที่หาคำตอบได้เร็วใน $O(n^k)$ (เช่น $O(n)$, $O(n^2)$)", "การเรียงลำดับ (Sort), ค้นหาเส้นทางสั้นสุด (Dijkstra), หาตัวประกอบ"],
+            ["**NP (Nondeterministic Polynomial)**", "หาคำตอบยากมาก แต่ถ้ามีคนเดาคำตอบมาให้ เราสามารถ **ตรวจทานคำตอบได้เร็วในเวลา Polynomial**", "Sudoku, ปัญหาการจัดกระเป๋า (Knapsack), การระบายสีแผนที่"],
+            ["**NP-Complete**", "กลุ่มปัญหาที่ยากที่สุดใน NP หากใครค้นพบวิธีแก้ปัญหา NP-Complete ข้อใดข้อหนึ่งในเวลา $O(n^k)$ จะแก้ปัญหาในโลกได้ทุกข้อทันที ($P = NP$)", "Traveling Salesperson Problem (TSP), Boolean Satisfiability (SAT), Clique Problem"],
           ],
         },
+        { t: "h2", c: "เมื่อไม่มีทางลัด: ทำไม Backtracking จึงจำเป็น?" },
         {
-          t: "callout",
-          title: "💡 ความต่างระหว่าง Divide & Conquer กับ Dynamic Programming",
-          c: "Divide and Conquer จะใช้เมื่อปัญหาย่อย **เป็นอิสระต่อกัน (Independent Subproblems)** เช่น ครึ่งซ้ายกับครึ่งขวาของ Merge Sort ไม่เกี่ยวกันเลย แต่ถ้าปัญหาย่อยมีส่วนที่ **ทับซ้อนกันซ้ำๆ (Overlapping Subproblems)** เช่น Fibonacci หรือ Knapsack เราต้องใช้ Dynamic Programming เพื่อจดจำคำตอบ",
+          t: "p",
+          c: "สำหรับปัญหาประเภท NP-Complete หรือปัญหาจัดสรรทรัพยากรที่ซับซ้อน ปัจจุบัน **ยังไม่มีสูตรทางลัดทางคณิตศาสตร์ใดที่หาคำตอบที่สมบูรณ์แบบได้** ทางเลือกของวิศวกรจึงมีเพียง 2 ทาง:\n1. ใช้ **Heuristic / Approximation Algorithm** (หาคำตอบที่ใกล้เคียง แต่ไม่รับประกันว่าดีที่สุด)\n2. ใช้ **Backtracking with Branch & Bound** ในการค้นหาทุกกรณีอย่างเป็นระบบ เพื่อรับประกันคำตอบที่ถูกต้องที่สุด 100%",
         },
       ],
       en: [],
     },
   },
 
-  "dsa-ch9-basic": {
-    slug: "dsa-ch9-basic",
+  "dsa-ch9-leetcode": {
+    slug: "dsa-ch9-leetcode",
     title: {
-      th: "Algorithm พื้นฐาน: Merge Sort & Quick Sort",
-      en: "Core Algorithms: Merge Sort and Quick Sort Deep Dive",
+      th: "โจทย์สัมภาษณ์ระดับบอส: N-Queens & Word Search",
+      en: "Boss-Level Backtracking: N-Queens & Word Search Grid Traversals",
     },
     lead: {
-      th: "เจาะลึก 2 อัลกอริทึมการจัดเรียงระดับ O(n log n): การ Merge สองอาร์เรย์ที่เรียงแล้ว และการ Partitioning ของ Quick Sort",
-      en: "Comprehensive analysis of O(n log n) sorts: stable Merge Sort vs in-place Quick Sort.",
+      th: "พิชิตโจทย์ปราบเซียน N-Queens (LeetCode 51) ด้วยเทคนิคการเช็คแนวทแยงใน O(1) และ Word Search (LeetCode 79) บนตาราง 2 มิติ",
+      en: "Master N-Queens with O(1) diagonal hash sets and 2D grid DFS backtracking in Word Search.",
     },
-    group: "บทที่ 8: การแบ่งแยกและเอาชนะ & การจัดเรียงขั้นสูง (Divide & Conquer & Fast Sorts)",
+    group: "บทที่ 9: การค้นหาย้อนรอย (Exhaustive Search & Backtracking)",
     blocks: {
       th: [
-        { t: "h2", c: "1. Merge Sort (เสถียรและรับประกัน O(n log n) เสมอ)" },
+        { t: "h2", c: "1. The Grand Boss: N-Queens (LeetCode 51)" },
         {
           t: "p",
-          c: "Merge Sort แบ่งอาร์เรย์ออกเป็น 2 ซีกเท่าๆ กัน จนเหลือตัวเดียว แล้วนำมา 'ผสาน' (**Merge**) คืนด้วยความเร็ว O(n):",
+          c: "โจทย์ให้วางราชินี (Queens) จำนวน $N$ ตัวลงบนกระดานหมากรุกขนาด $N \\times N$ โดยที่ **ไม่มีราชินีตัวใดกินกันได้** (ห้ามอยู่ในแถวเดียวกัน คอลัมน์เดียวกัน หรือแนวทแยงเดียวกัน):",
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "ความลับทางเรขาคณิตของการตรวจแนวทแยงใน O(1)",
+          c: `1. แถว (Rows): เราเดินทีละแถวอยู่แล้ว (r = 0, 1, ..., n-1) จึงไม่มีทางซ้ำแถวแน่นอน
+2. คอลัมน์ (Cols): เก็บ set ของคอลัมน์ที่ถูกครอบครอง (cols)
+3. ทแยงมุมขวาบน-ซ้ายล่าง (Positive Diagonal /): ค่าของ (r + c) จะคงที่ตลอดแนวทแยง!
+4. ทแยงมุมซ้ายบน-ขวาล่าง (Negative Diagonal \\): ค่าของ (r - c) จะคงที่ตลอดแนวทแยง!`,
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Merge Sort สมบูรณ์",
-          c: `def merge_sort(arr: list[int]) -> list[int]:
-    if len(arr) <= 1:
-        return arr
-        
-    mid = len(arr) // 2
-    left_half = merge_sort(arr[:mid])    # Divide & Conquer ซีกซ้าย
-    right_half = merge_sort(arr[mid:])   # Divide & Conquer ซีกขวา
+          label: "Python: N-Queens พร้อมการเช็ค O(1) Diagonals",
+          c: `def solve_n_queens(n: int) -> list[list[str]]:
+    cols = set()
+    pos_diag = set() # (r + c)
+    neg_diag = set() # (r - c)
     
-    return merge(left_half, right_half)  # Combine
-
-def merge(left: list[int], right: list[int]) -> list[int]:
-    merged = []
-    i = j = 0
+    board = [["."] * n for _ in range(n)]
+    result = []
     
-    while i < len(left) and j < len(right):
-        if left[i] <= right[j]:
-            merged.append(left[i])
-            i += 1
-        else:
-            merged.append(right[j])
-            j += 1
+    def backtrack(r: int):
+        if r == n:
+            # แปลงบอร์ดเป็นข้อความ
+            result.append(["".join(row) for row in board])
+            return
             
-    merged.extend(left[i:])
-    merged.extend(right[j:])
-    return merged
-
-print(merge_sort([38, 27, 43, 3, 9, 82, 10]))`,
-        },
-        { t: "h2", c: "2. Quick Sort (In-place Partitioning)" },
-        {
-          t: "p",
-          c: "Quick Sort เลือกค่าหนึ่งตัวเป็น **Pivot** แล้วจัดเรียงให้ตัวที่น้อยกว่า Pivot อยู่ทางซ้าย และตัวที่มากกว่าอยู่ทางขวา (**Partitioning**):",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Quick Sort (In-Place)",
-          c: `def quick_sort(arr: list[int], low: int, high: int) -> None:
-    if low < high:
-        pivot_idx = partition(arr, low, high)
-        quick_sort(arr, low, pivot_idx - 1)
-        quick_sort(arr, pivot_idx + 1, high)
-
-def partition(arr: list[int], low: int, high: int) -> int:
-    pivot = arr[high]
-    i = low - 1
-    for j in range(low, high):
-        if arr[j] <= pivot:
-            i += 1
-            arr[i], arr[j] = arr[j], arr[i]
-    arr[i + 1], arr[high] = arr[high], arr[i + 1]
-    return i + 1
-
-nums = [10, 80, 30, 90, 40, 50, 70]
-quick_sort(nums, 0, len(nums) - 1)
-print(nums)  # [10, 30, 40, 50, 70, 80, 90]`,
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch9-problem": {
-    slug: "dsa-ch9-problem",
-    title: {
-      th: "Divide & Conquer: โจทย์ปัญหาและการประยุกต์",
-      en: "Divide & Conquer Applications: Quickselect & Fast Pow",
-    },
-    lead: {
-      th: "ประยุกต์กับโจทย์สัมภาษณ์: Quickselect หาค่าอันดับที่ K ใน O(n) average (LeetCode 215) และ Binary Exponentiation O(log n)",
-      en: "Practical interview applications: Quickselect for Kth largest in O(n) and Fast Power in O(log n).",
-    },
-    group: "บทที่ 8: การแบ่งแยกและเอาชนะ & การจัดเรียงขั้นสูง (Divide & Conquer & Fast Sorts)",
-    blocks: {
-      th: [
-        { t: "h2", c: "1. Binary Exponentiation: Pow(x, n) ใน O(log n)" },
-        {
-          t: "p",
-          c: "การคำนวณ xⁿ ปกติใช้เวลา O(n) แต่ด้วย Divide and Conquer เราคำนวณ `x^(n/2) * x^(n/2)` ซึ่งลดเวลาลงเหลือ **O(log n)** (LeetCode 50):",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Pow(x, n) O(log n)",
-          c: `def my_pow(x: float, n: int) -> float:
-    if n == 0:
-        return 1.0
-    if n < 0:
-        x = 1 / x
-        n = -n
-        
-    half = my_pow(x, n // 2)
-    if n % 2 == 0:
-        return half * half
-    return half * half * x
-
-print(my_pow(2.0, 10))  # 1024.0`,
-        },
-        { t: "h2", c: "2. Quickselect: หาตัวเลขมากสุดอันดับที่ K (LeetCode 215)" },
-        {
-          t: "p",
-          c: "แทนที่จะต้องเรียงทั้งอาร์เรย์ O(n log n) เราใช้หลักการ Partition ของ Quick Sort เลือกค้นหาเฉพาะข้างที่มีอันดับเป้าหมาย ทำให้ได้เวลาเฉลี่ย **O(n) Average Time**:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Kth Largest Element (Quickselect)",
-          c: `import random
-
-def find_kth_largest(nums: list[int], k: int) -> int:
-    target_idx = len(nums) - k  # แปลงเป็น index ในแบบ sorted array
-    
-    def quickselect(left: int, right: int) -> int:
-        pivot_idx = random.randint(left, right)
-        pivot = nums[pivot_idx]
-        nums[pivot_idx], nums[right] = nums[right], nums[pivot_idx]
-        
-        p = left
-        for i in range(left, right):
-            if nums[i] <= pivot:
-                nums[p], nums[i] = nums[i], nums[p]
-                p += 1
-        nums[p], nums[right] = nums[right], nums[p]
-        
-        if p == target_idx:
-            return nums[p]
-        elif p < target_idx:
-            return quickselect(p + 1, right)
-        else:
-            return quickselect(left, p - 1)
+        for c in range(n):
+            # ตรวจสอบว่าช่องนี้ปลอดภัยหรือไม่ใน O(1)
+            if c in cols or (r + c) in pos_diag or (r - c) in neg_diag:
+                continue # ตัดกิ่งทิ้งทันที!
+                
+            # 1. Choose
+            cols.add(c)
+            pos_diag.add(r + c)
+            neg_diag.add(r - c)
+            board[r][c] = "Q"
             
-    return quickselect(0, len(nums) - 1)
+            # 2. Explore แถวถัดไป
+            backtrack(r + 1)
+            
+            # 3. Unchoose (คืนสภาพ)
+            cols.remove(c)
+            pos_diag.remove(r + c)
+            neg_diag.remove(r - c)
+            board[r][c] = "."
+            
+    backtrack(0)
+    return result
 
-print(find_kth_largest([3, 2, 1, 5, 6, 4], 2))  # 5 (อันดับที่ 2)`,
+solutions = solve_n_queens(4)
+print(f"Total solutions for 4-Queens: {len(solutions)}")
+for row in solutions[0]:
+    print(row)`,
+        },
+        { t: "h2", c: "2. Word Search บนตาราง 2 มิติ (LeetCode 79)" },
+        {
+          t: "p",
+          c: "ค้นหาคำว่าอยู่ในตารางตัวอักษร 2 มิติหรือไม่ โดยสามารถเดินใน 4 ทิศทาง (บน ล่าง ซ้าย ขวา) และห้ามเหยียบช่องเดิมซ้ำในการค้นหาคำนั้น:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Word Search ด้วย In-Place Character Masking",
+          c: `def exist(board: list[list[str]], word: str) -> bool:
+    rows, cols = len(board), len(board[0])
+    
+    def dfs(r: int, c: int, idx: int) -> bool:
+        if idx == len(word):
+            return True
+        if r < 0 or r >= rows or c < 0 or c >= cols or board[r][c] != word[idx]:
+            return False
+            
+        # 1. Choose: ปิดช่องเดิมด้วยเครื่องหมาย '#' เพื่อกันไม่ให้เดินซ้ำ
+        temp = board[r][c]
+        board[r][c] = '#'
+        
+        # 2. Explore: เดิน 4 ทิศทาง
+        found = (dfs(r + 1, c, idx + 1) or
+                 dfs(r - 1, c, idx + 1) or
+                 dfs(r, c + 1, idx + 1) or
+                 dfs(r, c - 1, idx + 1))
+                 
+        # 3. Unchoose: คืนตัวอักษรเดิมกลับมา
+        board[r][c] = temp
+        return found
+        
+    for r in range(rows):
+        for c in range(cols):
+            if board[r][c] == word[0] and dfs(r, c, 0):
+                return True
+    return False`,
         },
       ],
       en: [],

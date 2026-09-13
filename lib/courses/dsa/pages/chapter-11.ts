@@ -4,42 +4,54 @@ export const chapter11Pages: Record<string, Page> = {
   "dsa-ch11-intro": {
     slug: "dsa-ch11-intro",
     title: {
-      th: "Dynamic Programming: ความรู้เบื้องต้นและหัวใจสำคัญ",
-      en: "Dynamic Programming: Concepts & Overlapping Subproblems",
+      th: "กุญแจสู่ DP: Overlapping Subproblems & Optimal Substructure",
+      en: "The Essence of Dynamic Programming: Overlapping Subproblems & Optimal Substructure",
     },
     lead: {
-      th: "กำจัดงานซ้ำซ้อน: เปลี่ยนอัลกอริทึมจากช้าติดหล่ม O(2ⁿ) เป็นเร็วติดจรวด O(n) ด้วยหลักการจดจำคำตอบ",
-      en: "Eliminate redundant subproblems: transform exponential O(2ⁿ) algorithms into linear O(n) efficiency.",
+      th: "ทำความเข้าใจว่าทำไม Dynamic Programming ถึงเปลี่ยนอัลกอริทึมที่ช้าติดหล่ม O(2ⁿ) ให้กลายเป็นเร็วติดจรวด O(n) ด้วยศิลปะการไม่ทำงานซ้ำ",
+      en: "Discover why Dynamic Programming transforms exponential O(2ⁿ) runtime into linear O(n) efficiency by eliminating redundant calculations.",
     },
     group: "บทที่ 11: กำหนดการพลวัต (Dynamic Programming)",
     blocks: {
       th: [
         {
           t: "p",
-          c: "**Dynamic Programming (DP)** คือเทคนิคการเพิ่มประสิทธิภาพของอัลกอริทึม โดยนำผลลัพธ์ของปัญหาย่อยที่เคยคำนวณแล้วมา **บันทึกเก็บไว้ (Cache / Memoize)** เพื่อไม่ให้ต้องคำนวณซ้ำอีก",
+          c: "**Dynamic Programming (กำหนดการพลวัต)** มักถูกมองว่าเป็นหนึ่งในหัวข้อที่น่าสะพรึงกลัวที่สุดในการสอบสัมภาษณ์งาน แต่ในความเป็นจริง แก่นแท้ของมันถูกสรุปไว้อย่างเรียบง่ายโดยศาสตราจารย์ Richard Bellman ว่า:\n\n> *'คนที่จำอดีตไม่ได้ ย่อมถูกลงโทษให้ทำความผิดพลาดซ้ำรอยเดิม — ในโลกของคอมพิวเตอร์ คำตอบใดที่เคยคำนวณไปแล้ว จงบันทึกเก็บไว้ (Cache / Memoize) เพื่อที่จะได้ไม่ต้องคำนวณใหม่อีกเป็นครั้งที่สอง'*",
         },
-        { t: "h2", c: "ตัวอย่างคลาสสิก: ปัญหาฟีโบนักชี (Fibonacci)" },
+        { t: "h2", c: "ตัวอย่างคลาสสิก: มหันตภัยของ Fibonacci แบบธรรมดา" },
         {
           t: "p",
-          c: "หากเขียนฟังก์ชัน Fibonacci ด้วย Recursion ตรงๆ:",
+          c: "หากเขียนฟังก์ชัน Fibonacci ด้วย Recursion ตรงๆ โดยไม่บันทึกคำตอบ ต้นไม้การคำนวณจะระเบิดออกเป็น **$O(2^n)$**:",
         },
         {
           t: "code",
           lang: "text",
-          label: "การระเบิดของ Recursion Tree (Time Complexity: O(2ⁿ))",
-          c: `              fib(5)
-            /        \\
-        fib(4)          fib(3)
-        /    \\          /    \\
-     fib(3)  fib(2)  fib(2)  fib(1)
-     /   \\
-  fib(2) fib(1)
-  
-* สังเกตว่า fib(3) และ fib(2) ถูกคำนวณซ้ำซ้อนหลายรอบมาก!`,
+          label: "การคำนวณซ้ำซ้อนอย่างบ้าคลั่งใน fib(5)",
+          c: `                           fib(5)
+                       /            \\
+                fib(4)                fib(3)
+               /      \\              /      \\
+           fib(3)     fib(2)      fib(2)    fib(1)
+          /      \\    /    \\      /    \\
+      fib(2)   fib(1)fib(1)fib(0)fib(1)fib(0)
+      /    \\
+   fib(1) fib(0)
+
+* สังเกตว่า: fib(3) ถูกคำนวณซ้ำ 2 ครั้ง, fib(2) ถูกคำนวณซ้ำ 3 ครั้ง!
+* เมื่อคำนวณ fib(50) จะต้องคำนวณซ้ำถึง 1,125,899,906,842,624 รอบ (คอมพิวเตอร์ค้างทันที!)`,
+        },
+        { t: "h2", c: "เงื่อนไข 2 ประการที่โจทย์ต้องมี จึงจะใช้ DP ได้" },
+        {
+          t: "ol",
+          c: [
+            "**1. Overlapping Subproblems (ปัญหาย่อยที่ซ้ำซ้อน)**: ปัญหาใหญ่สามารถแตกออกเป็นปัญหาย่อยๆ ที่ 'หน้าตาเหมือนเดิมเป๊ะ' และถูกเรียกใช้งานซ้ำแล้วซ้ำเล่า",
+            "**2. Optimal Substructure (โครงสร้างคำตอบที่ดีที่สุด)**: คำตอบที่ดีที่สุดของปัญหาใหญ่ สามารถสร้างขึ้นจากคำตอบที่ดีที่สุดของปัญหาย่อยได้โดยตรง (เช่น $fib(n) = fib(n-1) + fib(n-2)$ หรือระยะทางสั้นสุด)",
+          ],
         },
         {
-          t: "p",
-          c: "ด้วย Dynamic Programming เราจะคำนวณ `fib(3)` เพียงครั้งเดียวแล้วจดจำไว้ ทำให้จำนวนรอบการทำงานลดลงจาก **2⁵⁰ (นับล้านปี) เหลือเพียง 50 รอบ (เสี้ยววินาที)**!",
+          t: "callout",
+          title: "🎯 ความแตกต่างระหว่าง Divide & Conquer กับ Dynamic Programming",
+          c: "- **Divide & Conquer (เช่น Merge Sort)**: ปัญหาย่อยจะ 'เป็นอิสระต่อกัน' (Independent) ไม่มีการคำนวณซ้ำกัน\n- **Dynamic Programming (เช่น Knapsack / Shortest Path)**: ปัญหาย่อยจะ 'ซ้ำซ้อนเกี่ยวพันกัน' (Overlapping) จึงต้องใช้ตารางแคชเพื่อเก็บคำตอบไว้",
         },
       ],
       en: [],
@@ -49,12 +61,12 @@ export const chapter11Pages: Record<string, Page> = {
   "dsa-ch11-main-concept": {
     slug: "dsa-ch11-main-concept",
     title: {
-      th: "DP Concepts: Memoization vs Tabulation",
-      en: "DP Mechanics: Top-Down Memoization vs Bottom-Up Tabulation",
+      th: "Memoization (Top-Down) vs Tabulation (Bottom-Up) & Space Optimization",
+      en: "Memoization vs Tabulation Paradigms & Space Optimization Techniques",
     },
     lead: {
-      th: "เปรียบเทียบสองกระบวนท่า: Top-Down (Memoization) ด้วย Recursion และ Bottom-Up (Tabulation) ด้วย Iteration",
-      en: "Compare the two core DP paradigms: Top-down recursion with cache vs bottom-up iterative tables.",
+      th: "เปรียบเทียบสองกระบวนท่าหลักของ DP: บนลงล่างด้วย Recursion + แคช vs ล่างขึ้นบนด้วย Loop + ตาราง พร้อมเทคนิคบีบอัดหน่วยความจำจาก O(n) เหลือ O(1)",
+      en: "Compare Top-Down recursive caching with Bottom-Up iterative tabulation, and learn the variable rolling space optimization pattern.",
     },
     group: "บทที่ 11: กำหนดการพลวัต (Dynamic Programming)",
     blocks: {
@@ -62,7 +74,7 @@ export const chapter11Pages: Record<string, Page> = {
         { t: "h2", c: "1. Top-Down with Memoization (บนลงล่าง + แคช)" },
         {
           t: "p",
-          c: "เขียน Recursion ตามธรรมชาติ แต่ก่อนจะคำนวณ ให้ตรวจดูในตารางแคช (Memo) ก่อนเสมอ ใน Python เราสามารถใช้ Decorator `@functools.lru_cache` ได้อย่างสวยงาม:",
+          c: "เรายังคงเขียนโครงสร้างแบบ Recursion ตามธรรมชาติ แต่ก่อนจะลงมือคำนวณ ให้ตรวจดูในตารางแคช (Memo Map / Array) ก่อนเสมอ หากเคยคำนวณแล้วให้ดึงคำตอบออกมาตอบทันทีใน $O(1)$:",
         },
         {
           t: "code",
@@ -70,38 +82,69 @@ export const chapter11Pages: Record<string, Page> = {
           label: "Python: Top-Down DP ด้วย lru_cache (O(n) Time, O(n) Space)",
           c: `from functools import lru_cache
 
+# Decorator นี้จะทำ Memoization ตารางแคชให้อัตโนมัติเบื้องหลัง
 @lru_cache(maxsize=None)
 def fib_memo(n: int) -> int:
     if n <= 1:
         return n
     return fib_memo(n - 1) + fib_memo(n - 2)
 
-print(fib_memo(50))  # 12586269025 (ตอบได้ทันทีใน 0.0001 วินาที!)`,
+print(fib_memo(50)) # 12586269025 (ตอบได้ทันทีใน 0.0001 วินาที!)`,
         },
         { t: "h2", c: "2. Bottom-Up with Tabulation (ล่างขึ้นบน + ตาราง)" },
         {
           t: "p",
-          c: "เริ่มคำนวณจากคำตอบที่เล็กที่สุด (Base Case: f(0), f(1)) แล้วใช้ Loop เติมค่าลงในตารางไปเรื่อยๆ จนถึงเป้าหมาย f(n):",
+          c: "เราเริ่มต้นคำนวณจากคำตอบที่เล็กที่สุดก่อน (Base Cases: $f(0) = 0, f(1) = 1$) แล้วใช้ลูป Iteration คำนวณขยับขึ้นไปเรื่อยๆ ตามตารางอาร์เรย์ จนถึงคำตอบเป้าหมาย $f(n)$:",
+        },
+        {
+          t: "code",
+          lang: "cpp",
+          label: "C++: Bottom-Up Tabulation",
+          c: `#include <vector>
+using namespace std;
+
+long long fibTabulation(int n) {
+    if (n <= 1) return n;
+    
+    // สร้างตาราง DP ขนาด n + 1
+    vector<long long> dp(n + 1, 0);
+    dp[0] = 0;
+    dp[1] = 1;
+    
+    for (int i = 2; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2]; // สูตร State Transition
+    }
+    return dp[n];
+}`,
+        },
+        { t: "h2", c: "3. Space Optimization: บีบอัดหน่วยความจำเหลือ O(1) Space" },
+        {
+          t: "p",
+          c: "สังเกตว่าในการคำนวณ `dp[i]` เราต้องการเพียงค่าของ **2 ตัวก่อนหน้าเท่านั้น** (`dp[i-1]` และ `dp[i-2]`) เราจึงไม่จำเป็นต้องเก็บทั้งอาร์เรย์ขนาด $N$ ให้เปลือง RAM! เราสามารถใช้ตัวแปรหมุนเวียนเพียง 2 ตัว:",
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Bottom-Up DP (O(n) Time, O(1) Space)",
-          c: `def fib_tabulation(n: int) -> int:
+          label: "Python: Space Optimized DP (O(n) Time, O(1) Space)",
+          c: `def fib_optimized(n: int) -> int:
     if n <= 1:
         return n
         
-    prev2 = 0
-    prev1 = 1
-    
+    prev2, prev1 = 0, 1
     for _ in range(2, n + 1):
         curr = prev1 + prev2
         prev2 = prev1
         prev1 = curr
         
-    return prev1
-
-print(fib_tabulation(50))  # 12586269025 (Space O(1))`,
+    return prev1`,
+        },
+        {
+          t: "table",
+          head: ["กระบวนท่า", "ข้อดี", "ข้อเสีย", "เมื่อไหร่ควรใช้"],
+          rows: [
+            ["**Top-Down (Memoization)**", "เขียนง่าย ตรงไปตรงมาตามคำนิยามปัญหา คำนวณเฉพาะกิ่งที่จำเป็นจริงๆ", "มี Overhead ของ Call Stack และเสี่ยง Stack Overflow", "เมื่อ State Space กว้างมากและคำนวณไม่ครบทุกช่อง"],
+            ["**Bottom-Up (Tabulation)**", "รวดเร็ว ไร้ Call Stack Overhead และเปิดทางสู่การทำ **Space Optimization**", "ต้องคำนวณเติมตารางทุกช่องตั้งแต่ต้นจนจบ", "มาตรฐานที่ควรใช้ในการสัมภาษณ์งานเมื่อทำได้"],
+          ],
         },
       ],
       en: [],
@@ -111,163 +154,110 @@ print(fib_tabulation(50))  # 12586269025 (Space O(1))`,
   "dsa-ch11-classic-dp": {
     slug: "dsa-ch11-classic-dp",
     title: {
-      th: "Classic DP: Climbing Stairs, Coin Change, 0/1 Knapsack, LCS & LIS",
-      en: "Classic DP Patterns: Knapsack, Coin Change, LCS & LIS",
+      th: "Classic DP: Climbing Stairs, 0/1 Knapsack, Coin Change & LCS",
+      en: "Mastering Classic DP Patterns: Knapsack, Unbounded Coin Change & LCS",
     },
     lead: {
-      th: "5 กระบวนท่า DP คลาสสิกประจำห้องสัมภาษณ์: บันได (Climbing Stairs), ทอนเหรียญ (Coin Change), เป้สะพายหลัง (0/1 Knapsack), ลำดับย่อยร่วมยาวสุด (LCS) และลำดับย่อยเพิ่มขึ้นยาวสุด (LIS)",
-      en: "Master standard interview DP archetypes: Climbing Stairs, Coin Change, 0/1 Knapsack, Longest Common Subsequence, and Longest Increasing Subsequence.",
+      th: "ฝึกฝน 4 รูปแบบมหาอำนาจของ Dynamic Programming: Climbing Stairs (1D DP), 0/1 Knapsack (2D DP), Coin Change (Unbounded DP), และ Longest Common Subsequence (String DP)",
+      en: "Master the 4 iconic DP archetypes: Climbing Stairs 1D, 0/1 Knapsack 2D, Unbounded Coin Change, and Longest Common Subsequence.",
     },
     group: "บทที่ 11: กำหนดการพลวัต (Dynamic Programming)",
     blocks: {
       th: [
-        { t: "h2", c: "1. Climbing Stairs (LeetCode 70)" },
+        { t: "h2", c: "1. 1D DP: Climbing Stairs (LeetCode 70)" },
         {
           t: "p",
-          c: "บันได $N$ ขั้น แต่ละก้าวสามารถเดินได้ 1 ขั้น หรือ 2 ขั้น จงหาว่ามีกี่วิธีที่จะก้าวถึงขั้นบนสุด (การจะถึงขั้นที่ $i$ ต้องก้าวมาจากขั้นที่ $i-1$ หรือ $i-2$):",
+          c: "มีบันได $n$ ขั้น ในแต่ละครั้งสามารถก้าวได้ 1 หรือ 2 ขั้น จงหาวิธีการเดินขึ้นบันไดทั้งหมด:\n- สัญชาตญาณ: การจะมายืนที่ขั้นที่ $i$ ได้ มีเพียง 2 ทางคือ ก้าว 1 ขั้นมาจากขั้น $i-1$ หรือ ก้าว 2 ขั้นมาจากขั้น $i-2$\n- สูตร State Transition: **$dp[i] = dp[i-1] + dp[i-2]$** (เหมือน Fibonacci เป๊ะ!)",
+        },
+        { t: "h2", c: "2. 2D DP: ปัญหาการจัดสิ่งของใส่กระเป๋า (0/1 Knapsack Problem)" },
+        {
+          t: "p",
+          c: "มีสิ่งของ $N$ ชิ้น แต่ละชิ้นมีน้ำหนัก $w_i$ และมูลค่า $v_i$ เรามีกระเป๋าที่รับน้ำหนักได้สูงสุด $W$ จงเลือกสิ่งของใส่กระเป๋าให้ได้มูลค่ารวมมากที่สุด (ของแต่ละชิ้นเลือกได้เพียง 0 คือไม่เอา หรือ 1 คือเอา):",
         },
         {
           t: "code",
-          lang: "python",
-          label: "Python: Climbing Stairs O(n) Time, O(1) Space",
-          c: `def climb_stairs(n: int) -> int:
-    if n <= 2:
-        return n
-    one_step_before = 2
-    two_steps_before = 1
-    
-    for _ in range(3, n + 1):
-        curr = one_step_before + two_steps_before
-        two_steps_before = one_step_before
-        one_step_before = curr
-        
-    return one_step_before
+          lang: "text",
+          label: "การตัดสินใจของสิ่งของชิ้นที่ i ที่ความจุกระเป๋า w",
+          c: `1. กรณีไม่หยิบชิ้นที่ i: มูลค่าเท่าเดิม = dp[i - 1][w]
+2. กรณีหยิบชิ้นที่ i (ถ้าน้ำหนัก w_i <= w): 
+   มูลค่า = v_i + dp[i - 1][w - w_i]
 
-print(climb_stairs(5))  # 8 วิธี`,
-        },
-        { t: "h2", c: "2. Coin Change: จำนวนเหรียญน้อยที่สุด (LeetCode 322)" },
-        {
-          t: "p",
-          c: "หาจำนวนเหรียญน้อยที่สุดเพื่อรวมให้ได้มูลค่า `amount` (หากทำไม่ได้ให้ส่งคืน -1):",
+สูตรสมบูรณ์:
+dp[i][w] = max(dp[i - 1][w], v_i + dp[i - 1][w - w_i])`,
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Coin Change Bottom-Up Tabulation (O(n * amount))",
+          label: "Python: 0/1 Knapsack แบบ 2D Tabulation",
+          c: `def knapsack_01(weights: list[int], values: list[int], capacity: int) -> int:
+    n = len(weights)
+    # สร้างตาราง dp ขนาด (n + 1) x (capacity + 1)
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+    
+    for i in range(1, n + 1):
+        w_item = weights[i - 1]
+        v_item = values[i - 1]
+        for w in range(1, capacity + 1):
+            if w_item <= w:
+                # เลือกระหว่าง: ไม่หยิบ vs หยิบ
+                dp[i][w] = max(dp[i - 1][w], v_item + dp[i - 1][w - w_item])
+            else:
+                dp[i][w] = dp[i - 1][w] # แบกไม่ไหว ไม่หยิบ
+                
+    return dp[n][capacity]
+
+print(knapsack_01([1, 2, 3], [10, 15, 40], 6)) # 65 (หยิบชิ้น 1, 2, 3 รวม 6kg)`,
+        },
+        { t: "h2", c: "3. Coin Change DP (LeetCode 322): ทอนเงินเหรียญน้อยที่สุด" },
+        {
+          t: "p",
+          c: "ในบทที่ 10 เราเห็นแล้วว่า Greedy ล้มเหลวกับเหรียญ `[1, 3, 4]` เมื่อทอนเงิน 6 บาท นี่คือโค้ด DP ที่ให้คำตอบถูกต้อง 2 เหรียญเสมอ:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Coin Change ด้วย 1D DP Table O(Amount * Coins)",
           c: `def coin_change(coins: list[int], amount: int) -> int:
-    # dp[i] คือจำนวนเหรียญน้อยสุดสำหรับมูลค่า i
-    dp = [float('inf')] * (amount + 1)
-    dp[0] = 0  # เงิน 0 บาท ใช้ 0 เหรียญ
+    # ตั้งค่าเริ่มต้นเป็น Infinity (amount + 1)
+    dp = [amount + 1] * (amount + 1)
+    dp[0] = 0 # เงิน 0 บาท ใช้ 0 เหรียญ
     
     for a in range(1, amount + 1):
-        for coin in coins:
-            if a - coin >= 0:
-                dp[a] = min(dp[a], 1 + dp[a - coin])
+        for c in coins:
+            if a - c >= 0:
+                dp[a] = min(dp[a], 1 + dp[a - c])
                 
-    return dp[amount] if dp[amount] != float('inf') else -1
+    return dp[amount] if dp[amount] != amount + 1 else -1
 
-print(coin_change([1, 2, 5], 11))  # 3 เหรียญ (5 + 5 + 1)`,
-        },
-        { t: "h2", c: "3. ปัญหาเป้สะพายหลัง 0/1 (0/1 Knapsack Problem)" },
-        {
-          t: "p",
-          c: "มีสิ่งของ $n$ ชิ้น แต่ละชิ้นมีน้ำหนัก `wt[i]` และมูลค่า `val[i]` กระเป๋ารับน้ำหนักได้สูงสุด $W$ ของแต่ละชิ้น **เลือกได้เพียงหยิบ (1) หรือไม่หยิบ (0)** ไม่สามารถหั่นแบ่งได้:",
-        },
-        {
-          t: "callout",
-          title: "💡 สูตรความสัมพันธ์เวียนเกิด (Recurrence Relation)",
-          c: "สำหรับของชิ้นที่ $i$:\\n- ถ้า $wt[i-1] > w$: ใส่ไม่ได้ ต้องข้าม: `dp[i][w] = dp[i-1][w]`\\n- ถ้าใส่ได้: เลือกระหว่างไม่ใส่ กับ ใส่: `dp[i][w] = max(dp[i-1][w], val[i-1] + dp[i-1][w - wt[i-1]])`",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: 0/1 Knapsack Tabulation (O(n * W) Time, O(W) Space)",
-          c: `def knapsack_01(W: int, wt: list[int], val: list[int], n: int) -> int:
-    # Space-optimized 1D array (ย้อนจาก W ถอยหลังมาเพื่อป้องกันการใช้ของซ้ำ)
-    dp = [0] * (W + 1)
-    
-    for i in range(n):
-        for w in range(W, wt[i] - 1, -1):
-            dp[w] = max(dp[w], val[i] + dp[w - wt[i]])
-            
-    return dp[W]
-
-val = [60, 100, 120]
-wt = [10, 20, 30]
-W = 50
-print("มูลค่าสูงสุดในเป้:", knapsack_01(W, wt, val, len(val)))  # 220`,
-        },
-        {
-          t: "code",
-          lang: "cpp",
-          label: "C++ Comparison: 0/1 Knapsack 2D Tabulation",
-          c: `#include <iostream>
-#include <vector>
-#include <algorithm>
-
-int knapSack(int W, const std::vector<int>& wt, const std::vector<int>& val, int n) {
-    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(W + 1, 0));
-    
-    for (int i = 1; i <= n; i++) {
-        for (int w = 0; w <= W; w++) {
-            if (wt[i - 1] <= w) {
-                dp[i][w] = std::max(dp[i - 1][w], val[i - 1] + dp[i - 1][w - wt[i - 1]]);
-            } else {
-                dp[i][w] = dp[i - 1][w];
-            }
-        }
-    }
-    return dp[n][W];
-}`,
+print(coin_change([1, 3, 4], 6)) # 2 (เหรียญ 3 + 3 อย่างถูกต้อง!)`,
         },
         { t: "h2", c: "4. Longest Common Subsequence (LCS - LeetCode 1143)" },
         {
           t: "p",
-          c: "กำหนดสตริง `text1` และ `text2` จงหาความยาวของ **ลำดับย่อยร่วมที่ยาวที่สุด** (ตัวอักษรเรียงลำดับเดิมแต่ไม่จำเป็นต้องติดกัน เช่น `\"ace\"` เป็น subsequence ของ `\"abcde\"`):",
+          c: "หาความยาวลำดับร่วมที่ยาวที่สุดระหว่างสตริง `text1` และ `text2` (ใช้ในคำสั่ง `git diff` และการเปรียบเทียบรหัสพันธุกรรม DNA):",
         },
         {
           t: "code",
-          lang: "python",
-          label: "Python: LCS ด้วย 2D DP Table (O(m * n))",
-          c: `def longest_common_subsequence(text1: str, text2: str) -> int:
-    m, n = len(text1), len(text2)
-    dp = [[0] * (n + 1) for _ in range(m + 1)]
-    
-    for i in range(1, m + 1):
-        for j in range(1, n + 1):
-            if text1[i - 1] == text2[j - 1]:
-                dp[i][j] = 1 + dp[i - 1][j - 1]
-            else:
-                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-                
-    return dp[m][n]
-
-print(longest_common_subsequence("abcde", "ace"))  # 3 ("ace")`,
-        },
-        { t: "h2", c: "5. Longest Increasing Subsequence (LIS - LeetCode 300)" },
-        {
-          t: "p",
-          c: "กำหนดอาร์เรย์ `nums` จงหาความยาวของลำดับย่อยที่ **มีค่าเพิ่มขึ้นอย่างเคร่งครัด** และยาวที่สุด:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: LIS ด้วย Dynamic Programming O(n²)",
-          c: `def length_of_lis(nums: list[int]) -> int:
-    if not nums:
-        return 0
+          lang: "cpp",
+          label: "C++: Longest Common Subsequence (LCS)",
+          c: `class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+        int m = text1.length(), n = text2.length();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
         
-    # dp[i] คือความยาว LIS ที่สิ้นสุดที่ดัชนี i
-    dp = [1] * len(nums)
-    
-    for i in range(len(nums)):
-        for j in range(i):
-            if nums[j] < nums[i]:
-                dp[i] = max(dp[i], 1 + dp[j])
-                
-    return max(dp)
-
-print(length_of_lis([10, 9, 2, 5, 3, 7, 101, 18]))  # 4 ([2, 3, 7, 101] หรือ [2, 3, 7, 18])`,
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[i][j] = 1 + dp[i - 1][j - 1]; // อักษรตรงกัน บวก 1
+                } else {
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]); // เลือกตัวที่ยาวกว่า
+                }
+            }
+        }
+        return dp[m][n];
+    }
+};`,
         },
       ],
       en: [],

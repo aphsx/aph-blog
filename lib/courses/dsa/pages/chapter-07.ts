@@ -4,166 +4,241 @@ export const chapter07Pages: Record<string, Page> = {
   "dsa-ch7-intro": {
     slug: "dsa-ch7-intro",
     title: {
-      th: "Code Complexity: ความซับซ้อนของโค้ดและการวัดประสิทธิภาพ",
-      en: "Code Complexity: Asymptotic Analysis Fundamentals",
+      th: "ก้าวข้ามเส้นตรงสู่ลำดับชั้น: Non-Linear Data Structures & Trees",
+      en: "Hierarchical Thinking: Non-Linear Data Structures & Trees",
     },
     lead: {
-      th: "ทำไมการจับเวลาด้วยนาฬิกา (Wall-Clock Time) จึงไม่เพียงพอ และทำไมโลกของ Software Engineering ต้องใช้ Asymptotic Analysis",
-      en: "Why wall-clock benchmarks fail and how asymptotic analysis provides machine-independent performance metrics.",
+      th: "ขยายขอบเขตความคิดจากโครงสร้างเชิงเส้นสู่อำนาจของโครงสร้างแบบลำดับชั้น (Hierarchy): คำศัพท์พื้นฐานของต้นไม้ และบทบาทในระบบคอมพิวเตอร์จริง",
+      en: "Expand beyond sequential arrays into hierarchical tree models: root-to-leaf terminology and real-world system applications.",
     },
-    group: "บทที่ 2: การวัดประสิทธิภาพ & Big-O (เรียนก่อนเพื่อใช้วัดผล)",
+    group: "บทที่ 7: การเรียกตัวเอง & โครงสร้างต้นไม้ (Recursion & Trees)",
     blocks: {
       th: [
         {
           t: "p",
-          c: "เวลาเราเขียนโค้ดแล้วทดสอบว่าโปรแกรมไหนเร็วกว่ากัน หลายคนมักใช้วิธีจับเวลาก่อนและหลังรันฟังก์ชัน (`time.time()`) แต่วิธีนี้มีข้อเสียร้ายแรงหลายประการ:",
+          c: "จนถึงตอนนี้ โครงสร้างข้อมูลที่เราเรียนมา (Array, Linked List, Stack, Queue) ล้วนเป็นโครงสร้างเชิงเส้น แต่ในโลกแห่งความเป็นจริง ข้อมูลส่วนใหญ่ไม่ได้เรียงกันเป็นเส้นตรง แต่มีความสัมพันธ์แบบ **ลำดับชั้น (Hierarchy)** หรือ **แม่-ลูก (Parent-Child)** เช่น โครงสร้างโฟลเดอร์ไฟล์ในคอมพิวเตอร์, แผนผังองค์กรบริษัท, หรือแท็ก HTML ในหน้าเว็บ (DOM Tree)",
+        },
+        { t: "h2", c: "พจนานุกรมคำศัพท์โครงสร้างต้นไม้ (Tree Terminology)" },
+        {
+          t: "code",
+          lang: "text",
+          label: "องค์ประกอบของต้นไม้ในวิทยาการคอมพิวเตอร์ (รากอยู่บน กิ่งก้านอยู่ล่าง)",
+          c: `             [ A: Root ]            <- ระดับ Depth 0 (รากของทั้งต้นไม้)
+             /         \\
+       [ B: Parent ]  [ C: Parent ]  <- ระดับ Depth 1
+        /         \\          \\
+   [ D: Leaf ] [ E: Leaf ] [ F: Leaf ] <- ระดับ Depth 2 (ใบไม้: ไม่มีลูก)`,
         },
         {
-          t: "ul",
-          c: [
-            "ขึ้นอยู่กับฮาร์ดแวร์: คอมพิวเตอร์ CPU แรงจะรันเร็วกว่าเครื่องเก่าเสมอ",
-            "ขึ้นอยู่กับสถานะเครื่องในขณะนั้น: หากมีโปรแกรมอื่นรันอยู่เบื้องหลัง เวลาจะแกว่ง",
-            "ไม่สามารถพยากรณ์ข้อมูลขนาดมหาศาล (Scalability) ได้จริง",
+          t: "table",
+          head: ["คำศัพท์", "ความหมาย", "ตัวอย่างจากไดอะแกรมข้างต้น"],
+          rows: [
+            ["**Root (ราก)**", "โหนดเริ่มต้นบนสุดของต้นไม้ มีเพียงโหนดเดียวและไม่มี Parent", "โหนด `A`"],
+            ["**Parent (พ่อแม่)**", "โหนดที่มีเส้นเชื่อมชี้ลงไปยังโหนดลูก", "`A` เป็น Parent ของ `B` และ `C`"],
+            ["**Child (ลูก)**", "โหนดที่สืบทอดลงมาจากโหนดพ่อแม่", "`D` และ `E` เป็นลูกของ `B`"],
+            ["**Leaf (ใบ)**", "โหนดปลายสุดที่ไม่มีลูกใดๆ เชื่อมต่ออีก (`child == nullptr`)", "`D`, `E`, `F`"],
+            ["**Height (ความสูง)**", "จำนวนเส้นเชื่อมที่ยาวที่สุดจากโหนดนั้นลงไปหา Leaf ที่ลึกที่สุด", "Height ของ `A` คือ 2"],
+            ["**Depth (ความลึก)**", "จำนวนเส้นเชื่อมจาก Root ลงมายังโหนดนั้น", "Depth ของ `D` คือ 2, Depth ของ `A` คือ 0"],
           ],
         },
         {
-          t: "p",
-          c: "นักวิทยาการคอมพิวเตอร์จึงคิดค้น **Asymptotic Analysis (Big-O Notation)** เพื่อวัดว่า **เมื่อขนาดข้อมูลนำเข้า (n) เพิ่มขึ้นเป็นอนันต์ ปริมาณงานหรือพื้นที่หน่วยความจำจะเติบโตในอัตราส่วนเท่าใด** โดยไม่ขึ้นกับยี่ห้อของ CPU",
-        },
-        {
           t: "callout",
-          title: "🎯 สัญลักษณ์ 3 แบบในทฤษฎี",
-          c: "Big-O (O): ขอบเขตบนสุด (Worst Case - ทำงานไม่ช้าไปกว่านี้), Big-Omega (Ω): ขอบเขตล่างสุด (Best Case), และ Big-Theta (Θ): ขอบเขตที่แน่นตรงกลาง (Average Case) ในการสัมภาษณ์งานเราจะพูดถึง Worst Case (Big-O) เป็นหลัก",
+          title: "🎯 คุณสมบัติทางคณิตศาสตร์ที่สำคัญ",
+          c: "1. ต้นไม้ที่มีจำนวนโหนด $N$ ตัว จะมีเส้นเชื่อม (Edges) พอดี **$N - 1$ เส้น** เสมอ\n2. ในต้นไม้ จะมี **เส้นทางเชื่อมต่อเพียงเส้นเดียว (Unique Path)** ระหว่างคู่โหนดใดๆ เสมอ (ห้ามมีวงวน / Acyclic เด็ดขาด)",
         },
       ],
       en: [],
     },
   },
 
-  "dsa-ch7-big-o-type": {
-    slug: "dsa-ch7-big-o-type",
+  "dsa-ch7-recursive": {
+    slug: "dsa-ch7-recursive",
     title: {
-      th: "Big-O Notation แต่ละระดับ",
-      en: "Big-O Classes: From Constant to Exponential",
+      th: "Recursion Mental Model: Base Case & Call Stack Tracing",
+      en: "The Recursion Mental Model: Base Cases & Call Stack Frames",
     },
     lead: {
-      th: "ตารางสรุประดับความซับซ้อน O(1), O(log n), O(n), O(n log n), O(n²), O(2ⁿ), O(n!) พร้อมตัวอย่างโค้ดจริง",
-      en: "Explore the Big-O spectrum: constant, logarithmic, linear, linearithmic, quadratic, and exponential.",
+      th: "ทลายความกลัวการเรียกตัวเอง (Recursion): เสาหลัก 3 ประการ, การทำงานของ Call Stack ใน RAM, และศิลปะ 'Leap of Faith'",
+      en: "Demystify recursion: the 3 foundational pillars, call stack memory visualization, and trusting inductive subproblem returns.",
     },
-    group: "บทที่ 2: การวัดประสิทธิภาพ & Big-O (เรียนก่อนเพื่อใช้วัดผล)",
+    group: "บทที่ 7: การเรียกตัวเอง & โครงสร้างต้นไม้ (Recursion & Trees)",
     blocks: {
       th: [
-        { t: "h2", c: "ตารางสรุป Big-O จากเร็วที่สุดไปหาช้าที่สุด" },
+        { t: "h2", c: "ทำไม Recursion ถึงดูเข้าใจยากในตอนแรก?" },
+        {
+          t: "p",
+          c: "สมองมนุษย์คุ้นเคยกับการคิดแบบลำดับ (Iteration: ทำข้อ 1 เสร็จ ไปข้อ 2 แล้ววนกลับมา) แต่ **การเรียกตัวเอง (Recursion)** ต้องการให้เราคิดแบบ **'การแตกปัญหาย่อยที่คล้ายตัวเอง' (Self-Similarity)**\n\nหัวใจสำคัญที่สุดในการเขียน Recursion มีเพียง 3 กฎเหล็ก:",
+        },
+        {
+          t: "ol",
+          c: [
+            "**1. Base Case (จุดหยุด)**: ขนาดปัญหาที่เล็กที่สุดและรู้คำตอบได้ทันทีโดยไม่ต้องคำนวณ เพื่อหยุดไม่ให้ฟังก์ชันเรียกตัวเองไม่รู้จบ (ป้องกัน Stack Overflow)",
+            "**2. Recursive Step (การยุบปัญหา)**: สั่งให้ฟังก์ชันแก้ปัญหากับข้อมูลที่ขนาดเล็กลงเรื่อยๆ เพื่อมุ่งหน้าเข้าหา Base Case",
+            "**3. Leap of Faith (ความเชื่อมั่นในทฤษฎีอุปนัย)**: จงเชื่อว่าฟังก์ชันลูกจะส่งคำตอบย่อยที่ถูกต้องกลับมา โดยไม่ต้องพยายามคิดจำลองในหัวจน Stack ล้นสมอง!",
+          ],
+        },
+        { t: "h2", c: "การเดินทางของ Call Stack ใน Factorial(4)" },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Factorial พร้อม Base Case และ Recursive Step",
+          c: `def factorial(n: int) -> int:
+    # 1. Base Case
+    if n <= 1:
+        return 1
+    # 2. Recursive Step
+    return n * factorial(n - 1)
+
+print(factorial(4)) # 24`,
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "ภาพจำลอง Stack Frames บน RAM (ขยายตัวขึ้น แล้วยุบตัวลง)",
+          c: `[ จังหวะที่ 1: ดันเข้า Stack (Winding) ]
+┌───────────────────────────┐
+│ factorial(1) -> ชน Base Case คืนค่า 1!
+├───────────────────────────┤
+│ factorial(2) รอ factorial(1)
+├───────────────────────────┤
+│ factorial(3) รอ factorial(2)
+├───────────────────────────┤
+│ factorial(4) รอ factorial(3)
+└───────────────────────────┘
+
+[ จังหวะที่ 2: คืนค่าและยุบตัว (Unwinding) ]
+factorial(1) คืน 1  ──► factorial(2) คำนวณ 2 * 1 = 2
+factorial(2) คืน 2  ──► factorial(3) คำนวณ 3 * 2 = 6
+factorial(3) คืน 6  ──► factorial(4) คำนวณ 4 * 6 = 24  (คำตอบสุดท้าย!)`,
+        },
+        {
+          t: "callout",
+          title: "⚠️ ทำไมต้องระวัง Stack Overflow?",
+          c: "ในระบบปฏิบัติการ Stack Memory มีขนาดจำกัด (มักอยู่ที่ 8 MB) หากฟังก์ชันเรียกตัวเองลึกเกินไป (เช่น $N = 100,000$) Stack Frame จะเต็มและโปรแกรมจะแครชทันที ในโจทย์ที่ลึกมากๆ เรามักเปลี่ยนมาใช้ลูป Iteration ร่วมกับ Explicit Stack แทน",
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch7-tree": {
+    slug: "dsa-ch7-tree",
+    title: {
+      th: "Binary Tree & BST: ค้นหา, แทรก, ลบ & ท่องโหนด DFS/BFS",
+      en: "Binary Search Trees: Search, Insert, Delete & DFS/BFS Traversals",
+    },
+    lead: {
+      th: "เจาะลึก Binary Search Tree (BST): กฎเหล็ก Left < Root < Right, การท่องโหนดครบ 4 แบบ (Pre/In/Post/Level-order), และการลบโหนดที่สมบูรณ์แบบ",
+      en: "Comprehensive guide to BST operations, 3 deletion cases with in-order successors, and preorder/inorder/postorder/BFS level traversals.",
+    },
+    group: "บทที่ 7: การเรียกตัวเอง & โครงสร้างต้นไม้ (Recursion & Trees)",
+    blocks: {
+      th: [
+        { t: "h2", c: "Binary Tree vs Binary Search Tree (BST)" },
+        {
+          t: "ul",
+          c: [
+            "**Binary Tree**: ต้นไม้ที่แต่ละโหนดมีลูกได้ไม่เกิน 2 คน (ลูกซ้าย `left` และลูกขวา `right`)",
+            "**Binary Search Tree (BST)**: ต้นไม้ทวิภาคที่มีกฎเหล็กควบคุมการจัดวางข้อมูล:\n> **'สมาชิกทุกตัวในกิ่งซ้าย ต้องน้อยกว่า Root และ สมาชิกทุกตัวในกิ่งขวา ต้องมากกว่า Root'**",
+          ],
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "ตัวอย่าง Binary Search Tree ที่ถูกต้อง (BST Property)",
+          c: `             [ 8 ]
+            /     \\
+         [ 3 ]    [ 10 ]
+        /    \\         \\
+      [ 1 ]  [ 6 ]     [ 14 ]
+             /   \\      /
+           [ 4 ] [ 7 ] [ 13 ]
+           
+* สังเกตว่า: กิ่งซ้ายของ 8 (3, 1, 6, 4, 7) น้อยกว่า 8 ทุกตัว
+* และกิ่งขวาของ 8 (10, 14, 13) มากกว่า 8 ทุกตัว!`,
+        },
+        { t: "h2", c: "การท่องโหนดในต้นไม้ (Tree Traversals)" },
         {
           t: "table",
-          head: ["ระดับ Big-O", "ชื่อเรียก", "ตัวอย่างการทำงาน", "n = 1,000,000 ใช้รอบประมาณ"],
+          head: ["วิธีการท่องโหนด", "ลำดับการอ่าน", "จุดเด่น / การใช้งานจริง"],
           rows: [
-            ["O(1)", "Constant Time", "เข้าถึง Index อาร์เรย์ `arr[i]`, ตรวจ Hash Map", "1 รอบ ⚡"],
-            ["O(log n)", "Logarithmic", "Binary Search, ค้นหาใน Balanced BST", "~20 รอบ 🚀"],
-            ["O(n)", "Linear", "วนลูป 1 รอบหา Max, Linear Search", "1,000,000 รอบ ✅"],
-            ["O(n log n)", "Linearithmic", "Merge Sort, Quick Sort (Average), Timsort", "~20,000,000 รอบ ⏱️"],
-            ["O(n²)", "Quadratic", "Nested loop สองชั้น, Bubble Sort", "1,000,000,000,000 รอบ 🐌 (เกิน 1 วินาที!)"],
-            ["O(2ⁿ)", "Exponential", "สร้าง Subsets ทั้งหมด, Recursive Fibonacci ดิบ", "เกินกำลังจักรวาลจะคำนวณไหว 💀"],
-            ["O(n!)", "Factorial", "สร้าง Permutations ทั้งหมด, Traveling Salesperson", "แทบค้างแม้ n แค่ 15 💥"],
+            ["**In-Order Traversal**", "ซ้าย $\\to$ Root $\\to$ ขวา", "🔥 มหัศจรรย์มาก: จะได้ข้อมูลเรียงจากน้อยไปหามากเสมอ!"],
+            ["**Pre-Order Traversal**", "Root $\\to$ ซ้าย $\\to$ ขวา", "เหมาะสำหรับการทำ Serialization / ก๊อปปี้โครงสร้างต้นไม้"],
+            ["**Post-Order Traversal**", "ซ้าย $\\to$ ขวา $\\to$ Root", "เหมาะสำหรับคำนวณขนาดพื้นที่โฟลเดอร์ หรือการลบต้นไม้จากล่างขึ้นบน"],
+            ["**Level-Order (BFS)**", "อ่านทีละชั้นจากบนลงล่าง", "ใช้ **Queue** ในการจำลองการเดินทีละชั้น"],
           ],
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: ตัวอย่างโค้ดในแต่ละระดับ Big-O",
-          c: `# 1. O(1) - Constant
-def get_first(arr):
-    return arr[0] if arr else None
+          label: "Python: การท่องโหนด DFS ทั้ง 3 รูปแบบ",
+          c: `class TreeNode:
+    def __init__(self, val: int = 0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
-# 2. O(log n) - Logarithmic
-def count_halves(n):
-    count = 0
-    while n > 1:
-        n //= 2
-        count += 1
-    return count
+# 1. In-order: ซ้าย -> Root -> ขวา (เรียงจากน้อยไปมาก)
+def inorder(root: TreeNode | None) -> list[int]:
+    if not root:
+        return []
+    return inorder(root.left) + [root.val] + inorder(root.right)
 
-# 3. O(n) - Linear
-def sum_all(arr):
-    total = 0
-    for x in arr:
-        total += x
-    return total
+# 2. Pre-order: Root -> ซ้าย -> ขวา
+def preorder(root: TreeNode | None) -> list[int]:
+    if not root:
+        return []
+    return [root.val] + preorder(root.left) + preorder(root.right)
 
-# 4. O(n^2) - Quadratic
-def print_pairs(arr):
-    for i in arr:
-        for j in arr:
-            pass`,
+# 3. Post-order: ซ้าย -> ขวา -> Root
+def postorder(root: TreeNode | None) -> list[int]:
+    if not root:
+        return []
+    return postorder(root.left) + postorder(root.right) + [root.val]`,
         },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch7-complexity": {
-    slug: "dsa-ch7-complexity",
-    title: {
-      th: "การวิเคราะห์ Time & Space Complexity",
-      en: "Analyzing Time & Space Complexity: Rules & Techniques",
-    },
-    lead: {
-      th: "กฎเหล็ก 4 ข้อในการตัดค่าคงที่ การวิเคราะห์พารามิเตอร์หลายตัว และการคำนวณ Auxiliary Space",
-      en: "Master simplification rules: dropping constants, multi-variable bounds, and auxiliary space analysis.",
-    },
-    group: "บทที่ 2: การวัดประสิทธิภาพ & Big-O (เรียนก่อนเพื่อใช้วัดผล)",
-    blocks: {
-      th: [
-        { t: "h2", c: "กฎเหล็ก 4 ข้อในการคำนวณ Big-O" },
+        { t: "h2", c: "การลบข้อมูลใน BST (The 3 Deletion Cases)" },
+        {
+          t: "p",
+          c: "การลบโหนดออกจาก BST เป็นหนึ่งในคำถามที่ท้าทายที่สุดในการสัมภาษณ์งาน เพราะต้องรักษากฎ Left < Root < Right ไว้เสมอ โดยแบ่งเป็น 3 กรณี:",
+        },
         {
           t: "ol",
           c: [
-            "**กฎข้อที่ 1: ตัดค่าคงที่ทิ้ง (Drop the Constants)**: `O(2n + 5)` จะถูกย่อเหลือเพียง `O(n)` เพราะเมื่อ n มีค่าเป็น 1,000,000 ตัวเลขคูณ 2 หรือบวก 5 ไม่มีนัยสำคัญต่ออัตราการเติบโต",
-            "**กฎข้อที่ 2: พจน์ที่ไม่เด่นให้ตัดทิ้ง (Drop Non-Dominant Terms)**: `O(n² + n + 100)` จะถูกย่อเหลือเพียง `O(n²)` เพราะ n² เติบโตเร็วกว่า n อย่างมหาศาล",
-            "**กฎข้อที่ 3: ระวังตัวแปรหลายตัว (Different Inputs -> Different Variables)**: หากมีอาร์เรย์ A ขนาดยาว N และอาร์เรย์ B ขนาดยาว M วนลูปซ้อนกัน คือ `O(N * M)` ไม่ใช่ `O(N²)`",
-            "**กฎข้อที่ 4: นับพื้นที่ Space เฉพาะส่วนเสริม (Auxiliary Space)**: พื้นที่ Input ดั้งเดิมไม่ถูกนับเป็น Space เพิ่มเติม แต่นับเฉพาะ Data Structure ที่เราสร้างขึ้นใหม่ (เช่น Stack, Map) และความลึกของ Recursion Call Stack",
-          ],
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch7-leetcode": {
-    slug: "dsa-ch7-leetcode",
-    title: {
-      th: "ประยุกต์ใช้ Big-O กับโจทย์ LeetCode & ห้องสัมภาษณ์",
-      en: "Applying Big-O to LeetCode & Interview Constraints",
-    },
-    lead: {
-      th: "ตารางถอดรหัส Constraints: ดูขนาดของ Input แล้วรู้อัลกอริทึมที่ต้องใช้ทันทีก่อนเริ่มเขียนโค้ด",
-      en: "The Interview Constraints Cheat Sheet: deducing expected algorithms directly from problem bounds.",
-    },
-    group: "บทที่ 2: การวัดประสิทธิภาพ & Big-O (เรียนก่อนเพื่อใช้วัดผล)",
-    blocks: {
-      th: [
-        { t: "h2", c: "ตารางถอดรหัส Constraints สำหรับห้องสัมภาษณ์งาน" },
-        {
-          t: "p",
-          c: "ในการสัมภาษณ์งานและแข่งขัน คอมพิวเตอร์สามารถคำนวณคำสั่งพื้นฐานได้ประมาณ **10⁷ ถึง 10⁸ รอบต่อวินาที (10–100 ล้านครั้ง)** ดังนั้นขนาดของ N ในโจทย์จะบอกคำตอบล่วงหน้าว่าอัลกอริทึมของคุณต้องมี Big-O เท่าใด:",
-        },
-        {
-          t: "table",
-          head: ["ขนาดของ N ในโจทย์ (Constraints)", "Big-O สูงสุดที่อนุญาต", "อัลกอริทึมที่ควรนึกถึงทันที"],
-          rows: [
-            ["N <= 10 – 12", "O(N!) หรือ O(2ᴺ * N)", "Brute Force, Recursion, Permutations"],
-            ["N <= 20 – 25", "O(2ᴺ)", "Backtracking, Bitmask DP, Subsets"],
-            ["N <= 100", "O(N⁴) หรือ O(N³)", "3D Dynamic Programming, Floyd-Warshall"],
-            ["N <= 1,000", "O(N²)", "Nested Loops, 2D DP, Insertion Sort"],
-            ["N <= 100,000 (10⁵)", "O(N log N) หรือ O(N)", "🔥 บ่อยสุด! Sorting, Binary Search, Two Pointers, Hash Table, Heap"],
-            ["N <= 1,000,000 (10⁶)", "O(N) หรือ O(N log N)", "Single Pass, Sliding Window, Monotonic Stack"],
-            ["N >= 10⁹", "O(log N) หรือ O(1)", "Binary Search, Math formula, Bitwise manipulation"],
+            "**กรณีที่ 1: โหนดที่ต้องการลบเป็น Leaf Node (ไม่มีลูก)** $\\implies$ ตัดการเชื่อมต่อทิ้งได้ทันที",
+            "**กรณีที่ 2: โหนดที่ต้องการลบมีลูกเพียงคนเดียว** $\\implies$ ดึงลูกคนนั้นขึ้นมาแทนที่ตำแหน่งของโหนดที่ถูกลบ",
+            "**กรณีที่ 3: โหนดที่ต้องการลบมีลูกทั้งสองฝั่ง (ซ้ายและขวา)** $\\implies$ หาโหนดที่มีค่าน้อยที่สุดในกิ่งขวา (**In-order Successor**) ดึงค่านั้นมาแทนที่ แล้วสั่งลบโหนดซ้ำที่กิ่งขวา!",
           ],
         },
         {
-          t: "callout",
-          title: "💡 เคล็ดลับการตอบสัมภาษณ์",
-          c: "ทันทีที่อ่านโจทย์ ให้ดูหัวข้อ Constraints ด้านล่าง ถ้าโจทย์บอกว่า `nums.length <= 100,000` คุณรู้ได้ทันทีเลยว่าห้ามใช้ nested loop O(n²) เด็ดขาด! คุณต้องมองหาทางออกที่เป็น O(n log n) หรือ O(n) เท่านั้น",
+          t: "code",
+          lang: "python",
+          label: "Python: ลบโหนดใน BST ครบทั้ง 3 กรณี (LeetCode 450)",
+          c: `def delete_node(root: TreeNode | None, key: int) -> TreeNode | None:
+    if not root:
+        return None
+        
+    if key < root.val:
+        root.left = delete_node(root.left, key)
+    elif key > root.val:
+        root.right = delete_node(root.right, key)
+    else:
+        # เจอโหนดที่ต้องการลบแล้ว!
+        # กรณี 1 & 2: มีลูกคนเดียว หรือ ไม่มีลูก
+        if not root.left:
+            return root.right
+        elif not root.right:
+            return root.left
+            
+        # กรณี 3: มีลูกสองฝั่ง -> หา In-order Successor (ตัวน้อยสุดในกิ่งขวา)
+        successor = root.right
+        while successor.left:
+            successor = successor.left
+            
+        root.val = successor.val # คัดลอกค่ามาทับ
+        # สั่งลบโหนด successor ทิ้งจากกิ่งขวา
+        root.right = delete_node(root.right, successor.val)
+        
+    return root`,
         },
       ],
       en: [],

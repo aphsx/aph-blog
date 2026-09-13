@@ -4,32 +4,42 @@ export const chapter10Pages: Record<string, Page> = {
   "dsa-ch10-intro": {
     slug: "dsa-ch10-intro",
     title: {
-      th: "Greedy Algorithm: กลยุทธ์เลือกสิ่งที่ดีที่สุด ณ ตอนนี้",
-      en: "Greedy Algorithms: Local Optimum vs Global Optimum",
+      th: "ปรัชญา Greedy: เลือกสิ่งที่ดีที่สุดเฉพาะหน้า (Greedy-Choice)",
+      en: "The Greedy Paradigm: Locally Optimal Choices & Global Optima",
     },
     lead: {
-      th: "แนวคิดการตัดสินใจแบบละโมบ: เลือกสิ่งที่ดีที่สุดในแต่ละก้าวโดยไม่ย้อนกลับมาเปลี่ยนใจ พร้อมเงื่อนไขว่าเมื่อใดที่ใช้ได้ผล",
-      en: "Master greedy choice properties, optimal substructure, and verifying when greedy strategies yield optimal solutions.",
+      th: "เข้าใจกระบวนทัศน์แบบละโมบ (Greedy): การตัดสินใจเลือกทางเลือกที่ดีที่สุดในปัจจุบันโดยไม่ย้อนกลับ และเสาหลัก 2 ประการที่ใช้พิสูจน์ความถูกต้อง",
+      en: "Understand the greedy paradigm: making locally optimal choices without backtracking, and the mathematical properties required for global optimality.",
     },
     group: "บทที่ 10: ขั้นตอนวิธีแบบละโมบ (Greedy Algorithms)",
     blocks: {
       th: [
         {
           t: "p",
-          c: "**Greedy Algorithm (ขั้นตอนวิธีแบบละโมบ)** คืออัลกอริทึมที่ในทุกๆ ขั้นตอนจะตัดสินใจเลือก **สิ่งที่ดีที่สุดเฉพาะหน้า (Local Optimum)** โดยตั้งสมมติฐานว่าการเลือกสิ่งที่ดีที่สุดในทุกก้าวจะนำไปสู่ **คำตอบที่ดีที่สุดของภาพรวม (Global Optimum)** เสมอ",
+          c: "**อัลกอริทึมแบบละโมบ (Greedy Algorithm)** ยึดหลักการที่เรียบง่ายแต่ทรงพลังคือ:\n\n> *'ในทุกๆ ก้าวของการตัดสินใจ จงเลือกตัวเลือกที่ดูดีที่สุดในปัจจุบันทันที (Locally Optimal Choice) โดยไม่ต้องมองย้อนหลัง และหวังว่าการเลือกที่ดีที่สุดในทุกก้าวจะนำไปสู่คำตอบที่ดีที่สุดในภาพรวม (Globally Optimal Solution)'*",
         },
-        { t: "h2", c: "2 เงื่อนไขสำคัญที่ทำให้ Greedy ใช้งานได้จริง" },
+        { t: "h2", c: "เสาหลัก 2 ประการที่โจทย์ต้องมี จึงจะใช้ Greedy ได้" },
         {
           t: "ol",
           c: [
-            "**1. Greedy-Choice Property**: เราสามารถเลือกคำตอบที่ดีที่สุดในปัจจุบันได้เลยโดยไม่ต้องคำนึงถึงผลลัพธ์ในอนาคต และไม่มีวันเสียใจหรือต้องย้อนกลับมาเปลี่ยนคำตอบ (No Backtracking)",
-            "**2. Optimal Substructure**: คำตอบที่ดีที่สุดของปัญหาใหญ่ ประกอบขึ้นมาจากคำตอบที่ดีที่สุดของปัญหาย่อยๆ",
+            "**1. Greedy-Choice Property**: เราสามารถประกอบคำตอบที่ดีที่สุดในภาพรวมได้ โดยการเลือกคำตอบที่ดีที่สุดเฉพาะหน้าในแต่ละก้าว โดยการเลือกนี้ **ไม่ต้องย้อนกลับมาเปลี่ยนใจ (No Backtracking)**",
+            "**2. Optimal Substructure**: ปัญหาใหญ่สามารถแบ่งออกเป็นปัญหาย่อยๆ ที่เมื่อแก้ปัญหาย่อยได้ดีที่สุดแล้ว ผลลัพธ์จะนำมารวมกันเป็นคำตอบที่ดีที่สุดของปัญหาใหญ่ได้",
+          ],
+        },
+        { t: "h2", c: "Greedy vs Dynamic Programming vs Backtracking" },
+        {
+          t: "table",
+          head: ["กระบวนทัศน์", "การตัดสินใจในแต่ละก้าว", "ความเร็ว (Time Complexity)", "การการันตีคำตอบ"],
+          rows: [
+            ["**Greedy**", "เลือกสิ่งที่ดีที่สุด ณ ปัจจุบัน 1 ทางเท่านั้น ไม่มองย้อนกลับ", "⚡ เร็วมาก มักอยู่ที่ $O(n)$ หรือ $O(n \\log n)$", "ใช้ได้เฉพาะกับปัญหาที่มี Greedy-Choice Property เท่านั้น"],
+            ["**Dynamic Programming**", "คำนวณและเปรียบเทียบทุกทางเลือกที่เป็นไปได้ แต่จดจำผลลัพธ์ไว้", "⏱️ ปานกลาง มักอยู่ที่ $O(n^2)$ หรือ $O(n \\times W)$", "การันตีคำตอบที่ดีที่สุดเสมอสำหรับปัญหา Optimal Substructure"],
+            ["**Backtracking**", "ทดลองเดินทุกทางเลือกอย่างละเอียด หากตันให้ถอยกลับ", "🐢 ช้ามาก อยู่ที่ $O(2^n)$ หรือ $O(n!)$", "การันตีคำตอบที่ดีที่สุดแม้ในปัญหา NP-Complete"],
           ],
         },
         {
           t: "callout",
-          title: "⚠️ กับดักของ Greedy ในห้องสัมภาษณ์",
-          c: "Greedy ไม่ได้รับประกันคำตอบที่ดีที่สุดเสมอไป! ตัวอย่างเช่น การทอนเงิน: ถ้ามีเหรียญ 10, 5, 1 บาท ระบบเงินไทยทอนได้ดีด้วย Greedy แต่ถ้ามีเหรียญ 1, 3, 4 บาท แล้วต้องการทอน 6 บาท Greedy จะเลือก 4 + 1 + 1 (3 เหรียญ) ทั้งที่คำตอบดีสุดคือ 3 + 3 (2 เหรียญ)! ปัญหานี้ต้องแก้ด้วย Dynamic Programming",
+          title: "⚠️ อันตรายของ Greedy: หลุมพรางความโลภ",
+          c: "Greedy เป็นกระบวนทัศน์ที่ 'เสี่ยง' ที่สุด เพราะหลายครั้งสิ่งที่ดูดีที่สุดในปัจจุบัน อาจนำไปสู่หายนะในอนาคต! หากโจทย์ไม่มีคุณสมบัติ Greedy-Choice Property การใช้ Greedy จะให้คำตอบที่ผิดทันที",
         },
       ],
       en: [],
@@ -39,152 +49,82 @@ export const chapter10Pages: Record<string, Page> = {
   "dsa-ch10-basic": {
     slug: "dsa-ch10-basic",
     title: {
-      th: "Greedy พื้นฐาน: Coin Change, Fractional Knapsack & Activity Selection",
-      en: "Greedy Basics: Canonical Coin Change, Fractional Knapsack & Activity Selection",
+      th: "เมื่อ Greedy ชนะ vs ล้มเหลว: Coin Change & Activity Selection",
+      en: "When Greedy Works vs Fails: Coin Change & Activity Selection",
     },
     lead: {
-      th: "3 โจทย์คลาสสิกของ Greedy: การทอนเงินระบบมาตรฐาน, ปัญหาเป้สะพายหลังแบ่งส่วนได้ (Fractional Knapsack) และการจัดตารางกิจกรรม (Interval Scheduling)",
-      en: "Master canonical coin change, fractional knapsack value-to-weight density, and interval scheduling.",
+      th: "วิเคราะห์กรณีศึกษาคลาสสิก: ทำไมการทอนเงินด้วยเหรียญไทยถึงใช้ Greedy ได้ แต่เหรียญในระบบอื่นกลับล้มเหลว และการพิสูจน์ Interval Scheduling ด้วย Exchange Argument",
+      en: "Classic case studies: why Greedy succeeds on canonical currency systems but fails on arbitrary denominations, and the Exchange Argument proof for Interval Scheduling.",
     },
     group: "บทที่ 10: ขั้นตอนวิธีแบบละโมบ (Greedy Algorithms)",
     blocks: {
       th: [
-        { t: "h2", c: "1. การทอนเงิน: Brute Force vs Greedy" },
+        { t: "h2", c: "กรณีศึกษาที่ 1: ปัญหาการทอนเงิน (Coin Change Problem)" },
         {
           t: "p",
-          c: "ปัญหา: ต้องการทอนเงินจำนวน `amount` โดยใช้เหรียญที่มีจำนวนน้อยที่สุด กำหนดเหรียญระบบเงินไทย `[1, 2, 5, 10]` บาท",
+          c: "ลองดูสองสถานการณ์ในการทอนเงินให้มีจำนวนเหรียญน้อยที่สุด:",
+        },
+        {
+          t: "table",
+          head: ["สถานการณ์", "เหรียญที่มีให้เลือก", "เป้าหมาย", "ผลลัพธ์จาก Greedy", "คำตอบที่ดีที่สุดจริง"],
+          rows: [
+            [
+              "**ระบบเหรียญทั่วไป (Canonical)**",
+              "`[10, 5, 2, 1]`",
+              "18 บาท",
+              "เลือก 10 + 5 + 2 + 1 = **4 เหรียญ** ✅",
+              "4 เหรียญ (Greedy ชนะ!)",
+            ],
+            [
+              "**ระบบเหรียญสมมติ (Non-Canonical)**",
+              "`[4, 3, 1]`",
+              "6 บาท",
+              "เลือก 4 + 1 + 1 = **3 เหรียญ** ❌",
+              "เลือก 3 + 3 = **2 เหรียญ**! (Greedy แพ้!)",
+            ],
+          ],
         },
         {
           t: "p",
-          c: "หากใช้ **Brute Force (Recursion)** เราต้องลองทุกเหรียญที่เป็นไปได้ ซึ่งมีความซับซ้อนระดับ **O(n^amount)** ช้ามากจนโปรแกรมค้าง แต่ถ้าเป็นระบบเหรียญมาตรฐาน (Canonical Coin System) เราสามารถใช้ **Greedy** โดยเลือกหยิบเหรียญที่มีค่ามากที่สุดก่อนเสมอ:",
+          c: "ในกรณีเหรียญ `[4, 3, 1]` การเลือกเหรียญ 4 (ใหญ่สุดเฉพาะหน้า) บีบให้เราต้องทอนเศษที่เหลือด้วยเหรียญ 1 อีกสองเหรียญ กลายเป็น 3 เหรียญ ในขณะที่การเลือกเหรียญ 3 สองเหรียญกลับให้ผลลัพธ์ที่ดีกว่า (**กรณีนี้ต้องใช้ Dynamic Programming เท่านั้น!**)",
+        },
+        { t: "h2", c: "กรณีศึกษาที่ 2: การจัดตารางกิจกรรม (Activity Selection / Interval Scheduling)" },
+        {
+          t: "p",
+          c: "โจทย์ให้ช่วงเวลากิจกรรมหลายกิจกรรม `[start, end]` จงเลือกจัดกิจกรรมให้ได้ **จำนวนมากที่สุด** โดยไม่มีช่วงเวลาทับซ้อนกัน:",
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "เราควรใช้เกณฑ์อะไรในการเลือกกิจกรรมถัดไป?",
+          c: `1. เลือกกิจกรรมที่เริ่มเร็วที่สุด (Earliest Start Time)?   -> ❌ ล้มเหลว (อาจเริ่มเร็วแต่ยาวข้ามวัน)
+2. เลือกกิจกรรมที่ใช้เวลาน้อยที่สุด (Shortest Duration)?   -> ❌ ล้มเหลว (อาจกินเวลาคาบเกี่ยวสองฝั่ง)
+3. เลือกกิจกรรมที่เสร็จสิ้นเร็วที่สุด (Earliest Finish Time)? -> ✅ ถูกต้องและผ่านการพิสูจน์แล้ว!`,
         },
         {
           t: "code",
           lang: "python",
-          label: "Python: Coin Change แบบ Greedy (O(จำนวนชนิดเหรียญ))",
-          c: `def coin_change_greedy(coins: list[int], amount: int) -> int:
-    # เรียงเหรียญจากค่ามากไปน้อย
-    coins.sort(reverse=True)
-    count = 0
-    
-    for coin in coins:
-        if amount == 0:
-            break
-        num_coins = amount // coin
-        count += num_coins
-        amount -= num_coins * coin
+          label: "Python: Activity Selection ด้วย Earliest Finish Time (O(n log n))",
+          c: `def max_activities(intervals: list[list[int]]) -> int:
+    if not intervals:
+        return 0
         
-    return count if amount == 0 else -1
-
-print("ทอนเงิน 27 บาท ใช้:", coin_change_greedy([1, 2, 5, 10], 27), "เหรียญ")  # 10*2 + 5*1 + 2*1 = 4 เหรียญ`,
-        },
-        { t: "h2", c: "2. ปัญหาเป้สะพายหลังแบ่งส่วนได้ (Fractional Knapsack)" },
-        {
-          t: "p",
-          c: "มีสิ่งของ $n$ ชิ้น แต่ละชิ้นมีมูลค่า $v_i$ และน้ำหนัก $w_i$ กระเป๋าสามารถรับน้ำหนักได้สูงสุด $W$ โดยเรา **สามารถตัดแบ่งสิ่งของเป็นเศษส่วนได้** (ต่างจาก 0/1 Knapsack ที่ต้องหยิบทั้งชิ้นหรือไม่หยิบเลย)",
-        },
-        {
-          t: "callout",
-          title: "💡 กลยุทธ์ Greedy: ความคุ้มค่าต่อหน่วย (Value Density)",
-          c: "คำนวณอัตราส่วน **Value / Weight** ของของแต่ละชิ้น แล้วเรียงลำดับจากมากไปน้อย หยิบชิ้นที่คุ้มค่าที่สุดใส่กระเป๋าก่อนจนเต็ม!",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Fractional Knapsack (O(n log n))",
-          c: `class Item:
-    def __init__(self, value: float, weight: float):
-        self.value = value
-        self.weight = weight
-        self.ratio = value / weight
-
-def fractional_knapsack(capacity: float, items: list[Item]) -> float:
-    # เรียงตาม ratio จากมากไปน้อย
-    items.sort(key=lambda x: x.ratio, reverse=True)
+    # เรียงลำดับตามเวลาสิ้นสุด (End Time) จากน้อยไปหามาก
+    intervals.sort(key=lambda x: x[1])
     
-    total_val = 0.0
-    rem_capacity = capacity
+    count = 1
+    last_end = intervals[0][1]
     
-    for item in items:
-        if rem_capacity <= 0:
-            break
-            
-        if item.weight <= rem_capacity:
-            # ใส่ได้ทั้งชิ้น
-            total_val += item.value
-            rem_capacity -= item.weight
-        else:
-            # ใส่ได้เพียงบางส่วน
-            fraction = rem_capacity / item.weight
-            total_val += item.value * fraction
-            rem_capacity = 0
-            
-    return total_val
-
-items = [Item(60, 10), Item(100, 20), Item(120, 30)]
-print(f"มูลค่าสูงสุดที่ใส่ได้: {fractional_knapsack(50, items):.2f}")  # 240.00`,
-        },
-        {
-          t: "code",
-          lang: "cpp",
-          label: "C++ Comparison: Fractional Knapsack using std::sort with lambda",
-          c: `#include <iostream>
-#include <vector>
-#include <algorithm>
-
-struct Item {
-    double value, weight;
-};
-
-double fractionalKnapsack(double capacity, std::vector<Item>& items) {
-    std::sort(items.begin(), items.end(), [](const Item& a, const Item& b) {
-        return (a.value / a.weight) > (b.value / b.weight);
-    });
-
-    double totalValue = 0.0;
-    for (const auto& item : items) {
-        if (capacity <= 0) break;
-        if (item.weight <= capacity) {
-            totalValue += item.value;
-            capacity -= item.weight;
-        } else {
-            totalValue += item.value * (capacity / item.weight);
-            capacity = 0;
-        }
-    }
-    return totalValue;
-}`,
-        },
-        { t: "h2", c: "3. การจัดตารางกิจกรรม (Activity Selection / Interval Scheduling)" },
-        {
-          t: "p",
-          c: "มีกิจกรรม N กิจกรรม แต่ละกิจกรรมมีเวลาเริ่มและเวลาสิ้นสุด `[start, end]` ห้องประชุมจัดได้ทีละ 1 งาน จงหากิจกรรมจำนวนมากที่สุดที่จัดได้โดยไม่ชนกัน:",
-        },
-        {
-          t: "callout",
-          title: "💡 กลยุทธ์ Greedy ที่ถูกต้อง",
-          c: "จงเลือกกิจกรรมที่ **จบเร็วที่สุดเสมอ (Sort by End Time)** เพราะยิ่งงานจบเร็วเท่าไร เราจะยิ่งเหลือเวลาในห้องประชุมมากที่สุดสำหรับจัดงานถัดไป!",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Activity Selection (O(n log n))",
-          c: `def max_activities(activities: list[tuple[int, int]]) -> int:
-    # 1. จัดเรียงตามเวลาสิ้นสุด (end time)
-    activities.sort(key=lambda x: x[1])
-    
-    count = 0
-    last_end_time = -1
-    
-    for start, end in activities:
-        if start >= last_end_time:
+    for i in range(1, len(intervals)):
+        start, end = intervals[i]
+        # หากกิจกรรมนี้เริ่มหลังหรือพร้อมกับที่กิจกรรมก่อนหน้าเสร็จ
+        if start >= last_end:
             count += 1
-            last_end_time = end # อัปเดตเวลาสิ้นสุด
+            last_end = end  # อัปเดตเวลาสิ้นสุด
             
     return count
 
-tasks = [(1, 4), (3, 5), (0, 6), (5, 7), (3, 9), (5, 9), (6, 10), (8, 11)]
-print(f"จัดงานได้สูงสุด: {max_activities(tasks)} งาน")  # 4 งาน`,
+print(max_activities([[1, 2], [2, 3], [3, 4], [1, 3]])) # 3 กิจกรรม`,
         },
       ],
       en: [],
@@ -194,20 +134,20 @@ print(f"จัดงานได้สูงสุด: {max_activities(tasks)} �
   "dsa-ch10-leetcode": {
     slug: "dsa-ch10-leetcode",
     title: {
-      th: "Greedy LeetCode: Jump Game & Gas Station",
-      en: "Greedy LeetCode Patterns: Jump Game & Gas Station",
+      th: "โจทย์สัมภาษณ์ยอดฮิต: Jump Game, Gas Station & Assign Cookies",
+      en: "Classic Interview Problems: Jump Game, Gas Station & Two Pointers Greedy",
     },
     lead: {
-      th: "ตะลุย 2 โจทย์ยอดนิยมระดับ Big Tech: Jump Game (LeetCode 55) และ Gas Station (LeetCode 134) ด้วยเทคนิค Greedy O(n) Single Pass",
-      en: "Tackle classic interview favorites: Jump Game I and Gas Station single-pass greedy patterns.",
+      th: "เจาะลึกโจทย์ Greedy ยอดฮิตในห้องสัมภาษณ์งาน: Jump Game (LeetCode 55) ด้วยการติดตามขอบเขตเอื้อมถึงสูงสุดใน O(n) และ Gas Station (LeetCode 134)",
+      en: "Master iconic interview problems: Jump Game reachability tracking in O(n) and the Gas Station circular surplus reset.",
     },
     group: "บทที่ 10: ขั้นตอนวิธีแบบละโมบ (Greedy Algorithms)",
     blocks: {
       th: [
-        { t: "h2", c: "1. Jump Game (LeetCode 55)" },
+        { t: "h2", c: "1. Jump Game I (LeetCode 55): กระโดดไปถึงจุดสิ้นสุดได้หรือไม่?" },
         {
           t: "p",
-          c: "กำหนดอาร์เรย์ `nums` โดย `nums[i]` คือระยะกระโดดสูงสุดจากตำแหน่งนั้น เริ่มต้นที่ดัชนี 0 จงหาว่าสามารถกระโดดไปถึงจุดสุดท้าย (`len(nums) - 1`) ได้หรือไม่:",
+          c: "กำหนดอาร์เรย์ `nums` โดย `nums[i]` คือระยะทางสูงสุดที่สามารถกระโดดได้จากช่องนั้น จงหาว่าสามารถกระโดดไปถึง Index สุดท้ายได้หรือไม่:\n- แทนที่จะจำลองการกระโดดทุกแบบ ($O(2^n)$ Backtracking) เราสามารถใช้ Greedy ติดตามตัวแปรเดียวคือ: **'ตำแหน่งที่ไกลที่สุดที่ฉันเอื้อมถึงได้ในตอนนี้' (Max Reach)**",
         },
         {
           t: "code",
@@ -215,53 +155,60 @@ print(f"จัดงานได้สูงสุด: {max_activities(tasks)} �
           label: "Python: Jump Game ด้วย Greedy O(n) Time, O(1) Space",
           c: `def can_jump(nums: list[int]) -> bool:
     max_reach = 0
-    target = len(nums) - 1
     
     for i, jump in enumerate(nums):
-        # ถ้าตำแหน่งปัจจุบันไกลเกินกว่าจุดที่เคยเอื้อมถึง แปลว่าติดหล่ม
+        # ถ้าตำแหน่งปัจจุบันเกินระยะที่เอื้อมถึง แปลว่าติดเกาะ เดินหน้าต่อไม่ได้!
         if i > max_reach:
             return False
+            
+        # อัปเดตขอบเขตที่ไกลที่สุดที่สามารถเอื้อมไปถึงได้
         max_reach = max(max_reach, i + jump)
-        if max_reach >= target:
+        
+        # หากเอื้อมถึงจุดสุดท้ายแล้ว จบเกมได้ทันที
+        if max_reach >= len(nums) - 1:
             return True
             
     return True
 
-print(can_jump([2, 3, 1, 1, 4]))  # True
-print(can_jump([3, 2, 1, 0, 4]))  # False (ติดที่เลข 0)`,
+print(can_jump([2, 3, 1, 1, 4])) # True
+print(can_jump([3, 2, 1, 0, 4])) # False (ติดที่ 0 ช่องที่สาม)`,
         },
-        { t: "h2", c: "2. Gas Station: เดินทางรอบวงกลม (LeetCode 134)" },
+        { t: "h2", c: "2. Gas Station (LeetCode 134): วนรอบวงกลมน้ำมัน" },
         {
           t: "p",
-          c: "มีปั๊มน้ำมัน $n$ แห่งเรียงเป็นวงกลม ปั๊มที่ $i$ มีน้ำมัน `gas[i]` และต้องใช้น้ำมัน `cost[i]` เพื่อเดินทางไปยังปั๊มถัดไป เริ่มต้นด้วยถังน้ำมันว่างเปล่า จงหา **ดัชนีปั๊มเริ่มต้น** ที่ทำให้เราขับรถวนครบ 1 รอบได้ (หากทำไม่ได้ให้ส่งคืน -1):",
-        },
-        {
-          t: "callout",
-          title: "💡 การพิสูจน์ทางคณิตศาสตร์ด้วย Greedy",
-          c: "1. หาก `sum(gas) < sum(cost)` แปลว่าไม่มีทางวนรอบได้แน่นอน ส่งคืน -1 ทันที\\n2. ถ้าเราเริ่มจากจุด A แล้วน้ำมันหมดกลางทางที่จุด B แปลว่า **ไม่มีจุดใดๆ ระหว่าง A ถึง B ที่สามารถเป็นจุดเริ่มต้นได้เลย!** ดังนั้นจุดเริ่มต้นถัดไปที่ต้องลองคือ B + 1",
+          c: "มีปั๊มน้ำมัน $N$ แห่งรอบวงกลม มีน้ำมันให้เติม `gas[i]` และค่าน้ำมันที่ต้องใช้ในการเดินทางไปยังปั๊มถัดไป `cost[i]` จงหาปั๊มเริ่มต้นที่สามารถขับวนครบรอบได้:",
         },
         {
           t: "code",
-          lang: "python",
-          label: "Python: Gas Station O(n) Single Pass, O(1) Space",
-          c: `def can_complete_circuit(gas: list[int], cost: list[int]) -> int:
-    # เงื่อนไขรวม: ถ้าน้ำมันทั้งหมดน้อยกว่าค่าใช้จ่ายรวม ยังไงก็ไม่รอด
-    if sum(gas) < sum(cost):
-        return -1
-        
-    total_tank = 0
-    start_station = 0
-    
-    for i in range(len(gas)):
-        total_tank += gas[i] - cost[i]
-        # ถ้าน้ำมันติดลบ แสดงว่าเริ่มจากสถานีตั้งแต่ start_station ถึง i ไม่ได้เลย
-        if total_tank < 0:
-            start_station = i + 1
-            total_tank = 0
-            
-    return start_station
+          lang: "cpp",
+          label: "C++: Gas Station O(n) Time, O(1) Space",
+          c: `#include <vector>
+using namespace std;
 
-print(can_complete_circuit([1, 2, 3, 4, 5], [3, 4, 5, 1, 2]))  # ดัชนี 3 (ปั๊มที่ 4)`,
+class Solution {
+public:
+    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+        int totalTank = 0;
+        int currTank = 0;
+        int startStation = 0;
+        
+        for (int i = 0; i < gas.size(); i++) {
+            int netGas = gas[i] - cost[i];
+            totalTank += netGas;
+            currTank += netGas;
+            
+            // ถ้าน้ำมันติดลบระหว่างทาง แสดงว่าสถานีตั้งแต่ startStation ถึง i
+            // ไม่สามารถเป็นจุดเริ่มต้นได้แน่นอน! ให้รีเซ็ตจุดเริ่มต้นไปที่ i + 1
+            if (currTank < 0) {
+                startStation = i + 1;
+                currTank = 0;
+            }
+        }
+        
+        // ถ้าน้ำมันรวมทั้งระบบน้อยกว่าค่าใช้จ่ายรวม ไม่มีทางวนได้แน่นอน
+        return (totalTank >= 0) ? startStation : -1;
+    }
+};`,
         },
       ],
       en: [],

@@ -4,350 +4,262 @@ export const chapter02Pages: Record<string, Page> = {
   "dsa-ch2-intro": {
     slug: "dsa-ch2-intro",
     title: {
-      th: "Problem Solving: เริ่มต้นการแก้โจทย์ปัญหา",
-      en: "Problem Solving: Principles & Decomposition",
+      th: "ทำไมต้องวัดประสิทธิภาพ: อวสานการจับเวลาด้วยนาฬิกา (Asymptotic Analysis)",
+      en: "Why Benchmarks Fail: The Need for Asymptotic Analysis",
     },
     lead: {
-      th: "กระบวนการคิดอย่างเป็นระบบ การวิเคราะห์ความต้องการของโจทย์ และขั้นตอนแปลงปัญหาเป็น Algorithm",
-      en: "Learn systematic problem-solving frameworks: decomposing requirements and designing algorithms.",
+      th: "เข้าใจข้อจำกัดของการจับเวลาด้วยนาฬิกา (Wall-Clock Time) สู่การวัดประสิทธิภาพเชิงสัญลักษณ์ Big-O ที่เป็นสากลและไม่ขึ้นกับฮาร์ดแวร์",
+      en: "Why wall-clock benchmarks produce misleading results and how asymptotic analysis provides machine-independent performance metrics.",
     },
-    group: "บทที่ 3: การฝึกแก้โจทย์ปัญหาเบื้องต้น",
+    group: "บทที่ 2: เข็มทิศวัดประสิทธิภาพ (Big-O & Complexity)",
     blocks: {
       th: [
         {
           t: "p",
-          c: "การแก้โจทย์ปัญหา (**Problem Solving**) ในสายวิทยาการคอมพิวเตอร์และห้องสัมภาษณ์งาน ไม่ใช่การพยายามกระโดดลงไปพิมพ์โค้ดทันที แต่คือกระบวนการทำความเข้าใจปัญหาอย่างถ่องแท้ แล้วแตกโจทย์ออกเป็นขั้นตอนย่อย (**Decomposition**) ก่อนแปลงเป็นขั้นตอนการคำนวณที่คอมพิวเตอร์ทำตามได้ (**Algorithm**)",
+          c: "เวลาโปรแกรมเมอร์มือใหม่ต้องการเปรียบเทียบว่าโค้ดชุดไหนเร็วกว่ากัน วิธีแรกที่ทุกคนมักคิดถึงคือการเขียนโค้ดจับเวลา เช่น การใช้ `time.time()` ใน Python หรือ `std::chrono` ใน C++ เพื่อดูว่าฟังก์ชันใช้เวลากี่มิลลิวินาที:",
         },
-        { t: "h2", c: "กระบวนการ 4 ขั้นตอนในการแก้โจทย์สัมภาษณ์ (UMPIRE Framework)" },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: ตัวอย่างการจับเวลาแบบ Wall-Clock Time (และทำไมจึงมีปัญหา)",
+          c: `import time
+
+start = time.perf_counter()
+# รันอัลกอริทึม A
+total = sum(range(10_000_000))
+end = time.perf_counter()
+
+print(f"Elapsed time: {end - start:.4f} seconds")`,
+        },
+        { t: "h2", c: "ทำไมการจับเวลาด้วยนาฬิกา (Wall-Clock Time) ถึงใช้ไม่ได้ผล?" },
+        {
+          t: "ul",
+          c: [
+            "**1. ขึ้นอยู่กับฮาร์ดแวร์โดยตรง**: รันบนแล็ปท็อป CPU ตัวท็อปย่อมเร็วกว่ารันบนคลาวด์เซิร์ฟเวอร์ขนาดเล็ก ทั้งที่เป็นโค้ดชุดเดียวกัน",
+            "**2. มีสัญญาณรบกวนจากระบบปฏิบัติการ (OS Noise)**: หากระบบปฏิบัติการกำลังอัปเดตซอฟต์แวร์ หรือมีโปรแกรมอื่นทำงานเบื้องหลัง เวลาที่วัดได้จะแกว่งอย่างมาก",
+            "**3. ไม่สามารถพยากรณ์ข้อมูลขนาดมหึมา (Scalability) ได้จริง**: โค้ดที่รันเร็วกับข้อมูล 100 ตัว อาจช้าจนระบบล่มเมื่อเจอข้อมูล 10,000,000 ตัว",
+          ],
+        },
+        { t: "h2", c: "กำเนิด Asymptotic Analysis: การวัดอัตราการเติบโต" },
+        {
+          t: "p",
+          c: "นักวิทยาการคอมพิวเตอร์จึงคิดค้นการวัดเชิงนามธรรมที่เรียกว่า **Asymptotic Analysis** ซึ่งตั้งคำถามเพียงข้อเดียวคือ:\n\n> *'เมื่อขนาดข้อมูลนำเข้า ($N$) เติบโตขึ้นเรื่อยๆ จนเข้าใกล้อนันต์ ($N \\to \\infty$) ปริมาณคำสั่งและพื้นที่หน่วยความจำจะเติบโตในอัตราส่วนเท่าใด?'*",
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "สัญลักษณ์ 3 พี่น้องในทางคณิตศาสตร์",
+          c: `1. Big-O (O):     ขอบเขตบนสุด (Upper Bound / Worst Case)
+   -> "การันตีว่าโปรแกรมจะทำงาน 'ไม่ช้าไปกว่านี้' แน่นอน" (มาตรฐานที่ห้องสัมภาษณ์ใช้)
+
+2. Big-Omega (Ω): ขอบเขตล่างสุด (Lower Bound / Best Case)
+   -> "โปรแกรมจะทำงาน 'ไม่เร็วกว่านี้' แน่นอน"
+
+3. Big-Theta (Θ): ขอบเขตที่ประกบแน่นตรงกลาง (Tight Bound / Average Case)
+   -> "ขอบเขตที่สะท้อนการทำงานเฉลี่ยในชีวิตจริง"`,
+        },
+        {
+          t: "callout",
+          title: "🎯 สรุปบทบาทของ Big-O",
+          c: "Big-O ไม่ได้บอกเวลาเป็นวินาที แต่บอก **'รูปทรงของเส้นกราฟการเติบโต'** ของการใช้ทรัพยากร ทำให้เราสามารถเปรียบเทียบอัลกอริทึมได้อย่างเป็นธรรม โดยไม่ต้องสนใจว่ารันบนเครื่องคอมพิวเตอร์เครื่องไหน!",
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch2-big-o-type": {
+    slug: "dsa-ch2-big-o-type",
+    title: {
+      th: "สเปกตรัมของ Big-O: จาก O(1) ถึง O(n!) เข้าใจด้วยภาพ",
+      en: "The Big-O Spectrum: From Constant O(1) to Factorial O(n!)",
+    },
+    lead: {
+      th: "เจาะลึกตระกูลความซับซ้อนทุกระดับ เปรียบเทียบจำนวนรอบคำนวณจริงเมื่อ N = 1,000,000 และตัวอย่างโค้ดในโลกจริง",
+      en: "Explore the Big-O spectrum: concrete operations when N = 1,000,000 and real-world code examples for each class.",
+    },
+    group: "บทที่ 2: เข็มทิศวัดประสิทธิภาพ (Big-O & Complexity)",
+    blocks: {
+      th: [
+        { t: "h2", c: "ตารางสรุปสเปกตรัม Big-O (จากเร็วที่สุด สู่ช้าจนระบบล่ม)" },
+        {
+          t: "table",
+          head: ["ระดับ Big-O", "ชื่อเรียก", "คำอธิบายเชิงสัญชาตญาณ", "เมื่อ N = 1,000,000 (จำนวนรอบ)", "ตัวอย่างจริงในชีวิตประจำวัน"],
+          rows: [
+            ["**O(1)**", "Constant Time", "เร็วมหัศจรรย์ ขนาดข้อมูลเท่าไรก็ใช้เวลาเท่าเดิม", "1 รอบ ⚡", "เข้าถึงข้อมูลในอาร์เรย์ด้วย Index เช่น `arr[5]`, ค้นหาใน Hash Map"],
+            ["**O(log n)**", "Logarithmic Time", "แบ่งปัญหาลงครึ่งหนึ่งในทุกๆ ก้าว (ยอดเยี่ยมมาก)", "~20 รอบ 🚀", "Binary Search ในพจนานุกรม, การค้นหาใน Balanced BST"],
+            ["**O(n)**", "Linear Time", "จำนวนรอบโตเป็นเส้นตรงตามขนาดข้อมูล", "1,000,000 รอบ ✅", "การสแกนหาค่ามากที่สุด (Max) ในลิสต์ 1 รอบ"],
+            ["**O(n log n)**", "Linearithmic Time", "ขีดจำกัดความเร็วที่ดีที่สุดของการเรียงข้อมูลแบบเปรียบเทียบ", "~20,000,000 รอบ ⏱️", "Merge Sort, Quick Sort, Timsort (ใน Python `sort()`)"],
+            ["**O(n²)**", "Quadratic Time", "มีลูปซ้อนกันสองชั้น ข้อมูลเพิ่ม 2 เท่า ช้าลง 4 เท่า", "1,000,000,000,000 รอบ 🐌 (เกิน 1 วินาที!)", "Bubble Sort, เปรียบเทียบคู่ข้อมูลทุกคู่ในอาร์เรย์"],
+            ["**O(2ⁿ)**", "Exponential Time", "จำนวนรอบเบิ้ลขึ้นเท่าตัวทุกครั้งที่ N เพิ่มขึ้น 1", "$2^{1000000}$ (มากกว่าอะตอมในจักรวาล) 💀", "การสร้าง Subsets ทั้งหมดของเซต, Recursive Fibonacci ดิบ"],
+            ["**O(n!)**", "Factorial Time", "การสร้างการจัดเรียงสับเปลี่ยนทั้งหมด (ช้าที่สุด)", "แทบค้างตั้งแต่ N = 15 💥", "Traveling Salesperson Problem (TSP) แบบ Brute Force"],
+          ],
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "ภาพจำลองกราฟการเติบโตของแต่ละฟังก์ชัน",
+          c: `Operations
+   ▲
+   │                                  O(n!)     O(2ⁿ)      O(n²)
+   │                                    │         │          │
+   │                                    │         │       ┌──┘
+   │                                    │         │    ┌──┘
+   │                                    │      ┌──┘ ┌──┘     O(n log n)
+   │                                    │   ┌──┘ ┌──┘      ┌─┘
+   │                                    │┌──┘ ┌──┘       ┌─┘
+   │                                    ││ ┌──┘        ┌─┘   O(n)
+   │                                  ┌─┘│┌┘         ┌─┘   ┌─┘
+   │                               ┌──┘  ││        ┌─┘   ┌─┘
+   │                            ┌──┘     ││      ┌─┘   ┌─┘
+   │                         ┌──┘        ││    ┌─┘   ┌─┘     O(log n)
+   │                      ┌──┘           ││  ┌─┘   ┌─┘   ┌───
+   │──────────────────────────────────────────────────────── O(1)
+   └──────────────────────────────────────────────────────────────► Size of Input (N)`,
+        },
+        { t: "h2", c: "ตัวอย่างโค้ดจริงในแต่ละระดับ Big-O" },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: ตัวอย่างโค้ดตั้งแต่ O(1) ถึง O(2ⁿ)",
+          c: `# 1. O(1) - Constant: ดึงตัวแรกจากลิสต์
+def get_first_element(arr: list[int]) -> int | None:
+    return arr[0] if arr else None
+
+# 2. O(log n) - Logarithmic: ลูปหารสองเรื่อยๆ
+def count_divisions_by_two(n: int) -> int:
+    count = 0
+    while n > 1:
+        n //= 2
+        count += 1
+    return count
+
+# 3. O(n) - Linear: ลูปตัวแปรตัวเดียววนตามความยาว N
+def find_maximum(arr: list[int]) -> int:
+    current_max = arr[0]
+    for x in arr:
+        if x > current_max:
+            current_max = x
+    return current_max
+
+# 4. O(n^2) - Quadratic: Nested Loop ซ้อนสองชั้น
+def print_all_pairs(arr: list[int]) -> None:
+    n = len(arr)
+    for i in range(n):
+        for j in range(n):
+            print(arr[i], arr[j])
+
+# 5. O(2^n) - Exponential: Fibonacci แบบเรียกซ้ำสองกิ่ง
+def fibonacci_recursive(n: int) -> int:
+    if n <= 1:
+        return n
+    return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2)`,
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch2-complexity": {
+    slug: "dsa-ch2-complexity",
+    title: {
+      th: "การวิเคราะห์ Time & Space Complexity ฉบับวิศวกร",
+      en: "Analyzing Time & Space Complexity: Mathematical Rules",
+    },
+    lead: {
+      th: "กฎการคำนวณ Big-O: กฎการบวก (Rule of Sums), กฎการคูณ (Rule of Products), การตัดสัมประสิทธิ์ และแนวคิด Amortized Analysis",
+      en: "Master asymptotic analysis arithmetic: addition, multiplication, constant elimination, and amortized complexity.",
+    },
+    group: "บทที่ 2: เข็มทิศวัดประสิทธิภาพ (Big-O & Complexity)",
+    blocks: {
+      th: [
+        { t: "h2", c: "กฎทอง 3 ข้อในการหา Big-O จากโค้ด" },
         {
           t: "ol",
           c: [
-            "**Understand (ทำความเข้าใจ)**: ถามคำถามเพื่อความชัดเจน เช่น ข้อมูลนำเข้าเป็นชนิดใด? เป็นไปได้ที่จะว่างเปล่า (Empty/None) หรือไม่? มีค่าติดลบหรือไม่? ค่าสูงสุดมีขนาดเท่าไร?",
-            "**Match (เทียบเคียงรูปแบบ)**: ดูว่าโจทย์นี้คล้ายกับปัญหาประเภทใดที่เคยเจอ เช่น Array Traversal, Two Pointers, Hash Table หรือ Frequency Counting?",
-            "**Plan (วางแผนและทดสอบด้วยมือ)**: คิดขั้นตอนและเขียนตัวอย่างทดสอบ (Test cases / Walkthrough) บนกระดาษหรือคอมเมนต์ในโค้ดก่อนลงมือเขียนฟังก์ชันจริง",
-            "**Implement & Review (ลงมือเขียนโค้ดและตรวจทาน)**: เขียนโค้ดให้สะอาด มีชื่อตัวแปรที่สื่อความหมาย ตรวจสอบขอบเขต (Boundary / Edge cases) และวิเคราะห์ Time & Space Complexity",
+            "**กฎข้อที่ 1: ตัดค่าคงที่ (Constants) ทิ้งเสมอ**\nไม่ว่าโค้ดจะรัน $2N$ รอบ หรือ $100N$ รอบ ในทาง Asymptotic เราถือว่าเป็น $O(n)$ เท่ากัน เพราะเมื่อ $N = 1,000,000,000$ ตัวคูณ 2 แทบไม่มีความหมายต่อรูปทรงของกราฟ",
+            "**กฎข้อที่ 2: ตัดพจน์ที่ไม่เด่น (Non-Dominant Terms) ทิ้งเสมอ**\nหากสมการการทำงานคือ $f(N) = N^2 + 500N + 9999$ เราจะสนใจเฉพาะพจน์ที่มีพลังทำลายล้างสูงสุดเมื่อ $N \\to \\infty$ นั่นคือ $O(n^2)$",
+            "**กฎข้อที่ 3: ลูปเรียงต่อกันให้ 'บวก' ลูปซ้อนกันให้ 'คูณ'**\n- ลูป A วน $N$ รอบ แล้วตามด้วยลูป B วน $M$ รอบ $\\implies O(N + M)$\n- ลูป A วน $N$ รอบ โดยข้างในมีลูป B วน $M$ รอบ $\\implies O(N \\times M)$",
           ],
         },
-        {
-          t: "callout",
-          title: "💡 กฎทองในห้องสัมภาษณ์งาน",
-          c: "ผู้สัมภาษณ์ไม่ได้มองหาคนที่พิมพ์โค้ดเร็วที่สุด แต่มองหาคนที่ 'สื่อสารกระบวนการคิด' (Communication & Problem Solving) ได้ชัดเจนที่สุด คิดอะไรอยู่ให้พูดออกมา (Think out loud) เสมอ",
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch2-number-problem": {
-    slug: "dsa-ch2-number-problem",
-    title: {
-      th: "Number Problem: โจทย์ตัวเลขและคณิตศาสตร์",
-      en: "Number Problem: Math & Digit Manipulation",
-    },
-    lead: {
-      th: "เทคนิคการจัดการตัวเลข การแกะทีละหลัก (Digit Extraction) การเช็คจำนวนเฉพาะ และฟีโบนักชี",
-      en: "Master number manipulation: digit extraction, prime checks, factorials, and Fibonacci sequences.",
-    },
-    group: "บทที่ 3: การฝึกแก้โจทย์ปัญหาเบื้องต้น",
-    blocks: {
-      th: [
-        { t: "h2", c: "1. การแยกตัวเลขทีละหลัก (Digit Extraction ด้วย % 10 และ // 10)" },
+        { t: "h2", c: "Time Complexity vs Space Complexity" },
         {
           t: "p",
-          c: "รูปแบบที่พบบ่อยที่สุดในการแก้โจทย์ตัวเลขคือการดึงหลักหน่วยออกมาด้วยการ Modulo 10 (`n % 10`) แล้วตัดหลักหน่วยทิ้งด้วยการหารปัดเศษ (`n // 10`):",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: กลับตัวเลข (Reverse Integer / Palindrome Number)",
-          c: `def reverse_number(n: int) -> int:
-    """กลับตัวเลข เช่น 1234 -> 4321"""
-    reversed_num = 0
-    temp = abs(n)
-    
-    while temp > 0:
-        digit = temp % 10          # ดึงหลักสุดท้าย
-        reversed_num = (reversed_num * 10) + digit  # เลื่อนหลักแล้วบวกเข้า
-        temp //= 10                 # ตัดหลักสุดท้ายทิ้ง
-        
-    return -reversed_num if n < 0 else reversed_num
-
-def is_palindrome_number(x: int) -> bool:
-    """LeetCode 9: ตรวจสอบว่าเป็น Palindrome หรือไม่ โดยไม่แปลงเป็น string"""
-    if x < 0 or (x % 10 == 0 and x != 0):
-        return False
-    return x == reverse_number(x)
-
-print(reverse_number(1234))           # 4321
-print(is_palindrome_number(121))      # True
-print(is_palindrome_number(-121))     # False`,
-        },
-        {
-          t: "code",
-          lang: "cpp",
-          label: "C++: Reverse Integer",
-          c: `#include <iostream>
-using namespace std;
-
-int reverseNumber(int n) {
-    long long reversedNum = 0;
-    int temp = abs(n);
-    while (temp > 0) {
-        reversedNum = (reversedNum * 10) + (temp % 10);
-        temp /= 10;
-    }
-    return (n < 0) ? -reversedNum : reversedNum;
-}
-
-int main() {
-    cout << reverseNumber(1234) << "\\n"; // 4321
-    return 0;
-}`,
-        },
-        { t: "h2", c: "2. การตรวจสอบจำนวนเฉพาะ (Prime Number Check)" },
-        {
-          t: "p",
-          c: "จำนวนเฉพาะ (Prime Number) คือจำนวนที่มีตัวหารลงตัวเพียง 1 และตัวมันเอง แทนที่จะวนลูปถึง n (O(n)) เราสามารถวนตรวจเฉพาะถึง √n ได้ ซึ่งลดเวลาลงเหลือ **O(√n)**:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: ตรวจสอบ Prime Number O(√n)",
-          c: `import math
-
-def is_prime(n: int) -> bool:
-    if n <= 1:
-        return False
-    if n <= 3:
-        return True
-    if n % 2 == 0 or n % 3 == 0:
-        return False
-        
-    # ตรวจสอบเฉพาะตัวเลขในรูป 6k ± 1 จนถึง sqrt(n)
-    limit = int(math.isqrt(n))
-    for i in range(5, limit + 1, 6):
-        if n % i == 0 or n % (i + 2) == 0:
-            return False
-    return True
-
-print(is_prime(29))  # True
-print(is_prime(100)) # False`,
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch2-array-problem": {
-    slug: "dsa-ch2-array-problem",
-    title: {
-      th: "Array Problem: โจทย์อาร์เรย์พื้นฐาน",
-      en: "Array Problem: Traversals & In-place Operations",
-    },
-    lead: {
-      th: "เทคนิคการค้นหาค่าสูงสุด ต่ำสุด ผลรวม การกลับอาร์เรย์ และเทคนิค Two Pointers เบื้องต้น",
-      en: "Essential array algorithms: min/max searches, accumulations, reversals, and introductory two-pointers.",
-    },
-    group: "บทที่ 3: การฝึกแก้โจทย์ปัญหาเบื้องต้น",
-    blocks: {
-      th: [
-        { t: "h2", c: "1. การหาค่าสูงสุดและต่ำสุด (Max / Min in One Pass)" },
-        {
-          t: "p",
-          c: "การหาค่าสูงสุดหรือต่ำสุดในอาร์เรย์ทำได้ด้วยการวนลูปเพียง 1 รอบ (**One Pass: O(n) Time, O(1) Space**):",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: หา Max & Min ใน 1 Pass",
-          c: `def find_min_max(arr: list[int]) -> tuple[int, int]:
-    if not arr:
-        raise ValueError("Array must not be empty")
-        
-    min_val = arr[0]
-    max_val = arr[0]
-    
-    for x in arr[1:]:
-        if x > max_val:
-            max_val = x
-        elif x < min_val:
-            min_val = x
-            
-    return min_val, max_val
-
-nums = [34, 12, 89, 5, 43]
-minimum, maximum = find_min_max(nums)
-print(f"Min: {minimum}, Max: {maximum}")  # Min: 5, Max: 89`,
-        },
-        { t: "h2", c: "2. การกลับอาร์เรย์ (Reverse Array ด้วย Two Pointers)" },
-        {
-          t: "p",
-          c: "แทนที่จะสร้างอาร์เรย์ใหม่ (เปลือง O(n) space) เราใช้สองตัวชี้ (**Two Pointers**) สลับค่าจากหัวและท้ายเข้าหากันในหน่วยความจำเดิม (**In-place O(1) space**):",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: In-Place Reverse Array (Two Pointers)",
-          c: `def reverse_array_inplace(arr: list[int]) -> None:
-    left = 0
-    right = len(arr) - 1
-    
-    while left < right:
-        # สลับค่าระหว่างตัวหน้ากับตัวหลัง
-        arr[left], arr[right] = arr[right], arr[left]
-        left += 1
-        right -= 1
-
-data = [10, 20, 30, 40, 50]
-reverse_array_inplace(data)
-print(data)  # [50, 40, 30, 20, 10]`,
-        },
-        {
-          t: "code",
-          lang: "cpp",
-          label: "C++: Two Pointers Reverse",
-          c: `#include <iostream>
-#include <vector>
-using namespace std;
-
-void reverseArray(vector<int>& arr) {
-    int left = 0;
-    int right = arr.size() - 1;
-    while (left < right) {
-        swap(arr[left], arr[right]);
-        left++;
-        right--;
-    }
-}
-
-int main() {
-    vector<int> data = {10, 20, 30, 40, 50};
-    reverseArray(data);
-    for (int x : data) cout << x << " "; // 50 40 30 20 10
-    cout << "\\n";
-    return 0;
-}`,
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch2-string-problem": {
-    slug: "dsa-ch2-string-problem",
-    title: {
-      th: "String Problem: โจทย์ข้อความและการจัดการสตริง",
-      en: "String Problem: Palindromes & Frequency Counting",
-    },
-    lead: {
-      th: "โจทย์สตริงยอดนิยม: การตรวจสอบ Palindrome, Anagram, การนับความถี่ตัวอักษร และข้อควรระวังเรื่อง String Immutability",
-      en: "Popular string interview patterns: palindrome checks, anagram detection, and frequency maps.",
-    },
-    group: "บทที่ 3: การฝึกแก้โจทย์ปัญหาเบื้องต้น",
-    blocks: {
-      th: [
-        { t: "h2", c: "1. การตรวจสอบ Palindrome (Valid Palindrome)" },
-        {
-          t: "p",
-          c: "สตริง Palindrome คือข้อความที่อ่านจากซ้ายไปขวา หรือขวาไปซ้ายก็มีลำดับอักขระเหมือนกัน เช่น `\"racecar\"`:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Valid Palindrome (LeetCode 125)",
-          c: `def is_valid_palindrome(s: str) -> bool:
-    # Two pointers วิ่งสวนกัน ไม่นับเว้นวรรคและสัญลักษณ์พิเศษ
-    left, right = 0, len(s) - 1
-    
-    while left < right:
-        while left < right and not s[left].isalnum():
-            left += 1
-        while left < right and not s[right].isalnum():
-            right -= 1
-            
-        if s[left].lower() != s[right].lower():
-            return False
-            
-        left += 1
-        right -= 1
-        
-    return True
-
-print(is_valid_palindrome("A man, a plan, a canal: Panama"))  # True
-print(is_valid_palindrome("race a car"))                      # False`,
-        },
-        { t: "h2", c: "2. การตรวจสอบ Anagram (Valid Anagram)" },
-        {
-          t: "p",
-          c: "สตริงสองตัวเป็น Anagram กันเมื่อทั้งสองมีตัวอักษรชุดเดียวกันและความถี่เท่ากัน เช่น `\"anagram\"` กับ `\"nagaram\"`:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Valid Anagram ด้วย Frequency Map (LeetCode 242)",
-          c: `from collections import Counter
-
-def is_anagram(s: str, t: str) -> bool:
-    if len(s) != len(t):
-        return False
-        
-    # ใช้ Counter (Hash Map) เพื่อนับความถี่ O(N) Time, O(1) Space (อักษร 26 ตัว)
-    count = {}
-    for char in s:
-        count[char] = count.get(char, 0) + 1
-        
-    for char in t:
-        if char not in count or count[char] == 0:
-            return False
-        count[char] -= 1
-        
-    return True
-
-print(is_anagram("anagram", "nagaram"))  # True
-print(is_anagram("rat", "car"))          # False`,
-        },
-        {
-          t: "callout",
-          title: "⚠️ String Immutability Trap ใน Python",
-          c: "ใน Python สตริงเป็น **Immutable** (ไม่สามารถแก้ไขตัวอักษรทีละตำแหน่งได้ เช่น `s[0] = 'a'` จะ Error) การต่อสตริงในลูปด้วย `s += char` จะสร้างสตริงใหม่ทุกครั้ง ทำให้กลายเป็น O(n²) วิธีที่ถูกต้องคือเก็บอักขระใส่ list แล้วใช้ `''.join(list)` ซึ่งใช้เวลาเพียง O(n)",
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "dsa-ch2-summary": {
-    slug: "dsa-ch2-summary",
-    title: {
-      th: "สรุปการแก้ปัญหาพื้นฐาน & แบบฝึกหัด (Summary)",
-      en: "Problem Solving Summary & Practice Checklist",
-    },
-    lead: {
-      th: "สรุป Edge Cases ที่พบบ่อย ตารางสรุปเทคนิคพื้นฐาน และเช็คลิสต์เตรียมความพร้อมก่อนเข้าสู่ Data Structures",
-      en: "Summary of common edge cases, problem-solving checklists, and mindset before learning data structures.",
-    },
-    group: "บทที่ 3: การฝึกแก้โจทย์ปัญหาเบื้องต้น",
-    blocks: {
-      th: [
-        { t: "h2", c: "เช็คลิสต์ Edge Cases ที่ห้ามลืมถามในห้องสัมภาษณ์" },
-        {
-          t: "p",
-          c: "ในการสอบสัมภาษณ์ เกือบ 50% ของบั๊กเกิดจากการลืมทดสอบ Edge Cases เหล่านี้:",
+          c: "นอกจากเวลาที่ใช้ประมวลผล (Time Complexity) เรายังต้องวัด **ปริมาณหน่วยความจำ RAM ส่วนเกิน (Space Complexity)** ที่อัลกอริทึมต้องจองเพิ่ม:",
         },
         {
           t: "table",
-          head: ["ชนิดข้อมูล", "Edge Cases สำคัญที่ต้องทดสอบ", "ตัวอย่าง"],
+          head: ["ชนิดของ Space Complexity", "คำอธิบาย", "ตัวอย่าง"],
           rows: [
-            ["จำนวนเต็ม (Integer)", "0, จำนวนติดลบ, ค่าสูงสุด/ต่ำสุด (Overflow)", "`0`, `-1`, `2³¹ - 1`"],
-            ["อาร์เรย์ (Array / List)", "อาร์เรย์ว่าง, มีสมาชิกตัวเดียว, ข้อมูลซ้ำกันทั้งหมด", "`[]`, `[7]`, `[5, 5, 5]`"],
-            ["สตริง (String)", "สตริงว่าง, มีแต่เว้นวรรค, ตัวพิมพ์เล็ก/ใหญ่ปนกัน", "`\"\"`, `\"   \"`, `\"AaBb\"`"],
-            ["ตัวชี้ (Pointers / Objects)", "`None` / `nullptr`, ค่าสุดท้ายของ List", "`head is None`, `node.next is None`"],
+            ["$O(1)$ Space (In-Place)", "ใช้อาร์กิวเมนต์ตัวแปรนับจำนวนไม่กี่ตัว ไม่สร้างโครงสร้างข้อมูลเพิ่มตาม $N$", "Two Pointers สลับตำแหน่งข้อมูลในลิสต์เดิม"],
+            ["$O(n)$ Space", "สร้าง Array, Hash Map, หรือ Stack ใหม่ที่มีขนาดแปรผันตรงตามจำนวนข้อมูล $N$", "การสร้างตารางความถี่ตัวอักษร, Call Stack ใน Recursion ลึก $N$ ชั้น"],
+            ["$O(n^2)$ Space", "สร้างตารางเมทริกซ์ 2 มิติขนาด $N \\times N$", "ตาราง 2D Dynamic Programming (เช่น Edit Distance, Knapsack)"],
           ],
         },
-        { t: "h2", c: "สรุปกระบวนการคิดก่อนเริ่มบทถัดไป" },
+        { t: "h2", c: "ความหมายที่แท้จริงของ 'Amortized O(1)'" },
         {
           t: "p",
-          c: "ตอนนี้คุณมีพื้นฐานในการควบคุมลูป, การสร้างฟังก์ชัน, การดึงหลักตัวเลข, การท่องอาร์เรย์ด้วย Two Pointers, และการนับความถี่สตริงแล้ว ในบทถัดไปเราจะเจาะลึกเข้าไปดูว่าคอมพิวเตอร์จัดเก็บข้อมูลเหล่านี้ในหน่วยความจำ RAM อย่างไร ผ่านเรื่อง **Pointer, Dynamic Array และ OOP**",
+          c: "คำว่า **Amortized (ถัวเฉลี่ย)** มักถูกถามบ่อยมากในการสัมภาษณ์งานระดับสากล เช่น *'ทำไมการ `append()` ข้อมูลลงใน Dynamic Array ถึงเป็น O(1) ทั้งที่มีจังหวะขยายขนาดอาร์เรย์เป็น O(n)?'*",
+        },
+        {
+          t: "code",
+          lang: "text",
+          label: "การถัวเฉลี่ยค่าใช้จ่าย (The Banker's Method)",
+          c: `การใส่ข้อมูล 8 ครั้งลงใน Dynamic Array:
+- Push 1: จองช่องที่ 1 (ใช้ 1 สเต็ป)
+- Push 2: ขยายเป็นขนาด 2 + คัดลอก + ใส่ (ใช้ 2 สเต็ป)
+- Push 3: ขยายเป็นขนาด 4 + คัดลอก + ใส่ (ใช้ 3 สเต็ป)
+- Push 4: ใส่ในช่องว่างที่เหลืออยู่ (ใช้ 1 สเต็ป)
+- Push 5: ขยายเป็นขนาด 8 + คัดลอก + ใส่ (ใช้ 5 สเต็ป)
+- Push 6: ใส่ในช่องว่าง (ใช้ 1 สเต็ป)
+- Push 7: ใส่ในช่องว่าง (ใช้ 1 สเต็ป)
+- Push 8: ใส่ในช่องว่าง (ใช้ 1 สเต็ป)
+
+ผลรวมการทำงานทั้งหมด: 15 สเต็ป ต่อการ Push 8 ครั้ง
+เฉลี่ยต่อครั้ง: 15 / 8 = 1.875 สเต็ป (ซึ่งเป็น 'ค่าคงที่' ไม่เกิน 2-3 สเต็ปเสมอ!)
+จึงสรุปได้ว่า: Append มี Time Complexity แบบ Amortized O(1) นั่นเอง!`,
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch2-leetcode": {
+    slug: "dsa-ch2-leetcode",
+    title: {
+      th: "ถอดรหัส Constraints ในโจทย์ LeetCode (สูตรลัด 10⁸ ops/sec)",
+      en: "Decoding LeetCode Constraints: The 10⁸ Operations/Sec Rule",
+    },
+    lead: {
+      th: "ความลับที่ผู้สอบผ่านสัมภาษณ์งานทุกคนใช้: วิธีเดาคำตอบและอัลกอริทึมที่ผู้คุมสอบต้องการทันที จากตัวเลขข้อจำกัด (Constraints)",
+      en: "The secret of interview masters: deduce the required algorithmic paradigm instantly from the problem constraints using the 10⁸ operations per second rule.",
+    },
+    group: "บทที่ 2: เข็มทิศวัดประสิทธิภาพ (Big-O & Complexity)",
+    blocks: {
+      th: [
+        { t: "h2", c: "กฎทองคำ: คอมพิวเตอร์คำนวณได้ประมาณ 10⁸ รอบต่อวินาที" },
+        {
+          t: "p",
+          c: "ในการสอบสัมภาษณ์งาน (LeetCode / HackerRank / Codeforces) ระบบคลาวด์จะมีเวลาจำกัดในการรันโค้ดของคุณ **ไม่เกิน 1.0 – 2.0 วินาที** เสมอ\n\nกฎข้อสำคัญคือ: **จำนวนรอบการทำงานทั้งหมดของโค้ดคุณจะต้องไม่เกิน $10^8$ ($100,000,000$) รอบ** หากเกินกว่านี้ ระบบจะตัดคะแนนเป็น **Time Limit Exceeded (TLE)** ทันที!",
+        },
+        { t: "h2", c: "ตารางถอดรหัส Constraints สู่ Algorithm (The Cheat Sheet)" },
+        {
+          t: "table",
+          head: ["ขนาดข้อมูลนำเข้า ($N$)", "Big-O สูงสุดที่ยอมรับได้", "อัลกอริทึมและแนวคิดที่เป็นไปได้ทันที"],
+          rows: [
+            ["$N \\le 10 – 12$", "**$O(n!)$ หรือ $O(n^2 2^n)$**", "Traveling Salesperson, สร้าง Permutations ทุกแบบ, Bitmask DP"],
+            ["$N \\le 20 – 25$", "**$O(2^n)$**", "Backtracking สร้าง Subsets, Exhaustive Search, Divide & Conquer แบบหยาบ"],
+            ["$N \\le 100$", "**$O(n^4)$ หรือ $O(n^3)$**", "Floyd-Warshall All-Pairs Shortest Path, 3D Dynamic Programming, ลูป 3 ชั้น"],
+            ["$N \\le 1,000 – 2,000$", "**$O(n^2)$**", "2D Dynamic Programming (Knapsack, LCS), Nested Loops 2 ชั้น, Matrix Traversal"],
+            ["$N \\le 100,000 – 200,000$", "**$O(n \\log n)$ หรือ $O(n)$**", "Sorting (Merge/Quick/Timsort), Binary Search, Heap, Two Pointers, Sliding Window, Tree Traversal"],
+            ["$N \\le 1,000,000$", "**$O(n)$ หรือ $O(n \\log n)$**", "Hash Table, Linear Scan, Prefix Sum, Stack/Queue, BFS/DFS บนกราฟ Sparse"],
+            ["$N \\ge 10^9$ หรือใหญ่มาก", "**$O(\\log n)$ หรือ $O(1)$**", "Binary Search คำตอบ, สูตรคณิตศาสตร์, Fast Exponentiation, Bit Manipulation"],
+          ],
+        },
+        {
+          t: "callout",
+          title: "🎯 ตัวอย่างจริงในห้องสอบสัมภาษณ์",
+          c: "สมมติคุณเจอโจทย์ที่ผู้สัมภาษณ์บอกว่า: *'Array มีความยาว $N = 10^5$ จงหาผลรวมของคู่ที่บวกกันได้ Target'*\n- หากคุณคิดจะใช้ Nested Loop 2 ชั้น: $N^2 = (10^5)^2 = 10^{10}$ รอบ! ซึ่งเกิน $10^8$ ไปถึง 100 เท่า $\\implies$ **ตกทันที!**\n- จากตาราง เมื่อ $N = 10^5$ คุณต้องหา Algorithm ระดับ **$O(n)$ หรือ $O(n \\log n)$** เท่านั้น $\\implies$ คุณจะนึกถึง **Hash Table หรือ Two Pointers** ได้ในเสี้ยววินาที!",
         },
       ],
       en: [],

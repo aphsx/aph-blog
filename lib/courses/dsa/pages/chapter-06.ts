@@ -4,116 +4,41 @@ export const chapter06Pages: Record<string, Page> = {
   "dsa-ch6-intro": {
     slug: "dsa-ch6-intro",
     title: {
-      th: "Search & Sort: หัวใจสำคัญของอัลกอริทึม",
-      en: "Search & Sort Overview: Foundations of Algorithmic Thinking",
+      th: "ทำไมต้องเรียงและค้นหา: รากฐานของ Database & Search Engine",
+      en: "The Essence of Searching & Sorting: Foundations of Modern Systems",
     },
     lead: {
-      th: "ทำความเข้าใจว่าทำไมการจัดเรียงและการค้นหาข้อมูลถึงเป็นรากฐานที่สำคัญที่สุดของวิทยาการคอมพิวเตอร์",
-      en: "Discover why sorting and searching form the bedrock of algorithm design and efficiency.",
+      th: "ทำความเข้าใจว่าทำไมการจัดเรียงและการค้นหาข้อมูลถึงเป็นปัญหาที่ใช้พลังงาน CPU มากที่สุดในโลก และวิเคราะห์จุดคุ้มทุนระหว่างการค้นหาตรงๆ กับการจัดเรียงข้อมูลล่วงหน้า",
+      en: "Discover why sorting and searching consume a massive portion of global compute, and evaluate the mathematical breakeven point between unsorted scans and sorted index lookups.",
     },
-    group: "บทที่ 6: การค้นหา, การจัดเรียงพื้นฐาน & ตารางแฮช (Searching, Sorting & Hash Tables)",
+    group: "บทที่ 6: การค้นหา, ตารางแฮช & การจัดเรียงพื้นฐาน",
     blocks: {
       th: [
         {
           t: "p",
-          c: "การค้นหาข้อมูล (**Search**) และการจัดเรียงข้อมูล (**Sort**) เป็นปัญหาพื้นฐานที่ระบบคอมพิวเตอร์ทั่วโลกต้องทำอยู่ตลอดเวลา ไม่ว่าจะเป็นระบบค้นหาของ Google, การจัดอันดับสินค้าใน Shopee, หรือการจับคู่คนขับรถใน Grab เมื่อข้อมูลถูกจัดเรียงอย่างเป็นระเบียบ การค้นหาจะเปลี่ยนจากช้ามาก **O(n)** เป็นเร็วระดับเสี้ยววินาที **O(log n)** ทันที",
+          c: "ในระบบซอฟต์แวร์ระดับโลก ไม่ว่าจะเป็นการค้นหาหน้าเว็บของ Google, การกรองสินค้าใน Amazon, หรือระบบดัชนี (Index) ในฐานข้อมูล PostgreSQL ปัญหาพื้นฐานที่เกิดขึ้นซ้ำๆ นับหมื่นล้านครั้งต่อวันมีเพียง 2 เรื่องคือ: **'จะจัดเรียงข้อมูลอย่างไรให้เร็วที่สุด?'** และ **'จะค้นหาข้อมูลที่ต้องการอย่างไรให้เร็วที่สุด?'**",
         },
-        { t: "h2", c: "ภาพรวมอัลกอริทึมการจัดเรียงและค้นหา" },
+        { t: "h2", c: "สมการจุดคุ้มทุน: เรียงข้อมูลก่อนคุ้มหรือไม่? (The Breakeven Equation)" },
         {
-          t: "table",
-          head: ["หมวดหมู่", "อัลกอริทึม", "Best Case", "Average Case", "Worst Case", "Space"],
-          rows: [
-            ["Simple Sort", "Bubble Sort", "O(n)", "O(n²)", "O(n²)", "O(1)"],
-            ["Simple Sort", "Selection Sort", "O(n²)", "O(n²)", "O(n²)", "O(1)"],
-            ["Simple Sort", "Insertion Sort", "O(n)", "O(n²)", "O(n²)", "O(1)"],
-            ["Advanced Sort", "Merge Sort", "O(n log n)", "O(n log n)", "O(n log n)", "O(n)"],
-            ["Advanced Sort", "Quick Sort", "O(n log n)", "O(n log n)", "O(n²)", "O(log n)"],
-            ["Searching", "Linear Search", "O(1)", "O(n)", "O(n)", "O(1)"],
-            ["Searching", "Binary Search", "O(1)", "O(log n)", "O(log n)", "O(1)"],
-            ["Direct Lookup", "Hash Table", "O(1)", "O(1)", "O(n)", "O(n)"],
-          ],
+          t: "p",
+          c: "สมมติคุณมีข้อมูล $N$ รายการ และต้องการค้นหาข้อมูลทั้งหมด $Q$ ครั้ง (Queries):\n- **แนวทางที่ 1 (ไม่จัดเรียง)**: ค้นหาด้วย Linear Search ทุกครั้ง จะใช้เวลารวม **$O(Q \\times N)$**\n- **แนวทางที่ 2 (จัดเรียงล่วงหน้าก่อนค้นหา)**: เสียเวลาจัดเรียงครั้งแรก $O(N \\log N)$ แล้วค้นหาด้วย Binary Search แต่ละครั้งใน $O(\\log N)$ จะใช้เวลารวม **$O(N \\log N + Q \\log N)$**",
         },
-      ],
-      en: [],
-    },
-  },
+        {
+          t: "code",
+          lang: "text",
+          label: "การเปรียบเทียบจุดคุ้มทุนเมื่อ N = 1,000,000 รายการ",
+          c: `หากค้นหาเพียง 1 ครั้ง (Q = 1):
+- แนวทางที่ 1 (Linear Search): 1,000,000 รอบ  <- คุ้มกว่า!
+- แนวทางที่ 2 (Sort + Binary):  20,000,020 รอบ
 
-  "dsa-ch6-sort": {
-    slug: "dsa-ch6-sort",
-    title: {
-      th: "Sorting Algorithms: การเรียงลำดับข้อมูลพื้นฐาน",
-      en: "Sorting Algorithms: Bubble, Selection & Insertion Sort",
-    },
-    lead: {
-      th: "เจาะลึก 3 อัลกอริทึมการจัดเรียงพื้นฐาน: Bubble Sort, Selection Sort, Insertion Sort พร้อมการวิเคราะห์การสลับข้อมูล",
-      en: "Understand fundamental comparison-based sorting algorithms: Bubble, Selection, and Insertion Sort.",
-    },
-    group: "บทที่ 6: การค้นหา, การจัดเรียงพื้นฐาน & ตารางแฮช (Searching, Sorting & Hash Tables)",
-    blocks: {
-      th: [
-        { t: "h2", c: "1. Bubble Sort (การลอยตัวของค่ามาก)" },
-        {
-          t: "p",
-          c: "เปรียบเทียบสมาชิกคู่ที่อยู่ติดกัน ถ้าตัวซ้ายมากกว่าตัวขวา ให้สลับที่กัน ทำซ้ำไปเรื่อยๆ จนกระทั่งค่าที่มากที่สุดจะค่อยๆ ลอยขึ้นไปอยู่ท้ายอาร์เรย์เหมือนฟองอากาศ:",
+หากค้นหา 10,000 ครั้ง (Q = 10,000 เช่นในระบบ Web Service):
+- แนวทางที่ 1 (Linear Search): 10,000 x 1,000,000 = 10,000,000,000 รอบ (ช้าจนระบบค้าง!)
+- แนวทางที่ 2 (Sort + Binary):  20,000,000 + (10,000 x 20) = 20,200,000 รอบ (เร็วกว่าเกือบ 500 เท่า!)`,
         },
         {
-          t: "code",
-          lang: "python",
-          label: "Python: Optimized Bubble Sort",
-          c: `def bubble_sort(arr: list[int]) -> list[int]:
-    n = len(arr)
-    for i in range(n):
-        swapped = False
-        # ตัวที่อยู่ท้ายๆ เรียงแล้ว ไม่ต้องวนตรวจซ้ำ
-        for j in range(0, n - i - 1):
-            if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-                swapped = True
-        # ถ้าไม่มีการสลับเลย แปลว่าเรียงเสร็จแล้ว หยุดลูปได้เลย (Best case O(n))
-        if not swapped:
-            break
-    return arr
-
-print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))`,
-        },
-        { t: "h2", c: "2. Selection Sort (เลือกค่าน้อยที่สุดมาไว้หน้าสุด)" },
-        {
-          t: "p",
-          c: "ในแต่ละรอบจะสแกนหาค่าที่น้อยที่สุดในส่วนที่ยังไม่เรียง แล้วนำมาสลับกับตำแหน่งแรกของรอบนั้น การทำงานจะเป็น **O(n²)** เสมอไม่ว่าข้อมูลจะเรียงมาแล้วหรือไม่:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Selection Sort",
-          c: `def selection_sort(arr: list[int]) -> list[int]:
-    n = len(arr)
-    for i in range(n):
-        min_idx = i
-        for j in range(i + 1, n):
-            if arr[j] < arr[min_idx]:
-                min_idx = j
-        arr[i], arr[min_idx] = arr[min_idx], arr[i]
-    return arr`,
-        },
-        { t: "h2", c: "3. Insertion Sort (การแทรกไพ่ในมือ)" },
-        {
-          t: "p",
-          c: "เสมือนการหยิบไพ่ทีละใบแล้วแทรกเข้าไปในตำแหน่งที่ถูกต้องของไพ่ที่เรียงแล้วในมือ **Insertion Sort มีประสิทธิภาพสูงมากเมื่อข้อมูลเกือบเรียงลำดับอยู่แล้ว (Almost Sorted)**:",
-        },
-        {
-          t: "code",
-          lang: "python",
-          label: "Python: Insertion Sort",
-          c: `def insertion_sort(arr: list[int]) -> list[int]:
-    for i in range(1, len(arr)):
-        key = arr[i]
-        j = i - 1
-        # เลื่อนสมาชิกที่มากกว่า key ไปข้างหน้าหนึ่งตำแหน่ง
-        while j >= 0 and arr[j] > key:
-            arr[j + 1] = arr[j]
-            j -= 1
-        arr[j + 1] = key
-    return arr`,
+          t: "callout",
+          title: "🎯 บทเรียนทางวิศวกรรม",
+          c: "นี่คือเหตุผลที่ฐานข้อมูลอย่าง SQL ต้องสร้าง **B-Tree Index** ล่วงหน้า เพื่อยอมเสียเวลาและพื้นที่ตอนเขียนข้อมูล (Write/Insert) เพื่อแลกกับความเร็วสูงสุดในการค้นหาข้อมูล (Read/Query) ระดับ $O(\\log n)$!",
         },
       ],
       en: [],
@@ -123,51 +48,181 @@ print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))`,
   "dsa-ch6-search": {
     slug: "dsa-ch6-search",
     title: {
-      th: "Search Algorithms: Linear Search & Binary Search",
-      en: "Search Algorithms: Linear Search vs Binary Search",
+      th: "การค้นหาข้อมูล: Linear Search vs Binary Search (3 Templates)",
+      en: "Searching Algorithms: Linear vs Binary Search & The 3 Templates",
     },
     lead: {
-      th: "ก้าวกระโดดจาก O(n) สู่ O(log n): เคล็ดลับแม่แบบการเขียน Binary Search ให้ไม่มีวันเกิด Off-by-one bug",
-      en: "Leap from O(n) to O(log n): binary search templates and avoiding off-by-one errors.",
+      th: "เจาะลึก Binary Search: การแบ่งครึ่งพื้นที่ค้นหา, วิธีเลี่ยง Integer Overflow ในตัวแปร mid, และ 3 แม่แบบมาตรฐานสำหรับรับมือโจทย์สัมภาษณ์งานทุกรูปแบบ",
+      en: "Master binary search mechanics, prevent integer overflow bugs in mid calculations, and learn the 3 canonical templates for all interview variants.",
     },
-    group: "บทที่ 6: การค้นหา, การจัดเรียงพื้นฐาน & ตารางแฮช (Searching, Sorting & Hash Tables)",
+    group: "บทที่ 6: การค้นหา, ตารางแฮช & การจัดเรียงพื้นฐาน",
     blocks: {
       th: [
         { t: "h2", c: "Linear Search vs Binary Search" },
         {
-          t: "p",
-          c: "**Linear Search** เหมาะกับข้อมูลที่ไม่เรียงลำดับ ตรวจสอบทีละตัวจากซ้ายไปขวา (Time Complexity: O(n)) ส่วน **Binary Search** บังคับว่าข้อมูลต้อง **เรียงลำดับแล้ว (Sorted Array)** เท่านั้น โดยจะตัดข้อมูลทิ้งทีละครึ่งหนึ่งในแต่ละรอบ ทำให้ค้นหาข้อมูล 1 ล้านตัวได้ในเวลาไม่เกิน 20 ครั้ง! (Time Complexity: **O(log n)**)",
+          t: "table",
+          head: ["คุณลักษณะ", "Linear Search (ค้นหาตามลำดับ)", "Binary Search (ค้นหาแบบทวิภาค)"],
+          rows: [
+            ["เงื่อนไขข้อมูลนำเข้า", "ข้อมูลจะเรียงหรือไม่เรียงก็ได้", "⚠️ ข้อมูลต้องถูกจัดเรียง (Sorted) แล้วเท่านั้น"],
+            ["Time Complexity (Worst)", "🐢 O(n)", "⚡ O(log n)"],
+            ["Space Complexity", "O(1)", "O(1)"],
+            ["สัญชาตญาณ", "เปิดอ่านหนังสือทีละหน้าตั้งแต่หน้าแรก", "เปิดตรงกลาง เลือกว่าจะไปครึ่งซ้ายหรือครึ่งขวา แล้วตัดอีกครึ่งทิ้ง"],
+          ],
         },
-        { t: "h2", c: "Binary Search Template มาตรฐานสำหรับการสอบสัมภาษณ์" },
+        { t: "h2", c: "กับดัก Integer Overflow ในการหา Mid" },
+        {
+          t: "p",
+          c: "โค้ดดั้งเดิมที่หลายคนเขียนคือ `mid = (left + right) // 2` ซึ่งมีบั๊กซ่อนอยู่ระดับตำนาน หาก `left` และ `right` มีค่าเข้าใกล้ $2 \\times 10^9$ ผลบวก `left + right` จะเกินค่าสูงสุดของ 32-bit Integer ทำให้เกิด Overflow กลายเป็นค่าติดลบทันที!\n\nวิธีคำนวณที่ปลอดภัยทางคณิตศาสตร์ 100% คือ:",
+        },
+        {
+          t: "code",
+          lang: "cpp",
+          label: "สูตรคำนวณ Mid ที่ปลอดภัยจาก Overflow",
+          c: `// แทนที่จะใช้: mid = (left + right) / 2;
+// ให้เขียนแบบนี้เสมอ:
+int mid = left + (right - left) / 2;`,
+        },
+        { t: "h2", c: "แม่แบบที่ 1: ค้นหาค่าที่ตรงกันเป๊ะ (Exact Match)" },
         {
           t: "code",
           lang: "python",
-          label: "Python: Binary Search (LeetCode 704)",
+          label: "Python: Binary Search แม่แบบที่ 1 (LeetCode 704)",
           c: `def binary_search(nums: list[int], target: int) -> int:
-    left = 0
-    right = len(nums) - 1
+    left, right = 0, len(nums) - 1
     
     while left <= right:
-        # คำนวณ mid แบบปลอดภัยจาก Integer Overflow
         mid = left + (right - left) // 2
         
         if nums[mid] == target:
-            return mid  # เจอตำแหน่งของ target
+            return mid  # เจอคำตอบทันที!
         elif nums[mid] < target:
-            left = mid + 1  # ข้อมูลเป้าหมายอยู่ครึ่งขวา
+            left = mid + 1   # ตัดครึ่งซ้ายทิ้ง มุ่งไปครึ่งขวา
         else:
-            right = mid - 1 # ข้อมูลเป้าหมายอยู่ครึ่งซ้าย
+            right = mid - 1  # ตัดครึ่งขวาทิ้ง มุ่งไปครึ่งซ้าย
             
     return -1  # หาไม่พบ
 
-data = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
-print("Index ของ 23 คือ:", binary_search(data, 23))  # Index: 5
-print("Index ของ 50 คือ:", binary_search(data, 50))  # Index: -1`,
+print(binary_search([-1, 0, 3, 5, 9, 12], 9))  # 4 (อยู่ที่ Index 4)
+print(binary_search([-1, 0, 3, 5, 9, 12], 2))  # -1 (ไม่มีในอาร์เรย์)`,
+        },
+        { t: "h2", c: "แม่แบบที่ 2: ค้นหาตำแหน่งแรกที่เป็นจริง (Lower Bound / First True)" },
+        {
+          t: "p",
+          c: "ใช้เมื่อต้องการหาจุดเปลี่ยนผ่าน เช่น หาตัวเลขแรกที่ $\\ge target$ หรือหาเวอร์ชันแรกที่มีบั๊ก (First Bad Version - LeetCode 278):",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Binary Search แม่แบบ First True",
+          c: `def find_first_true(nums: list[int], target: int) -> int:
+    left, right = 0, len(nums) - 1
+    ans = -1
+    
+    while left <= right:
+        mid = left + (right - left) // 2
+        if nums[mid] >= target:
+            ans = mid        # อาจเป็นคำตอบ แต่ยังพยายามบีบหาตัวที่อยู่ซ้ายกว่า
+            right = mid - 1
+        else:
+            left = mid + 1
+            
+    return ans`,
         },
         {
           t: "callout",
-          title: "⚠️ Bug คลาสสิก: Integer Overflow ใน C++",
-          c: "ใน C++ การเขียน `mid = (left + right) / 2;` อาจทำให้เกิดผลรวมล้นตัวแปร int (Overflow เกิน 2×10⁹) ในการสัมภาษณ์งานให้เขียน `mid = left + (right - left) / 2;` เสมอ เพื่อแสดงความรอบคอบระดับมืออาชีพ!",
+          title: "🌐 Use Case ในโลกจริง: Git Bisect",
+          c: "คำสั่ง `git bisect` ใน Git ใช้ Binary Search ในการค้นหา Commit ที่ทำให้เกิดบั๊กในประวัติศาสตร์ที่มีนับหมื่น Commits โดยใช้การทดสอบเพียงไม่กี่ครั้งแทนที่จะต้องไล่เช็คทีละ Commit!",
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "dsa-ch6-sort": {
+    slug: "dsa-ch6-sort",
+    title: {
+      th: "การเรียงลำดับพื้นฐาน O(n²): Bubble, Selection, Insertion Sort",
+      en: "Fundamental Comparison Sorts: Bubble, Selection & Insertion Sort",
+    },
+    lead: {
+      th: "เจาะลึก 3 อัลกอริทึมการจัดเรียงพื้นฐาน O(n²), การทำงานทีละสเต็ป และทำไม Insertion Sort ถึงเป็นหัวใจในระบบเรียงข้อมูลระดับโลกอย่าง Timsort",
+      en: "Detailed mechanics of O(n²) sorting algorithms: Bubble, Selection, and Insertion Sort, and why real engines rely on Insertion Sort for small subarrays.",
+    },
+    group: "บทที่ 6: การค้นหา, ตารางแฮช & การจัดเรียงพื้นฐาน",
+    blocks: {
+      th: [
+        { t: "h2", c: "1. Bubble Sort (การลอยตัวของค่ามาก)" },
+        {
+          t: "p",
+          c: "เปรียบเทียบสมาชิกคู่ที่อยู่ติดกัน ถ้าตัวซ้ายมากกว่าตัวขวา ให้สลับที่กัน ค่าที่มากที่สุดจะค่อยๆ ลอยขึ้นไปอยู่ท้ายอาร์เรย์เหมือนฟองอากาศในน้ำ:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Optimized Bubble Sort พร้อม Early Exit Flag",
+          c: `def bubble_sort(arr: list[int]) -> list[int]:
+    n = len(arr)
+    for i in range(n):
+        swapped = False
+        # ตัวท้ายๆ i ตัวเรียงแล้ว ไม่ต้องวนตรวจซ้ำ
+        for j in range(0, n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+        # หากจบลูปในแล้วไม่มีการสลับเลย แปลว่าอาร์เรย์เรียงเสร็จแล้ว หยุดได้เลย! (Best Case O(n))
+        if not swapped:
+            break
+    return arr
+
+print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))`,
+        },
+        { t: "h2", c: "2. Selection Sort (เลือกค่าน้อยที่สุดมาไว้ข้างหน้า)" },
+        {
+          t: "p",
+          c: "ในแต่ละรอบจะสแกนหาค่าที่น้อยที่สุดในส่วนที่ยังไม่ได้จัดเรียง แล้วนำมาสลับกับตำแหน่งแรกของรอบนั้น การทำงานจะเป็น $O(n^2)$ เสมอแม้ข้อมูลจะเรียงมาแล้วก็ตาม:",
+        },
+        {
+          t: "code",
+          lang: "cpp",
+          label: "C++: Selection Sort",
+          c: `void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        // สลับค่าที่น้อยที่สุดมาไว้ที่ตำแหน่ง i
+        swap(arr[i], arr[minIdx]);
+    }
+}`,
+        },
+        { t: "h2", c: "3. Insertion Sort (การแทรกไพ่ในมือ) — ราชาแห่ง Small Data" },
+        {
+          t: "p",
+          c: "จำลองพฤติกรรมการจัดไพ่ในมือ: เราหยิบไพ่ใบใหม่ขึ้นมา แล้วเลื่อนถอยหลังเพื่อหาช่องว่างที่ถูกต้องสำหรับแทรกไพ่ใบนั้นลงไป:",
+        },
+        {
+          t: "code",
+          lang: "python",
+          label: "Python: Insertion Sort",
+          c: `def insertion_sort(arr: list[int]) -> list[int]:
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i - 1
+        # เลื่อนสมาชิกที่มากกว่า key ไปทางขวาทีละช่อง
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    return arr`,
+        },
+        {
+          t: "callout",
+          title: "🚀 ทำไมระบบจริงยังใช้ Insertion Sort?",
+          c: "ในซอฟต์แวร์ระดับโปรดักชันอย่าง **Python (`list.sort()`) และ Java (`Arrays.sort()`)** ใช้อัลกอริทึมชื่อ **Timsort** ซึ่งเป็นลูกผสมระหว่าง Merge Sort และ Insertion Sort!\n\nเมื่อข้อมูลมีขนาดเล็ก ($N \\le 32 – 64$) หรือข้อมูลเกือบจะเรียงอยู่แล้ว Insertion Sort จะทำงานเร็วที่สุดเหนือกว่า Merge/Quick Sort เพราะมี Overhead น้อยมาก และทำงานแบบ **Adaptive O(n)** บนข้อมูลที่เกือบเรียง!",
         },
       ],
       en: [],
@@ -177,80 +232,72 @@ print("Index ของ 50 คือ:", binary_search(data, 50))  # Index: -1`,
   "dsa-ch6-hash-table": {
     slug: "dsa-ch6-hash-table",
     title: {
-      th: "Hash Table: ตารางแฮช & Hash Map O(1)",
-      en: "Hash Table: O(1) Lookups & Collision Resolution",
+      th: "Hash Table & Hash Map: Collision Resolution & Two Sum O(1)",
+      en: "Hash Tables & Hash Maps: Hash Functions, Collisions & O(1) Lookups",
     },
     lead: {
-      th: "โครงสร้างข้อมูลที่ใช้บ่อยที่สุดในโลกสัมภาษณ์งาน: Hash Function, Collision Resolution (Chaining) และโจทย์ตำนาน Two Sum",
-      en: "The most vital interview data structure: Hash functions, collision resolution, and LeetCode #1: Two Sum.",
+      th: "ความมหัศจรรย์ของการค้นหาข้อมูลใน O(1), การออกแบบ Hash Function, กลยุทธ์แก้ Collision (Chaining vs Open Addressing), และเปรียบเทียบ C++ unordered_map vs map",
+      en: "The mechanics of constant-time O(1) operations, collision resolution strategies (chaining vs open addressing), and C++ unordered_map vs map.",
     },
-    group: "บทที่ 6: การค้นหา, การจัดเรียงพื้นฐาน & ตารางแฮช (Searching, Sorting & Hash Tables)",
+    group: "บทที่ 6: การค้นหา, ตารางแฮช & การจัดเรียงพื้นฐาน",
     blocks: {
       th: [
-        { t: "h2", c: "Hash Table ทำงานอย่างไรให้ได้ O(1)?" },
+        { t: "h2", c: "Hash Table ทำงานอย่างไรในระดับหน่วยความจำ?" },
         {
           t: "p",
-          c: "**Hash Table (หรือ Dictionary / Hash Map)** รับค่า Key (เช่น ข้อความ) แล้วส่งผ่าน **Hash Function** เพื่อคำนวณออกมาเป็นดัชนีตัวเลข (Index) ของอาร์เรย์ในหน่วยความจำ ทำให้การค้นหา, แทรก, และลบ ทำได้ในเวลาเฉลี่ย **O(1) Average Time**:",
+          c: "ความเร็วระดับ **$O(1)$** ของ Hash Table เกิดจากการแปลงคีย์ (Key) ใดๆ เช่น สตริง `\"john_doe\"` ให้กลายเป็นหมายเลข Index ในอาร์เรย์ ผ่านฟังก์ชันคณิตศาสตร์ที่เรียกว่า **Hash Function**:",
         },
         {
           t: "code",
           lang: "text",
-          label: "การทำงานของ Hash Function",
-          c: `Key: "apple"  -> Hash Function -> Index: 3 -> Buckets[3] = 45 บาท
-Key: "banana" -> Hash Function -> Index: 7 -> Buckets[7] = 20 บาท`,
+          label: "กระบวนการแปลง Key สู่ Bucket Index",
+          c: `Key ("john_doe") 
+       │
+       ▼ (ผ่าน Hash Function)
+Hash Code (ตัวเลขขนาดใหญ่ เช่น 2,948,104,912)
+       │
+       ▼ (Modulo ขนาดตาราง: % Array_Size)
+Bucket Index: 4
+       │
+       ▼
+บันทึกหรือค้นหาค่า Value ที่ Array[4] ได้ในทันที O(1)!`,
         },
-        { t: "h2", c: "การแก้ปัญหาเมื่อคีย์ชนกัน (Collision Resolution)" },
-        {
-          t: "ul",
-          c: [
-            "**Separate Chaining**: เมื่อสองคีย์ได้ Hash Index เดียวกัน ให้เก็บข้อมูลเป็น Linked List ซ้อนอยู่ในช่องนั้น (วิธีนี้เป็นที่นิยมที่สุด)",
-            "**Open Addressing (Linear Probing)**: ถ้าช่องนั้นเต็ม ให้ขยับไปหาช่องว่างช่องถัดไป",
-          ],
-        },
-        { t: "h2", c: "โจทย์อันดับ 1 ของโลกสัมภาษณ์: Two Sum (LeetCode 1)" },
+        { t: "h2", c: "การชนกันของข้อมูล (Hash Collision) และวิธีแก้ไข" },
         {
           t: "p",
-          c: "หาคู่ของตัวเลขในอาร์เรย์ที่บวกกันแล้วได้เท่ากับค่า `target` แทนที่จะใช้ลูปซ้อนกัน O(n²) เราสามารถใช้ Hash Map จำตัวเลขที่เคยเห็นมาแล้วเพื่อตอบได้ใน **O(n) Time และ O(n) Space**:",
+          c: "เนื่องจากจำนวนคีย์ที่เป็นไปได้มีเป็นอนันต์ แต่ขนาดของอาร์เรย์ใน RAM มีจำกัด ย่อมต้องมีกรณีที่สองคีย์ที่ต่างกันได้ผลลัพธ์ Bucket Index เดียวกัน เรียกว่า **Collision** โดยมี 2 วิธีแก้หลัก:",
         },
         {
-          t: "code",
-          lang: "python",
-          label: "Python: Two Sum ด้วย Hash Map (O(n))",
-          c: `def two_sum(nums: list[int], target: int) -> list[int]:
-    # เก็บ mapping: {ค่าตัวเลข: index ของตัวเลขนั้น}
-    seen = {}
-    
-    for i, num in enumerate(nums):
-        complement = target - num  # หาค่าที่ต้องการเพื่อรวมได้ target
-        
-        if complement in seen:
-            return [seen[complement], i]
-            
-        seen[num] = i
-        
-    return []
-
-print(two_sum([2, 7, 11, 15], 9))  # [0, 1] เพราะ 2 + 7 = 9`,
+          t: "table",
+          head: ["วิธีการแก้ Collision", "กลไกการทำงาน", "ข้อดี / ข้อเสีย"],
+          rows: [
+            [
+              "**Separate Chaining (การต่อลูกโซ่)**",
+              "แต่ละช่องในอาร์เรย์เป็นหัวของ Linked List หากชนกัน ก็นำโหนดใหม่ไปต่อท้ายในช่องนั้น",
+              "✅ ทำง่าย ไม่เต็มความจุ\n🐢 หาก Collision สูง จะกลายสภาพเป็น Linked List ช้า $O(n)$",
+            ],
+            [
+              "**Open Addressing (Linear Probing)**",
+              "หากช่องที่คำนวณได้มีคนจองแล้ว ให้ขยับไปดูช่องถัดไปเรื่อยๆ จนกว่าจะเจอช่องว่าง",
+              "✅ ใช้หน่วยความจำต่อเนื่อง Cache Locality ดีมาก\n🐢 เกิดปัญหาการเกาะกลุ่ม (Clustering)",
+            ],
+          ],
+        },
+        { t: "h2", c: "เปรียบเทียบ C++ std::unordered_map vs std::map" },
+        {
+          t: "table",
+          head: ["คุณสมบัติ", "`std::unordered_map` (Hash Table)", "`std::map` (Balanced BST: Red-Black Tree)"],
+          rows: [
+            ["โครงสร้างภายใน", "Hash Table (Bucket Array + Chaining)", "Self-Balancing Binary Search Tree"],
+            ["ลำดับของข้อมูล", "❌ ไม่มีลำดับ (Unordered)", "✅ ข้อมูลเรียงตามลำดับคีย์เสมอ (Sorted Key)"],
+            ["Time Complexity (Search/Insert)", "⚡ **O(1)** Average (Worst case O(n))", "⏱️ **O(log n)** Guaranteed"],
+            ["การใช้งานในการสัมภาษณ์", "ใช้เมื่อต้องการความเร็วสูงสุดและไม่สนใจการเรียงข้อมูล", "ใช้เมื่อต้องการดึง Min/Max ของ Key หรือต้องการข้อมูลเรียงลำดับ"],
+          ],
         },
         {
-          t: "code",
-          lang: "cpp",
-          label: "C++: Two Sum ด้วย std::unordered_map",
-          c: `#include <vector>
-#include <unordered_map>
-using namespace std;
-
-vector<int> twoSum(vector<int>& nums, int target) {
-    unordered_map<int, int> seen;
-    for (int i = 0; i < nums.size(); i++) {
-        int complement = target - nums[i];
-        if (seen.find(complement) != seen.end()) {
-            return {seen[complement], i};
-        }
-        seen[nums[i]] = i;
-    }
-    return {};
-}`,
+          t: "callout",
+          title: "🎯 สรุปการใช้ Hash Table ในการสัมภาษณ์งาน",
+          c: "เมื่อใดก็ตามที่โจทย์ถามว่า: *'มีตัวเลขนี้อยู่ในข้อมูลหรือไม่?'* หรือ *'มีคู่นี้บวกกันได้ Target หรือไม่?'* หรือ *'ตัวอักษรใดปรากฏบ่อยที่สุด?'* ให้คิดถึง **Hash Map / Hash Set** เป็นสิ่งแรกเสมอ เพราะสามารถเปลี่ยนความซับซ้อนจาก $O(n^2)$ เหลือ $O(n)$ ได้ในทันที!",
         },
       ],
       en: [],

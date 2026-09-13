@@ -14,7 +14,7 @@ import { chapter10Pages } from "./pages/chapter-10";
 import { chapter11Pages } from "./pages/chapter-11";
 import { chapter12Pages } from "./pages/chapter-12";
 
-const pages: Record<string, Page> = {
+const rawPages: Record<string, Page> = {
   ...overviewPages,
   ...chapter01Pages,
   ...chapter02Pages,
@@ -30,11 +30,28 @@ const pages: Record<string, Page> = {
   ...chapter12Pages,
 };
 
+/**
+ * Backward compatibility alias mappings:
+ * Ensures any previously bookmarked URLs continue to work seamlessly.
+ */
+const legacyAliases: Record<string, Page> = {
+  "dsa-ch7-intro": rawPages["dsa-ch2-intro"],
+  "dsa-ch7-big-o-type": rawPages["dsa-ch2-big-o-type"],
+  "dsa-ch7-complexity": rawPages["dsa-ch2-complexity"],
+  "dsa-ch7-leetcode": rawPages["dsa-ch2-leetcode"],
+  "dsa-ch5-graph": rawPages["dsa-ch12-representation"],
+};
+
+const pages: Record<string, Page> = {
+  ...legacyAliases,
+  ...rawPages,
+};
+
 export const dsaCourse: Course = {
   id: "dsa",
   title: "Data Structures & Algorithms (DSA)",
   description:
-    "เรียนรู้โครงสร้างข้อมูลและอัลกอริทึมครบ 12 ตอน 49 บทเรียน ถอดรหัสโจทย์คลาสสิกสู่การสัมภาษณ์งานจริงด้วย Python (พร้อมเทียบเคียง C++)",
+    "เรียนรู้โครงสร้างข้อมูลและอัลกอริทึมครบ 12 ตอน 49 บทเรียน ถอดรหัสวิธีคิดเชิงสถาปัตยกรรมสู่การทำงานจริงและการสัมภาษณ์งานระดับสากลด้วย Python และ C++",
   badge: "⚡",
   overviewSlug: "dsa-overview",
   nav: dsaNav,
