@@ -64,19 +64,8 @@ export const chapter05Pages: Record<string, Page> = {
           ],
         },
         {
-          t: "code",
-          lang: "text",
-          label: "ไดอะแกรมแสดงโครงสร้าง Singly vs Doubly vs Circular",
-          c: `1. Singly Linked List:
-   [Head: 1 | next] ──► [ 2 | next ] ──► [ 3 | nullptr ]
-
-2. Doubly Linked List:
-   nullptr ◄── [nullptr | 1 | next] ◄──► [prev | 2 | next] ◄──► [prev | 3 | nullptr] ──► nullptr
-
-3. Circular Linked List:
-   ┌──► [ 1 | next ] ──► [ 2 | next ] ──► [ 3 | next ] ──┐
-   │                                                     │
-   └─────────────────────────────────────────────────────┘`,
+          t: "viz",
+          id: "dsa-linked-list-types",
         },
         { t: "h2", c: "2. โปรเจกต์ในโลกจริง: Music Playlist Manager" },
         {
@@ -170,15 +159,8 @@ int main() {
           c: "โจทย์ให้กลับทิศทางลูกศรของ Singly Linked List จาก `1 -> 2 -> 3 -> None` ให้กลายเป็น `3 -> 2 -> 1 -> None` โดยใช้หน่วยความจำส่วนเกินแบบ **O(1) Space**:",
         },
         {
-          t: "code",
-          lang: "text",
-          label: "การหมุนสาย Pointer ด้วย 3 ตัวแปร (prev, curr, next_temp)",
-          c: `เริ่มต้น:   prev = None, curr = [Node 1]
-สเต็ป 1:     next_temp = curr.next     (จำ Node 2 ไว้ก่อนกันหลุด!)
-สเต็ป 2:     curr.next = prev          (พลิกหัวลูกศร Node 1 ชี้กลับไปหา prev)
-สเต็ป 3:     prev = curr               (ขยับ prev มาที่ Node 1)
-สเต็ป 4:     curr = next_temp          (ขยับ curr ไปที่ Node 2)
-ทำซ้ำจนกระทั่ง curr กลายเป็น None -> prev จะกลายเป็น Head ตัวใหม่!`,
+          t: "viz",
+          id: "reverse-linked-list",
         },
         {
           t: "code",
@@ -244,15 +226,8 @@ print(" -> ".join(res)) # 3 -> 2 -> 1`,
           c: "**สแต็ก (Stack)** เปรียบเสมือน 'กองจานที่วางซ้อนกัน' หรือ 'ซองบรรจุกระสุนปืน':\n- คุณสามารถวางจานใบใหม่ลงไปบนยอดได้เท่านั้น (**Push**)\n- คุณสามารถหยิบจานใบบนสุดออกได้เท่านั้น (**Pop**)\n- คุณสามารถมองดูจานใบบนสุดได้ (**Top / Peek**)\n- จานใบที่วางลงไปชิ้นสุดท้าย จะเป็นชิ้นแรกที่ถูกหยิบออกเสมอ (**Last-In, First-Out**)",
         },
         {
-          t: "code",
-          lang: "text",
-          label: "การทำงานของ Stack Operations ใน O(1)",
-          c: `Push(10)  ──► [ 10 ]
-Push(20)  ──► [ 10, 20 ]
-Push(30)  ──► [ 10, 20, 30 ]  <- Top คือ 30
-
-Pop()     ──► คืนค่า 30, สแต็กเหลือ [ 10, 20 ]
-Peek()    ──► ดูค่า Top คือ 20 (โดยไม่ดึงออก)`,
+          t: "viz",
+          id: "dsa-stack-operations",
         },
         { t: "h2", c: "การสร้าง Stack ด้วย Array vs Linked List" },
         {
@@ -334,11 +309,8 @@ print(is_valid_parentheses("{[]}"))   # True`,
           c: "หากเราสร้าง Queue ด้วย Fixed Array ขนาด 5 ช่อง เมื่อเรา Enqueue และ Dequeue ไปเรื่อยๆ ตัวชี้ `front` และ `rear` จะเลื่อนไปทางขวาจนชนขอบท้าย แม้ข้างหน้าจะมีช่องว่างเหลืออยู่ก็ตาม (เรียกว่า False Overflow)\n\nทางแก้คือการใช้ **Circular Queue** โดยใช้ตัวดำเนินการ Modulo (`% capacity`) ให้ตัวชี้วนกลับมาที่ Index 0 เมื่อชนขอบท้าย:",
         },
         {
-          t: "code",
-          lang: "text",
-          label: "Circular Queue วนรอบด้วย Modulo",
-          c: `next_rear  = (rear + 1) % capacity
-next_front = (front + 1) % capacity`,
+          t: "viz",
+          id: "dsa-circular-queue",
         },
         {
           t: "code",

@@ -51,6 +51,25 @@ import {
 } from "@/components/viz/GraphBfsViz";
 import { NearestExitViz, RottingOrangesViz } from "@/components/viz/GraphBfsProblemsViz";
 import { HeapPushPopViz, HeapShapeViz, KthLargestViz } from "@/components/viz/HeapViz";
+import {
+  AmortizedDoublingViz,
+  AsymptoticBoundsViz,
+  BacktrackPruningViz,
+  BigOChartViz,
+  BstPropertyViz,
+  CallStackRecursionViz,
+  CircularQueueViz,
+  CompilationPipelineViz,
+  DigitExtractionViz,
+  DivideConquerTreeViz,
+  DynamicArrayMemoryViz,
+  FibOverlappingViz,
+  HashFunctionPipelineViz,
+  LinkedListTypesViz,
+  MemoryAlignmentViz,
+  StackOperationsViz,
+  TreeAnatomyViz,
+} from "@/components/viz/DsaViz";
 
 /**
  * The only place that maps a viz id → component.
@@ -123,6 +142,24 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "heap-shape": HeapShapeViz,
   "heap-push-pop": HeapPushPopViz,
   "kth-largest": KthLargestViz,
+  // DSA Mastercourse
+  "dsa-compilation-pipeline": CompilationPipelineViz,
+  "dsa-asymptotic-bounds": AsymptoticBoundsViz,
+  "dsa-big-o-chart": BigOChartViz,
+  "dsa-amortized-doubling": AmortizedDoublingViz,
+  "dsa-digit-extraction": DigitExtractionViz,
+  "dsa-dynamic-array-memory": DynamicArrayMemoryViz,
+  "dsa-memory-alignment": MemoryAlignmentViz,
+  "dsa-linked-list-types": LinkedListTypesViz,
+  "dsa-stack-operations": StackOperationsViz,
+  "dsa-circular-queue": CircularQueueViz,
+  "dsa-hash-function-pipeline": HashFunctionPipelineViz,
+  "dsa-tree-anatomy": TreeAnatomyViz,
+  "dsa-call-stack-recursion": CallStackRecursionViz,
+  "dsa-bst-property": BstPropertyViz,
+  "dsa-divide-conquer-tree": DivideConquerTreeViz,
+  "dsa-backtrack-pruning": BacktrackPruningViz,
+  "dsa-fib-overlapping": FibOverlappingViz,
 };
 
 export default function VizBlock({ id }: { id: VizId }) {

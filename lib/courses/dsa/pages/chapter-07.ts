@@ -20,14 +20,8 @@ export const chapter07Pages: Record<string, Page> = {
         },
         { t: "h2", c: "พจนานุกรมคำศัพท์โครงสร้างต้นไม้ (Tree Terminology)" },
         {
-          t: "code",
-          lang: "text",
-          label: "องค์ประกอบของต้นไม้ในวิทยาการคอมพิวเตอร์ (รากอยู่บน กิ่งก้านอยู่ล่าง)",
-          c: `             [ A: Root ]            <- ระดับ Depth 0 (รากของทั้งต้นไม้)
-             /         \\
-       [ B: Parent ]  [ C: Parent ]  <- ระดับ Depth 1
-        /         \\          \\
-   [ D: Leaf ] [ E: Leaf ] [ F: Leaf ] <- ระดับ Depth 2 (ใบไม้: ไม่มีลูก)`,
+          t: "viz",
+          id: "dsa-tree-anatomy",
         },
         {
           t: "table",
@@ -92,24 +86,8 @@ export const chapter07Pages: Record<string, Page> = {
 print(factorial(4)) # 24`,
         },
         {
-          t: "code",
-          lang: "text",
-          label: "ภาพจำลอง Stack Frames บน RAM (ขยายตัวขึ้น แล้วยุบตัวลง)",
-          c: `[ จังหวะที่ 1: ดันเข้า Stack (Winding) ]
-┌───────────────────────────┐
-│ factorial(1) -> ชน Base Case คืนค่า 1!
-├───────────────────────────┤
-│ factorial(2) รอ factorial(1)
-├───────────────────────────┤
-│ factorial(3) รอ factorial(2)
-├───────────────────────────┤
-│ factorial(4) รอ factorial(3)
-└───────────────────────────┘
-
-[ จังหวะที่ 2: คืนค่าและยุบตัว (Unwinding) ]
-factorial(1) คืน 1  ──► factorial(2) คำนวณ 2 * 1 = 2
-factorial(2) คืน 2  ──► factorial(3) คำนวณ 3 * 2 = 6
-factorial(3) คืน 6  ──► factorial(4) คำนวณ 4 * 6 = 24  (คำตอบสุดท้าย!)`,
+          t: "viz",
+          id: "dsa-call-stack-recursion",
         },
         {
           t: "callout",
@@ -143,19 +121,8 @@ factorial(3) คืน 6  ──► factorial(4) คำนวณ 4 * 6 = 24  (�
           ],
         },
         {
-          t: "code",
-          lang: "text",
-          label: "ตัวอย่าง Binary Search Tree ที่ถูกต้อง (BST Property)",
-          c: `             [ 8 ]
-            /     \\
-         [ 3 ]    [ 10 ]
-        /    \\         \\
-      [ 1 ]  [ 6 ]     [ 14 ]
-             /   \\      /
-           [ 4 ] [ 7 ] [ 13 ]
-           
-* สังเกตว่า: กิ่งซ้ายของ 8 (3, 1, 6, 4, 7) น้อยกว่า 8 ทุกตัว
-* และกิ่งขวาของ 8 (10, 14, 13) มากกว่า 8 ทุกตัว!`,
+          t: "viz",
+          id: "dsa-bst-property",
         },
         { t: "h2", c: "การท่องโหนดในต้นไม้ (Tree Traversals)" },
         {

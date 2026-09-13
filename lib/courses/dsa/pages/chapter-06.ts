@@ -248,19 +248,8 @@ print(bubble_sort([64, 34, 25, 12, 22, 11, 90]))`,
           c: "ความเร็วระดับ **$O(1)$** ของ Hash Table เกิดจากการแปลงคีย์ (Key) ใดๆ เช่น สตริง `\"john_doe\"` ให้กลายเป็นหมายเลข Index ในอาร์เรย์ ผ่านฟังก์ชันคณิตศาสตร์ที่เรียกว่า **Hash Function**:",
         },
         {
-          t: "code",
-          lang: "text",
-          label: "กระบวนการแปลง Key สู่ Bucket Index",
-          c: `Key ("john_doe") 
-       │
-       ▼ (ผ่าน Hash Function)
-Hash Code (ตัวเลขขนาดใหญ่ เช่น 2,948,104,912)
-       │
-       ▼ (Modulo ขนาดตาราง: % Array_Size)
-Bucket Index: 4
-       │
-       ▼
-บันทึกหรือค้นหาค่า Value ที่ Array[4] ได้ในทันที O(1)!`,
+          t: "viz",
+          id: "dsa-hash-function-pipeline",
         },
         { t: "h2", c: "การชนกันของข้อมูล (Hash Collision) และวิธีแก้ไข" },
         {

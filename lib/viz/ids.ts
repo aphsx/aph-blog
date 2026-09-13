@@ -78,6 +78,24 @@ export const VIZ_IDS = [
   "heap-shape",
   "heap-push-pop",
   "kth-largest",
+  // DSA Mastercourse Visualizers
+  "dsa-compilation-pipeline",
+  "dsa-asymptotic-bounds",
+  "dsa-big-o-chart",
+  "dsa-amortized-doubling",
+  "dsa-digit-extraction",
+  "dsa-dynamic-array-memory",
+  "dsa-memory-alignment",
+  "dsa-linked-list-types",
+  "dsa-stack-operations",
+  "dsa-circular-queue",
+  "dsa-hash-function-pipeline",
+  "dsa-tree-anatomy",
+  "dsa-call-stack-recursion",
+  "dsa-bst-property",
+  "dsa-divide-conquer-tree",
+  "dsa-backtrack-pruning",
+  "dsa-fib-overlapping",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

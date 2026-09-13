@@ -24,19 +24,8 @@ export const chapter01Pages: Record<string, Page> = {
           c: "หน่วยประมวลผลกลาง (**CPU**) ไม่เข้าใจภาษาอังกฤษ ไม่รู้จักภาษา Python หรือ C++ สิ่งเดียวที่ทรานซิสเตอร์พันล้านตัวใน CPU รับรู้คือ **ระดับแรงดันไฟฟ้า (Voltage)**: มีไฟ (1) หรือไม่มีไฟ (0) ซึ่งเราเรียกว่า **เลขฐานสอง (Binary / Machine Code)**",
         },
         {
-          t: "code",
-          lang: "text",
-          label: "การเดินทางของโค้ด 3 บรรทัด สู่กระแสไฟฟ้าใน CPU",
-          c: `Source Code (C++ / Python)
-       │
-       ▼  (ผ่าน Compiler หรือ Interpreter)
-Assembly Language (คำสั่งมนุษย์อ่านได้ เช่น MOV, ADD, JMP)
-       │
-       ▼  (ผ่าน Assembler)
-Machine Code (ชุดเลขฐานสอง: 01001000 10001001 11100101)
-       │
-       ▼
-สัญญาณไฟฟ้ากระตุ้นทรานซิสเตอร์ในแกน CPU ให้ประมวลผลทางตรรกศาสตร์!`,
+          t: "viz",
+          id: "dsa-compilation-pipeline",
         },
         { t: "h2", c: "สองตระกูลภาษา: Compiled Language vs Interpreted / Bytecode" },
         {

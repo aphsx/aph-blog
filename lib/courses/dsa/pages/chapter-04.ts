@@ -196,16 +196,8 @@ print("a after b modified:", a) # [1, 2, 3, 999] (ได้รับผลกร
           ],
         },
         {
-          t: "code",
-          lang: "text",
-          label: "แผนภาพแสดง Size vs Capacity ในหน่วยความจำ",
-          c: `Vector บน Stack: [ data* | size: 3 | capacity: 4 ]
-                      │
-                      ▼ (ชี้ไปที่ Heap)
-Heap Memory:     [ 10 | 20 | 30 | (ว่าง) ]
-                   ▲    ▲    ▲     ▲
-                   │    │    │     └── ยังใส่ได้อีก 1 ช่องโดยไม่ต้องขยาย!
-                   └── สมาชิกปัจจุบัน (Size = 3)`,
+          t: "viz",
+          id: "dsa-dynamic-array-memory",
         },
         { t: "h2", c: "กลยุทธ์การขยายขนาด 2 เท่า (Geometric Doubling)" },
         {
@@ -292,13 +284,8 @@ int main() {
           c: "ทำไมถึงเป็น 12 Bytes? คำตอบคือ **ฮาร์ดแวร์ CPU อ่านข้อมูลใน RAM ทีละ Word (ครั้งละ 4 หรือ 8 Bytes)** หากตัวแปร `int` (ขนาด 4 Bytes) วางอยู่ที่ตำแหน่งที่ไม่หารด้วย 4 ลงตัว CPU จะต้องสั่งอ่าน RAM ถึง 2 ครั้งแล้วนำมาประกอบกัน (Unaligned Memory Access) ซึ่งช้ามาก!\n\nCompiler จึงแทรก **Padding Bytes (ไบต์เปล่า)** เข้าไปเพื่อจัดระเบียบข้อมูลให้ตรงขอบเขต Word เสมอ:",
         },
         {
-          t: "code",
-          lang: "text",
-          label: "การวางตัวของ BadStruct ใน RAM (12 Bytes)",
-          c: `[ char a (1B) | Pad (1B) | Pad (1B) | Pad (1B) ]  <- 4 Bytes แถวที่ 1
-[                  int b (4 Bytes)              ]  <- 4 Bytes แถวที่ 2
-[ char c (1B) | Pad (1B) | Pad (1B) | Pad (1B) ]  <- 4 Bytes แถวที่ 3
-รวมทั้งหมด = 12 Bytes!`,
+          t: "viz",
+          id: "dsa-memory-alignment",
         },
         {
           t: "code",
