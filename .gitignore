@@ -1,7 +1,28 @@
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Next.js build outputs
 .next
 out
+
+# TypeScript
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# IDEs and tools
 .DS_Store
+.claude/
+.idea/
+.vscode/
+
+# Logs & Environment
 *.log
 .env*
-next-env.d.ts
