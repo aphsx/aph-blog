@@ -1,0 +1,48 @@
+"use client";
+
+import Link from "next/link";
+import { COURSE_METAS } from "@/lib/courses/metadata";
+import { coursePath, pagePath } from "@/lib/paths";
+
+export default function Footer() {
+  return (
+    <footer className="bg-footer px-4 py-12 text-white/80">
+      <div className="mx-auto max-w-[1140px]">
+        <div className="mb-12 grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-8">
+          {COURSE_METAS.map((course) => {
+            const links = course.nav
+              .flatMap((cat) => cat.items)
+              .filter((item) => item.slug !== course.overviewSlug)
+              .slice(0, 4);
+
+            return (
+              <div key={course.id}>
+                <Link
+                  href={coursePath(course.id)}
+                  className="mb-3 block text-[15px] font-bold text-white no-underline hover:underline"
+                >
+                  {course.title}
+                </Link>
+                <ul className="m-0 list-none p-0">
+                  {links.map((l) => (
+                    <li key={l.slug} className="my-1.5">
+                      <Link
+                        href={pagePath(l.slug)}
+                        className="text-sm text-white/80 no-underline hover:text-white hover:underline"
+                      >
+                        {l.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+        <div className="text-sm">
+          Copyright © {new Date().getFullYear()} Aph&apos;s Blog
+        </div>
+      </div>
+    </footer>
+  );
+}

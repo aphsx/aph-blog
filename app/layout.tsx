@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import LastPathTracker from "@/components/LastPathTracker";
-import { LocaleProvider } from "@/components/LocaleProvider";
+import LastPathTracker from "@/components/providers/LastPathTracker";
+import { LocaleProvider } from "@/components/providers/LocaleProvider";
 import { getRequestLocale } from "@/lib/locale-server";
 import "./globals.css";
 

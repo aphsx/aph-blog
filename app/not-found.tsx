@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { COURSE_MAP } from "@/lib/courses";
-import { LAST_PATH_COOKIE } from "@/components/LastPathTracker";
+import { LAST_PATH_COOKIE } from "@/components/providers/LastPathTracker";
 
 /**
  * Mirrors the exact validity rules from app/course/[course]/page.tsx and

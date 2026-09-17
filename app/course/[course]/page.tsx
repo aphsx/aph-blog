@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import GuidePage from "@/components/GuidePage";
+import GuidePage from "@/components/content/GuidePage";
 import { COURSES, COURSE_MAP } from "@/lib/courses";
 
 export function generateStaticParams() {

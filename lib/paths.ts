@@ -1,4 +1,4 @@
-import { COURSE_MAP, COURSES, PAGES, SLUG_TO_COURSE } from "./courses";
+import { COURSE_META_MAP, COURSE_METAS, SLUG_TO_COURSE } from "./courses/metadata";
 
 /** URL path of a course landing, e.g. /course/se-roadmap */
 export function coursePath(courseId: string): string {
@@ -13,8 +13,8 @@ export function coursePath(courseId: string): string {
 export function pagePath(slug: string): string {
   const courseId = SLUG_TO_COURSE[slug];
   if (!courseId) return "/";
-  const course = COURSE_MAP[courseId];
-  if (slug === course.overviewSlug) return coursePath(courseId);
+  const course = COURSE_META_MAP[courseId];
+  if (course && slug === course.overviewSlug) return coursePath(courseId);
   return `/course/${courseId}/${slug}`;
 }
 
@@ -26,11 +26,11 @@ export function slugFromPathname(pathname: string): string | null {
   const parts = clean.split("/").filter(Boolean); // ["course", id, slug?]
   if (parts[0] !== "course" || !parts[1]) return null;
 
-  const course = COURSE_MAP[parts[1]];
+  const course = COURSE_META_MAP[parts[1]];
   if (!course) return null;
 
   if (!parts[2]) return course.overviewSlug;
-  return PAGES[parts[2]] ? parts[2] : null;
+  return SLUG_TO_COURSE[parts[2]] ? parts[2] : null;
 }
 
 /** The course id a pathname belongs to (null on the blog home). */
@@ -38,7 +38,7 @@ export function courseFromPathname(pathname: string): string | null {
   const clean = pathname.replace(/\/$/, "") || "/";
   const parts = clean.split("/").filter(Boolean);
   if (parts[0] !== "course" || !parts[1]) return null;
-  return COURSE_MAP[parts[1]] ? parts[1] : null;
+  return COURSE_META_MAP[parts[1]] ? parts[1] : null;
 }
 
 export function isPagePath(pathname: string, slug: string): boolean {
@@ -47,8 +47,8 @@ export function isPagePath(pathname: string, slug: string): boolean {
 
 /** Static params for every course: its non-overview pages. */
 export const COURSE_PAGE_PARAMS: { course: string; slug: string }[] =
-  COURSES.flatMap((c) =>
-    Object.keys(c.pages)
+  COURSE_METAS.flatMap((c) =>
+    c.order
       .filter((slug) => slug !== c.overviewSlug)
       .map((slug) => ({ course: c.id, slug })),
   );

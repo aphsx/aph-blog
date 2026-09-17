@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import GuidePage from "@/components/GuidePage";
-import { COURSE_MAP } from "@/lib/courses";
+import GuidePage from "@/components/content/GuidePage";
+import { COURSE_MAP, COURSES } from "@/lib/courses";
 import { pickLocalized } from "@/lib/locale";
 import { getRequestLocale } from "@/lib/locale-server";
-import { COURSE_PAGE_PARAMS } from "@/lib/paths";
 
 export function generateStaticParams() {
-  return COURSE_PAGE_PARAMS;
+  return COURSES.flatMap((c) =>
+    Object.keys(c.pages)
+      .filter((slug) => slug !== c.overviewSlug)
+      .map((slug) => ({ course: c.id, slug })),
+  );
 }
 
 export async function generateMetadata({

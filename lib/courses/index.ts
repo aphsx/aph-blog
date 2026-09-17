@@ -6,6 +6,9 @@ import { practiceProblems } from "./practice-problems";
 import { thirtyDaysPython } from "./30-days-python";
 import { leetcode75 } from "./leetcode-75";
 import { dsaCourse } from "./dsa";
+import { SLUG_TO_COURSE } from "./metadata";
+
+export * from "./metadata";
 
 /** Every course "Aph's Blog" hosts, in catalog order. Add a course here. */
 export const COURSES: Course[] = [
@@ -25,7 +28,7 @@ export const COURSE_MAP: Record<string, Course> = Object.fromEntries(
 
 /**
  * All pages across all courses, flattened. Slugs are globally unique, so this
- * stays a flat map — it lets `pagePath(slug)` resolve any internal link
+ * stays a flat map — it lets pagePath(slug) resolve any internal link
  * (including cross-course links) without the caller knowing the course.
  */
 export const PAGES: Record<string, Page> = Object.assign(
@@ -33,12 +36,8 @@ export const PAGES: Record<string, Page> = Object.assign(
   ...COURSES.map((c) => c.pages),
 );
 
-/** slug → owning course id. Powers single-argument `pagePath`. */
-export const SLUG_TO_COURSE: Record<string, string> = Object.fromEntries(
-  COURSES.flatMap((c) => Object.keys(c.pages).map((slug) => [slug, c.id])),
-);
-
 /** The course that owns a slug. */
 export function courseForSlug(slug: string): Course | undefined {
-  return COURSE_MAP[SLUG_TO_COURSE[slug]];
+  const courseId = SLUG_TO_COURSE[slug];
+  return courseId ? COURSE_MAP[courseId] : undefined;
 }
