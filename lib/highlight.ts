@@ -7,11 +7,12 @@ const THEME = "github-dark-default";
 
 // Every `lang` value actually used across lib/courses, kept in sync manually —
 // grep for `lang: "` if a new language shows up in content.
-const BUNDLED_LANGS = ["python", "bash", "json", "sql", "yaml"] as const;
+const BUNDLED_LANGS = ["python", "bash", "json", "sql", "yaml", "go"] as const;
 
 const LANG_ALIASES: Record<string, string> = {
   sh: "bash",
   shell: "bash",
+  golang: "go",
 };
 
 let highlighterPromise: Promise<Highlighter> | null = null;

@@ -6,6 +6,7 @@ import { practiceProblemsNav } from "./practice-problems/nav";
 import { thirtyDaysPythonNav } from "./30-days-python/nav";
 import { leetcode75Nav } from "./leetcode-75/nav";
 import { dsaNav } from "./dsa/nav";
+import { simpleBankNav } from "./simple-bank/nav";
 
 export interface CourseNavMeta {
   id: string;
@@ -87,6 +88,16 @@ export const COURSE_METAS: CourseNavMeta[] = [
     overviewSlug: "dsa-overview",
     nav: dsaNav,
     order: dsaNav.flatMap((c) => c.items.map((i) => i.slug)),
+  },
+  {
+    id: "simple-bank",
+    title: "Simple Bank in Go",
+    description:
+      "สร้างระบบธนาคารจำลองด้วยภาษา Go และ PostgreSQL — เจาะลึก ACID Transactions, Row Locking, Deadlock Prevention, Concurrency Testing, และ RESTful API",
+    badge: "🏦",
+    overviewSlug: "bank-overview",
+    nav: simpleBankNav,
+    order: simpleBankNav.flatMap((c) => c.items.map((i) => i.slug)),
   },
 ];
 

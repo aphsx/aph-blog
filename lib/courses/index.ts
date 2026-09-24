@@ -6,6 +6,7 @@ import { practiceProblems } from "./practice-problems";
 import { thirtyDaysPython } from "./30-days-python";
 import { leetcode75 } from "./leetcode-75";
 import { dsaCourse } from "./dsa";
+import { simpleBankCourse } from "./simple-bank";
 import { SLUG_TO_COURSE } from "./metadata";
 
 export * from "./metadata";
@@ -19,6 +20,7 @@ export const COURSES: Course[] = [
   thirtyDaysPython,
   leetcode75,
   dsaCourse,
+  simpleBankCourse,
 ];
 
 /** Course lookup by id. */
