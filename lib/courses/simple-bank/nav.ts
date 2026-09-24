@@ -52,4 +52,10 @@ export const simpleBankNav: NavCategory[] = [
       { slug: "bank-config-docker-prod", title: "Config Management, Docker & Production Checklist" },
     ],
   },
+  {
+    label: "8. เตรียมตัวสัมภาษณ์งาน",
+    items: [
+      { slug: "bank-interview-system-design", title: "เจาะลึกคำถามสัมภาษณ์ & สถาปัตยกรรมระดับสูง" },
+    ],
+  },
 ];

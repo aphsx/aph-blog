@@ -7,6 +7,7 @@ import { concurrencyPages } from "./pages/04-concurrency";
 import { testingPages } from "./pages/05-testing";
 import { apiPages } from "./pages/06-api";
 import { securityProdPages } from "./pages/07-security-prod";
+import { interviewPages } from "./pages/08-interview";
 
 const pages: Record<string, Page> = {
   ...introPages,
@@ -16,6 +17,7 @@ const pages: Record<string, Page> = {
   ...testingPages,
   ...apiPages,
   ...securityProdPages,
+  ...interviewPages,
 };
 
 export const simpleBankCourse: Course = {

@@ -175,6 +175,11 @@ export const introPages: Record<string, Page> = {
               slug: "bank-config-docker-prod",
               desc: "โหลดคอนฟิกด้วย Viper, Multi-Stage Dockerfile ย่อเหลือ 20MB และ Production Checklist",
             },
+            {
+              title: "16. เจาะลึกคำถามสัมภาษณ์ & สถาปัตยกรรมระดับสูง →",
+              slug: "bank-interview-system-design",
+              desc: "รวม 10 คำถามสัมภาษณ์ยอดฮิต, Idempotency, Saga Pattern, Hot Accounts และ System Design สเกลล้านผู้ใช้",
+            },
           ],
         },
       ],
