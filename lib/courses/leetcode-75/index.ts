@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { leetcode75Nav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { overviewPages } from "./pages/overview";
 import { fundamentalsPages } from "./pages/fundamentals";
 import { arrayStringPages } from "./pages/array-string";
@@ -53,13 +53,6 @@ const pages: Record<string, Page> = {
 };
 
 export const leetcode75: Course = {
-  id: "leetcode-75",
-  title: "LeetCode 75",
-  description:
-    "พิชิต LeetCode 75 ทั้ง 75 ข้อ แบบละเอียดทีละข้อ — สอน concept ของแต่ละหัวข้อก่อน แยกส่วน \"แนวทาง\" กับ \"เฉลยละเอียด\" เป็นภาษา Python",
-  badge: "🧑‍💻",
-  overviewSlug: "lc75",
-  nav: leetcode75Nav,
+  ...COURSE_META_MAP["leetcode-75"],
   pages,
-  order: leetcode75Nav.flatMap((c) => c.items.map((i) => i.slug)),
 };

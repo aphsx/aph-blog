@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { VizStaticFrame } from "@/components/viz/VizFrame";
 import { FONT_MONO } from "./constants";
 

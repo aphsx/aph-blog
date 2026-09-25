@@ -148,7 +148,14 @@ print(nodeA.next.val)     # ยืนอยู่ตู้ A -> เดินต�
           t: "codeout",
           lang: "python",
           label: "แม่แบบการเดินตรวจ Linked List",
-          code: `curr = nodeA
+          code: `class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+nodeA = ListNode(10, ListNode(20))
+
+curr = nodeA
 while curr:
     print(curr.val, end=" -> ")
     curr = curr.next

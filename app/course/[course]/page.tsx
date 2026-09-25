@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import GuidePage from "@/components/content/GuidePage";
-import { COURSES, COURSE_MAP } from "@/lib/courses";
+import { COURSE_METAS, COURSE_META_MAP } from "@/lib/courses/metadata";
+import { UI } from "@/lib/locale";
+import { getRequestLocale } from "@/lib/locale-server";
 
 export function generateStaticParams() {
-  return COURSES.map((c) => ({ course: c.id }));
+  return COURSE_METAS.map((c) => ({ course: c.id }));
 }
 
 export async function generateMetadata({
@@ -13,8 +15,10 @@ export async function generateMetadata({
   params: Promise<{ course: string }>;
 }): Promise<Metadata> {
   const { course } = await params;
-  const c = COURSE_MAP[course];
-  return { title: c ? `${c.title} — Aph's Blog` : "ไม่พบหน้า" };
+  const c = COURSE_META_MAP[course];
+  const locale = await getRequestLocale();
+  const ui = UI[locale];
+  return { title: c ? `${c.title} — Aph's Blog` : ui.pageNotFound };
 }
 
 export default async function CourseOverview({
@@ -23,7 +27,7 @@ export default async function CourseOverview({
   params: Promise<{ course: string }>;
 }) {
   const { course } = await params;
-  const c = COURSE_MAP[course];
+  const c = COURSE_META_MAP[course];
   if (!c) notFound();
   return <GuidePage slug={c.overviewSlug} />;
 }

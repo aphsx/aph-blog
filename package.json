@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test:codeout": "python3 scripts/verify-codeout.py"
   },
   "dependencies": {
     "next": "15.5.18",
@@ -19,6 +21,8 @@
     "@types/node": "22.10.7",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.18",
     "postcss": "8.5.1",
     "tailwindcss": "^4.1.13",
     "typescript": "5.7.3"

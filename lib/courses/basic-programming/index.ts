@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { basicProgrammingNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { overviewPages } from "./pages/overview";
 import { csBasicsPages } from "./pages/cs-basics";
 import { programmingBasicsPages } from "./pages/programming-basics";
@@ -19,13 +19,6 @@ const pages: Record<string, Page> = {
 };
 
 export const basicProgramming: Course = {
-  id: "basic-programming",
-  title: "เขียนโปรแกรมจากศูนย์",
-  description:
-    "เริ่มจากไม่มีพื้นฐานเลย — เข้าใจคอมพิวเตอร์, เขียนโปรแกรม และ Computer Science ทีละขั้น พร้อมโค้ดตัวอย่างให้ลองทำตาม",
-  badge: "🎓",
-  overviewSlug: "learn",
-  nav: basicProgrammingNav,
+  ...COURSE_META_MAP["basic-programming"],
   pages,
-  order: basicProgrammingNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

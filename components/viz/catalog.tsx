@@ -4,22 +4,29 @@ import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 import type { VizId } from "@/lib/viz/ids";
 
+import { useLocale } from "@/components/providers/LocaleProvider";
+import { UI } from "@/lib/locale";
+
 function VizLoadingSkeleton() {
+  const { locale } = useLocale();
+  const ui = UI[locale];
   return (
     <div className="my-6 flex h-48 w-full items-center justify-center rounded-xl border border-[#2a3040] bg-[#0c0e16] text-[#8a90a0]">
       <div className="flex items-center gap-2.5 text-sm">
         <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-        <span>กำลังโหลด Visualizer...</span>
+        <span>{ui.loadingVisualizer}</span>
       </div>
     </div>
   );
 }
 
-const load = (loader: () => Promise<any>) =>
+const load = <P extends object = Record<string, unknown>>(
+  loader: () => Promise<ComponentType<P> | { default: ComponentType<P> }>,
+) =>
   dynamic(loader, {
     loading: () => <VizLoadingSkeleton />,
     ssr: false,
-  }) as ComponentType<any>;
+  }) as ComponentType<P>;
 
 /**
  * Visualizer Catalog with Dynamic Code Splitting.

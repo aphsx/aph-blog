@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { intermediateProgrammingNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { overviewPages } from "./pages/overview";
 import { pythonDeepPages } from "./pages/python-deep";
 import { robustCodePages } from "./pages/robust-code";
@@ -33,13 +33,6 @@ const pages: Record<string, Page> = {
 };
 
 export const intermediateProgramming: Course = {
-  id: "intermediate-programming",
-  title: "เขียนโปรแกรมเชิงลึก",
-  description:
-    "คอร์สเขียนโปรแกรมแบบลงลึก ต่อยอดจากคอร์สพื้นฐาน — เจาะลึกทุกหัวข้อให้ละเอียดกว่าเดิม: Python เชิงลึก, debugging, testing, git, clean code, ฐานข้อมูล, web API และ Data Structures & Algorithms",
-  badge: "🚀",
-  overviewSlug: "intermediate",
-  nav: intermediateProgrammingNav,
+  ...COURSE_META_MAP["intermediate-programming"],
   pages,
-  order: intermediateProgrammingNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

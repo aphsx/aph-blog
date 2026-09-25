@@ -1,16 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import GuidePage from "@/components/content/GuidePage";
-import { COURSE_MAP, COURSES } from "@/lib/courses";
-import { pickLocalized } from "@/lib/locale";
+import { COURSE_MAP } from "@/lib/courses";
+import { UI, pickLocalized } from "@/lib/locale";
 import { getRequestLocale } from "@/lib/locale-server";
+import { COURSE_PAGE_PARAMS } from "@/lib/paths";
 
 export function generateStaticParams() {
-  return COURSES.flatMap((c) =>
-    Object.keys(c.pages)
-      .filter((slug) => slug !== c.overviewSlug)
-      .map((slug) => ({ course: c.id, slug })),
-  );
+  return COURSE_PAGE_PARAMS;
 }
 
 export async function generateMetadata({
@@ -20,8 +17,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { course, slug } = await params;
   const page = COURSE_MAP[course]?.pages[slug];
-  if (!page) return { title: "Page not found" };
   const locale = await getRequestLocale();
+  const ui = UI[locale];
+  if (!page) return { title: `${ui.pageNotFound} — Aph's Blog` };
   const title = pickLocalized(page.title, locale);
   return { title: `${title} — Aph's Blog` };
 }

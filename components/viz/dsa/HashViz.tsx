@@ -1,7 +1,6 @@
 "use client";
 
 import { VizStaticFrame } from "@/components/viz/VizFrame";
-import { FONT_MONO } from "./constants";
 
 // ============================================================================
 // 11. Hash Function Pipeline: Key to Bucket Index (Chapter 6)
@@ -23,7 +22,7 @@ export function HashFunctionPipelineViz() {
             {/* 1. Key */}
             <div className="rounded-lg border border-[#3b82f6]/40 bg-[#0e1628] p-3">
               <span className="text-[10px] text-[#93c5fd] font-mono">1. Raw Key</span>
-              <div className="mt-1 font-mono text-sm font-bold text-white">"john_doe"</div>
+              <div className="mt-1 font-mono text-sm font-bold text-white">{`"john_doe"`}</div>
               <span className="text-[11px] text-[#8a90a0]">ข้อมูลตั้งต้น</span>
             </div>
 

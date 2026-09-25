@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { VizStaticFrame } from "@/components/viz/VizFrame";
 import { FONT_MONO } from "./constants";
 
@@ -42,7 +41,7 @@ export function DigitExtractionViz() {
                 </span>
                 <span className="text-xs text-[#64748b]">|</span>
                 <span className="font-mono text-sm text-[#cbd5e1]">
-                  {st.n} // 10 = <span className="font-bold text-[#38bdf8]">{st.div}</span>
+                  {st.n} {"//"} 10 = <span className="font-bold text-[#38bdf8]">{st.div}</span>
                 </span>
               </div>
               <div className="flex items-center gap-3">

@@ -281,8 +281,8 @@ export function buildDiffSteps(): DiffStep[] {
   let adding: DiffStep["adding"] = null;
   let collapsed: DiffStep["collapsed"] = null;
   let phase: DiffStep["phase"] = "build";
-  let leftOut: number[] = [];
-  let rightOut: number[] = [];
+  const leftOut: number[] = [];
+  const rightOut: number[] = [];
 
   const snap = (line: number, msg: string) => {
     steps.push({

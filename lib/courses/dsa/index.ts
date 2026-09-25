@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { dsaNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { overviewPages } from "./pages/overview";
 import { chapter01Pages } from "./pages/chapter-01";
 import { chapter02Pages } from "./pages/chapter-02";
@@ -48,13 +48,6 @@ const pages: Record<string, Page> = {
 };
 
 export const dsaCourse: Course = {
-  id: "dsa",
-  title: "Data Structures & Algorithms (DSA)",
-  description:
-    "เรียนรู้โครงสร้างข้อมูลและอัลกอริทึมครบ 12 ตอน 49 บทเรียน ถอดรหัสวิธีคิดเชิงสถาปัตยกรรมสู่การทำงานจริงและการสัมภาษณ์งานระดับสากลด้วย Python และ C++",
-  badge: "⚡",
-  overviewSlug: "dsa-overview",
-  nav: dsaNav,
+  ...COURSE_META_MAP["dsa"],
   pages,
-  order: dsaNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

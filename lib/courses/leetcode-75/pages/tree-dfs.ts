@@ -2560,10 +2560,10 @@ ZigZag path ของไบนารีทรีถูกนิยามดั�
               lang: "python",
               label: "ส่วนที่ 6: การเรียกใช้งานครั้งแรกและการคืนค่า",
               c: `        # จุดเริ่มต้นจาก Root: ลองก้าวซ้ายเป็นก้าวแรก และ ลองก้าวขวาเป็นก้าวแรก
-        dfs(root.left, 'left', 1)
-        dfs(root.right, 'right', 1)
+dfs(root.left, 'left', 1)
+dfs(root.right, 'right', 1)
 
-        return self.max_len`,
+return self.max_len`,
             },
             {
               t: "callout",
@@ -3009,11 +3009,11 @@ class Solution:
               lang: "python",
               label: "ส่วนที่ 3: ตรรกะการรวบรวมคำตอบจากล่างขึ้นบน (Bottom-Up Combining)",
               c: `        # กรณีที่ 1: เจอโหนดเป้าหมายจากทั้งซ้ายและขวา
-        if left and right:
-            return root
+if left and right:
+    return root
 
-        # กรณีที่ 2 & 3: เจอแค่ฝั่งเดียว หรือ ไม่เจอเลยทั้งคู่
-        return left if left else right`,
+# กรณีที่ 2 & 3: เจอแค่ฝั่งเดียว หรือ ไม่เจอเลยทั้งคู่
+return left if left else right`,
             },
             {
               t: "callout",

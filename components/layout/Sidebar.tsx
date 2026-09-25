@@ -135,11 +135,7 @@ export default function Sidebar({
                 type="button"
                 onClick={onToggleCollapse}
                 className="group hidden min-[997px]:inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-surface-soft/80 px-2 py-1 text-xs font-medium text-muted hover:border-primary/40 hover:bg-primary-soft hover:text-primary transition-all duration-200 cursor-pointer shadow-2xs"
-                title={
-                  locale === "th"
-                    ? "หุบแถบข้างซ้ายและขวา (โหมดโฟกัส) · กด ["
-                    : "Collapse sidebars (Focus mode) · Press ["
-                }
+                title={ui.collapseSidebarsTooltip}
                 aria-label={ui.collapseSidebars}
               >
                 <svg

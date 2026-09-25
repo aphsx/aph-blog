@@ -702,8 +702,8 @@ merged: a p b q c d`,
               lang: "python",
               label: "ตอบเมื่อหารได้ทั้งคู่",
               c: `if divides(cand, str1) and divides(cand, str2):
-      return cand
-  return ""`,
+    return cand
+return ""`,
             },
             {
               t: "ul",
@@ -733,18 +733,18 @@ merged: a p b q c d`,
               label: "คำตอบสำหรับวางใน LeetCode",
               c: `import math
 
-  class Solution:
-      def gcdOfStrings(self, str1: str, str2: str) -> str:
-          def divides(block: str, s: str) -> bool:
-              # ต่อบล็อกซ้ำแล้วต้องได้ s เป๊ะ
-              return block * (len(s) // len(block)) == s
+class Solution:
+    def gcdOfStrings(self, str1: str, str2: str) -> str:
+        def divides(block: str, s: str) -> bool:
+            # ต่อบล็อกซ้ำแล้วต้องได้ s เป๊ะ
+            return block * (len(s) // len(block)) == s
 
-          g = math.gcd(len(str1), len(str2))  # ความยาวที่เป็นไปได้มีค่าเดียว
-          cand = str1[:g]  # ตัดหัวมาเป็นบล็อกที่จะลอง
+        g = math.gcd(len(str1), len(str2))  # ความยาวที่เป็นไปได้มีค่าเดียว
+        cand = str1[:g]  # ตัดหัวมาเป็นบล็อกที่จะลอง
 
-          if divides(cand, str1) and divides(cand, str2):
-              return cand
-          return ""`,
+        if divides(cand, str1) and divides(cand, str2):
+            return cand
+        return ""`,
             },
 
             { t: "h3", c: "อ่านโค้ดทีละส่วน" },
@@ -1121,9 +1121,9 @@ merged: a p b q c d`,
               lang: "python",
               label: "กวาดแปลงทีละช่อง",
               c: `count = 0
-  for i in range(len(flowerbed)):
-      if flowerbed[i] != 0:
-          continue`,
+for i in range(len(flowerbed)):
+    if flowerbed[i] != 0:
+        continue`,
             },
             {
               t: "ul",
@@ -1142,7 +1142,7 @@ merged: a p b q c d`,
               lang: "python",
               label: "ไม่มีเพื่อนบ้าน = เพื่อนบ้านว่าง",
               c: `left = (i == 0) or (flowerbed[i - 1] == 0)
-  right = (i == len(flowerbed) - 1) or (flowerbed[i + 1] == 0)`,
+right = (i == len(flowerbed) - 1) or (flowerbed[i + 1] == 0)`,
             },
             {
               t: "ul",
@@ -1183,9 +1183,9 @@ merged: a p b q c d`,
               lang: "python",
               label: "ออกเร็วเมื่อครบ n",
               c: `if count >= n:
-      return True
-  # ... หลังลูป
-  return count >= n`,
+    return True
+# ... หลังลูป
+return count >= n`,
             },
             {
               t: "ul",
@@ -1408,15 +1408,15 @@ merged: a p b q c d`,
               lang: "python",
               label: "วิ่งเข้าหากัน แล้วสลับสระ",
               c: `i, j = 0, len(ch) - 1
-  while i < j:
-      if ch[i] not in VOWELS:
-          i += 1
-      elif ch[j] not in VOWELS:
-          j -= 1
-      else:
-          ch[i], ch[j] = ch[j], ch[i]
-          i += 1
-          j -= 1`,
+while i < j:
+    if ch[i] not in VOWELS:
+        i += 1
+    elif ch[j] not in VOWELS:
+        j -= 1
+    else:
+        ch[i], ch[j] = ch[j], ch[i]
+        i += 1
+        j -= 1`,
             },
             {
               t: "ul",
@@ -1648,10 +1648,10 @@ merged: a p b q c d`,
               lang: "python",
               label: "split() vs split(\" \")",
               code: `s = "a good   example"
-  print(s.split())
-  print(s.split(" "))`,
+print(s.split())
+print(s.split(" "))`,
               out: `['a', 'good', 'example']
-  ['a', 'good', '', '', 'example']`,
+['a', 'good', '', '', 'example']`,
             },
 
             {
@@ -1874,7 +1874,7 @@ merged: a p b q c d`,
               lang: "python",
               label: "ตั้งต้น answer",
               c: `n = len(nums)
-  answer = [1] * n`,
+answer = [1] * n`,
             },
             {
               t: "ul",
@@ -1915,9 +1915,9 @@ merged: a p b q c d`,
               lang: "python",
               label: "รอบขวา — คูณทับจนได้คำตอบ",
               c: `right = 1
-  for i in range(n - 1, -1, -1):
-      answer[i] *= right
-      right *= nums[i]`,
+for i in range(n - 1, -1, -1):
+    answer[i] *= right
+    right *= nums[i]`,
             },
             {
               t: "ul",
@@ -2386,7 +2386,7 @@ merged: a p b q c d`,
               lang: "python",
               label: "ช่องว่างผลอยู่หัวแถว",
               c: `write = read = 0
-  n = len(chars)`,
+n = len(chars)`,
             },
             {
               t: "ul",
@@ -2431,7 +2431,7 @@ merged: a p b q c d`,
               lang: "python",
               label: "วางตัวอักษรของกลุ่ม",
               c: `chars[write] = ch
-  write += 1`,
+write += 1`,
             },
             {
               t: "ul",

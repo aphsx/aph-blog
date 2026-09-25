@@ -34,7 +34,7 @@ export default async function GuidePage({ slug }: { slug: string }) {
   const category = getCategoryForSlug(page.slug);
 
   return (
-    <Shell toc={toc}>
+    <Shell toc={toc} locale={locale}>
       <div className="doc-item-container">
         <article className="min-[768px]:text-[18px]">
           <DocBreadcrumbs
@@ -43,9 +43,10 @@ export default async function GuidePage({ slug }: { slug: string }) {
             categoryLabel={category?.label}
             categoryHref={category ? getCategoryHref(category) : undefined}
             pageTitle={resolved.title}
+            locale={locale}
           />
 
-          <TocMobile headings={toc} />
+          <TocMobile headings={toc} locale={locale} />
 
           <header>
             <h1 className="m-0 text-[1.5em] font-bold leading-[1.2] tracking-tight text-[#1c1e21] min-[768px]:text-[2.25em]">
@@ -53,7 +54,7 @@ export default async function GuidePage({ slug }: { slug: string }) {
             </h1>
           </header>
 
-          <Shoutout />
+          <Shoutout locale={locale} />
 
           {resolved.lead ? (
             <p className="mb-6 italic leading-relaxed text-[#1c1e21]">
@@ -62,7 +63,7 @@ export default async function GuidePage({ slug }: { slug: string }) {
           ) : null}
 
           {/* Article stays an async Server Component — passed as children of client Shell */}
-          <Article blocks={resolved.blocks} />
+          <Article blocks={resolved.blocks} locale={locale} />
         </article>
 
         <DocPaginator
@@ -76,6 +77,7 @@ export default async function GuidePage({ slug }: { slug: string }) {
               ? { slug: nextSlug, title: nextResolved.title }
               : null
           }
+          locale={locale}
         />
       </div>
     </Shell>

@@ -158,7 +158,7 @@ export function buildInsertSteps(): InsertStep[] {
   let to: number | null = null;
   let writing: number | null = null;
   let shifts = 0;
-  let mode: InsertStep["mode"] = "insert";
+  const mode: InsertStep["mode"] = "insert";
 
   const snap = (line: number, msg: string) => {
     steps.push({

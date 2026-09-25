@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { thirtyDaysPythonNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { overviewPages } from "./pages/overview";
 import { day01Page } from "./pages/day-01";
 import { day02Page } from "./pages/day-02";
@@ -67,13 +67,6 @@ const pages: Record<string, Page> = {
 };
 
 export const thirtyDaysPython: Course = {
-  id: "30-days-python",
-  title: "30 วัน Python",
-  description:
-    "เรียน Python จากศูนย์ถึงสร้าง API ใน 30 วัน — แปลและเรียบเรียงจาก 30 Days of Python โดย Asabeneh เนื้อหาครบทุกบทไม่มีตัดทอน",
-  badge: "🐍",
-  overviewSlug: "py30-overview",
-  nav: thirtyDaysPythonNav,
+  ...COURSE_META_MAP["30-days-python"],
   pages,
-  order: thirtyDaysPythonNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

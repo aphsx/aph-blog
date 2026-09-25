@@ -1,14 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { UI, type Locale } from "@/lib/locale";
 
 /**
  * Small copy-to-clipboard button for code panels. Client component — the
  * surrounding Article.tsx is an async Server Component, so interactivity
  * lives here only.
  */
-export default function CopyButton({ code }: { code: string }) {
+export default function CopyButton({
+  code,
+  locale = "th",
+}: {
+  code: string;
+  locale?: Locale;
+}) {
   const [copied, setCopied] = useState(false);
+  const ui = UI[locale];
 
   const copy = async () => {
     try {
@@ -32,8 +40,8 @@ export default function CopyButton({ code }: { code: string }) {
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? "คัดลอกแล้ว" : "คัดลอกโค้ด"}
-      title={copied ? "คัดลอกแล้ว ✓" : "คัดลอกโค้ด"}
+      aria-label={copied ? ui.copied : ui.copyCode}
+      title={copied ? `${ui.copied} ✓` : ui.copyCode}
       className={`grid h-6 w-6 shrink-0 place-items-center rounded transition-colors ${
         copied
           ? "bg-[#1a2e24] text-[#8cffb8]"

@@ -393,7 +393,7 @@ function ConcatDiagram({ step }: { step: ConcatStep }) {
 
       {chars.length === 0 && (
         <text x={W / 2} y={y + 28} textAnchor="middle" fill={DIM} fontSize={14} fontFamily={FONT}>
-          ""
+          {`""`}
         </text>
       )}
       {chars.map((ch, i) => {

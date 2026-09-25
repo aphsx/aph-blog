@@ -25,7 +25,6 @@ export const PRODUCT_EXCEPT_SELF_CODE = [
 
 export function buildProductExceptSelfSteps(): ProductExceptSelfStep[] {
   const nums = [1, 2, 3, 4];
-  const n = nums.length;
   const steps: ProductExceptSelfStep[] = [];
   let answer = [1, 1, 1, 1];
   let right = 1;

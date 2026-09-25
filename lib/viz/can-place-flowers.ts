@@ -33,7 +33,7 @@ export const CAN_PLACE_FLOWERS_CODE = [
 export function buildCanPlaceFlowersSteps(): CanPlaceFlowersStep[] {
   const n = 1;
   const steps: CanPlaceFlowersStep[] = [];
-  let bed = [1, 0, 0, 0, 1];
+  const bed = [1, 0, 0, 0, 1];
   let i = 0;
   let count = 0;
   let focus: number | null = null;

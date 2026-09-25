@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { seRoadmapNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { introPages } from "./pages/intro";
 import { gettingInterviewPages } from "./pages/getting-interview";
 import { portfolioPages } from "./pages/portfolio";
@@ -27,13 +27,6 @@ const pages: Record<string, Page> = {
 };
 
 export const seRoadmap: Course = {
-  id: "se-roadmap",
-  title: "เตรียมสัมภาษณ์ Software Engineer",
-  description:
-    "Roadmap เตรียมสมัครงาน SE ตั้งแต่ Resume, Coding, System Design, Behavioral จนถึงต่อรอง Offer — ภาษาไทย ทำตามทีละขั้น",
-  badge: "💼",
-  overviewSlug: "overview",
-  nav: seRoadmapNav,
+  ...COURSE_META_MAP["se-roadmap"],
   pages,
-  order: seRoadmapNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

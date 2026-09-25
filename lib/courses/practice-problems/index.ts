@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { practiceProblemsNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { overviewPages } from "./pages/overview";
 import { basicsPages } from "./pages/basics";
 import { stringsPages } from "./pages/strings";
@@ -21,13 +21,6 @@ const pages: Record<string, Page> = {
 };
 
 export const practiceProblems: Course = {
-  id: "practice-problems",
-  title: "โจทย์ฝึกเขียนโปรแกรม",
-  description:
-    "โจทย์ฝึกพร้อมเฉลยละเอียดเป็นภาษา Python — ลองทำเองก่อนเปิดเฉลย ฝึกตั้งแต่พื้นฐานจนถึงเทคนิคที่เจอในสัมภาษณ์",
-  badge: "🧩",
-  overviewSlug: "practice",
-  nav: practiceProblemsNav,
+  ...COURSE_META_MAP["practice-problems"],
   pages,
-  order: practiceProblemsNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

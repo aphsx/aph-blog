@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { COURSE_METAS } from "@/lib/courses/metadata";
@@ -24,6 +24,16 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
   const { locale } = useLocale();
   const ui = UI[locale];
 
+  // Close dropdown on Escape key
+  useEffect(() => {
+    if (!coursesOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCoursesOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [coursesOpen]);
+
   return (
     <>
       <div className="flex min-h-[2.5rem] items-center justify-center bg-primary px-4 py-2 text-center text-sm font-medium text-white">
@@ -34,11 +44,25 @@ export default function Header({ onMenu }: { onMenu?: () => void }) {
           {/* ซ้าย: ปุ่มเมนูมือถือ + โลโก้ */}
           <button
             type="button"
-            className="hidden rounded p-1.5 text-xl text-[#1c1e21] hover:bg-surface-soft max-[996px]:block"
+            className="hidden rounded-lg p-2 text-[#1c1e21] hover:bg-surface-soft max-[996px]:flex items-center justify-center cursor-pointer transition-colors"
             onClick={onMenu}
             aria-label={ui.openSidebar}
           >
-            ☰
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </button>
           <Link
             href="/"

@@ -247,7 +247,6 @@ export default function ReverseLinkedListViz() {
 
   const step = steps[idx];
   const atStart = idx === 0;
-  const atEnd = idx === steps.length - 1;
 
   const stop = useCallback(() => {
     if (timer.current) clearInterval(timer.current);

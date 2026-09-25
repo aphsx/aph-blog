@@ -3,23 +3,30 @@ import Link from "next/link";
 import type { Block } from "@/lib/content";
 import { pagePath } from "@/lib/paths";
 import { highlightCode } from "@/lib/highlight";
+import { UI, type Locale } from "@/lib/locale";
 import VizBlock from "@/components/viz/catalog";
 import CopyButton from "./CopyButton";
 
-/* parse **bold** only (backticks already stripped/handled by renderInline) */
-function renderBold(text: string): ReactNode {
-  const parts = text.split("**");
+/* parse **bold** and *italic* (backticks already handled by renderInline) */
+function renderFormatted(text: string): ReactNode {
+  const parts = text.split(/(\*\*[^*]+?\*\*|\*[^*]+?\*)/g);
   if (parts.length === 1) return text;
-  return parts.map((part, k) =>
-    k % 2 === 1 ? <strong key={k}>{part}</strong> : <Fragment key={k}>{part}</Fragment>
-  );
+  return parts.map((part, k) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return <strong key={k}>{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+      return <em key={k}>{part.slice(1, -1)}</em>;
+    }
+    return <Fragment key={k}>{part}</Fragment>;
+  });
 }
 
-/* parse `inline code` → <code>, then **bold** inside the non-code segments */
+/* parse `inline code` → <code>, then **bold** / *italic* inside the non-code segments */
 function renderInline(text: string): ReactNode {
   const segs = text.split("`");
-  // even segment count = unbalanced backtick → keep it literal, bold only
-  if (segs.length % 2 === 0) return renderBold(text);
+  // even segment count = unbalanced backtick → keep it literal, format only
+  if (segs.length % 2 === 0) return renderFormatted(text);
   return segs.map((seg, i) =>
     i % 2 === 1 ? (
       <code
@@ -29,8 +36,8 @@ function renderInline(text: string): ReactNode {
         {seg}
       </code>
     ) : (
-      <Fragment key={i}>{renderBold(seg)}</Fragment>
-    )
+      <Fragment key={i}>{renderFormatted(seg)}</Fragment>
+    ),
   );
 }
 
@@ -55,7 +62,17 @@ const prose =
  * surface on the page reads as one family. Left: accent dot + snippet label.
  * Right: language badge + copy button.
  */
-function CodeChrome({ label, lang, code }: { label?: string; lang?: string; code: string }) {
+function CodeChrome({
+  label,
+  lang,
+  code,
+  locale = "th",
+}: {
+  label?: string;
+  lang?: string;
+  code: string;
+  locale?: Locale;
+}) {
   const showLang = lang && lang !== "text";
   return (
     <div className="flex items-center gap-2.5 bg-[#121620] px-4 py-2">
@@ -73,7 +90,7 @@ function CodeChrome({ label, lang, code }: { label?: string; lang?: string; code
             {lang}
           </span>
         )}
-        <CopyButton code={code} />
+        <CopyButton code={code} locale={locale} />
       </div>
     </div>
   );
@@ -85,11 +102,13 @@ async function CodePanel({
   lang,
   label,
   roundBottom = true,
+  locale = "th",
 }: {
   code: string;
   lang?: string;
   label?: string;
   roundBottom?: boolean;
+  locale?: Locale;
 }) {
   const html = await highlightCode(code, lang);
   // Line numbers only make sense for real source (python/bash/...) — an
@@ -102,7 +121,7 @@ async function CodePanel({
         roundBottom ? "rounded-lg shadow-sm" : "rounded-t-lg"
       }`}
     >
-      <CodeChrome label={label} lang={lang} code={code} />
+      <CodeChrome label={label} lang={lang} code={code} locale={locale} />
       <div
         className={`border-t border-[#2a3040] ${numbered ? "shiki-numbered" : ""}`}
         dangerouslySetInnerHTML={{ __html: html }}
@@ -115,8 +134,10 @@ async function renderBlock(
   b: Block,
   i: number,
   prefix = "h",
+  locale: Locale = "th",
 ): Promise<ReactNode> {
   const id = `${prefix}-${i}`;
+  const ui = UI[locale];
   switch (b.t) {
     case "p":
       return <p key={id}>{renderText(b.c)}</p>;
@@ -159,7 +180,7 @@ async function renderBlock(
     case "code":
       return (
         <div key={id} className="my-5">
-          <CodePanel code={b.c} lang={b.lang} label={b.label} />
+          <CodePanel code={b.c} lang={b.lang} label={b.label} locale={locale} />
         </div>
       );
     case "callout":
@@ -214,7 +235,7 @@ async function renderBlock(
           id={id}
           className="my-5 scroll-mt-28 rounded-md border border-border border-l-4 border-l-[#8a8f98] bg-surface-soft/30 px-4 py-3"
         >
-          <div className="mb-1 font-bold">Constraints (ข้อจำกัด)</div>
+          <div className="mb-1 font-bold">{ui.constraintsTitle}</div>
           <ul className="m-0 list-disc pl-5 font-mono text-[0.85em] [&_li]:my-1">
             {b.c.map((x, j) => (
               <li key={j}>{x}</li>
@@ -239,7 +260,7 @@ async function renderBlock(
                   </summary>
                   <div className="mt-3">
                     {await Promise.all(
-                      h.c.map((bb, k) => renderBlock(bb, k, hid)),
+                      h.c.map((bb, k) => renderBlock(bb, k, hid, locale)),
                     )}
                   </div>
                 </details>
@@ -251,11 +272,11 @@ async function renderBlock(
     case "codeout":
       return (
         <div key={id} className="my-5">
-          <CodePanel code={b.code} lang={b.lang} label={b.label} roundBottom={false} />
+          <CodePanel code={b.code} lang={b.lang} label={b.label} roundBottom={false} locale={locale} />
           <div className="rounded-b-lg border border-t-0 border-[#2a3040] bg-[#121620] px-4 py-3">
             <div className="mb-2 flex items-center gap-2">
               <span className="rounded border border-[#3a8868] bg-[#142820] px-2 py-0.5 font-mono text-[0.7em] font-bold uppercase tracking-wider text-[#8cffb8]">
-                ▶ Output
+                ▶ {ui.output}
               </span>
               <span className="h-px flex-1 bg-[#2a3040]" />
             </div>
@@ -282,13 +303,13 @@ async function renderBlock(
             </span>
             <span className="min-w-0 flex-1">
               <span className="block font-bold text-[#1c1e21]">
-                {b.summary ?? "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน"}
+                {b.summary ?? ui.solutionDefaultSummary}
               </span>
               <span className="mt-0.5 block text-[0.8em] text-muted group-open/sol:hidden">
-                พับไว้ด้านใน — คลิกเมื่อพร้อมดู
+                {ui.solutionFoldedHint}
               </span>
               <span className="mt-0.5 hidden text-[0.8em] text-muted group-open/sol:block">
-                เปิดแล้ว · คลิกอีกครั้งเพื่อพับกลับ
+                {ui.solutionOpenedHint}
               </span>
             </span>
             <span
@@ -299,7 +320,7 @@ async function renderBlock(
             </span>
           </summary>
           <div className="border-t border-dashed border-border px-4 pb-5 pt-2">
-            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j, id)))}
+            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j, id, locale)))}
           </div>
         </details>
       );
@@ -314,7 +335,7 @@ async function renderBlock(
             {b.summary}
           </summary>
           <div className="mt-3">
-            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j, id)))}
+            {await Promise.all(b.c.map((bb, j) => renderBlock(bb, j, id, locale)))}
           </div>
         </details>
       );
@@ -438,7 +459,15 @@ async function renderBlock(
   }
 }
 
-export default async function Article({ blocks }: { blocks: Block[] }) {
-  const rendered = await Promise.all(blocks.map((b, i) => renderBlock(b, i)));
+export default async function Article({
+  blocks,
+  locale = "th",
+}: {
+  blocks: Block[];
+  locale?: Locale;
+}) {
+  const rendered = await Promise.all(
+    blocks.map((b, i) => renderBlock(b, i, "h", locale)),
+  );
   return <div className={prose}>{rendered}</div>;
 }

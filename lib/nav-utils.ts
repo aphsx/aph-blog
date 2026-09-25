@@ -16,5 +16,7 @@ export function getCategoryForSlug(slug: string): NavCategory | undefined {
 
 /** Link to a category — points at its first page. */
 export function getCategoryHref(cat: NavCategory): string {
-  return pagePath(cat.items[0].slug);
+  const firstSlug =
+    cat.items[0]?.slug ?? cat.subcategories?.[0]?.items[0]?.slug ?? "";
+  return firstSlug ? pagePath(firstSlug) : "#";
 }

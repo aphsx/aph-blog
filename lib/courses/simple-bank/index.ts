@@ -1,5 +1,5 @@
 import type { Course, Page } from "@/lib/types";
-import { simpleBankNav } from "./nav";
+import { COURSE_META_MAP } from "../metadata";
 import { introPages } from "./pages/01-intro";
 import { databasePages } from "./pages/02-database";
 import { storeTxPages } from "./pages/03-store-tx";
@@ -21,13 +21,6 @@ const pages: Record<string, Page> = {
 };
 
 export const simpleBankCourse: Course = {
-  id: "simple-bank",
-  title: "Simple Bank in Go — สร้างระบบธนาคารจำลองด้วย Go & PostgreSQL",
-  description:
-    "เรียนรู้การสร้างระบบ Backend ธนาคารระดับ Production ด้วยภาษา Go, PostgreSQL, ACID Transactions, Row Locking, Deadlock Prevention, Concurrency Testing, และ RESTful API",
-  badge: "🏦",
-  overviewSlug: "bank-overview",
-  nav: simpleBankNav,
+  ...COURSE_META_MAP["simple-bank"],
   pages,
-  order: simpleBankNav.flatMap((c) => c.items.map((i) => i.slug)),
 };

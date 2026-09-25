@@ -64,6 +64,23 @@ export const UI: Record<
     startCourse: string;
     featuredHeading: string;
     featuredBlurb: string;
+    onThisPage: string;
+    previous: string;
+    next: string;
+    shoutout: string;
+    copyCode: string;
+    copied: string;
+    loadingVisualizer: string;
+    output: string;
+    pageNotFound: string;
+    solutionDefaultSummary: string;
+    solutionFoldedHint: string;
+    solutionOpenedHint: string;
+    constraintsTitle: string;
+    collapseSidebarsTooltip: string;
+    expandSidebarsTooltip: string;
+    breadcrumbsAria: string;
+    homeAria: string;
   }
 > = {
   en: {
@@ -81,6 +98,24 @@ export const UI: Record<
     startCourse: "Start course",
     featuredHeading: "Start reading here",
     featuredBlurb: "Recommended pages from each course",
+    onThisPage: "On this page",
+    previous: "Previous",
+    next: "Next",
+    shoutout:
+      "👋 Aph's Blog is free and open to everyone — follow along chapter-by-chapter in the sidebar. Feedback and topic requests are always welcome!",
+    copyCode: "Copy code",
+    copied: "Copied!",
+    loadingVisualizer: "Loading visualizer...",
+    output: "Output",
+    pageNotFound: "Page not found",
+    solutionDefaultSummary: "Full solution · Hidden for self-practice",
+    solutionFoldedHint: "Folded inside — click when ready to check",
+    solutionOpenedHint: "Opened · click again to fold back",
+    constraintsTitle: "Constraints",
+    collapseSidebarsTooltip: "Collapse sidebars (Focus mode) · Press [",
+    expandSidebarsTooltip: "Expand sidebars · Press [",
+    breadcrumbsAria: "Breadcrumb navigation",
+    homeAria: "Aph's Blog Home",
   },
   th: {
     banner: "บันทึกและคอร์สเรียนพัฒนาซอฟต์แวร์ · ภาษาไทย · เรียนฟรี",
@@ -97,6 +132,24 @@ export const UI: Record<
     startCourse: "เริ่มคอร์ส",
     featuredHeading: "เริ่มอ่านจากตรงนี้",
     featuredBlurb: "บทความแนะนำจากแต่ละคอร์ส",
+    onThisPage: "ในหน้านี้",
+    previous: "ก่อนหน้า",
+    next: "ถัดไป",
+    shoutout:
+      "👋 อ่านฟรีทั้งหมดบน Aph's Blog — ทำตามทีละหน้าใน sidebar ได้เลย หากมีข้อเสนอแนะหรืออยากให้เพิ่มหัวข้อไหน บอกได้เสมอ",
+    copyCode: "คัดลอกโค้ด",
+    copied: "คัดลอกแล้ว!",
+    loadingVisualizer: "กำลังโหลด Visualizer...",
+    output: "ผลลัพธ์ (Output)",
+    pageNotFound: "ไม่พบหน้า",
+    solutionDefaultSummary: "เฉลยเต็ม · ซ่อนไว้ให้ลองเองก่อน",
+    solutionFoldedHint: "พับไว้ด้านใน — คลิกเมื่อพร้อมดู",
+    solutionOpenedHint: "เปิดแล้ว · คลิกอีกครั้งเพื่อพับกลับ",
+    constraintsTitle: "Constraints (ข้อจำกัด)",
+    collapseSidebarsTooltip: "หุบแถบข้างซ้ายและขวา (โหมดโฟกัส) · กด [",
+    expandSidebarsTooltip: "แสดงแถบข้างซ้ายและขวา · กด [",
+    breadcrumbsAria: "เส้นทางนำทาง (Breadcrumb)",
+    homeAria: "หน้าแรก Aph's Blog",
   },
 };
 
