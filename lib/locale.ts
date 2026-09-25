@@ -55,6 +55,9 @@ export const UI: Record<
     courses: string;
     topics: (n: number) => string;
     openSidebar: string;
+    collapseSidebars: string;
+    expandSidebars: string;
+    allCourses: string;
     langAria: string;
     coursesHeading: string;
     coursesBlurb: string;
@@ -69,6 +72,9 @@ export const UI: Record<
     courses: "Courses",
     topics: (n) => `${n} topics`,
     openSidebar: "Open sidebar menu",
+    collapseSidebars: "Collapse sidebars",
+    expandSidebars: "Expand sidebars",
+    allCourses: "All courses",
     langAria: "Language",
     coursesHeading: "Courses",
     coursesBlurb: "Pick a path and start whenever you’re ready.",
@@ -82,6 +88,9 @@ export const UI: Record<
     courses: "คอร์ส",
     topics: (n) => `${n} หัวข้อ`,
     openSidebar: "เปิดเมนู sidebar",
+    collapseSidebars: "หุบแถบข้าง",
+    expandSidebars: "แสดงแถบข้าง",
+    allCourses: "คอร์สทั้งหมด",
     langAria: "ภาษา",
     coursesHeading: "คอร์สเรียน",
     coursesBlurb: "เลือกเส้นทางที่อยากเริ่มได้เลย",
@@ -90,3 +99,4 @@ export const UI: Record<
     featuredBlurb: "บทความแนะนำจากแต่ละคอร์ส",
   },
 };
+
