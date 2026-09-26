@@ -492,6 +492,60 @@ Content-Type: application/json; charset=utf-8
   "error": "สกุลเงินของบัญชี [1] คือ USD ไม่ตรงกับคำขอโอน THB"
 }`,
         },
+
+        { t: "h2", c: "ประกอบร่างและเปิดรันเซิร์ฟเวอร์ด้วย `main.go`" },
+        {
+          t: "p",
+          c: "เมื่อเขียน API Handlers และตัวตรวจสอบความถูกต้อง (Validation) ครบทุกส่วนแล้ว ตอนนี้ถึงเวลาสร้างไฟล์ `main.go` ที่ Root ของโปรเจกต์ เพื่อเชื่อมต่อ Database เข้ากับ Gin Server และเปิดให้บริการจริง:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "main.go (Root Directory)",
+          c: `package main
+
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/lib/pq"
+	"simplebank/api"
+	db "simplebank/db"
+)
+
+const (
+	dbDriver      = "postgres"
+	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+	serverAddress = "0.0.0.0:8080"
+)
+
+func main() {
+	conn, err := sql.Open(dbDriver, dbSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	store := db.NewStore(conn)
+	server := api.NewServer(store)
+
+	err = server.Start(serverAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "คำสั่งเปิดเซิร์ฟเวอร์ Gin และ Log การลงทะเบียน Route ครบทุกตัว",
+          code: `go run main.go`,
+          out: `[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)
+[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (3 handlers)
+[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080`,
+        },
       ],
       en: [],
     },

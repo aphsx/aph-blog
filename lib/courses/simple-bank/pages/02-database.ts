@@ -70,19 +70,32 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
           c: "นี่คือกฎเหล็กข้อสำคัญที่สุดของวิศวกรซอฟต์แวร์: **ห้ามใช้ชนิดข้อมูลทศนิยมแบบ Floating-Point (เช่น float, double) ในการเก็บเงินเด็ดขาด!** มาดูการพิสูจน์จริงด้วยโค้ด Go:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "go",
-          label: "เปรียบเทียบ Float VS Bigint ในภาษา Go",
-          c: `// 1. ความคลาดเคลื่อนของ Float จากมาตรฐาน IEEE 754
-var floatA, floatB float64 = 0.1, 0.2
-floatSum := floatA + floatB
-fmt.Println(floatSum)         // 0.30000000000000004
-fmt.Println(floatSum == 0.3)  // false! (เงินเพี้ยนทันที)
+          label: "float_vs_bigint.go (รันเดี่ยวด้วย: go run float_vs_bigint.go)",
+          code: `// บันทึกเป็นไฟล์ float_vs_bigint.go แล้วรันด้วย: go run float_vs_bigint.go
+package main
 
-// 2. ทางออกที่ถูกต้อง: เก็บเป็นจำนวนเต็ม Bigint ในหน่วยย่อยที่สุด (สตางค์ หรือ เซนต์)
-var centA, centB int64 = 10, 20 // 10 เซนต์ + 20 เซนต์
-centSum := centA + centB
-fmt.Println(centSum)          // 30 (แม่นยำ 100% ไร้การปัดเศษ!)`,
+import "fmt"
+
+func main() {
+	// 1. ความคลาดเคลื่อนของ Float ในคอมพิวเตอร์ (IEEE 754)
+	var floatA, floatB float64 = 0.1, 0.2
+	floatSum := floatA + floatB
+	fmt.Printf(">> คำนวณด้วย Float: 0.1 + 0.2 = %.17f\\n", floatSum)
+	fmt.Printf("   เปรียบเทียบว่าเท่ากับ 0.3 หรือไม่: %t (เงินเพี้ยนทันที!)\\n\\n", floatSum == 0.3)
+
+	// 2. การเก็บเป็นจำนวนเต็ม (Bigint) ในหน่วยย่อยที่สุด (สตางค์ หรือ เซนต์)
+	var centA, centB int64 = 10, 20 // 10 เซนต์ + 20 เซนต์
+	centSum := centA + centB
+	fmt.Printf(">> คำนวณด้วย Bigint: 10 เซนต์ + 20 เซนต์ = %d เซนต์\\n", centSum)
+	fmt.Printf("   เปรียบเทียบว่าเท่ากับ 30 เซนต์หรือไม่: %t (แม่นยำ 100%% ไร้การปัดเศษ!)\\n", centSum == 30)
+}`,
+          out: `>> คำนวณด้วย Float: 0.1 + 0.2 = 0.30000000000000004
+   เปรียบเทียบว่าเท่ากับ 0.3 หรือไม่: false (เงินเพี้ยนทันที!)
+
+>> คำนวณด้วย Bigint: 10 เซนต์ + 20 เซนต์ = 30 เซนต์
+   เปรียบเทียบว่าเท่ากับ 30 เซนต์หรือไม่: true (แม่นยำ 100% ไร้การปัดเศษ!)`,
         },
         {
           t: "p",

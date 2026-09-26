@@ -55,10 +55,54 @@ ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "cur
           c: "Bcrypt เป็นอัลกอริทึมประเภท **Slow Hashing** ที่ถูกออกแบบมาให้กินเวลาประมวลผลของ CPU (มี Cost Factor หรือ Work Factor) และมีการสุ่มค่า **Salt** (ตัวแปรสุ่มพิเศษ) เติมเข้าไปในทุกรหัสผ่านโดยอัตโนมัติ ทำให้แม้ผู้ใช้สองคนจะตั้งรหัสผ่าน `123456` เหมือนกัน ค่าแฮชที่ได้ก็จะแตกต่างกันอย่างสิ้นเชิง ป้องกัน Rainbow Table ได้ 100%!",
         },
 
-        { t: "h2", c: "3. ฟังก์ชันแฮชและตรวจสอบรหัสผ่านใน Go" },
+        { t: "h2", c: "3. ตัวอย่างรันเดี่ยวทดสอบกลไก Bcrypt (Salt & Work Factor)" },
         {
           t: "p",
-          c: "เราจะใช้แพ็กเกจ `golang.org/x/crypto/bcrypt` ในการจัดการรหัสผ่าน:",
+          c: "เพื่อทำความเข้าใจว่าทำไมรหัสผ่านเดียวกันถึงได้ Hash ต่างกัน และ Bcrypt ตรวจสอบรหัสผ่านอย่างไร คุณสามารถบันทึกโค้ดด้านล่างเป็นไฟล์เดี่ยวแล้วทดลองรันดูผลลัพธ์ได้ทันที:",
+        },
+        {
+          t: "codeout",
+          lang: "go",
+          label: "bcrypt_demo.go (รันเดี่ยวด้วย: go run bcrypt_demo.go)",
+          code: `// บันทึกเป็นไฟล์ bcrypt_demo.go แล้วรันด้วย: go run bcrypt_demo.go
+// หมายเหตุ: ต้องติดตั้งไลบรารีก่อน: go get golang.org/x/crypto/bcrypt
+package main
+
+import (
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+)
+
+func main() {
+	rawPassword := "secretPassword123"
+
+	// 1. แฮชรหัสผ่านเดียวกัน 2 ครั้ง (สังเกตค่า Salt ที่สุ่มใหม่เสมอ)
+	hash1, _ := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
+	hash2, _ := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
+
+	fmt.Println("Hash #1:", string(hash1))
+	fmt.Println("Hash #2:", string(hash2))
+	fmt.Println("Hashes identical?:", string(hash1) == string(hash2))
+
+	// 2. ตรวจสอบรหัสผ่านที่ถูกต้อง
+	errCorrect := bcrypt.CompareHashAndPassword(hash1, []byte("secretPassword123"))
+	fmt.Println("Check correct password err == nil:", errCorrect == nil)
+
+	// 3. ตรวจสอบรหัสผ่านที่ผิด
+	errWrong := bcrypt.CompareHashAndPassword(hash1, []byte("wrongPassword456"))
+	fmt.Println("Check wrong password error:", errWrong)
+}`,
+          out: `Hash #1: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+Hash #2: $2a$10$vWfPjE7zCkgvG5WlqL2Egu5K70dFwJ9o6e0jNqEaYc8hKx8bLqXsm
+Hashes identical?: false (Bcrypt สุ่ม Salt ใหม่เสมอ ป้องกัน Rainbow Table)
+Check correct password err == nil: true (ยืนยันรหัสถูกต้องสำเร็จ)
+Check wrong password error: crypto/bcrypt: hashedPassword is not the hash of the given password`,
+        },
+
+        { t: "h2", c: "4. นำไปสร้างเป็นฟังก์ชันในโปรเจกต์ Simple Bank" },
+        {
+          t: "p",
+          c: "เมื่อเข้าใจหลักการแล้ว ในโปรเจกต์จริงเราจะนำฟังก์ชันนี้ไปไว้ในแพ็กเกจ `util` (`util/password.go`) เพื่อให้ Handler อื่นๆ เรียกใช้งานได้:",
         },
         {
           t: "code",
@@ -142,7 +186,7 @@ ok      simplebank/util 0.231s`,
           ],
         },
 
-        { t: "h2", c: "4. การซ่อน Hashed Password ตอนส่ง JSON กลับไป" },
+        { t: "h2", c: "5. การซ่อน Hashed Password ตอนส่ง JSON กลับไป" },
         {
           t: "p",
           c: "ใน API สมัครสมาชิก `POST /users` เมื่อสร้างผู้ใช้สำเร็จ เรา **ห้ามส่ง `hashed_password` กลับไปใน JSON Response เด็ดขาด** เพื่อสุขอนามัยที่ดีของระบบความปลอดภัย:",

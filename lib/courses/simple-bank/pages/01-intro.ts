@@ -223,6 +223,11 @@ export const introPages: Record<string, Page> = {
           t: "p",
           c: "ในบทนี้ เราจะมาทบทวน 5 คอนเซปต์สำคัญของ Go ที่เราจำเป็นต้องใช้ในการสร้างระบบ Simple Bank ตลอดทั้งคอร์ส โดยทุกตัวอย่างจะแสดงโค้ดพร้อมผลลัพธ์การรันใน Terminal เพื่อให้เห็นชัดเจนว่าแต่ละคำสั่งส่งผลอย่างไรต่อตัวแปรและระบบ",
         },
+        {
+          t: "callout",
+          title: "💻 วิธีการทดลองรันโค้ดในบทนี้ (Standalone Single Files)",
+          c: "ตัวอย่างทั้ง 5 ข้อในบทนี้ถูกออกแบบให้เป็น **'ไฟล์เดี่ยวรันได้ทันที (Single Runnable File)'** คุณสามารถสร้างไฟล์ชั่วคราว (เช่น `struct_pointer.go`) คัดลอกโค้ดไปวาง แล้วสั่งรันด้วยคำสั่ง `go run <ชื่อไฟล์>.go` ใน Terminal ได้ด้วยตัวเองโดยไม่ต้องเซ็ตอัปโปรเจกต์ใดๆ!",
+        },
 
         { t: "h2", c: "1. Struct, Pointer และ Value vs Pointer Receiver" },
         {
@@ -232,8 +237,9 @@ export const introPages: Record<string, Page> = {
         {
           t: "codeout",
           lang: "go",
-          label: "struct_pointer_example.go",
-          code: `package main
+          label: "struct_pointer.go (รันเดี่ยวด้วย: go run struct_pointer.go)",
+          code: `// บันทึกเป็นไฟล์ struct_pointer.go แล้วรันด้วย: go run struct_pointer.go
+package main
 
 import "fmt"
 
@@ -294,8 +300,9 @@ func main() {
         {
           t: "codeout",
           lang: "go",
-          label: "error_handling.go",
-          code: `package main
+          label: "error_handling.go (รันเดี่ยวด้วย: go run error_handling.go)",
+          code: `// บันทึกเป็นไฟล์ error_handling.go แล้วรันด้วย: go run error_handling.go
+package main
 
 import (
 	"errors"
@@ -357,8 +364,9 @@ func main() {
         {
           t: "codeout",
           lang: "go",
-          label: "defer_example.go",
-          code: `package main
+          label: "defer_demo.go (รันเดี่ยวด้วย: go run defer_demo.go)",
+          code: `// บันทึกเป็นไฟล์ defer_demo.go แล้วรันด้วย: go run defer_demo.go
+package main
 
 import "fmt"
 
@@ -396,8 +404,9 @@ func main() {
         {
           t: "codeout",
           lang: "go",
-          label: "context_example.go",
-          code: `package main
+          label: "context_demo.go (รันเดี่ยวด้วย: go run context_demo.go)",
+          code: `// บันทึกเป็นไฟล์ context_demo.go แล้วรันด้วย: go run context_demo.go
+package main
 
 import (
 	"context"
@@ -440,8 +449,9 @@ func main() {
         {
           t: "codeout",
           lang: "go",
-          label: "concurrency_example.go",
-          code: `package main
+          label: "concurrency_demo.go (รันเดี่ยวด้วย: go run concurrency_demo.go)",
+          code: `// บันทึกเป็นไฟล์ concurrency_demo.go แล้วรันด้วย: go run concurrency_demo.go
+package main
 
 import (
 	"fmt"
@@ -489,8 +499,8 @@ func main() {
         },
         {
           t: "callout",
-          title: "🎯 สรุปก่อนไปต่อ",
-          c: "ตอนนี้เราเห็นการทำงานจริงของอาวุธพื้นฐาน Go ครบมือแล้ว! ในบทถัดไป เราจะนำทักษะเหล่านี้ไปใช้ออกแบบฐานข้อมูล และสร้างตาราง Ledger เพื่อป้องกันข้อมูลเงินพังในระบบธนาคารจริง",
+          title: "🧭 การเปลี่ยนผ่านสู่การสร้างโปรเจกต์จริง",
+          c: "ตอนนี้เราเห็นการทำงานจริงของอาวุธพื้นฐาน Go ครบทั้ง 5 อย่างผ่านตัวอย่างที่รันแยกเป็นไฟล์เดี่ยวๆ ได้แล้ว! ในบทถัดไป เราจะเริ่มเข้าสู่โปรเจกต์ **Simple Bank** จริง โค้ดจะถูกแบ่งออกเป็นโมดูลและแพ็กเกจ (`db/`, `api/`, `util/`) ตามมาตรฐานสากล ซึ่งจะถูกรันผ่าน Database Migration, Automated Tests (`go test ./...`), และรันทั้งระบบผ่านเซิร์ฟเวอร์ Gin และ Docker!",
         },
       ],
       en: [],
