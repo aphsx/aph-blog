@@ -72,9 +72,8 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
         {
           t: "codeout",
           lang: "go",
-          label: "float_vs_bigint.go (รันเดี่ยวด้วย: go run float_vs_bigint.go)",
-          code: `// บันทึกเป็นไฟล์ float_vs_bigint.go แล้วรันด้วย: go run float_vs_bigint.go
-package main
+          label: "float_vs_bigint.go",
+          code: `package main
 
 import "fmt"
 

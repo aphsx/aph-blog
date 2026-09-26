@@ -55,18 +55,16 @@ ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "cur
           c: "Bcrypt เป็นอัลกอริทึมประเภท **Slow Hashing** ที่ถูกออกแบบมาให้กินเวลาประมวลผลของ CPU (มี Cost Factor หรือ Work Factor) และมีการสุ่มค่า **Salt** (ตัวแปรสุ่มพิเศษ) เติมเข้าไปในทุกรหัสผ่านโดยอัตโนมัติ ทำให้แม้ผู้ใช้สองคนจะตั้งรหัสผ่าน `123456` เหมือนกัน ค่าแฮชที่ได้ก็จะแตกต่างกันอย่างสิ้นเชิง ป้องกัน Rainbow Table ได้ 100%!",
         },
 
-        { t: "h2", c: "3. ตัวอย่างรันเดี่ยวทดสอบกลไก Bcrypt (Salt & Work Factor)" },
+        { t: "h2", c: "3. ตัวอย่างการทำงานของ Bcrypt (Salt & Work Factor)" },
         {
           t: "p",
-          c: "เพื่อทำความเข้าใจว่าทำไมรหัสผ่านเดียวกันถึงได้ Hash ต่างกัน และ Bcrypt ตรวจสอบรหัสผ่านอย่างไร คุณสามารถบันทึกโค้ดด้านล่างเป็นไฟล์เดี่ยวแล้วทดลองรันดูผลลัพธ์ได้ทันที:",
+          c: "เพื่อทำความเข้าใจว่าทำไมรหัสผ่านเดียวกันถึงได้ Hash ต่างกัน และ Bcrypt ตรวจสอบรหัสผ่านอย่างไร ดูตัวอย่างการทำงานด้านล่างนี้:",
         },
         {
           t: "codeout",
           lang: "go",
-          label: "bcrypt_demo.go (รันเดี่ยวด้วย: go run bcrypt_demo.go)",
-          code: `// บันทึกเป็นไฟล์ bcrypt_demo.go แล้วรันด้วย: go run bcrypt_demo.go
-// หมายเหตุ: ต้องติดตั้งไลบรารีก่อน: go get golang.org/x/crypto/bcrypt
-package main
+          label: "bcrypt_demo.go",
+          code: `package main
 
 import (
 	"fmt"
