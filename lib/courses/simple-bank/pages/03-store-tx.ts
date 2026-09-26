@@ -615,6 +615,45 @@ type TransferTxResult struct {
 }`,
         },
 
+        { t: "h2", c: "ทบทวน Structs ของ Queries ที่เรียกใช้ใน TransferTx (ระวัง Data Type: int64)" },
+        {
+          t: "p",
+          c: "ภายในฟังก์ชัน `TransferTx` เราจะเรียกใช้งานคำสั่ง Queries ที่เตรียมไว้จากบทก่อนหน้า ได้แก่ `CreateTransfer`, `CreateEntry` และ `AddAccountBalance` ซึ่งรับ Struct Parameters ดังนี้:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "db/account.go & db/entry.go & db/transfer.go (ทบทวน Params)",
+          c: `// ตรวจสอบ Data Type ของพารามิเตอร์ทั้งหมดใน Data Access Layer
+// จุดสำคัญมาก: ทุกฟิลด์ที่เกี่ยวกับยอดเงิน (Amount) และรหัส (ID) ต้องเป็น int64 ให้ตรงกับคอลัมน์ BIGINT ในฐานข้อมูล
+// ห้ามประกาศ Amount เป็น int ธรรมดาเด็ดขาด เพราะ arg.Amount เป็น int64
+
+// 1. จาก db/transfer.go
+type CreateTransferParams struct {
+	FromAccountID int64 \`json:"from_account_id"\`
+	ToAccountID   int64 \`json:"to_account_id"\`
+	Amount        int64 \`json:"amount"\` // int64: ยอดเงินโอน (ค่าบวกเสมอ)
+}
+
+// 2. จาก db/entry.go
+type CreateEntryParams struct {
+	AccountID int64 \`json:"account_id"\`
+	Amount    int64 \`json:"amount"\` // int64: บวก = เงินเข้า, ลบ = เงินออก (-arg.Amount)
+}
+
+// 3. จาก db/account.go
+type AddAccountBalanceParams struct {
+	ID     int64 \`json:"id"\`
+	Amount int64 \`json:"amount"\` // int64: บวก = ฝากเงิน, ลบ = ตัดเงิน (-arg.Amount)
+}`,
+        },
+        {
+          t: "callout",
+          title: "⚠️ จุดผิดพลาดยอดฮิต: Type Mismatch (int vs int64)",
+          c: "ในภาษา Go ชนิดข้อมูล `int` กับ `int64` เป็นคนละ Type กันอย่างสิ้นเชิง (แม้จะรันบน OS 64-bit ก็ตาม) เนื่องจาก `TransferTxParams.Amount` ถูกกำหนดเป็น `int64` เพื่อรองรับ `BIGINT` ใน PostgreSQL\n\nหากใน `AddAccountBalanceParams` หรือ `CreateEntryParams` คุณเผลอประกาศ `Amount int` ตอนส่ง `-arg.Amount` หรือ `arg.Amount` เข้าไป Go จะแจ้งเตือน Type Mismatch ทันที:\n\`cannot use -arg.Amount (variable of type int64) as int value in struct literal\`\nดังนั้นจงตรวจสอบให้มั่นใจว่าฟิลด์ Amount ทุกตัวในโปรเจกต์ของคุณเป็น **`int64`** เสมอ!",
+          warn: true,
+        },
+
         { t: "h2", c: "โค้ดเต็มของฟังก์ชัน `TransferTx`" },
         {
           t: "p",

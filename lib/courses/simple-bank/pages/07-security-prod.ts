@@ -192,23 +192,113 @@ ok      simplebank/util 0.231s`,
           ],
         },
 
-        { t: "h2", c: "5. การซ่อน Hashed Password ตอนส่ง JSON กลับไป" },
+        { t: "h2", c: "5. Model ตาราง Users และการซ่อน Hashed Password ตอนส่ง JSON" },
         {
           t: "p",
-          c: "ใน API สมัครสมาชิก `POST /users` เมื่อสร้างผู้ใช้สำเร็จ เรา **ห้ามส่ง `hashed_password` กลับไปใน JSON Response เด็ดขาด** เพื่อสุขอนามัยที่ดีของระบบความปลอดภัย:",
+          c: "สร้าง Go Struct และฟังก์ชัน CRUD สำหรับจัดการตาราง `users` ใน `db/user.go`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "db/user.go",
+          c: `// ฟังก์ชัน CRUD สำหรับจัดการข้อมูลผู้ใช้งานในตาราง users
+// ทำเพื่อแก้ปัญหา: บันทึกข้อมูลและดึงข้อมูลผู้ใช้เพื่อตรวจสอบสิทธิ์ในการเข้าสู่ระบบ
+package db
+
+import (
+	"context"
+	"time"
+)
+
+type User struct {
+	Username          string    \`json:"username"\`
+	HashedPassword    string    \`json:"hashed_password"\`
+	FullName          string    \`json:"full_name"\`
+	Email             string    \`json:"email"\`
+	PasswordChangedAt time.Time \`json:"password_changed_at"\`
+	CreatedAt         time.Time \`json:"created_at"\`
+}
+
+type CreateUserParams struct {
+	Username       string \`json:"username"\`
+	HashedPassword string \`json:"hashed_password"\`
+	FullName       string \`json:"full_name"\`
+	Email          string \`json:"email"\`
+}
+
+const createUser = \`-- name: CreateUser :one
+INSERT INTO users (
+  username,
+  hashed_password,
+  full_name,
+  email
+) VALUES (
+  $1, $2, $3, $4
+)
+RETURNING username, hashed_password, full_name, email, password_changed_at, created_at;
+\`
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.HashedPassword, arg.FullName, arg.Email)
+	var i User
+	err := row.Scan(
+		&i.Username,
+		&i.HashedPassword,
+		&i.FullName,
+		&i.Email,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUser = \`-- name: GetUser :one
+SELECT username, hashed_password, full_name, email, password_changed_at, created_at FROM users
+WHERE username = $1 LIMIT 1;
+\`
+
+func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, username)
+	var i User
+	err := row.Scan(
+		&i.Username,
+		&i.HashedPassword,
+		&i.FullName,
+		&i.Email,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}`,
+        },
+        {
+          t: "p",
+          c: "ใน API สมัครสมาชิก `POST /users` เมื่อสร้างผู้ใช้สำเร็จ เรา **ห้ามส่ง `hashed_password` กลับไปใน JSON Response เด็ดขาด** จึงต้องสร้าง `userResponse` เพื่อคัดกรองข้อมูล:",
         },
         {
           t: "code",
           lang: "go",
           label: "api/user.go",
-          c: `type createUserRequest struct {
+          c: `// API Handler สำหรับสมัครสมาชิกใหม่ (POST /users)
+package api
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	db "simplebank/db"
+	"simplebank/util"
+)
+
+type createUserRequest struct {
 	Username string \`json:"username" binding:"required,alphanum"\`
 	Password string \`json:"password" binding:"required,min=6"\`
 	FullName string \`json:"full_name" binding:"required"\`
 	Email    string \`json:"email" binding:"required,email"\`
 }
 
-// userResponse คือ struct ที่ตัดฟิลด์ hashedPassword ทิ้งไป
+// userResponse คือ struct ที่ตัดฟิลด์ hashedPassword ทิ้งไปเพื่อความปลอดภัย
 type userResponse struct {
 	Username          string    \`json:"username"\`
 	FullName          string    \`json:"full_name"\`
@@ -225,6 +315,40 @@ func newUserResponse(user db.User) userResponse {
 		PasswordChangedAt: user.PasswordChangedAt,
 		CreatedAt:         user.CreatedAt,
 	}
+}
+
+func (server *Server) createUser(ctx *gin.Context) {
+	// 1. ตรวจสอบเงื่อนไขข้อมูลที่ส่งมาทาง JSON
+	var req createUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// 2. แฮชรหัสผ่านด้วย Bcrypt ก่อนบันทึก
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// 3. บันทึกผู้ใช้ลงฐานข้อมูลผ่าน store
+	arg := db.CreateUserParams{
+		Username:       req.Username,
+		HashedPassword: hashedPassword,
+		FullName:       req.FullName,
+		Email:          req.Email,
+	}
+
+	user, err := server.store.CreateUser(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// 4. ส่งกลับเฉพาะข้อมูลที่ปลอดภัย ปราศจาก hashedPassword
+	rsp := newUserResponse(user)
+	ctx.JSON(http.StatusCreated, rsp)
 }`,
         },
         {
@@ -351,6 +475,140 @@ func (payload *Payload) Valid() error {
 		return ErrExpiredToken
 	}
 	return nil
+}`,
+        },
+        {
+          t: "p",
+          c: "สร้างอินเทอร์เฟซ `Maker` ใน `token/maker.go` เพื่อเปิดทางให้ระบบสามารถสลับระหว่าง PASETO และ JWT ได้อย่างยืดหยุ่นในอนาคต:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "token/maker.go",
+          c: `// Maker เป็น Interface สำหรับจัดการสร้างและตรวจสอบความถูกต้องของ Token
+package token
+
+import "time"
+
+type Maker interface {
+	CreateToken(username string, duration time.Duration) (string, error)
+	VerifyToken(token string) (*Payload, error)
+}`,
+        },
+        {
+          t: "p",
+          c: "จากนั้นสร้าง `PasetoMaker` ใน `token/paseto_maker.go` โดยใช้ Symmetric Encryption แบบ ChaCha20-Poly1305:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "token/paseto_maker.go",
+          c: `package token
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/aead/chacha20poly1305"
+	"github.com/o1egl/paseto"
+)
+
+// PasetoMaker จัดการ PASETO Token ด้วยการเข้ารหัสแบบ Symmetric
+type PasetoMaker struct {
+	paseto       *paseto.V2
+	symmetricKey []byte
+}
+
+func NewPasetoMaker(symmetricKey string) (Maker, error) {
+	if len(symmetricKey) != chacha20poly1305.KeySize {
+		return nil, fmt.Errorf("ขนาด key ไม่ถูกต้อง: ต้องมีขนาด %d ไบต์พอดี", chacha20poly1305.KeySize)
+	}
+
+	maker := &PasetoMaker{
+		paseto:       paseto.NewV2(),
+		symmetricKey: []byte(symmetricKey),
+	}
+	return maker, nil
+}
+
+func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+	payload, err := NewPayload(username, duration)
+	if err != nil {
+		return "", err
+	}
+	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+}
+
+func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
+	payload := &Payload{}
+	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	err = payload.Valid()
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}`,
+        },
+        {
+          t: "p",
+          c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `api/user.go` เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไป:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "api/user.go (LoginUser)",
+          c: `type loginUserRequest struct {
+	Username string \`json:"username" binding:"required,alphanum"\`
+	Password string \`json:"password" binding:"required,min=6"\`
+}
+
+type loginUserResponse struct {
+	AccessToken string       \`json:"access_token"\`
+	User        userResponse \`json:"user"\`
+}
+
+func (server *Server) loginUser(ctx *gin.Context) {
+	// 1. ตรวจสอบเงื่อนไขข้อมูลที่ส่งมาทาง JSON
+	var req loginUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// 2. ดึงข้อมูลผู้ใช้จากฐานข้อมูลเพื่อหารหัสผ่านที่แฮชไว้
+	user, err := server.store.GetUser(ctx, req.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// 3. ตรวจสอบความถูกต้องของรหัสผ่านผ่าน Bcrypt
+	err = util.CheckPassword(req.Password, user.HashedPassword)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	// 4. ออก PASETO Token รับรองตัวตน
+	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	rsp := loginUserResponse{
+		AccessToken: accessToken,
+		User:        newUserResponse(user),
+	}
+	ctx.JSON(http.StatusOK, rsp)
 }`,
         },
 
