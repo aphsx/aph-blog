@@ -212,6 +212,20 @@ func TestDeleteAccount(t *testing.T) {
             "**`require.EqualError(t, err, sql.ErrNoRows.Error())`**: พิสูจน์ว่าเมื่อลบบัญชีไปแล้ว ฐานข้อมูลต้องคืนข้อผิดพลาด 'ไม่พบแถวข้อมูล' ออกมาจริงๆ ตามที่ควรจะเป็น",
           ],
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "คำสั่งรัน Unit Test ใน Terminal และผลลัพธ์ที่ได้",
+          code: `go test -v -run TestAccount ./db`,
+          out: `=== RUN   TestCreateAccount
+--- PASS: TestCreateAccount (0.01s)
+=== RUN   TestGetAccount
+--- PASS: TestGetAccount (0.01s)
+=== RUN   TestDeleteAccount
+--- PASS: TestDeleteAccount (0.01s)
+PASS
+ok      simplebank/db   0.142s`,
+        },
       ],
       en: [],
     },
@@ -340,6 +354,18 @@ func TestTransferTx(t *testing.T) {
           t: "p",
           c: "ในการโอนเงิน 5 ครั้ง ครั้งละ 10 บาท เงินที่ลดลงในแต่ละรอบต้องเป็น 10, 20, 30, 40, 50 บาทตามลำดับ ดังนั้นตัวแปร `k` (จำนวนรอบที่สะสม) จะต้องครอบคลุมเลข 1 ถึง 5 พอดี หากมีบั๊กเรื่อง Race Condition จะเกิดกรณีที่เงินลดซ้ำยอดเดิม (เช่น มี 2 รอบที่เงินลดลง 20 บาทเท่ากัน) ซึ่งคำสั่ง `require.NotContains(t, existed, k)` จะดักจับได้ทันที!",
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "คำสั่งรัน Concurrency Test และ Terminal Output ยอดเงินก่อน/หลังโอน",
+          code: `go test -v -run TestTransferTx ./db`,
+          out: `=== RUN   TestTransferTx
+>> ยอดเงินก่อนโอน: 100 100
+>> ยอดเงินหลังโอน: 50 150
+--- PASS: TestTransferTx (0.07s)
+PASS
+ok      simplebank/db   0.198s`,
+        },
 
         { t: "h2", c: "2. การทดสอบปราบ Deadlock ด้วยการโอนสวนทาง (TestTransferTxDeadlock)" },
         {
@@ -406,14 +432,39 @@ func TestTransferTx(t *testing.T) {
           c: "Go มีเครื่องมือในตัวที่ทรงพลังมากชื่อว่า Race Detector ซึ่งสามารถเปิดใช้งานได้ผ่านแฟล็ก `-race`:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "bash",
-          label: "คำสั่งรัน Concurrency Test",
-          c: `go test -v -race ./db`,
+          label: "คำสั่งรัน Concurrency & Deadlock Test พร้อมเปิด Race Detector",
+          code: `go test -v -race -run 'TestTransferTx|TestTransferTxDeadlock' ./db`,
+          out: `=== RUN   TestTransferTx
+>> ยอดเงินก่อนโอน: 100 100
+>> ยอดเงินหลังโอน: 50 150
+--- PASS: TestTransferTx (0.08s)
+=== RUN   TestTransferTxDeadlock
+--- PASS: TestTransferTxDeadlock (0.13s)
+PASS
+ok      simplebank/db   0.452s
+(ตรวจไม่พบ Data Race และไม่มีคำสั่งใดติด Deadlock แม้แต่ตัวเดียว)`,
         },
         {
           t: "p",
-          c: "เมื่อรันคำสั่งนี้ คุณจะเห็นผลการทดสอบ `PASS` สีเขียวสวยงาม ยืนยันว่าระบบ Backend ของคุณสามารถรองรับคำสั่งโอนเงินคู่ขนานได้จริงโดยที่ข้อมูลเงินไม่พังและไม่มีอาการค้างแม้แต่เสี้ยววินาที!",
+          c: "ลองเปรียบเทียบกับภาพด้านล่าง หากเราไม่ได้ใช้ Resource Ordering ในการป้องกัน Deadlock เทสต์จะพังลงในทันทีด้วยข้อผิดพลาด SQLSTATE 40P01:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "เปรียบเทียบผลลัพธ์ใน Terminal กรณีไม่ได้ป้องกัน Deadlock (FAIL)",
+          code: `# เมื่อยังไม่ได้ใส่ Resource Ordering (รันโอนเงินสวนทางชนกัน)
+go test -v -run TestTransferTxDeadlock ./db`,
+          out: `=== RUN   TestTransferTxDeadlock
+    store_deadlock_test.go:400: 
+        	Error Trace:	store_deadlock_test.go:400
+        	Error:      	Received unexpected error:
+        	            	pq: deadlock detected (SQLSTATE 40P01)
+        	Test:       	TestTransferTxDeadlock
+--- FAIL: TestTransferTxDeadlock (0.05s)
+FAIL
+FAIL	simplebank/db	0.185s`,
         },
       ],
       en: [],

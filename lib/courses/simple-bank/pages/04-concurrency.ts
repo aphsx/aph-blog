@@ -41,6 +41,19 @@ export const concurrencyPages: Record<string, Page> = {
           c: "Transaction 2 ทำการอ่านค่ายอดเงิน (Read) ก่อนที่ Transaction 1 จะทันได้บันทึกการหักเงิน (Commit) ทำให้ Transaction 2 มองเห็นข้อมูลเก่า (Stale Read) และยอมให้เงินไหลออกจากระบบซ้ำสอง! ในโลกการเงิน ปัญหานี้เรียกว่า 'Double Spending' ซึ่งธนาคารต้องเป็นผู้รับผิดชอบความเสียหายทั้งหมด",
           warn: true,
         },
+        {
+          t: "codeout",
+          lang: "text",
+          label: "จำลองภาพสิ่งที่เกิดขึ้นจริงใน Terminal เมื่อเกิด Stale Read (ไม่มี Lock)",
+          code: `// Goroutine 1 & 2 ยิงคำขอถอนเงิน 100 บาทพร้อมกันในเสี้ยววินาทีเดียว
+go withdrawWithoutLock(accID, 100)
+go withdrawWithoutLock(accID, 100)`,
+          out: `[Goroutine 1] SELECT balance FROM accounts WHERE id = 1 -> ได้ 100 บาท (อนุมัติถอน)
+[Goroutine 2] SELECT balance FROM accounts WHERE id = 1 -> ได้ 100 บาท (Stale Read! อนุมัติถอน)
+[Goroutine 1] UPDATE accounts SET balance = 0 WHERE id = 1 -> ส่งมอบเงินสด 100 บาท
+[Goroutine 2] UPDATE accounts SET balance = 0 WHERE id = 1 -> ส่งมอบเงินสด 100 บาท
+[สรุปหายนะ] บัญชีมีเงิน 100 บาท แต่ถูกถอนออกไปได้ 200 บาท! (Double Spending ขาดทุน 100 บาท)`,
+        },
 
         { t: "h2", c: "ทางออก: Pessimistic Row Locking (การล็อกแถวข้อมูล)" },
         {
@@ -92,6 +105,19 @@ RETURNING id, owner, balance, currency, created_at;`,
         {
           t: "p",
           c: "หากเราส่ง `$1` เป็น `-100` เงินจะลดลง 100 บาท หากส่ง `+100` เงินจะเพิ่มขึ้น 100 บาท การสั่ง `balance = balance + $1` ในระดับ SQL จะการันตีความถูกต้องในระดับหน่วยย่อยที่สุดของ Database และประหยัด Network Round-trip ไปได้ถึงครึ่งหนึ่ง!",
+        },
+        {
+          t: "codeout",
+          lang: "text",
+          label: "เปรียบเทียบพฤติกรรมในระดับ Database เมื่อใช้ Atomic Update",
+          code: `-- คำสั่ง 2 ตัวยิงเข้าฐานข้อมูลพร้อมกัน
+Tx 1: UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+Tx 2: UPDATE accounts SET balance = balance - 100 WHERE id = 1;`,
+          out: `[Tx 1] ได้รับ Exclusive Row Lock บนแถว id = 1 ทันที -> balance 100 - 100 = 0
+[Tx 2] พยายามแก้ไขแถว id = 1 -> ถูก PostgreSQL สั่งให้ "หยุดรอ (Block)"
+[Tx 1] COMMIT ธุรกรรมสำเร็จ -> ปลด Row Lock
+[Tx 2] ได้รับ Row Lock ต่อมา -> อ่านค่ายอดเงินล่าสุดพบว่าเป็น 0 บาท -> ตรวจสอบว่าไม่พอถอน ปฏิเสธคำสั่ง!
+[สรุปความปลอดภัย] ข้อมูลเงินคงเส้นคงวา (Consistent) ปราศจาก Double Spending 100%`,
         },
       ],
       en: [],
@@ -147,12 +173,17 @@ RETURNING id, owner, balance, currency, created_at;`,
           c: "ต่างคนต่างไม่ยอมปล่อย และต่างคนต่างรออีกฝั่ง เกิดเป็นวงรอบแบบงูกินหาง (Circular Dependency) หลังจากรอไปครู่หนึ่ง PostgreSQL จะตรวจพบวงจรนี้และสั่งฆ่าคำสั่งใดคำสั่งหนึ่งทิ้ง พร้อมพ่น Error สีแดงแจ๋ออกมา:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "text",
-          label: "Error จาก PostgreSQL",
-          c: `pq: deadlock detected (SQLSTATE 40P01)
+          label: "PostgreSQL Deadlock Log ใน Terminal Server",
+          code: `-- Tx 1 (โอน 1 -> 2) และ Tx 2 (โอน 2 -> 1) ยิงชนกัน
+UPDATE accounts SET balance = balance - 10 WHERE id = 2; -- (Tx 1 รอล็อก 2)
+UPDATE accounts SET balance = balance - 10 WHERE id = 1; -- (Tx 2 รอล็อก 1)`,
+          out: `ERROR: deadlock detected (SQLSTATE 40P01)
 DETAIL: Process 1421 waits for ExclusiveLock on tuple (0,2) of relation "accounts"; blocked by process 1422.
-Process 1422 waits for ExclusiveLock on tuple (0,1) of relation "accounts"; blocked by process 1421.`,
+Process 1422 waits for ExclusiveLock on tuple (0,1) of relation "accounts"; blocked by process 1421.
+HINT: See server log for query details.
+STATEMENT: UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING id, owner, balance, currency, created_at;`,
         },
 
         { t: "h2", c: "วิธีแก้ปัญหาที่ถูกต้อง: Strict Resource Ordering (การบังคับลำดับทรัพยากร)" },
@@ -189,7 +220,7 @@ Process 1422 waits for ExclusiveLock on tuple (0,1) of relation "accounts"; bloc
         {
           t: "code",
           lang: "go",
-          label: "db/store_deadlock_free.go",
+          label: "db/store.go (อัปเดตฟังก์ชัน TransferTx ให้ปลอด Deadlock)",
           c: `package db
 
 import "context"
@@ -274,6 +305,19 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
             "**กรณี ID ผู้รับน้อยกว่า (2 < 1)**: เรียก `addMoney` โดยส่ง `ToAccountID` (+amount) ก่อน แล้วตามด้วย `FromAccountID` (-amount)",
             "**ผลลัพธ์ในหน่วยความจำ**: ตัวแปร `result.FromAccount` และ `result.ToAccount` ยังคงเก็บค่าบัญชีผู้โอนและผู้รับอย่างถูกต้องตามเดิม แต่ในแง่ของฐานข้อมูล ลำดับการยิงคำสั่ง `UPDATE` ถูกการันตีว่าจะวิ่งจาก ID น้อยไปมากเสมอ ปราศจากโอกาสเกิด Deadlock ตลอดกาล!",
           ],
+        },
+        {
+          t: "codeout",
+          lang: "text",
+          label: "จำลองการทำงานจริงใน Terminal หลังใช้ Resource Ordering (ไม่มี Deadlock อีกต่อไป)",
+          code: `// ปล่อยคำสั่งโอนเงินสวนทางกันพร้อมกัน
+go TransferTx(1 -> 2, 10 USD) // Tx 1
+go TransferTx(2 -> 1, 10 USD) // Tx 2`,
+          out: `[Tx 1] เปรียบเทียบ ID: 1 < 2 -> ขอล็อกแถว 1 ก่อน (สำเร็จ) -> กำลังขอล็อกแถว 2...
+[Tx 2] เปรียบเทียบ ID: 1 < 2 -> ขอล็อกแถว 1 ก่อนเช่นกัน! -> พบ Tx 1 ถือครองอยู่ -> "หยุดรอตามคิว"
+[Tx 1] ได้รับ Lock แถว 2 -> โอนเงินสำเร็จ -> Commit ธุรกรรม -> ปลด Lock ทั้งหมด
+[Tx 2] หลุดจากการหยุดรอ -> เข้าครอบครอง Lock แถว 1 -> ได้รับ Lock แถว 2 -> Commit สำเร็จ!
+ผลลัพธ์: การโอนเงินสวนทางกัน 10 รายการสำเร็จครบถ้วน ไร้ข้อผิดพลาด Deadlock (0 Deadlocks Detected)`,
         },
       ],
       en: [],

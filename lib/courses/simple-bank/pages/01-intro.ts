@@ -69,6 +69,21 @@ export const introPages: Record<string, Page> = {
             "**Deadlock Freeze (ระบบล็อกค้าง):** เมื่อนาย A พยายามโอนเงินให้นาย B ในจังหวะเดียวกับที่นาย B พยายามโอนเงินให้นาย A หากคำสั่งแรกทำการล็อกบัญชี A แล้วรอจะล็อกบัญชี B ส่วนคำสั่งที่สองทำการล็อกบัญชี B แล้วรอจะล็อกบัญชี A ทั้งสองคำสั่งจะติดกับดักรอซึ่งกันและกันชั่วกาลนาน เซิร์ฟเวอร์จะค้างและระบบฐานข้อมูลจะแครช!",
           ],
         },
+        {
+          t: "codeout",
+          lang: "text",
+          label: "ตัวอย่าง Terminal Log จำลองหายนะ Double Spending บนเซิร์ฟเวอร์จริง",
+          code: `[API Gateway] 10:00:00.100 POST /transfers - From: Acc 1 (Bob), Amount: 1,000 THB -> Worker #1
+[API Gateway] 10:00:00.101 POST /transfers - From: Acc 1 (Bob), Amount: 1,000 THB -> Worker #2
+[Worker #1] SELECT balance FROM accounts WHERE id = 1 -> ได้ 1,000 THB (อนุมัติโอน)
+[Worker #2] SELECT balance FROM accounts WHERE id = 1 -> ได้ 1,000 THB (Stale Read! ยังไม่อัปเดต)
+[Worker #1] UPDATE accounts SET balance = 0 WHERE id = 1 -> โอนออกสำเร็จ 1,000 THB
+[Worker #2] UPDATE accounts SET balance = 0 WHERE id = 1 -> โอนออกสำเร็จ 1,000 THB`,
+          out: `[FATAL ALERT] ตรวจพบ Double Spending ในระบบ!
+ยอดเงินตั้งต้น: 1,000 THB
+ยอดเงินที่ถูกตัดออกจริง: 2,000 THB (เงินงอกเกินจริงไป 1,000 THB!)
+สถานะเงินในระบบ: ยอดเงินรวมของธนาคารติดลบ ขาดทุนทันที`,
+        },
 
         { t: "h2", c: "เส้นทางและสิ่งที่คุณจะได้ลงมือสร้างจริง" },
         {
@@ -194,8 +209,8 @@ export const introPages: Record<string, Page> = {
       en: "Go Backend Primer — Core Concepts for Production Systems",
     },
     lead: {
-      th: "ปูพื้นฐานกลไกสำคัญของ Go ที่ใช้ในงาน Backend: Pointers, Structs, Error Handling สไตล์ Go, defer, Context, Goroutines, Channels, และ WaitGroup",
-      en: "Essential Go mechanics for backend systems: pointers, structs, explicit error handling, defer, context, goroutines, and channels.",
+      th: "ปูพื้นฐานกลไกสำคัญของ Go ที่ใช้ในงาน Backend: Pointers, Structs, Error Handling สไตล์ Go, defer, Context, Goroutines, Channels, และ WaitGroup พร้อมผลลัพธ์ Terminal Output ให้เห็นการทำงานจริง",
+      en: "Essential Go mechanics for backend systems: pointers, structs, explicit error handling, defer, context, goroutines, and channels with executable terminal outputs.",
     },
     group: "1. บทนำ & รากฐาน",
     blocks: {
@@ -206,19 +221,19 @@ export const introPages: Record<string, Page> = {
         },
         {
           t: "p",
-          c: "ในบทนี้ เราจะมาทบทวน 6 คอนเซปต์สำคัญของ Go ที่เราจำเป็นต้องใช้ในการสร้างระบบ Simple Bank ตลอดทั้งคอร์ส เพื่อให้ทุกคนเข้าใจตรงกันตั้งแต่บรรทัดแรก",
+          c: "ในบทนี้ เราจะมาทบทวน 5 คอนเซปต์สำคัญของ Go ที่เราจำเป็นต้องใช้ในการสร้างระบบ Simple Bank ตลอดทั้งคอร์ส โดยทุกตัวอย่างจะแสดงโค้ดพร้อมผลลัพธ์การรันใน Terminal เพื่อให้เห็นชัดเจนว่าแต่ละคำสั่งส่งผลอย่างไรต่อตัวแปรและระบบ",
         },
 
         { t: "h2", c: "1. Struct, Pointer และ Value vs Pointer Receiver" },
         {
           t: "p",
-          c: "ใน Go ไม่มีคลาส (Class) แต่เราใช้ `struct` ในการจัดกลุ่มข้อมูล และใช้ Pointer (`*`) เมื่อเราต้องการส่งผ่านการอ้างอิงตำแหน่งในหน่วยความจำโดยไม่ต้องคัดลอกข้อมูลทั้งก้อน",
+          c: "ใน Go ไม่มีคลาส (Class) แต่เราใช้ `struct` ในการจัดกลุ่มข้อมูล และใช้ Pointer (`*`) เมื่อเราต้องการส่งผ่านการอ้างอิงตำแหน่งในหน่วยความจำโดยไม่ต้องคัดลอกข้อมูลทั้งก้อน ลองสังเกตความแตกต่างเมื่อใช้ Value Receiver (สำเนา) เทียบกับ Pointer Receiver (ชี้ไปยังก้อนจริง):",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "go",
           label: "struct_pointer_example.go",
-          c: `package main
+          code: `package main
 
 import "fmt"
 
@@ -229,7 +244,12 @@ type Account struct {
 	Balance int64  \`json:"balance"\`
 }
 
-// Deposit รับ pointer (*Account) เพื่อแก้ไขข้อมูลของก้อนเดิมในหน่วยความจำ
+// DepositCopy รับค่าสำเนา (Value Receiver) แก้ไขแล้วก้อนเดิมในหน่วยความจำไม่เปลี่ยน
+func (a Account) DepositCopy(amount int64) {
+	a.Balance += amount
+}
+
+// Deposit รับ pointer (*Account) เพื่อแก้ไขข้อมูลของก้อนเดิมในหน่วยความจำโดยตรง
 func (a *Account) Deposit(amount int64) {
 	a.Balance += amount
 }
@@ -241,9 +261,20 @@ func (a Account) GetBalance() int64 {
 
 func main() {
 	acc := &Account{ID: 1, Owner: "Alice", Balance: 1000}
+
+	fmt.Println(">> 1. ทดสอบ Value Receiver (ส่งสำเนา):")
+	acc.DepositCopy(500)
+	fmt.Printf("   ยอดเงินหลัง DepositCopy: %d บาท (ก้อนเดิมไม่เปลี่ยน!)\\n\\n", acc.GetBalance())
+
+	fmt.Println(">> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):")
 	acc.Deposit(500)
-	fmt.Printf("บัญชีของคุณ %s มียอดเงิน: %d บาท\\n", acc.Owner, acc.GetBalance())
+	fmt.Printf("   ยอดเงินหลัง Deposit: %d บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)\\n", acc.GetBalance())
 }`,
+          out: `>> 1. ทดสอบ Value Receiver (ส่งสำเนา):
+   ยอดเงินหลัง DepositCopy: 1000 บาท (ก้อนเดิมไม่เปลี่ยน!)
+
+>> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):
+   ยอดเงินหลัง Deposit: 1500 บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)`,
         },
         {
           t: "ul",
@@ -258,13 +289,13 @@ func main() {
         { t: "h2", c: "2. การจัดการ Error แบบ Go (Explicit Error Handling)" },
         {
           t: "p",
-          c: "ในภาษาอื่นๆ เราอาจจะคุ้นชินกับการใช้ `try...catch` แต่ในภาษา Go **ไม่มี try-catch** ปรัชญาของ Go คือ Error ถือเป็น 'ค่าข้อมูลธรรมดาตัวหนึ่ง (Normal Value)' ที่ฟังก์ชันสามารถ return ออกมาได้คู่กับผลลัพธ์",
+          c: "ในภาษาอื่นๆ เราอาจจะคุ้นชินกับการใช้ `try...catch` แต่ในภาษา Go **ไม่มี try-catch** ปรัชญาของ Go คือ Error ถือเป็น 'ค่าข้อมูลธรรมดาตัวหนึ่ง (Normal Value)' ที่ฟังก์ชันสามารถ return ออกมาได้คู่กับผลลัพธ์ ลองดูตัวอย่างทั้งเคสที่เงินพอและเคสที่เงินไม่พอ:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "go",
           label: "error_handling.go",
-          c: `package main
+          code: `package main
 
 import (
 	"errors"
@@ -285,13 +316,29 @@ func Withdraw(balance int64, amount int64) (int64, error) {
 }
 
 func main() {
-	newBalance, err := Withdraw(500, 1000)
+	currentBalance := int64(1000)
+
+	fmt.Println(">> ทดสอบเคสที่ 1: ถอนเงินเกินยอดคงเหลือ (ถอน 1,500 บาท จาก 1,000 บาท)")
+	newBalance, err := Withdraw(currentBalance, 1500)
 	if err != nil {
-		fmt.Println("เกิดข้อผิดพลาด:", err)
-		return
+		fmt.Println("   [X] เกิดข้อผิดพลาด:", err)
+	} else {
+		fmt.Println("   [✓] ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
 	}
-	fmt.Println("ถอนเงินสำเร็จ ยอดคงเหลือใหม่:", newBalance)
+
+	fmt.Println("\\n>> ทดสอบเคสที่ 2: ถอนเงินปกติ (ถอน 400 บาท จาก 1,000 บาท)")
+	newBalance, err = Withdraw(currentBalance, 400)
+	if err != nil {
+		fmt.Println("   [X] เกิดข้อผิดพลาด:", err)
+	} else {
+		fmt.Println("   [✓] ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
+	}
 }`,
+          out: `>> ทดสอบเคสที่ 1: ถอนเงินเกินยอดคงเหลือ (ถอน 1,500 บาท จาก 1,000 บาท)
+   [X] เกิดข้อผิดพลาด: ยอดเงินคงเหลือไม่เพียงพอ
+
+>> ทดสอบเคสที่ 2: ถอนเงินปกติ (ถอน 400 บาท จาก 1,000 บาท)
+   [✓] ถอนเงินสำเร็จ ยอดคงเหลือ: 600`,
         },
         {
           t: "ul",
@@ -305,28 +352,35 @@ func main() {
         { t: "h2", c: "3. การใช้ `defer` สำหรับทำความสะอาด Resource" },
         {
           t: "p",
-          c: "คำสั่ง `defer` จะสั่งให้โค้ดบรรทัดนั้นรอทำงาน **ตอนที่ฟังก์ชันกำลังจะจบลง** เสมอ ไม่ว่าฟังก์ชันจะจบลงตามปกติ หรือจบด้วยการ return error ทันที เหมาะอย่างยิ่งสำหรับการปิดการเชื่อมต่อ Database, ปิด File, หรือการสั่ง Rollback Transaction",
+          c: "คำสั่ง `defer` จะสั่งให้โค้ดบรรทัดนั้นรอทำงาน **ตอนที่ฟังก์ชันกำลังจะจบลง** เสมอ ไม่ว่าฟังก์ชันจะจบลงตามปกติ หรือจบด้วยการ return error ทันที เหมาะอย่างยิ่งสำหรับการปิดการเชื่อมต่อ Database, ปิด File, หรือการสั่ง Rollback Transaction และคำสั่ง defer จะทำงานแบบ LIFO (Last-In, First-Out):",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "go",
           label: "defer_example.go",
-          c: `package main
+          code: `package main
 
 import "fmt"
 
 func ProcessTransaction() {
 	fmt.Println("1. เริ่มต้นเชื่อมต่อฐานข้อมูล")
-	defer fmt.Println("5. ปิดการเชื่อมต่อฐานข้อมูลเรียบร้อย (ทำงานตอนฟังก์ชันจะจบ)")
+	defer fmt.Println(">> [defer 1] ปิดการเชื่อมต่อฐานข้อมูล (LIFO: รันลำดับสุดท้าย)")
+	defer fmt.Println(">> [defer 2] ปลด Row Lock ของบัญชี (LIFO: รันก่อน)")
 
-	fmt.Println("2. ตรวจสอบบัญชี")
-	fmt.Println("3. โอนเงิน")
-	fmt.Println("4. บันทึกประวัติสำเร็จ")
+	fmt.Println("2. ตรวจสอบยอดเงินในบัญชี")
+	fmt.Println("3. โอนเงิน 500 บาทสำเร็จ")
+	fmt.Println("4. กำลังจะออกจากฟังก์ชัน...")
 }
 
 func main() {
 	ProcessTransaction()
 }`,
+          out: `1. เริ่มต้นเชื่อมต่อฐานข้อมูล
+2. ตรวจสอบยอดเงินในบัญชี
+3. โอนเงิน 500 บาทสำเร็จ
+4. กำลังจะออกจากฟังก์ชัน...
+>> [defer 2] ปลด Row Lock ของบัญชี (LIFO: รันก่อน)
+>> [defer 1] ปิดการเชื่อมต่อฐานข้อมูล (LIFO: รันลำดับสุดท้าย)`,
         },
         {
           t: "callout",
@@ -337,13 +391,13 @@ func main() {
         { t: "h2", c: "4. บริบทการทำงาน: `context.Context`" },
         {
           t: "p",
-          c: "เวลาที่เซิร์ฟเวอร์ Go รับคำสั่งเข้ามา เรามักจะส่งต่อ `ctx context.Context` ไปให้ทุกฟังก์ชันที่คุยกับฐานข้อมูลหรือยิง Network ภายนอก หน้าที่ของ Context คือการส่งสัญญาณ **Timeout (ตัดการทำงานถ้าช้าเกินไป)** หรือ **Cancellation (ลูกค้ายกเลิกคำขอ)**",
+          c: "เวลาที่เซิร์ฟเวอร์ Go รับคำสั่งเข้ามา เรามักจะส่งต่อ `ctx context.Context` ไปให้ทุกฟังก์ชันที่คุยกับฐานข้อมูลหรือยิง Network ภายนอก หน้าที่ของ Context คือการส่งสัญญาณ **Timeout (ตัดการทำงานถ้าช้าเกินไป)** หรือ **Cancellation (ลูกค้ายกเลิกคำขอ)** ลองดูผลการทำงานเมื่อคิวรีใช้เวลา 2 วินาที แต่ Timeout กำหนดไว้ 1 วินาที:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "go",
           label: "context_example.go",
-          c: `package main
+          code: `package main
 
 import (
 	"context"
@@ -352,9 +406,10 @@ import (
 )
 
 func QueryDatabase(ctx context.Context) error {
+	fmt.Println(">> เริ่มต้นค้นหาข้อมูลใน Database...")
 	select {
 	case <-time.After(2 * time.Second): // จำลองการคิวรีที่ใช้เวลา 2 วินาที
-		fmt.Println("คิวรีข้อมูลสำเร็จ")
+		fmt.Println("   ค้นหาข้อมูลสำเร็จ")
 		return nil
 	case <-ctx.Done(): // หาก Context สั่งตัดเวลาหรือถูกยกเลิก
 		return ctx.Err()
@@ -362,54 +417,67 @@ func QueryDatabase(ctx context.Context) error {
 }
 
 func main() {
-	// ตั้งให้ตัดการทำงานอัตโนมัติหากเกิน 1 วินาที
+	// ตั้ง Timeout สูงสุดไม่เกิน 1 วินาที (แต่งานจริงใช้ 2 วินาที)
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	err := QueryDatabase(ctx)
 	if err != nil {
-		fmt.Println("การคิวรีล้มเหลว:", err) // จะพิมพ์: context deadline exceeded
+		fmt.Println(">> การทำงานล้มเหลว:", err)
+		fmt.Println("   (สาเหตุ: ระบบตัดการทำงานอัตโนมัติเนื่องจากเกินเวลา 1 วินาทีที่กำหนด)")
 	}
 }`,
+          out: `>> เริ่มต้นค้นหาข้อมูลใน Database...
+>> การทำงานล้มเหลว: context deadline exceeded
+   (สาเหตุ: ระบบตัดการทำงานอัตโนมัติเนื่องจากเกินเวลา 1 วินาทีที่กำหนด)`,
         },
 
         { t: "h2", c: "5. การทำงานแบบคู่ขนาน: Goroutines, Channels และ WaitGroup" },
         {
           t: "p",
-          c: "หัวใจที่ทำให้ Go โด่งดังไปทั่วโลกคือ **Goroutine** ซึ่งเป็น Lightweight Thread ที่ใช้หน่วยความจำเริ่มต้นเพียงแค่ 2 KB (เทียบกับ OS Thread ปกติที่กิน 1–2 MB) ทำให้ Go สามารถรัน 10,000 ถึง 100,000 goroutines พร้อมกันบนเครื่องเดียวได้สบายๆ",
+          c: "หัวใจที่ทำให้ Go โด่งดังไปทั่วโลกคือ **Goroutine** ซึ่งเป็น Lightweight Thread ที่ใช้หน่วยความจำเริ่มต้นเพียงแค่ 2 KB (เทียบกับ OS Thread ปกติที่กิน 1–2 MB) ทำให้ Go สามารถรัน 10,000 ถึง 100,000 goroutines พร้อมกันบนเครื่องเดียวได้สบายๆ ลองดูตัวอย่างการปล่อยคนงาน 3 ตัวทำงานคู่ขนานและส่งผลผ่าน Channel:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "go",
           label: "concurrency_example.go",
-          c: `package main
+          code: `package main
 
 import (
 	"fmt"
 	"sync"
+	"time"
 )
 
 func Worker(id int, ch chan<- string, wg *sync.WaitGroup) {
-	defer wg.Done() // สั่งบอก WaitGroup ว่างานชิ้นนี้ทำเสร็จแล้วนะ
-	ch <- fmt.Sprintf("คนงานเบอร์ %d ทำงานสำเร็จ", id)
+	defer wg.Done() // สั่งบอก WaitGroup เมื่องานเสร็จสิ้น
+	time.Sleep(time.Duration(id*10) * time.Millisecond) // จำลองเวลาประมวลผล
+	ch <- fmt.Sprintf("Goroutine #%d: ประมวลผลธุรกรรมสำเร็จ", id)
 }
 
 func main() {
 	var wg sync.WaitGroup
-	resultChan := make(chan string, 3) // Channel สำหรับส่งข้อความหากันข้าม Goroutine
+	resultChan := make(chan string, 3)
 
+	fmt.Println(">> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...")
 	for i := 1; i <= 3; i++ {
-		wg.Add(1) // แจ้งว่าจะเพิ่มงานอีก 1 ชิ้น
-		go Worker(i, resultChan, &wg) // ใช้คำสั่ง go นำหน้าเพื่อสั่งรันเป็น Goroutine
+		wg.Add(1)
+		go Worker(i, resultChan, &wg)
 	}
 
-	wg.Wait()          // รอจนกว่าคนงานทุกคนจะเรียก wg.Done() ครบ
-	close(resultChan)  // ปิด channel เมื่อส่งข้อมูลครบหมดแล้ว
+	wg.Wait()         // รอจนกว่าคนงานทุกคนจะเรียก wg.Done() ครบ
+	close(resultChan) // ปิด channel เมื่อส่งข้อมูลครบ
 
+	fmt.Println(">> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:")
 	for msg := range resultChan {
-		fmt.Println(msg)
+		fmt.Println("  ", msg)
 	}
 }`,
+          out: `>> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...
+>> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:
+   Goroutine #1: ประมวลผลธุรกรรมสำเร็จ
+   Goroutine #2: ประมวลผลธุรกรรมสำเร็จ
+   Goroutine #3: ประมวลผลธุรกรรมสำเร็จ`,
         },
         {
           t: "ul",
@@ -422,7 +490,7 @@ func main() {
         {
           t: "callout",
           title: "🎯 สรุปก่อนไปต่อ",
-          c: "ตอนนี้เรามีอาวุธพื้นฐานของ Go ครบมือแล้ว! ในบทถัดไป เราจะนำทักษะเหล่านี้ไปใช้ออกแบบฐานข้อมูล และสร้างตาราง Ledger เพื่อป้องกันข้อมูลเงินพังในระบบธนาคารจริง",
+          c: "ตอนนี้เราเห็นการทำงานจริงของอาวุธพื้นฐาน Go ครบมือแล้ว! ในบทถัดไป เราจะนำทักษะเหล่านี้ไปใช้ออกแบบฐานข้อมูล และสร้างตาราง Ledger เพื่อป้องกันข้อมูลเงินพังในระบบธนาคารจริง",
         },
       ],
       en: [],

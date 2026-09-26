@@ -86,6 +86,53 @@ func CheckPassword(password string, hashedPassword string) error {
 }`,
         },
         {
+          t: "code",
+          lang: "go",
+          label: "util/password_test.go",
+          c: `package util
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
+)
+
+func TestPassword(t *testing.T) {
+	password := RandomString(6)
+
+	// 1. แฮชรหัสผ่านครั้งที่ 1
+	hashedPassword1, err := HashPassword(password)
+	require.NoError(t, err)
+	require.NotEmpty(t, hashedPassword1)
+
+	// 2. แฮชรหัสผ่านเดิมซ้ำครั้งที่ 2 (ต้องได้ค่า Hash ต่างกันจาก Salt)
+	hashedPassword2, err := HashPassword(password)
+	require.NoError(t, err)
+	require.NotEmpty(t, hashedPassword2)
+	require.NotEqual(t, hashedPassword1, hashedPassword2)
+
+	// 3. ตรวจสอบรหัสผ่านที่ถูกต้อง
+	err = CheckPassword(password, hashedPassword1)
+	require.NoError(t, err)
+
+	// 4. ตรวจสอบรหัสผ่านที่ผิด (ต้องส่ง ErrMismatchedHashAndPassword)
+	wrongPassword := RandomString(6)
+	err = CheckPassword(wrongPassword, hashedPassword1)
+	require.EqualError(t, err, bcrypt.ErrMismatchedHashAndPassword.Error())
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "คำสั่งรัน Unit Test ทดสอบฟังก์ชัน Password ใน Terminal",
+          code: `go test -v -run TestPassword ./util`,
+          out: `=== RUN   TestPassword
+--- PASS: TestPassword (0.18s)
+PASS
+ok      simplebank/util 0.231s`,
+        },
+        {
           t: "h3", c: "อธิบายการทำงาน" },
         {
           t: "ul",
@@ -129,6 +176,32 @@ func newUserResponse(user db.User) userResponse {
 		CreatedAt:         user.CreatedAt,
 	}
 }`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบสมัครสมาชิกผ่าน cURL (ตรวจสอบความปลอดภัยของ Response)",
+          code: `curl -i -X POST http://localhost:8080/users \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "username": "alice",
+    "password": "secretPassword123",
+    "full_name": "Alice Wonderland",
+    "email": "alice@example.com"
+  }'`,
+          out: `HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 08:35:00 GMT
+Content-Length: 172
+
+{
+  "username": "alice",
+  "full_name": "Alice Wonderland",
+  "email": "alice@example.com",
+  "password_changed_at": "0001-01-01T00:00:00Z",
+  "created_at": "2026-09-26T08:35:00.124851Z"
+}
+# สังเกต: ฟิลด์ hashed_password ถูกตัดทิ้งไปอย่างปลอดภัย ไม่หลุดไปยังหน้าบ้านเด็ดขาด!`,
         },
       ],
       en: [],
@@ -293,6 +366,31 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	}
 }`,
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบล็อกอินเพื่อรับ PASETO Token ผ่าน cURL",
+          code: `curl -i -X POST http://localhost:8080/users/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "username": "alice",
+    "password": "secretPassword123"
+  }'`,
+          out: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 08:35:10 GMT
+Content-Length: 320
+
+{
+  "access_token": "v2.local.O4WcQo7c...[ChaCha20-Poly1305 Encrypted Payload]...L8a9m",
+  "user": {
+    "username": "alice",
+    "full_name": "Alice Wonderland",
+    "email": "alice@example.com",
+    "created_at": "2026-09-26T08:35:00.124851Z"
+  }
+}`,
+        },
 
         { t: "h2", c: "3. ปกป้องคำสั่งโอนเงิน: ป้องกันคนอื่นมาแอบสั่งโอนแทนเรา" },
         {
@@ -316,6 +414,63 @@ if fromAccount.Owner != authPayload.Username {
 	err := errors.New("บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน")
 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 	return
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบโอนเงินพร้อม Authorization Bearer Token (สำเร็จ 200 OK)",
+          code: `curl -i -X POST http://localhost:8080/transfers \\
+  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 1000,
+    "currency": "USD"
+  }'`,
+          out: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 08:35:15 GMT
+
+{
+  "transfer": {
+    "id": 1,
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 1000,
+    "created_at": "2026-09-26T08:35:15.829102Z"
+  },
+  "from_account": { "id": 1, "owner": "alice", "balance": 9000, "currency": "USD" },
+  "to_account": { "id": 2, "owner": "bob", "balance": 11000, "currency": "USD" }
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบแอบโอนเงินจากบัญชีผู้อื่น / ไม่ส่ง Token (ถูกบล็อก 401 Unauthorized)",
+          code: `# กรณีที่ 1: Alice พยายามสั่งโอนเงินออกจากบัญชีของ Bob (FromAccountID = 2)
+curl -i -X POST http://localhost:8080/transfers \\
+  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
+  -H "Content-Type: application/json" \\
+  -d '{"from_account_id": 2, "to_account_id": 1, "amount": 5000, "currency": "USD"}'
+
+# กรณีที่ 2: เรียก API โดยไม่แนบ Authorization Header
+curl -i -X POST http://localhost:8080/transfers \\
+  -H "Content-Type: application/json" \\
+  -d '{"from_account_id": 1, "to_account_id": 2, "amount": 1000, "currency": "USD"}'`,
+          out: `# ผลลัพธ์กรณีที่ 1: ตรวจจับได้ว่าไม่ใช่เจ้าของบัญชี
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json; charset=utf-8
+{
+  "error": "บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน"
+}
+
+# ผลลัพธ์กรณีที่ 2: Middleware สกัดกั้นทันที
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json; charset=utf-8
+{
+  "error": "ไม่มีการแนบ Authorization Header"
 }`,
         },
         {
@@ -349,6 +504,16 @@ if fromAccount.Owner != authPayload.Username {
         {
           t: "p",
           c: "เราจะใช้ไลบรารี **Viper** ซึ่งสามารถอ่านค่าคอนฟิกได้ทั้งจากไฟล์ `.env` ในช่วงพัฒนาบนเครื่องตัวเอง และดึงค่าจาก System Environment Variables อัตโนมัติเมื่อรันบน Docker หรือ Kubernetes:",
+        },
+        {
+          t: "code",
+          lang: "env",
+          label: "app.env",
+          c: `DB_DRIVER=postgres
+DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+SERVER_ADDRESS=0.0.0.0:8080
+TOKEN_SYMMETRIC_KEY=12345678901234567890123456789012
+ACCESS_TOKEN_DURATION=15m`,
         },
         {
           t: "code",
@@ -413,6 +578,33 @@ COPY db/migration ./db/migration
 
 EXPOSE 8080
 CMD [ "/app/main" ]`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "คอมไพล์ Docker Image และตรวจสอบขนาด (Multi-Stage Optimization)",
+          code: `# สั่ง Build Docker Image
+docker build -t simplebank:latest .
+
+# ตรวจสอบขนาดของ Image ที่สร้างเสร็จ
+docker images simplebank:latest`,
+          out: `[+] Building 6.8s (13/13) FINISHED
+ => [internal] load build definition from Dockerfile
+ => [builder 1/5] FROM docker.io/library/golang:1.22-alpine3.19
+ => [builder 2/5] WORKDIR /app
+ => [builder 3/5] COPY go.mod go.sum ./
+ => [builder 4/5] RUN go mod download
+ => [builder 5/5] RUN CGO_ENABLED=0 GOOS=linux go build -o main main.go
+ => [stage-1 1/4] FROM docker.io/library/alpine:3.19
+ => [stage-1 2/4] COPY --from=builder /app/main .
+ => [stage-1 3/4] COPY app.env .
+ => [stage-1 4/4] COPY db/migration ./db/migration
+ => exporting to image
+ => => naming to docker.io/library/simplebank:latest
+
+REPOSITORY   TAG      IMAGE ID       CREATED          SIZE
+simplebank   latest   e3b0c44298fc   12 seconds ago   21.4MB
+# เทียบกับ Go Builder Image ดั้งเดิมที่มีขนาดถึง ~850MB! ประหยัดพื้นที่กว่า 40 เท่า!`,
         },
         {
           t: "callout",

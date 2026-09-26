@@ -123,6 +123,29 @@ func (server *Server) createAccount(ctx *gin.Context) {
             "**`http.StatusCreated` (201)**: เป็น Status Code มาตรฐานสำหรับการสร้างทรัพยากรใหม่ในระบบ",
           ],
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบยิง curl POST /accounts สร้างบัญชีใหม่ใน Terminal",
+          code: `curl -i -X POST http://localhost:8080/accounts \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "owner": "alice",
+    "currency": "USD"
+  }'`,
+          out: `HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 10:00:00 GMT
+Content-Length: 104
+
+{
+  "id": 1,
+  "owner": "alice",
+  "balance": 0,
+  "currency": "USD",
+  "created_at": "2026-09-26T10:00:00.123456Z"
+}`,
+        },
 
         { t: "h2", c: "3. การสร้าง Handler: `GET /accounts/:id`" },
         {
@@ -163,6 +186,35 @@ func (server *Server) getAccount(ctx *gin.Context) {
           t: "callout",
           title: "🎯 หลักการกำหนด HTTP Status Code ที่ดี",
           c: "แยกแยะข้อผิดพลาดให้ชัดเจนเสมอ:\n- ลูกค้าส่งข้อมูลผิด (เช่น ID ติดลบ, ส่ง JSON ไม่ครบ) -> ใช้ **400 Bad Request**\n- ข้อมูลไม่มีในระบบ -> ใช้ **404 Not Found**\n- เซิร์ฟเวอร์หรือฐานข้อมูลพัง -> ใช้ **500 Internal Server Error**",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบยิง curl GET /accounts/:id (เปรียบเทียบ 200 OK vs 404 Not Found)",
+          code: `# 1. ดึงข้อมูลบัญชี ID = 1 ที่มีอยู่จริง
+curl -i http://localhost:8080/accounts/1
+
+# 2. ดึงข้อมูลบัญชี ID = 99999 ที่ไม่มีอยู่จริง
+curl -i http://localhost:8080/accounts/99999`,
+          out: `[เคสที่ 1: พบบัญชีในระบบ]
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{
+  "id": 1,
+  "owner": "alice",
+  "balance": 0,
+  "currency": "USD",
+  "created_at": "2026-09-26T10:00:00.123456Z"
+}
+
+[เคสที่ 2: ไม่พบบัญชีในระบบ]
+HTTP/1.1 404 Not Found
+Content-Type: application/json; charset=utf-8
+
+{
+  "error": "sql: no rows in result set"
+}`,
         },
       ],
       en: [],
@@ -263,6 +315,23 @@ func NewServer(store *db.Store) *Server {
 	return server
 }`,
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบ Custom Currency Validator เมื่อส่งสกุลเงินที่ไม่รองรับ (XYZ)",
+          code: `curl -i -X POST http://localhost:8080/accounts \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "owner": "alice",
+    "currency": "XYZ"
+  }'`,
+          out: `HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+
+{
+  "error": "Key: 'createAccountRequest.Currency' Error:Field validation for 'Currency' failed on the 'oneof' tag"
+}`,
+        },
 
         { t: "h2", c: "3. Endpoint โอนเงิน: `POST /transfers` พร้อมกฎ Currency Match" },
         {
@@ -352,6 +421,76 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
             "**`validAccount(...)`**: ตรวจสอบบัญชีก่อนส่งคำสั่งเข้า Transaction ช่วยลดภาระของฐานข้อมูล (Database Load) ไม่ต้องเปิด Transaction โดยเปล่าประโยชน์หากบัญชีไม่มีอยู่จริงหรือสกุลเงินไม่ตรงกัน",
             "**Currency Consistency**: การันตีว่าไม่มีการโอนข้ามสกุลเงินเกิดขึ้น ข้อมูลเงินในระบบจะถูกต้องตรงตามความเป็นจริง 100%",
           ],
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบยิง curl POST /transfers (โอนเงินสำเร็จ 200 OK)",
+          code: `curl -i -X POST http://localhost:8080/transfers \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 100,
+    "currency": "USD"
+  }'`,
+          out: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{
+  "transfer": {
+    "id": 1,
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 100,
+    "created_at": "2026-09-26T10:05:00.654321Z"
+  },
+  "from_account": {
+    "id": 1,
+    "owner": "alice",
+    "balance": 900,
+    "currency": "USD",
+    "created_at": "2026-09-26T10:00:00.123456Z"
+  },
+  "to_account": {
+    "id": 2,
+    "owner": "bob",
+    "balance": 600,
+    "currency": "USD",
+    "created_at": "2026-09-26T10:01:00.123456Z"
+  },
+  "from_entry": {
+    "id": 1,
+    "account_id": 1,
+    "amount": -100,
+    "created_at": "2026-09-26T10:05:00.654321Z"
+  },
+  "to_entry": {
+    "id": 2,
+    "account_id": 2,
+    "amount": 100,
+    "created_at": "2026-09-26T10:05:00.654321Z"
+  }
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบกรณีโอนข้ามสกุลเงิน (ตรวจพบ Currency Mismatch -> HTTP 400)",
+          code: `curl -i -X POST http://localhost:8080/transfers \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 100,
+    "currency": "THB"
+  }'`,
+          out: `HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+
+{
+  "error": "สกุลเงินของบัญชี [1] คือ USD ไม่ตรงกับคำขอโอน THB"
+}`,
         },
       ],
       en: [],

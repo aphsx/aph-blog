@@ -67,14 +67,22 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
         { t: "h2", c: "ทำไมห้ามใช้ FLOAT หรือ DOUBLE เก็บเงินเด็ดขาด?" },
         {
           t: "p",
-          c: "นี่คือกฎเหล็กข้อสำคัญที่สุดของวิศวกรซอฟต์แวร์: **ห้ามใช้ชนิดข้อมูลทศนิยมแบบ Floating-Point (เช่น float, double) ในการเก็บเงินเด็ดขาด!**",
+          c: "นี่คือกฎเหล็กข้อสำคัญที่สุดของวิศวกรซอฟต์แวร์: **ห้ามใช้ชนิดข้อมูลทศนิยมแบบ Floating-Point (เช่น float, double) ในการเก็บเงินเด็ดขาด!** มาดูการพิสูจน์จริงด้วยโค้ด Go:",
         },
         {
           t: "code",
           lang: "go",
-          label: "ความผิดพลาดของทศนิยม floating-point",
-          c: `// ในคอมพิวเตอร์ เลขทศนิยมฐานสองไม่สามารถแทนค่า 0.1 หรือ 0.2 ได้แม่นยำ 100%
-0.1 + 0.2 == 0.30000000000000004 // ผลลัพธ์ไม่ได้ 0.3 พอดี!`,
+          label: "เปรียบเทียบ Float VS Bigint ในภาษา Go",
+          c: `// 1. ความคลาดเคลื่อนของ Float จากมาตรฐาน IEEE 754
+var floatA, floatB float64 = 0.1, 0.2
+floatSum := floatA + floatB
+fmt.Println(floatSum)         // 0.30000000000000004
+fmt.Println(floatSum == 0.3)  // false! (เงินเพี้ยนทันที)
+
+// 2. ทางออกที่ถูกต้อง: เก็บเป็นจำนวนเต็ม Bigint ในหน่วยย่อยที่สุด (สตางค์ หรือ เซนต์)
+var centA, centB int64 = 10, 20 // 10 เซนต์ + 20 เซนต์
+centSum := centA + centB
+fmt.Println(centSum)          // 30 (แม่นยำ 100% ไร้การปัดเศษ!)`,
         },
         {
           t: "p",
@@ -145,6 +153,27 @@ CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");`,
             "**`CREATE INDEX ON transfers (from_account_id, to_account_id)`**: Composite Index สำหรับสืบค้นประวัติการโอนเงินระหว่าง 2 บัญชีที่เจาะจงได้อย่างรวดเร็ว",
           ],
         },
+        {
+          t: "codeout",
+          lang: "sql",
+          label: "ตรวจสอบ Schema ใน Terminal ด้วยคำสั่ง psql (\\d accounts)",
+          code: `\\d accounts`,
+          out: `                                         Table "public.accounts"
+   Column   |           Type           | Collation | Nullable |               Default                
+------------+--------------------------+-----------+----------+--------------------------------------
+ id         | bigint                   |           | not null | nextval('accounts_id_seq'::regclass)
+ owner      | character varying        |           | not null | 
+ balance    | bigint                   |           | not null | 
+ currency   | character varying(3)     |           | not null | 
+ created_at | timestamp with time zone |           | not null | now()
+Indexes:
+    "accounts_pkey" PRIMARY KEY, btree (id)
+    "accounts_owner_idx" btree (owner)
+Referenced by:
+    TABLE "entries" CONSTRAINT "entries_account_id_fkey" FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    TABLE "transfers" CONSTRAINT "transfers_from_account_id_fkey" FOREIGN KEY (from_account_id) REFERENCES accounts(id) ON DELETE CASCADE
+    TABLE "transfers" CONSTRAINT "transfers_to_account_id_fkey" FOREIGN KEY (to_account_id) REFERENCES accounts(id) ON DELETE CASCADE`,
+        },
       ],
       en: [],
     },
@@ -179,10 +208,12 @@ CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");`,
           c: "แทนที่จะต้องติดตั้งโปรแกรม PostgreSQL ลงบนเครื่องตรงๆ เราจะรันผ่าน Docker Container ซึ่งแยกสภาพแวดล้อมออกจากระบบปฏิบัติการอย่างสมบูรณ์ และพร้อมเริ่มใหม่ได้ทันทีในคำสั่งเดียว:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "bash",
           label: "คำสั่งเปิด Docker Container สำหรับ PostgreSQL",
-          c: `docker run --name postgres16 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:16-alpine`,
+          code: `docker run --name postgres16 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:16-alpine`,
+          out: `c39f0d1487ea8a462b404d70b55169a68fa91e0a297e268615ff28b5774a3f5a
+(Container รันสำเร็จในโหมด Background พร้อมใช้งานบนพอร์ต 5432)`,
         },
         {
           t: "ul",
@@ -214,10 +245,12 @@ brew install golang-migrate
           c: "สร้างไฟล์ Migration คู่แรกสำหรับโปรเจกต์ของเรา ด้วยคำสั่ง:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "bash",
           label: "สร้างไฟล์ migration",
-          c: `migrate create -ext sql -dir db/migration -seq init_schema`,
+          code: `migrate create -ext sql -dir db/migration -seq init_schema`,
+          out: `/Users/simple_bank/db/migration/000001_init_schema.up.sql
+/Users/simple_bank/db/migration/000001_init_schema.down.sql`,
         },
         {
           t: "p",
@@ -277,18 +310,54 @@ migratedown:
           t: "h3", c: "ทดสอบรัน Migration จริง" },
         {
           t: "p",
-          c: "เมื่อเขียน `Makefile` เสร็จแล้ว เราสามารถสร้างฐานข้อมูลและรัน Migration ขึ้นระบบได้ทันทีด้วย 2 คำสั่งสั้นๆ:",
+          c: "เมื่อเขียน `Makefile` เสร็จแล้ว เราสามารถสร้างฐานข้อมูลและรัน Migration ขึ้นระบบได้ทันที สังเกต Terminal Output ที่แสดงความคืบหน้าของการสร้าง Schema:",
         },
         {
-          t: "code",
+          t: "codeout",
           lang: "bash",
-          label: "รันคำสั่งผ่าน make",
-          c: `make createdb
+          label: "ทดสอบรัน make createdb และ make migrateup",
+          code: `make createdb
 make migrateup`,
+          out: `$ make createdb
+docker exec -it postgres16 createdb --username=root --owner=root simple_bank
+
+$ make migrateup
+migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
+2026/09/26 10:00:00 reading entries from db/migration
+2026/09/26 10:00:00 Applying migration: 1
+2026/09/26 10:00:00 Applied migration: 1 in 14.851ms`,
         },
         {
           t: "p",
-          c: "ผลลัพธ์จะแสดงว่าตาราง `accounts`, `entries`, และ `transfers` ถูกสร้างขึ้นเรียบร้อย รวมถึงมีตาราง `schema_migrations` คอยจดจำเวอร์ชันปัจจุบันของฐานข้อมูลให้อัตโนมัติ",
+          c: "มาตรวจสอบตารางที่ถูกสร้างขึ้นใน PostgreSQL ด้วยคำสั่ง `psql \\dt`:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ตรวจสอบตารางทั้งหมดในฐานข้อมูลด้วย psql (\\dt)",
+          code: `docker exec -it postgres16 psql -U root -d simple_bank -c "\\dt"`,
+          out: `                 List of relations
+ Schema |       Name        | Type  | Owner 
+--------+-------------------+-------+-------
+ public | accounts          | table | root
+ public | entries           | table | root
+ public | schema_migrations | table | root
+ public | transfers         | table | root
+(4 rows)`,
+        },
+        {
+          t: "p",
+          c: "สังเกตว่ามีตาราง `schema_migrations` เพิ่มเข้ามาโดยอัตโนมัติ ซึ่ง `golang-migrate` ใช้จดจำเลขเวอร์ชันและสถานะว่า migration ใดถูกรันไปแล้ว หากเราต้องการทดสอบ Rollback ถอยหลัง ก็สามารถรัน `make migratedown` ได้อย่างปลอดภัย:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบคำสั่ง Rollback (make migratedown)",
+          code: `make migratedown`,
+          out: `migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
+Are you sure you want to apply all down migrations? [y/N]: y
+2026/09/26 10:01:00 Applying migration: 1
+2026/09/26 10:01:00 Applied migration: 1 in 11.230ms`,
         },
       ],
       en: [],

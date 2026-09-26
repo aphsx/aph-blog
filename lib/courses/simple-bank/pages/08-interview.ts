@@ -65,6 +65,21 @@ export const interviewPages: Record<string, Page> = {
           t: "p",
           c: "**แนวทางการตอบ:**\n'เราจะใช้หลักการ **Idempotency (การกระทำซ้ำแล้วได้ผลลัพธ์เดิม)** โดยให้ Client ส่ง **Idempotency Key** (เช่น UUID v4) แนบมาใน HTTP Header ทุกครั้งที่มีการกดยืนยันโอนเงิน:\n\n1. เมื่อเซิร์ฟเวอร์ได้รับคำขอ จะนำ Idempotency Key ไปทำ `SET key value NX EX 120` ใน **Redis** (ล็อกไว้ชั่วคราว 2 นาที)\n2. หาก Redis คืนค่าว่า Key นี้มีอยู่แล้ว แสดงว่าเป็นคำขอซ้ำ ระบบจะปฏิเสธหรือคืนค่าผลลัพธ์เดิมกลับไปโดยไม่ตัดเงินซ้ำสอง\n3. เมื่อ Database Transaction บันทึกสำเร็จ จึงบันทึกผลลัพธ์ลงใน Database พร้อม Idempotency Key นั้นอย่างถาวรครับ'",
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "จำลองคำสั่ง Redis Atomic Lock ป้องกัน Double Submit ใน Terminal",
+          code: `# คำขอที่ 1 (ผู้ใช้กดโอนเงินครั้งแรก):
+redis-cli SET "idempotency:tx:9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" "PROCESSING" NX EX 120
+
+# คำขอที่ 2 (เสี้ยววินาทีถัดมา ผู้ใช้กดย้ำปุ่มเดิมด้วย Idempotency Key เดิม):
+redis-cli SET "idempotency:tx:9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d" "PROCESSING" NX EX 120`,
+          out: `# ผลลัพธ์คำขอที่ 1: ล็อกสำเร็จ เซิร์ฟเวอร์เริ่มทำ Transaction ใน PostgreSQL
+OK
+
+# ผลลัพธ์คำขอที่ 2: Redis คืนค่า nil ทันที! เซิร์ฟเวอร์ดักจับได้และคืน HTTP 409 Conflict หรือผลลัพธ์เดิม
+(nil)`,
+        },
 
         { t: "h3", c: "ข้อที่ 5: หากระบบถูกแยกเป็น Microservices และบัญชีอยู่คนละ Database จะจัดการโอนเงินอย่างไร?" },
         {
@@ -100,6 +115,36 @@ export const interviewPages: Record<string, Page> = {
         {
           t: "p",
           c: "**แนวทางการตอบ:**\n'`assert` เมื่อการตรวจสอบล้มเหลว จะเพียงแค่พ่นข้อความเตือน แต่จะปล่อยให้โค้ดบรรทัดถัดไปทำงานต่อ ซึ่งหากขั้นตอนการสร้างบัญชีล้มเหลว ตัวแปรบัญชีจะมีค่าเป็น nil การปล่อยให้โค้ดรันต่อไปจะทำให้โปรแกรมเกิด `panic: runtime error: invalid memory address or nil pointer dereference`\n\nส่วน `require` จะทำการเรียก `t.FailNow()` เพื่อหยุดการรันเทสต์ของฟังก์ชันนั้นทันที ทำให้ผลลัพธ์ของเทสต์ชัดเจนและไม่เกิด Panic ซ้อนครับ'",
+        },
+        {
+          t: "codeout",
+          lang: "text",
+          label: "เปรียบเทียบผลลัพธ์ Terminal Test เมื่อสร้างบัญชีล้มเหลว (assert VS require)",
+          code: `# เมื่อใช้ testify/assert: (รันต่อไปจนติด Nil Pointer Dereference Panic)
+=== RUN   TestCreateAccount
+    account_test.go:28: 
+        	Error:      	Received unexpected error: pq: connection refused
+    panic: runtime error: invalid memory address or nil pointer dereference [recovered]
+        	panic: runtime error: invalid memory address or nil pointer dereference
+    goroutine 19 [running]:
+    simplebank/db_test.TestCreateAccount(0x140001149c0)
+        account_test.go:31 +0x1b4
+
+--- FAIL: TestCreateAccount (0.01s)
+FAIL
+
+--------------------------------------------------------------------------------
+
+# เมื่อใช้ testify/require: (หยุดทันทีด้วย FailNow ไม่พ่น Panic รกหน้าจอ)
+=== RUN   TestCreateAccount
+    account_test.go:28: 
+        	Error:      	Received unexpected error: pq: connection refused
+        	Test:       	TestCreateAccount
+        	Messages:   	ไม่สามารถสร้างบัญชีได้
+
+--- FAIL: TestCreateAccount (0.00s)
+FAIL`,
+          out: `สรุป: require ช่วยให้ Error Report ชี้ตรงจุดที่ผิดพลาดบรรทัดแรกทันที ไม่บดบังด้วย Nil Pointer Panic!`,
         },
 
         { t: "h3", c: "ข้อที่ 10: Graceful Shutdown ในระบบเซิร์ฟเวอร์การเงินสำคัญอย่างไร?" },
