@@ -222,6 +222,92 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+type AddAccountBalanceParams struct {
+	ID     int64 \`json:"id"\`
+	Amount int64 \`json:"amount"\` // บวก = เพิ่มเงิน, ลบ = หักเงิน
+}
+
+const addAccountBalance = \`-- name: AddAccountBalance :one
+UPDATE accounts
+SET balance = balance + $1
+WHERE id = $2
+RETURNING id, owner, balance, currency, created_at;
+\`
+
+// AddAccountBalance ปรับยอดเงินคงเหลือในระดับ SQL อย่างเป็น Atomic (balance = balance + amount)
+// รองรับทั้งการฝากเงิน (Amount เป็นบวก) และการตัดเงิน (Amount เป็นลบ)
+func (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {
+	// 1. ส่งคำสั่ง UPDATE โดยให้ฐานข้อมูลบวก/ลบยอดเงินในตัว (Atomic Update)
+	row := q.db.QueryRowContext(ctx, addAccountBalance, arg.Amount, arg.ID)
+
+	// 2. แกะข้อมูลแถวที่อัปเดตแล้วใส่ตัวแปร Account
+	var i Account
+	err := row.Scan(
+		&i.ID,
+		&i.Owner,
+		&i.Balance,
+		&i.Currency,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const deleteAccount = \`-- name: DeleteAccount :exec
+DELETE FROM accounts
+WHERE id = $1;
+\`
+
+// DeleteAccount ลบบัญชีตาม ID ออกจากฐานข้อมูล
+func (q *Queries) DeleteAccount(ctx context.Context, id int64) error {
+	// 1. ส่งคำสั่ง DELETE ผ่าน ExecContext เมื่อไม่ต้องการข้อมูลแถวกลับมา
+	_, err := q.db.ExecContext(ctx, deleteAccount, id)
+	return err
+}
+
+type ListAccountsParams struct {
+	Limit  int32 \`json:"limit"\`
+	Offset int32 \`json:"offset"\`
+}
+
+const listAccounts = \`-- name: ListAccounts :many
+SELECT id, owner, balance, currency, created_at FROM accounts
+ORDER BY id
+LIMIT $1 OFFSET $2;
+\`
+
+// ListAccounts ดึงรายชื่อบัญชีแบบแบ่งหน้า (Pagination)
+func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {
+	// 1. ส่งคำสั่ง SELECT ค้นหาหลายแถวด้วย QueryContext
+	rows, err := q.db.QueryContext(ctx, listAccounts, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// 2. วนลูปอ่านข้อมูลทีละแถวด้วย rows.Next() และ Scan ค่าใส่ struct
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.Balance,
+			&i.Currency,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }`,
         },
         {
@@ -230,9 +316,108 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
           t: "ul",
           c: [
             "**`$1, $2, $3` (Placeholder)**: เป็นการส่งตัวแปรเข้าไปในคำสั่ง SQL แบบ Parameterized Query ซึ่ง PostgreSQL จะแยกตัวคำสั่งออกจากข้อมูล ทำให้ปลอดภัยจากการโจมตีแบบ **SQL Injection 100%** (ห้ามต่อ String แบบ `fmt.Sprintf` เด็ดขาด!)",
-            "**`RETURNING id, owner, ...`**: เป็นคำสั่งพิเศษของ PostgreSQL ที่ช่วยให้เราดึงข้อมูลแถวที่เพิ่งถูก `INSERT` กลับมาได้ทันทีในรอบเดียว โดยไม่ต้องยิงคำสั่ง `SELECT` ซ้ำอีกรอบ",
+            "**`RETURNING id, owner, ...`**: เป็นคำสั่งพิเศษของ PostgreSQL ที่ช่วยให้เราดึงข้อมูลแถวที่เพิ่งถูก `INSERT` หรือ `UPDATE` กลับมาได้ทันทีในรอบเดียว โดยไม่ต้องยิงคำสั่ง `SELECT` ซ้ำอีกรอบ",
             "**`q.db.QueryRowContext(ctx, ...)`**: ยิงคำสั่ง SQL ที่คาดหวังผลลัพธ์กลับมาเพียงแถวเดียว พร้อมส่ง Context เพื่อให้ยกเลิกการทำงานได้หากเกิด Timeout",
-            "**`row.Scan(&i.ID, ...)`**: อ่านค่าจากแต่ละคอลัมน์ของแถวที่ได้จากฐานข้อมูล นำมาแม็ปใส่ในฟิลด์ของ struct ผ่าน Pointer (`&`) หากไม่พบคอลัมน์หรือชนิดข้อมูลไม่ตรง จะส่ง Error ออกมาทันที",
+            "**`AddAccountBalance`**: ใช้ `balance = balance + $1` เพื่อให้ PostgreSQL ทำการคำนวณและอัปเดตเงินในระดับ Database Atomic ทันที",
+            "**`DeleteAccount`**: ใช้ `q.db.ExecContext` ยิงคำสั่ง `DELETE` โดยไม่ต้องดึงข้อมูลแถวกลับมา เหมาะสำหรับงานลบข้อมูล",
+            "**`ListAccounts`**: ใช้ `q.db.QueryContext` ค้นหาข้อมูลแบบแบ่งหน้า (Pagination) ด้วย `LIMIT` และ `OFFSET` พร้อมใช้ `rows.Next()` วนลูปอ่านข้อมูล",
+          ],
+        },
+
+        { t: "h2", c: "5. การเขียนฟังก์ชัน CRUD สำหรับ Entries และ Transfers" },
+        {
+          t: "p",
+          c: "เพื่อให้ระบบพร้อมสำหรับการทำธุรกรรมโอนเงินแบบครบวงจรในบทถัดไป เราจำเป็นต้องมีฟังก์ชันสร้างบันทึก Ledger (`entries`) และประวัติการโอน (`transfers`):",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "db/entry.go",
+          c: `// ฟังก์ชันจัดการบันทึกข้อมูลสมุดบัญชีแยกประเภท (Ledger) ในตาราง entries
+// ทำเพื่อแก้ปัญหา: บันทึกหลักฐานเงินเข้า-ออกของแต่ละบัญชีอย่างละเอียดทุกครั้งที่มีธุรกรรม
+package db
+
+import "context"
+
+type CreateEntryParams struct {
+	AccountID int64 \`json:"account_id"\` // รหัสบัญชีที่เป็นเจ้าของ Entry
+	Amount    int64 \`json:"amount"\`     // ยอดเงิน: บวก = เงินเข้า, ลบ = เงินออก
+}
+
+const createEntry = \`-- name: CreateEntry :one
+INSERT INTO entries (
+  account_id,
+  amount
+) VALUES (
+  $1, $2
+)
+RETURNING id, account_id, amount, created_at;
+\`
+
+// CreateEntry สร้างบันทึก Entry เงินเข้าหรือเงินออกลงในตาราง entries
+func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
+	// 1. ส่งคำสั่ง INSERT ข้อมูล Entry ลงตาราง
+	row := q.db.QueryRowContext(ctx, createEntry, arg.AccountID, arg.Amount)
+
+	// 2. แกะผลลัพธ์ใส่ตัวแปร Entry
+	var i Entry
+	err := row.Scan(
+		&i.ID,
+		&i.AccountID,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
+}`,
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "db/transfer.go",
+          c: `// ฟังก์ชันจัดการบันทึกข้อมูลธุรกรรมการโอนเงินในตาราง transfers
+// ทำเพื่อแก้ปัญหา: บันทึกประวัติการโอนเงินระหว่าง 2 บัญชี พร้อมสร้าง Transfer ID สำหรับใช้เป็นเลขอ้างอิง
+package db
+
+import "context"
+
+type CreateTransferParams struct {
+	FromAccountID int64 \`json:"from_account_id"\` // บัญชีผู้โอน (ต้นทาง)
+	ToAccountID   int64 \`json:"to_account_id"\`   // บัญชีผู้รับ (ปลายทาง)
+	Amount        int64 \`json:"amount"\`          // จำนวนเงินที่โอน (ต้องเป็นค่าบวกเสมอ)
+}
+
+const createTransfer = \`-- name: CreateTransfer :one
+INSERT INTO transfers (
+  from_account_id,
+  to_account_id,
+  amount
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, from_account_id, to_account_id, amount, created_at;
+\`
+
+// CreateTransfer สร้างบันทึกประวัติการโอนเงินลงในตาราง transfers
+func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
+	// 1. ส่งคำสั่ง INSERT บันทึกธุรกรรมการโอนเงิน
+	row := q.db.QueryRowContext(ctx, createTransfer, arg.FromAccountID, arg.ToAccountID, arg.Amount)
+
+	// 2. แกะผลลัพธ์ใส่ตัวแปร Transfer
+	var i Transfer
+	err := row.Scan(
+		&i.ID,
+		&i.FromAccountID,
+		&i.ToAccountID,
+		&i.Amount,
+		&i.CreatedAt,
+	)
+	return i, err
+}`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**ความพร้อมของ Data Access Layer**: ตอนนี้เรามีฟังก์ชันพื้นฐานครบทั้ง 3 ตารางแล้ว (`accounts`, `entries`, `transfers`) พร้อมสำหรับการนำไปร้อยเรียงกันในระดับ Transaction ในบทถัดไป!",
           ],
         },
       ],

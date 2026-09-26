@@ -200,6 +200,25 @@ func TestDeleteAccount(t *testing.T) {
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
 	require.Empty(t, acc2)
+}
+
+func TestListAccounts(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		createRandomAccount(t)
+	}
+
+	arg := ListAccountsParams{
+		Limit:  5,
+		Offset: 5,
+	}
+
+	accounts, err := testQueries.ListAccounts(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, accounts, 5)
+
+	for _, account := range accounts {
+		require.NotEmpty(t, account)
+	}
 }`,
         },
         {
@@ -210,6 +229,7 @@ func TestDeleteAccount(t *testing.T) {
             "**`require.NoError(t, err)`**: เช็กว่าคำสั่งทำงานสำเร็จ ถ้ามี error เทสต์จะหยุดทันทีพร้อมแสดงสาเหตุ",
             "**`require.WithinDuration(...)`**: วันเวลา `CreatedAt` ที่ผ่านการแปลงไปกลับระหว่าง Go และ PostgreSQL อาจมีความคลาดเคลื่อนในระดับไมโครวินาที การใช้ `WithinDuration(..., time.Second)` ช่วยให้การเทียบเวลาไม่พังจากความละเอียดของนาฬิกา",
             "**`require.EqualError(t, err, sql.ErrNoRows.Error())`**: พิสูจน์ว่าเมื่อลบบัญชีไปแล้ว ฐานข้อมูลต้องคืนข้อผิดพลาด 'ไม่พบแถวข้อมูล' ออกมาจริงๆ ตามที่ควรจะเป็น",
+            "**`require.Len(t, accounts, 5)`**: ตรวจสอบว่าระบบแบ่งหน้า (Pagination) ดึงข้อมูลมาตามจำนวน Limit ที่ระบุจริง",
           ],
         },
         {
@@ -223,6 +243,8 @@ func TestDeleteAccount(t *testing.T) {
 --- PASS: TestGetAccount (0.01s)
 === RUN   TestDeleteAccount
 --- PASS: TestDeleteAccount (0.01s)
+=== RUN   TestListAccounts
+--- PASS: TestListAccounts (0.01s)
 PASS
 ok      simplebank/db   0.142s`,
         },

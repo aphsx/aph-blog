@@ -417,6 +417,28 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 }`,
         },
         {
+          t: "p",
+          c: "จากนั้นนำ `authMiddleware` ไปผูกเข้ากับกลุ่มของ Route ที่ต้องการการยืนยันตัวตนใน `api/server.go`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "api/server.go (แนบ Auth Middleware ให้กับ Routes)",
+          c: `// ในฟังก์ชัน NewServer (api/server.go)
+router := gin.Default()
+
+// เส้นทางสาธารณะ (Public Routes): ทุกคนเข้าถึงได้โดยไม่ต้องล็อกอิน
+router.POST("/users", server.createUser)
+router.POST("/users/login", server.loginUser)
+
+// เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
+authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+authRoutes.POST("/accounts", server.createAccount)
+authRoutes.GET("/accounts/:id", server.getAccount)
+authRoutes.GET("/accounts", server.listAccounts)
+authRoutes.POST("/transfers", server.createTransfer)`,
+        },
+        {
           t: "codeout",
           lang: "bash",
           label: "ทดสอบล็อกอินเพื่อรับ PASETO Token ผ่าน cURL",

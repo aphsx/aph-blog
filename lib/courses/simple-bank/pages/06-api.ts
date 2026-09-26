@@ -228,6 +228,80 @@ Content-Type: application/json; charset=utf-8
   "error": "sql: no rows in result set"
 }`,
         },
+
+        { t: "h2", c: "4. การสร้าง Handler: `GET /accounts` (Pagination)" },
+        {
+          t: "p",
+          c: "การดึงข้อมูลรายการบัญชีทั้งหมดแบบแบ่งหน้า (Pagination) เพื่อไม่ให้เซิร์ฟเวอร์โหลดข้อมูลมากเกินไปในคำขอเดียว โดยรับ Query Parameters ผ่าน `ctx.ShouldBindQuery`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "api/account.go (ListAccounts)",
+          c: `// listAccountsRequest กำหนด Query Parameters สำหรับการแบ่งหน้า (Pagination)
+type listAccountsRequest struct {
+	PageID   int32 \`form:"page_id" binding:"required,min=1"\`
+	PageSize int32 \`form:"page_size" binding:"required,min=5,max=10"\`
+}
+
+func (server *Server) listAccounts(ctx *gin.Context) {
+	// 1. แกะ Query Parameters จาก URL (?page_id=1&page_size=5) ผ่าน ShouldBindQuery
+	var req listAccountsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// 2. คำนวณ Limit และ Offset สำหรับส่งให้คำสั่ง SQL (Offset = (PageID - 1) * PageSize)
+	arg := db.ListAccountsParams{
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+
+	// 3. ดึงรายชื่อบัญชีจากฐานข้อมูลผ่าน store
+	accounts, err := server.store.ListAccounts(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// 4. ส่ง JSON Array ของบัญชีกลับไปพร้อม HTTP 200 OK
+	ctx.JSON(http.StatusOK, accounts)
+}`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**`form:\"page_id\"`**: Gin จะอ่านค่าจาก URL Query String เช่น `?page_id=1&page_size=5`",
+            "**`binding:\"required,min=5,max=10\"`**: บังคับให้ขนาดหน้าต้องอยู่ระหว่าง 5 ถึง 10 แถว เพื่อป้องกันผู้ใช้ขอข้อมูลครั้งละ 1,000,000 แถวจนหน่วยความจำเซิร์ฟเวอร์เต็ม (DoS Protection)",
+            "**`Offset = (PageID - 1) * PageSize`**: สูตรคำนวณตำแหน่งเริ่มต้นของข้อมูลในฐานข้อมูล เช่น หน้าที่ 2 ขนาด 5 แถว จะได้ Offset = 5 (ข้าม 5 แถวแรกไป)",
+          ],
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ทดสอบยิง curl GET /accounts แบบแบ่งหน้า (Pagination) ใน Terminal",
+          code: `curl -i "http://localhost:8080/accounts?page_id=1&page_size=5"`,
+          out: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+[
+  {
+    "id": 1,
+    "owner": "alice",
+    "balance": 0,
+    "currency": "USD",
+    "created_at": "2026-09-26T10:00:00.123456Z"
+  },
+  {
+    "id": 2,
+    "owner": "bob",
+    "balance": 1000,
+    "currency": "USD",
+    "created_at": "2026-09-26T10:01:00.654321Z"
+  }
+]`,
+        },
       ],
       en: [],
     },
