@@ -221,11 +221,16 @@ STATEMENT: UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING id
           t: "code",
           lang: "go",
           label: "db/store.go (อัปเดตฟังก์ชัน TransferTx ให้ปลอด Deadlock)",
-          c: `package db
+          c: `// อัปเดตฟังก์ชัน TransferTx และเพิ่มฟังก์ชัน addMoney พร้อมกลไก Lock Ordering
+// ทำเพื่อแก้ปัญหา: ปัญหา Deadlock เมื่อเกิดการโอนเงินสวนทางกันระหว่าง 2 บัญชีในเวลาเดียวกัน
+// เช่น A โอนให้ B และ B โอนให้ A ในเสี้ยววินาทีเดียวกัน หากต่างคนต่างล็อกบัญชีตัวเองก่อน จะติด Circular Wait
+// การบังคับให้ทุก Transaction ล็อกแถวบัญชีที่มี ID น้อยกว่าก่อนเสมอ จะกำจัด Deadlock ได้อย่างเด็ดขาด 100%
+
+package db
 
 import "context"
 
-// addMoney ทำการตัดเงินและเพิ่มเงินระหว่างสองบัญชี โดยล็อกบัญชีที่มี ID น้อยกว่าก่อนเสมอ
+// addMoney ทำหน้าที่อัปเดตยอดเงินของทั้ง 2 บัญชีตามลำดับที่ส่งเข้ามา
 func addMoney(
 	ctx context.Context,
 	q *Queries,
@@ -234,6 +239,7 @@ func addMoney(
 	accountID2 int64,
 	amount2 int64,
 ) (account1 Account, account2 Account, err error) {
+	// 1. อัปเดตยอดเงินบัญชีแรก (ระบบจะล็อกแถวของ accountID1 ก่อน)
 	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
 		ID:     accountID1,
 		Amount: amount1,
@@ -242,6 +248,7 @@ func addMoney(
 		return
 	}
 
+	// 2. อัปเดตยอดเงินบัญชีที่สอง (ระบบจะล็อกแถวของ accountID2 ตามมา)
 	account2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
 		ID:     accountID2,
 		Amount: amount2,
@@ -249,19 +256,20 @@ func addMoney(
 	return
 }
 
-// TransferTx เวอร์ชันป้องกัน Deadlock 100%
+// TransferTx เวอร์ชันปรับปรุงที่ป้องกัน Deadlock ได้อย่างสมบูรณ์
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		// บันทึก Transfer และ Entries ตามปกติ
+		// 1. สร้างประวัติการโอนเงินลงในตาราง transfers
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams(arg))
 		if err != nil {
 			return err
 		}
 
+		// 2. สร้าง Entry เงินออกของบัญชีต้นทาง (Ledger บันทึกยอดลบ)
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
 			Amount:    -arg.Amount,
@@ -270,6 +278,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
+		// 3. สร้าง Entry เงินเข้าของบัญชีปลายทาง (Ledger บันทึกยอดบวก)
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.ToAccountID,
 			Amount:    arg.Amount,
@@ -278,12 +287,15 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
-		// พระเอกของเรา: เช็กว่า ID ไหนน้อยกว่า ให้อัปเดตบัญชีนั้นก่อนเสมอ!
+		// 4. หัวใจสำคัญ: ตรวจสอบว่า ID ไหนน้อยกว่า ให้อัปเดตและล็อกบัญชีนั้นก่อนเสมอ!
+		// ไม่ว่าใครจะเป็นผู้โอนหรือผู้รับ ลำดับการขอ Lock ในฐานข้อมูลจะวิ่งจาก ID น้อย -> ID มากเสมอ
 		if arg.FromAccountID < arg.ToAccountID {
+			// เคสที่ 1: From ID น้อยกว่า To ID -> หักเงินบัญชี From ก่อน แล้วค่อยเพิ่มเงินบัญชี To
 			result.FromAccount, result.ToAccount, err = addMoney(
 				ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount,
 			)
 		} else {
+			// เคสที่ 2: To ID น้อยกว่า From ID -> เพิ่มเงินบัญชี To ก่อน แล้วค่อยหักเงินบัญชี From
 			result.ToAccount, result.FromAccount, err = addMoney(
 				ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount,
 			)

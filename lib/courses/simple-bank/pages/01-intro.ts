@@ -233,39 +233,47 @@ export const introPages: Record<string, Page> = {
           t: "codeout",
           lang: "go",
           label: "struct_pointer.go",
-          code: `package main
+          code: `// นิยาม Account struct และเปรียบเทียบการทำงานระหว่าง Value Receiver กับ Pointer Receiver
+// ทำเพื่อแก้ปัญหา: เข้าใจว่าเมื่อไหร่ต้องส่ง Pointer เพื่อแก้ไขข้อมูลในก้อนเดิม และเมื่อไหร่ส่ง Value ที่เป็นการคัดลอกสำเนา
+
+package main
 
 import "fmt"
 
-// Account คือโครงสร้างข้อมูลแทนบัญชีธนาคาร
+// Account คือโครงสร้างข้อมูลจำลองบัญชีธนาคาร
 type Account struct {
 	ID      int64  \`json:"id"\`
 	Owner   string \`json:"owner"\`
 	Balance int64  \`json:"balance"\`
 }
 
-// DepositCopy รับค่าสำเนา (Value Receiver) แก้ไขแล้วก้อนเดิมในหน่วยความจำไม่เปลี่ยน
+// DepositCopy รับค่าแบบสำเนา (Value Receiver)
+// ข้อจำกัด: การเปลี่ยนแปลงตัวแปร a ภายในฟังก์ชันนี้จะกระทบแค่สำเนา ก้อนต้นฉบับในหน่วยความจำจะไม่เปลี่ยน
 func (a Account) DepositCopy(amount int64) {
 	a.Balance += amount
 }
 
-// Deposit รับ pointer (*Account) เพื่อแก้ไขข้อมูลของก้อนเดิมในหน่วยความจำโดยตรง
+// Deposit รับค่าแบบ Pointer (*Account) เพื่อเข้าถึงตำแหน่งหน่วยความจำโดยตรง
+// ประโยชน์: แก้ไข Balance ของบัญชีต้นฉบับได้โดยตรง ไม่ต้องคัดลอกข้อมูลทั้งก้อน
 func (a *Account) Deposit(amount int64) {
 	a.Balance += amount
 }
 
-// GetBalance รับค่าสำเนา (Account) เข้ามาอ่านค่าเฉยๆ โดยไม่แก้ไขต้นฉบับ
+// GetBalance รับค่าสำเนา (Account) เพื่อเข้ามาอ่านข้อมูลเพียงอย่างเดียว โดยไม่แก้ไขค่าใดๆ
 func (a Account) GetBalance() int64 {
 	return a.Balance
 }
 
 func main() {
+	// 1. สร้างบัญชีใหม่พร้อมยอดเงินเริ่มต้น 1,000 บาท
 	acc := &Account{ID: 1, Owner: "Alice", Balance: 1000}
 
+	// 2. ทดสอบ Value Receiver (ส่งสำเนา): ยอดเงินก้อนเดิมต้องไม่ขยับ
 	fmt.Println(">> 1. ทดสอบ Value Receiver (ส่งสำเนา):")
 	acc.DepositCopy(500)
 	fmt.Printf("   ยอดเงินหลัง DepositCopy: %d บาท (ก้อนเดิมไม่เปลี่ยน!)\\n\\n", acc.GetBalance())
 
+	// 3. ทดสอบ Pointer Receiver (ส่ง Pointer): ยอดเงินก้อนเดิมจะถูกอัปเดตจริงเป็น 1,500 บาท
 	fmt.Println(">> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):")
 	acc.Deposit(500)
 	fmt.Printf("   ยอดเงินหลัง Deposit: %d บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)\\n", acc.GetBalance())
@@ -295,37 +303,49 @@ func main() {
           t: "codeout",
           lang: "go",
           label: "error_handling.go",
-          code: `package main
+          code: `// สาธิตการจัดการ Error ตามปรัชญาของ Go (Explicit Error Handling)
+// ทำเพื่อแก้ปัญหา: ภาษา Go ไม่มี try-catch แต่ใช้การ return error ออกมาให้ผู้เรียกตรวจสอบทันที ป้องกันข้อผิดพลาดแอบแฝง
+
+package main
 
 import (
 	"errors"
 	"fmt"
 )
 
-// ErrInsufficientBalance เป็นข้อผิดพลาดมาตรฐานเมื่อเงินไม่พอ
+// ErrInsufficientBalance เป็นข้อผิดพลาดมาตรฐานที่นิยามไว้ล่วงหน้า (Sentinel Error)
 var ErrInsufficientBalance = errors.New("ยอดเงินคงเหลือไม่เพียงพอ")
 
+// Withdraw ฟังก์ชันถอนเงิน คืนค่ายอดเงินคงเหลือใหม่คู่กับ error
 func Withdraw(balance int64, amount int64) (int64, error) {
+	// 1. ตรวจสอบเงื่อนไขว่าจำนวนเงินที่ถอนต้องมากกว่า 0
 	if amount <= 0 {
 		return balance, errors.New("จำนวนเงินที่ถอนต้องมากกว่า 0")
 	}
+
+	// 2. ตรวจสอบว่ายอดเงินในบัญชีพอถอนหรือไม่
 	if balance < amount {
-		return balance, ErrInsufficientBalance
+		return balance, ErrInsufficientBalance // คืนค่า Error ที่นิยามไว้
 	}
+
+	// 3. หากผ่านทุกเงื่อนไข ให้ตัดเงินและส่ง error เป็น nil (ไม่มีข้อผิดพลาด)
 	return balance - amount, nil
 }
 
 func main() {
 	currentBalance := int64(1000)
 
+	// ทดสอบเคสที่ 1: ถอนเกินยอดคงเหลือ (ยอดเงินไม่พอ)
 	fmt.Println(">> ทดสอบเคสที่ 1: ถอนเงินเกินยอดคงเหลือ (ถอน 1,500 บาท จาก 1,000 บาท)")
 	newBalance, err := Withdraw(currentBalance, 1500)
+	// ตรวจสอบทันทีว่ามี Error หรือไม่ตามสไตล์ Go
 	if err != nil {
 		fmt.Println("   เกิดข้อผิดพลาด:", err)
 	} else {
 		fmt.Println("   ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
 	}
 
+	// ทดสอบเคสที่ 2: ถอนปกติ (เงินพอถอน)
 	fmt.Println("\\n>> ทดสอบเคสที่ 2: ถอนเงินปกติ (ถอน 400 บาท จาก 1,000 บาท)")
 	newBalance, err = Withdraw(currentBalance, 400)
 	if err != nil {
@@ -358,18 +378,28 @@ func main() {
           t: "codeout",
           lang: "go",
           label: "defer_demo.go",
-          code: `package main
+          code: `// สาธิตการทำงานของ defer ในการเก็บกวาด Resource และลำดับการทำงานแบบ LIFO
+// ทำเพื่อแก้ปัญหา: ป้องกันการลืมปิด Connection หรือลืมปลด Lock เมื่อเกิด Error กลางทาง
+// แม้ฟังก์ชันจะ Return ก่อนเวลา คำสั่ง defer จะการันตีทำงานเสมอ
+
+package main
 
 import "fmt"
 
 func ProcessTransaction() {
+	// 1. เริ่มต้นเชื่อมต่อฐานข้อมูล
 	fmt.Println("1. เริ่มต้นเชื่อมต่อฐานข้อมูล")
+
+	// 2. ลงทะเบียนคำสั่ง defer ล่วงหน้าไว้สำหรับทำความสะอาด Resource
+	// สังเกต: defer ทำงานแบบ LIFO (Last-In, First-Out) คำสั่งที่ประกาศทีหลังจะทำงานก่อน
 	defer fmt.Println(">> [defer 1] ปิดการเชื่อมต่อฐานข้อมูล (LIFO: รันลำดับสุดท้าย)")
 	defer fmt.Println(">> [defer 2] ปลด Row Lock ของบัญชี (LIFO: รันก่อน)")
 
+	// 3. ทำงาน Business Logic โอนเงิน
 	fmt.Println("2. ตรวจสอบยอดเงินในบัญชี")
 	fmt.Println("3. โอนเงิน 500 บาทสำเร็จ")
 	fmt.Println("4. กำลังจะออกจากฟังก์ชัน...")
+	// เมื่อฟังก์ชันจบลงที่บรรทัดนี้ คำสั่ง defer 2 และ defer 1 จะถูกรันย้อนหลังตามลำดับ
 }
 
 func main() {
@@ -397,7 +427,10 @@ func main() {
           t: "codeout",
           lang: "go",
           label: "context_demo.go",
-          code: `package main
+          code: `// สาธิตการใช้งาน context.Context ในการควบคุมเวลาทำงาน (Timeout) และการยกเลิกคำขอ
+// ทำเพื่อแก้ปัญหา: ป้องกันไม่ให้คำสั่งคิวรี Database ที่ค้างหรือช้าบล็อกการทำงานของเซิร์ฟเวอร์จนทรัพยากรหมด
+
+package main
 
 import (
 	"context"
@@ -405,22 +438,26 @@ import (
 	"time"
 )
 
+// QueryDatabase จำลองฟังก์ชันคิวรีฐานข้อมูลที่รับ context เข้ามาตรวจสอบการ Timeout
 func QueryDatabase(ctx context.Context) error {
 	fmt.Println(">> เริ่มต้นค้นหาข้อมูลใน Database...")
+
+	// ใช้ select เพื่อดักฟังสัญญาณระหว่างงานเสร็จ กับ Context หมดเวลาก่อน
 	select {
-	case <-time.After(2 * time.Second): // จำลองการคิวรีที่ใช้เวลา 2 วินาที
+	case <-time.After(2 * time.Second): // จำลองการคิวรีที่ใช้เวลาประมวลผล 2 วินาที
 		fmt.Println("   ค้นหาข้อมูลสำเร็จ")
 		return nil
-	case <-ctx.Done(): // หาก Context สั่งตัดเวลาหรือถูกยกเลิก
-		return ctx.Err()
+	case <-ctx.Done(): // กรณี Context ตัดเวลาก่อนที่งานจะเสร็จ
+		return ctx.Err() // ส่งคืน error เช่น context deadline exceeded
 	}
 }
 
 func main() {
-	// ตั้ง Timeout สูงสุดไม่เกิน 1 วินาที (แต่งานจริงใช้ 2 วินาที)
+	// 1. สร้าง Context พร้อมกำหนด Timeout สูงสุดไม่เกิน 1 วินาที
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
+	defer cancel() // คืนทรัพยากรของ Context เสมอเมื่อจบฟังก์ชัน
 
+	// 2. เรียกฟังก์ชันที่มีงาน 2 วินาที (เกินกว่าเวลาที่ Context ยอมรับได้)
 	err := QueryDatabase(ctx)
 	if err != nil {
 		fmt.Println(">> การทำงานล้มเหลว:", err)
@@ -441,7 +478,10 @@ func main() {
           t: "codeout",
           lang: "go",
           label: "concurrency_demo.go",
-          code: `package main
+          code: `// สาธิตการทำงานคู่ขนานด้วย Goroutines, Channels, และ sync.WaitGroup
+// ทำเพื่อแก้ปัญหา: การประมวลผลงานหลายชิ้นพร้อมกันโดยไม่บล็อก และส่งข้อมูลผลลัพธ์กลับมาอย่างปลอดภัยโดยไม่ต้องใช้ Lock
+
+package main
 
 import (
 	"fmt"
@@ -449,25 +489,34 @@ import (
 	"time"
 )
 
+// Worker จำลองคนงานที่ทำงานแบบ Asynchronous ใน Goroutine
 func Worker(id int, ch chan<- string, wg *sync.WaitGroup) {
-	defer wg.Done() // สั่งบอก WaitGroup เมื่องานเสร็จสิ้น
-	time.Sleep(time.Duration(id*10) * time.Millisecond) // จำลองเวลาประมวลผล
+	// 1. แจ้งเตือน WaitGroup เมื่องานเสร็จสิ้น (รันผ่าน defer เพื่อความแน่นอน)
+	defer wg.Done()
+
+	// 2. จำลองเวลาประมวลผลธุรกรรม
+	time.Sleep(time.Duration(id*10) * time.Millisecond)
+
+	// 3. ส่งข้อมูลผลลัพธ์ผ่าน Channel ไปยังฟังก์ชันหลัก
 	ch <- fmt.Sprintf("Goroutine #%d: ประมวลผลธุรกรรมสำเร็จ", id)
 }
 
 func main() {
 	var wg sync.WaitGroup
-	resultChan := make(chan string, 3)
+	resultChan := make(chan string, 3) // สร้าง Channel แบบ Buffered ขนาด 3 ช่อง
 
+	// 1. ปล่อย 3 Goroutines ให้ทำงานคู่ขนานกันในเวลาเดียวกัน
 	fmt.Println(">> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...")
 	for i := 1; i <= 3; i++ {
-		wg.Add(1)
+		wg.Add(1) // เพิ่มตัวนับงานใน WaitGroup ทีละ 1
 		go Worker(i, resultChan, &wg)
 	}
 
-	wg.Wait()         // รอจนกว่าคนงานทุกคนจะเรียก wg.Done() ครบ
-	close(resultChan) // ปิด channel เมื่อส่งข้อมูลครบ
+	// 2. รอจนกว่าคนงานทั้ง 3 คนจะทำงานเสร็จ (ตัวนับลดลงเหลือ 0)
+	wg.Wait()
+	close(resultChan) // ปิด Channel เมื่อส่งข้อมูลครบถ้วน ป้องกัน Deadlock
 
+	// 3. วนลูปอ่านข้อมูลผลลัพธ์ทั้งหมดที่ส่งออกมาจาก Channel
 	fmt.Println(">> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:")
 	for msg := range resultChan {
 		fmt.Println("  ", msg)

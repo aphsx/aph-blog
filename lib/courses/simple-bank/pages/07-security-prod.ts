@@ -64,7 +64,9 @@ ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "cur
           t: "codeout",
           lang: "go",
           label: "bcrypt_demo.go",
-          code: `package main
+          code: `// สาธิตกลไกความปลอดภัยของ Bcrypt: การสุ่ม Salt อัตโนมัติ และการตรวจสอบรหัสผ่าน
+// ทำเพื่อแก้ปัญหา: ป้องกันการแฮกผ่าน Rainbow Table เพราะรหัสผ่านเดียวกันจะได้ Hash ที่แตกต่างกันทุกครั้ง
+package main
 
 import (
 	"fmt"
@@ -74,7 +76,7 @@ import (
 func main() {
 	rawPassword := "secretPassword123"
 
-	// 1. แฮชรหัสผ่านเดียวกัน 2 ครั้ง (สังเกตค่า Salt ที่สุ่มใหม่เสมอ)
+	// 1. แฮชรหัสผ่านเดียวกัน 2 ครั้ง (Bcrypt จะสุ่ม Salt ใหม่ทุกครั้ง ทำให้ผลลัพธ์ไม่ตรงกัน)
 	hash1, _ := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 	hash2, _ := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 
@@ -82,11 +84,11 @@ func main() {
 	fmt.Println("Hash #2:", string(hash2))
 	fmt.Println("Hashes identical?:", string(hash1) == string(hash2))
 
-	// 2. ตรวจสอบรหัสผ่านที่ถูกต้อง
+	// 2. ตรวจสอบรหัสผ่านที่ถูกต้องด้วย CompareHashAndPassword (ถ้ารหัสตรงกัน err จะเป็น nil)
 	errCorrect := bcrypt.CompareHashAndPassword(hash1, []byte("secretPassword123"))
 	fmt.Println("Check correct password err == nil:", errCorrect == nil)
 
-	// 3. ตรวจสอบรหัสผ่านที่ผิด
+	// 3. ตรวจสอบรหัสผ่านที่ผิด (ถ้ารหัสไม่ตรง จะส่ง Error กลับมา)
 	errWrong := bcrypt.CompareHashAndPassword(hash1, []byte("wrongPassword456"))
 	fmt.Println("Check wrong password error:", errWrong)
 }`,
@@ -106,24 +108,30 @@ Check wrong password error: crypto/bcrypt: hashedPassword is not the hash of the
           t: "code",
           lang: "go",
           label: "util/password.go",
-          c: `package util
+          c: `// ยูทิลิตี้จัดการการแฮชและตรวจสอบรหัสผ่านด้วยอัลกอริทึม Bcrypt
+// ทำเพื่อแก้ปัญหา: ห้ามบันทึกรหัสผ่านเป็น Plain Text ลงฐานข้อมูลเด็ดขาด เพื่อความปลอดภัยของผู้ใช้งาน
+package util
 
 import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 )
 
-// HashPassword แปลงรหัสผ่าน Plain Text ให้กลายเป็น Bcrypt Hash
+// HashPassword แปลงรหัสผ่าน Plain Text ให้กลายเป็น Bcrypt Hash พร้อมแนบ Salt อัตโนมัติ
 func HashPassword(password string) (string, error) {
+	// 1. แฮชรหัสผ่านโดยใช้ค่า Cost มาตรฐาน (DefaultCost = 10)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", fmt.Errorf("ไม่สามารถแฮชรหัสผ่านได้: %w", err)
 	}
+
+	// 2. คืนค่าสตริงของ Bcrypt Hash ที่พร้อมนำไปบันทึกลงคอลัมน์ hashed_password
 	return string(hashedPassword), nil
 }
 
 // CheckPassword ตรวจสอบว่ารหัสผ่านที่ป้อนเข้ามา ตรงกับ Bcrypt Hash ในฐานข้อมูลหรือไม่
 func CheckPassword(password string, hashedPassword string) error {
+	// ใช้ CompareHashAndPassword เพื่อแกะ Salt จาก Hash แล้วนำมาเทียบกับรหัสผ่านที่ส่งเข้ามา
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }`,
         },

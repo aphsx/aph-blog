@@ -258,7 +258,10 @@ ok      simplebank/db   0.142s`,
           t: "code",
           lang: "go",
           label: "db/store_test.go",
-          c: `package db
+          c: `// ชุดทดสอบ TestTransferTx สำหรับพิสูจน์ความถูกต้องของการโอนเงินแบบคู่ขนาน (Concurrent Transactions)
+// ทำเพื่อแก้ปัญหา: ป้องกันบั๊ก Race Condition และเงินสูญหายระหว่างทาง เมื่อมีคำสั่งโอนเงินเข้ามารัวๆ พร้อมกัน
+
+package db
 
 import (
 	"context"
@@ -271,11 +274,12 @@ import (
 func TestTransferTx(t *testing.T) {
 	store := NewStore(testDB)
 
+	// 1. สร้างบัญชีทดสอบ 2 บัญชีพร้อมบันทึกยอดเงินตั้งต้น
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 	fmt.Println(">> ยอดเงินก่อนโอน:", account1.Balance, account2.Balance)
 
-	// รันการโอนเงินพร้อมกัน 5 ครั้ง ครั้งละ 10 บาท
+	// 2. ปล่อย Goroutines โอนเงินพร้อมกัน 5 ครั้ง ครั้งละ 10 บาท
 	n := 5
 	amount := int64(10)
 
@@ -295,16 +299,16 @@ func TestTransferTx(t *testing.T) {
 		}()
 	}
 
-	// ตรวจสอบผลลัพธ์จากแต่ละ Goroutine
+	// 3. ตรวจสอบผลลัพธ์จากแต่ละ Goroutine ผ่าน Channels
 	existed := make(map[int]bool)
 	for i := 0; i < n; i++ {
 		err := <-errs
-		require.NoError(t, err)
+		require.NoError(t, err) // ต้องไม่มี error เกิดขึ้นในขั้นตอนใดเลย
 
 		result := <-results
 		require.NotEmpty(t, result)
 
-		// เช็กตาราง Transfer
+		// 3.1 ตรวจสอบข้อมูลแถวในตาราง Transfer
 		transfer := result.Transfer
 		require.NotEmpty(t, transfer)
 		require.Equal(t, account1.ID, transfer.FromAccountID)
@@ -312,7 +316,7 @@ func TestTransferTx(t *testing.T) {
 		require.Equal(t, amount, transfer.Amount)
 		require.NotZero(t, transfer.ID)
 
-		// เช็ก Entries
+		// 3.2 ตรวจสอบสมุดบัญชีแยกประเภท Entries (เงินเข้า/เงินออก)
 		fromEntry := result.FromEntry
 		require.NotEmpty(t, fromEntry)
 		require.Equal(t, account1.ID, fromEntry.AccountID)
@@ -323,20 +327,20 @@ func TestTransferTx(t *testing.T) {
 		require.Equal(t, account2.ID, toEntry.AccountID)
 		require.Equal(t, amount, toEntry.Amount)
 
-		// เช็กการลด/เพิ่มของ Balance ในแต่ละก้าว
+		// 3.3 ตรวจสอบยอดเงินคงเหลือของแต่ละบัญชีในแต่ละรอบ
 		diff1 := account1.Balance - result.FromAccount.Balance
 		diff2 := result.ToAccount.Balance - account2.Balance
-		require.Equal(t, diff1, diff2)
+		require.Equal(t, diff1, diff2) // ยอดเงินที่หักออก ต้องเท่ากับยอดเงินที่เพิ่มเข้า
 		require.True(t, diff1 > 0)
 		require.True(t, diff1%amount == 0) // ผลต่างต้องหารด้วยจำนวนเงินโอนลงตัว
 
 		k := int(diff1 / amount)
 		require.True(t, k >= 1 && k <= n)
-		require.NotContains(t, existed, k) // แต่ละรอบ k ต้องไม่ซ้ำกันเด็ดขาด!
+		require.NotContains(t, existed, k) // แต่ละรอบ k ต้องไม่ซ้ำกันเด็ดขาด (พิสูจน์ว่าไม่มี Race Condition)
 		existed[k] = true
 	}
 
-	// ตรวจสอบยอดเงินคงเหลือสุดท้ายในฐานข้อมูล
+	// 4. ตรวจสอบยอดเงินคงเหลือสุทธิสุดท้ายในฐานข้อมูลจริง
 	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 
@@ -376,13 +380,26 @@ ok      simplebank/db   0.198s`,
           t: "code",
           lang: "go",
           label: "db/store_deadlock_test.go",
-          c: `func TestTransferTxDeadlock(t *testing.T) {
+          c: `// ชุดทดสอบ TestTransferTxDeadlock พิสูจน์ว่าการโอนเงินสวนทางกันจะไม่ทำให้เกิด Deadlock
+// ทำเพื่อแก้ปัญหา: จำลองสถานการณ์ A โอนให้ B และ B โอนให้ A พร้อมๆ กัน หากจัดการ Lock ไม่ดี ระบบจะค้างทันที
+
+package db
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestTransferTxDeadlock(t *testing.T) {
 	store := NewStore(testDB)
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 
-	n := 10 // ทั้งหมด 10 ธุรกรรม
+	// 1. จำลองการโอนเงินสวนทางกันทั้งหมด 10 ธุรกรรม
+	n := 10
 	amount := int64(10)
 	errs := make(chan error)
 
@@ -390,7 +407,7 @@ ok      simplebank/db   0.198s`,
 		fromAccountID := account1.ID
 		toAccountID := account2.ID
 
-		// ครึ่งหนึ่งให้โอนสลับทิศทาง (2 โอนให้ 1)
+		// สลับทิศทางครึ่งหนึ่ง: ให้บัญชี 2 โอนกลับคืนให้บัญชี 1
 		if i%2 == 1 {
 			fromAccountID = account2.ID
 			toAccountID = account1.ID
@@ -406,13 +423,13 @@ ok      simplebank/db   0.198s`,
 		}()
 	}
 
-	// รอรับผลลัพธ์จากทั้ง 10 คำสั่ง
+	// 2. ตรวจสอบผลลัพธ์: ทุก Transaction ต้องสำเร็จ ไร้ปัญหา Deadlock 100%
 	for i := 0; i < n; i++ {
 		err := <-errs
-		require.NoError(t, err) // ต้องไม่มี error แม้แต่อันเดียว! ไม่มี Deadlock เกิดขึ้น!
+		require.NoError(t, err) // ต้องไม่มีข้อผิดพลาด pq: deadlock detected แม้แต่ครั้งเดียว
 	}
 
-	// ตรวจสอบยอดเงินสุดท้าย: โอนไป 5 ครั้ง โอนกลับ 5 ครั้ง ยอดต้องเท่าเดิมเป๊ะ!
+	// 3. ตรวจสอบยอดเงินคงเหลือสุดท้าย: โอนไป 5 ครั้ง โอนกลับ 5 ครั้ง ยอดเงินต้องเท่าเดิมเป๊ะ
 	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 

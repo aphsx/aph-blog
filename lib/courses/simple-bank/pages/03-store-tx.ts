@@ -28,27 +28,32 @@ export const storeTxPages: Record<string, Page> = {
           t: "code",
           lang: "go",
           label: "db/db.go",
-          c: `package db
+          c: `// จัดการการเชื่อมต่อฐานข้อมูล PostgreSQL ผ่าน database/sql พร้อมระบบ Connection Pooling
+// ทำเพื่อแก้ปัญหา: หากเปิด-ปิด Connection ทุกครั้งที่ยิงคิวรี เซิร์ฟเวอร์จะกินทรัพยากรสูงและช้ามาก
+// Connection Pool จะเตรียมท่อเชื่อมต่อสแตนด์บายไว้ล่วงหน้า ทำให้ยิงคิวรีได้รวดเร็วทันที
+package db
 
 import (
 	"database/sql"
 	"time"
 
-	_ "github.com/lib/pq" // postgres driver
+	_ "github.com/lib/pq" // ลงทะเบียน postgres driver ให้กับ database/sql
 )
 
+// NewDB ทำหน้าที่เปิดสระรวมการเชื่อมต่อ (Connection Pool) และตั้งค่าขีดจำกัดที่เหมาะสมสำหรับ Production
 func NewDB(dataSourceName string) (*sql.DB, error) {
+	// 1. ตรวจสอบรูปแบบ Connection String และสร้าง Pool (คำสั่งนี้ยังไม่ได้ต่อฐานข้อมูลจริง)
 	db, err := sql.Open("postgres", dataSourceName)
 	if err != nil {
 		return nil, err
 	}
 
-	// ตั้งค่า Connection Pool
-	db.SetMaxOpenConns(25)                  // จำนวน connection สูงสุดที่เปิดพร้อมกันได้
-	db.SetMaxIdleConns(25)                  // จำนวน connection ที่รอสแตนด์บายไว้ใน pool
-	db.SetConnMaxLifetime(5 * time.Minute)  // อายุสูงสุดของแต่ละ connection ก่อนจะถูกรีเฟรชใหม่
+	// 2. กำหนดขนาด Connection Pool เพื่อควบคุมการใช้ทรัพยากร
+	db.SetMaxOpenConns(25)                 // จำนวน Connection สูงสุดที่เปิดใช้งานพร้อมกันได้ (ป้องกัน DB รับโหลดเกิน)
+	db.SetMaxIdleConns(25)                 // จำนวน Connection ที่เปิดสแตนด์บายไว้ใน Pool พร้อมหยิบไปใช้ทันที
+	db.SetConnMaxLifetime(5 * time.Minute) // อายุขัยสูงสุดของ Connection ก่อนถูกปิดแล้วสร้างใหม่ (ป้องกัน Stale Connection)
 
-	// ทดสอบว่าเชื่อมต่อฐานข้อมูลได้จริงหรือไม่
+	// 3. ทดสอบส่งคำสั่ง ping ไปยังฐานข้อมูลจริง เพื่อการันตีว่าเชื่อมต่อได้สำเร็จก่อนคืนค่า
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
@@ -74,30 +79,35 @@ func NewDB(dataSourceName string) (*sql.DB, error) {
           t: "code",
           lang: "go",
           label: "db/models.go",
-          c: `package db
+          c: `// นิยาม Go Struct สำหรับเป็นพิมพ์เขียว (Model) ที่ตรงกับโครงสร้างตารางใน PostgreSQL
+// ทำเพื่อแก้ปัญหา: แปลงข้อมูลจากตารางฐานข้อมูล (Rows) ให้กลายเป็นตัวแปร Strong-type ใน Go ที่ตรวจสอบประเภทข้อมูลได้ตั้งแต่ตอนคอมไพล์
+package db
 
 import "time"
 
+// Account แทนโครงสร้างตาราง accounts (บัญชีผู้ใช้งาน)
 type Account struct {
 	ID        int64     \`json:"id"\`
 	Owner     string    \`json:"owner"\`
-	Balance   int64     \`json:"balance"\`
+	Balance   int64     \`json:"balance"\` // เก็บเป็นหน่วยย่อยที่สุด (สตางค์/เซนต์) ห้ามใช้ทศนิยม
 	Currency  string    \`json:"currency"\`
 	CreatedAt time.Time \`json:"created_at"\`
 }
 
+// Entry แทนโครงสร้างตาราง entries (สมุดบัญชีแยกประเภท Ledger บันทึกเงินเข้า-ออก)
 type Entry struct {
 	ID        int64     \`json:"id"\`
 	AccountID int64     \`json:"account_id"\`
-	Amount    int64     \`json:"amount"\` // บวก = เงินเข้า, ลบ = เงินออก
+	Amount    int64     \`json:"amount"\` // บวก = เงินเข้าบัญชี, ลบ = เงินออกจากบัญชี
 	CreatedAt time.Time \`json:"created_at"\`
 }
 
+// Transfer แทนโครงสร้างตาราง transfers (ประวัติธุรกรรมการโอนเงินระหว่าง 2 บัญชี)
 type Transfer struct {
 	ID            int64     \`json:"id"\`
-	FromAccountID int64     \`json:"from_account_id"\`
-	ToAccountID   int64     \`json:"to_account_id"\`
-	Amount        int64     \`json:"amount"\`
+	FromAccountID int64     \`json:"from_account_id"\` // บัญชีต้นทาง (ผู้โอน)
+	ToAccountID   int64     \`json:"to_account_id"\`   // บัญชีปลายทาง (ผู้รับ)
+	Amount        int64     \`json:"amount"\`          // จำนวนเงินที่โอน (ต้องเป็นค่าบวกเสมอ)
 	CreatedAt     time.Time \`json:"created_at"\`
 }`,
         },
@@ -111,14 +121,16 @@ type Transfer struct {
           t: "code",
           lang: "go",
           label: "db/db.go (DBTX Interface)",
-          c: `package db
+          c: `// กำหนด DBTX Interface กลางเพื่อให้คิวรีทำงานได้ทั้งแบบเดี่ยว (*sql.DB) และแบบทรานแซกชัน (*sql.Tx)
+// ทำเพื่อแก้ปัญหา: ฟังก์ชัน CRUD ทั่วไปเขียนครั้งเดียว แต่สามารถนำไปใช้ใน Transaction ได้ทันทีโดยไม่ต้องเขียนโค้ดซ้ำ
+package db
 
 import (
 	"context"
 	"database/sql"
 )
 
-// DBTX เป็นอินเทอร์เฟซที่รวมฟังก์ชันที่มีทั้งใน *sql.DB และ *sql.Tx
+// DBTX รวบรวมฟังก์ชันมาตรฐานสำหรับการยิงคำสั่ง SQL ที่มีร่วมกันใน *sql.DB และ *sql.Tx
 type DBTX interface {
 	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 	PrepareContext(context.Context, string) (*sql.Stmt, error)
@@ -126,6 +138,7 @@ type DBTX interface {
 	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
 }
 
+// Queries ทำหน้าที่รันคำสั่ง SQL ทั้งหมด โดยผูกอยู่กับ DBTX
 type Queries struct {
 	db DBTX
 }
@@ -134,7 +147,7 @@ func New(db DBTX) *Queries {
 	return &Queries{db: db}
 }
 
-// WithTx ช่วยให้เปลี่ยนตัวรันคิวรีไปเป็น Transaction ชั่วคราวได้
+// WithTx สร้าง Queries ชุดใหม่ที่ผูกเข้ากับ Transaction (tx) ชั่วคราว
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{db: tx}
 }`,
@@ -149,7 +162,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
           t: "code",
           lang: "go",
           label: "db/account.go",
-          c: `package db
+          c: `// ฟังก์ชัน CRUD สำหรับจัดการตาราง accounts ด้วย Parameterized Query
+// ทำเพื่อแก้ปัญหา: แยกคำสั่ง SQL ออกจากตัวแปรข้อมูล ป้องกัน SQL Injection ได้ 100%
+package db
 
 import "context"
 
@@ -170,8 +185,12 @@ INSERT INTO accounts (
 RETURNING id, owner, balance, currency, created_at;
 \`
 
+// CreateAccount สร้างบัญชีใหม่และดึงข้อมูลแถวที่เพิ่งสร้างกลับมาทันที
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
+	// 1. ส่งคำสั่ง INSERT พร้อมตัวแปรผ่าน Placeholder ($1, $2, $3)
 	row := q.db.QueryRowContext(ctx, createAccount, arg.Owner, arg.Balance, arg.Currency)
+
+	// 2. นำข้อมูลแถวที่คืนกลับมาจาก RETURNING มาแกะใส่ตัวแปร Account
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -188,8 +207,12 @@ SELECT id, owner, balance, currency, created_at FROM accounts
 WHERE id = $1 LIMIT 1;
 \`
 
+// GetAccount ดึงข้อมูลบัญชีตาม ID
 func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
+	// 1. ยิงคำสั่ง SELECT ค้นหาตาม ID ผ่าน Placeholder $1
 	row := q.db.QueryRowContext(ctx, getAccount, id)
+
+	// 2. แกะผลลัพธ์ใส่ตัวแปร Account ผ่าน Pointer
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -272,7 +295,13 @@ func (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {
           t: "code",
           lang: "go",
           label: "db/store.go",
-          c: `package db
+          c: `// สร้าง Store struct สืบทอดความสามารถของ Queries มาทั้งหมด
+// และเพิ่มความสามารถในการเปิด Transaction จัดการ BEGIN, COMMIT, และ ROLLBACK
+
+// ทำเพื่อแก้ปัญหา: เวลาเขียนคำสั่ง Query หลายๆ ตัวเรียงกัน เราต้องการระบบเปิด-ปิด Transaction มาครอบไว้
+// เพื่อความปลอดภัยของข้อมูลตามหลัก ACID
+
+package db
 
 import (
 	"context"
@@ -281,6 +310,7 @@ import (
 )
 
 // Store ครอบคลุมทั้งฟังก์ชันการคิวรีรายตัว และการทำงานร่วมกันเป็น Transaction
+// สร้าง Store struct มาให้มัดรวมตัวแปรเชื่อมฐานข้อมูล db กับคำสั่งคิวรี (Queries) เป็นก้อนเดียวกัน
 type Store struct {
 	*Queries
 	db *sql.DB
@@ -293,24 +323,32 @@ func NewStore(db *sql.DB) *Store {
 	}
 }
 
-// execTx เป็นฟังก์ชันภายในที่ควบคุมรอบชีวิตของ Transaction อย่างปลอดภัย
+// execTx เป็นฟังก์ชันภายในที่ควบคุมรอบชีวิต (Cycle) ของ Transaction อย่างปลอดภัย
+// สร้าง execTx มาทำหน้าที่เป็น Template ในการรัน Transaction โดยที่เราไม่ต้องมานั่งเขียนคำสั่ง
+// db.BeginTx, tx.Rollback, tx.Commit ซ้ำๆ ทุกครั้งเวลาจะทำระบบอะไรก็ตาม
 func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+	// 1. สั่งให้ฐานข้อมูลเปิด Transaction (เริ่มกระบวนการคุมข้อมูลแบบ ACID)
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	q := New(tx) // สร้าง Queries ชุดใหม่ที่รันอยู่บน Transaction นี้
-	err = fn(q)  // รัน Callback Function ที่ส่งเข้ามา
+	// 2. สร้างตัว Query ชุดใหม่ q โดยให้ทำงานอยู่ภายใต้ Transaction (tx) ที่เพิ่งเปิดไปด้านบน
+	q := New(tx)
+
+	// 3. รันฟังก์ชันคำสั่งที่เราส่งเข้ามา (เช่น Withdraw, Transfers) โดยส่งตัว Query (q) ให้มันไปใช้รันต่อ
+	err = fn(q)
+
+	// 4. เช็กว่าฟังก์ชันที่รันไปมี Error หรือไม่
 	if err != nil {
-		// หากเกิด Error ให้สั่งย้อนกลับทันที
+		// ถ้ามี Error ให้ Rollback ทันที เพื่อยกเลิกทุกอย่างที่ทำไปใน Transaction
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("tx err: %v, rollback err: %v", err, rbErr)
 		}
-		return err
+		return err // ส่ง Error ออกไปบอกตัวเรียกใช้งาน
 	}
 
-	// หากคำสั่งทุกอย่างสำเร็จ ไม่มี Error ให้สั่งยืนยันบันทึกข้อมูล
+	// 5. ถ้าไม่มี Error เลย แปลว่าผ่าน ให้สั่ง Commit เพื่อบันทึกข้อมูลลงไปถาวร
 	return tx.Commit()
 }`,
         },
@@ -371,22 +409,24 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
           t: "code",
           lang: "go",
           label: "db/transfer_types.go",
-          c: `package db
+          c: `// นิยาม Struct สำหรับพารามิเตอร์ขาเข้า (Input) และผลลัพธ์ขาออก (Output) ของธุรกรรมการโอนเงิน
+// ทำเพื่อแก้ปัญหา: มัดรวมข้อมูลที่เกี่ยวข้องกับการโอนเงินเป็นก้อนเดียว เพื่อให้ส่งผ่านและตรวจสอบข้อมูลได้ง่ายและปลอดภัย
+package db
 
-// TransferTxParams คือข้อมูลที่ต้องใช้ในการสั่งโอนเงิน
+// TransferTxParams คือข้อมูลที่ต้องใช้ในการสั่งโอนเงินระหว่าง 2 บัญชี
 type TransferTxParams struct {
-	FromAccountID int64 \`json:"from_account_id"\`
-	ToAccountID   int64 \`json:"to_account_id"\`
-	Amount        int64 \`json:"amount"\`
+	FromAccountID int64 \`json:"from_account_id"\` // รหัสบัญชีผู้โอน (ต้นทาง)
+	ToAccountID   int64 \`json:"to_account_id"\`   // รหัสบัญชีผู้รับ (ปลายทาง)
+	Amount        int64 \`json:"amount"\`          // จำนวนเงินที่ต้องการโอน (หน่วยย่อยที่สุด: สตางค์/เซนต์)
 }
 
-// TransferTxResult คือผลลัพธ์ที่ได้หลังจากโอนเงินสำเร็จ
+// TransferTxResult คือผลลัพธ์ที่ได้หลังจากโอนเงินสำเร็จ เพื่อส่งกลับให้หน้าบ้านแสดงผล
 type TransferTxResult struct {
-	Transfer    Transfer \`json:"transfer"\`
-	FromAccount Account  \`json:"from_account"\`
-	ToAccount   Account  \`json:"to_account"\`
-	FromEntry   Entry    \`json:"from_entry"\`
-	ToEntry     Entry    \`json:"to_entry"\`
+	Transfer    Transfer \`json:"transfer"\`     // ข้อมูลบันทึกประวัติการโอนเงิน (มี Transfer ID ไว้อ้างอิง)
+	FromAccount Account  \`json:"from_account"\` // บัญชีต้นทางพร้อมยอดเงินคงเหลือใหม่ล่าสุด (หลังหักเงิน)
+	ToAccount   Account  \`json:"to_account"\`   // บัญชีปลายทางพร้อมยอดเงินคงเหลือใหม่ล่าสุด (หลังรับเงิน)
+	FromEntry   Entry    \`json:"from_entry"\`   // หลักฐาน Ledger เงินออกจากบัญชีต้นทาง (ยอดลบ)
+	ToEntry     Entry    \`json:"to_entry"\`     // หลักฐาน Ledger เงินเข้าบัญชีปลายทาง (ยอดบวก)
 }`,
         },
 
@@ -399,18 +439,23 @@ type TransferTxResult struct {
           t: "code",
           lang: "go",
           label: "db/store_transfer.go",
-          c: `package db
+          c: `// TransferTx รวม 5 ขั้นตอนของการโอนเงินจริงเข้าด้วยกันใน 1 Transaction
+// ทำเพื่อแก้ปัญหา: ป้องกันเงินสูญหายระหว่างทาง (Partial Failure) หากตัดเงินต้นทางได้แต่ปลายทางล้มเหลว
+// ทุกขั้นตอนจะถูกครอบด้วย execTx หากขั้นตอนใดมี Error ระบบจะ Rollback คืนค่าเดิมทันที
+
+package db
 
 import "context"
 
-// TransferTx รันการโอนเงินจากบัญชีหนึ่งไปยังอีกบัญชีหนึ่งใน 1 Transaction
+// TransferTx รันการโอนเงินจากบัญชีหนึ่งไปยังอีกบัญชีหนึ่งใน 1 Transaction อย่างปลอดภัย
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
+	// เรียกใช้ execTx เพื่อเปิด Transaction และครอบทุกขั้นตอนไว้ด้วยกัน
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
-		// สเต็ปที่ 1: สร้างแถวในตาราง transfers
+		// 1. สร้างแถวในตาราง transfers เพื่อบันทึกหลักฐานประวัติการโอนเงิน
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
 			FromAccountID: arg.FromAccountID,
 			ToAccountID:   arg.ToAccountID,
@@ -420,7 +465,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
-		// สเต็ปที่ 2: สร้าง entry เงินออกของบัญชีต้นทาง (ลบเงิน)
+		// 2. สร้าง Entry เงินออกของบัญชีต้นทาง (ยอดเงินติดลบใน Ledger)
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
 			Amount:    -arg.Amount,
@@ -429,7 +474,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
-		// สเต็ปที่ 3: สร้าง entry เงินเข้าของบัญชีปลายทาง (บวกเงิน)
+		// 3. สร้าง Entry เงินเข้าของบัญชีปลายทาง (ยอดเงินเป็นบวกใน Ledger)
 		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.ToAccountID,
 			Amount:    arg.Amount,
@@ -438,7 +483,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
-		// สเต็ปที่ 4: หักเงินจากบัญชี A (ต้นทาง)
+		// 4. ตัดยอดเงินคงเหลือจากบัญชีต้นทาง (หักเงินออก)
 		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
 			ID:     arg.FromAccountID,
 			Amount: -arg.Amount,
@@ -447,7 +492,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
-		// สเต็ปที่ 5: เพิ่มเงินเข้าบัญชี B (ปลายทาง)
+		// 5. เพิ่มยอดเงินคงเหลือให้บัญชีปลายทาง (โอนเงินเข้า)
 		result.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
 			ID:     arg.ToAccountID,
 			Amount: arg.Amount,
@@ -456,6 +501,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			return err
 		}
 
+		// ทุกขั้นตอนสำเร็จ ไม่มี Error ให้คืนค่า nil เพื่อสั่ง Commit
 		return nil
 	})
 

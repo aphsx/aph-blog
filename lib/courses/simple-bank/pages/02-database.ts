@@ -73,19 +73,24 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
           t: "codeout",
           lang: "go",
           label: "float_vs_bigint.go",
-          code: `package main
+          code: `// สาธิตความแตกต่างระหว่างการใช้ Floating-Point (float64) เทียบกับ Integer (int64)
+// ทำเพื่อแก้ปัญหา: มาตรฐาน IEEE 754 ของ Float ทำให้เกิดความคลาดเคลื่อนในการคำนวณเงิน
+// ระบบธนาคารจึงต้องเก็บเงินเป็นจำนวนเต็มในหน่วยย่อยที่สุด (สตางค์/เซนต์) เสมอ
+
+package main
 
 import "fmt"
 
 func main() {
-	// 1. ความคลาดเคลื่อนของ Float ในคอมพิวเตอร์ (IEEE 754)
+	// 1. ความคลาดเคลื่อนของ Float ในคอมพิวเตอร์ (IEEE 754 แทนเลขฐาน 10 เป็นฐาน 2 ไม่ลงตัว)
 	var floatA, floatB float64 = 0.1, 0.2
 	floatSum := floatA + floatB
 	fmt.Printf(">> คำนวณด้วย Float: 0.1 + 0.2 = %.17f\\n", floatSum)
 	fmt.Printf("   เปรียบเทียบว่าเท่ากับ 0.3 หรือไม่: %t (เงินเพี้ยนทันที!)\\n\\n", floatSum == 0.3)
 
 	// 2. การเก็บเป็นจำนวนเต็ม (Bigint) ในหน่วยย่อยที่สุด (สตางค์ หรือ เซนต์)
-	var centA, centB int64 = 10, 20 // 10 เซนต์ + 20 เซนต์
+	// 10 เซนต์ + 20 เซนต์ = 30 เซนต์ ($0.10 + $0.20 = $0.30)
+	var centA, centB int64 = 10, 20
 	centSum := centA + centB
 	fmt.Printf(">> คำนวณด้วย Bigint: 10 เซนต์ + 20 เซนต์ = %d เซนต์\\n", centSum)
 	fmt.Printf("   เปรียบเทียบว่าเท่ากับ 30 เซนต์หรือไม่: %t (แม่นยำ 100%% ไร้การปัดเศษ!)\\n", centSum == 30)

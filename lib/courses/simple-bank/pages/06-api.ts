@@ -32,7 +32,10 @@ export const apiPages: Record<string, Page> = {
           t: "code",
           lang: "go",
           label: "api/server.go",
-          c: `package api
+          c: `// โครงสร้าง Server และการผูก Routing ผ่าน Gin Web Framework พร้อม Dependency Injection
+// ทำเพื่อแก้ปัญหา: หลีกเลี่ยงการใช้ Global Variable ในการเข้าถึง Database
+// การ Inject db.Store เข้าไปใน Server struct ทำให้โค้ดเป็นระเบียบ และสามารถ Mock ได้ง่ายตอนทำ Unit Test
+package api
 
 import (
 	"github.com/gin-gonic/gin"
@@ -41,20 +44,23 @@ import (
 
 // Server ทำหน้าที่จัดการ HTTP requests ทั้งหมดของระบบธนาคาร
 type Server struct {
-	store  *db.Store
-	router *gin.Engine
+	store  *db.Store   // ที่เก็บตัวเชื่อมต่อฐานข้อมูลและทรานแซกชัน
+	router *gin.Engine // ตัวจัดการเส้นทาง HTTP Routing ของ Gin
 }
 
+// NewServer ทำหน้าที่กำหนดค่าเริ่มต้น สร้าง Router และลงทะเบียนเส้นทาง API ทั้งหมด
 func NewServer(store *db.Store) *Server {
+	// 1. สร้าง Instance ของ Server พร้อมแนบ store เข้าไป
 	server := &Server{store: store}
 	router := gin.Default()
 
-	// ลงทะเบียน Routing
+	// 2. ลงทะเบียน Routing สำหรับแต่ละ Endpoint
 	router.POST("/accounts", server.createAccount)
 	router.GET("/accounts/:id", server.getAccount)
 	router.GET("/accounts", server.listAccounts)
 	router.POST("/transfers", server.createTransfer)
 
+	// 3. แนบ Router กลับเข้าไปใน Server
 	server.router = router
 	return server
 }
@@ -64,7 +70,7 @@ func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
 
-// errorResponse จัดรูปแบบ Error ข้อความให้อยู่ใน JSON key "error"
+// errorResponse จัดรูปแบบข้อความ Error ให้อยู่ใน JSON Key "error" อย่างสม่ำเสมอ
 func errorResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
 }`,
@@ -79,41 +85,47 @@ func errorResponse(err error) gin.H {
           t: "code",
           lang: "go",
           label: "api/account.go (CreateAccount)",
-          c: `package api
+          c: `// API Handler สำหรับจัดการการเปิดบัญชีใหม่ (POST /accounts)
+// ทำเพื่อแก้ปัญหา: แกะ JSON Payload ตรวจสอบความถูกต้อง (Validation) ก่อนส่งไปบันทึกลงในฐานข้อมูล
+package api
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "simplebank/db"
 )
 
+// createAccountRequest กำหนดโครงสร้าง JSON ขาเข้า พร้อมกฎการตรวจสอบความถูกต้อง (Binding Tags)
 type createAccountRequest struct {
 	Owner    string \`json:"owner" binding:"required"\`
-	Currency string \`json:"currency" binding:"required,oneof=USD EUR THB"\`
+	Currency string \`json:"currency" binding:"required,oneof=USD EUR THB"\` // สกุลเงินต้องตรงตามที่อนุญาต
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
+	// 1. แกะ JSON Payload และตรวจสอบเงื่อนไขความถูกต้อง
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err)) // ส่ง 400 Bad Request หากข้อมูลผิดรูปแบบ
 		return
 	}
 
+	// 2. เตรียมพารามิเตอร์สำหรับบันทึกลงฐานข้อมูล (ยอดเงินเปิดบัญชีเริ่มต้นที่ 0 เสมอ)
 	arg := db.CreateAccountParams{
 		Owner:    req.Owner,
 		Currency: req.Currency,
-		Balance:  0, // เปิดบัญชีใหม่เริ่มต้นที่ 0 บาท
+		Balance:  0,
 	}
 
+	// 3. ยิงคำสั่งสร้างบัญชีผ่าน store
 	account, err := server.store.CreateAccount(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err)) // ส่ง 500 หากฐานข้อมูลมีปัญหา
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, account) // ส่ง HTTP 201 Created
+	// 4. ส่งข้อมูลบัญชีที่สร้างเสร็จสมบูรณ์กลับไปในรูปแบบ JSON พร้อม HTTP Status 201 Created
+	ctx.JSON(http.StatusCreated, account)
 }`,
         },
         {
@@ -342,7 +354,10 @@ Content-Type: application/json; charset=utf-8
           t: "code",
           lang: "go",
           label: "api/transfer.go",
-          c: `package api
+          c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers)
+// ทำเพื่อแก้ปัญหา: ตรวจสอบความถูกต้องของบัญชีต้นทาง-ปลายทาง และสกุลเงิน ก่อนส่งคำสั่งเข้า Transaction
+// ป้องกันการเปิด Transaction เสียเที่ยว และป้องกันการแฮกด้วยยอดเงินติดลบ
+package api
 
 import (
 	"database/sql"
@@ -353,56 +368,64 @@ import (
 	db "simplebank/db"
 )
 
+// transferRequest กำหนดโครงสร้าง JSON สำหรับคำขอโอนเงิน พร้อมเงื่อนไขความปลอดภัย
 type transferRequest struct {
 	FromAccountID int64  \`json:"from_account_id" binding:"required,min=1"\`
 	ToAccountID   int64  \`json:"to_account_id" binding:"required,min=1"\`
-	Amount        int64  \`json:"amount" binding:"required,gt=0"\`
+	Amount        int64  \`json:"amount" binding:"required,gt=0"\`         // จำนวนเงินต้องมากกว่า 0 ห้ามติดลบเด็ดขาด
 	Currency      string \`json:"currency" binding:"required,currency"\`
 }
 
 func (server *Server) createTransfer(ctx *gin.Context) {
+	// 1. แกะ JSON Payload และตรวจสอบความถูกต้องของข้อมูล
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	// ตรวจสอบบัญชีต้นทางว่ามีอยู่จริงและสกุลเงินตรงกันไหม
+	// 2. ตรวจสอบว่าบัญชีต้นทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
 	if !server.validAccount(ctx, req.FromAccountID, req.Currency) {
 		return
 	}
 
-	// ตรวจสอบบัญชีปลายทางว่ามีอยู่จริงและสกุลเงินตรงกันไหม
+	// 3. ตรวจสอบว่าบัญชีปลายทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
 	if !server.validAccount(ctx, req.ToAccountID, req.Currency) {
 		return
 	}
 
+	// 4. เตรียมพารามิเตอร์ส่งต่อไปยัง Transaction Manager
 	arg := db.TransferTxParams{
 		FromAccountID: req.FromAccountID,
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
 	}
 
+	// 5. สั่งรันการโอนเงินแบบ Atomic ผ่าน TransferTx
 	result, err := server.store.TransferTx(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	// 6. ส่งผลลัพธ์การโอนเงินสำเร็จกลับไปให้หน้าบ้าน
 	ctx.JSON(http.StatusOK, result)
 }
 
+// validAccount ตรวจสอบความมีอยู่จริงและสกุลเงินของบัญชีก่อนเริ่มทำ Transaction
 func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) bool {
+	// ค้นหาข้อมูลบัญชีจากฐานข้อมูล
 	account, err := server.store.GetAccount(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			ctx.JSON(http.StatusNotFound, errorResponse(err)) // ไม่พบบัญชี ส่ง 404
 			return false
 		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err)) // ข้อผิดพลาดฝั่งเซิร์ฟเวอร์ ส่ง 500
 		return false
 	}
 
+	// ตรวจสอบความสอดคล้องของสกุลเงิน ป้องกันการโอนข้ามสกุลเงินโดยไม่แปลงค่า
 	if account.Currency != currency {
 		err := fmt.Errorf("สกุลเงินของบัญชี [%d] คือ %s ไม่ตรงกับคำขอโอน %s", accountID, account.Currency, currency)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
