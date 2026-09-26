@@ -212,25 +212,27 @@ STATEMENT: UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING id
           c: "เมื่อ Tx 2 ถูกบังคับให้ขอล็อกบัญชี 1 ก่อน Tx 2 จะหยุดรอตั้งแต่ก้าวแรก ไม่มีการไปแย่งล็อกบัญชี 2 ไว้ก่อน ทำให้ Tx 1 ทำงานจนจบและปล่อย Lock ทั้งหมด จากนั้น Tx 2 จึงค่อยเริ่มทำงานต่อตามคิว วงจร Deadlock จึงถูกทำลายจนหมดสิ้น!",
         },
 
-        { t: "h2", c: "เขียนโค้ด Go จัดลำดับการโอนเงิน" },
+        { t: "h2", c: "แนวทางการอัปเดตโค้ด TransferTx เพื่อแก้ Deadlock" },
         {
           t: "p",
-          c: "เราจะสร้างฟังก์ชันผู้ช่วยชื่อ `addMoney` เพื่อสลับลำดับการอัปเดตยอดเงินตาม Account ID ให้ถูกต้องอัตโนมัติ:",
+          c: "เปิดไฟล์ที่คุณเขียนฟังก์ชัน `TransferTx` ไว้จากบทที่ 3:\n- **กรณีรวมไฟล์เดียว:** เปิด `db/store.go`\n- **กรณีแยกไฟล์:** เปิด `db/store_transfer.go`",
+        },
+        {
+          t: "callout",
+          title: "⚠️ คำเตือน: อย่าลบโค้ด Store และ execTx เดิมทิ้ง!",
+          c: "เราจะทำการ **แก้ไขเฉพาะฟังก์ชัน `TransferTx` และเพิ่มฟังก์ชัน `addMoney`** เข้าไปเท่านั้น ห้ามนำโค้ดเฉพาะท่อนนี้ไปวางทับไฟล์ `db/store.go` ทั้งหมดเด็ดขาด เพราะจะทำให้โครงสร้าง `Store` และ `execTx` หายไปจนคอมไพล์ไม่ผ่าน (`undefined: Store`)",
+          warn: true,
+        },
+        { t: "h3", c: "ขั้นตอนที่ 1: เพิ่มฟังก์ชันผู้ช่วย addMoney" },
+        {
+          t: "p",
+          c: "วางฟังก์ชันนี้ไว้เหนือฟังก์ชัน `TransferTx` เพื่อทำหน้าที่อัปเดตยอดเงินของ 2 บัญชีตามลำดับ Account ID ที่ส่งเข้ามา:",
         },
         {
           t: "code",
           lang: "go",
-          label: "db/store.go (อัปเดตฟังก์ชัน TransferTx ให้ปลอด Deadlock)",
-          c: `// อัปเดตฟังก์ชัน TransferTx และเพิ่มฟังก์ชัน addMoney พร้อมกลไก Lock Ordering
-// ทำเพื่อแก้ปัญหา: ปัญหา Deadlock เมื่อเกิดการโอนเงินสวนทางกันระหว่าง 2 บัญชีในเวลาเดียวกัน
-// เช่น A โอนให้ B และ B โอนให้ A ในเสี้ยววินาทีเดียวกัน หากต่างคนต่างล็อกบัญชีตัวเองก่อน จะติด Circular Wait
-// การบังคับให้ทุก Transaction ล็อกแถวบัญชีที่มี ID น้อยกว่าก่อนเสมอ จะกำจัด Deadlock ได้อย่างเด็ดขาด 100%
-
-package db
-
-import "context"
-
-// addMoney ทำหน้าที่อัปเดตยอดเงินของทั้ง 2 บัญชีตามลำดับที่ส่งเข้ามา
+          label: "เพิ่มฟังก์ชันนี้ไว้เหนือ TransferTx",
+          c: `// addMoney ทำหน้าที่อัปเดตยอดเงินของทั้ง 2 บัญชีตามลำดับที่ส่งเข้ามา
 func addMoney(
 	ctx context.Context,
 	q *Queries,
@@ -254,9 +256,67 @@ func addMoney(
 		Amount: amount2,
 	})
 	return
-}
-
-// TransferTx เวอร์ชันปรับปรุงที่ป้องกัน Deadlock ได้อย่างสมบูรณ์
+}`,
+        },
+        { t: "h3", c: "ขั้นตอนที่ 2: จุดที่แก้ไขใน TransferTx (เปรียบเทียบ Before vs After)" },
+        {
+          t: "p",
+          c: "ในฟังก์ชัน `TransferTx` ขั้นตอนที่ 1, 2, 3 (สร้าง Transfer และ Entries) ยังคงทำงานเหมือนเดิมทุกประการ สิ่งที่ต้องเปลี่ยนมีเพียงจุดเดียวคือ **ลบขั้นตอนที่ 4 และ 5 เดิมออก แล้วแทนที่ด้วยการเช็ก ID (ยุบรวมเป็นข้อ 4 ใหม่)** ดังนี้:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "เปรียบเทียบจุดที่ตัดออก (-) และใส่เพิ่มเข้าแทนที่ (+)",
+          c: `-		// 4. ตัดยอดเงินคงเหลือจากบัญชีต้นทาง (หักเงินออก)
+-		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+-			ID:     arg.FromAccountID,
+-			Amount: -arg.Amount,
+-		})
+-		if err != nil {
+-			return err
+-		}
+-
+-		// 5. เพิ่มยอดเงินคงเหลือให้บัญชีปลายทาง (โอนเงินเข้า)
+-		result.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+-			ID:     arg.ToAccountID,
+-			Amount: arg.Amount,
+-		})
+-		if err != nil {
+-			return err
+-		}
++		// 4. หัวใจสำคัญ: ตรวจสอบว่า ID ไหนน้อยกว่า ให้อัปเดตและล็อกบัญชีนั้นก่อนเสมอ!
++		// ไม่ว่าใครจะเป็นผู้โอนหรือผู้รับ ลำดับการขอ Lock ในฐานข้อมูลจะวิ่งจาก ID น้อย -> ID มากเสมอ
++		if arg.FromAccountID < arg.ToAccountID {
++			// เคสที่ 1: From ID น้อยกว่า To ID -> หักเงินบัญชี From ก่อน แล้วค่อยเพิ่มเงินบัญชี To
++			result.FromAccount, result.ToAccount, err = addMoney(
++				ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount,
++			)
++		} else {
++			// เคสที่ 2: To ID น้อยกว่า From ID -> เพิ่มเงินบัญชี To ก่อน แล้วค่อยหักเงินบัญชี From
++			result.ToAccount, result.FromAccount, err = addMoney(
++				ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount,
++			)
++		}
++		if err != nil {
++			return err
++		}`,
+        },
+        {
+          t: "callout",
+          title: "⚡ ระวังเครื่องหมายบวกลบในเคสที่ 2 (else)!",
+          c: "สังเกตพารามิเตอร์ของ `addMoney` ในเคสที่ 2 ให้ดี:\n- `arg.ToAccountID` เป็นบัญชีปลายทาง (คนรับเงิน) จึงต้องส่งยอดเงินเป็น **`+arg.Amount`**\n- `arg.FromAccountID` เป็นบัญชีต้นทาง (คนโอนเงิน) จึงต้องส่งยอดเงินเป็น **`-arg.Amount`**\nอย่าเผลอใส่เครื่องหมายลบที่ `ToAccountID` เด็ดขาด เพราะจะทำให้เงินเข้าผิดบัญชีทันที!",
+          warn: true,
+        },
+        { t: "h3", c: "โค้ดเต็มฟังก์ชัน TransferTx เวอร์ชันป้องกัน Deadlock" },
+        {
+          t: "p",
+          c: "ภาพรวมฟังก์ชัน `TransferTx` หลังนำโค้ดขั้นตอนที่ 1 และ 2 มาประกอบร่างกันเสร็จสมบูรณ์:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "TransferTx ฉบับปลอด Deadlock (นำไปวางแทนที่ TransferTx เดิม)",
+          c: `// TransferTx เวอร์ชันปรับปรุงที่ป้องกัน Deadlock ได้อย่างสมบูรณ์
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
@@ -300,6 +360,148 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 			)
 		} else {
 			// เคสที่ 2: To ID น้อยกว่า From ID -> เพิ่มเงินบัญชี To ก่อน แล้วค่อยหักเงินบัญชี From
+			result.ToAccount, result.FromAccount, err = addMoney(
+				ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount,
+			)
+		}
+
+		return err
+	})
+
+	return result, err
+}`,
+        },
+        { t: "h3", c: "📁 สำหรับคนที่ต้องการโค้ดเต็มไฟล์เดียว (All-in-One Complete File)" },
+        {
+          t: "p",
+          c: "หากคุณกลัวว่าจะตัดแปะผิดตำแหน่ง หรือต้องการให้โปรเจกต์มีโครงสร้างที่คลีนแบบไฟล์เดียวจบ สามารถคัดลอกโค้ดเต็มด้านล่างนี้ไปวางทับไฟล์ `db/store.go` ทั้งไฟล์ได้ทันที (มีครบทั้ง Store struct, execTx, Params, addMoney และ TransferTx ตัวใหม่):",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "db/store.go (โค้ดเต็มไฟล์เดียวพร้อมรัน 100%)",
+          c: `package db
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+)
+
+// Store ครอบคลุมทั้งฟังก์ชันการคิวรีรายตัว และการทำงานร่วมกันเป็น Transaction
+type Store struct {
+	*Queries
+	db *sql.DB
+}
+
+// NewStore สร้างอินสแตนซ์ใหม่ของ Store
+func NewStore(db *sql.DB) *Store {
+	return &Store{
+		db:      db,
+		Queries: New(db),
+	}
+}
+
+// execTx เป็นผู้จัดการ Transaction กลาง มี Auto Commit / Rollback
+func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+	tx, err := store.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	q := New(tx)
+	err = fn(q)
+	if err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("tx err: %v, rollback err: %v", err, rbErr)
+		}
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// TransferTxParams ข้อมูลที่ต้องใช้ในการสั่งโอนเงิน
+type TransferTxParams struct {
+	FromAccountID int64 \`json:"from_account_id"\`
+	ToAccountID   int64 \`json:"to_account_id"\`
+	Amount        int64 \`json:"amount"\`
+}
+
+// TransferTxResult ผลลัพธ์ที่ได้หลังจากโอนเงินสำเร็จ
+type TransferTxResult struct {
+	Transfer    Transfer \`json:"transfer"\`
+	FromAccount Account  \`json:"from_account"\`
+	ToAccount   Account  \`json:"to_account"\`
+	FromEntry   Entry    \`json:"from_entry"\`
+	ToEntry     Entry    \`json:"to_entry"\`
+}
+
+// addMoney ฟังก์ชันผู้ช่วยสำหรับ Update ยอดเงินตามลำดับ ID เพื่อป้องกัน Deadlock
+func addMoney(
+	ctx context.Context,
+	q *Queries,
+	accountID1 int64,
+	amount1 int64,
+	accountID2 int64,
+	amount2 int64,
+) (account1 Account, account2 Account, err error) {
+	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     accountID1,
+		Amount: amount1,
+	})
+	if err != nil {
+		return
+	}
+
+	account2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     accountID2,
+		Amount: amount2,
+	})
+	return
+}
+
+// TransferTx รันการโอนเงินจากบัญชีหนึ่งไปยังอีกบัญชีหนึ่งใน 1 Transaction อย่างปลอดภัย ไร้ Deadlock
+func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+	var result TransferTxResult
+
+	err := store.execTx(ctx, func(q *Queries) error {
+		var err error
+
+		// 1. บันทึกหลักฐานประวัติการโอน
+		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
+			FromAccountID: arg.FromAccountID,
+			ToAccountID:   arg.ToAccountID,
+			Amount:        arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 2. บันทึก Ledger เงินออก (ยอดลบ)
+		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.FromAccountID,
+			Amount:    -arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 3. บันทึก Ledger เงินเข้า (ยอดบวก)
+		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.ToAccountID,
+			Amount:    arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 4. ล็อกแถวและอัปเดตยอดเงินตามลำดับ ID น้อย -> ID มาก เพื่อแก้ Deadlock 100%
+		if arg.FromAccountID < arg.ToAccountID {
+			result.FromAccount, result.ToAccount, err = addMoney(
+				ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount,
+			)
+		} else {
 			result.ToAccount, result.FromAccount, err = addMoney(
 				ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount,
 			)
