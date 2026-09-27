@@ -212,26 +212,28 @@ STATEMENT: UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING id
           c: "เมื่อ Tx 2 ถูกบังคับให้ขอล็อกบัญชี 1 ก่อน Tx 2 จะหยุดรอตั้งแต่ก้าวแรก ไม่มีการไปแย่งล็อกบัญชี 2 ไว้ก่อน ทำให้ Tx 1 ทำงานจนจบและปล่อย Lock ทั้งหมด จากนั้น Tx 2 จึงค่อยเริ่มทำงานต่อตามคิว วงจร Deadlock จึงถูกทำลายจนหมดสิ้น!",
         },
 
-        { t: "h2", c: "แนวทางการอัปเกรด simplebank/db/store.go จาก Version 1 เป็น Version 2" },
+        { t: "h2", c: "แนวทางการอัปเกรด simplebank/db/tx_transfer.go จาก Version 1 เป็น Version 2 (Deadlock-Free)" },
         {
           t: "p",
-          c: "ในบทที่ 3 เราได้สร้างไฟล์ \`simplebank/db/store.go\` (Version 1) ซึ่งมีโครงสร้างพื้นฐานและฟังก์ชัน \`TransferTx\` 5 ขั้นตอนเรียบร้อยแล้ว\n\nในบทนี้ เราจะทำการ **อัปเกรดไฟล์เดิม \`simplebank/db/store.go\` ให้กลายเป็น Version 2 (Deadlock-Free)** โดยการจัดลำดับการขอล็อกแถวตาม Account ID ผ่าน 2 ขั้นตอนง่ายๆ ดังนี้:",
+          c: "ในบทที่ 3 เราได้สร้างไฟล์ \`simplebank/db/tx_transfer.go\` (Version 1: พื้นฐาน 5 ขั้นตอน) เอาไว้เรียบร้อยแล้ว\n\nสังเกตความงดงามของ Clean Architecture ที่เราออกแบบไว้: **เราไม่ต้องแตะต้องไฟล์ \`simplebank/db/store.go\` เลยแม้แต่บรรทัดเดียว!** เพราะ \`store.go\` ทำหน้าที่เป็น Transaction Engine กลางที่สมบูรณ์แบบอยู่แล้ว\n\nสิ่งที่เราจะทำในบทนี้ คือการ **อัปเกรดเฉพาะไฟล์ \`simplebank/db/tx_transfer.go\` ให้กลายเป็น Version 2 (Deadlock-Free)** โดยการจัดลำดับการขอล็อกแถวตาม Account ID ผ่าน 2 ขั้นตอนง่ายๆ ดังนี้:",
         },
         {
           t: "callout",
-          title: "⚠️ คำเตือน: อย่าลบโค้ด Store struct และ execTx เดิมทิ้ง!",
-          c: "เราจะทำการ **แก้ไขเฉพาะฟังก์ชัน `TransferTx` และเพิ่มฟังก์ชัน `addMoney`** เข้าไปในไฟล์ `simplebank/db/store.go` เท่านั้น อย่าเผลอก๊อปปี้เฉพาะท่อนเล็กๆ ไปวางทับไฟล์เดิมทั้งไฟล์ เพราะจะทำให้โครงสร้าง `Store` และ `execTx` หายไปจนคอมไพล์ไม่ผ่าน (`undefined: Store`)",
-          warn: true,
+          title: "💡 ทำไมฟังก์ชัน addMoney ถึงควรอยู่ใน tx_transfer.go (ไม่ใช่ store.go)?",
+          c: `มีเหตุผลเชิงสถาปัตยกรรม 3 ข้อหลักที่ทำให้ \`addMoney\` ต้องอยู่ใน \`tx_transfer.go\`:
+1. **Unexported Private Helper (ฟังก์ชันช่วยงานเฉพาะตัว)**: ชื่อฟังก์ชันขึ้นต้นด้วยตัวพิมพ์เล็ก \`addMoney\` แปลว่าเป็นฟังก์ชันส่วนตัวที่เรียกใช้เฉพาะในไฟล์นี้เท่านั้น ไม่มีส่วนอื่นของระบบต้องมายุ่งเกี่ยว
+2. **ไม่ทำให้ store.go รก (No God Object)**: \`store.go\` มีหน้าที่คุม Transaction ระดับภาพรวม ไม่ควรต้องมารู้รายละเอียดว่าการโอนเงินต้องบวกลบคอลัมน์ไหนก่อนหลัง
+3. **Encapsulation & High Cohesion**: วางตรรกะการจัดลำดับ Lock (\`addMoney\` + \`TransferTx\`) ไว้ด้วยกันใน \`tx_transfer.go\` ทำให้โค้ดอ่านง่าย ตรวจสอบง่าย และเวลาแก้ไขระบบโอนเงินก็จัดการจบในไฟล์นี้ไฟล์เดียว 100%!`,
         },
-        { t: "h3", c: "ขั้นตอนที่ 1: เพิ่มฟังก์ชันผู้ช่วย addMoney" },
+        { t: "h3", c: "ขั้นตอนที่ 1: เพิ่มฟังก์ชันผู้ช่วย addMoney ใน tx_transfer.go" },
         {
           t: "p",
-          c: "เปิดไฟล์ `simplebank/db/store.go` แล้ววางฟังก์ชัน `addMoney` นี้ไว้เหนือฟังก์ชัน `TransferTx` เพื่อทำหน้าที่อัปเดตยอดเงินของ 2 บัญชีตามลำดับ Account ID ที่ส่งเข้ามา:",
+          c: "เปิดไฟล์ `simplebank/db/tx_transfer.go` แล้ววางฟังก์ชัน `addMoney` นี้ไว้เหนือฟังก์ชัน `TransferTx` เพื่อทำหน้าที่อัปเดตยอดเงินของ 2 บัญชีตามลำดับ Account ID ที่ส่งเข้ามา:",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (เพิ่มไว้เหนือฟังก์ชัน TransferTx)",
+          label: "simplebank/db/tx_transfer.go (เพิ่มไว้เหนือฟังก์ชัน TransferTx)",
           c: `// addMoney ทำหน้าที่อัปเดตยอดเงินของทั้ง 2 บัญชีตามลำดับที่ส่งเข้ามา
 func addMoney(
 	ctx context.Context,
@@ -315,7 +317,7 @@ func addMoney(
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (ฟังก์ชัน TransferTx Version 2 ปลอด Deadlock)",
+          label: "simplebank/db/tx_transfer.go (ฟังก์ชัน TransferTx Version 2 ปลอด Deadlock)",
           c: `// TransferTx เวอร์ชันปรับปรุงที่ป้องกัน Deadlock ได้อย่างสมบูรณ์
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
@@ -371,57 +373,20 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 	return result, err
 }`,
         },
-        { t: "h3", c: "📁 สำหรับคนที่ต้องการโค้ดเต็มไฟล์เดียว (All-in-One Complete File)" },
+        { t: "h3", c: "📁 โค้ดเต็มของ simplebank/db/tx_transfer.go (Version 2 สมบูรณ์พร้อมรัน 100%)" },
         {
           t: "p",
-          c: "หากคุณกลัวว่าจะตัดแปะผิดตำแหน่ง หรือต้องการให้โปรเจกต์มีโครงสร้างที่คลีนแบบไฟล์เดียวจบ สามารถคัดลอกโค้ดเต็มด้านล่างนี้ไปวางทับไฟล์ `db/store.go` ทั้งไฟล์ได้ทันที (มีครบทั้ง Store struct, execTx, Params, addMoney และ TransferTx ตัวใหม่):",
+          c: "คุณสามารถตรวจสอบความถูกต้อง หรือคัดลอกโค้ดฉบับเต็มด้านล่างนี้ไปวางทับไฟล์ `simplebank/db/tx_transfer.go` ทั้งไฟล์ได้ทันที (สะอาด กระชับ แยกหมวดหมู่ชัดเจน และคง `store.go` ไว้เหมือนเดิม 100%):",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (Version 2 สมบูรณ์พร้อมรัน 100%)",
+          label: "simplebank/db/tx_transfer.go (Version 2 สมบูรณ์พร้อมรัน 100%)",
           c: `package db
 
-import (
-	"context"
-	"database/sql"
-	"fmt"
-)
+import "context"
 
-// Store ครอบคลุมทั้งฟังก์ชันการคิวรีรายตัว และการทำงานร่วมกันเป็น Transaction
-type Store struct {
-	*Queries
-	db *sql.DB
-}
-
-// NewStore สร้างอินสแตนซ์ใหม่ของ Store
-func NewStore(db *sql.DB) *Store {
-	return &Store{
-		db:      db,
-		Queries: New(db),
-	}
-}
-
-// execTx เป็นผู้จัดการ Transaction กลาง มี Auto Commit / Rollback
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := store.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	q := New(tx)
-	err = fn(q)
-	if err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("tx err: %v, rollback err: %v", err, rbErr)
-		}
-		return err
-	}
-
-	return tx.Commit()
-}
-
-// TransferTxParams ข้อมูลที่ต้องใช้ในการสั่งโอนเงิน
+// TransferTxParams ข้อมูลที่ต้องใช้ในการสั่งโอนเงินระหว่าง 2 บัญชี
 type TransferTxParams struct {
 	FromAccountID int64 \`json:"from_account_id"\`
 	ToAccountID   int64 \`json:"to_account_id"\`

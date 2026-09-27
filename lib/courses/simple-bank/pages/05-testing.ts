@@ -274,12 +274,12 @@ ok      simplebank/db   0.142s`,
         { t: "h2", c: "1. การทดสอบการโอนเงินคู่ขนาน (TestTransferTx)" },
         {
           t: "p",
-          c: "เราจะปล่อย 5 Goroutines ให้โอนเงินจาก Account 1 ไป Account 2 คนละ 10 บาทพร้อมๆ กัน แล้วส่งผลลัพธ์ผ่าน Channel กลับมารวมที่จุดเดียว:",
+          c: "เราจะปล่อย 5 Goroutines ให้โอนเงินจาก Account 1 ไป Account 2 คนละ 10 บาทพร้อมๆ กัน แล้วส่งผลลัพธ์ผ่าน Channel กลับมารวมที่จุดเดียว โดยสร้างไฟล์ `simplebank/db/tx_transfer_test.go` เพื่อทดสอบฟังก์ชัน `TransferTx` โดยเฉพาะ:",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store_test.go (ทดสอบ TransferTx Version 2)",
+          label: "simplebank/db/tx_transfer_test.go (ทดสอบ Concurrency: TestTransferTx)",
           c: `// ชุดทดสอบ TestTransferTx สำหรับพิสูจน์ความถูกต้องของการโอนเงินแบบคู่ขนาน (Concurrent Transactions)
 // ทำเพื่อแก้ปัญหา: ป้องกันบั๊ก Race Condition และเงินสูญหายระหว่างทาง เมื่อมีคำสั่งโอนเงินเข้ามารัวๆ พร้อมกัน
 
@@ -396,24 +396,14 @@ ok      simplebank/db   0.198s`,
         { t: "h2", c: "2. การทดสอบปราบ Deadlock ด้วยการโอนสวนทาง (TestTransferTxDeadlock)" },
         {
           t: "p",
-          c: "ตอนนี้มาถึงการทดสอบขั้นสุดยอด: เราจะสั่งให้ Account 1 โอนให้ 2 จำนวน 5 ครั้ง พร้อมๆ กับที่ Account 2 โอนกลับคืนให้ 1 อีก 5 ครั้ง ในเสี้ยววินาทีเดียวกัน เพื่อพิสูจน์ว่า Resource Ordering ที่เราเขียนไว้สามารถสยบ Deadlock ได้จริง:",
+          c: "ตอนนี้มาถึงการทดสอบขั้นสุดยอด: เราจะเขียนฟังก์ชัน `TestTransferTxDeadlock` ต่อท้ายลงในไฟล์ `simplebank/db/tx_transfer_test.go` โดยสั่งให้ Account 1 โอนให้ 2 จำนวน 5 ครั้ง พร้อมๆ กับที่ Account 2 โอนกลับคืนให้ 1 อีก 5 ครั้ง ในเสี้ยววินาทีเดียวกัน เพื่อพิสูจน์ว่า Resource Ordering ที่เราเขียนไว้สามารถสยบ Deadlock ได้จริง:",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store_deadlock_test.go (ทดสอบปราบ Deadlock)",
-          c: `// ชุดทดสอบ TestTransferTxDeadlock พิสูจน์ว่าการโอนเงินสวนทางกันจะไม่ทำให้เกิด Deadlock
-// ทำเพื่อแก้ปัญหา: จำลองสถานการณ์ A โอนให้ B และ B โอนให้ A พร้อมๆ กัน หากจัดการ Lock ไม่ดี ระบบจะค้างทันที
-
-package db
-
-import (
-	"context"
-	"testing"
-
-	"github.com/stretchr/testify/require"
-)
-
+          label: "simplebank/db/tx_transfer_test.go (เขียนต่อท้ายในไฟล์เดิม - ทดสอบ Deadlock)",
+          c: `// เพิ่มฟังก์ชัน TestTransferTxDeadlock ต่อท้ายใน simplebank/db/tx_transfer_test.go
+// พิสูจน์ว่าการโอนเงินสวนทางกันจะไม่ทำให้เกิด Deadlock
 func TestTransferTxDeadlock(t *testing.T) {
 	store := NewStore(testDB)
 
@@ -496,8 +486,8 @@ ok      simplebank/db   0.452s
           code: `# เมื่อยังไม่ได้ใส่ Resource Ordering (รันโอนเงินสวนทางชนกัน)
 go test -v -run TestTransferTxDeadlock ./db`,
           out: `=== RUN   TestTransferTxDeadlock
-    store_deadlock_test.go:400: 
-        	Error Trace:	store_deadlock_test.go:400
+    tx_transfer_test.go:120: 
+        	Error Trace:	tx_transfer_test.go:120
         	Error:      	Received unexpected error:
         	            	pq: deadlock detected (SQLSTATE 40P01)
         	Test:       	TestTransferTxDeadlock

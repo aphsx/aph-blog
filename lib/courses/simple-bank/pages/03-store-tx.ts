@@ -22,7 +22,7 @@ export const storeTxPages: Record<string, Page> = {
         {
           t: "callout",
           title: "🗺️ แผนผังโฟลเดอร์ของโปรเจกต์ simplebank ในบทนี้",
-          c: `เพื่อให้เห็นภาพตรงกันตลอดทั้งคอร์ส เราจะกำหนดให้ Root Directory ของโปรเจกต์ชื่อว่า \`simplebank\` โดยในบทที่ 3 นี้ ไฟล์หลักทั้งหมดของ Data Access Layer จะถูกสร้างและจัดเก็บไว้ใต้โฟลเดอร์ \`simplebank/db/\` ดังนี้:
+          c: `เพื่อให้เห็นภาพตรงกันตลอดทั้งคอร์ส เราจะกำหนดให้ Root Directory ของโปรเจกต์ชื่อว่า \`simplebank\` โดยในบทที่ 3 นี้ ไฟล์หลักทั้งหมดของ Data Access Layer จะถูกสร้างและจัดเก็บไว้ใต้โฟลเดอร์ \`simplebank/db/\` แยกหน้าที่กันอย่างชัดเจนตามหลัก Clean Architecture ดังนี้:
 \`\`\`text
 simplebank/
 ├── db/
@@ -31,7 +31,8 @@ simplebank/
 │   ├── account.go     # ฟังก์ชัน CRUD ของตาราง accounts
 │   ├── entry.go       # ฟังก์ชันบันทึกสมุดบัญชีแยกประเภท (Ledger)
 │   ├── transfer.go    # ฟังก์ชันบันทึกประวัติการโอนเงิน
-│   └── store.go       # Store struct, execTx, และ TransferTx (Version 1)
+│   ├── store.go       # Transaction Manager กลาง (Store struct, NewStore, execTx จบในตัว)
+│   └── tx_transfer.go # โค้ดระบบโอนเงินระดับธุรกรรม (TransferTxParams, Result, TransferTx)
 ├── go.mod
 └── ...
 \`\`\``,
@@ -497,7 +498,7 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (สร้างไฟล์ใหม่ - ส่วนที่ 1: Store struct & execTx)",
+          label: "simplebank/db/store.go (สร้างไฟล์ใหม่ - Transaction Manager กลาง)",
           c: `// สร้าง Store struct สืบทอดความสามารถของ Queries มาทั้งหมด
 // และเพิ่มความสามารถในการเปิด Transaction จัดการ BEGIN, COMMIT, และ ROLLBACK
 
@@ -603,15 +604,26 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
           ],
         },
 
-        { t: "h2", c: "เขียน Struct สำหรับ Request และ Result" },
+        {
+          t: "callout",
+          title: "🏗️ ทำไมเราถึงแยกไฟล์ tx_transfer.go ออกจาก store.go?",
+          c: `ในภาษา Go และการออกแบบซอฟต์แวร์ระดับโปรดักชันที่ดี (Clean Architecture):
+- **\`store.go\`** ทำหน้าที่เป็น **Transaction Engine กลาง** มีหน้าที่เปิด-ปิด-Rollback ทรานแซกชันเท่านั้น ไม่ควรยัดเยียดโค้ด Business Logic เฉพาะทางเข้าไปจนกลายเป็น "God File" ที่ยาวนับพันบรรทัด
+- **\`tx_transfer.go\`** ทำหน้าที่รับผิดชอบ **Business Logic ของการโอนเงิน (Transfer Transaction Domain)** โดยเฉพาะ
+- **Go รองรับการประกาศ Method ของ Struct ข้ามไฟล์ใน Package เดียวกัน**:
+  ในภาษา Go เราสามารถเขียน \`func (store *Store) TransferTx(...)\` ไว้ในไฟล์ \`tx_transfer.go\` ได้อย่างสมบูรณ์แบบ ตราบใดที่ทั้งคู่อยู่ใน \`package db\`
+  ทำให้ในอนาคต หากเราต้องการเพิ่มระบบธุรกรรมใหม่อย่างการสร้างผู้ใช้พร้อมเปิดบัญชี (\`tx_create_user.go\`) เราก็แค่สร้างไฟล์ใหม่ขึ้นมา โดยไม่ต้องแตะต้องหรือเสี่ยงทำไฟล์ \`store.go\` พังเลยแม้แต่น้อย!`,
+        },
+
+        { t: "h2", c: "เขียน Struct สำหรับ Request และ Result ใน tx_transfer.go" },
         {
           t: "p",
-          c: "เปิดไฟล์ `simplebank/db/store.go` ที่เราสร้างไว้ในหัวข้อที่แล้ว แล้ว **เขียนโค้ดต่อท้าย** ฟังก์ชัน `execTx` เพื่อกำหนดพารามิเตอร์ขาเข้าและผลลัพธ์ของการโอนเงิน:",
+          c: "สร้างไฟล์ใหม่ชื่อว่า `simplebank/db/tx_transfer.go` เพื่อเก็บข้อมูลพารามิเตอร์ขาเข้าและผลลัพธ์ของการโอนเงิน:",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (เขียนต่อท้ายในไฟล์เดิม - ส่วนที่ 2: TransferTxParams & Result)",
+          label: "simplebank/db/tx_transfer.go (สร้างไฟล์ใหม่ - ส่วนที่ 1: TransferTxParams & Result)",
           c: `// นิยาม Struct สำหรับพารามิเตอร์ขาเข้า (Input) และผลลัพธ์ขาออก (Output) ของธุรกรรมการโอนเงิน
 // ทำเพื่อแก้ปัญหา: มัดรวมข้อมูลที่เกี่ยวข้องกับการโอนเงินเป็นก้อนเดียว เพื่อให้ส่งผ่านและตรวจสอบข้อมูลได้ง่ายและปลอดภัย
 package db
@@ -675,25 +687,21 @@ type AddAccountBalanceParams struct {
         { t: "h2", c: "โค้ดของฟังก์ชัน `TransferTx` (Version 1: โครงสร้างพื้นฐาน)" },
         {
           t: "p",
-          c: "เขียนฟังก์ชัน `TransferTx` ต่อท้ายลงในไฟล์ `simplebank/db/store.go` โดยสังเกตการเรียกใช้ `execTx` เพื่อรวม 5 ขั้นตอนของการโอนเงินเข้าด้วยกันใน 1 Transaction:",
+          c: "เขียนฟังก์ชัน `TransferTx` ต่อท้ายลงในไฟล์ `simplebank/db/tx_transfer.go` โดยสังเกตการเรียกใช้ `store.execTx` เพื่อรวม 5 ขั้นตอนของการโอนเงินเข้าด้วยกันใน 1 Transaction:",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (เขียนต่อท้ายในไฟล์เดิม - ส่วนที่ 3: TransferTx Version 1)",
+          label: "simplebank/db/tx_transfer.go (เขียนต่อในไฟล์เดิม - ส่วนที่ 2: TransferTx Version 1)",
           c: `// TransferTx รวม 5 ขั้นตอนของการโอนเงินจริงเข้าด้วยกันใน 1 Transaction
 // ทำเพื่อแก้ปัญหา: ป้องกันเงินสูญหายระหว่างทาง (Partial Failure) หากตัดเงินต้นทางได้แต่ปลายทางล้มเหลว
 // ทุกขั้นตอนจะถูกครอบด้วย execTx หากขั้นตอนใดมี Error ระบบจะ Rollback คืนค่าเดิมทันที
-
-package db
-
-import "context"
 
 // TransferTx รันการโอนเงินจากบัญชีหนึ่งไปยังอีกบัญชีหนึ่งใน 1 Transaction อย่างปลอดภัย
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
-	// เรียกใช้ execTx เพื่อเปิด Transaction และครอบทุกขั้นตอนไว้ด้วยกัน
+	// เรียกใช้ execTx จาก Store เพื่อเปิด Transaction และครอบทุกขั้นตอนไว้ด้วยกัน
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
@@ -755,60 +763,24 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
         {
           t: "ul",
           c: [
-            "**`store.execTx(...)`**: เปิด Transaction ขึ้นมา หากเกิด error ในขั้นตอนใดขั้นตอนหนึ่ง ตัว Transaction Manager จะสั่ง Rollback คืนค่าข้อมูลทุกอย่างอัตโนมัติ",
+            "**`store.execTx(...)`**: เรียกใช้งาน Transaction Engine จาก `store.go` เพื่อเปิด Transaction หากเกิด error ในขั้นตอนใดขั้นตอนหนึ่ง ระบบจะสั่ง Rollback คืนค่าข้อมูลทุกอย่างอัตโนมัติ",
             "**`CreateTransfer(...)`**: สร้างบันทึกประวัติการโอนเงินทันที ทำให้เราได้ `Transfer.ID` มาเป็นหลักฐานอ้างอิง",
             "**`-arg.Amount`**: สังเกตเครื่องหมายลบหน้า `arg.Amount` ในตอนสร้าง FromEntry และ AddAccountBalance บัญชี A เป็นการตัดเงินออกอย่างชัดเจน",
             "**`result.ToAccount`**: เราบันทึกสถานะล่าสุดของบัญชีที่อัปเดตแล้วลงในตัวแปร `result` เพื่อส่งกลับไปให้หน้าบ้านแสดงผลได้ทันทีว่า ยอดเงินคงเหลือใหม่เป็นเท่าใด",
           ],
         },
-        { t: "h3", c: "📁 โค้ดเต็มของ simplebank/db/store.go (Version 1: โครงสร้างพื้นฐานพร้อมใช้งาน)" },
+        { t: "h3", c: "📁 โค้ดเต็มของ simplebank/db/tx_transfer.go (Version 1: โครงสร้างพื้นฐานพร้อมใช้งาน)" },
         {
           t: "p",
-          c: "เมื่อนำโค้ดทั้ง 3 ส่วนมารวมกัน ไฟล์ `simplebank/db/store.go` ในบทนี้จะได้หน้าตาฉบับเต็มดังนี้ (สามารถใช้ตรวจเช็กความถูกต้อง เพื่อเตรียมนำไปทดสอบและอัปเกรดในบทถัดไป):",
+          c: "เมื่อนำโค้ดทั้ง 2 ส่วนมารวมกัน ไฟล์ `simplebank/db/tx_transfer.go` ในบทนี้จะได้หน้าตาฉบับเต็มดังนี้ (สามารถใช้ตรวจเช็กความถูกต้อง เพื่อเตรียมนำไปทดสอบและอัปเกรดในบทถัดไป):",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (Version 1: โค้ดเต็มไฟล์เดียวพร้อมรัน)",
+          label: "simplebank/db/tx_transfer.go (Version 1: โค้ดเต็มไฟล์เดียวพร้อมรัน)",
           c: `package db
 
-import (
-	"context"
-	"database/sql"
-	"fmt"
-)
-
-// Store ครอบคลุมทั้งฟังก์ชันการคิวรีรายตัว และการทำงานร่วมกันเป็น Transaction
-type Store struct {
-	*Queries
-	db *sql.DB
-}
-
-func NewStore(db *sql.DB) *Store {
-	return &Store{
-		db:      db,
-		Queries: New(db),
-	}
-}
-
-// execTx เป็นฟังก์ชันภายในที่ควบคุมรอบชีวิต (Cycle) ของ Transaction อย่างปลอดภัย
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := store.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	q := New(tx)
-	err = fn(q)
-	if err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("tx err: %v, rollback err: %v", err, rbErr)
-		}
-		return err
-	}
-
-	return tx.Commit()
-}
+import "context"
 
 // TransferTxParams คือข้อมูลที่ต้องใช้ในการสั่งโอนเงินระหว่าง 2 บัญชี
 type TransferTxParams struct {
