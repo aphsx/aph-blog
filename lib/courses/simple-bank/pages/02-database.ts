@@ -21,7 +21,7 @@ export const databasePages: Record<string, Page> = {
         {
           t: "code",
           lang: "sql",
-          label: "คำสั่งที่ห้ามทำในระบบธนาคารจริง!",
+          label: "คำสั่งที่ห้ามทำในระบบธนาคารจริง! (❌ ห้ามใช้ Direct Mutation โดยไร้ Ledger)",
           c: `-- แบบที่ผิดมหันต์!
 UPDATE accounts SET balance = balance - 100 WHERE id = 1;
 UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
@@ -72,7 +72,7 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
         {
           t: "codeout",
           lang: "go",
-          label: "float_vs_bigint.go",
+          label: "float_vs_bigint.go (เปรียบเทียบ: Float ❌ ห้ามใช้ vs Bigint ✅ ใช้จริง)",
           code: `// สาธิตความแตกต่างระหว่างการใช้ Floating-Point (float64) เทียบกับ Integer (int64)
 // ทำเพื่อแก้ปัญหา: มาตรฐาน IEEE 754 ของ Float ทำให้เกิดความคลาดเคลื่อนในการคำนวณเงิน
 // ระบบธนาคารจึงต้องเก็บเงินเป็นจำนวนเต็มในหน่วยย่อยที่สุด (สตางค์/เซนต์) เสมอ

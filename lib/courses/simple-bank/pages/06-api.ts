@@ -382,25 +382,28 @@ func IsSupportedCurrency(currency string) bool {
         },
         {
           t: "code",
-          lang: "go",
-          label: "simplebank/api/server.go (อัปเดต NewServer เพื่อลงทะเบียน Validator)",
-          c: `import (
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
-)
+          lang: "diff",
+          label: "simplebank/api/server.go (จุดแก้ไข: เพิ่มลงทะเบียน Currency Validator)",
+          c: ` package api
 
-func NewServer(store *db.Store) *Server {
-	server := &Server{store: store}
-	router := gin.Default()
+ import (
+ 	"github.com/gin-gonic/gin"
++	"github.com/gin-gonic/gin/binding"
++	"github.com/go-playground/validator/v10"
+ 	db "simplebank/db"
+ )
 
-	// ลงทะเบียน validator tag ใหม่
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("currency", validCurrency)
-	}
+ func NewServer(store *db.Store) *Server {
+ 	server := &Server{store: store}
+ 	router := gin.Default()
 
-	// ... routing อื่นๆ
-	return server
-}`,
++	// ลงทะเบียน custom validator tag "currency"
++	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
++		v.RegisterValidation("currency", validCurrency)
++	}
++
+ 	// 2. ลงทะเบียน Routing สำหรับแต่ละ Endpoint
+ 	router.POST("/accounts", server.createAccount)`,
         },
         {
           t: "codeout",

@@ -42,27 +42,21 @@ html {
 
 /*
  * Shiki-highlighted code panels (components/Article.tsx `code` / `codeout`).
- * Dark editor look, tuned to match the interactive viz players
- * (components/viz/VizFrame.tsx: panels #0c0e16, chrome #121620, borders
- * #2a3040). Shiki emits its own inline background/color on <pre class="shiki">;
- * the !important below is what lets it lose to the panel background so
- * highlighted blocks stay one family with the surrounding chrome.
+ * VS Code Dark+ aesthetic (#1e1e1e editor body, #858585 gutters, #2d2d2d borders).
  */
 .shiki {
   margin: 0;
-  padding: 1rem;
+  padding: 0.875rem 1rem;
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: 0.875em;
-  line-height: 1.7;
-  background-color: #0c0e16 !important;
+  line-height: 1.65;
+  background-color: #1e1e1e !important;
+  color: #d4d4d4;
 }
 
 /*
- * Line-number gutter for real source code (.shiki-numbered, set in
- * components/Article.tsx only when `lang` is an actual language — plain
- * ASCII diagrams stay gutter-free). Pure CSS counters against Shiki's
- * existing per-line <span class="line">, no extra markup needed.
+ * VS Code line-number gutter
  */
 .shiki-numbered .shiki code {
   counter-reset: line;
@@ -72,16 +66,46 @@ html {
   counter-increment: line;
   content: counter(line);
   display: inline-block;
-  /* fixed (not content-based min-width): keeps every row's gutter the exact
-     same pixel width, so a line reaching a 2-digit number can't nudge that
-     one line's code a few px to the right of the rest */
-  width: 1.75em;
-  margin-right: 1em;
-  padding-right: 1em;
-  border-right: 1px solid #2a3040;
+  width: 2.75ch;
+  margin-right: 1.25rem;
+  padding-right: 0.75rem;
+  border-right: 1px solid #2d2d2d;
   text-align: right;
-  color: #6a7080;
+  color: #858585;
   user-select: none;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/*
+ * VS Code Diff Editor: soft red and green line highlights with solid accent left indicators
+ */
+.shiki .line.diff-remove,
+.shiki .line.diff-add,
+.shiki .line.diff-hunk {
+  display: inline-block;
+  min-width: calc(100% + 2rem);
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 0.85rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
+}
+
+.shiki .line.diff-remove {
+  background-color: rgba(241, 76, 76, 0.18);
+  border-left: 4px solid #f14c4c;
+}
+
+.shiki .line.diff-add {
+  background-color: rgba(46, 160, 67, 0.2);
+  border-left: 4px solid #2ea043;
+}
+
+.shiki .line.diff-hunk {
+  background-color: rgba(0, 122, 204, 0.15);
+  border-left: 4px solid #007acc;
+  color: #4fc1ff;
 }
 
 @layer utilities {
