@@ -116,8 +116,10 @@ Tx 2: UPDATE accounts SET balance = balance - 100 WHERE id = 1;`,
           out: `[Tx 1] ได้รับ Exclusive Row Lock บนแถว id = 1 ทันที -> balance 100 - 100 = 0
 [Tx 2] พยายามแก้ไขแถว id = 1 -> ถูก PostgreSQL สั่งให้ "หยุดรอ (Block)"
 [Tx 1] COMMIT ธุรกรรมสำเร็จ -> ปลด Row Lock
-[Tx 2] ได้รับ Row Lock ต่อมา -> อ่านค่ายอดเงินล่าสุดพบว่าเป็น 0 บาท -> ตรวจสอบว่าไม่พอถอน ปฏิเสธคำสั่ง!
-[สรุปความปลอดภัย] ข้อมูลเงินคงเส้นคงวา (Consistent) ปราศจาก Double Spending 100%`,
+[Tx 2] ได้รับ Row Lock ต่อมา -> พยายามทำ 0 - 100 = -100 -> ละเมิด Check Constraint "accounts_balance_check"
+[PostgreSQL] ERROR: new row for relation "accounts" violates check constraint "accounts_balance_check"
+[execTx in Go] ตรวจพบ error จากฐานข้อมูล -> สั่ง tx.Rollback() คืนค่าอัตโนมัติ 100%!
+[สรุปความปลอดภัย] ข้อมูลเงินคงเส้นคงวา (Consistent) ปราศจาก Double Spending และยอดเงินไม่มีวันติดลบ`,
         },
       ],
       en: [],

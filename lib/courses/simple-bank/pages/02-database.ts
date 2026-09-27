@@ -124,7 +124,7 @@ func main() {
 CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
   "owner" varchar NOT NULL,
-  "balance" bigint NOT NULL,
+  "balance" bigint NOT NULL CHECK ("balance" >= 0), -- บังคับยอดเงินห้ามติดลบเด็ดขาด (No Overdraft)
   "currency" varchar(3) NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
@@ -164,6 +164,7 @@ CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");`,
           t: "ul",
           c: [
             "**`bigserial PRIMARY KEY`**: กำหนดให้ id เป็นเลขจำนวนเต็ม 64-bit ที่รันเพิ่มขึ้นอัตโนมัติ (Auto-increment) รองรับธุรกรรมได้หลายล้านล้านแถวโดยไม่ต้องกลัว id เต็ม",
+            "**`CHECK (balance >= 0)`**: กฎเหล็กระดับฐานข้อมูลที่ป้องกันไม่ให้ยอดเงินในบัญชีติดลบเด็ดขาด (No Overdraft) หากมีคำสั่งใดพยายามตัดเงินเกินยอดคงเหลือ PostgreSQL จะ Reject คำสั่งทันทีและทำให้ Transaction เข้าสู่ Auto Rollback ตามหลัก Consistency",
             "**`timestamptz`**: เก็บวันเวลาพร้อม Timezone ป้องกันปัญหาเรื่องเวลาสับสนเมื่อระบบขยายไปหลายประเทศ",
             "**`FOREIGN KEY (...) REFERENCES ...`**: ป้องกันการบันทึกประวัติลอยๆ เช่น จะบันทึกการโอนเงินได้ บัญชีต้นทางและปลายทางต้องมีตัวตนอยู่จริงในตาราง `accounts` เท่านั้น",
             "**`CREATE INDEX ON accounts (owner)`**: ช่วยให้การค้นหาบัญชีทั้งหมดของลูกค้าคนใดคนหนึ่ง (เช่น ค้นหาว่านาย Alice มีบัญชีกี่เล่ม) ทำงานได้เร็วระดับ $O(\\log N)$ แทนที่จะต้องสแกนตารางทั้งหมด ($O(N)$)",
@@ -186,6 +187,8 @@ CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");`,
 Indexes:
     "accounts_pkey" PRIMARY KEY, btree (id)
     "accounts_owner_idx" btree (owner)
+Check constraints:
+    "accounts_balance_check" CHECK (balance >= 0)
 Referenced by:
     TABLE "entries" CONSTRAINT "entries_account_id_fkey" FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
     TABLE "transfers" CONSTRAINT "transfers_from_account_id_fkey" FOREIGN KEY (from_account_id) REFERENCES accounts(id) ON DELETE CASCADE

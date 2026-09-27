@@ -524,6 +524,20 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
           ],
         },
         {
+          t: "callout",
+          title: "💡 การเตรียมเงินทดสอบก่อนสั่งโอน (Initial Balance Seeding)",
+          c: `เนื่องจากตอนเปิดบัญชีผ่าน \`POST /accounts\` ระบบจะกำหนดยอดเงินเริ่มต้นเป็น 0 บาท (\`balance = 0\`) เสมอตามหลักความปลอดภัย
+ก่อนที่เราจะทดสอบยิงโอนเงิน 100 USD จากบัญชี 1 (Alice) ไปยังบัญชี 2 (Bob) ให้เราทำการใส่เงินตั้งต้น 1,000 USD ให้บัญชี 1 และ 500 USD ให้บัญชี 2 ผ่านคำสั่ง SQL ใน Terminal ดังนี้:
+\`\`\`bash
+docker exec -it postgres16 psql -U root -d simple_bank -c "
+UPDATE accounts SET balance = 1000 WHERE id = 1;
+UPDATE accounts SET balance = 500 WHERE id = 2;
+INSERT INTO entries (account_id, amount) VALUES (1, 1000), (2, 500);
+"
+\`\`\`
+*(ในระบบธนาคารจริง ยอดเงินตั้งต้นนี้จะมาจากการฝากเงินสดที่สาขา หรือการเติมเงินผ่าน Payment Gateway/PromptPay)*`,
+        },
+        {
           t: "codeout",
           lang: "bash",
           label: "ทดสอบยิง curl POST /transfers (โอนเงินสำเร็จ 200 OK)",

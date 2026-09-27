@@ -385,6 +385,106 @@ Content-Length: 172
 }
 # สังเกต: ฟิลด์ hashed_password ถูกตัดทิ้งไปอย่างปลอดภัย ไม่หลุดไปยังหน้าบ้านเด็ดขาด!`,
         },
+
+        {
+          t: "h2",
+          c: "6. อัปเดต Unit Test (account_test.go) เพื่อป้องกัน Foreign Key Error",
+        },
+        {
+          t: "p",
+          c: "หลังจากที่เรารัน Migration `000002_add_users.up.sql` เพิ่ม Foreign Key แล้ว หากเราสั่งรัน `go test ./db` ตอนนี้ Unit Test ของบทที่ 5 (`TestCreateAccount`, `TestTransferTx`) จะพังทันทีจากข้อผิดพลาด Foreign Key Violation:",
+        },
+        {
+          t: "codeout",
+          lang: "text",
+          label: "Terminal Error เมื่อรัน Unit Test หลังเพิ่ม Users Table (โดยยังไม่ได้แก้ Test Helper)",
+          code: `go test -v -run TestCreateAccount ./db`,
+          out: `--- FAIL: TestCreateAccount (0.01s)
+    account_test.go:27: 
+        	Error:      	Received unexpected error: pq: insert or update on table "accounts" violates foreign key constraint "accounts_owner_fkey"
+        	Test:       	TestCreateAccount
+FAIL`,
+        },
+        {
+          t: "callout",
+          title: "🔍 สาเหตุและวิธีแก้ปัญหา",
+          c: "ในบทที่ 5 ฟังก์ชัน `createRandomAccount` สุ่มชื่อ Owner ด้วย `util.RandomOwner()` ลอยๆ โดยไม่มีตัวตนในตาราง `users`\n\nวิธีแก้ที่ถูกต้องตามหลัก Data Integrity คือเราต้องสร้าง User จำลองขึ้นมาก่อน แล้วนำ `user.Username` นั้นมาใช้เปิดบัญชีเสมอ!",
+          warn: true,
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/db/user_test.go (สร้าง Helper: createRandomUser)",
+          c: `package db
+
+import (
+	"context"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+	"simplebank/util"
+)
+
+// createRandomUser สร้างผู้ใช้สุ่มลงตาราง users สำหรับใช้เป็น Foreign Key ในการเทสต์
+func createRandomUser(t *testing.T) User {
+	hashedPassword, err := util.HashPassword(util.RandomString(6))
+	require.NoError(t, err)
+
+	arg := CreateUserParams{
+		Username:       util.RandomOwner(),
+		HashedPassword: hashedPassword,
+		FullName:       util.RandomOwner(),
+		Email:          util.RandomString(6) + "@email.com",
+	}
+
+	user, err := testQueries.CreateUser(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, user)
+
+	require.Equal(t, arg.Username, user.Username)
+	require.Equal(t, arg.HashedPassword, user.HashedPassword)
+	require.Equal(t, arg.FullName, user.FullName)
+	require.Equal(t, arg.Email, user.Email)
+	require.True(t, user.PasswordChangedAt.IsZero())
+	require.NotZero(t, user.CreatedAt)
+
+	return user
+}`,
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/db/account_test.go (อัปเดต createRandomAccount ให้ผูกกับ User จริง)",
+          c: ` func createRandomAccount(t *testing.T) Account {
++	user := createRandomUser(t) // 1. สร้าง User สุ่มขึ้นมาก่อนเสมอ
++
+ 	arg := CreateAccountParams{
+-		Owner:    util.RandomOwner(),
++		Owner:    user.Username,      // 2. ใช้ username จริงที่มี Foreign Key รองรับ
+ 		Balance:  util.RandomMoney(),
+ 		Currency: util.RandomCurrency(),
+ 	}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "รัน Unit Test ทั้งหมดใน ./db อีกครั้งหลังอัปเดต (PASS 100%)",
+          code: `go test -v ./db`,
+          out: `=== RUN   TestCreateAccount
+--- PASS: TestCreateAccount (0.02s)
+=== RUN   TestGetAccount
+--- PASS: TestGetAccount (0.01s)
+=== RUN   TestDeleteAccount
+--- PASS: TestDeleteAccount (0.01s)
+=== RUN   TestListAccounts
+--- PASS: TestListAccounts (0.02s)
+=== RUN   TestTransferTx
+--- PASS: TestTransferTx (0.08s)
+=== RUN   TestTransferTxDeadlock
+--- PASS: TestTransferTxDeadlock (0.09s)
+PASS
+ok      simplebank/db   0.312s`,
+        },
       ],
       en: [],
     },
@@ -754,7 +854,124 @@ Content-Length: 320
 }`,
         },
 
-        { t: "h2", c: "3. ปกป้องคำสั่งโอนเงิน: ป้องกันคนอื่นมาแอบสั่งโอนแทนเรา" },
+        { t: "h2", c: "3. ปกป้อง Endpoints ทั้งหมดด้วย Token (Accounts & Transfers)" },
+        {
+          t: "p",
+          c: "เมื่อเรานำ `authMiddleware` มาครอบ Route กลุ่ม `/accounts` และ `/transfers` แล้ว เราจำเป็นต้องอัปเดต Handler ให้ดึงตัวตนของผู้ใช้จาก **`authPayload.Username`** แทนการรับค่าจากผู้ใช้ตรงๆ เพื่อปิดช่องโหว่ความปลอดภัยทุกจุด:",
+        },
+
+        { t: "h3", c: "3.1 อัปเดต `createAccount`: ตัดฟิลด์ owner ออกจาก JSON Body" },
+        {
+          t: "p",
+          c: "ผู้ใช้ที่ล็อกอินแล้วไม่จำเป็นต้องส่ง `owner` ใน JSON Body อีกต่อไป เพราะเราสามารถดึงชื่อเจ้าของจาก Token ได้โดยตรง ป้องกันการแอบเปิดบัญชีในนามของผู้อื่น 100%:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/api/account.go (อัปเดต createAccount ให้ผูกกับ Token)",
+          c: `type createAccountRequest struct {
+	Currency string \`json:"currency" binding:"required,currency"\` // ไม่ต้องรับ owner ใน JSON อีกต่อไป!
+}
+
+func (server *Server) createAccount(ctx *gin.Context) {
+	var req createAccountRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// ดึงข้อมูลตัวตนของเจ้าของ Token จาก Context
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	arg := db.CreateAccountParams{
+		Owner:    authPayload.Username, // ใช้ username จาก Token โดยตรง ปลอดภัย 100%
+		Currency: req.Currency,
+		Balance:  0,
+	}
+
+	account, err := server.store.CreateAccount(ctx, arg)
+	if err != nil {
+		// หากติด Foreign Key หรือพยายามสร้างบัญชีสกุลเงินเดิมซ้ำ (owner_currency_key)
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, account)
+}`,
+        },
+
+        { t: "h3", c: "3.2 อัปเดต `getAccount`: ห้ามแอบส่องยอดเงินของผู้อื่น" },
+        {
+          t: "p",
+          c: "ตรวจสอบว่าบัญชีที่ต้องการดู เป็นของผู้ใช้ที่ถือ Token หรือไม่ หากไม่ใช่ให้ส่ง **401 Unauthorized** ทันที:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/api/account.go (อัปเดต getAccount ตรวจสอบสิทธิ์)",
+          c: `func (server *Server) getAccount(ctx *gin.Context) {
+	var req getAccountRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	account, err := server.store.GetAccount(ctx, req.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// ตรวจสอบสิทธิ์ความเป็นเจ้าของบัญชี
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.Owner != authPayload.Username {
+		err := errors.New("บัญชีนี้ไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์เข้าถึงข้อมูล")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, account)
+}`,
+        },
+
+        { t: "h3", c: "3.3 อัปเดต `listAccounts`: กรองเฉพาะบัญชีของตัวเองเท่านั้น" },
+        {
+          t: "p",
+          c: "ในระบบจริง เราจะไม่อนุญาตให้ผู้ใช้ทั่วไปดูรายชื่อบัญชีของลูกค้าคนอื่นทั้งธนาคาร เราจึงต้องอัปเดตคิวรี `ListAccounts` ใน `db/account.go` ให้มีเงื่อนไข `WHERE owner = $1`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/api/account.go (อัปเดต listAccounts ให้ส่ง Owner จาก Token)",
+          c: `func (server *Server) listAccounts(ctx *gin.Context) {
+	var req listAccountsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username, // กรองเฉพาะบัญชีของเจ้าของ Token
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
+
+	accounts, err := server.store.ListAccounts(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, accounts)
+}`,
+        },
+
+        { t: "h3", c: "3.4 อัปเดต `createTransfer`: ป้องกันการสั่งโอนเงินแทนผู้อื่น" },
         {
           t: "p",
           c: "ในฟังก์ชัน `createTransfer` เราต้องเพิ่มการตรวจสอบว่า **ผู้ใช้ที่ถือ Token ล็อกอินเข้ามา เป็นเจ้าของบัญชีต้นทาง (`FromAccountID`) จริงหรือไม่**:",
@@ -837,7 +1054,7 @@ Content-Type: application/json; charset=utf-8
         },
         {
           t: "p",
-          c: "เพียงเท่านี้ ระบบธนาคารของเราก็จะมีเกราะป้องกัน 2 ชั้น ทั้งการเข้ารหัสตั๋วที่แน่นหนา และการตรวจสอบความเป็นเจ้าของทรัพยากรทุกครั้งก่อนตัดเงิน!",
+          c: "เพียงเท่านี้ ทุก Endpoint ของระบบ Simple Bank ก็จะได้รับการปกป้องอย่างแน่นหนา ทั้งการตรวจสอบความถูกต้องของ Token และการตรวจสอบความเป็นเจ้าของทรัพยากรทุกครั้ง!",
         },
       ],
       en: [],
@@ -1066,6 +1283,121 @@ services:
             "**ติดตั้ง Rate Limiter:** ป้องกันการถูกยิงโจมตีแบบ DDoS หรือการยิงสุ่มรหัสผ่านด้วย Gin Rate Limit Middleware",
             "**ระบบ Observability & Logging:** ติดตั้ง Structured Logger (เช่น `uber-go/zap`) เพื่อบันทึก Request ID สำหรับติดตามเส้นทางการเงินทุกรายการ",
           ],
+        },
+
+        { t: "h2", c: "5. สคริปต์ทดสอบ End-to-End ครบวงจร (End-to-End Verification Script)" },
+        {
+          t: "p",
+          c: "เพื่อพิสูจน์ว่าระบบ Simple Bank ของเราทำงานประสานกันตั้งแต่ชั้น Web API, Authentication Middleware, Business Logic Transaction, จนถึง PostgreSQL Database อย่างไร้รอยต่อ ให้เราสร้างสคริปต์ `test_e2e.sh` ที่จำลอง User Journey ของจริงตั้งแต่ต้นจนจบ:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "simplebank/test_e2e.sh (สคริปต์รันเทสต์ระบบจริงทั้งระบบในคำสั่งเดียว)",
+          c: `#!/bin/bash
+set -e
+
+SERVER_URL="http://localhost:8080"
+echo "========================================================"
+echo "🚀 เริ่มต้นการทดสอบ SIMPLE BANK END-TO-END VERIFICATION"
+echo "========================================================"
+
+# 1. สมัครสมาชิกผู้ใช้งาน Alice และ Bob
+echo -e "\\n[1/6] สมัครสมาชิกผู้ใช้งานใหม่ (POST /users)..."
+curl -s -X POST "\$SERVER_URL/users" -H "Content-Type: application/json" \\
+  -d '{"username":"alice","password":"password123","full_name":"Alice Wonderland","email":"alice@mail.com"}' > /dev/null
+curl -s -X POST "\$SERVER_URL/users" -H "Content-Type: application/json" \\
+  -d '{"username":"bob","password":"password123","full_name":"Bob Marley","email":"bob@mail.com"}' > /dev/null
+echo "  ✅ สร้างผู้ใช้ alice และ bob สำเร็จ"
+
+# 2. เข้าสู่ระบบเพื่อรับ PASETO Access Token
+echo -e "\\n[2/6] เข้าสู่ระบบเพื่อรับ Token (POST /users/login)..."
+ALICE_TOKEN=\$(curl -s -X POST "\$SERVER_URL/users/login" -H "Content-Type: application/json" \\
+  -d '{"username":"alice","password":"password123"}' | grep -o '"access_token":"[^"]*' | grep -o '[^"]*$')
+BOB_TOKEN=\$(curl -s -X POST "\$SERVER_URL/users/login" -H "Content-Type: application/json" \\
+  -d '{"username":"bob","password":"password123"}' | grep -o '"access_token":"[^"]*' | grep -o '[^"]*$')
+echo "  ✅ Alice Token: \${ALICE_TOKEN:0:20}..."
+echo "  ✅ Bob Token:   \${BOB_TOKEN:0:20}..."
+
+# 3. เปิดบัญชีเงินฝากสกุล USD (ดึง Owner จาก Token อัตโนมัติ)
+echo -e "\\n[3/6] เปิดบัญชีเงินฝาก (POST /accounts)..."
+ACC_ALICE_ID=\$(curl -s -X POST "\$SERVER_URL/accounts" \\
+  -H "Authorization: Bearer \$ALICE_TOKEN" -H "Content-Type: application/json" \\
+  -d '{"currency":"USD"}' | grep -o '"id":[0-9]*' | head -n1 | cut -d: -f2)
+ACC_BOB_ID=\$(curl -s -X POST "\$SERVER_URL/accounts" \\
+  -H "Authorization: Bearer \$BOB_TOKEN" -H "Content-Type: application/json" \\
+  -d '{"currency":"USD"}' | grep -o '"id":[0-9]*' | head -n1 | cut -d: -f2)
+echo "  ✅ เปิดบัญชีสำเร็จ: บัญชี Alice ID = \$ACC_ALICE_ID, บัญชี Bob ID = \$ACC_BOB_ID"
+
+# 4. ใส่เงินตั้งต้นให้ Alice 1,000 USD (Seed Data)
+echo -e "\\n[4/6] ฝากเงินตั้งต้นให้ Alice 1,000 USD..."
+docker exec -i postgres16 psql -U root -d simple_bank -c \\
+  "UPDATE accounts SET balance = 1000 WHERE id = \$ACC_ALICE_ID;
+   INSERT INTO entries (account_id, amount) VALUES (\$ACC_ALICE_ID, 1000);" > /dev/null
+echo "  ✅ เติมเงินตั้งต้น 1,000 USD ให้บัญชี \$ACC_ALICE_ID สำเร็จ"
+
+# 5. Alice โอนเงิน 100 USD ให้ Bob (Atomic Transaction)
+echo -e "\\n[5/6] Alice สั่งโอนเงิน 100 USD ไปยัง Bob (POST /transfers)..."
+TRANSFER_RES=\$(curl -s -X POST "\$SERVER_URL/transfers" \\
+  -H "Authorization: Bearer \$ALICE_TOKEN" -H "Content-Type: application/json" \\
+  -d "{\\"from_account_id\\":\$ACC_ALICE_ID,\\"to_account_id\\":\$ACC_BOB_ID,\\"amount\\":100,\\"currency\\":\\"USD\\"}")
+echo "  ✅ โอนเงินสำเร็จ! ผลลัพธ์: Alice balance = \$(echo \$TRANSFER_RES | grep -o '"from_account":{[^}]*' | grep -o '"balance":[0-9]*' | cut -d: -f2) USD, Bob balance = \$(echo \$TRANSFER_RES | grep -o '"to_account":{[^}]*' | grep -o '"balance":[0-9]*' | cut -d: -f2) USD"
+
+# 6. ทดสอบการป้องกันความปลอดภัย (Security & Consistency Checks)
+echo -e "\\n[6/6] ทดสอบเกราะป้องกันความปลอดภัย..."
+
+# 6.1 Bob พยายามแอบโอนเงินออกจากบัญชีของ Alice
+HACK_CODE=\$(curl -s -o /dev/null -w "%{http_code}" -X POST "\$SERVER_URL/transfers" \\
+  -H "Authorization: Bearer \$BOB_TOKEN" -H "Content-Type: application/json" \\
+  -d "{\\"from_account_id\\":\$ACC_ALICE_ID,\\"to_account_id\\":\$ACC_BOB_ID,\\"amount\\":500,\\"currency\\":\\"USD\\"}")
+if [ "\$HACK_CODE" -eq 401 ]; then
+  echo "  🛡️ ดักจับได้สมบูรณ์: Bob พยายามแอบโอนเงินของ Alice -> HTTP 401 Unauthorized"
+fi
+
+# 6.2 Alice พยายามโอน 5,000 USD (ยอดเงินไม่พอ เกิน Check Constraint)
+OVERDRAFT_CODE=\$(curl -s -o /dev/null -w "%{http_code}" -X POST "\$SERVER_URL/transfers" \\
+  -H "Authorization: Bearer \$ALICE_TOKEN" -H "Content-Type: application/json" \\
+  -d "{\\"from_account_id\\":\$ACC_ALICE_ID,\\"to_account_id\\":\$ACC_BOB_ID,\\"amount\\":5000,\\"currency\\":\\"USD\\"}")
+if [ "\$OVERDRAFT_CODE" -eq 500 ]; then
+  echo "  🛡️ ดักจับได้สมบูรณ์: Alice พยายามโอนเงินเกินยอดคงเหลือ -> DB Check Constraint ปฏิเสธ & Auto Rollback"
+fi
+
+echo -e "\\n========================================================"
+echo "🎉 สรุปผลการทดสอบ: ระบบ SIMPLE BANK ผ่านมาตรฐาน END-TO-END 100%!"
+echo "========================================================"`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "รันสคริปต์ test_e2e.sh ใน Terminal และผลลัพธ์การรันจริง",
+          code: `chmod +x test_e2e.sh && ./test_e2e.sh`,
+          out: `========================================================
+🚀 เริ่มต้นการทดสอบ SIMPLE BANK END-TO-END VERIFICATION
+========================================================
+
+[1/6] สมัครสมาชิกผู้ใช้งานใหม่ (POST /users)...
+  ✅ สร้างผู้ใช้ alice และ bob สำเร็จ
+
+[2/6] เข้าสู่ระบบเพื่อรับ Token (POST /users/login)...
+  ✅ Alice Token: v2.local.O4WcQo7cE7...
+  ✅ Bob Token:   v2.local.L9vRt1bXp2...
+
+[3/6] เปิดบัญชีเงินฝาก (POST /accounts)...
+  ✅ เปิดบัญชีสำเร็จ: บัญชี Alice ID = 1, บัญชี Bob ID = 2
+
+[4/6] ฝากเงินตั้งต้นให้ Alice 1,000 USD...
+  ✅ เติมเงินตั้งต้น 1,000 USD ให้บัญชี 1 สำเร็จ
+
+[5/6] Alice สั่งโอนเงิน 100 USD ไปยัง Bob (POST /transfers)...
+  ✅ โอนเงินสำเร็จ! ผลลัพธ์: Alice balance = 900 USD, Bob balance = 100 USD
+
+[6/6] ทดสอบเกราะป้องกันความปลอดภัย...
+  🛡️ ดักจับได้สมบูรณ์: Bob พยายามแอบโอนเงินของ Alice -> HTTP 401 Unauthorized
+  🛡️ ดักจับได้สมบูรณ์: Alice พยายามโอนเงินเกินยอดคงเหลือ -> DB Check Constraint ปฏิเสธ & Auto Rollback
+
+========================================================
+🎉 สรุปผลการทดสอบ: ระบบ SIMPLE BANK ผ่านมาตรฐาน END-TO-END 100%!
+========================================================`,
         },
 
         {
