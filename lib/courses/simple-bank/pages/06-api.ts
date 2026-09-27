@@ -31,7 +31,7 @@ export const apiPages: Record<string, Page> = {
         {
           t: "code",
           lang: "go",
-          label: "api/server.go",
+          label: "simplebank/api/server.go (สร้างไฟล์ใหม่)",
           c: `// โครงสร้าง Server และการผูก Routing ผ่าน Gin Web Framework พร้อม Dependency Injection
 // ทำเพื่อแก้ปัญหา: หลีกเลี่ยงการใช้ Global Variable ในการเข้าถึง Database
 // การ Inject db.Store เข้าไปใน Server struct ทำให้โค้ดเป็นระเบียบ และสามารถ Mock ได้ง่ายตอนทำ Unit Test
@@ -84,7 +84,7 @@ func errorResponse(err error) gin.H {
         {
           t: "code",
           lang: "go",
-          label: "api/account.go (CreateAccount)",
+          label: "simplebank/api/account.go (สร้างไฟล์ใหม่: CreateAccount)",
           c: `// API Handler สำหรับจัดการการเปิดบัญชีใหม่ (POST /accounts)
 // ทำเพื่อแก้ปัญหา: แกะ JSON Payload ตรวจสอบความถูกต้อง (Validation) ก่อนส่งไปบันทึกลงในฐานข้อมูล
 package api
@@ -167,8 +167,9 @@ Content-Length: 104
         {
           t: "code",
           lang: "go",
-          label: "api/account.go (GetAccount)",
-          c: `type getAccountRequest struct {
+          label: "simplebank/api/account.go (เขียนต่อในไฟล์เดิม: GetAccount)",
+          c: `// หมายเหตุ: อย่าลืมเพิ่ม "database/sql" ใน import ของไฟล์ simplebank/api/account.go
+type getAccountRequest struct {
 	ID int64 \`uri:"id" binding:"required,min=1"\`
 }
 
@@ -237,7 +238,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "go",
-          label: "api/account.go (ListAccounts)",
+          label: "simplebank/api/account.go (เขียนต่อในไฟล์เดิม: ListAccounts)",
           c: `// listAccountsRequest กำหนด Query Parameters สำหรับการแบ่งหน้า (Pagination)
 type listAccountsRequest struct {
 	PageID   int32 \`form:"page_id" binding:"required,min=1"\`
@@ -333,7 +334,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "go",
-          label: "api/validator.go",
+          label: "simplebank/api/validator.go (สร้างไฟล์ใหม่)",
           c: `package api
 
 import (
@@ -356,7 +357,7 @@ var validCurrency validator.Func = func(fieldLevel validator.FieldLevel) bool {
         {
           t: "code",
           lang: "go",
-          label: "util/currency.go",
+          label: "simplebank/util/currency.go (สร้างไฟล์ใหม่)",
           c: `package util
 
 const (
@@ -382,7 +383,7 @@ func IsSupportedCurrency(currency string) bool {
         {
           t: "code",
           lang: "go",
-          label: "api/server.go (Register Validator)",
+          label: "simplebank/api/server.go (อัปเดต NewServer เพื่อลงทะเบียน Validator)",
           c: `import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
@@ -427,7 +428,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "go",
-          label: "api/transfer.go",
+          label: "simplebank/api/transfer.go (สร้างไฟล์ใหม่)",
           c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers)
 // ทำเพื่อแก้ปัญหา: ตรวจสอบความถูกต้องของบัญชีต้นทาง-ปลายทาง และสกุลเงิน ก่อนส่งคำสั่งเข้า Transaction
 // ป้องกันการเปิด Transaction เสียเที่ยว และป้องกันการแฮกด้วยยอดเงินติดลบ
@@ -598,7 +599,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "go",
-          label: "main.go (Root Directory)",
+          label: "simplebank/main.go (สร้างไฟล์ที่ Root Directory)",
           c: `package main
 
 import (

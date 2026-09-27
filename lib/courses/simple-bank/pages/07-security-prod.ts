@@ -22,12 +22,12 @@ export const securityProdPages: Record<string, Page> = {
         { t: "h2", c: "1. ออกแบบตาราง Users และผูก Foreign Key กับ Accounts" },
         {
           t: "p",
-          c: "เราจะสร้าง Migration ไฟล์ใหม่เพื่อเพิ่มตาราง `users` และปรับปรุงตาราง `accounts` ให้ผูกความสัมพันธ์:",
+          c: "เราจะสร้าง Migration ไฟล์ใหม่ด้วยคำสั่ง `migrate create -ext sql -dir db/migration -seq add_users` เพื่อเพิ่มตาราง `users` และปรับปรุงตาราง `accounts` ให้ผูกความสัมพันธ์:",
         },
         {
           t: "code",
           lang: "sql",
-          label: "db/migration/000002_add_users.up.sql",
+          label: "simplebank/db/migration/000002_add_users.up.sql",
           c: `CREATE TABLE "users" (
   "username" varchar PRIMARY KEY,
   "hashed_password" varchar NOT NULL,
@@ -42,6 +42,14 @@ ALTER TABLE "accounts" ADD FOREIGN KEY ("owner") REFERENCES "users" ("username")
 
 -- กฎ: ผู้ใช้ 1 คน ห้ามเปิดบัญชีสกุลเงินเดียวกันซ้ำซ้อน (เช่น Alice มีบัญชี USD ได้แค่เล่มเดียว)
 ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "currency");`,
+        },
+        {
+          t: "code",
+          lang: "sql",
+          label: "simplebank/db/migration/000002_add_users.down.sql",
+          c: `ALTER TABLE IF EXISTS "accounts" DROP CONSTRAINT IF EXISTS "owner_currency_key";
+ALTER TABLE IF EXISTS "accounts" DROP CONSTRAINT IF EXISTS "accounts_owner_fkey";
+DROP TABLE IF EXISTS "users";`,
         },
 
         { t: "h2", c: "2. ทำไมห้ามเก็บ Plain Text หรือ MD5 / SHA-256 เด็ดขาด?" },
@@ -63,7 +71,7 @@ ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "cur
         {
           t: "codeout",
           lang: "go",
-          label: "bcrypt_demo.go",
+          label: "bcrypt_demo.go (สร้างไฟล์เดี่ยวเพื่อทดลองรันดูผลลัพธ์ Salt)",
           code: `// สาธิตกลไกความปลอดภัยของ Bcrypt: การสุ่ม Salt อัตโนมัติ และการตรวจสอบรหัสผ่าน
 // ทำเพื่อแก้ปัญหา: ป้องกันการแฮกผ่าน Rainbow Table เพราะรหัสผ่านเดียวกันจะได้ Hash ที่แตกต่างกันทุกครั้ง
 package main
@@ -102,12 +110,12 @@ Check wrong password error: crypto/bcrypt: hashedPassword is not the hash of the
         { t: "h2", c: "4. นำไปสร้างเป็นฟังก์ชันในโปรเจกต์ Simple Bank" },
         {
           t: "p",
-          c: "เมื่อเข้าใจหลักการแล้ว ในโปรเจกต์จริงเราจะนำฟังก์ชันนี้ไปไว้ในแพ็กเกจ `util` (`util/password.go`) เพื่อให้ Handler อื่นๆ เรียกใช้งานได้:",
+          c: "เมื่อเข้าใจหลักการแล้ว ในโปรเจกต์จริงเราจะนำฟังก์ชันนี้ไปไว้ในแพ็กเกจ `util` (`simplebank/util/password.go`) เพื่อให้ Handler อื่นๆ เรียกใช้งานได้:",
         },
         {
           t: "code",
           lang: "go",
-          label: "util/password.go",
+          label: "simplebank/util/password.go (สร้างไฟล์ใหม่)",
           c: `// ยูทิลิตี้จัดการการแฮชและตรวจสอบรหัสผ่านด้วยอัลกอริทึม Bcrypt
 // ทำเพื่อแก้ปัญหา: ห้ามบันทึกรหัสผ่านเป็น Plain Text ลงฐานข้อมูลเด็ดขาด เพื่อความปลอดภัยของผู้ใช้งาน
 package util
@@ -138,7 +146,7 @@ func CheckPassword(password string, hashedPassword string) error {
         {
           t: "code",
           lang: "go",
-          label: "util/password_test.go",
+          label: "simplebank/util/password_test.go (สร้างไฟล์ใหม่)",
           c: `package util
 
 import (
@@ -195,12 +203,12 @@ ok      simplebank/util 0.231s`,
         { t: "h2", c: "5. Model ตาราง Users และการซ่อน Hashed Password ตอนส่ง JSON" },
         {
           t: "p",
-          c: "สร้าง Go Struct และฟังก์ชัน CRUD สำหรับจัดการตาราง `users` ใน `db/user.go`:",
+          c: "สร้าง Go Struct และฟังก์ชัน CRUD สำหรับจัดการตาราง `users` ใน `simplebank/db/user.go`:",
         },
         {
           t: "code",
           lang: "go",
-          label: "db/user.go",
+          label: "simplebank/db/user.go (สร้างไฟล์ใหม่)",
           c: `// ฟังก์ชัน CRUD สำหรับจัดการข้อมูลผู้ใช้งานในตาราง users
 // ทำเพื่อแก้ปัญหา: บันทึกข้อมูลและดึงข้อมูลผู้ใช้เพื่อตรวจสอบสิทธิ์ในการเข้าสู่ระบบ
 package db
@@ -273,12 +281,12 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
         },
         {
           t: "p",
-          c: "ใน API สมัครสมาชิก `POST /users` เมื่อสร้างผู้ใช้สำเร็จ เรา **ห้ามส่ง `hashed_password` กลับไปใน JSON Response เด็ดขาด** จึงต้องสร้าง `userResponse` เพื่อคัดกรองข้อมูล:",
+          c: "สร้าง Handler สมัครสมาชิก `POST /users` ใน `simplebank/api/user.go` โดยเมื่อสร้างผู้ใช้สำเร็จ เรา **ห้ามส่ง `hashed_password` กลับไปใน JSON Response เด็ดขาด** จึงต้องสร้าง `userResponse` เพื่อคัดกรองข้อมูล:",
         },
         {
           t: "code",
           lang: "go",
-          label: "api/user.go",
+          label: "simplebank/api/user.go (สร้างไฟล์ใหม่)",
           c: `// API Handler สำหรับสมัครสมาชิกใหม่ (POST /users)
 package api
 
@@ -435,7 +443,7 @@ Content-Length: 172
         {
           t: "code",
           lang: "go",
-          label: "token/payload.go",
+          label: "simplebank/token/payload.go (สร้างไฟล์ใหม่)",
           c: `package token
 
 import (
@@ -479,12 +487,12 @@ func (payload *Payload) Valid() error {
         },
         {
           t: "p",
-          c: "สร้างอินเทอร์เฟซ `Maker` ใน `token/maker.go` เพื่อเปิดทางให้ระบบสามารถสลับระหว่าง PASETO และ JWT ได้อย่างยืดหยุ่นในอนาคต:",
+          c: "สร้างอินเทอร์เฟซ `Maker` ใน `simplebank/token/maker.go` เพื่อเปิดทางให้ระบบสามารถสลับระหว่าง PASETO และ JWT ได้อย่างยืดหยุ่นในอนาคต:",
         },
         {
           t: "code",
           lang: "go",
-          label: "token/maker.go",
+          label: "simplebank/token/maker.go (สร้างไฟล์ใหม่)",
           c: `// Maker เป็น Interface สำหรับจัดการสร้างและตรวจสอบความถูกต้องของ Token
 package token
 
@@ -497,12 +505,12 @@ type Maker interface {
         },
         {
           t: "p",
-          c: "จากนั้นสร้าง `PasetoMaker` ใน `token/paseto_maker.go` โดยใช้ Symmetric Encryption แบบ ChaCha20-Poly1305:",
+          c: "จากนั้นสร้าง `PasetoMaker` ใน `simplebank/token/paseto_maker.go` โดยใช้ Symmetric Encryption แบบ ChaCha20-Poly1305:",
         },
         {
           t: "code",
           lang: "go",
-          label: "token/paseto_maker.go",
+          label: "simplebank/token/paseto_maker.go (สร้างไฟล์ใหม่)",
           c: `package token
 
 import (
@@ -555,12 +563,12 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
         },
         {
           t: "p",
-          c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `api/user.go` เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไป:",
+          c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `simplebank/api/user.go` (เขียนต่อในไฟล์เดิม) เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไป:",
         },
         {
           t: "code",
           lang: "go",
-          label: "api/user.go (LoginUser)",
+          label: "simplebank/api/user.go (เขียนต่อในไฟล์เดิม: LoginUser)",
           c: `type loginUserRequest struct {
 	Username string \`json:"username" binding:"required,alphanum"\`
 	Password string \`json:"password" binding:"required,min=6"\`
@@ -620,7 +628,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
         {
           t: "code",
           lang: "go",
-          label: "api/middleware.go",
+          label: "simplebank/api/middleware.go (สร้างไฟล์ใหม่)",
           c: `package api
 
 import (
@@ -676,25 +684,49 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         },
         {
           t: "p",
-          c: "จากนั้นนำ `authMiddleware` ไปผูกเข้ากับกลุ่มของ Route ที่ต้องการการยืนยันตัวตนใน `api/server.go`:",
+          c: "จากนั้นนำ `authMiddleware` ไปผูกเข้ากับกลุ่มของ Route ที่ต้องการการยืนยันตัวตน และอัปเดต `Server` struct ให้เก็บ `tokenMaker` ใน `simplebank/api/server.go`:",
         },
         {
           t: "code",
           lang: "go",
-          label: "api/server.go (แนบ Auth Middleware ให้กับ Routes)",
-          c: `// ในฟังก์ชัน NewServer (api/server.go)
-router := gin.Default()
+          label: "simplebank/api/server.go (อัปเดต Server Struct & NewServer)",
+          c: `// อัปเดต Server struct ใน simplebank/api/server.go ให้ถือ tokenMaker และ config
+type Server struct {
+	config     util.Config
+	store      *db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
+}
 
-// เส้นทางสาธารณะ (Public Routes): ทุกคนเข้าถึงได้โดยไม่ต้องล็อกอิน
-router.POST("/users", server.createUser)
-router.POST("/users/login", server.loginUser)
+// ฟังก์ชัน NewServer ที่รับ config และ store เข้ามา พร้อมสร้าง PasetoMaker
+func NewServer(config util.Config, store *db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
 
-// เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
-authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
-authRoutes.POST("/accounts", server.createAccount)
-authRoutes.GET("/accounts/:id", server.getAccount)
-authRoutes.GET("/accounts", server.listAccounts)
-authRoutes.POST("/transfers", server.createTransfer)`,
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
+
+	router := gin.Default()
+
+	// 1. เส้นทางสาธารณะ (Public Routes): ทุกคนเข้าถึงได้โดยไม่ต้องแนบ Token
+	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
+
+	// 2. เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes.POST("/accounts", server.createAccount)
+	authRoutes.GET("/accounts/:id", server.getAccount)
+	authRoutes.GET("/accounts", server.listAccounts)
+	authRoutes.POST("/transfers", server.createTransfer)
+
+	server.router = router
+	return server, nil
+}`,
         },
         {
           t: "codeout",
@@ -730,7 +762,7 @@ Content-Length: 320
         {
           t: "code",
           lang: "go",
-          label: "api/transfer.go (Authorization Check)",
+          label: "simplebank/api/transfer.go (อัปเดต createTransfer เพื่อตรวจสอบสิทธิ์เจ้าของบัญชี)",
           c: `// ดึงข้อมูลตัวตนของผู้ใช้ที่ผ่านการตรวจสอบจาก Auth Middleware
 authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
@@ -838,7 +870,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "env",
-          label: "app.env",
+          label: "simplebank/app.env (สร้างไฟล์ใหม่ที่ Root Directory)",
           c: `DB_DRIVER=postgres
 DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
 SERVER_ADDRESS=0.0.0.0:8080
@@ -848,7 +880,7 @@ ACCESS_TOKEN_DURATION=15m`,
         {
           t: "code",
           lang: "go",
-          label: "util/config.go",
+          label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
           c: `package util
 
 import (
@@ -881,6 +913,52 @@ func LoadConfig(path string) (config Config, err error) {
 	return
 }`,
         },
+        {
+          t: "p",
+          c: "หลังจากสร้างโมดูล Config เสร็จแล้ว ให้นำไปใช้งานจริงใน `simplebank/main.go` โดยแทนที่ค่าคงที่เดิม (Hardcoded Strings) ด้วยค่าที่อ่านมาจาก `app.env` ผ่าน `util.LoadConfig`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/main.go (อัปเดตให้โหลด Config จาก app.env ผ่าน Viper)",
+          c: `package main
+
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/lib/pq"
+	"simplebank/api"
+	db "simplebank/db"
+	"simplebank/util"
+)
+
+func main() {
+	// 1. โหลดการตั้งค่าจากไฟล์ app.env ในโฟลเดอร์ Root
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	// 2. เชื่อมต่อฐานข้อมูลโดยใช้ค่าจาก Config
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	store := db.NewStore(conn)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
+
+	// 3. สตาร์ตเซิร์ฟเวอร์ตามที่อยู่พอร์ตใน Config
+	err = server.Start(config.ServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
+}`,
+        },
 
         { t: "h2", c: "2. การเขียน Multi-Stage Dockerfile แบบมืออาชีพ" },
         {
@@ -890,7 +968,7 @@ func LoadConfig(path string) (config Config, err error) {
         {
           t: "code",
           lang: "dockerfile",
-          label: "Dockerfile (Multi-Stage)",
+          label: "simplebank/Dockerfile (สร้างไฟล์ใหม่ที่ Root Directory)",
           c: `# Build Stage: ทำการคอมไพล์โค้ด Go
 FROM golang:1.22-alpine3.19 AS builder
 WORKDIR /app
@@ -950,7 +1028,7 @@ simplebank   latest   e3b0c44298fc   12 seconds ago   21.4MB
         {
           t: "code",
           lang: "yaml",
-          label: "docker-compose.yml",
+          label: "simplebank/docker-compose.yml (สร้างไฟล์ใหม่ที่ Root Directory)",
           c: `version: "3.9"
 services:
   postgres:

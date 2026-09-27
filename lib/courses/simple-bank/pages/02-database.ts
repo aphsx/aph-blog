@@ -114,12 +114,12 @@ func main() {
         { t: "h2", c: "คำสั่ง SQL ออกแบบโครงสร้างตาราง (DDL)" },
         {
           t: "p",
-          c: "ด้านล่างนี้คือโค้ด SQL ที่เราจะใช้สร้างตารางทั้ง 3 พร้อม Foreign Keys และ Indexes:",
+          c: "ด้านล่างนี้คือโค้ด SQL ที่เราจะใช้สร้างตารางทั้ง 3 พร้อม Foreign Keys และ Indexes (ซึ่งในหัวข้อถัดไป เราจะนำโค้ดชุดนี้ไปบันทึกไว้ในไฟล์ Migration `simplebank/db/migration/000001_init_schema.up.sql`):",
         },
         {
           t: "code",
           lang: "sql",
-          label: "init_schema.sql",
+          label: "simplebank/db/migration/000001_init_schema.up.sql (โค้ด DDL สร้างตาราง)",
           c: `-- 1. ตาราง Accounts
 CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
@@ -266,12 +266,12 @@ brew install golang-migrate
           lang: "bash",
           label: "สร้างไฟล์ migration",
           code: `migrate create -ext sql -dir db/migration -seq init_schema`,
-          out: `/Users/simple_bank/db/migration/000001_init_schema.up.sql
-/Users/simple_bank/db/migration/000001_init_schema.down.sql`,
+          out: `simplebank/db/migration/000001_init_schema.up.sql
+simplebank/db/migration/000001_init_schema.down.sql`,
         },
         {
           t: "p",
-          c: "ระบบจะสร้างไฟล์ขึ้นมา 2 ไฟล์ในโฟลเดอร์ `db/migration`:",
+          c: "ระบบจะสร้างไฟล์ขึ้นมา 2 ไฟล์ในโฟลเดอร์ `simplebank/db/migration`:",
         },
         {
           t: "ul",
@@ -284,12 +284,12 @@ brew install golang-migrate
         { t: "h2", c: "3. เขียนไฟล์ Down Migration" },
         {
           t: "p",
-          c: "ในไฟล์ `000001_init_schema.down.sql` เราต้องเขียนคำสั่งลบตาราง โดยต้องลบตารางที่มี Foreign Key อ้างอิงก่อนเสมอ (ลบย้อนศร):",
+          c: "ในไฟล์ `simplebank/db/migration/000001_init_schema.down.sql` เราต้องเขียนคำสั่งลบตาราง โดยต้องลบตารางที่มี Foreign Key อ้างอิงก่อนเสมอ (ลบย้อนศร):",
         },
         {
           t: "code",
           lang: "sql",
-          label: "db/migration/000001_init_schema.down.sql",
+          label: "simplebank/db/migration/000001_init_schema.down.sql",
           c: `DROP TABLE IF EXISTS "entries";
 DROP TABLE IF EXISTS "transfers";
 DROP TABLE IF EXISTS "accounts";`,
@@ -298,12 +298,12 @@ DROP TABLE IF EXISTS "accounts";`,
         { t: "h2", c: "4. สร้าง `Makefile` รวมคำสั่งจัดการระบบ" },
         {
           t: "p",
-          c: "เพื่อไม่ให้เราต้องพิมพ์คำสั่ง Docker และ Migration ยาวๆ ซ้ำๆ ทุกวัน เราจะสร้างไฟล์ `Makefile` ไว้ที่ Root ของโปรเจกต์ เพื่อเป็นศูนย์รวมคำสั่งสั้นๆ ที่เรียกใช้ง่าย:",
+          c: "เพื่อไม่ให้เราต้องพิมพ์คำสั่ง Docker และ Migration ยาวๆ ซ้ำๆ ทุกวัน เราจะสร้างไฟล์ `Makefile` ไว้ที่ Root ของโปรเจกต์ (`simplebank/Makefile`) เพื่อเป็นศูนย์รวมคำสั่งสั้นๆ ที่เรียกใช้ง่าย:",
         },
         {
           t: "code",
           lang: "bash",
-          label: "Makefile",
+          label: "simplebank/Makefile",
           c: `DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
 
 postgres:
