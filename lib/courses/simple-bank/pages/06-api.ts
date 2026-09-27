@@ -290,26 +290,25 @@ func main() {
 (เซิร์ฟเวอร์เปิดทำงานสำเร็จ พร้อมรับคำขอ HTTP แล้ว!)`,
         },
 
-        { t: "h2", c: "6. ทดสอบยิง cURL ใน Terminal จริง" },
+        { t: "h2", c: "6. ทดสอบเรียกใช้งาน API (Postman / API Client)" },
         {
           t: "callout",
-          title: "💡 วิธีการทดสอบจริงใน Terminal",
-          c: "ให้คุณเปิด **Terminal หน้าต่างที่ 2** ขึ้นมาคู่กัน (โดยปล่อยให้ Terminal หน้าต่างแรกเปิดรัน `go run main.go` ค้างไว้) แล้วทดสอบยิงคำสั่ง cURL ดังนี้:",
+          title: "💡 จุดที่ต้องตั้งค่าใน Postman / API Client",
+          c: "ในการทดสอบ API ให้เปิด Postman (หรือ REST Client) แล้วตั้งค่าตาม 3 จุดหลักดังนี้:\n- **Method & URL:** เลือก Method (`POST`, `GET`) และใส่ URL ปลายทาง\n- **Headers:** ในแท็บ `Headers` กำหนด `Content-Type`: `application/json`\n- **Body:** เลือกแท็บ `Body` → ติ๊ก `raw` → เลือกประเภทเป็น `JSON` แล้ววางข้อมูล Payload",
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal ที่ 2: ทดสอบสร้างบัญชีใหม่ (POST /accounts)",
-          code: `curl -i -X POST http://localhost:8080/accounts \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "owner": "alice",
-    "currency": "USD"
-  }'`,
+          lang: "http",
+          label: "1. สร้างบัญชีใหม่: POST /accounts",
+          code: `POST http://localhost:8080/accounts
+Content-Type: application/json
+
+{
+  "owner": "alice",
+  "currency": "USD"
+}`,
           out: `HTTP/1.1 201 Created
 Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 10:00:00 GMT
-Content-Length: 104
 
 {
   "id": 1,
@@ -321,14 +320,14 @@ Content-Length: 104
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal ที่ 2: ทดสอบดึงข้อมูลบัญชีตาม ID (GET /accounts/:id)",
-          code: `# 1. ดึงข้อมูลบัญชี ID = 1 ที่มีอยู่จริง (200 OK)
-curl -i http://localhost:8080/accounts/1
+          lang: "http",
+          label: "2. ดึงข้อมูลบัญชีตาม ID: GET /accounts/:id",
+          code: `# เคสที่ 1: ดึงบัญชี ID = 1 ที่มีอยู่จริง (URL: http://localhost:8080/accounts/1)
+GET http://localhost:8080/accounts/1
 
-# 2. ดึงข้อมูลบัญชี ID = 99999 ที่ไม่มีอยู่จริง (404 Not Found)
-curl -i http://localhost:8080/accounts/99999`,
-          out: `[เคสที่ 1: พบบัญชีในระบบ]
+# เคสที่ 2: ดึงบัญชี ID = 99999 ที่ไม่มีอยู่จริง (URL: http://localhost:8080/accounts/99999)
+GET http://localhost:8080/accounts/99999`,
+          out: `# ผลลัพธ์เคสที่ 1: 200 OK
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
 
@@ -340,7 +339,7 @@ Content-Type: application/json; charset=utf-8
   "created_at": "2026-09-26T10:00:00.123456Z"
 }
 
-[เคสที่ 2: ไม่พบบัญชีในระบบ]
+# ผลลัพธ์เคสที่ 2: 404 Not Found
 HTTP/1.1 404 Not Found
 Content-Type: application/json; charset=utf-8
 
@@ -350,9 +349,9 @@ Content-Type: application/json; charset=utf-8
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal ที่ 2: ทดสอบดึงรายการบัญชีแบบแบ่งหน้า (GET /accounts)",
-          code: `curl -i "http://localhost:8080/accounts?page_id=1&page_size=5"`,
+          lang: "http",
+          label: "3. ดึงรายการบัญชีแบบแบ่งหน้า: GET /accounts (Query Params)",
+          code: `GET http://localhost:8080/accounts?page_id=1&page_size=5`,
           out: `HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
 
@@ -484,14 +483,15 @@ func IsSupportedCurrency(currency string) bool {
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal ที่ 2: ทดสอบส่งสกุลเงินที่ไม่รองรับ (XYZ) -> Gin จะปฏิเสธทันทีด้วย HTTP 400",
-          code: `curl -i -X POST http://localhost:8080/accounts \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "owner": "alice",
-    "currency": "XYZ"
-  }'`,
+          lang: "http",
+          label: "ทดสอบส่งสกุลเงินที่ไม่รองรับ (XYZ) ใน Postman / API Client -> ได้รับ HTTP 400",
+          code: `POST http://localhost:8080/accounts
+Content-Type: application/json
+
+{
+  "owner": "alice",
+  "currency": "XYZ"
+}`,
           out: `HTTP/1.1 400 Bad Request
 Content-Type: application/json; charset=utf-8
 
@@ -655,16 +655,17 @@ INSERT INTO entries (account_id, amount) VALUES (1, 1000), (2, 500);
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal ที่ 2: ทดสอบยิง curl POST /transfers (โอนเงินสำเร็จ 200 OK)",
-          code: `curl -i -X POST http://localhost:8080/transfers \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "from_account_id": 1,
-    "to_account_id": 2,
-    "amount": 100,
-    "currency": "USD"
-  }'`,
+          lang: "http",
+          label: "1. สั่งโอนเงินสำเร็จ: POST /transfers (ตั้งค่าใน Postman / API Client)",
+          code: `POST http://localhost:8080/transfers
+Content-Type: application/json
+
+{
+  "from_account_id": 1,
+  "to_account_id": 2,
+  "amount": 100,
+  "currency": "USD"
+}`,
           out: `HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
 
@@ -706,16 +707,17 @@ Content-Type: application/json; charset=utf-8
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal ที่ 2: ทดสอบกรณีโอนข้ามสกุลเงิน (ตรวจพบ Currency Mismatch -> HTTP 400)",
-          code: `curl -i -X POST http://localhost:8080/transfers \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "from_account_id": 1,
-    "to_account_id": 2,
-    "amount": 100,
-    "currency": "THB"
-  }'`,
+          lang: "http",
+          label: "2. ทดสอบกรณีโอนข้ามสกุลเงิน (ตรวจพบ Currency Mismatch) -> ได้รับ HTTP 400",
+          code: `POST http://localhost:8080/transfers
+Content-Type: application/json
+
+{
+  "from_account_id": 1,
+  "to_account_id": 2,
+  "amount": 100,
+  "currency": "THB"
+}`,
           out: `HTTP/1.1 400 Bad Request
 Content-Type: application/json; charset=utf-8
 

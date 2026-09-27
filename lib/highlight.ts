@@ -7,7 +7,7 @@ const THEME = "dark-plus";
 
 // Every `lang` value actually used across lib/courses, kept in sync manually —
 // grep for `lang: "` if a new language shows up in content.
-const BUNDLED_LANGS = ["python", "bash", "json", "sql", "yaml", "go", "diff"] as const;
+const BUNDLED_LANGS = ["python", "bash", "json", "sql", "yaml", "go", "diff", "http"] as const;
 
 const LANG_ALIASES: Record<string, string> = {
   sh: "bash",

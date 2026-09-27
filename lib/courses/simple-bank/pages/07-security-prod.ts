@@ -399,20 +399,19 @@ router.POST("/users", server.createUser)`,
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "Terminal 2: ทดสอบสมัครสมาชิกผ่าน cURL (ตรวจสอบความปลอดภัยของ Response)",
-          code: `curl -i -X POST http://localhost:8080/users \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "username": "alice",
-    "password": "secretPassword123",
-    "full_name": "Alice Wonderland",
-    "email": "alice@example.com"
-  }'`,
+          lang: "http",
+          label: "ทดสอบสมัครสมาชิก: POST /users (ตั้งค่าใน Postman / API Client)",
+          code: `POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "password": "secretPassword123",
+  "full_name": "Alice Wonderland",
+  "email": "alice@example.com"
+}`,
           out: `HTTP/1.1 201 Created
 Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 08:35:00 GMT
-Content-Length: 172
 
 {
   "username": "alice",
@@ -1246,25 +1245,29 @@ func main() {
 [GIN-debug] [WARNING] Listening and serving HTTP on 0.0.0.0:8080`,
         },
 
-        { t: "h2", c: "8. ทดสอบ API ครบวงจรด้วย cURL (Terminal 2)" },
+        { t: "h2", c: "8. ทดสอบ API ครบวงจร (ตั้งค่า Request ใน Postman / API Client)" },
         {
           t: "p",
-          c: "เปิด **Terminal หน้าต่างที่สอง** เพื่อทดสอบ Flow การทำงานจริงตั้งแต่การล็อกอินรับ PASETO Token ไปจนถึงการทำธุรกรรมโอนเงินที่มีเกราะป้องกันความปลอดภัย:",
+          c: "เปิด Postman หรือ API Client เพื่อทดสอบ Flow การทำงานจริงตั้งแต่การล็อกอินรับ PASETO Token ไปจนถึงการทำธุรกรรมโอนเงินที่มีเกราะป้องกันความปลอดภัย:",
+        },
+        {
+          t: "callout",
+          title: "💡 การแนบ Token ใน Postman / API Client",
+          c: "สำหรับ Endpoint ที่ต้องยืนยันตัวตน (Protected Routes) ให้คัดลอกค่า `access_token` ที่ได้จากการล็อกอิน แล้วนำไปใส่ที่:\n- แท็บ **Headers**: เพิ่มคีย์ `Authorization` กำหนดค่าเป็น `Bearer <access_token>`\n- หรือแท็บ **Authorization / Auth**: เลือก Type เป็น `Bearer Token` แล้ววาง Token ในช่อง Token",
         },
         {
           t: "codeout",
-          lang: "bash",
+          lang: "http",
           label: "ขั้นตอนที่ 1: ล็อกอินเพื่อรับ PASETO Token (POST /users/login)",
-          code: `curl -i -X POST http://localhost:8080/users/login \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "username": "alice",
-    "password": "secretPassword123"
-  }'`,
+          code: `POST http://localhost:8080/users/login
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "password": "secretPassword123"
+}`,
           out: `HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 08:35:10 GMT
-Content-Length: 320
 
 {
   "access_token": "v2.local.O4WcQo7c...[ChaCha20-Poly1305 Encrypted Payload]...L8a9m",
@@ -1278,15 +1281,15 @@ Content-Length: 320
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "ขั้นตอนที่ 2: สร้างบัญชีเงินฝากใหม่พร้อมแนบ Bearer Token (POST /accounts)",
-          code: `# คัดลอกค่า access_token ที่ได้จากขั้นตอนที่ 1 มาใส่ใน Header
-curl -i -X POST http://localhost:8080/accounts \\
-  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "currency": "USD"
-  }'`,
+          lang: "http",
+          label: "ขั้นตอนที่ 2: สร้างบัญชีเงินฝากพร้อมแนบ Bearer Token (POST /accounts)",
+          code: `POST http://localhost:8080/accounts
+Authorization: Bearer v2.local.O4WcQo7c...L8a9m
+Content-Type: application/json
+
+{
+  "currency": "USD"
+}`,
           out: `HTTP/1.1 201 Created
 Content-Type: application/json; charset=utf-8
 
@@ -1300,20 +1303,20 @@ Content-Type: application/json; charset=utf-8
         },
         {
           t: "codeout",
-          lang: "bash",
-          label: "ขั้นตอนที่ 3: สั่งโอนเงินพร้อม Authorization Bearer Token (สำเร็จ 200 OK)",
-          code: `curl -i -X POST http://localhost:8080/transfers \\
-  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "from_account_id": 1,
-    "to_account_id": 2,
-    "amount": 1000,
-    "currency": "USD"
-  }'`,
+          lang: "http",
+          label: "ขั้นตอนที่ 3: สั่งโอนเงินพร้อม Authorization Bearer Token (POST /transfers)",
+          code: `POST http://localhost:8080/transfers
+Authorization: Bearer v2.local.O4WcQo7c...L8a9m
+Content-Type: application/json
+
+{
+  "from_account_id": 1,
+  "to_account_id": 2,
+  "amount": 1000,
+  "currency": "USD"
+}`,
           out: `HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 08:35:15 GMT
 
 {
   "transfer": {
@@ -1329,28 +1332,42 @@ Date: Sat, 26 Sep 2026 08:35:15 GMT
         },
         {
           t: "codeout",
-          lang: "bash",
+          lang: "http",
           label: "ขั้นตอนที่ 4: ทดสอบความปลอดภัย (แอบโอนเงินคนอื่น / ไม่ส่ง Token -> ถูกบล็อก 401)",
           code: `# กรณีที่ 1: Alice พยายามสั่งโอนเงินออกจากบัญชีของ Bob (FromAccountID = 2)
-curl -i -X POST http://localhost:8080/transfers \\
-  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
-  -H "Content-Type: application/json" \\
-  -d '{"from_account_id": 2, "to_account_id": 1, "amount": 5000, "currency": "USD"}'
+POST http://localhost:8080/transfers
+Authorization: Bearer v2.local.O4WcQo7c...L8a9m
+Content-Type: application/json
+
+{
+  "from_account_id": 2,
+  "to_account_id": 1,
+  "amount": 5000,
+  "currency": "USD"
+}
 
 # กรณีที่ 2: เรียก API โดยไม่แนบ Authorization Header
-curl -i -X POST http://localhost:8080/transfers \\
-  -H "Content-Type: application/json" \\
-  -d '{"from_account_id": 1, "to_account_id": 2, "amount": 1000, "currency": "USD"}'`,
+POST http://localhost:8080/transfers
+Content-Type: application/json
+
+{
+  "from_account_id": 1,
+  "to_account_id": 2,
+  "amount": 1000,
+  "currency": "USD"
+}`,
           out: `# ผลลัพธ์กรณีที่ 1: ตรวจจับได้ว่าไม่ใช่เจ้าของบัญชี
 HTTP/1.1 401 Unauthorized
 Content-Type: application/json; charset=utf-8
+
 {
   "error": "บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน"
 }
 
-# ผลลัพธ์กรณีที่ 2: Middleware สกัดกั้นทันที
+# ผลลัพธ์กรณีที่ 2: Middleware สกัดกั้นทันทีเมื่อไม่มี Header
 HTTP/1.1 401 Unauthorized
 Content-Type: application/json; charset=utf-8
+
 {
   "error": "ไม่มีการแนบ Authorization Header"
 }`,
