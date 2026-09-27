@@ -66,7 +66,13 @@ DROP TABLE IF EXISTS "users";`,
         { t: "h2", c: "3. ตัวอย่างการทำงานของ Bcrypt (Salt & Work Factor)" },
         {
           t: "p",
-          c: "เพื่อทำความเข้าใจว่าทำไมรหัสผ่านเดียวกันถึงได้ Hash ต่างกัน และ Bcrypt ตรวจสอบรหัสผ่านอย่างไร ดูตัวอย่างการทำงานด้านล่างนี้:",
+          c: "เพื่อทำความเข้าใจว่าทำไมรหัสผ่านเดียวกันถึงได้ Hash ต่างกัน และ Bcrypt ตรวจสอบรหัสผ่านอย่างไร ให้ติดตั้งไลบรารี `golang.org/x/crypto` ก่อน:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "ติดตั้งแพ็กเกจ crypto",
+          c: `go get golang.org/x/crypto`,
         },
         {
           t: "codeout",
@@ -538,6 +544,16 @@ ok      simplebank/db   0.312s`,
         { t: "h2", c: "1. ออกแบบ Payload และ PasetoMaker ใน Go" },
         {
           t: "p",
+          c: "ติดตั้งแพ็กเกจที่จำเป็นสำหรับการสร้าง PASETO Token, UUID และการเข้ารหัสแบบ Symmetric:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "ติดตั้ง paseto, uuid และ chacha20poly1305",
+          c: `go get github.com/google/uuid github.com/o1egl/paseto github.com/aead/chacha20poly1305`,
+        },
+        {
+          t: "p",
           c: "ข้อมูลภายใน Token จะประกอบด้วย `Username`, เวลาที่ออกตั๋ว (`IssuedAt`), และเวลาหมดอายุ (`ExpiredAt`):",
         },
         {
@@ -790,7 +806,20 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
           t: "code",
           lang: "go",
           label: "simplebank/api/server.go (อัปเดต Server Struct & NewServer)",
-          c: `// อัปเดต Server struct ใน simplebank/api/server.go ให้ถือ tokenMaker และ config
+          c: `// อัปเดต Server struct ใน simplebank/api/server.go ให้ถือ tokenMaker และ config พร้อมลงทะเบียน Validator
+package api
+
+import (
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	db "simplebank/db"
+	"simplebank/token"
+	"simplebank/util"
+)
+
 type Server struct {
 	config     util.Config
 	store      *db.Store
@@ -812,6 +841,11 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 	}
 
 	router := gin.Default()
+
+	// ลงทะเบียน custom validator tag "currency"
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency", validCurrency)
+	}
 
 	// 1. เส้นทางสาธารณะ (Public Routes): ทุกคนเข้าถึงได้โดยไม่ต้องแนบ Token
 	router.POST("/users", server.createUser)
@@ -970,28 +1004,110 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, accounts)
 }`,
         },
+        {
+          t: "p",
+          c: "และใน Data Access Layer (`simplebank/db/account.go`) ให้อัปเดตคิวรี `ListAccounts` และพารามิเตอร์ `ListAccountsParams` ให้รับฟิลด์ `Owner`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/db/account.go (อัปเดต ListAccounts ให้กรองตาม Owner)",
+          c: `type ListAccountsParams struct {
+	Owner  string \`json:"owner"\`
+	Limit  int32  \`json:"limit"\`
+	Offset int32  \`json:"offset"\`
+}
+
+const listAccounts = \`-- name: ListAccounts :many
+SELECT id, owner, balance, currency, created_at FROM accounts
+WHERE owner = $1
+ORDER BY id
+LIMIT $2 OFFSET $3;
+\`
+
+func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, listAccounts, arg.Owner, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []Account
+	for rows.Next() {
+		var i Account
+		if err := rows.Scan(
+			&i.ID,
+			&i.Owner,
+			&i.Balance,
+			&i.Currency,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}`,
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/db/account_test.go (อัปเดต TestListAccounts ให้ส่ง Owner)",
+          c: `func TestListAccounts(t *testing.T) {
+	var lastAccount Account
+	for i := 0; i < 10; i++ {
+		lastAccount = createRandomAccount(t)
+	}
+
+	arg := ListAccountsParams{
+		Owner:  lastAccount.Owner,
+		Limit:  5,
+		Offset: 0,
+	}
+
+	accounts, err := testQueries.ListAccounts(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, accounts)
+
+	for _, account := range accounts {
+		require.NotEmpty(t, account)
+		require.Equal(t, lastAccount.Owner, account.Owner)
+	}
+}`,
+        },
 
         { t: "h3", c: "3.4 อัปเดต `createTransfer`: ป้องกันการสั่งโอนเงินแทนผู้อื่น" },
         {
           t: "p",
-          c: "ในฟังก์ชัน `createTransfer` เราต้องเพิ่มการตรวจสอบว่า **ผู้ใช้ที่ถือ Token ล็อกอินเข้ามา เป็นเจ้าของบัญชีต้นทาง (`FromAccountID`) จริงหรือไม่**:",
+          c: "ในฟังก์ชัน `createTransfer` เราต้องเพิ่มการตรวจสอบว่า **ผู้ใช้ที่ถือ Token ล็อกอินเข้ามา เป็นเจ้าของบัญชีต้นทาง (`FromAccountID`) จริงหรือไม่** โดยอาศัย `fromAccount` ที่ส่งคืนมาจาก `validAccount`:",
         },
         {
           t: "code",
           lang: "go",
           label: "simplebank/api/transfer.go (อัปเดต createTransfer เพื่อตรวจสอบสิทธิ์เจ้าของบัญชี)",
-          c: `// ดึงข้อมูลตัวตนของผู้ใช้ที่ผ่านการตรวจสอบจาก Auth Middleware
-authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
-fromAccount, err := server.store.GetAccount(ctx, req.FromAccountID)
-if err != nil {
-	// ... จัดการกรณีไม่พบบัญชี
+          c: `// 1. ตรวจสอบบัญชีต้นทางและสกุลเงิน (คืนค่า fromAccount กลับมาทันที)
+fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+if !valid {
+	return
 }
 
-// ตรวจสอบสิทธิ์: คุณไม่ใช่เจ้าของบัญชีนี้ คุณไม่มีสิทธิ์สั่งโอนเงินออก!
+// 2. ดึงข้อมูลตัวตนจาก Auth Middleware และตรวจสอบสิทธิ์ความเป็นเจ้าของ
+authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 if fromAccount.Owner != authPayload.Username {
 	err := errors.New("บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน")
 	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+	return
+}
+
+// 3. ตรวจสอบบัญชีปลายทาง
+_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+if !valid {
 	return
 }`,
         },
@@ -1082,7 +1198,13 @@ Content-Type: application/json; charset=utf-8
         { t: "h2", c: "1. จัดการ Configuration ด้วย `spf13/viper`" },
         {
           t: "p",
-          c: "เราจะใช้ไลบรารี **Viper** ซึ่งสามารถอ่านค่าคอนฟิกได้ทั้งจากไฟล์ `.env` ในช่วงพัฒนาบนเครื่องตัวเอง และดึงค่าจาก System Environment Variables อัตโนมัติเมื่อรันบน Docker หรือ Kubernetes:",
+          c: "เราจะใช้ไลบรารี **Viper** ซึ่งสามารถอ่านค่าคอนฟิกได้ทั้งจากไฟล์ `.env` ในช่วงพัฒนาบนเครื่องตัวเอง และดึงค่าจาก System Environment Variables อัตโนมัติเมื่อรันบน Docker หรือ Kubernetes เริ่มต้นด้วยการติดตั้ง Viper:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "ติดตั้ง spf13/viper",
+          c: `go get github.com/spf13/viper`,
         },
         {
           t: "code",

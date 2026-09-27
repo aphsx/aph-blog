@@ -222,7 +222,20 @@ Referenced by:
           c: "เราจะเขียนการเปลี่ยนแปลงของตารางลงในไฟล์ `.sql` ที่มีเลขเวอร์ชันกำกับ และเก็บไว้ใน Git เช่นเดียวกับ Source Code ทั่วไป โดยใช้เครื่องมือระดับสากลที่ชื่อว่า **golang-migrate**",
         },
 
-        { t: "h2", c: "1. รัน PostgreSQL บนเครื่องด้วย Docker" },
+        { t: "h2", c: "1. เริ่มต้นสร้างโฟลเดอร์โปรเจกต์ & Go Module" },
+        {
+          t: "p",
+          c: "เปิด Terminal ขึ้นมา สร้างโฟลเดอร์หลักสำหรับโปรเจกต์ชื่อ `simplebank` และสั่งเริ่มต้น Go Module ด้วยคำสั่ง:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "สร้างโฟลเดอร์โปรเจกต์และเริ่ม Go Module",
+          c: `mkdir -p simplebank && cd simplebank
+go mod init simplebank`,
+        },
+
+        { t: "h2", c: "2. รัน PostgreSQL บนเครื่องด้วย Docker" },
         {
           t: "p",
           c: "แทนที่จะต้องติดตั้งโปรแกรม PostgreSQL ลงบนเครื่องตรงๆ เราจะรันผ่าน Docker Container ซึ่งแยกสภาพแวดล้อมออกจากระบบปฏิบัติการอย่างสมบูรณ์ และพร้อมเริ่มใหม่ได้ทันทีในคำสั่งเดียว:",
@@ -245,7 +258,7 @@ Referenced by:
           ],
         },
 
-        { t: "h2", c: "2. ติดตั้งและใช้งาน `golang-migrate`" },
+        { t: "h2", c: "3. ติดตั้งและใช้งาน `golang-migrate`" },
         {
           t: "p",
           c: "ติดตั้งเครื่องมือ `migrate` CLI บนเครื่องของคุณ:",
@@ -284,7 +297,7 @@ simplebank/db/migration/000001_init_schema.down.sql`,
           ],
         },
 
-        { t: "h2", c: "3. เขียนไฟล์ Down Migration" },
+        { t: "h2", c: "4. เขียนไฟล์ Down Migration" },
         {
           t: "p",
           c: "ในไฟล์ `simplebank/db/migration/000001_init_schema.down.sql` เราต้องเขียนคำสั่งลบตาราง โดยต้องลบตารางที่มี Foreign Key อ้างอิงก่อนเสมอ (ลบย้อนศร):",
@@ -298,7 +311,7 @@ DROP TABLE IF EXISTS "transfers";
 DROP TABLE IF EXISTS "accounts";`,
         },
 
-        { t: "h2", c: "4. สร้าง `Makefile` รวมคำสั่งจัดการระบบ" },
+        { t: "h2", c: "5. สร้าง `Makefile` รวมคำสั่งจัดการระบบ" },
         {
           t: "p",
           c: "เพื่อไม่ให้เราต้องพิมพ์คำสั่ง Docker และ Migration ยาวๆ ซ้ำๆ ทุกวัน เราจะสร้างไฟล์ `Makefile` ไว้ที่ Root ของโปรเจกต์ (`simplebank/Makefile`) เพื่อเป็นศูนย์รวมคำสั่งสั้นๆ ที่เรียกใช้ง่าย:",

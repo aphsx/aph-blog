@@ -26,7 +26,13 @@ export const apiPages: Record<string, Page> = {
         { t: "h2", c: "1. โครงสร้าง Server และการทำ Dependency Injection" },
         {
           t: "p",
-          c: "เราจะสร้าง `Server` struct ในแพ็กเกจ `api` โดยฉีด (Inject) `*db.Store` เข้าไปใน Server เพื่อให้ทุก API Handler สามารถเข้าถึงฐานข้อมูลได้โดยไม่ต้องใช้ Global Variable:",
+          c: "เราจะสร้าง `Server` struct ในแพ็กเกจ `api` โดยฉีด (Inject) `*db.Store` เข้าไปใน Server เพื่อให้ทุก API Handler สามารถเข้าถึงฐานข้อมูลได้โดยไม่ต้องใช้ Global Variable เริ่มต้นด้วยการติดตั้ง Gin Framework และ Validator:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "ติดตั้ง Gin Web Framework",
+          c: `go get github.com/gin-gonic/gin`,
         },
         {
           t: "code",
@@ -463,18 +469,20 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 	}
 
 	// 2. ตรวจสอบว่าบัญชีต้นทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
-	if !server.validAccount(ctx, req.FromAccountID, req.Currency) {
+	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+	if !valid {
 		return
 	}
 
 	// 3. ตรวจสอบว่าบัญชีปลายทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
-	if !server.validAccount(ctx, req.ToAccountID, req.Currency) {
+	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+	if !valid {
 		return
 	}
 
 	// 4. เตรียมพารามิเตอร์ส่งต่อไปยัง Transaction Manager
 	arg := db.TransferTxParams{
-		FromAccountID: req.FromAccountID,
+		FromAccountID: fromAccount.ID,
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
 	}
@@ -490,27 +498,27 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-// validAccount ตรวจสอบความมีอยู่จริงและสกุลเงินของบัญชีก่อนเริ่มทำ Transaction
-func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) bool {
+// validAccount ตรวจสอบความมีอยู่จริงและสกุลเงินของบัญชีก่อนเริ่มทำ Transaction พร้อมคืนค่า Account เพื่อนำไปใช้งานต่อ
+func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
 	// ค้นหาข้อมูลบัญชีจากฐานข้อมูล
 	account, err := server.store.GetAccount(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, errorResponse(err)) // ไม่พบบัญชี ส่ง 404
-			return false
+			return account, false
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err)) // ข้อผิดพลาดฝั่งเซิร์ฟเวอร์ ส่ง 500
-		return false
+		return account, false
 	}
 
 	// ตรวจสอบความสอดคล้องของสกุลเงิน ป้องกันการโอนข้ามสกุลเงินโดยไม่แปลงค่า
 	if account.Currency != currency {
 		err := fmt.Errorf("สกุลเงินของบัญชี [%d] คือ %s ไม่ตรงกับคำขอโอน %s", accountID, account.Currency, currency)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return false
+		return account, false
 	}
 
-	return true
+	return account, true
 }`,
         },
         {
