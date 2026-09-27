@@ -44,7 +44,7 @@ export const testingPages: Record<string, Page> = {
         {
           t: "code",
           lang: "go",
-          label: "db/main_test.go",
+          label: "simplebank/db/main_test.go",
           c: `package db
 
 import (
@@ -86,7 +86,7 @@ func TestMain(m *testing.M) {
         {
           t: "code",
           lang: "go",
-          label: "util/random.go",
+          label: "simplebank/util/random.go",
           c: `package util
 
 import (
@@ -137,7 +137,7 @@ func RandomCurrency() string {
         {
           t: "code",
           lang: "go",
-          label: "db/account_test.go",
+          label: "simplebank/db/account_test.go",
           c: `package db
 
 import (
@@ -279,7 +279,7 @@ ok      simplebank/db   0.142s`,
         {
           t: "code",
           lang: "go",
-          label: "db/store_test.go",
+          label: "simplebank/db/store_test.go (ทดสอบ TransferTx Version 2)",
           c: `// ชุดทดสอบ TestTransferTx สำหรับพิสูจน์ความถูกต้องของการโอนเงินแบบคู่ขนาน (Concurrent Transactions)
 // ทำเพื่อแก้ปัญหา: ป้องกันบั๊ก Race Condition และเงินสูญหายระหว่างทาง เมื่อมีคำสั่งโอนเงินเข้ามารัวๆ พร้อมกัน
 
@@ -401,7 +401,7 @@ ok      simplebank/db   0.198s`,
         {
           t: "code",
           lang: "go",
-          label: "db/store_deadlock_test.go",
+          label: "simplebank/db/store_deadlock_test.go (ทดสอบปราบ Deadlock)",
           c: `// ชุดทดสอบ TestTransferTxDeadlock พิสูจน์ว่าการโอนเงินสวนทางกันจะไม่ทำให้เกิด Deadlock
 // ทำเพื่อแก้ปัญหา: จำลองสถานการณ์ A โอนให้ B และ B โอนให้ A พร้อมๆ กัน หากจัดการ Lock ไม่ดี ระบบจะค้างทันที
 

@@ -95,7 +95,7 @@ WHERE id = 1 FOR UPDATE;
         {
           t: "code",
           lang: "sql",
-          label: "db/query/account.sql",
+          label: "simplebank/db/query/account.sql",
           c: `-- name: AddAccountBalance :one
 UPDATE accounts
 SET balance = balance + $1
@@ -212,26 +212,26 @@ STATEMENT: UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING id
           c: "เมื่อ Tx 2 ถูกบังคับให้ขอล็อกบัญชี 1 ก่อน Tx 2 จะหยุดรอตั้งแต่ก้าวแรก ไม่มีการไปแย่งล็อกบัญชี 2 ไว้ก่อน ทำให้ Tx 1 ทำงานจนจบและปล่อย Lock ทั้งหมด จากนั้น Tx 2 จึงค่อยเริ่มทำงานต่อตามคิว วงจร Deadlock จึงถูกทำลายจนหมดสิ้น!",
         },
 
-        { t: "h2", c: "แนวทางการอัปเดตโค้ด TransferTx เพื่อแก้ Deadlock" },
+        { t: "h2", c: "แนวทางการอัปเกรด simplebank/db/store.go จาก Version 1 เป็น Version 2" },
         {
           t: "p",
-          c: "เปิดไฟล์ที่คุณเขียนฟังก์ชัน `TransferTx` ไว้จากบทที่ 3:\n- **กรณีรวมไฟล์เดียว:** เปิด `db/store.go`\n- **กรณีแยกไฟล์:** เปิด `db/store_transfer.go`",
+          c: "ในบทที่ 3 เราได้สร้างไฟล์ \`simplebank/db/store.go\` (Version 1) ซึ่งมีโครงสร้างพื้นฐานและฟังก์ชัน \`TransferTx\` 5 ขั้นตอนเรียบร้อยแล้ว\n\nในบทนี้ เราจะทำการ **อัปเกรดไฟล์เดิม \`simplebank/db/store.go\` ให้กลายเป็น Version 2 (Deadlock-Free)** โดยการจัดลำดับการขอล็อกแถวตาม Account ID ผ่าน 2 ขั้นตอนง่ายๆ ดังนี้:",
         },
         {
           t: "callout",
-          title: "⚠️ คำเตือน: อย่าลบโค้ด Store และ execTx เดิมทิ้ง!",
-          c: "เราจะทำการ **แก้ไขเฉพาะฟังก์ชัน `TransferTx` และเพิ่มฟังก์ชัน `addMoney`** เข้าไปเท่านั้น ห้ามนำโค้ดเฉพาะท่อนนี้ไปวางทับไฟล์ `db/store.go` ทั้งหมดเด็ดขาด เพราะจะทำให้โครงสร้าง `Store` และ `execTx` หายไปจนคอมไพล์ไม่ผ่าน (`undefined: Store`)",
+          title: "⚠️ คำเตือน: อย่าลบโค้ด Store struct และ execTx เดิมทิ้ง!",
+          c: "เราจะทำการ **แก้ไขเฉพาะฟังก์ชัน `TransferTx` และเพิ่มฟังก์ชัน `addMoney`** เข้าไปในไฟล์ `simplebank/db/store.go` เท่านั้น อย่าเผลอก๊อปปี้เฉพาะท่อนเล็กๆ ไปวางทับไฟล์เดิมทั้งไฟล์ เพราะจะทำให้โครงสร้าง `Store` และ `execTx` หายไปจนคอมไพล์ไม่ผ่าน (`undefined: Store`)",
           warn: true,
         },
         { t: "h3", c: "ขั้นตอนที่ 1: เพิ่มฟังก์ชันผู้ช่วย addMoney" },
         {
           t: "p",
-          c: "วางฟังก์ชันนี้ไว้เหนือฟังก์ชัน `TransferTx` เพื่อทำหน้าที่อัปเดตยอดเงินของ 2 บัญชีตามลำดับ Account ID ที่ส่งเข้ามา:",
+          c: "เปิดไฟล์ `simplebank/db/store.go` แล้ววางฟังก์ชัน `addMoney` นี้ไว้เหนือฟังก์ชัน `TransferTx` เพื่อทำหน้าที่อัปเดตยอดเงินของ 2 บัญชีตามลำดับ Account ID ที่ส่งเข้ามา:",
         },
         {
           t: "code",
           lang: "go",
-          label: "เพิ่มฟังก์ชันนี้ไว้เหนือ TransferTx",
+          label: "simplebank/db/store.go (เพิ่มไว้เหนือฟังก์ชัน TransferTx)",
           c: `// addMoney ทำหน้าที่อัปเดตยอดเงินของทั้ง 2 บัญชีตามลำดับที่ส่งเข้ามา
 func addMoney(
 	ctx context.Context,
@@ -315,7 +315,7 @@ func addMoney(
         {
           t: "code",
           lang: "go",
-          label: "TransferTx ฉบับปลอด Deadlock (นำไปวางแทนที่ TransferTx เดิม)",
+          label: "simplebank/db/store.go (ฟังก์ชัน TransferTx Version 2 ปลอด Deadlock)",
           c: `// TransferTx เวอร์ชันปรับปรุงที่ป้องกัน Deadlock ได้อย่างสมบูรณ์
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
@@ -379,7 +379,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
         {
           t: "code",
           lang: "go",
-          label: "db/store.go (โค้ดเต็มไฟล์เดียวพร้อมรัน 100%)",
+          label: "simplebank/db/store.go (Version 2 สมบูรณ์พร้อมรัน 100%)",
           c: `package db
 
 import (

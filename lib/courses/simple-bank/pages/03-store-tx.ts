@@ -19,6 +19,24 @@ export const storeTxPages: Record<string, Page> = {
           c: "ในการพัฒนาระบบที่มีความสำคัญระดับสูง เช่น ระบบธนาคารหรือระบบชำระเงิน หลายองค์กรเลือกที่จะ **ไม่ใช้ ORM (Object-Relational Mapping)** ตัวใหญ่ๆ เพราะ ORM มักสร้างคำสั่ง SQL เบื้องหลังที่เราควบคุมได้ยาก และซ่อนกลไกการล็อกฐานข้อมูลเอาไว้ การเขียน Raw SQL ใน Go ร่วมกับแพ็กเกจมาตรฐาน `database/sql` จะทำให้เราเห็นการทำงานทุกกระเบียดนิ้ว และสามารถรีดประสิทธิภาพออกมาได้สูงสุด",
         },
 
+        {
+          t: "callout",
+          title: "🗺️ แผนผังโฟลเดอร์ของโปรเจกต์ simplebank ในบทนี้",
+          c: `เพื่อให้เห็นภาพตรงกันตลอดทั้งคอร์ส เราจะกำหนดให้ Root Directory ของโปรเจกต์ชื่อว่า \`simplebank\` โดยในบทที่ 3 นี้ ไฟล์หลักทั้งหมดของ Data Access Layer จะถูกสร้างและจัดเก็บไว้ใต้โฟลเดอร์ \`simplebank/db/\` ดังนี้:
+\`\`\`text
+simplebank/
+├── db/
+│   ├── db.go          # ตัวเชื่อมต่อ Connection Pool & DBTX Interface & Queries
+│   ├── models.go      # Go Struct ของตาราง accounts, entries, transfers
+│   ├── account.go     # ฟังก์ชัน CRUD ของตาราง accounts
+│   ├── entry.go       # ฟังก์ชันบันทึกสมุดบัญชีแยกประเภท (Ledger)
+│   ├── transfer.go    # ฟังก์ชันบันทึกประวัติการโอนเงิน
+│   └── store.go       # Store struct, execTx, และ TransferTx (Version 1)
+├── go.mod
+└── ...
+\`\`\``,
+        },
+
         { t: "h2", c: "1. การเชื่อมต่อฐานข้อมูล & Connection Pooling" },
         {
           t: "p",
@@ -27,7 +45,7 @@ export const storeTxPages: Record<string, Page> = {
         {
           t: "code",
           lang: "go",
-          label: "db/db.go",
+          label: "simplebank/db/db.go (สร้างไฟล์ใหม่ - ส่วนที่ 1: Connection Pool)",
           c: `// จัดการการเชื่อมต่อฐานข้อมูล PostgreSQL ผ่าน database/sql พร้อมระบบ Connection Pooling
 // ทำเพื่อแก้ปัญหา: หากเปิด-ปิด Connection ทุกครั้งที่ยิงคิวรี เซิร์ฟเวอร์จะกินทรัพยากรสูงและช้ามาก
 // Connection Pool จะเตรียมท่อเชื่อมต่อสแตนด์บายไว้ล่วงหน้า ทำให้ยิงคิวรีได้รวดเร็วทันที
@@ -78,7 +96,7 @@ func NewDB(dataSourceName string) (*sql.DB, error) {
         {
           t: "code",
           lang: "go",
-          label: "db/models.go",
+          label: "simplebank/db/models.go (สร้างไฟล์ใหม่)",
           c: `// นิยาม Go Struct สำหรับเป็นพิมพ์เขียว (Model) ที่ตรงกับโครงสร้างตารางใน PostgreSQL
 // ทำเพื่อแก้ปัญหา: แปลงข้อมูลจากตารางฐานข้อมูล (Rows) ให้กลายเป็นตัวแปร Strong-type ใน Go ที่ตรวจสอบประเภทข้อมูลได้ตั้งแต่ตอนคอมไพล์
 package db
@@ -115,12 +133,12 @@ type Transfer struct {
         { t: "h2", c: "3. อินเทอร์เฟซ DBTX และ Queries Struct" },
         {
           t: "p",
-          c: "เพื่อให้โค้ดค้นหาข้อมูลสามารถใช้ได้ทั้งกับ `*sql.DB` (คิวรีทั่วไป) และ `*sql.Tx` (คิวรีภายใน Transaction) เราจะสร้าง Interface กลางชื่อว่า `DBTX` ขึ้นมา:",
+          c: "เพื่อให้โค้ดค้นหาข้อมูลสามารถใช้ได้ทั้งกับ `*sql.DB` (คิวรีทั่วไป) และ `*sql.Tx` (คิวรีภายใน Transaction) ให้เปิดไฟล์ `simplebank/db/db.go` เดิม แล้ว **เขียนโค้ดต่อท้าย** ฟังก์ชัน `NewDB`:",
         },
         {
           t: "code",
           lang: "go",
-          label: "db/db.go (DBTX Interface)",
+          label: "simplebank/db/db.go (เขียนต่อท้ายในไฟล์เดิม - ส่วนที่ 2: DBTX & Queries)",
           c: `// กำหนด DBTX Interface กลางเพื่อให้คิวรีทำงานได้ทั้งแบบเดี่ยว (*sql.DB) และแบบทรานแซกชัน (*sql.Tx)
 // ทำเพื่อแก้ปัญหา: ฟังก์ชัน CRUD ทั่วไปเขียนครั้งเดียว แต่สามารถนำไปใช้ใน Transaction ได้ทันทีโดยไม่ต้องเขียนโค้ดซ้ำ
 package db
@@ -161,7 +179,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
         {
           t: "code",
           lang: "go",
-          label: "db/account.go",
+          label: "simplebank/db/account.go (สร้างไฟล์ใหม่)",
           c: `// ฟังก์ชัน CRUD สำหรับจัดการตาราง accounts ด้วย Parameterized Query
 // ทำเพื่อแก้ปัญหา: แยกคำสั่ง SQL ออกจากตัวแปรข้อมูล ป้องกัน SQL Injection ได้ 100%
 package db
@@ -332,7 +350,7 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
         {
           t: "code",
           lang: "go",
-          label: "db/entry.go",
+          label: "simplebank/db/entry.go (สร้างไฟล์ใหม่)",
           c: `// ฟังก์ชันจัดการบันทึกข้อมูลสมุดบัญชีแยกประเภท (Ledger) ในตาราง entries
 // ทำเพื่อแก้ปัญหา: บันทึกหลักฐานเงินเข้า-ออกของแต่ละบัญชีอย่างละเอียดทุกครั้งที่มีธุรกรรม
 package db
@@ -373,7 +391,7 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
         {
           t: "code",
           lang: "go",
-          label: "db/transfer.go",
+          label: "simplebank/db/transfer.go (สร้างไฟล์ใหม่)",
           c: `// ฟังก์ชันจัดการบันทึกข้อมูลธุรกรรมการโอนเงินในตาราง transfers
 // ทำเพื่อแก้ปัญหา: บันทึกประวัติการโอนเงินระหว่าง 2 บัญชี พร้อมสร้าง Transfer ID สำหรับใช้เป็นเลขอ้างอิง
 package db
@@ -479,7 +497,7 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
         {
           t: "code",
           lang: "go",
-          label: "db/store.go",
+          label: "simplebank/db/store.go (สร้างไฟล์ใหม่ - ส่วนที่ 1: Store struct & execTx)",
           c: `// สร้าง Store struct สืบทอดความสามารถของ Queries มาทั้งหมด
 // และเพิ่มความสามารถในการเปิด Transaction จัดการ BEGIN, COMMIT, และ ROLLBACK
 
@@ -587,18 +605,13 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 
         { t: "h2", c: "เขียน Struct สำหรับ Request และ Result" },
         {
-          t: "callout",
-          title: "📁 แนะนำโครงสร้างไฟล์: รวมไฟล์เดียว หรือ แยกไฟล์?",
-          c: "ในแพ็กเกจ `db` คุณสามารถเลือกจัดโครงสร้างโค้ดได้ 2 แบบตามถนัด:\n- **แบบที่ 1 (แนะนำสำหรับมือใหม่ - รวมไฟล์เดียว):** นำโค้ด Struct และฟังก์ชัน `TransferTx` ต่อไปนี้ ไปเขียนต่อท้ายในไฟล์ `db/store.go` ได้เลย ทุกอย่างจะรวมอยู่ที่เดียว ไม่ต้องสลับไฟล์ไปมา\n- **แบบที่ 2 (แบบแยกไฟล์):** สร้างไฟล์ `db/store_transfer.go` เพื่อแยกโค้ดที่เกี่ยวกับการโอนเงินออกมาเฉพาะ",
-        },
-        {
           t: "p",
-          c: "เราจะนิยามพารามิเตอร์ที่ต้องรับเข้ามา และผลลัพธ์ที่ต้องส่งกลับออกไปให้ผู้ใช้งาน:",
+          c: "เปิดไฟล์ `simplebank/db/store.go` ที่เราสร้างไว้ในหัวข้อที่แล้ว แล้ว **เขียนโค้ดต่อท้าย** ฟังก์ชัน `execTx` เพื่อกำหนดพารามิเตอร์ขาเข้าและผลลัพธ์ของการโอนเงิน:",
         },
         {
           t: "code",
           lang: "go",
-          label: "db/store_transfer.go (หรือเขียนต่อท้ายใน db/store.go)",
+          label: "simplebank/db/store.go (เขียนต่อท้ายในไฟล์เดิม - ส่วนที่ 2: TransferTxParams & Result)",
           c: `// นิยาม Struct สำหรับพารามิเตอร์ขาเข้า (Input) และผลลัพธ์ขาออก (Output) ของธุรกรรมการโอนเงิน
 // ทำเพื่อแก้ปัญหา: มัดรวมข้อมูลที่เกี่ยวข้องกับการโอนเงินเป็นก้อนเดียว เพื่อให้ส่งผ่านและตรวจสอบข้อมูลได้ง่ายและปลอดภัย
 package db
@@ -628,7 +641,7 @@ type TransferTxResult struct {
         {
           t: "code",
           lang: "go",
-          label: "db/account.go & db/entry.go & db/transfer.go (ทบทวน Params)",
+          label: "simplebank/db/account.go & db/entry.go & db/transfer.go (ทบทวน Params)",
           c: `// ตรวจสอบ Data Type ของพารามิเตอร์ทั้งหมดใน Data Access Layer
 // จุดสำคัญมาก: ทุกฟิลด์ที่เกี่ยวกับยอดเงิน (Amount) และรหัส (ID) ต้องเป็น int64 ให้ตรงกับคอลัมน์ BIGINT ในฐานข้อมูล
 // ห้ามประกาศ Amount เป็น int ธรรมดาเด็ดขาด เพราะ arg.Amount เป็น int64
@@ -659,15 +672,15 @@ type AddAccountBalanceParams struct {
           warn: true,
         },
 
-        { t: "h2", c: "โค้ดเต็มของฟังก์ชัน `TransferTx`" },
+        { t: "h2", c: "โค้ดของฟังก์ชัน `TransferTx` (Version 1: โครงสร้างพื้นฐาน)" },
         {
           t: "p",
-          c: "ดูโค้ดด้านล่าง และสังเกตการเรียกใช้ `execTx` เพื่อรวมทุกขั้นตอนเข้าด้วยกัน:",
+          c: "เขียนฟังก์ชัน `TransferTx` ต่อท้ายลงในไฟล์ `simplebank/db/store.go` โดยสังเกตการเรียกใช้ `execTx` เพื่อรวม 5 ขั้นตอนของการโอนเงินเข้าด้วยกันใน 1 Transaction:",
         },
         {
           t: "code",
           lang: "go",
-          label: "db/store_transfer.go",
+          label: "simplebank/db/store.go (เขียนต่อท้ายในไฟล์เดิม - ส่วนที่ 3: TransferTx Version 1)",
           c: `// TransferTx รวม 5 ขั้นตอนของการโอนเงินจริงเข้าด้วยกันใน 1 Transaction
 // ทำเพื่อแก้ปัญหา: ป้องกันเงินสูญหายระหว่างทาง (Partial Failure) หากตัดเงินต้นทางได้แต่ปลายทางล้มเหลว
 // ทุกขั้นตอนจะถูกครอบด้วย execTx หากขั้นตอนใดมี Error ระบบจะ Rollback คืนค่าเดิมทันที
@@ -747,6 +760,130 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
             "**`-arg.Amount`**: สังเกตเครื่องหมายลบหน้า `arg.Amount` ในตอนสร้าง FromEntry และ AddAccountBalance บัญชี A เป็นการตัดเงินออกอย่างชัดเจน",
             "**`result.ToAccount`**: เราบันทึกสถานะล่าสุดของบัญชีที่อัปเดตแล้วลงในตัวแปร `result` เพื่อส่งกลับไปให้หน้าบ้านแสดงผลได้ทันทีว่า ยอดเงินคงเหลือใหม่เป็นเท่าใด",
           ],
+        },
+        { t: "h3", c: "📁 โค้ดเต็มของ simplebank/db/store.go (Version 1: โครงสร้างพื้นฐานพร้อมใช้งาน)" },
+        {
+          t: "p",
+          c: "เมื่อนำโค้ดทั้ง 3 ส่วนมารวมกัน ไฟล์ `simplebank/db/store.go` ในบทนี้จะได้หน้าตาฉบับเต็มดังนี้ (สามารถใช้ตรวจเช็กความถูกต้อง เพื่อเตรียมนำไปทดสอบและอัปเกรดในบทถัดไป):",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/db/store.go (Version 1: โค้ดเต็มไฟล์เดียวพร้อมรัน)",
+          c: `package db
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+)
+
+// Store ครอบคลุมทั้งฟังก์ชันการคิวรีรายตัว และการทำงานร่วมกันเป็น Transaction
+type Store struct {
+	*Queries
+	db *sql.DB
+}
+
+func NewStore(db *sql.DB) *Store {
+	return &Store{
+		db:      db,
+		Queries: New(db),
+	}
+}
+
+// execTx เป็นฟังก์ชันภายในที่ควบคุมรอบชีวิต (Cycle) ของ Transaction อย่างปลอดภัย
+func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+	tx, err := store.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	q := New(tx)
+	err = fn(q)
+	if err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return fmt.Errorf("tx err: %v, rollback err: %v", err, rbErr)
+		}
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// TransferTxParams คือข้อมูลที่ต้องใช้ในการสั่งโอนเงินระหว่าง 2 บัญชี
+type TransferTxParams struct {
+	FromAccountID int64 \`json:"from_account_id"\`
+	ToAccountID   int64 \`json:"to_account_id"\`
+	Amount        int64 \`json:"amount"\`
+}
+
+// TransferTxResult คือผลลัพธ์ที่ได้หลังจากโอนเงินสำเร็จ
+type TransferTxResult struct {
+	Transfer    Transfer \`json:"transfer"\`
+	FromAccount Account  \`json:"from_account"\`
+	ToAccount   Account  \`json:"to_account"\`
+	FromEntry   Entry    \`json:"from_entry"\`
+	ToEntry     Entry    \`json:"to_entry"\`
+}
+
+// TransferTx รวม 5 ขั้นตอนของการโอนเงินจริงเข้าด้วยกันใน 1 Transaction (Version 1)
+func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+	var result TransferTxResult
+
+	err := store.execTx(ctx, func(q *Queries) error {
+		var err error
+
+		// 1. สร้างแถวในตาราง transfers เพื่อบันทึกหลักฐานประวัติการโอนเงิน
+		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
+			FromAccountID: arg.FromAccountID,
+			ToAccountID:   arg.ToAccountID,
+			Amount:        arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 2. สร้าง Entry เงินออกของบัญชีต้นทาง (ยอดเงินติดลบใน Ledger)
+		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.FromAccountID,
+			Amount:    -arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 3. สร้าง Entry เงินเข้าของบัญชีปลายทาง (ยอดเงินเป็นบวกใน Ledger)
+		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+			AccountID: arg.ToAccountID,
+			Amount:    arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 4. ตัดยอดเงินคงเหลือจากบัญชีต้นทาง (หักเงินออก)
+		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+			ID:     arg.FromAccountID,
+			Amount: -arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		// 5. เพิ่มยอดเงินคงเหลือให้บัญชีปลายทาง (โอนเงินเข้า)
+		result.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+			ID:     arg.ToAccountID,
+			Amount: arg.Amount,
+		})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return result, err
+}`,
         },
         {
           t: "callout",
