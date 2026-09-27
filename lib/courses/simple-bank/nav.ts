@@ -49,7 +49,7 @@ export const simpleBankNav: NavCategory[] = [
     items: [
       { slug: "bank-user-auth-bcrypt", title: "ระบบผู้ใช้งาน & แฮชรหัสผ่านด้วย Bcrypt" },
       { slug: "bank-jwt-paseto-token", title: "ระบบยืนยันตัวตนด้วย PASETO Token & Middleware" },
-      { slug: "bank-config-docker-prod", title: "Config Management, Docker & Production Checklist" },
+      { slug: "bank-config-docker-prod", title: "Docker Deployment & Production Checklist" },
     ],
   },
   {

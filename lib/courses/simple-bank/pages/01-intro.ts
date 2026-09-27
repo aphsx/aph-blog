@@ -186,9 +186,9 @@ export const introPages: Record<string, Page> = {
               desc: "ทำไม PASETO ถึงปลอดภัยกว่า JWT พร้อมสร้าง Gin Auth Middleware ป้องกันการสวมรอย",
             },
             {
-              title: "15. Config Management, Docker & Production Checklist →",
+              title: "15. Docker Deployment & Production Checklist →",
               slug: "bank-config-docker-prod",
-              desc: "โหลดคอนฟิกด้วย Viper, Multi-Stage Dockerfile ย่อเหลือ 20MB และ Production Checklist",
+              desc: "Multi-Stage Dockerfile ย่อเหลือ 20MB, Docker Compose และ Production Checklist สำหรับระบบจริง",
             },
             {
               title: "16. เจาะลึกคำถามสัมภาษณ์ & สถาปัตยกรรมระดับสูง →",

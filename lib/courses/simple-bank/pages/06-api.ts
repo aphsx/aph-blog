@@ -60,11 +60,11 @@ func NewServer(store *db.Store) *Server {
 	server := &Server{store: store}
 	router := gin.Default()
 
-	// 2. ลงทะเบียน Routing สำหรับแต่ละ Endpoint
+	// 2. ลงทะเบียน Routing สำหรับ Endpoint บัญชี
 	router.POST("/accounts", server.createAccount)
 	router.GET("/accounts/:id", server.getAccount)
 	router.GET("/accounts", server.listAccounts)
-	router.POST("/transfers", server.createTransfer)
+	// (หมายเหตุ: เส้นทาง /transfers จะถูกลงทะเบียนในบทถัดไปพร้อมตัวตรวจสอบสกุลเงิน)
 
 	// 3. แนบ Router กลับเข้าไปใน Server
 	server.router = router
@@ -141,30 +141,6 @@ func (server *Server) createAccount(ctx *gin.Context) {
             "**`http.StatusCreated` (201)**: เป็น Status Code มาตรฐานสำหรับการสร้างทรัพยากรใหม่ในระบบ",
           ],
         },
-        {
-          t: "codeout",
-          lang: "bash",
-          label: "ทดสอบยิง curl POST /accounts สร้างบัญชีใหม่ใน Terminal",
-          code: `curl -i -X POST http://localhost:8080/accounts \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "owner": "alice",
-    "currency": "USD"
-  }'`,
-          out: `HTTP/1.1 201 Created
-Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 10:00:00 GMT
-Content-Length: 104
-
-{
-  "id": 1,
-  "owner": "alice",
-  "balance": 0,
-  "currency": "USD",
-  "created_at": "2026-09-26T10:00:00.123456Z"
-}`,
-        },
-
         { t: "h2", c: "3. การสร้าง Handler: `GET /accounts/:id`" },
         {
           t: "p",
@@ -205,35 +181,6 @@ func (server *Server) getAccount(ctx *gin.Context) {
           t: "callout",
           title: "🎯 หลักการกำหนด HTTP Status Code ที่ดี",
           c: "แยกแยะข้อผิดพลาดให้ชัดเจนเสมอ:\n- ลูกค้าส่งข้อมูลผิด (เช่น ID ติดลบ, ส่ง JSON ไม่ครบ) -> ใช้ **400 Bad Request**\n- ข้อมูลไม่มีในระบบ -> ใช้ **404 Not Found**\n- เซิร์ฟเวอร์หรือฐานข้อมูลพัง -> ใช้ **500 Internal Server Error**",
-        },
-        {
-          t: "codeout",
-          lang: "bash",
-          label: "ทดสอบยิง curl GET /accounts/:id (เปรียบเทียบ 200 OK vs 404 Not Found)",
-          code: `# 1. ดึงข้อมูลบัญชี ID = 1 ที่มีอยู่จริง
-curl -i http://localhost:8080/accounts/1
-
-# 2. ดึงข้อมูลบัญชี ID = 99999 ที่ไม่มีอยู่จริง
-curl -i http://localhost:8080/accounts/99999`,
-          out: `[เคสที่ 1: พบบัญชีในระบบ]
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-
-{
-  "id": 1,
-  "owner": "alice",
-  "balance": 0,
-  "currency": "USD",
-  "created_at": "2026-09-26T10:00:00.123456Z"
-}
-
-[เคสที่ 2: ไม่พบบัญชีในระบบ]
-HTTP/1.1 404 Not Found
-Content-Type: application/json; charset=utf-8
-
-{
-  "error": "sql: no rows in result set"
-}`,
         },
 
         { t: "h2", c: "4. การสร้าง Handler: `GET /accounts` (Pagination)" },
@@ -284,10 +231,127 @@ func (server *Server) listAccounts(ctx *gin.Context) {
             "**`Offset = (PageID - 1) * PageSize`**: สูตรคำนวณตำแหน่งเริ่มต้นของข้อมูลในฐานข้อมูล เช่น หน้าที่ 2 ขนาด 5 แถว จะได้ Offset = 5 (ข้าม 5 แถวแรกไป)",
           ],
         },
+
+        { t: "h2", c: "5. ประกอบร่างและเปิดรันเซิร์ฟเวอร์ด้วย `main.go`" },
+        {
+          t: "p",
+          c: "หลังจากที่เราเขียน API Handlers สำหรับจัดการบัญชีครบถ้วนแล้ว ตอนนี้ถึงเวลาสร้างไฟล์ `main.go` ที่ Root Directory (`simplebank/main.go`) เพื่อเชื่อมต่อ Database เข้ากับ Gin Server และเปิดให้บริการจริง:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/main.go (สร้างไฟล์ใหม่ที่ Root Directory)",
+          c: `package main
+
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/lib/pq"
+	"simplebank/api"
+	db "simplebank/db"
+)
+
+const (
+	dbDriver      = "postgres"
+	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+	serverAddress = "0.0.0.0:8080"
+)
+
+func main() {
+	conn, err := sql.Open(dbDriver, dbSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	store := db.NewStore(conn)
+	server := api.NewServer(store)
+
+	err = server.Start(serverAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
+}`,
+        },
+        {
+          t: "p",
+          c: "เปิด Terminal ขึ้นมา แล้วสั่งรันเซิร์ฟเวอร์ด้วยคำสั่ง:",
+        },
         {
           t: "codeout",
           lang: "bash",
-          label: "ทดสอบยิง curl GET /accounts แบบแบ่งหน้า (Pagination) ใน Terminal",
+          label: "Terminal ที่ 1: คำสั่งสตาร์ตเซิร์ฟเวอร์ Gin (Listening on :8080)",
+          code: `go run main.go`,
+          out: `[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)
+[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080
+(เซิร์ฟเวอร์เปิดทำงานสำเร็จ พร้อมรับคำขอ HTTP แล้ว!)`,
+        },
+
+        { t: "h2", c: "6. ทดสอบยิง cURL ใน Terminal จริง" },
+        {
+          t: "callout",
+          title: "💡 วิธีการทดสอบจริงใน Terminal",
+          c: "ให้คุณเปิด **Terminal หน้าต่างที่ 2** ขึ้นมาคู่กัน (โดยปล่อยให้ Terminal หน้าต่างแรกเปิดรัน `go run main.go` ค้างไว้) แล้วทดสอบยิงคำสั่ง cURL ดังนี้:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "Terminal ที่ 2: ทดสอบสร้างบัญชีใหม่ (POST /accounts)",
+          code: `curl -i -X POST http://localhost:8080/accounts \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "owner": "alice",
+    "currency": "USD"
+  }'`,
+          out: `HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 10:00:00 GMT
+Content-Length: 104
+
+{
+  "id": 1,
+  "owner": "alice",
+  "balance": 0,
+  "currency": "USD",
+  "created_at": "2026-09-26T10:00:00.123456Z"
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "Terminal ที่ 2: ทดสอบดึงข้อมูลบัญชีตาม ID (GET /accounts/:id)",
+          code: `# 1. ดึงข้อมูลบัญชี ID = 1 ที่มีอยู่จริง (200 OK)
+curl -i http://localhost:8080/accounts/1
+
+# 2. ดึงข้อมูลบัญชี ID = 99999 ที่ไม่มีอยู่จริง (404 Not Found)
+curl -i http://localhost:8080/accounts/99999`,
+          out: `[เคสที่ 1: พบบัญชีในระบบ]
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{
+  "id": 1,
+  "owner": "alice",
+  "balance": 0,
+  "currency": "USD",
+  "created_at": "2026-09-26T10:00:00.123456Z"
+}
+
+[เคสที่ 2: ไม่พบบัญชีในระบบ]
+HTTP/1.1 404 Not Found
+Content-Type: application/json; charset=utf-8
+
+{
+  "error": "sql: no rows in result set"
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "Terminal ที่ 2: ทดสอบดึงรายการบัญชีแบบแบ่งหน้า (GET /accounts)",
           code: `curl -i "http://localhost:8080/accounts?page_id=1&page_size=5"`,
           out: `HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8
@@ -299,13 +363,6 @@ Content-Type: application/json; charset=utf-8
     "balance": 0,
     "currency": "USD",
     "created_at": "2026-09-26T10:00:00.123456Z"
-  },
-  {
-    "id": 2,
-    "owner": "bob",
-    "balance": 1000,
-    "currency": "USD",
-    "created_at": "2026-09-26T10:01:00.654321Z"
   }
 ]`,
         },
@@ -412,9 +469,23 @@ func IsSupportedCurrency(currency string) bool {
  	router.POST("/accounts", server.createAccount)`,
         },
         {
+          t: "p",
+          c: "จากนั้นให้เปิดไฟล์ `api/account.go` เพื่อเปลี่ยนแท็ก Validation ของฟิลด์ `Currency` จากเดิมที่เป็น `oneof=USD EUR THB` มาใช้ Custom Tag `currency` ที่เราเพิ่งสร้างขึ้น:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/account.go (จุดแก้ไข: เปลี่ยนมาใช้ Custom Tag currency)",
+          c: ` type createAccountRequest struct {
+ 	Owner    string \`json:"owner" binding:"required"\`
+-	Currency string \`json:"currency" binding:"required,oneof=USD EUR THB"\`
++	Currency string \`json:"currency" binding:"required,currency"\`
+ }`,
+        },
+        {
           t: "codeout",
           lang: "bash",
-          label: "ทดสอบ Custom Currency Validator เมื่อส่งสกุลเงินที่ไม่รองรับ (XYZ)",
+          label: "Terminal ที่ 2: ทดสอบส่งสกุลเงินที่ไม่รองรับ (XYZ) -> Gin จะปฏิเสธทันทีด้วย HTTP 400",
           code: `curl -i -X POST http://localhost:8080/accounts \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -425,7 +496,7 @@ func IsSupportedCurrency(currency string) bool {
 Content-Type: application/json; charset=utf-8
 
 {
-  "error": "Key: 'createAccountRequest.Currency' Error:Field validation for 'Currency' failed on the 'oneof' tag"
+  "error": "Key: 'createAccountRequest.Currency' Error:Field validation for 'Currency' failed on the 'currency' tag"
 }`,
         },
 
@@ -531,6 +602,43 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
             "**Currency Consistency**: การันตีว่าไม่มีการโอนข้ามสกุลเงินเกิดขึ้น ข้อมูลเงินในระบบจะถูกต้องตรงตามความเป็นจริง 100%",
           ],
         },
+
+        { t: "h2", c: "4. ลงทะเบียน Route `/transfers` และรีสตาร์ตเซิร์ฟเวอร์" },
+        {
+          t: "p",
+          c: "เปิดไฟล์ `api/server.go` เพื่อลงทะเบียน Route `POST /transfers` เข้าสู่ Gin Engine ให้ครบสมบูรณ์:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/server.go (จุดแก้ไข: เพิ่ม Route /transfers)",
+          c: ` 	// ลงทะเบียน Routing สำหรับแต่ละ Endpoint
+ 	router.POST("/accounts", server.createAccount)
+ 	router.GET("/accounts/:id", server.getAccount)
+ 	router.GET("/accounts", server.listAccounts)
++	router.POST("/transfers", server.createTransfer)
+ 
+ 	server.router = router
+ 	return server`,
+        },
+        {
+          t: "p",
+          c: "กลับไปที่ **Terminal หน้าต่างที่ 1** กด `Ctrl + C` เพื่อหยุดเซิร์ฟเวอร์เดิม แล้วสั่งรันใหม่อีกครั้งเพื่อโหลด Route ล่าสุด:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "Terminal ที่ 1: สั่งรันเซิร์ฟเวอร์ใหม่ (จะเห็น Route /transfers ปรากฏขึ้น)",
+          code: `go run main.go`,
+          out: `[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)
+[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (3 handlers)
+[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080`,
+        },
+
+        { t: "h2", c: "5. เติมเงินตั้งต้นและทดสอบยิงโอนเงินจริง" },
         {
           t: "callout",
           title: "💡 การเตรียมเงินทดสอบก่อนสั่งโอน (Initial Balance Seeding)",
@@ -548,7 +656,7 @@ INSERT INTO entries (account_id, amount) VALUES (1, 1000), (2, 500);
         {
           t: "codeout",
           lang: "bash",
-          label: "ทดสอบยิง curl POST /transfers (โอนเงินสำเร็จ 200 OK)",
+          label: "Terminal ที่ 2: ทดสอบยิง curl POST /transfers (โอนเงินสำเร็จ 200 OK)",
           code: `curl -i -X POST http://localhost:8080/transfers \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -599,7 +707,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "codeout",
           lang: "bash",
-          label: "ทดสอบกรณีโอนข้ามสกุลเงิน (ตรวจพบ Currency Mismatch -> HTTP 400)",
+          label: "Terminal ที่ 2: ทดสอบกรณีโอนข้ามสกุลเงิน (ตรวจพบ Currency Mismatch -> HTTP 400)",
           code: `curl -i -X POST http://localhost:8080/transfers \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -615,59 +723,10 @@ Content-Type: application/json; charset=utf-8
   "error": "สกุลเงินของบัญชี [1] คือ USD ไม่ตรงกับคำขอโอน THB"
 }`,
         },
-
-        { t: "h2", c: "ประกอบร่างและเปิดรันเซิร์ฟเวอร์ด้วย `main.go`" },
         {
-          t: "p",
-          c: "เมื่อเขียน API Handlers และตัวตรวจสอบความถูกต้อง (Validation) ครบทุกส่วนแล้ว ตอนนี้ถึงเวลาสร้างไฟล์ `main.go` ที่ Root ของโปรเจกต์ เพื่อเชื่อมต่อ Database เข้ากับ Gin Server และเปิดให้บริการจริง:",
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/main.go (สร้างไฟล์ที่ Root Directory)",
-          c: `package main
-
-import (
-	"database/sql"
-	"log"
-
-	_ "github.com/lib/pq"
-	"simplebank/api"
-	db "simplebank/db"
-)
-
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
-)
-
-func main() {
-	conn, err := sql.Open(dbDriver, dbSource)
-	if err != nil {
-		log.Fatal("cannot connect to db:", err)
-	}
-
-	store := db.NewStore(conn)
-	server := api.NewServer(store)
-
-	err = server.Start(serverAddress)
-	if err != nil {
-		log.Fatal("cannot start server:", err)
-	}
-}`,
-        },
-        {
-          t: "codeout",
-          lang: "bash",
-          label: "คำสั่งเปิดเซิร์ฟเวอร์ Gin และ Log การลงทะเบียน Route ครบทุกตัว",
-          code: `go run main.go`,
-          out: `[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)
-[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)
-[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)
-[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (3 handlers)
-[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080`,
+          t: "callout",
+          title: "🎉 สรุปความพร้อมระดับ Production ของ RESTful API",
+          c: "ยินดีด้วย! ถึงจุดนี้คุณได้สร้าง Web Service สำหรับระบบ Simple Bank ที่สมบูรณ์แบบ ทั้งการลงทะเบียนบัญชี, การดึงข้อมูลแบบแบ่งหน้า (Pagination), และการโอนเงินที่มีทั้ง Transaction ป้องกัน Deadlock และ Custom Validator ป้องกันข้อมูลผิดพลาด\n\nในบทถัดไป เราจะก้าวเข้าสู่ **หมวดที่ 7: HTTP API Testing & Mocking** เพื่อเขียน Unit Test ให้กับ REST API เหล่านี้โดยใช้ GoMock ทำให้ทดสอบได้รวดเร็วโดยไม่ต้องพึ่งพาฐานข้อมูลจริง!",
         },
       ],
       en: [],

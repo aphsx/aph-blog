@@ -95,9 +95,8 @@ WHERE id = 1 FOR UPDATE;
         {
           t: "code",
           lang: "sql",
-          label: "simplebank/db/query/account.sql",
-          c: `-- name: AddAccountBalance :one
-UPDATE accounts
+          label: "simplebank/db/account.go (คำสั่ง SQL AddAccountBalance)",
+          c: `UPDATE accounts
 SET balance = balance + $1
 WHERE id = $2
 RETURNING id, owner, balance, currency, created_at;`,

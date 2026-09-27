@@ -51,6 +51,15 @@ ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "cur
 ALTER TABLE IF EXISTS "accounts" DROP CONSTRAINT IF EXISTS "accounts_owner_fkey";
 DROP TABLE IF EXISTS "users";`,
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "รัน Migration เพิ่มตาราง users และ Foreign Key ใน PostgreSQL",
+          code: `make migrateup`,
+          out: `migrate -path db/migration -database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
+2026/09/27 18:30:00 Start running migration 000002_add_users.up.sql
+2026/09/27 18:30:00 Finished running migration 000002_add_users.up.sql (OK)`,
+        },
 
         { t: "h2", c: "2. ทำไมห้ามเก็บ Plain Text หรือ MD5 / SHA-256 เด็ดขาด?" },
         {
@@ -366,9 +375,32 @@ func (server *Server) createUser(ctx *gin.Context) {
 }`,
         },
         {
+          t: "p",
+          c: "จากนั้นลงทะเบียน Route `POST /users` ใน `simplebank/api/server.go`:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/api/server.go (ลงทะเบียน Route /users)",
+          c: `// ในฟังก์ชัน NewServer ของ simplebank/api/server.go
+router.POST("/users", server.createUser)`,
+        },
+        {
           t: "codeout",
           lang: "bash",
-          label: "ทดสอบสมัครสมาชิกผ่าน cURL (ตรวจสอบความปลอดภัยของ Response)",
+          label: "Terminal 1: รีสตาร์ตเซิร์ฟเวอร์ Go เพื่อโหลด Route ใหม่",
+          code: `go run main.go`,
+          out: `[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)
+[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)
+[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (3 handlers)
+[GIN-debug] POST   /users                    --> simplebank/api.(*Server).createUser-fm (3 handlers)
+[GIN-debug] [WARNING] Listening and serving HTTP on 0.0.0.0:8080`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "Terminal 2: ทดสอบสมัครสมาชิกผ่าน cURL (ตรวจสอบความปลอดภัยของ Response)",
           code: `curl -i -X POST http://localhost:8080/users \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -541,7 +573,65 @@ ok      simplebank/db   0.312s`,
           ],
         },
 
-        { t: "h2", c: "1. ออกแบบ Payload และ PasetoMaker ใน Go" },
+        { t: "h2", c: "1. จัดการ Configuration ด้วย `spf13/viper`" },
+        {
+          t: "p",
+          c: "ในการสร้าง PASETO Token เราจำเป็นต้องใช้ Symmetric Key ขนาด 32 ไบต์ และระยะเวลาหมดอายุของตั๋ว (Token Duration) ซึ่งตามหลักสากล **เราต้องไม่ Hardcode คีย์เหล่านี้ลงในโค้ด Go เด็ดขาด** เราจะติดตั้งไลบรารี `spf13/viper` เพื่ออ่านค่าการตั้งค่าจากไฟล์ `app.env`:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "ติดตั้ง spf13/viper",
+          c: `go get github.com/spf13/viper`,
+        },
+        {
+          t: "code",
+          lang: "env",
+          label: "simplebank/app.env (สร้างไฟล์ใหม่ที่ Root Directory)",
+          c: `DB_DRIVER=postgres
+DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+SERVER_ADDRESS=0.0.0.0:8080
+TOKEN_SYMMETRIC_KEY=12345678901234567890123456789012
+ACCESS_TOKEN_DURATION=15m`,
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
+          c: `package util
+
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
+
+type Config struct {
+	DBDriver            string        \`mapstructure:"DB_DRIVER"\`
+	DBSource            string        \`mapstructure:"DB_SOURCE"\`
+	ServerAddress       string        \`mapstructure:"SERVER_ADDRESS"\`
+	TokenSymmetricKey   string        \`mapstructure:"TOKEN_SYMMETRIC_KEY"\`
+	AccessTokenDuration time.Duration \`mapstructure:"ACCESS_TOKEN_DURATION"\`
+}
+
+func LoadConfig(path string) (config Config, err error) {
+	viper.AddConfigPath(path)
+	viper.SetConfigName("app")
+	viper.SetConfigType("env") // ค้นหาไฟล์ app.env
+
+	viper.AutomaticEnv() // ดึงค่าจาก OS Environment ทับหากมีตัวแปรชื่อตรงกัน
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+
+	err = viper.Unmarshal(&config)
+	return
+}`,
+        },
+
+        { t: "h2", c: "2. ออกแบบ Payload และ PasetoMaker ใน Go" },
         {
           t: "p",
           c: "ติดตั้งแพ็กเกจที่จำเป็นสำหรับการสร้าง PASETO Token, UUID และการเข้ารหัสแบบ Symmetric:",
@@ -677,6 +767,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	return payload, nil
 }`,
         },
+        { t: "h2", c: "3. สร้าง Endpoint ล็อกอิน: `POST /users/login`" },
         {
           t: "p",
           c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `simplebank/api/user.go` (เขียนต่อในไฟล์เดิม) เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไป:",
@@ -736,7 +827,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 }`,
         },
 
-        { t: "h2", c: "2. การสร้าง Gin Authentication Middleware" },
+        { t: "h2", c: "4. การสร้าง Gin Authentication Middleware" },
         {
           t: "p",
           c: "เราจะสร้าง Middleware มาดักหน้าทุก Endpoint ที่ต้องการความปลอดภัย หากไม่มี Token หรือ Token ปลอม ระบบจะปฏิเสธคำขอทันทีด้วย **401 Unauthorized**:",
@@ -798,103 +889,13 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	}
 }`,
         },
-        {
-          t: "p",
-          c: "จากนั้นนำ `authMiddleware` ไปผูกเข้ากับกลุ่มของ Route ที่ต้องการการยืนยันตัวตน และอัปเดต `Server` struct ให้เก็บ `tokenMaker` ใน `simplebank/api/server.go`:",
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/api/server.go (อัปเดต Server Struct & NewServer)",
-          c: `// อัปเดต Server struct ใน simplebank/api/server.go ให้ถือ tokenMaker และ config พร้อมลงทะเบียน Validator
-package api
-
-import (
-	"fmt"
-
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
-	db "simplebank/db"
-	"simplebank/token"
-	"simplebank/util"
-)
-
-type Server struct {
-	config     util.Config
-	store      *db.Store
-	tokenMaker token.Maker
-	router     *gin.Engine
-}
-
-// ฟังก์ชัน NewServer ที่รับ config และ store เข้ามา พร้อมสร้าง PasetoMaker
-func NewServer(config util.Config, store *db.Store) (*Server, error) {
-	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
-	if err != nil {
-		return nil, fmt.Errorf("cannot create token maker: %w", err)
-	}
-
-	server := &Server{
-		config:     config,
-		store:      store,
-		tokenMaker: tokenMaker,
-	}
-
-	router := gin.Default()
-
-	// ลงทะเบียน custom validator tag "currency"
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterValidation("currency", validCurrency)
-	}
-
-	// 1. เส้นทางสาธารณะ (Public Routes): ทุกคนเข้าถึงได้โดยไม่ต้องแนบ Token
-	router.POST("/users", server.createUser)
-	router.POST("/users/login", server.loginUser)
-
-	// 2. เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
-	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
-	authRoutes.POST("/accounts", server.createAccount)
-	authRoutes.GET("/accounts/:id", server.getAccount)
-	authRoutes.GET("/accounts", server.listAccounts)
-	authRoutes.POST("/transfers", server.createTransfer)
-
-	server.router = router
-	return server, nil
-}`,
-        },
-        {
-          t: "codeout",
-          lang: "bash",
-          label: "ทดสอบล็อกอินเพื่อรับ PASETO Token ผ่าน cURL",
-          code: `curl -i -X POST http://localhost:8080/users/login \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "username": "alice",
-    "password": "secretPassword123"
-  }'`,
-          out: `HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 08:35:10 GMT
-Content-Length: 320
-
-{
-  "access_token": "v2.local.O4WcQo7c...[ChaCha20-Poly1305 Encrypted Payload]...L8a9m",
-  "user": {
-    "username": "alice",
-    "full_name": "Alice Wonderland",
-    "email": "alice@example.com",
-    "created_at": "2026-09-26T08:35:00.124851Z"
-  }
-}`,
-        },
-
-        { t: "h2", c: "3. ปกป้อง Endpoints ทั้งหมดด้วย Token (Accounts & Transfers)" },
+        { t: "h2", c: "5. ปกป้อง Endpoints เดิมด้วย Token (Accounts & Transfers)" },
         {
           t: "p",
           c: "เมื่อเรานำ `authMiddleware` มาครอบ Route กลุ่ม `/accounts` และ `/transfers` แล้ว เราจำเป็นต้องอัปเดต Handler ให้ดึงตัวตนของผู้ใช้จาก **`authPayload.Username`** แทนการรับค่าจากผู้ใช้ตรงๆ เพื่อปิดช่องโหว่ความปลอดภัยทุกจุด:",
         },
 
-        { t: "h3", c: "3.1 อัปเดต `createAccount`: ตัดฟิลด์ owner ออกจาก JSON Body" },
+        { t: "h3", c: "5.1 อัปเดต `createAccount`: ตัดฟิลด์ owner ออกจาก JSON Body" },
         {
           t: "p",
           c: "ผู้ใช้ที่ล็อกอินแล้วไม่จำเป็นต้องส่ง `owner` ใน JSON Body อีกต่อไป เพราะเราสามารถดึงชื่อเจ้าของจาก Token ได้โดยตรง ป้องกันการแอบเปิดบัญชีในนามของผู้อื่น 100%:",
@@ -934,7 +935,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 }`,
         },
 
-        { t: "h3", c: "3.2 อัปเดต `getAccount`: ห้ามแอบส่องยอดเงินของผู้อื่น" },
+        { t: "h3", c: "5.2 อัปเดต `getAccount`: ห้ามแอบส่องยอดเงินของผู้อื่น" },
         {
           t: "p",
           c: "ตรวจสอบว่าบัญชีที่ต้องการดู เป็นของผู้ใช้ที่ถือ Token หรือไม่ หากไม่ใช่ให้ส่ง **401 Unauthorized** ทันที:",
@@ -972,7 +973,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 }`,
         },
 
-        { t: "h3", c: "3.3 อัปเดต `listAccounts`: กรองเฉพาะบัญชีของตัวเองเท่านั้น" },
+        { t: "h3", c: "5.3 อัปเดต `listAccounts`: กรองเฉพาะบัญชีของตัวเองเท่านั้น" },
         {
           t: "p",
           c: "ในระบบจริง เราจะไม่อนุญาตให้ผู้ใช้ทั่วไปดูรายชื่อบัญชีของลูกค้าคนอื่นทั้งธนาคาร เราจึงต้องอัปเดตคิวรี `ListAccounts` ใน `db/account.go` ให้มีเงื่อนไข `WHERE owner = $1`:",
@@ -1082,7 +1083,7 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
 }`,
         },
 
-        { t: "h3", c: "3.4 อัปเดต `createTransfer`: ป้องกันการสั่งโอนเงินแทนผู้อื่น" },
+        { t: "h3", c: "5.4 อัปเดต `createTransfer`: ป้องกันการสั่งโอนเงินแทนผู้อื่น" },
         {
           t: "p",
           c: "ในฟังก์ชัน `createTransfer` เราต้องเพิ่มการตรวจสอบว่า **ผู้ใช้ที่ถือ Token ล็อกอินเข้ามา เป็นเจ้าของบัญชีต้นทาง (`FromAccountID`) จริงหรือไม่** โดยอาศัย `fromAccount` ที่ส่งคืนมาจาก `validAccount`:",
@@ -1111,150 +1112,80 @@ if !valid {
 	return
 }`,
         },
-        {
-          t: "codeout",
-          lang: "bash",
-          label: "ทดสอบโอนเงินพร้อม Authorization Bearer Token (สำเร็จ 200 OK)",
-          code: `curl -i -X POST http://localhost:8080/transfers \\
-  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "from_account_id": 1,
-    "to_account_id": 2,
-    "amount": 1000,
-    "currency": "USD"
-  }'`,
-          out: `HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Date: Sat, 26 Sep 2026 08:35:15 GMT
-
-{
-  "transfer": {
-    "id": 1,
-    "from_account_id": 1,
-    "to_account_id": 2,
-    "amount": 1000,
-    "created_at": "2026-09-26T08:35:15.829102Z"
-  },
-  "from_account": { "id": 1, "owner": "alice", "balance": 9000, "currency": "USD" },
-  "to_account": { "id": 2, "owner": "bob", "balance": 11000, "currency": "USD" }
-}`,
-        },
-        {
-          t: "codeout",
-          lang: "bash",
-          label: "ทดสอบแอบโอนเงินจากบัญชีผู้อื่น / ไม่ส่ง Token (ถูกบล็อก 401 Unauthorized)",
-          code: `# กรณีที่ 1: Alice พยายามสั่งโอนเงินออกจากบัญชีของ Bob (FromAccountID = 2)
-curl -i -X POST http://localhost:8080/transfers \\
-  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
-  -H "Content-Type: application/json" \\
-  -d '{"from_account_id": 2, "to_account_id": 1, "amount": 5000, "currency": "USD"}'
-
-# กรณีที่ 2: เรียก API โดยไม่แนบ Authorization Header
-curl -i -X POST http://localhost:8080/transfers \\
-  -H "Content-Type: application/json" \\
-  -d '{"from_account_id": 1, "to_account_id": 2, "amount": 1000, "currency": "USD"}'`,
-          out: `# ผลลัพธ์กรณีที่ 1: ตรวจจับได้ว่าไม่ใช่เจ้าของบัญชี
-HTTP/1.1 401 Unauthorized
-Content-Type: application/json; charset=utf-8
-{
-  "error": "บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน"
-}
-
-# ผลลัพธ์กรณีที่ 2: Middleware สกัดกั้นทันที
-HTTP/1.1 401 Unauthorized
-Content-Type: application/json; charset=utf-8
-{
-  "error": "ไม่มีการแนบ Authorization Header"
-}`,
-        },
+        { t: "h2", c: "6. นำทุก Route มาประกอบเข้าด้วยกันใน `simplebank/api/server.go`" },
         {
           t: "p",
-          c: "เพียงเท่านี้ ทุก Endpoint ของระบบ Simple Bank ก็จะได้รับการปกป้องอย่างแน่นหนา ทั้งการตรวจสอบความถูกต้องของ Token และการตรวจสอบความเป็นเจ้าของทรัพยากรทุกครั้ง!",
-        },
-      ],
-      en: [],
-    },
-  },
-
-  "bank-config-docker-prod": {
-    slug: "bank-config-docker-prod",
-    title: {
-      th: "Config Management, Docker & Production Checklist",
-      en: "Config Management with Viper, Multi-Stage Dockerfile & Production",
-    },
-    lead: {
-      th: "จัดการ Environment Variables ด้วย Viper, เขียน Multi-Stage Dockerfile ย่อขนาดแอปเหลือ 20MB, และเช็กลิสต์ความพร้อมก่อนรันจริงบน Production",
-      en: "Configuration management with Viper, ultra-lean multi-stage Docker builds, and the production readiness checklist.",
-    },
-    group: "7. Security, Auth & Production",
-    blocks: {
-      th: [
-        {
-          t: "p",
-          c: "ในการนำระบบซอฟต์แวร์ขึ้นไปรันบน Production เราต้องไม่ฝัง Secret, Password หรือ URL ฐานข้อมูลลงใน Source Code เด็ดขาด ตามหลักการ **The Twelve-Factor App** การตั้งค่าทั้งหมดจะต้องถูกส่งผ่านเข้ามาทาง Environment Variables",
-        },
-
-        { t: "h2", c: "1. จัดการ Configuration ด้วย `spf13/viper`" },
-        {
-          t: "p",
-          c: "เราจะใช้ไลบรารี **Viper** ซึ่งสามารถอ่านค่าคอนฟิกได้ทั้งจากไฟล์ `.env` ในช่วงพัฒนาบนเครื่องตัวเอง และดึงค่าจาก System Environment Variables อัตโนมัติเมื่อรันบน Docker หรือ Kubernetes เริ่มต้นด้วยการติดตั้ง Viper:",
-        },
-        {
-          t: "code",
-          lang: "bash",
-          label: "ติดตั้ง spf13/viper",
-          c: `go get github.com/spf13/viper`,
-        },
-        {
-          t: "code",
-          lang: "env",
-          label: "simplebank/app.env (สร้างไฟล์ใหม่ที่ Root Directory)",
-          c: `DB_DRIVER=postgres
-DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
-SERVER_ADDRESS=0.0.0.0:8080
-TOKEN_SYMMETRIC_KEY=12345678901234567890123456789012
-ACCESS_TOKEN_DURATION=15m`,
+          c: "เมื่อเตรียมทั้ง Auth Middleware และ Handler ทุกตัวพร้อมแล้ว ให้นำมาผูกเข้าด้วยกันใน `simplebank/api/server.go` โดยแยก Public Routes (สมัครสมาชิก/ล็อกอิน) ออกจาก Protected Routes (บัญชีและการโอนเงิน):",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
-          c: `package util
+          label: "simplebank/api/server.go (อัปเดต Server Struct & NewServer ครบวงจร)",
+          c: `package api
 
 import (
-	"time"
+	"fmt"
 
-	"github.com/spf13/viper"
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	db "simplebank/db"
+	"simplebank/token"
+	"simplebank/util"
 )
 
-type Config struct {
-	DBDriver            string        \`mapstructure:"DB_DRIVER"\`
-	DBSource            string        \`mapstructure:"DB_SOURCE"\`
-	ServerAddress       string        \`mapstructure:"SERVER_ADDRESS"\`
-	TokenSymmetricKey   string        \`mapstructure:"TOKEN_SYMMETRIC_KEY"\`
-	AccessTokenDuration time.Duration \`mapstructure:"ACCESS_TOKEN_DURATION"\`
+type Server struct {
+	config     util.Config
+	store      *db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
-func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
-	viper.SetConfigType("env") // ค้นหาไฟล์ app.env
-
-	viper.AutomaticEnv() // ดึงค่าจาก OS Environment ทับหากมีตัวแปรชื่อตรงกัน
-
-	err = viper.ReadInConfig()
+// NewServer รับ config และ store พร้อมสร้าง PasetoMaker
+func NewServer(config util.Config, store *db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 
-	err = viper.Unmarshal(&config)
-	return
+	server := &Server{
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
+	}
+
+	router := gin.Default()
+
+	// ลงทะเบียน custom validator tag "currency"
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency", validCurrency)
+	}
+
+	// 1. เส้นทางสาธารณะ (Public Routes): เข้าถึงได้โดยไม่ต้องแนบ Token
+	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
+
+	// 2. เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes.POST("/accounts", server.createAccount)
+	authRoutes.GET("/accounts/:id", server.getAccount)
+	authRoutes.GET("/accounts", server.listAccounts)
+	authRoutes.POST("/transfers", server.createTransfer)
+
+	server.router = router
+	return server, nil
+}
+
+// Start รันเซิร์ฟเวอร์ HTTP บน Address ที่ระบุ
+func (server *Server) Start(address string) error {
+	return server.router.Run(address)
 }`,
         },
+
+        { t: "h2", c: "7. อัปเดต `main.go` และสตาร์ตเซิร์ฟเวอร์ (Terminal 1)" },
         {
           t: "p",
-          c: "หลังจากสร้างโมดูล Config เสร็จแล้ว ให้นำไปใช้งานจริงใน `simplebank/main.go` โดยแทนที่ค่าคงที่เดิม (Hardcoded Strings) ด้วยค่าที่อ่านมาจาก `app.env` ผ่าน `util.LoadConfig`:",
+          c: "อัปเดตไฟล์ `simplebank/main.go` ให้โหลด Configuration จาก `app.env` ผ่าน `util.LoadConfig` แล้วส่ง `config` เข้าไปตอนสร้าง Server ด้วย `api.NewServer(config, store)`:",
         },
         {
           t: "code",
@@ -1298,8 +1229,160 @@ func main() {
 	}
 }`,
         },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "Terminal 1: สตาร์ตเซิร์ฟเวอร์ Go พร้อมระบบ Authentication",
+          code: `go run main.go`,
+          out: `[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
 
-        { t: "h2", c: "2. การเขียน Multi-Stage Dockerfile แบบมืออาชีพ" },
+[GIN-debug] POST   /users                    --> simplebank/api.(*Server).createUser-fm (3 handlers)
+[GIN-debug] POST   /users/login              --> simplebank/api.(*Server).loginUser-fm (3 handlers)
+[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (4 handlers)
+[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (4 handlers)
+[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (4 handlers)
+[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (4 handlers)
+[GIN-debug] [WARNING] Listening and serving HTTP on 0.0.0.0:8080`,
+        },
+
+        { t: "h2", c: "8. ทดสอบ API ครบวงจรด้วย cURL (Terminal 2)" },
+        {
+          t: "p",
+          c: "เปิด **Terminal หน้าต่างที่สอง** เพื่อทดสอบ Flow การทำงานจริงตั้งแต่การล็อกอินรับ PASETO Token ไปจนถึงการทำธุรกรรมโอนเงินที่มีเกราะป้องกันความปลอดภัย:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ขั้นตอนที่ 1: ล็อกอินเพื่อรับ PASETO Token (POST /users/login)",
+          code: `curl -i -X POST http://localhost:8080/users/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "username": "alice",
+    "password": "secretPassword123"
+  }'`,
+          out: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 08:35:10 GMT
+Content-Length: 320
+
+{
+  "access_token": "v2.local.O4WcQo7c...[ChaCha20-Poly1305 Encrypted Payload]...L8a9m",
+  "user": {
+    "username": "alice",
+    "full_name": "Alice Wonderland",
+    "email": "alice@example.com",
+    "created_at": "2026-09-26T08:35:00.124851Z"
+  }
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ขั้นตอนที่ 2: สร้างบัญชีเงินฝากใหม่พร้อมแนบ Bearer Token (POST /accounts)",
+          code: `# คัดลอกค่า access_token ที่ได้จากขั้นตอนที่ 1 มาใส่ใน Header
+curl -i -X POST http://localhost:8080/accounts \\
+  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "currency": "USD"
+  }'`,
+          out: `HTTP/1.1 201 Created
+Content-Type: application/json; charset=utf-8
+
+{
+  "id": 1,
+  "owner": "alice",
+  "balance": 0,
+  "currency": "USD",
+  "created_at": "2026-09-26T08:35:12.302194Z"
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ขั้นตอนที่ 3: สั่งโอนเงินพร้อม Authorization Bearer Token (สำเร็จ 200 OK)",
+          code: `curl -i -X POST http://localhost:8080/transfers \\
+  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 1000,
+    "currency": "USD"
+  }'`,
+          out: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Date: Sat, 26 Sep 2026 08:35:15 GMT
+
+{
+  "transfer": {
+    "id": 1,
+    "from_account_id": 1,
+    "to_account_id": 2,
+    "amount": 1000,
+    "created_at": "2026-09-26T08:35:15.829102Z"
+  },
+  "from_account": { "id": 1, "owner": "alice", "balance": 9000, "currency": "USD" },
+  "to_account": { "id": 2, "owner": "bob", "balance": 11000, "currency": "USD" }
+}`,
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ขั้นตอนที่ 4: ทดสอบความปลอดภัย (แอบโอนเงินคนอื่น / ไม่ส่ง Token -> ถูกบล็อก 401)",
+          code: `# กรณีที่ 1: Alice พยายามสั่งโอนเงินออกจากบัญชีของ Bob (FromAccountID = 2)
+curl -i -X POST http://localhost:8080/transfers \\
+  -H "Authorization: Bearer v2.local.O4WcQo7c...L8a9m" \\
+  -H "Content-Type: application/json" \\
+  -d '{"from_account_id": 2, "to_account_id": 1, "amount": 5000, "currency": "USD"}'
+
+# กรณีที่ 2: เรียก API โดยไม่แนบ Authorization Header
+curl -i -X POST http://localhost:8080/transfers \\
+  -H "Content-Type: application/json" \\
+  -d '{"from_account_id": 1, "to_account_id": 2, "amount": 1000, "currency": "USD"}'`,
+          out: `# ผลลัพธ์กรณีที่ 1: ตรวจจับได้ว่าไม่ใช่เจ้าของบัญชี
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json; charset=utf-8
+{
+  "error": "บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน"
+}
+
+# ผลลัพธ์กรณีที่ 2: Middleware สกัดกั้นทันที
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json; charset=utf-8
+{
+  "error": "ไม่มีการแนบ Authorization Header"
+}`,
+        },
+        {
+          t: "p",
+          c: "เพียงเท่านี้ ทุก Endpoint ของระบบ Simple Bank ก็จะได้รับการปกป้องอย่างแน่นหนา ทั้งการตรวจสอบความถูกต้องของ Token และการตรวจสอบความเป็นเจ้าของทรัพยากรทุกครั้ง!",
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "bank-config-docker-prod": {
+    slug: "bank-config-docker-prod",
+    title: {
+      th: "Docker Deployment & Production Checklist",
+      en: "Multi-Stage Dockerfile, Docker Compose & Production Readiness",
+    },
+    lead: {
+      th: "เขียน Multi-Stage Dockerfile ย่อขนาดแอป Go เหลือ 20MB, จัดการ Container ด้วย Docker Compose และเช็กลิสต์ความพร้อมก่อนรันจริงบน Production",
+      en: "Ultra-lean multi-stage Docker builds, docker-compose orchestration, and the production readiness checklist.",
+    },
+    group: "7. Security, Auth & Production",
+    blocks: {
+      th: [
+        {
+          t: "p",
+          c: "ในการนำระบบซอฟต์แวร์ขึ้นไปรันบน Production สภาพแวดล้อมที่เสถียรและจำลองได้เหมือนเดิมทุกที่ (Reproducible Environment) เป็นสิ่งสำคัญอย่างยิ่ง เราจะนำเทคโนโลยี Container อย่าง Docker เข้ามาช่วยแพ็กแอปพลิเคชัน Go และฐานข้อมูลให้พร้อมรันได้ทันทีบนคลาวด์",
+        },
+
+        { t: "h2", c: "1. การเขียน Multi-Stage Dockerfile แบบมืออาชีพ" },
         {
           t: "p",
           c: "หากเราใช้ Docker Image ของ Go ทั่วไปในการรัน ขนาดของ Container จะใหญ่ถึง 800MB–1GB ซึ่งเปลืองพื้นที่และดาวน์โหลดช้ามาก เราสามารถใช้เทคนิค **Multi-Stage Build** เพื่อคอมไพล์โค้ดใน Stage แรก แล้วก๊อปปี้เฉพาะไฟล์ไบนารีที่รันได้จริงไปใส่ใน Image ตัวจิ๋วอย่าง `alpine` ใน Stage ที่สอง:",
@@ -1359,7 +1442,7 @@ simplebank   latest   e3b0c44298fc   12 seconds ago   21.4MB
           c: "ขนาดของ Docker Image จะลดลงจากเกือบ 1,000 MB เหลือเพียงแค่ **~20 MB เท่านั้น!** ปลอดภัยกว่าเพราะไม่มี Compiler หรือเครื่องมือที่ไม่จำเป็นตกค้างอยู่ในระบบ ช่วยลดช่องโหว่จากการถูกโจมตี (Attack Surface)",
         },
 
-        { t: "h2", c: "3. ประกอบร่างด้วย `docker-compose.yml`" },
+        { t: "h2", c: "2. ประกอบร่างด้วย `docker-compose.yml`" },
         {
           t: "p",
           c: "ไฟล์ `docker-compose.yml` จะช่วยให้เราสามารถสตาร์ตทั้งเซิร์ฟเวอร์ Go และฐานข้อมูล PostgreSQL ขึ้นมาพร้อมกันได้ในคำสั่งเดียว:",
@@ -1391,7 +1474,7 @@ services:
       - postgres`,
         },
 
-        { t: "h2", c: "4. Production Readiness Checklist สำหรับระบบการเงิน" },
+        { t: "h2", c: "3. Production Readiness Checklist สำหรับระบบการเงิน" },
         {
           t: "p",
           c: "ก่อนที่คุณจะนำระบบธนาคารขึ้นสู่อินเทอร์เน็ตจริง จงตรวจสอบเช็กลิสต์ความปลอดภัยเหล่านี้ให้ครบทุกข้อ:",
@@ -1407,7 +1490,7 @@ services:
           ],
         },
 
-        { t: "h2", c: "5. สคริปต์ทดสอบ End-to-End ครบวงจร (End-to-End Verification Script)" },
+        { t: "h2", c: "4. สคริปต์ทดสอบ End-to-End ครบวงจร (End-to-End Verification Script)" },
         {
           t: "p",
           c: "เพื่อพิสูจน์ว่าระบบ Simple Bank ของเราทำงานประสานกันตั้งแต่ชั้น Web API, Authentication Middleware, Business Logic Transaction, จนถึง PostgreSQL Database อย่างไร้รอยต่อ ให้เราสร้างสคริปต์ `test_e2e.sh` ที่จำลอง User Journey ของจริงตั้งแต่ต้นจนจบ:",

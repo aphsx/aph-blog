@@ -172,9 +172,13 @@ CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");`,
           ],
         },
         {
+          t: "p",
+          c: "*(ในบทถัดไป เมื่อเราเริ่มรัน Docker PostgreSQL และรัน Migration เราจะสามารถใช้คำสั่ง `\\d accounts` ใน `psql` เพื่อตรวจสอบโครงสร้างตารางจริง ซึ่งจะแสดงผลลัพธ์พร้อม Constraints และ Indexes ดังนี้)*",
+        },
+        {
           t: "codeout",
           lang: "sql",
-          label: "ตรวจสอบ Schema ใน Terminal ด้วยคำสั่ง psql (\\d accounts)",
+          label: "ตัวอย่าง Schema ตาราง accounts ที่ได้เมื่อตรวจสอบด้วย psql (\\d accounts)",
           code: `\\d accounts`,
           out: `                                         Table "public.accounts"
    Column   |           Type           | Collation | Nullable |               Default                
