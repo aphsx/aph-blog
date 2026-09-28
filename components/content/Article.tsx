@@ -287,6 +287,127 @@ async function CodePanel({
   );
 }
 
+async function renderRichContent(content: string, locale: Locale): Promise<ReactNode> {
+  // Split into text segments and fenced code block segments
+  const codeBlockRegex = /```([a-zA-Z0-9_-]*)\r?\n([\s\S]*?)```/g;
+  const segments: Array<
+    | { type: "text"; content: string }
+    | { type: "code"; lang: string; content: string }
+  > = [];
+
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({
+        type: "text",
+        content: content.substring(lastIndex, match.index),
+      });
+    }
+    segments.push({
+      type: "code",
+      lang: match[1] || "bash",
+      content: match[2].trim(),
+    });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < content.length) {
+    segments.push({
+      type: "text",
+      content: content.substring(lastIndex),
+    });
+  }
+
+  const renderedSegments = await Promise.all(
+    segments.map(async (seg, segIdx) => {
+      if (seg.type === "code") {
+        return (
+          <div key={`seg-${segIdx}`} className="my-3 shadow-md shadow-black/20">
+            <CodePanel
+              code={seg.content}
+              lang={seg.lang}
+              roundBottom={true}
+              locale={locale}
+            />
+          </div>
+        );
+      }
+
+      // Parse text into paragraphs and bullet lists
+      const blocks: Array<
+        | { type: "p"; lines: string[] }
+        | { type: "ul"; items: string[] }
+      > = [];
+
+      const lines = seg.content.split(/\r?\n/);
+      let currentList: string[] | null = null;
+      let currentPara: string[] = [];
+
+      const flushPara = () => {
+        if (currentPara.length > 0) {
+          blocks.push({ type: "p", lines: [...currentPara] });
+          currentPara = [];
+        }
+      };
+
+      const flushList = () => {
+        if (currentList && currentList.length > 0) {
+          blocks.push({ type: "ul", items: [...currentList] });
+          currentList = null;
+        }
+      };
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const bulletMatch = line.match(/^\s*[-*]\s+(.*)$/);
+
+        if (bulletMatch) {
+          flushPara();
+          if (!currentList) currentList = [];
+          currentList.push(bulletMatch[1]);
+        } else if (line.trim() === "") {
+          flushPara();
+          flushList();
+        } else {
+          flushList();
+          currentPara.push(line);
+        }
+      }
+
+      flushPara();
+      flushList();
+
+      return (
+        <div key={`seg-${segIdx}`} className="space-y-2.5">
+          {blocks.map((block, bIdx) => {
+            if (block.type === "ul") {
+              return (
+                <ul key={`ul-${bIdx}`} className="my-2 list-disc pl-5 space-y-1">
+                  {block.items.map((item, itemIdx) => (
+                    <li key={`li-${itemIdx}`}>{renderInline(item)}</li>
+                  ))}
+                </ul>
+              );
+            }
+
+            const joined = block.lines.join("\n").trim();
+            if (!joined) return null;
+            return (
+              <p key={`p-${bIdx}`} className="m-0 leading-relaxed">
+                {renderText(joined)}
+              </p>
+            );
+          })}
+        </div>
+      );
+    })
+  );
+
+  return <>{renderedSegments}</>;
+}
+
 async function renderBlock(
   b: Block,
   i: number,
@@ -296,8 +417,16 @@ async function renderBlock(
   const id = `${prefix}-${i}`;
   const ui = UI[locale];
   switch (b.t) {
-    case "p":
+    case "p": {
+      if (b.c.includes("```")) {
+        return (
+          <div key={id} className="my-4 text-base leading-relaxed">
+            {await renderRichContent(b.c, locale)}
+          </div>
+        );
+      }
       return <p key={id}>{renderText(b.c)}</p>;
+    }
     case "h2":
       return (
         <h2
@@ -340,20 +469,28 @@ async function renderBlock(
           <CodePanel code={b.c} lang={b.lang} label={b.label} locale={locale} />
         </div>
       );
-    case "callout":
+    case "callout": {
+      const renderedContent = await renderRichContent(b.c, locale);
       return (
         <div
           key={id}
-          className={`my-5 rounded-md border border-[#444950] p-[14px_18px] text-base ${
+          className={`my-5 rounded-lg border p-4 text-base ${
             b.warn
-              ? "border-l-4 border-l-[#d9822b] bg-[#fff8f0]"
-              : "border-l-4 border-l-primary bg-primary-soft/60"
+              ? "border-[#f59e0b]/40 border-l-4 border-l-[#d97706] bg-[#fffbeb] text-slate-800"
+              : "border-primary/30 border-l-4 border-l-primary bg-primary-soft/50 text-slate-800"
           }`}
         >
-          {b.title && <div className="mb-1 font-bold">{b.title}</div>}
-          <p className="m-0">{b.c}</p>
+          {b.title && (
+            <div className="mb-2.5 font-bold text-[1.05em] text-slate-900 flex items-center gap-1.5">
+              {renderInline(b.title)}
+            </div>
+          )}
+          <div className="space-y-2.5 text-[0.95em] leading-relaxed">
+            {renderedContent}
+          </div>
         </div>
       );
+    }
     case "example":
       return (
         <div key={id} id={id} className="my-5 grid scroll-mt-28 gap-3">
