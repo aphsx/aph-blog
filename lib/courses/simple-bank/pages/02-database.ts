@@ -159,21 +159,52 @@ CREATE INDEX ON "transfers" ("to_account_id");
 CREATE INDEX ON "transfers" ("from_account_id", "to_account_id");`,
         },
 
-        { t: "h3", c: "อธิบายโครงสร้างและ Index แต่ละส่วน" },
+        { t: "h3", c: "1. เจาะลึกกฎเหล็กระดับคอลัมน์ (Column Constraints & Types)" },
         {
           t: "ul",
           c: [
             "**`bigserial PRIMARY KEY`**: กำหนดให้ id เป็นเลขจำนวนเต็ม 64-bit ที่รันเพิ่มขึ้นอัตโนมัติ (Auto-increment) รองรับธุรกรรมได้หลายล้านล้านแถวโดยไม่ต้องกลัว id เต็ม",
             "**`CHECK (balance >= 0)`**: กฎเหล็กระดับฐานข้อมูลที่ป้องกันไม่ให้ยอดเงินในบัญชีติดลบเด็ดขาด (No Overdraft) หากมีคำสั่งใดพยายามตัดเงินเกินยอดคงเหลือ PostgreSQL จะ Reject คำสั่งทันทีและทำให้ Transaction เข้าสู่ Auto Rollback ตามหลัก Consistency",
             "**`timestamptz`**: เก็บวันเวลาพร้อม Timezone ป้องกันปัญหาเรื่องเวลาสับสนเมื่อระบบขยายไปหลายประเทศ",
-            "**`FOREIGN KEY (...) REFERENCES ...`**: ป้องกันการบันทึกประวัติลอยๆ เช่น จะบันทึกการโอนเงินได้ บัญชีต้นทางและปลายทางต้องมีตัวตนอยู่จริงในตาราง `accounts` เท่านั้น",
-            "**`CREATE INDEX ON accounts (owner)`**: ช่วยให้การค้นหาบัญชีทั้งหมดของลูกค้าคนใดคนหนึ่ง (เช่น ค้นหาว่านาย Alice มีบัญชีกี่เล่ม) ทำงานได้เร็วระดับ $O(\\log N)$ แทนที่จะต้องสแกนตารางทั้งหมด ($O(N)$)",
-            "**`CREATE INDEX ON transfers (from_account_id, to_account_id)`**: Composite Index สำหรับสืบค้นประวัติการโอนเงินระหว่าง 2 บัญชีที่เจาะจงได้อย่างรวดเร็ว",
           ],
         },
+
+        { t: "h3", c: "2. การผูกความสัมพันธ์ระดับตาราง (Foreign Keys & Cascade Rules)" },
         {
           t: "p",
-          c: "*(ในบทถัดไป เมื่อเราเริ่มรัน Docker PostgreSQL และรัน Migration เราจะสามารถใช้คำสั่ง `\\d accounts` ใน `psql` เพื่อตรวจสอบโครงสร้างตารางจริง ซึ่งจะแสดงผลลัพธ์พร้อม Constraints และ Indexes ดังนี้)*",
+          c: "เพื่อป้องกัน 'ข้อมูลกำพร้า (Orphan Data)' หรือการบันทึกประวัติเงินลอยๆ โดยไม่มีบัญชีอยู่จริง เราจะใช้ Foreign Key ผูกความสัมพันธ์แบบ Strict:",
+        },
+        {
+          t: "table",
+          head: ["ตารางลูก (Child Table)", "คอลัมน์ Foreign Key", "อ้างอิงตารางแม่ (Parent Table)", "เงื่อนไข Cascade (ON DELETE CASCADE)"],
+          rows: [
+            ["entries", "account_id", "accounts (id)", "หากบัญชีถูกลบ ประวัติเงินเข้า-ออกของบัญชีนั้นจะถูกลบตามทันที"],
+            ["transfers", "from_account_id", "accounts (id)", "บัญชีต้นทางที่โอนเงินต้องมีตัวตนอยู่จริงในระบบ"],
+            ["transfers", "to_account_id", "accounts (id)", "บัญชีปลายทางที่รับเงินต้องมีตัวตนอยู่จริงในระบบ"],
+          ],
+        },
+
+        { t: "h3", c: "3. แผนผัง Index และความเร็วในการค้นหา (Query Performance Matrix)" },
+        {
+          t: "p",
+          c: "การสร้าง Index ช่วยเปลี่ยนความเร็วในการค้นหาจาก Full Table Scan ($O(N)$) ให้เป็น Binary Search Tree ($O(\\log N)$) ด้านล่างนี้คือตารางแจกแจง Index ทั้ง 5 ตัวในระบบ พร้อมเหตุผลและ Use Case:",
+        },
+        {
+          t: "table",
+          head: ["ลำดับ", "ตาราง", "คอลัมน์ที่สร้าง Index", "ประเภท Index", "คำสั่ง SQL ที่ได้รับประโยชน์สูงสุด (Query Use Case)"],
+          rows: [
+            ["1", "accounts", "owner", "Single B-Tree", "WHERE owner = 'alice' (ค้นหาบัญชีทั้งหมดของลูกค้าคนใดคนหนึ่ง)"],
+            ["2", "entries", "account_id", "Single B-Tree", "WHERE account_id = 1 (ดึง Statement รายการเงินเข้า-ออกของบัญชี)"],
+            ["3", "transfers", "from_account_id", "Single B-Tree", "WHERE from_account_id = 1 (ดึงประวัติการโอนเงินออกจากบัญชีนี้)"],
+            ["4", "transfers", "to_account_id", "Single B-Tree", "WHERE to_account_id = 1 (ดึงประวัติการรับเงินโอนเข้าสู่บัญชีนี้)"],
+            ["5", "transfers", "from_account_id, to_account_id", "Composite B-Tree", "WHERE from_account_id = 1 AND to_account_id = 2 (ดึงประวัติการโอนระหว่าง 2 คนที่เจาะจง)"],
+          ],
+        },
+
+        { t: "h3", c: "4. ตรวจสอบ Schema จริงผ่าน psql (\\d accounts)" },
+        {
+          t: "p",
+          c: "ในบทถัดไป เมื่อเราเริ่มรัน Docker PostgreSQL และรัน Migration เราจะสามารถใช้คำสั่ง `\\d accounts` ใน `psql` เพื่อตรวจสอบโครงสร้างตารางจริง ซึ่งจะแสดงผลลัพธ์แยกเป็น 4 โซนสำคัญ:",
         },
         {
           t: "codeout",
@@ -197,6 +228,11 @@ Referenced by:
     TABLE "entries" CONSTRAINT "entries_account_id_fkey" FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
     TABLE "transfers" CONSTRAINT "transfers_from_account_id_fkey" FOREIGN KEY (from_account_id) REFERENCES accounts(id) ON DELETE CASCADE
     TABLE "transfers" CONSTRAINT "transfers_to_account_id_fkey" FOREIGN KEY (to_account_id) REFERENCES accounts(id) ON DELETE CASCADE`,
+        },
+        {
+          t: "callout",
+          title: "🔍 สรุป 4 โซนสำคัญที่มองเห็นในผลลัพธ์ psql",
+          c: "1. **Columns:** รายการฟิลด์และ Data Types (`bigint`, `varchar`, `timestamptz`)\n2. **Indexes:** มีทั้ง `accounts_pkey` (สร้างอัตโนมัติจาก Primary Key) และ `accounts_owner_idx` ที่เราสั่งสร้าง\n3. **Check constraints:** มี `accounts_balance_check` คอย Guard ยอดเงินไม่ให้ติดลบ\n4. **Referenced by:** แสดงความสัมพันธ์ย้อนกลับว่ามีตาราง `entries` และ `transfers` ผูก Foreign Key มาที่ตารางนี้",
         },
       ],
       en: [],

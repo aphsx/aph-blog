@@ -6,6 +6,8 @@ import { highlightCode } from "@/lib/highlight";
 import { UI, type Locale } from "@/lib/locale";
 import VizBlock from "@/components/viz/catalog";
 import CopyButton from "./CopyButton";
+import PostmanPanel from "./PostmanPanel";
+import { parsePostmanBlock } from "@/lib/postman-parser";
 
 /* parse **bold** and *italic* (backticks already handled by renderInline) */
 function renderFormatted(text: string): ReactNode {
@@ -428,105 +430,35 @@ async function renderBlock(
       const isHttp = b.lang === "http" || /^(POST|GET|PUT|DELETE|PATCH)\b/m.test(b.code);
 
       if (isHttp) {
-        const reqHtml = await highlightCode(b.code, "http", b.label, "github-light");
-        const outHtml = await highlightCode(b.out, "http", undefined, "github-light");
-
-        const methodMatch =
-          b.code.match(/^\s*(GET|POST|PUT|DELETE|PATCH)\b/m) ||
-          b.label?.match(/\b(GET|POST|PUT|DELETE|PATCH)\b/);
-        const method = methodMatch ? methodMatch[1] : null;
-
-        const statusMatch = b.out.match(/HTTP\/1\.[01]\s+(\d{3}(?:\s+[^\r\n]+)?)/i);
-        const statusCode = statusMatch ? parseInt(statusMatch[1], 10) : null;
-        const statusText = statusMatch ? statusMatch[1].trim() : null;
+        const rawCases = parsePostmanBlock(b.code, b.out, b.label);
+        const casesWithHtml = await Promise.all(
+          rawCases.map(async (c) => {
+            const reqBodyHtml = c.reqBodyRaw
+              ? await highlightCode(c.reqBodyRaw, "json", undefined, "github-light")
+              : undefined;
+            const resBodyHtml = c.resBodyRaw
+              ? await highlightCode(c.resBodyRaw, "json", undefined, "github-light")
+              : undefined;
+            return {
+              ...c,
+              reqBodyHtml,
+              resBodyHtml,
+            };
+          })
+        );
 
         return (
-          <div
+          <PostmanPanel
             key={id}
-            className="my-6 overflow-hidden rounded-lg border border-[#e2e8f0] bg-white shadow-sm"
-          >
-            {/* API Request Header */}
-            <div className="flex h-9 items-center justify-between border-b border-[#e2e8f0] bg-[#f8fafc] px-3.5">
-              <div className="flex items-center gap-2">
-                {method && (
-                  <span
-                    className={`rounded px-1.5 py-0.5 font-mono text-[0.7em] font-bold ${
-                      method === "GET"
-                        ? "bg-emerald-100 border border-emerald-300 text-emerald-800"
-                        : method === "POST"
-                        ? "bg-amber-100 border border-amber-300 text-amber-800"
-                        : method === "DELETE"
-                        ? "bg-rose-100 border border-rose-300 text-rose-800"
-                        : method === "PUT"
-                        ? "bg-blue-100 border border-blue-300 text-blue-800"
-                        : "bg-purple-100 border border-purple-300 text-purple-800"
-                    }`}
-                  >
-                    {method}
-                  </span>
-                )}
-                {b.label && (
-                  <span className="font-mono text-[0.8em] font-medium text-slate-700">
-                    {b.label}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[0.65em] font-semibold uppercase tracking-wider text-slate-500">
-                  REQUEST
-                </span>
-                <CopyButton code={b.code} locale={locale} />
-              </div>
-            </div>
-
-            {/* Request Body (Light) */}
-            <div className="bg-white p-3.5 text-[0.85em] leading-relaxed overflow-x-auto [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0 [&_pre]:!border-0">
-              <div dangerouslySetInnerHTML={{ __html: reqHtml }} />
-            </div>
-
-            {/* API Response Header */}
-            <div className="flex h-8 items-center justify-between border-t border-b border-[#e2e8f0] bg-[#f1f5f9] px-3.5">
-              <div className="flex items-center gap-2.5">
-                <span className="font-mono text-[0.72em] font-bold tracking-wider text-slate-700">
-                  RESPONSE
-                </span>
-                {statusText && (
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 font-mono text-[0.7em] font-bold ${
-                      statusCode && statusCode >= 200 && statusCode < 300
-                        ? "bg-emerald-100 border border-emerald-300 text-emerald-800"
-                        : statusCode && statusCode >= 400 && statusCode < 500
-                        ? "bg-amber-100 border border-amber-300 text-amber-800"
-                        : "bg-rose-100 border border-rose-300 text-rose-800"
-                    }`}
-                  >
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        statusCode && statusCode >= 200 && statusCode < 300
-                          ? "bg-emerald-500"
-                          : statusCode && statusCode >= 400 && statusCode < 500
-                          ? "bg-amber-500"
-                          : "bg-rose-500"
-                      }`}
-                    />
-                    {statusText}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="rounded border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-[0.65em] font-medium text-slate-500">
-                  JSON
-                </span>
-              </div>
-            </div>
-
-            {/* Response Body (Light) */}
-            <div className="bg-[#f8fafc] p-3.5 text-[0.85em] leading-relaxed overflow-x-auto [&_pre]:!bg-transparent [&_pre]:!m-0 [&_pre]:!p-0 [&_pre]:!border-0">
-              <div dangerouslySetInnerHTML={{ __html: outHtml }} />
-            </div>
-          </div>
+            label={b.label}
+            cases={casesWithHtml}
+            locale={locale}
+          />
         );
       }
+
+      const isSql = b.lang === "sql" || b.code.trim().startsWith("\\d") || /^(SELECT|CREATE|INSERT|UPDATE|DELETE|ALTER|DROP)\b/i.test(b.code.trim());
+      const shellName = isSql ? "psql (PostgreSQL)" : "bash";
 
       return (
         <div key={id} className="my-5 shadow-lg shadow-black/30">
@@ -537,10 +469,10 @@ async function renderBlock(
               <div className="flex items-center gap-2">
                 <span className="flex items-center gap-1.5 border-b-2 border-b-[#0078d4] pb-0.5 font-mono text-[0.7em] font-semibold tracking-wider text-[#d4d4d4]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#3fb950]" />
-                  TERMINAL
+                  {isSql ? "PSQL" : "TERMINAL"}
                 </span>
               </div>
-              <span className="font-mono text-[0.68em] text-[#858585]">bash</span>
+              <span className="font-mono text-[0.68em] text-[#858585]">{shellName}</span>
             </div>
             <div className="p-3.5">
               <pre className="m-0 overflow-x-auto whitespace-pre-wrap font-mono text-[0.85em] leading-relaxed text-[#cccccc]">
