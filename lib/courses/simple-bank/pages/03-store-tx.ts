@@ -140,20 +140,80 @@ type Transfer struct {
         { t: "h2", c: "3. อินเทอร์เฟซ DBTX และ Queries Struct" },
         {
           t: "p",
-          c: "เพื่อให้โค้ดค้นหาข้อมูลสามารถใช้ได้ทั้งกับ `*sql.DB` (คิวรีทั่วไป) และ `*sql.Tx` (คิวรีภายใน Transaction) ให้เปิดไฟล์ `simplebank/db/db.go` เดิม แล้ว **เขียนโค้ดต่อท้าย** ฟังก์ชัน `NewDB`:",
+          c: "เพื่อให้โค้ดค้นหาข้อมูลสามารถใช้ได้ทั้งกับ `*sql.DB` (คิวรีทั่วไป) และ `*sql.Tx` (คิวรีภายใน Transaction) ให้เปิดไฟล์ `simplebank/db/db.go` เพื่อเพิ่ม `\"context\"` ใน import และเขียน DBTX / Queries ต่อท้ายฟังก์ชัน `NewDB`:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/db/db.go (จุดแก้ไข Diff: เพิ่ม context และ DBTX / Queries)",
+          c: ` package db
+ 
+ import (
++	"context"
+ 	"database/sql"
+ 	"time"
+ 
+ 	_ "github.com/lib/pq"
+ )
+ 
+ // ... ฟังก์ชัน NewDB เดิม ...
+ 	return db, nil
+ }
++
++// DBTX รวบรวมฟังก์ชันมาตรฐานสำหรับการยิงคำสั่ง SQL ที่มีร่วมกันใน *sql.DB และ *sql.Tx
++type DBTX interface {
++	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
++	PrepareContext(context.Context, string) (*sql.Stmt, error)
++	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
++	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
++}
++
++// Queries ทำหน้าที่รันคำสั่ง SQL ทั้งหมด โดยผูกอยู่กับ DBTX
++type Queries struct {
++	db DBTX
++}
++
++func New(db DBTX) *Queries {
++	return &Queries{db: db}
++}
++
++// WithTx สร้าง Queries ชุดใหม่ที่ผูกเข้ากับ Transaction (tx) ชั่วคราว
++func (q *Queries) WithTx(tx *sql.Tx) *Queries {
++	return &Queries{db: tx}
++}`,
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/db.go (เขียนต่อท้ายในไฟล์เดิม - ส่วนที่ 2: DBTX & Queries)",
-          c: `// กำหนด DBTX Interface กลางเพื่อให้คิวรีทำงานได้ทั้งแบบเดี่ยว (*sql.DB) และแบบทรานแซกชัน (*sql.Tx)
-// ทำเพื่อแก้ปัญหา: ฟังก์ชัน CRUD ทั่วไปเขียนครั้งเดียว แต่สามารถนำไปใช้ใน Transaction ได้ทันทีโดยไม่ต้องเขียนโค้ดซ้ำ
+          label: "simplebank/db/db.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังเพิ่ม DBTX)",
+          c: `// จัดการการเชื่อมต่อฐานข้อมูล PostgreSQL พร้อม DBTX Interface สำหรับรองรับ Transaction
 package db
 
 import (
 	"context"
 	"database/sql"
+	"time"
+
+	_ "github.com/lib/pq" // ลงทะเบียน postgres driver ให้กับ database/sql
 )
+
+// NewDB ทำหน้าที่เปิดสระรวมการเชื่อมต่อ (Connection Pool) และตั้งค่าขีดจำกัดที่เหมาะสมสำหรับ Production
+func NewDB(dataSourceName string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+
+	db.SetMaxOpenConns(25)                 // จำนวน Connection สูงสุดที่เปิดใช้งานพร้อมกันได้
+	db.SetMaxIdleConns(25)                 // จำนวน Connection ที่เปิดสแตนด์บายไว้ใน Pool
+	db.SetConnMaxLifetime(5 * time.Minute) // อายุขัยสูงสุดของ Connection
+
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
 
 // DBTX รวบรวมฟังก์ชันมาตรฐานสำหรับการยิงคำสั่ง SQL ที่มีร่วมกันใน *sql.DB และ *sql.Tx
 type DBTX interface {

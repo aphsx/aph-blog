@@ -144,13 +144,152 @@ func (server *Server) createAccount(ctx *gin.Context) {
         { t: "h2", c: "3. การสร้าง Handler: `GET /accounts/:id`" },
         {
           t: "p",
-          c: "การดึงข้อมูลบัญชีรายตัวผ่าน URI Parameter เช่น `/accounts/42`:",
+          c: "การดึงข้อมูลบัญชีรายตัวผ่าน URI Parameter เช่น `/accounts/42` โดยเปิดไฟล์ `simplebank/api/account.go` เพื่อเพิ่ม `\"database/sql\"` ใน import และเขียนฟังก์ชัน `getAccount` ต่อท้าย:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/account.go (จุดแก้ไข Diff: เพิ่ม database/sql และ GetAccount)",
+          c: ` package api
+ 
+ import (
++	"database/sql"
+ 	"net/http"
+ 
+ 	"github.com/gin-gonic/gin"
+ 	db "simplebank/db"
+ )
+ 
+ // ... โค้ดเดิม createAccountRequest และ createAccount ...
+ 	ctx.JSON(http.StatusCreated, account)
+ }
++
++type getAccountRequest struct {
++	ID int64 \`uri:"id" binding:"required,min=1"\`
++}
++
++func (server *Server) getAccount(ctx *gin.Context) {
++	var req getAccountRequest
++	if err := ctx.ShouldBindUri(&req); err != nil {
++		ctx.JSON(http.StatusBadRequest, errorResponse(err))
++		return
++	}
++
++	account, err := server.store.GetAccount(ctx, req.ID)
++	if err != nil {
++		if err == sql.ErrNoRows {
++			// หากไม่พบบัญชี ให้ตอบ 404 Not Found
++			ctx.JSON(http.StatusNotFound, errorResponse(err))
++			return
++		}
++		// หากฐานข้อมูลล่ม ให้ตอบ 500 Internal Server Error
++		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
++		return
++	}
++
++	ctx.JSON(http.StatusOK, account) // ส่ง HTTP 200 OK
++}`,
+        },
+        {
+          t: "callout",
+          title: "🎯 หลักการกำหนด HTTP Status Code ที่ดี",
+          c: "แยกแยะข้อผิดพลาดให้ชัดเจนเสมอ:\n- ลูกค้าส่งข้อมูลผิด (เช่น ID ติดลบ, ส่ง JSON ไม่ครบ) -> ใช้ **400 Bad Request**\n- ข้อมูลไม่มีในระบบ -> ใช้ **404 Not Found**\n- เซิร์ฟเวอร์หรือฐานข้อมูลพัง -> ใช้ **500 Internal Server Error**",
+        },
+
+        { t: "h2", c: "4. การสร้าง Handler: `GET /accounts` (Pagination)" },
+        {
+          t: "p",
+          c: "การดึงข้อมูลรายการบัญชีทั้งหมดแบบแบ่งหน้า (Pagination) เพื่อไม่ให้เซิร์ฟเวอร์โหลดข้อมูลมากเกินไปในคำขอเดียว โดยเขียน Struct และ Handler `listAccounts` ต่อท้ายลงในไฟล์ `simplebank/api/account.go`:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/account.go (จุดแก้ไข Diff: เพิ่ม ListAccounts ต่อท้าย)",
+          c: ` // ... โค้ดเดิม createAccount และ getAccount ...
+ 	ctx.JSON(http.StatusOK, account)
+ }
++
++// listAccountsRequest กำหนด Query Parameters สำหรับการแบ่งหน้า (Pagination)
++type listAccountsRequest struct {
++	PageID   int32 \`form:"page_id" binding:"required,min=1"\`
++	PageSize int32 \`form:"page_size" binding:"required,min=5,max=10"\`
++}
++
++func (server *Server) listAccounts(ctx *gin.Context) {
++	// 1. แกะ Query Parameters จาก URL (?page_id=1&page_size=5) ผ่าน ShouldBindQuery
++	var req listAccountsRequest
++	if err := ctx.ShouldBindQuery(&req); err != nil {
++		ctx.JSON(http.StatusBadRequest, errorResponse(err))
++		return
++	}
++
++	// 2. คำนวณ Limit และ Offset สำหรับส่งให้คำสั่ง SQL (Offset = (PageID - 1) * PageSize)
++	arg := db.ListAccountsParams{
++		Limit:  req.PageSize,
++		Offset: (req.PageID - 1) * req.PageSize,
++	}
++
++	// 3. ดึงรายชื่อบัญชีจากฐานข้อมูลผ่าน store
++	accounts, err := server.store.ListAccounts(ctx, arg)
++	if err != nil {
++		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
++		return
++	}
++
++	// 4. ส่ง JSON Array ของบัญชีกลับไปพร้อม HTTP 200 OK
++	ctx.JSON(http.StatusOK, accounts)
++}`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**`form:\"page_id\"`**: Gin จะอ่านค่าจาก URL Query String เช่น `?page_id=1&page_size=5`",
+            "**`binding:\"required,min=5,max=10\"`**: บังคับให้ขนาดหน้าต้องอยู่ระหว่าง 5 ถึง 10 แถว เพื่อป้องกันผู้ใช้ขอข้อมูลครั้งละ 1,000,000 แถวจนหน่วยความจำเซิร์ฟเวอร์เต็ม (DoS Protection)",
+            "**`Offset = (PageID - 1) * PageSize`**: สูตรคำนวณตำแหน่งเริ่มต้นของข้อมูลในฐานข้อมูล เช่น หน้าที่ 2 ขนาด 5 แถว จะได้ Offset = 5 (ข้าม 5 แถวแรกไป)",
+          ],
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/account.go (เขียนต่อในไฟล์เดิม: GetAccount)",
-          c: `// หมายเหตุ: อย่าลืมเพิ่ม "database/sql" ใน import ของไฟล์ simplebank/api/account.go
+          label: "simplebank/api/account.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อมรันทั้ง 3 Endpoints)",
+          c: `// API Handler สำหรับจัดการบัญชี (POST /accounts, GET /accounts/:id, GET /accounts)
+package api
+
+import (
+	"database/sql"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	db "simplebank/db"
+)
+
+type createAccountRequest struct {
+	Owner    string \`json:"owner" binding:"required"\`
+	Currency string \`json:"currency" binding:"required,oneof=USD EUR THB"\`
+}
+
+func (server *Server) createAccount(ctx *gin.Context) {
+	var req createAccountRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.CreateAccountParams{
+		Owner:    req.Owner,
+		Currency: req.Currency,
+		Balance:  0,
+	}
+
+	account, err := server.store.CreateAccount(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, account)
+}
+
 type getAccountRequest struct {
 	ID int64 \`uri:"id" binding:"required,min=1"\`
 }
@@ -165,71 +304,41 @@ func (server *Server) getAccount(ctx *gin.Context) {
 	account, err := server.store.GetAccount(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			// หากไม่พบบัญชี ให้ตอบ 404 Not Found
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
 			return
 		}
-		// หากฐานข้อมูลล่ม ให้ตอบ 500 Internal Server Error
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, account) // ส่ง HTTP 200 OK
-}`,
-        },
-        {
-          t: "callout",
-          title: "🎯 หลักการกำหนด HTTP Status Code ที่ดี",
-          c: "แยกแยะข้อผิดพลาดให้ชัดเจนเสมอ:\n- ลูกค้าส่งข้อมูลผิด (เช่น ID ติดลบ, ส่ง JSON ไม่ครบ) -> ใช้ **400 Bad Request**\n- ข้อมูลไม่มีในระบบ -> ใช้ **404 Not Found**\n- เซิร์ฟเวอร์หรือฐานข้อมูลพัง -> ใช้ **500 Internal Server Error**",
-        },
+	ctx.JSON(http.StatusOK, account)
+}
 
-        { t: "h2", c: "4. การสร้าง Handler: `GET /accounts` (Pagination)" },
-        {
-          t: "p",
-          c: "การดึงข้อมูลรายการบัญชีทั้งหมดแบบแบ่งหน้า (Pagination) เพื่อไม่ให้เซิร์ฟเวอร์โหลดข้อมูลมากเกินไปในคำขอเดียว โดยรับ Query Parameters ผ่าน `ctx.ShouldBindQuery`:",
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/api/account.go (เขียนต่อในไฟล์เดิม: ListAccounts)",
-          c: `// listAccountsRequest กำหนด Query Parameters สำหรับการแบ่งหน้า (Pagination)
 type listAccountsRequest struct {
 	PageID   int32 \`form:"page_id" binding:"required,min=1"\`
 	PageSize int32 \`form:"page_size" binding:"required,min=5,max=10"\`
 }
 
 func (server *Server) listAccounts(ctx *gin.Context) {
-	// 1. แกะ Query Parameters จาก URL (?page_id=1&page_size=5) ผ่าน ShouldBindQuery
 	var req listAccountsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	// 2. คำนวณ Limit และ Offset สำหรับส่งให้คำสั่ง SQL (Offset = (PageID - 1) * PageSize)
 	arg := db.ListAccountsParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
-	// 3. ดึงรายชื่อบัญชีจากฐานข้อมูลผ่าน store
 	accounts, err := server.store.ListAccounts(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	// 4. ส่ง JSON Array ของบัญชีกลับไปพร้อม HTTP 200 OK
 	ctx.JSON(http.StatusOK, accounts)
 }`,
-        },
-        {
-          t: "ul",
-          c: [
-            "**`form:\"page_id\"`**: Gin จะอ่านค่าจาก URL Query String เช่น `?page_id=1&page_size=5`",
-            "**`binding:\"required,min=5,max=10\"`**: บังคับให้ขนาดหน้าต้องอยู่ระหว่าง 5 ถึง 10 แถว เพื่อป้องกันผู้ใช้ขอข้อมูลครั้งละ 1,000,000 แถวจนหน่วยความจำเซิร์ฟเวอร์เต็ม (DoS Protection)",
-            "**`Offset = (PageID - 1) * PageSize`**: สูตรคำนวณตำแหน่งเริ่มต้นของข้อมูลในฐานข้อมูล เช่น หน้าที่ 2 ขนาด 5 แถว จะได้ Offset = 5 (ข้าม 5 แถวแรกไป)",
-          ],
         },
 
         { t: "h2", c: "5. ประกอบร่างและเปิดรันเซิร์ฟเวอร์ด้วย `main.go`" },

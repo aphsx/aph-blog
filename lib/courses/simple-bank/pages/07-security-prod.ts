@@ -376,14 +376,21 @@ func (server *Server) createUser(ctx *gin.Context) {
         },
         {
           t: "p",
-          c: "จากนั้นลงทะเบียน Route `POST /users` ใน `simplebank/api/server.go`:",
+          c: "จากนั้นเปิดไฟล์ `simplebank/api/server.go` เพื่อลงทะเบียน Route `POST /users` เข้าสู่ Gin Engine ให้สามารถเรียกใช้งานได้:",
         },
         {
           t: "code",
-          lang: "go",
-          label: "simplebank/api/server.go (ลงทะเบียน Route /users)",
-          c: `// ในฟังก์ชัน NewServer ของ simplebank/api/server.go
-router.POST("/users", server.createUser)`,
+          lang: "diff",
+          label: "simplebank/api/server.go (จุดแก้ไข Diff: เพิ่ม Route /users)",
+          c: ` 	// 2. ลงทะเบียน Routing สำหรับแต่ละ Endpoint
+ 	router.POST("/accounts", server.createAccount)
+ 	router.GET("/accounts/:id", server.getAccount)
+ 	router.GET("/accounts", server.listAccounts)
+ 	router.POST("/transfers", server.createTransfer)
++	router.POST("/users", server.createUser)
+ 
+ 	server.router = router
+ 	return server`,
         },
         {
           t: "codeout",
@@ -769,13 +776,162 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
         { t: "h2", c: "3. สร้าง Endpoint ล็อกอิน: `POST /users/login`" },
         {
           t: "p",
-          c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `simplebank/api/user.go` (เขียนต่อในไฟล์เดิม) เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไป:",
+          c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `simplebank/api/user.go` เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไปให้ผู้ใช้ โดยการแก้ไขไฟล์ `simplebank/api/user.go` เดิมมี 2 จุดสำคัญที่ต้องทำ:\n1. เพิ่ม `\"database/sql\"` เข้าไปใน `import` เพื่อใช้ตรวจสอบข้อผิดพลาด `sql.ErrNoRows` (เมื่อไม่พบชื่อผู้ใช้ในระบบ)\n2. เขียน Struct คำขอ/การตอบกลับ และฟังก์ชัน `loginUser` ต่อท้ายฟังก์ชัน `createUser` เดิม",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/user.go (จุดแก้ไข Diff: เพิ่ม database/sql และ Handler loginUser)",
+          c: ` package api
+ 
+ import (
++	"database/sql"
+ 	"net/http"
+ 	"time"
+ 
+ 	"github.com/gin-gonic/gin"
+ 	db "simplebank/db"
+ 	"simplebank/util"
+ )
+ 
+ // ... โค้ดเดิม createUserRequest, userResponse, newUserResponse, createUser ...
+ 	rsp := newUserResponse(user)
+ 	ctx.JSON(http.StatusCreated, rsp)
+ }
++
++type loginUserRequest struct {
++	Username string \`json:"username" binding:"required,alphanum"\`
++	Password string \`json:"password" binding:"required,min=6"\`
++}
++
++type loginUserResponse struct {
++	AccessToken string       \`json:"access_token"\`
++	User        userResponse \`json:"user"\`
++}
++
++func (server *Server) loginUser(ctx *gin.Context) {
++	// 1. ตรวจสอบเงื่อนไขข้อมูลที่ส่งมาทาง JSON
++	var req loginUserRequest
++	if err := ctx.ShouldBindJSON(&req); err != nil {
++		ctx.JSON(http.StatusBadRequest, errorResponse(err))
++		return
++	}
++
++	// 2. ดึงข้อมูลผู้ใช้จากฐานข้อมูลเพื่อหารหัสผ่านที่แฮชไว้
++	user, err := server.store.GetUser(ctx, req.Username)
++	if err != nil {
++		if err == sql.ErrNoRows {
++			ctx.JSON(http.StatusNotFound, errorResponse(err))
++			return
++		}
++		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
++		return
++	}
++
++	// 3. ตรวจสอบความถูกต้องของรหัสผ่านผ่าน Bcrypt
++	err = util.CheckPassword(req.Password, user.HashedPassword)
++	if err != nil {
++		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
++		return
++	}
++
++	// 4. ออก PASETO Token รับรองตัวตน
++	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
++	if err != nil {
++		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
++		return
++	}
++
++	rsp := loginUserResponse{
++		AccessToken: accessToken,
++		User:        newUserResponse(user),
++	}
++	ctx.JSON(http.StatusOK, rsp)
++}`,
+        },
+        {
+          t: "callout",
+          title: "💡 การทำงานร่วมกันของ tokenMaker & config ใน Server struct",
+          c: "สังเกตว่าใน `loginUser` มีการเรียกใช้งาน `server.tokenMaker` และ `server.config.AccessTokenDuration`:\n- ตัวแปรทั้งสองนี้จะถูกผูกเข้ากับ `Server` struct ใน `simplebank/api/server.go`\n- เมื่อเราสร้าง Auth Middleware ในขั้นตอนที่ 4 และอัปเดต Handlers ในขั้นตอนที่ 5 เสร็จแล้ว ใน**ขั้นตอนที่ 6** เราจะทำการอัปเกรด `server.go` รวบยอด เพื่อลงทะเบียน Route `POST /users/login` และผูก Middleware ปกป้อง Endpoint อื่นๆ อย่างเป็นระบบ!",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/user.go (เขียนต่อในไฟล์เดิม: LoginUser)",
-          c: `type loginUserRequest struct {
+          label: "simplebank/api/user.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังเพิ่ม loginUser)",
+          c: `// API Handler สำหรับจัดการผู้ใช้งาน (POST /users และ POST /users/login)
+package api
+
+import (
+	"database/sql"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	db "simplebank/db"
+	"simplebank/util"
+)
+
+type createUserRequest struct {
+	Username string \`json:"username" binding:"required,alphanum"\`
+	Password string \`json:"password" binding:"required,min=6"\`
+	FullName string \`json:"full_name" binding:"required"\`
+	Email    string \`json:"email" binding:"required,email"\`
+}
+
+// userResponse คือ struct ที่ตัดฟิลด์ hashedPassword ทิ้งไปเพื่อความปลอดภัย
+type userResponse struct {
+	Username          string    \`json:"username"\`
+	FullName          string    \`json:"full_name"\`
+	Email             string    \`json:"email"\`
+	PasswordChangedAt time.Time \`json:"password_changed_at"\`
+	CreatedAt         time.Time \`json:"created_at"\`
+}
+
+func newUserResponse(user db.User) userResponse {
+	return userResponse{
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
+	}
+}
+
+func (server *Server) createUser(ctx *gin.Context) {
+	// 1. ตรวจสอบเงื่อนไขข้อมูลที่ส่งมาทาง JSON
+	var req createUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// 2. แฮชรหัสผ่านด้วย Bcrypt ก่อนบันทึก
+	hashedPassword, err := util.HashPassword(req.Password)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// 3. บันทึกผู้ใช้ลงฐานข้อมูลผ่าน store
+	arg := db.CreateUserParams{
+		Username:       req.Username,
+		HashedPassword: hashedPassword,
+		FullName:       req.FullName,
+		Email:          req.Email,
+	}
+
+	user, err := server.store.CreateUser(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// 4. ส่งกลับเฉพาะข้อมูลที่ปลอดภัย ปราศจาก hashedPassword
+	rsp := newUserResponse(user)
+	ctx.JSON(http.StatusCreated, rsp)
+}
+
+type loginUserRequest struct {
 	Username string \`json:"username" binding:"required,alphanum"\`
 	Password string \`json:"password" binding:"required,min=6"\`
 }
@@ -897,41 +1053,54 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         { t: "h3", c: "5.1 อัปเดต `createAccount`: ตัดฟิลด์ owner ออกจาก JSON Body" },
         {
           t: "p",
-          c: "ผู้ใช้ที่ล็อกอินแล้วไม่จำเป็นต้องส่ง `owner` ใน JSON Body อีกต่อไป เพราะเราสามารถดึงชื่อเจ้าของจาก Token ได้โดยตรง ป้องกันการแอบเปิดบัญชีในนามของผู้อื่น 100%:",
+          c: "ผู้ใช้ที่ล็อกอินแล้วไม่จำเป็นต้องส่ง `owner` ใน JSON Body อีกต่อไป เพราะเราสามารถดึงชื่อเจ้าของจาก Token ได้โดยตรง ป้องกันการแอบเปิดบัญชีในนามของผู้อื่น 100% (อย่าลืมเพิ่ม `\"errors\"` และ `\"simplebank/token\"` ใน imports):",
         },
         {
           t: "code",
-          lang: "go",
-          label: "simplebank/api/account.go (อัปเดต createAccount ให้ผูกกับ Token)",
-          c: `type createAccountRequest struct {
-	Currency string \`json:"currency" binding:"required,currency"\` // ไม่ต้องรับ owner ใน JSON อีกต่อไป!
-}
-
-func (server *Server) createAccount(ctx *gin.Context) {
-	var req createAccountRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
-	// ดึงข้อมูลตัวตนของเจ้าของ Token จาก Context
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
-	arg := db.CreateAccountParams{
-		Owner:    authPayload.Username, // ใช้ username จาก Token โดยตรง ปลอดภัย 100%
-		Currency: req.Currency,
-		Balance:  0,
-	}
-
-	account, err := server.store.CreateAccount(ctx, arg)
-	if err != nil {
-		// หากติด Foreign Key หรือพยายามสร้างบัญชีสกุลเงินเดิมซ้ำ (owner_currency_key)
-		ctx.JSON(http.StatusForbidden, errorResponse(err))
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, account)
-}`,
+          lang: "diff",
+          label: "simplebank/api/account.go (จุดแก้ไข Diff: createAccount - ตัด owner และดึง username จาก Token)",
+          c: ` package api
+ 
+ import (
+ 	"database/sql"
++	"errors"
+ 	"net/http"
+ 
+ 	"github.com/gin-gonic/gin"
+ 	db "simplebank/db"
++	"simplebank/token"
+ )
+ 
+ type createAccountRequest struct {
+-	Owner    string \`json:"owner" binding:"required"\`
+ 	Currency string \`json:"currency" binding:"required,currency"\` // ไม่ต้องรับ owner ใน JSON อีกต่อไป!
+ }
+ 
+ func (server *Server) createAccount(ctx *gin.Context) {
+ 	var req createAccountRequest
+ 	if err := ctx.ShouldBindJSON(&req); err != nil {
+ 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+ 		return
+ 	}
+ 
++	// ดึงข้อมูลตัวตนของเจ้าของ Token จาก Context
++	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
++
+ 	arg := db.CreateAccountParams{
+-		Owner:    req.Owner,
++		Owner:    authPayload.Username, // ใช้ username จาก Token โดยตรง ปลอดภัย 100%
+ 		Currency: req.Currency,
+ 		Balance:  0,
+ 	}
+ 
+ 	account, err := server.store.CreateAccount(ctx, arg)
+ 	if err != nil {
+ 		ctx.JSON(http.StatusForbidden, errorResponse(err))
+ 		return
+ 	}
+ 
+ 	ctx.JSON(http.StatusCreated, account)
+ }`,
         },
 
         { t: "h3", c: "5.2 อัปเดต `getAccount`: ห้ามแอบส่องยอดเงินของผู้อื่น" },
@@ -941,9 +1110,147 @@ func (server *Server) createAccount(ctx *gin.Context) {
         },
         {
           t: "code",
+          lang: "diff",
+          label: "simplebank/api/account.go (จุดแก้ไข Diff: getAccount - ตรวจสอบสิทธิ์ความเป็นเจ้าของ)",
+          c: ` 	account, err := server.store.GetAccount(ctx, req.ID)
+ 	if err != nil {
+ 		if err == sql.ErrNoRows {
+ 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+ 			return
+ 		}
+ 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+ 		return
+ 	}
+ 
++	// ตรวจสอบสิทธิ์ความเป็นเจ้าของบัญชี
++	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
++	if account.Owner != authPayload.Username {
++		err := errors.New("บัญชีนี้ไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์เข้าถึงข้อมูล")
++		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
++		return
++	}
++
+ 	ctx.JSON(http.StatusOK, account)`,
+        },
+
+        { t: "h3", c: "5.3 อัปเดต `listAccounts`: กรองเฉพาะบัญชีของตัวเองเท่านั้น" },
+        {
+          t: "p",
+          c: "ในระบบจริง เราจะไม่อนุญาตให้ผู้ใช้ทั่วไปดูรายชื่อบัญชีของลูกค้าคนอื่นทั้งธนาคาร เราจึงต้องอัปเดตทั้ง Handler ใน `api/account.go` และคิวรี `ListAccounts` ใน `db/account.go` ให้มีเงื่อนไข `WHERE owner = $1`:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/account.go (จุดแก้ไข Diff: listAccounts - กรองตาม Owner จาก Token)",
+          c: ` func (server *Server) listAccounts(ctx *gin.Context) {
+ 	var req listAccountsRequest
+ 	if err := ctx.ShouldBindQuery(&req); err != nil {
+ 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+ 		return
+ 	}
+ 
++	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+ 	arg := db.ListAccountsParams{
++		Owner:  authPayload.Username, // กรองเฉพาะบัญชีของเจ้าของ Token
+ 		Limit:  req.PageSize,
+ 		Offset: (req.PageID - 1) * req.PageSize,
+ 	}`,
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/db/account.go (จุดแก้ไข Diff: ListAccounts - รับ Owner และแก้ SQL WHERE owner = $1)",
+          c: ` type ListAccountsParams struct {
++	Owner  string \`json:"owner"\`
+ 	Limit  int32  \`json:"limit"\`
+ 	Offset int32  \`json:"offset"\`
+ }
+ 
+ const listAccounts = \`-- name: ListAccounts :many
+ SELECT id, owner, balance, currency, created_at FROM accounts
++WHERE owner = $1
+ ORDER BY id
+-LIMIT $1 OFFSET $2;
++LIMIT $2 OFFSET $3;
+ \`
+ 
+ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {
+-	rows, err := q.db.QueryContext(ctx, listAccounts, arg.Limit, arg.Offset)
++	rows, err := q.db.QueryContext(ctx, listAccounts, arg.Owner, arg.Limit, arg.Offset)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+ 	defer rows.Close()`,
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/db/account_test.go (จุดแก้ไข Diff: TestListAccounts - ส่ง Owner ใน Params)",
+          c: ` 	arg := ListAccountsParams{
++		Owner:  lastAccount.Owner,
+ 		Limit:  5,
+ 		Offset: 0,
+ 	}
+ 
+ 	accounts, err := testQueries.ListAccounts(context.Background(), arg)
+ 	require.NoError(t, err)
+ 	require.NotEmpty(t, accounts)
+ 
+ 	for _, account := range accounts {
+ 		require.NotEmpty(t, account)
++		require.Equal(t, lastAccount.Owner, account.Owner)
+ 	}`,
+        },
+        {
+          t: "code",
           lang: "go",
-          label: "simplebank/api/account.go (อัปเดต getAccount ตรวจสอบสิทธิ์)",
-          c: `func (server *Server) getAccount(ctx *gin.Context) {
+          label: "simplebank/api/account.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังผูกระบบความปลอดภัยและ Token)",
+          c: `// API Handler สำหรับจัดการบัญชี (POST /accounts, GET /accounts/:id, GET /accounts)
+package api
+
+import (
+	"database/sql"
+	"errors"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	db "simplebank/db"
+	"simplebank/token"
+)
+
+type createAccountRequest struct {
+	Currency string \`json:"currency" binding:"required,currency"\`
+}
+
+func (server *Server) createAccount(ctx *gin.Context) {
+	var req createAccountRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	arg := db.CreateAccountParams{
+		Owner:    authPayload.Username,
+		Currency: req.Currency,
+		Balance:  0,
+	}
+
+	account, err := server.store.CreateAccount(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, account)
+}
+
+type getAccountRequest struct {
+	ID int64 \`uri:"id" binding:"required,min=1"\`
+}
+
+func (server *Server) getAccount(ctx *gin.Context) {
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -960,7 +1267,6 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		return
 	}
 
-	// ตรวจสอบสิทธิ์ความเป็นเจ้าของบัญชี
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if account.Owner != authPayload.Username {
 		err := errors.New("บัญชีนี้ไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์เข้าถึงข้อมูล")
@@ -969,19 +1275,14 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, account)
-}`,
-        },
+}
 
-        { t: "h3", c: "5.3 อัปเดต `listAccounts`: กรองเฉพาะบัญชีของตัวเองเท่านั้น" },
-        {
-          t: "p",
-          c: "ในระบบจริง เราจะไม่อนุญาตให้ผู้ใช้ทั่วไปดูรายชื่อบัญชีของลูกค้าคนอื่นทั้งธนาคาร เราจึงต้องอัปเดตคิวรี `ListAccounts` ใน `db/account.go` ให้มีเงื่อนไข `WHERE owner = $1`:",
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/api/account.go (อัปเดต listAccounts ให้ส่ง Owner จาก Token)",
-          c: `func (server *Server) listAccounts(ctx *gin.Context) {
+type listAccountsRequest struct {
+	PageID   int32 \`form:"page_id" binding:"required,min=1"\`
+	PageSize int32 \`form:"page_size" binding:"required,min=5,max=10"\`
+}
+
+func (server *Server) listAccounts(ctx *gin.Context) {
 	var req listAccountsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -990,7 +1291,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListAccountsParams{
-		Owner:  authPayload.Username, // กรองเฉพาะบัญชีของเจ้าของ Token
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
@@ -1004,122 +1305,204 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, accounts)
 }`,
         },
-        {
-          t: "p",
-          c: "และใน Data Access Layer (`simplebank/db/account.go`) ให้อัปเดตคิวรี `ListAccounts` และพารามิเตอร์ `ListAccountsParams` ให้รับฟิลด์ `Owner`:",
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/db/account.go (อัปเดต ListAccounts ให้กรองตาม Owner)",
-          c: `type ListAccountsParams struct {
-	Owner  string \`json:"owner"\`
-	Limit  int32  \`json:"limit"\`
-	Offset int32  \`json:"offset"\`
-}
-
-const listAccounts = \`-- name: ListAccounts :many
-SELECT id, owner, balance, currency, created_at FROM accounts
-WHERE owner = $1
-ORDER BY id
-LIMIT $2 OFFSET $3;
-\`
-
-func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {
-	rows, err := q.db.QueryContext(ctx, listAccounts, arg.Owner, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var items []Account
-	for rows.Next() {
-		var i Account
-		if err := rows.Scan(
-			&i.ID,
-			&i.Owner,
-			&i.Balance,
-			&i.Currency,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}`,
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/db/account_test.go (อัปเดต TestListAccounts ให้ส่ง Owner)",
-          c: `func TestListAccounts(t *testing.T) {
-	var lastAccount Account
-	for i := 0; i < 10; i++ {
-		lastAccount = createRandomAccount(t)
-	}
-
-	arg := ListAccountsParams{
-		Owner:  lastAccount.Owner,
-		Limit:  5,
-		Offset: 0,
-	}
-
-	accounts, err := testQueries.ListAccounts(context.Background(), arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, accounts)
-
-	for _, account := range accounts {
-		require.NotEmpty(t, account)
-		require.Equal(t, lastAccount.Owner, account.Owner)
-	}
-}`,
-        },
 
         { t: "h3", c: "5.4 อัปเดต `createTransfer`: ป้องกันการสั่งโอนเงินแทนผู้อื่น" },
         {
           t: "p",
-          c: "ในฟังก์ชัน `createTransfer` เราต้องเพิ่มการตรวจสอบว่า **ผู้ใช้ที่ถือ Token ล็อกอินเข้ามา เป็นเจ้าของบัญชีต้นทาง (`FromAccountID`) จริงหรือไม่** โดยอาศัย `fromAccount` ที่ส่งคืนมาจาก `validAccount`:",
+          c: "ในฟังก์ชัน `createTransfer` ของ `simplebank/api/transfer.go` เราต้องเพิ่มการตรวจสอบว่า **ผู้ใช้ที่ถือ Token ล็อกอินเข้ามา เป็นเจ้าของบัญชีต้นทาง (`FromAccountID`) จริงหรือไม่** โดยอาศัย `fromAccount` ที่ส่งคืนมาจาก `validAccount`:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/transfer.go (จุดแก้ไข Diff: createTransfer - ตรวจสอบสิทธิ์เจ้าของบัญชีต้นทาง)",
+          c: ` package api
+ 
+ import (
+ 	"database/sql"
++	"errors"
+ 	"fmt"
+ 	"net/http"
+ 
+ 	"github.com/gin-gonic/gin"
+ 	db "simplebank/db"
++	"simplebank/token"
+ )
+ 
+ // ... โค้ด transferRequest เดิม ...
+ 
+ func (server *Server) createTransfer(ctx *gin.Context) {
+ 	var req transferRequest
+ 	if err := ctx.ShouldBindJSON(&req); err != nil {
+ 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+ 		return
+ 	}
+ 
+ 	// 2. ตรวจสอบว่าบัญชีต้นทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
+ 	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+ 	if !valid {
+ 		return
+ 	}
+ 
++	// ดึงข้อมูลตัวตนจาก Auth Middleware และตรวจสอบสิทธิ์ความเป็นเจ้าของ
++	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
++	if fromAccount.Owner != authPayload.Username {
++		err := errors.New("บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน")
++		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
++		return
++	}
++
+ 	// 3. ตรวจสอบว่าบัญชีปลายทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
+ 	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+ 	if !valid {
+ 		return
+ 	}`,
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/transfer.go (อัปเดต createTransfer เพื่อตรวจสอบสิทธิ์เจ้าของบัญชี)",
-          c: `// 1. ตรวจสอบบัญชีต้นทางและสกุลเงิน (คืนค่า fromAccount กลับมาทันที)
-fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
-if !valid {
-	return
+          label: "simplebank/api/transfer.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังผูกระบบความปลอดภัยและ Token)",
+          c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers)
+package api
+
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	db "simplebank/db"
+	"simplebank/token"
+)
+
+type transferRequest struct {
+	FromAccountID int64  \`json:"from_account_id" binding:"required,min=1"\`
+	ToAccountID   int64  \`json:"to_account_id" binding:"required,min=1"\`
+	Amount        int64  \`json:"amount" binding:"required,gt=0"\`
+	Currency      string \`json:"currency" binding:"required,currency"\`
 }
 
-// 2. ดึงข้อมูลตัวตนจาก Auth Middleware และตรวจสอบสิทธิ์ความเป็นเจ้าของ
-authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-if fromAccount.Owner != authPayload.Username {
-	err := errors.New("บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน")
-	ctx.JSON(http.StatusUnauthorized, errorResponse(err))
-	return
+func (server *Server) createTransfer(ctx *gin.Context) {
+	var req transferRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
+	if !valid {
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if fromAccount.Owner != authPayload.Username {
+		err := errors.New("บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
+	if !valid {
+		return
+	}
+
+	arg := db.TransferTxParams{
+		FromAccountID: fromAccount.ID,
+		ToAccountID:   req.ToAccountID,
+		Amount:        req.Amount,
+	}
+
+	result, err := server.store.TransferTx(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, result)
 }
 
-// 3. ตรวจสอบบัญชีปลายทาง
-_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
-if !valid {
-	return
+func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
+	account, err := server.store.GetAccount(ctx, accountID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return account, false
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return account, false
+	}
+
+	if account.Currency != currency {
+		err := fmt.Errorf("สกุลเงินของบัญชี [%d] คือ %s ไม่ตรงกับคำขอโอน %s", accountID, account.Currency, currency)
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return account, false
+	}
+
+	return account, true
 }`,
         },
+
         { t: "h2", c: "6. นำทุก Route มาประกอบเข้าด้วยกันใน `simplebank/api/server.go`" },
         {
           t: "p",
-          c: "เมื่อเตรียมทั้ง Auth Middleware และ Handler ทุกตัวพร้อมแล้ว ให้นำมาผูกเข้าด้วยกันใน `simplebank/api/server.go` โดยแยก Public Routes (สมัครสมาชิก/ล็อกอิน) ออกจาก Protected Routes (บัญชีและการโอนเงิน):",
+          c: "เมื่อเตรียมทั้ง Auth Middleware และ Handler ทุกตัวพร้อมแล้ว ให้นำมาผูกเข้าด้วยกันใน `simplebank/api/server.go` โดยเพิ่ม `config` และ `tokenMaker` ใน `Server` struct พร้อมแยก Public Routes (สมัครสมาชิก/ล็อกอิน) ออกจาก Protected Routes (บัญชีและการโอนเงิน):",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/server.go (จุดแก้ไข Diff: ผูก TokenMaker และแยก Protected Routes)",
+          c: ` type Server struct {
++	config     util.Config
+ 	store      *db.Store
++	tokenMaker token.Maker
+ 	router     *gin.Engine
+ }
+ 
+-func NewServer(store *db.Store) *Server {
+-	server := &Server{store: store}
++func NewServer(config util.Config, store *db.Store) (*Server, error) {
++	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
++	if err != nil {
++		return nil, fmt.Errorf("cannot create token maker: %w", err)
++	}
++
++	server := &Server{
++		config:     config,
++		store:      store,
++		tokenMaker: tokenMaker,
++	}
+ 
+ 	router := gin.Default()
+ 
+ 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+ 		v.RegisterValidation("currency", validCurrency)
+ 	}
+ 
+-	router.POST("/accounts", server.createAccount)
+-	router.GET("/accounts/:id", server.getAccount)
+-	router.GET("/accounts", server.listAccounts)
+-	router.POST("/transfers", server.createTransfer)
+-	router.POST("/users", server.createUser)
++	// 1. เส้นทางสาธารณะ (Public Routes): เข้าถึงได้โดยไม่ต้องแนบ Token
++	router.POST("/users", server.createUser)
++	router.POST("/users/login", server.loginUser)
++
++	// 2. เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
++	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
++	authRoutes.POST("/accounts", server.createAccount)
++	authRoutes.GET("/accounts/:id", server.getAccount)
++	authRoutes.GET("/accounts", server.listAccounts)
++	authRoutes.POST("/transfers", server.createTransfer)
+ 
+ 	server.router = router
+-	return server
++	return server, nil
+ }`,
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/server.go (อัปเดต Server Struct & NewServer ครบวงจร)",
+          label: "simplebank/api/server.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อม errorResponse)",
           c: `package api
 
 import (
@@ -1178,6 +1561,11 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 // Start รันเซิร์ฟเวอร์ HTTP บน Address ที่ระบุ
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
+}
+
+// errorResponse จัดรูปแบบข้อความ Error ให้อยู่ใน JSON Key "error" อย่างสม่ำเสมอ
+func errorResponse(err error) gin.H {
+	return gin.H{"error": err.Error()}
 }`,
         },
 
@@ -1188,8 +1576,59 @@ func (server *Server) Start(address string) error {
         },
         {
           t: "code",
+          lang: "diff",
+          label: "simplebank/main.go (จุดแก้ไข Diff: โหลด Config ผ่าน Viper และส่งเข้า NewServer)",
+          c: ` package main
+ 
+ import (
+ 	"database/sql"
+ 	"log"
+ 
+ 	_ "github.com/lib/pq"
+ 	"simplebank/api"
+ 	db "simplebank/db"
++	"simplebank/util"
+ )
+ 
+-const (
+-	dbDriver      = "postgres"
+-	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+-	serverAddress = "0.0.0.0:8080"
+-)
+-
+ func main() {
+-	conn, err := sql.Open(dbDriver, dbSource)
++	// 1. โหลดการตั้งค่าจากไฟล์ app.env ในโฟลเดอร์ Root
++	config, err := util.LoadConfig(".")
++	if err != nil {
++		log.Fatal("cannot load config:", err)
++	}
++
++	// 2. เชื่อมต่อฐานข้อมูลโดยใช้ค่าจาก Config
++	conn, err := sql.Open(config.DBDriver, config.DBSource)
+ 	if err != nil {
+ 		log.Fatal("cannot connect to db:", err)
+ 	}
+ 
+ 	store := db.NewStore(conn)
+-	server := api.NewServer(store)
++	server, err := api.NewServer(config, store)
++	if err != nil {
++		log.Fatal("cannot create server:", err)
++	}
+ 
+-	err = server.Start(serverAddress)
++	// 3. สตาร์ตเซิร์ฟเวอร์ตามที่อยู่พอร์ตใน Config
++	err = server.Start(config.ServerAddress)
+ 	if err != nil {
+ 		log.Fatal("cannot start server:", err)
+ 	}
+ }`,
+        },
+        {
+          t: "code",
           lang: "go",
-          label: "simplebank/main.go (อัปเดตให้โหลด Config จาก app.env ผ่าน Viper)",
+          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังโหลด Config ผ่าน Viper)",
           c: `package main
 
 import (

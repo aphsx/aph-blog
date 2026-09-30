@@ -400,57 +400,61 @@ ok      simplebank/db   0.198s`,
         },
         {
           t: "code",
-          lang: "go",
-          label: "simplebank/db/tx_transfer_test.go (เขียนต่อท้ายในไฟล์เดิม - ทดสอบ Deadlock)",
-          c: `// เพิ่มฟังก์ชัน TestTransferTxDeadlock ต่อท้ายใน simplebank/db/tx_transfer_test.go
-// พิสูจน์ว่าการโอนเงินสวนทางกันจะไม่ทำให้เกิด Deadlock
-func TestTransferTxDeadlock(t *testing.T) {
-	store := NewStore(testDB)
-
-	account1 := createRandomAccount(t)
-	account2 := createRandomAccount(t)
-
-	// 1. จำลองการโอนเงินสวนทางกันทั้งหมด 10 ธุรกรรม
-	n := 10
-	amount := int64(10)
-	errs := make(chan error)
-
-	for i := 0; i < n; i++ {
-		fromAccountID := account1.ID
-		toAccountID := account2.ID
-
-		// สลับทิศทางครึ่งหนึ่ง: ให้บัญชี 2 โอนกลับคืนให้บัญชี 1
-		if i%2 == 1 {
-			fromAccountID = account2.ID
-			toAccountID = account1.ID
-		}
-
-		go func() {
-			_, err := store.TransferTx(context.Background(), TransferTxParams{
-				FromAccountID: fromAccountID,
-				ToAccountID:   toAccountID,
-				Amount:        amount,
-			})
-			errs <- err
-		}()
-	}
-
-	// 2. ตรวจสอบผลลัพธ์: ทุก Transaction ต้องสำเร็จ ไร้ปัญหา Deadlock 100%
-	for i := 0; i < n; i++ {
-		err := <-errs
-		require.NoError(t, err) // ต้องไม่มีข้อผิดพลาด pq: deadlock detected แม้แต่ครั้งเดียว
-	}
-
-	// 3. ตรวจสอบยอดเงินคงเหลือสุดท้าย: โอนไป 5 ครั้ง โอนกลับ 5 ครั้ง ยอดเงินต้องเท่าเดิมเป๊ะ
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
-	require.NoError(t, err)
-
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
-	require.NoError(t, err)
-
-	require.Equal(t, account1.Balance, updatedAccount1.Balance)
-	require.Equal(t, account2.Balance, updatedAccount2.Balance)
-}`,
+          lang: "diff",
+          label: "simplebank/db/tx_transfer_test.go (จุดแก้ไข Diff: เพิ่ม TestTransferTxDeadlock ต่อท้าย)",
+          c: ` 	fmt.Println(">> ยอดเงินหลังโอน:", updatedAccount1.Balance, updatedAccount2.Balance)
+ 	require.Equal(t, account1.Balance-int64(n)*amount, updatedAccount1.Balance)
+ 	require.Equal(t, account2.Balance+int64(n)*amount, updatedAccount2.Balance)
+ }
++
++// TestTransferTxDeadlock พิสูจน์ว่าการโอนเงินสวนทางกันจะไม่ทำให้เกิด Deadlock
++func TestTransferTxDeadlock(t *testing.T) {
++	store := NewStore(testDB)
++
++	account1 := createRandomAccount(t)
++	account2 := createRandomAccount(t)
++
++	// 1. จำลองการโอนเงินสวนทางกันทั้งหมด 10 ธุรกรรม
++	n := 10
++	amount := int64(10)
++	errs := make(chan error)
++
++	for i := 0; i < n; i++ {
++		fromAccountID := account1.ID
++		toAccountID := account2.ID
++
++		// สลับทิศทางครึ่งหนึ่ง: ให้บัญชี 2 โอนกลับคืนให้บัญชี 1
++		if i%2 == 1 {
++			fromAccountID = account2.ID
++			toAccountID = account1.ID
++		}
++
++		go func() {
++			_, err := store.TransferTx(context.Background(), TransferTxParams{
++				FromAccountID: fromAccountID,
++				ToAccountID:   toAccountID,
++				Amount:        amount,
++			})
++			errs <- err
++		}()
++	}
++
++	// 2. ตรวจสอบผลลัพธ์: ทุก Transaction ต้องสำเร็จ ไร้ปัญหา Deadlock 100%
++	for i := 0; i < n; i++ {
++		err := <-errs
++		require.NoError(t, err) // ต้องไม่มีข้อผิดพลาด pq: deadlock detected แม้แต่ครั้งเดียว
++	}
++
++	// 3. ตรวจสอบยอดเงินคงเหลือสุดท้าย: โอนไป 5 ครั้ง โอนกลับ 5 ครั้ง ยอดเงินต้องเท่าเดิมเป๊ะ
++	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
++	require.NoError(t, err)
++
++	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
++	require.NoError(t, err)
++
++	require.Equal(t, account1.Balance, updatedAccount1.Balance)
++	require.Equal(t, account2.Balance, updatedAccount2.Balance)
++}`,
         },
         {
           t: "h2",
