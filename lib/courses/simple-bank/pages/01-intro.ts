@@ -109,16 +109,16 @@ export const introPages: Record<string, Page> = {
         {
           t: "callout",
           title: "💡 สไตล์การสอนของคอร์สนี้",
-          c: "เราจะสอนโดยสมมติว่าคุณมีเพียงพื้นฐานภาษา Go ทั่วไป ดังนั้นทุกฟีเจอร์สำคัญ ไม่ว่าจะเป็น Pointer, Interface, Goroutine, Channel, หรือ Transaction Callback เราจะอธิบายว่าคืออะไร ทำงานยังไง และอธิบายโค้ดทีละบรรทัดอย่างละเอียดเหมือนการเฉลยโจทย์ระดับโลก!",
+          c: "บทถัดไปเริ่มภาษา Go จากศูนย์ ไม่ต้องเคยเขียนมาก่อน เราจะแปลคำที่เจอซ้ำทั้งคอร์สให้ก่อน โดยเฉพาะ `_, err`, struct, interface และการฝัง struct ซึ่งไม่ใช่ inheritance แล้วค่อยเอาของพวกนี้ไปใช้ในโค้ดธนาคารทีละจุด",
         },
         { t: "h2", c: "สารบัญและบทเรียนทั้งหมด" },
         {
           t: "links",
           c: [
             {
-              title: "1. Go พื้นฐานสำหรับระบบ Backend →",
+              title: "1. Go จากศูนย์สำหรับระบบ Backend →",
               slug: "bank-go-backend-primer",
-              desc: "ทบทวน Pointers, Structs, Errors, defer, Context และ Goroutines/Channels",
+              desc: "อ่านไฟล์ Go, `_, err`, struct และเหตุผลที่ Go ไม่มี inheritance ก่อนแตะธนาคาร",
             },
             {
               title: "2. ออกแบบ Schema & สมุดบัญชีแยกประเภท →",
@@ -205,29 +205,266 @@ export const introPages: Record<string, Page> = {
   "bank-go-backend-primer": {
     slug: "bank-go-backend-primer",
     title: {
-      th: "Go พื้นฐานสำหรับระบบ Backend — ทบทวนและเตรียมพร้อม",
-      en: "Go Backend Primer — Core Concepts for Production Systems",
+      th: "Go จากศูนย์สำหรับระบบ Backend",
+      en: "Go from Zero for Backend Systems",
     },
     lead: {
-      th: "ปูพื้นฐานกลไกสำคัญของ Go ที่ใช้ในงาน Backend: Pointers, Structs, Error Handling สไตล์ Go, defer, Context, Goroutines, Channels, และ WaitGroup พร้อมผลลัพธ์ Terminal Output ให้เห็นการทำงานจริง",
-      en: "Essential Go mechanics for backend systems: pointers, structs, explicit error handling, defer, context, goroutines, and channels with executable terminal outputs.",
+      th: "ยังไม่เคยเขียน Go ก็เริ่มบทนี้ได้: อ่านไฟล์ทีละคำ, ฟังก์ชันที่คืนค่าคู่กับ error, ขีดล่างใน `_, err` คืออะไร, และทำไม Go ไม่มี inheritance",
+      en: "Go from zero: how to read a file, why functions return a value plus error, what the blank identifier in `_, err` means, and why Go has no class inheritance.",
     },
     group: "1. บทนำ & รากฐาน",
     blocks: {
       th: [
         {
           t: "p",
-          c: "ภาษา Go ถูกสร้างขึ้นโดยทีมวิศวกรของ Google (Robert Griesemer, Rob Pike, Ken Thompson) เพื่อแก้ปัญหาการพัฒนาระบบเครือข่ายและระบบ Backend ขนาดใหญ่ จุดเด่นของ Go คือความเรียบง่าย (Simplicity), ทำงานได้เร็วเทียบเท่า C/C++, และมีระบบ Concurrency ระดับเทพที่ติดมากับตัวภาษา",
+          c: "บทนี้สมมติว่าคุณยังไม่เคยเขียน Go เป้าหมายไม่ใช่ท่องไวยากรณ์ทั้งภาษา แต่ให้อ่านโค้ดธนาคารในบทถัดไปแล้วรู้ว่าแต่ละคำแปลว่าอะไร ตัวอย่างทุกก้อนด้านล่างรันได้จริง และผลในกล่อง Output คือสิ่งที่โปรแกรมพิมพ์ออกมา",
         },
         {
-          t: "p",
-          c: "ในบทนี้ เราจะมาทบทวน 5 คอนเซปต์สำคัญของ Go ที่เราจำเป็นต้องใช้ในการสร้างระบบ Simple Bank ตลอดทั้งคอร์ส โดยทุกตัวอย่างจะแสดงโค้ดพร้อมผลลัพธ์การรันใน Terminal เพื่อให้เห็นชัดเจนว่าแต่ละคำสั่งส่งผลอย่างไรต่อตัวแปรและระบบ",
+          t: "table",
+          head: ["คำที่เจอทั้งคอร์ส", "แปลสั้น ๆ", "หน้าตาในโค้ด"],
+          rows: [
+            ["package / import / func", "แฟ้มนี้ชื่ออะไร, ดึงเครื่องมืออะไรมาใช้, และก้อนคำสั่งชื่ออะไร", "package db"],
+            ["name := value", "สร้างตัวแปรชื่อ name แล้วใส่ค่าให้ทันที", "balance := 1000"],
+            ["(int64, error)", "ฟังก์ชันคืนค่าได้สองตัว พร้อมกัน", "func Withdraw(...) (int64, error)"],
+            ["err และ nil", "err คือกล่องรายงานปัญหา nil แปลว่าไม่มีปัญหา", "if err != nil"],
+            ["_", "ถังขยะ รับค่ามาแล้วทิ้ง เพราะ Go บังคับให้รับทุกค่าที่ฟังก์ชันคืน", "_, err :="],
+            ["struct", "กล่องข้อมูล มีชื่อฟิลด์ ไม่ใช่คลาส", "type Account struct"],
+            ["interface", "สัญญาว่าต้องมีเมธอดชุดนี้ ไม่ใช่คลาสแม่", "type Maker interface"],
+            ["embedding", "วาง struct ซ้อนใน struct เมธอดของข้างในถูกยกขึ้นมาเรียกได้ ไม่ใช่การสืบทอด", "type Store struct { *Queries }"],
+          ],
         },
 
-        { t: "h2", c: "1. Struct, Pointer และ Value vs Pointer Receiver" },
+        { t: "h2", c: "1. อ่านไฟล์ Go ทีละคำ" },
         {
           t: "p",
-          c: "ใน Go ไม่มีคลาส (Class) แต่เราใช้ `struct` ในการจัดกลุ่มข้อมูล และใช้ Pointer (`*`) เมื่อเราต้องการส่งผ่านการอ้างอิงตำแหน่งในหน่วยความจำโดยไม่ต้องคัดลอกข้อมูลทั้งก้อน ลองสังเกตความแตกต่างเมื่อใช้ Value Receiver (สำเนา) เทียบกับ Pointer Receiver (ชี้ไปยังก้อนจริง):",
+          c: "ไฟล์ Go ทุกไฟล์เริ่มด้วยชื่อแพ็กเกจ แล้วตามด้วยของที่ดึงมาใช้ แล้วตามด้วยฟังก์ชัน โปรแกรมเล็ก ๆ ที่รันเองได้ต้องมี `package main` และฟังก์ชันชื่อ `main` เครื่องหมาย `:=` อ่านว่า \"สร้างตัวแปรนี้แล้วใส่ค่า\" Go จะเดาชนิดข้อมูลจากค่าที่ใส่ให้",
+        },
+        {
+          t: "codeout",
+          lang: "go",
+          label: "read_a_file.go",
+          code: `package main
+
+import "fmt"
+
+func main() {
+	owner := "Alice" // string สร้างใหม่ชื่อ owner
+	balance := 1000  // int สร้างใหม่ชื่อ balance
+	fmt.Println(owner, "มียอด", balance, "บาท")
+}`,
+          out: `Alice มียอด 1000 บาท`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**`package main`**: บอกว่าไฟล์นี้อยู่ในแพ็กเกจ `main` ไฟล์ในโฟลเดอร์เดียวกันต้องใช้ชื่อแพ็กเกจเดียวกัน ในโปรเจกต์ธนาคารจะเห็น `package db` และ `package api` แทน",
+            "**`import \"fmt\"`**: ดึงแพ็กเกจ `fmt` มาใช้พิมพ์ข้อความ ถ้า import แล้วไม่ใช้ โปรแกรมคอมไพล์ไม่ผ่าน",
+            "**`func main()`**: จุดเริ่มของโปรแกรม `func` คือคำประกาศฟังก์ชัน",
+            "**`:=`**: สร้างตัวแปรครั้งแรก ครั้งถัดไปที่เปลี่ยนค่าตัวเดิมใช้ `=` ตัวเดียว เช่น `balance = 500`",
+            "**ชนิดที่ใช้กับเงินในคอร์สนี้**: `int64` คือจำนวนเต็ม 64 บิต เราเก็บเงินเป็นสตางค์ใน `int64` ไม่ใช้ทศนิยม `string` คือข้อความ",
+          ],
+        },
+
+        { t: "h2", c: "2. ฟังก์ชันคืนได้สองค่า และ `_, err` คืออะไร" },
+        {
+          t: "p",
+          c: "Go ไม่มี `try/catch` ฟังก์ชันที่อาจพังจะคืนค่าผลลัพธ์ตัวหนึ่ง คู่กับค่า `error` อีกตัว ถ้าสำเร็จ `error` จะเป็น `nil` (ว่าง ไม่มีปัญหา) ถ้าพัง `error` จะเป็นข้อความปัญหา และผลลัพธ์ตัวแรกมักใช้ไม่ได้",
+        },
+        {
+          t: "p",
+          c: "เวลาเรียก ต้องรับให้ครบทุกตัวที่ฟังก์ชันคืน ถ้าไม่อยากเก็บตัวไหน ให้ใส่ `_` ตรงช่องนั้น `_` อ่านว่า blank identifier แปลว่า \"รับมาแล้วทิ้ง\" นี่คือบรรทัดที่คุณจะเห็นทั้งคอร์ส:",
+        },
+        {
+          t: "table",
+          head: ["บรรทัด", "อ่านว่า", "ใช้เมื่อไหร่"],
+          rows: [
+            ["`left, err := Withdraw(1000, 400)`", "เก็บทั้งยอดเงินใหม่และ error", "ต้องใช้ยอดเงินต่อ"],
+            ["`_, err := Withdraw(1000, 400)`", "ทิ้งยอดเงิน เก็บแค่ error", "สนแค่ว่าพังหรือไม่ เช่นในเทสต์"],
+            ["`if err := db.Ping(); err != nil {`", "เรียก Ping สร้าง err ไว้ใช้แค่ใน if นี้", "เช็คแล้วจบ ไม่ต้องมีตัวแปร err นอกบล็อก"],
+          ],
+        },
+        {
+          t: "codeout",
+          lang: "go",
+          label: "blank_and_err.go",
+          code: `package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// คืนสองค่า: ยอดคงเหลือใหม่ และ error
+func Withdraw(balance int64, amount int64) (int64, error) {
+	if balance < amount {
+		return 0, errors.New("ยอดเงินไม่พอ")
+	}
+	return balance - amount, nil
+}
+
+func Ping() error {
+	return errors.New("ต่อฐานข้อมูลไม่ได้")
+}
+
+func main() {
+	// ช่องที่ 1 = ยอดเงิน, ช่องที่ 2 = error
+	left, err := Withdraw(1000, 400)
+	fmt.Println("1) เก็บทั้งสองค่า:", left, err)
+
+	// _ ทิ้งช่องที่ 1 เหลือแค่ err
+	// err มีอยู่แล้วจากบรรทัดบน จึงใช้ = ไม่ใช่ :=
+	_, err = Withdraw(1000, 1500)
+	fmt.Println("2) ทิ้งยอดเงิน เหลือแค่ err:", err)
+
+	// สร้าง err เฉพาะในเงื่อนไข ใช้ข้างนอก if ไม่ได้
+	if err := Ping(); err != nil {
+		fmt.Println("3) if err := ... :", err)
+	}
+}`,
+          out: `1) เก็บทั้งสองค่า: 600 <nil>
+2) ทิ้งยอดเงิน เหลือแค่ err: ยอดเงินไม่พอ
+3) if err := ... : ต่อฐานข้อมูลไม่ได้`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**`(int64, error)`**: วงเล็บหลังชื่อฟังก์ชันคือสิ่งที่คืนกลับมา ตัวท้ายของฟังก์ชันในคอร์สนี้มักเป็น `error`",
+            "**`nil`**: ค่าว่าง เมื่อพิมพ์ออกมาจะเห็น `<nil>` แปลว่าไม่มี error",
+            "**`if err != nil`**: แปลว่า \"ถ้ามีปัญหา\" ต้องเช็คทันที อย่ารันต่อทั้งที่ err ไม่ใช่ nil",
+            "**`_, err :=`**: ขีดล่างไม่ใช่ชื่อตัวแปรพิเศษที่เก็บค่าลับ มันคือการบอกคอมไพเลอร์ว่าช่องนี้ตั้งใจไม่ใช้ ถ้าเขียนชื่อตัวแปรแล้วไม่ใช้ โปรแกรมคอมไพล์ไม่ผ่าน",
+            "**`if err := Ping(); err != nil`**: เครื่องหมาย `;` แยกสองขั้นในบรรทัดเดียว ขั้นแรกเรียกฟังก์ชันแล้วเก็บ error ขั้นหลังเช็คว่ามีปัญหาไหม ตัว `err` ตัวนี้มีชีวิตแค่ในบล็อก if",
+            "**`_ \"github.com/lib/pq\"`**: อีกรูปของขีดล่าง อยู่หน้า import แปลว่าดึงแพ็กเกจมาเพื่อให้มันทำงานตอนเปิดโปรแกรม (ลงทะเบียนไดรเวอร์ฐานข้อมูล) แต่เราจะไม่เขียนชื่อแพ็กเกจนั้นในโค้ด บทเชื่อมต่อฐานข้อมูลใช้แบบนี้",
+          ],
+        },
+        {
+          t: "codeout",
+          lang: "go",
+          label: "error_handling.go",
+          code: `package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrInsufficientBalance = errors.New("ยอดเงินคงเหลือไม่เพียงพอ")
+
+func Withdraw(balance int64, amount int64) (int64, error) {
+	if amount <= 0 {
+		return balance, errors.New("จำนวนเงินที่ถอนต้องมากกว่า 0")
+	}
+	if balance < amount {
+		return balance, ErrInsufficientBalance
+	}
+	return balance - amount, nil
+}
+
+func main() {
+	currentBalance := int64(1000)
+
+	fmt.Println(">> ถอน 1,500 จาก 1,000")
+	newBalance, err := Withdraw(currentBalance, 1500)
+	if err != nil {
+		fmt.Println("   เกิดข้อผิดพลาด:", err)
+	} else {
+		fmt.Println("   ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
+	}
+
+	fmt.Println(">> ถอน 400 จาก 1,000")
+	newBalance, err = Withdraw(currentBalance, 400)
+	if err != nil {
+		fmt.Println("   เกิดข้อผิดพลาด:", err)
+	} else {
+		fmt.Println("   ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
+	}
+}`,
+          out: `>> ถอน 1,500 จาก 1,000
+   เกิดข้อผิดพลาด: ยอดเงินคงเหลือไม่เพียงพอ
+>> ถอน 400 จาก 1,000
+   ถอนเงินสำเร็จ ยอดคงเหลือ: 600`,
+        },
+        {
+          t: "callout",
+          title: "ทำไมตัวอย่างที่สองถึงคืนยอดเดิมตอนพัง แต่ตัวอย่างแรกคืน 0",
+          c: "ไม่มีกฎตายตัวว่าช่องแรกต้องเป็นอะไรตอน error สิ่งที่ผู้เรียกต้องเชื่อคือช่อง `err` เท่านั้น ถ้า `err != nil` อย่าเอาช่องแรกไปใช้ต่อ ในระบบธนาคารเราจะเช็ค `err` ก่อนเสมอ แล้วค่อยอ่านยอดเงิน",
+        },
+
+        { t: "h2", c: "3. Go ไม่มี inheritance" },
+        {
+          t: "p",
+          c: "ถ้าเคยเขียน Java, C#, หรือ Python แบบมีคลาสแม่กับคลาสลูก ให้วางภาพนั้นลงก่อน Go ไม่มีคีย์เวิร์ด `class` และไม่มีการสืบทอด (inheritance) แบบ `class Store extends Queries` ของที่ใช้แทนมีสามชิ้น และชิ้นที่คนสับสนบ่อยที่สุดคือการฝัง struct",
+        },
+        {
+          t: "table",
+          head: ["ในภาษาที่มีคลาส", "ใน Go", "ความต่างที่ต้องจำ"],
+          rows: [
+            ["class Account { fields }", "type Account struct { fields }", "struct คือกล่องข้อมูลล้วน ๆ ยังไม่มีพฤติกรรม"],
+            ["method อยู่ในคลาส", "func (a *Account) Deposit(amount int64)", "เมธอดคือฟังก์ชันธรรมดาที่ประกาศว่าตัวมันผูกกับ Account"],
+            ["class Dog extends Animal", "ไม่มี", "ไม่มีคลาสลูกที่ได้ฟิลด์และเมธอดของแม่มาโดยอัตโนมัติแบบลำดับชั้น"],
+            ["interface ที่คลาสต้องเขียนว่า implements", "type Maker interface { CreateToken(...) }", "ไม่ต้องเขียนคำว่า implements แค่มีเมธอดครบตามสัญญา ก็ใช้แทน interface นั้นได้"],
+            ["extends เพื่อเอาเมธอดของอีกคลาสมาใช้", "type Store struct { *Queries }", "นี่เรียก embedding วาง Queries ไว้ใน Store แล้วเรียก store.GetAccount() ได้ เพราะเมธอดถูกยกขึ้นมา ไม่ใช่เพราะ Store สืบทอดจาก Queries"],
+          ],
+        },
+        {
+          t: "codeout",
+          lang: "go",
+          label: "no_inheritance.go",
+          code: `package main
+
+import "fmt"
+
+type Queries struct{}
+
+func (q *Queries) GetAccount() string {
+	return "อ่านบัญชีจาก Queries"
+}
+
+// ฝัง *Queries ไว้ใน Store ไม่ได้แปลว่า Store สืบทอด Queries
+type Store struct {
+	*Queries
+	name string
+}
+
+// สัญญา: ใครมีเมธอด Notify ก็เป็น Notifier ได้
+type Notifier interface {
+	Notify(msg string)
+}
+
+type LogNotifier struct{}
+
+func (LogNotifier) Notify(msg string) {
+	fmt.Println("log:", msg)
+}
+
+func main() {
+	store := &Store{
+		Queries: &Queries{},
+		name:    "simple-bank",
+	}
+	fmt.Println(store.name)
+	fmt.Println(store.GetAccount())
+
+	var n Notifier = LogNotifier{}
+	n.Notify("โอนสำเร็จ")
+}`,
+          out: `simple-bank
+อ่านบัญชีจาก Queries
+log: โอนสำเร็จ`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**`type Store struct { *Queries }`**: ฟิลด์ไม่มีชื่อ แบบนี้เรียกว่าฝัง (embed) เมธอดของ `Queries` เช่น `GetAccount` โผล่มาให้เรียกผ่าน `store.GetAccount()` ได้เลย",
+            "**ทำไมไม่เรียกว่า inheritance**: Store ไม่ได้กลายเป็นชนิด Queries คลาสลูกในภาษาอื่นมักถูกมองว่า \"เป็น\" คลาสแม่ ใน Go `Store` \"มี\" `Queries` อยู่ข้างใน แล้วภาษาช่วยยกเมธอดขึ้นมาให้เรียกสั้นลง",
+            "**`type Notifier interface`**: รายการเมธอดที่ต้องมี `LogNotifier` ไม่ได้เขียนว่ามัน implements อะไร พอมันมี `Notify` อยู่แล้ว ตัวแปรชนิด `Notifier` จึงรับมันได้",
+            "**บทถัดไปใช้ของนี้ตรงไหน**: `DBTX` และ `Maker` เป็น interface `Store` ฝัง `*Queries` เพื่อเรียกคำสั่ง SQL เดิมได้ แล้วเติมความสามารถเปิด transaction เข้าไป",
+          ],
+        },
+
+        { t: "h2", c: "4. Struct, Pointer และ Value vs Pointer Receiver" },
+        {
+          t: "p",
+          c: "หัวข้อที่แล้วบอกว่า struct คือกล่องข้อมูล และเมธอดคือฟังก์ชันที่ผูกกับกล่องนั้น ตอนนี้ดูว่ากล่องที่ส่งเข้าเมธอดเป็นสำเนา หรือเป็นตัวชี้ไปที่ก้อนเดิม Pointer (`*`) ใช้เมื่อต้องแก้ข้อมูลก้อนเดิมโดยไม่คัดลอกทั้งก้อน:",
         },
         {
           t: "codeout",
@@ -287,89 +524,14 @@ func main() {
         {
           t: "ul",
           c: [
-            "**`type Account struct`**: เป็นการนิยามแม่แบบข้อมูล คล้าย Object ในภาษาอื่น",
+            "**`type Account struct`**: แม่แบบของกล่องข้อมูล ไม่ใช่คลาส และไม่ได้สืบทอดจากใคร",
             "**`json:\"id\"`**: เรียกว่า Struct Tag ใช้บอกไลบรารี JSON ว่าเวลาแปลงเป็น JSON ให้ใช้คีย์ชื่ออะไร",
             "**`(a *Account) Deposit(...)`**: ใช้ `*Account` เป็น Receiver หมายความว่าฟังก์ชันนี้ได้รับ Pointer มา ทำให้เวลาเราเปลี่ยนค่า `a.Balance` บัญชีต้นฉบับจะเปลี่ยนตามไปด้วย",
             "**`acc := &Account{...}`**: เครื่องหมาย `&` ใช้เพื่อดึง Address ของ struct นั้นมา ทำให้ตัวแปร `acc` มีชนิดข้อมูลเป็น `*Account` (Pointer to Account)",
           ],
         },
 
-        { t: "h2", c: "2. การจัดการ Error แบบ Go (Explicit Error Handling)" },
-        {
-          t: "p",
-          c: "ในภาษาอื่นๆ เราอาจจะคุ้นชินกับการใช้ `try...catch` แต่ในภาษา Go **ไม่มี try-catch** ปรัชญาของ Go คือ Error ถือเป็น 'ค่าข้อมูลธรรมดาตัวหนึ่ง (Normal Value)' ที่ฟังก์ชันสามารถ return ออกมาได้คู่กับผลลัพธ์ ลองดูตัวอย่างทั้งเคสที่เงินพอและเคสที่เงินไม่พอ:",
-        },
-        {
-          t: "codeout",
-          lang: "go",
-          label: "error_handling.go",
-          code: `// สาธิตการจัดการ Error ตามปรัชญาของ Go (Explicit Error Handling)
-// ทำเพื่อแก้ปัญหา: ภาษา Go ไม่มี try-catch แต่ใช้การ return error ออกมาให้ผู้เรียกตรวจสอบทันที ป้องกันข้อผิดพลาดแอบแฝง
-
-package main
-
-import (
-	"errors"
-	"fmt"
-)
-
-// ErrInsufficientBalance เป็นข้อผิดพลาดมาตรฐานที่นิยามไว้ล่วงหน้า (Sentinel Error)
-var ErrInsufficientBalance = errors.New("ยอดเงินคงเหลือไม่เพียงพอ")
-
-// Withdraw ฟังก์ชันถอนเงิน คืนค่ายอดเงินคงเหลือใหม่คู่กับ error
-func Withdraw(balance int64, amount int64) (int64, error) {
-	// 1. ตรวจสอบเงื่อนไขว่าจำนวนเงินที่ถอนต้องมากกว่า 0
-	if amount <= 0 {
-		return balance, errors.New("จำนวนเงินที่ถอนต้องมากกว่า 0")
-	}
-
-	// 2. ตรวจสอบว่ายอดเงินในบัญชีพอถอนหรือไม่
-	if balance < amount {
-		return balance, ErrInsufficientBalance // คืนค่า Error ที่นิยามไว้
-	}
-
-	// 3. หากผ่านทุกเงื่อนไข ให้ตัดเงินและส่ง error เป็น nil (ไม่มีข้อผิดพลาด)
-	return balance - amount, nil
-}
-
-func main() {
-	currentBalance := int64(1000)
-
-	// ทดสอบเคสที่ 1: ถอนเกินยอดคงเหลือ (ยอดเงินไม่พอ)
-	fmt.Println(">> ทดสอบเคสที่ 1: ถอนเงินเกินยอดคงเหลือ (ถอน 1,500 บาท จาก 1,000 บาท)")
-	newBalance, err := Withdraw(currentBalance, 1500)
-	// ตรวจสอบทันทีว่ามี Error หรือไม่ตามสไตล์ Go
-	if err != nil {
-		fmt.Println("   เกิดข้อผิดพลาด:", err)
-	} else {
-		fmt.Println("   ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
-	}
-
-	// ทดสอบเคสที่ 2: ถอนปกติ (เงินพอถอน)
-	fmt.Println("\\n>> ทดสอบเคสที่ 2: ถอนเงินปกติ (ถอน 400 บาท จาก 1,000 บาท)")
-	newBalance, err = Withdraw(currentBalance, 400)
-	if err != nil {
-		fmt.Println("   เกิดข้อผิดพลาด:", err)
-	} else {
-		fmt.Println("   ถอนเงินสำเร็จ ยอดคงเหลือ:", newBalance)
-	}
-}`,
-          out: `>> ทดสอบเคสที่ 1: ถอนเงินเกินยอดคงเหลือ (ถอน 1,500 บาท จาก 1,000 บาท)
-   เกิดข้อผิดพลาด: ยอดเงินคงเหลือไม่เพียงพอ
-
->> ทดสอบเคสที่ 2: ถอนเงินปกติ (ถอน 400 บาท จาก 1,000 บาท)
-   ถอนเงินสำเร็จ ยอดคงเหลือ: 600`,
-        },
-        {
-          t: "ul",
-          c: [
-            "**`(int64, error)`**: ฟังก์ชันใน Go สามารถ return ค่าได้หลายตัว โดยตัวสุดท้ายมักจะเป็น `error` เสมอ",
-            "**`nil`**: หากการทำงานสำเร็จ ไร้ข้อผิดพลาด เราจะส่งค่า `nil` กลับไปแทน error",
-            "**`if err != nil`**: เป็น pattern มาตรฐานของ Go ที่เราต้องตรวจเช็กทันทีหลังจากเรียกฟังก์ชัน เพื่อจัดการปัญหาก่อนที่โค้ดจะรันต่อ ป้องกันการเกิดบั๊กแอบแฝงในระบบธนาคาร",
-          ],
-        },
-
-        { t: "h2", c: "3. การใช้ `defer` สำหรับทำความสะอาด Resource" },
+        { t: "h2", c: "5. `defer` ทำงานตอนฟังก์ชันกำลังจะจบ" },
         {
           t: "p",
           c: "คำสั่ง `defer` จะสั่งให้โค้ดบรรทัดนั้นรอทำงาน **ตอนที่ฟังก์ชันกำลังจะจบลง** เสมอ ไม่ว่าฟังก์ชันจะจบลงตามปกติ หรือจบด้วยการ return error ทันที เหมาะอย่างยิ่งสำหรับการปิดการเชื่อมต่อ Database, ปิด File, หรือการสั่ง Rollback Transaction และคำสั่ง defer จะทำงานแบบ LIFO (Last-In, First-Out):",
@@ -418,7 +580,7 @@ func main() {
           c: "defer จะทำงานตามหลัก LIFO (Last-In, First-Out) คือคำสั่ง defer ตัวล่าสุดที่ถูกเรียก จะทำงานเป็นตัวแรกสุดตอนฟังก์ชันจบลง และแม้จะเกิด Panic หรือ Return ก่อนเวลา defer ก็จะถูกรันแน่นอน 100%",
         },
 
-        { t: "h2", c: "4. บริบทการทำงาน: `context.Context`" },
+        { t: "h2", c: "6. `context.Context` คือใบสั่งให้ยกเลิกงานที่ช้าเกิน" },
         {
           t: "p",
           c: "เวลาที่เซิร์ฟเวอร์ Go รับคำสั่งเข้ามา เรามักจะส่งต่อ `ctx context.Context` ไปให้ทุกฟังก์ชันที่คุยกับฐานข้อมูลหรือยิง Network ภายนอก หน้าที่ของ Context คือการส่งสัญญาณ **Timeout (ตัดการทำงานถ้าช้าเกินไป)** หรือ **Cancellation (ลูกค้ายกเลิกคำขอ)** ลองดูผลการทำงานเมื่อคิวรีใช้เวลา 2 วินาที แต่ Timeout กำหนดไว้ 1 วินาที:",
@@ -469,7 +631,7 @@ func main() {
    (สาเหตุ: ระบบตัดการทำงานอัตโนมัติเนื่องจากเกินเวลา 1 วินาทีที่กำหนด)`,
         },
 
-        { t: "h2", c: "5. การทำงานแบบคู่ขนาน: Goroutines, Channels และ WaitGroup" },
+        { t: "h2", c: "7. Goroutine คือฟังก์ชันที่แยกไปรันคู่ขนาน" },
         {
           t: "p",
           c: "หัวใจที่ทำให้ Go โด่งดังไปทั่วโลกคือ **Goroutine** ซึ่งเป็น Lightweight Thread ที่ใช้หน่วยความจำเริ่มต้นเพียงแค่ 2 KB (เทียบกับ OS Thread ปกติที่กิน 1–2 MB) ทำให้ Go สามารถรัน 10,000 ถึง 100,000 goroutines พร้อมกันบนเครื่องเดียวได้สบายๆ ลองดูตัวอย่างการปล่อยคนงาน 3 ตัวทำงานคู่ขนานและส่งผลผ่าน Channel:",
@@ -539,7 +701,7 @@ func main() {
         {
           t: "callout",
           title: "ก้าวต่อไปสู่การสร้างโปรเจกต์จริง",
-          c: "เมื่อเราเข้าใจพื้นฐานสำคัญของ Go ทั้ง 5 เรื่องเรียบร้อยแล้ว ในบทถัดไป เราจะเริ่มเข้าสู่โปรเจกต์ **Simple Bank** จริง โค้ดจะถูกแบ่งออกเป็นโมดูลและแพ็กเกจ (`db/`, `api/`, `util/`) ตามมาตรฐานสากล ซึ่งจะถูกรันผ่าน Database Migration, Automated Tests (`go test ./...`), และรันทั้งระบบผ่านเซิร์ฟเวอร์ Gin และ Docker!",
+          c: "พออ่านเจ็ดเรื่องนี้ได้แล้ว บทถัดไปจะเข้าโปรเจกต์ Simple Bank จริง โค้ดจะถูกแบ่งเป็นแพ็กเกจ `db/`, `api/`, `util/` เวลาเจอ `_, err` หรือ `type Store struct { *Queries }` ให้ย้อนมาที่หัวข้อ 2 กับ 3 ของบทนี้",
         },
       ],
       en: [],

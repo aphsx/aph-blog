@@ -288,7 +288,7 @@ ok      simplebank/db   0.142s`,
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer_test.go (ทดสอบ Concurrency: TestTransferTx)",
+          label: "simplebank/db/tx_transfer_test.go",
           c: `// ชุดทดสอบ TestTransferTx สำหรับพิสูจน์ความถูกต้องของการโอนเงินแบบคู่ขนาน (Concurrent Transactions)
 // ทำเพื่อแก้ปัญหา: ป้องกันบั๊ก Race Condition และเงินสูญหายระหว่างทาง เมื่อมีคำสั่งโอนเงินเข้ามารัวๆ พร้อมกัน
 
@@ -405,12 +405,12 @@ ok      simplebank/db   0.198s`,
         { t: "h2", c: "2. การทดสอบปราบ Deadlock ด้วยการโอนสวนทาง (TestTransferTxDeadlock)" },
         {
           t: "p",
-          c: "ตอนนี้มาถึงการทดสอบขั้นสุดยอด: เราจะเขียนฟังก์ชัน `TestTransferTxDeadlock` ต่อท้ายลงในไฟล์ `simplebank/db/tx_transfer_test.go` โดยสั่งให้ Account 1 โอนให้ 2 จำนวน 5 ครั้ง พร้อมๆ กับที่ Account 2 โอนกลับคืนให้ 1 อีก 5 ครั้ง ในเสี้ยววินาทีเดียวกัน เพื่อพิสูจน์ว่า Resource Ordering ที่เราเขียนไว้สามารถสยบ Deadlock ได้จริง:",
+          c: "ตอนนี้มาถึงการทดสอบขั้นสุดยอด: เราจะเขียนฟังก์ชัน `TestTransferTxDeadlock` ต่อท้ายลงในไฟล์ `simplebank/db/tx_transfer_test.go` โดยสั่งให้ Account 1 โอนให้ 2 จำนวน 5 ครั้ง พร้อมๆ กับที่ Account 2 โอนกลับคืนให้ 1 อีก 5 ครั้ง ในเสี้ยววินาทีเดียวกัน เพื่อพิสูจน์ว่า Resource Ordering ที่เราเขียนไว้สามารถสยบ Deadlock ได้จริง ในลูปมีบรรทัด `_, err := store.TransferTx(...)` ฟังก์ชันนี้คืนสองค่า (ผลโอน, error) เทสต์นี้สนแค่ว่าโอนพังหรือไม่ จึงใช้ `_` ทิ้งผลโอน แล้วส่งเฉพาะ `err` เข้า channel",
         },
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/db/tx_transfer_test.go (จุดแก้ไข Diff: เพิ่ม TestTransferTxDeadlock ต่อท้าย)",
+          label: "simplebank/db/tx_transfer_test.go",
           c: ` 	fmt.Println(">> ยอดเงินหลังโอน:", updatedAccount1.Balance, updatedAccount2.Balance)
  	require.Equal(t, account1.Balance-int64(n)*amount, updatedAccount1.Balance)
  	require.Equal(t, account2.Balance+int64(n)*amount, updatedAccount2.Balance)

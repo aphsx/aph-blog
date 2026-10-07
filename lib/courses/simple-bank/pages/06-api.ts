@@ -37,7 +37,7 @@ export const apiPages: Record<string, Page> = {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/server.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/api/server.go",
           c: `// โครงสร้าง Server และการผูก Routing ผ่าน Gin Web Framework พร้อม Dependency Injection
 // ทำเพื่อแก้ปัญหา: หลีกเลี่ยงการใช้ Global Variable ในการเข้าถึง Database
 // การ Inject db.Store เข้าไปใน Server struct ทำให้โค้ดเป็นระเบียบ และสามารถ Mock ได้ง่ายตอนทำ Unit Test
@@ -90,7 +90,7 @@ func errorResponse(err error) gin.H {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/account.go (สร้างไฟล์ใหม่: CreateAccount)",
+          label: "simplebank/api/account.go",
           c: `// API Handler สำหรับจัดการการเปิดบัญชีใหม่ (POST /accounts)
 // ทำเพื่อแก้ปัญหา: แกะ JSON Payload ตรวจสอบความถูกต้อง (Validation) ก่อนส่งไปบันทึกลงในฐานข้อมูล
 package api
@@ -137,6 +137,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
         {
           t: "ul",
           c: [
+            "**`if err := ctx.ShouldBindJSON(&req); err != nil`**: รูปแบบสั้นจากบท Go จากศูนย์ เรียกฟังก์ชันแล้วเช็ค error ในบรรทัดเดียว ถ้า JSON ผิดจะตอบ 400 แล้ว `return` ทันที บรรทัด `account, err :=` ด้านล่างเป็นอีกรูป เก็บทั้งบัญชีที่สร้างได้และ error",
             "**`binding:\"required,oneof=USD EUR THB\"`**: เป็นการสั่งให้ Gin ตรวจสอบว่าต้องมีค่าส่งมา และต้องเป็น 1 ใน 3 สกุลเงินนี้เท่านั้น หากส่งค่าว่างหรือส่งสกุลเงินอื่นมา Gin จะตอบกลับ HTTP 400 Bad Request ทันทีโดยไม่ต้องเขียน `if-else` เอง",
             "**`http.StatusCreated` (201)**: เป็น Status Code มาตรฐานสำหรับการสร้างทรัพยากรใหม่ในระบบ",
           ],
@@ -149,7 +150,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/account.go (จุดแก้ไข Diff: เพิ่ม database/sql และ GetAccount)",
+          label: "simplebank/api/account.go",
           c: ` package api
  
  import (
@@ -204,7 +205,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/account.go (จุดแก้ไข Diff: เพิ่ม ListAccounts ต่อท้าย)",
+          label: "simplebank/api/account.go",
           c: ` // ... โค้ดเดิม createAccount และ getAccount ...
  	ctx.JSON(http.StatusOK, account)
  }
@@ -251,7 +252,7 @@ func (server *Server) createAccount(ctx *gin.Context) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/account.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อมรันทั้ง 3 Endpoints)",
+          label: "simplebank/api/account.go",
           c: `// API Handler สำหรับจัดการบัญชี (POST /accounts, GET /accounts/:id, GET /accounts)
 package api
 
@@ -349,7 +350,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/main.go (จุดแก้ไข Diff: อัปเกรดจากสคริปต์ทดสอบสู่ Gin Server)",
+          label: "simplebank/main.go",
           c: ` package main
 
  import (
@@ -392,7 +393,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังอัปเกรด)",
+          label: "simplebank/main.go",
           c: `package main
 
 import (
@@ -548,7 +549,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/validator.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/api/validator.go",
           c: `package api
 
 import (
@@ -571,7 +572,7 @@ var validCurrency validator.Func = func(fieldLevel validator.FieldLevel) bool {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/util/currency.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/util/currency.go",
           c: `package util
 
 const (
@@ -597,7 +598,7 @@ func IsSupportedCurrency(currency string) bool {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/server.go (จุดแก้ไข: เพิ่มลงทะเบียน Currency Validator)",
+          label: "simplebank/api/server.go",
           c: ` package api
 
  import (
@@ -626,7 +627,7 @@ func IsSupportedCurrency(currency string) bool {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/account.go (จุดแก้ไข: เปลี่ยนมาใช้ Custom Tag currency)",
+          label: "simplebank/api/account.go",
           c: ` type createAccountRequest struct {
  	Owner    string \`json:"owner" binding:"required"\`
 -	Currency string \`json:"currency" binding:"required,oneof=USD EUR THB"\`
@@ -660,7 +661,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/transfer.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/api/transfer.go",
           c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers)
 // ทำเพื่อแก้ปัญหา: ตรวจสอบความถูกต้องของบัญชีต้นทาง-ปลายทาง และสกุลเงิน ก่อนส่งคำสั่งเข้า Transaction
 // ป้องกันการเปิด Transaction เสียเที่ยว และป้องกันการแฮกด้วยยอดเงินติดลบ
@@ -763,7 +764,7 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/server.go (จุดแก้ไข: เพิ่ม Route /transfers)",
+          label: "simplebank/api/server.go",
           c: ` 	// ลงทะเบียน Routing สำหรับแต่ละ Endpoint
  	router.POST("/accounts", server.createAccount)
  	router.GET("/accounts/:id", server.getAccount)

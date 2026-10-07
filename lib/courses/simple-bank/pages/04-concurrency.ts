@@ -95,7 +95,7 @@ WHERE id = 1 FOR UPDATE;
         {
           t: "code",
           lang: "sql",
-          label: "simplebank/db/account.go (คำสั่ง SQL AddAccountBalance)",
+          label: "simplebank/db/account.go",
           c: `UPDATE accounts
 SET balance = balance + $1
 WHERE id = $2
@@ -234,7 +234,7 @@ STATEMENT: UPDATE accounts SET balance = balance + $1 WHERE id = $2 RETURNING id
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer.go (เพิ่มไว้เหนือฟังก์ชัน TransferTx)",
+          label: "simplebank/db/tx_transfer.go",
           c: `// addMoney ทำหน้าที่อัปเดตยอดเงินของทั้ง 2 บัญชีตามลำดับที่ส่งเข้ามา
 func addMoney(
 	ctx context.Context,
@@ -269,7 +269,7 @@ func addMoney(
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/db/tx_transfer.go (Diff: ตัดขั้นตอน 4-5 เดิมออก แล้วแทนด้วยการจัดลำดับ Account ID)",
+          label: "simplebank/db/tx_transfer.go",
           c: `-		// 4. ตัดยอดเงินคงเหลือจากบัญชีต้นทาง (หักเงินออก)
 -		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
 -			ID:     arg.FromAccountID,
@@ -318,7 +318,7 @@ func addMoney(
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer.go (ฟังก์ชัน TransferTx Version 2 ปลอด Deadlock)",
+          label: "simplebank/db/tx_transfer.go",
           c: `// TransferTx เวอร์ชันปรับปรุงที่ป้องกัน Deadlock ได้อย่างสมบูรณ์
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
@@ -382,7 +382,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer.go (Version 2 สมบูรณ์พร้อมรัน 100%)",
+          label: "simplebank/db/tx_transfer.go",
           c: `// นิยาม: โครงสร้างข้อมูลและฟังก์ชัน TransferTx เวอร์ชัน 2 ป้องกัน Deadlock
 // ทำเพื่อแก้ปัญหา: บัญชี A โอนหา B สวนทางกับ B โอนหา A พร้อมกันทำให้เกิด Circular Wait (Deadlock)
 // กลยุทธ์แก้ไข: บังคับลำดับการขอล็อกแถว (Resource Ordering) ให้เริ่มจาก Account ID ค่าน้อยไปหามากเสมอ

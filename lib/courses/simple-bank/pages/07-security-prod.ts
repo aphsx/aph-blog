@@ -86,7 +86,7 @@ DROP TABLE IF EXISTS "users";`,
         {
           t: "codeout",
           lang: "go",
-          label: "bcrypt_demo.go (สร้างไฟล์เดี่ยวเพื่อทดลองรันดูผลลัพธ์ Salt)",
+          label: "bcrypt_demo.go",
           code: `// สาธิตกลไกความปลอดภัยของ Bcrypt: การสุ่ม Salt อัตโนมัติ และการตรวจสอบรหัสผ่าน
 // ทำเพื่อแก้ปัญหา: ป้องกันการแฮกผ่าน Rainbow Table เพราะรหัสผ่านเดียวกันจะได้ Hash ที่แตกต่างกันทุกครั้ง
 package main
@@ -130,7 +130,7 @@ Check wrong password error: crypto/bcrypt: hashedPassword is not the hash of the
         {
           t: "code",
           lang: "go",
-          label: "simplebank/util/password.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/util/password.go",
           c: `// ยูทิลิตี้จัดการการแฮชและตรวจสอบรหัสผ่านด้วยอัลกอริทึม Bcrypt
 // ทำเพื่อแก้ปัญหา: ห้ามบันทึกรหัสผ่านเป็น Plain Text ลงฐานข้อมูลเด็ดขาด เพื่อความปลอดภัยของผู้ใช้งาน
 package util
@@ -161,7 +161,7 @@ func CheckPassword(password string, hashedPassword string) error {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/util/password_test.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/util/password_test.go",
           c: `package util
 
 import (
@@ -223,7 +223,7 @@ ok      simplebank/util 0.231s`,
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/user.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/db/user.go",
           c: `// ฟังก์ชัน CRUD สำหรับจัดการข้อมูลผู้ใช้งานในตาราง users
 // ทำเพื่อแก้ปัญหา: บันทึกข้อมูลและดึงข้อมูลผู้ใช้เพื่อตรวจสอบสิทธิ์ในการเข้าสู่ระบบ
 package db
@@ -301,7 +301,7 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/user.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/api/user.go",
           c: `// API Handler สำหรับสมัครสมาชิกใหม่ (POST /users)
 package api
 
@@ -381,7 +381,7 @@ func (server *Server) createUser(ctx *gin.Context) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/server.go (จุดแก้ไข Diff: เพิ่ม Route /users)",
+          label: "simplebank/api/server.go",
           c: ` 	// 2. ลงทะเบียน Routing สำหรับแต่ละ Endpoint
  	router.POST("/accounts", server.createAccount)
  	router.GET("/accounts/:id", server.getAccount)
@@ -458,7 +458,7 @@ FAIL`,
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/user_test.go (สร้าง Helper: createRandomUser)",
+          label: "simplebank/db/user_test.go",
           c: `package db
 
 import (
@@ -498,7 +498,7 @@ func createRandomUser(t *testing.T) User {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/db/account_test.go (อัปเดต createRandomAccount ให้ผูกกับ User จริง)",
+          label: "simplebank/db/account_test.go",
           c: ` func createRandomAccount(t *testing.T) Account {
 +	user := createRandomUser(t) // 1. สร้าง User สุ่มขึ้นมาก่อนเสมอ
 +
@@ -597,7 +597,7 @@ ok      simplebank/db   0.312s`,
         {
           t: "code",
           lang: "go",
-          label: "simplebank/token/payload.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/token/payload.go",
           c: `// นิยาม Payload สำหรับบรรจุข้อมูลประจำตัวของผู้ใช้ที่ถูกเข้ารหัสไว้ใน Token
 // ทำเพื่อแก้ปัญหา: จัดเก็บตัวตน (Username) วันหมดอายุ (ExpiredAt) และ UUID เฉพาะตัว เพื่อใช้ระบุสิทธิ์ของผู้ใช้งานในระบบ
 package token
@@ -650,12 +650,12 @@ func (payload *Payload) Valid() error {
         },
         {
           t: "p",
-          c: "สร้างอินเทอร์เฟซ `Maker` ใน `simplebank/token/maker.go` เพื่อเปิดทางให้ระบบสามารถสลับระหว่าง PASETO และ JWT ได้อย่างยืดหยุ่นในอนาคต:",
+          c: "สร้างอินเทอร์เฟซ `Maker` ใน `simplebank/token/maker.go` เป็นสัญญาว่าต้องมี `CreateToken` กับ `VerifyToken` `PasetoMaker` ไม่ได้สืบทอดจาก `Maker` แค่มีสองเมธอดนี้ครบ จึงใส่ในตัวแปรชนิด `Maker` ได้ และสลับไปใช้ JWT ทีหลังได้โดยไม่แก้คนเรียก:",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/token/maker.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/token/maker.go",
           c: `// Maker คือ Interface สำหรับสร้างและตรวจสอบความถูกต้องของ Token รับรองตัวตน
 // ทำเพื่อแก้ปัญหา: ออกแบบตามหลัก Clean Architecture เพื่อให้สลับระบบ Token ได้อย่างอิสระ (เช่น สลับระหว่าง PASETO กับ JWT)
 // และช่วยให้ Mock ตัว Maker ได้อย่างง่ายดายในการเขียน Unit Test สำหรับ API Handlers
@@ -679,7 +679,7 @@ type Maker interface {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/token/paseto_maker.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/token/paseto_maker.go",
           c: `// PasetoMaker จัดการสร้างและถอดรหัส PASETO Token (Platform-Agnostic Security Tokens) เวอร์ชัน 2 Local (Symmetric)
 // ทำเพื่อแก้ปัญหา: มอบระบบรักษาความปลอดภัยที่เหนือกว่า JWT โดยขจัดปัญหา 'None' algorithm attack และบังคับใช้ ChaCha20-Poly1305
 package token
@@ -752,7 +752,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/user.go (จุดแก้ไข Diff: เพิ่ม database/sql และ Handler loginUser)",
+          label: "simplebank/api/user.go",
           c: ` package api
  
  import (
@@ -828,7 +828,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/user.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังเพิ่ม loginUser)",
+          label: "simplebank/api/user.go",
           c: `// API Handler สำหรับจัดการผู้ใช้งาน (POST /users และ POST /users/login)
 package api
 
@@ -961,7 +961,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/middleware.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/api/middleware.go",
           c: `// Middleware ตรวจสอบตั๋วรับรองตัวตน (Authentication Middleware) สำหรับ Gin Framework
 // ทำเพื่อแก้ปัญหา: สกัดกั้นคำขอที่ไม่ได้รับอนุญาตก่อนที่จะหลุดเข้าไปถึง API Handlers ที่สำคัญ (เช่น การเปิดบัญชี หรือการโอนเงิน)
 // โดยจะดักจับ Authorization Header, ตรวจสอบประเภท Bearer, และถอดรหัส PASETO Token
@@ -1039,7 +1039,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/account.go (จุดแก้ไข Diff: createAccount - ตัด owner และดึง username จาก Token)",
+          label: "simplebank/api/account.go",
           c: ` package api
  
  import (
@@ -1092,7 +1092,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/account.go (จุดแก้ไข Diff: getAccount - ตรวจสอบสิทธิ์ความเป็นเจ้าของ)",
+          label: "simplebank/api/account.go",
           c: ` 	account, err := server.store.GetAccount(ctx, req.ID)
  	if err != nil {
  		if err == sql.ErrNoRows {
@@ -1122,7 +1122,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/account.go (จุดแก้ไข Diff: listAccounts - กรองตาม Owner จาก Token)",
+          label: "simplebank/api/account.go",
           c: ` func (server *Server) listAccounts(ctx *gin.Context) {
  	var req listAccountsRequest
  	if err := ctx.ShouldBindQuery(&req); err != nil {
@@ -1140,7 +1140,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/db/account.go (จุดแก้ไข Diff: ListAccounts - รับ Owner และแก้ SQL WHERE owner = $1)",
+          label: "simplebank/db/account.go",
           c: ` type ListAccountsParams struct {
 +	Owner  string \`json:"owner"\`
  	Limit  int32  \`json:"limit"\`
@@ -1166,7 +1166,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/db/account_test.go (จุดแก้ไข Diff: TestListAccounts - ส่ง Owner ใน Params)",
+          label: "simplebank/db/account_test.go",
           c: ` 	arg := ListAccountsParams{
 +		Owner:  lastAccount.Owner,
  		Limit:  5,
@@ -1185,7 +1185,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/account.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังผูกระบบความปลอดภัยและ Token)",
+          label: "simplebank/api/account.go",
           c: `// API Handler สำหรับจัดการบัญชี (POST /accounts, GET /accounts/:id, GET /accounts) ฉบับปลอดภัยระดับ Production
 // ทำเพื่อแก้ปัญหา: ผูกบัญชีกับตัวตนของผู้ใช้ที่ล็อกอินจริง ป้องกันการแอบสร้างบัญชีในนามผู้อื่น และป้องกันการแอบดูยอดเงินของลูกค้าคนอื่น
 package api
@@ -1309,7 +1309,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/transfer.go (จุดแก้ไข Diff: createTransfer - ตรวจสอบสิทธิ์เจ้าของบัญชีต้นทาง)",
+          label: "simplebank/api/transfer.go",
           c: ` package api
  
  import (
@@ -1355,7 +1355,7 @@ func (server *Server) listAccounts(ctx *gin.Context) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/transfer.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังผูกระบบความปลอดภัยและ Token)",
+          label: "simplebank/api/transfer.go",
           c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers) ฉบับปลอดภัยระดับ Production
 // ทำเพื่อแก้ปัญหา: บังคับให้ผู้สั่งโอนต้องเป็นเจ้าของบัญชีต้นทางจริง ป้องกันการขโมยเงินหรือสั่งโอนเงินแทนผู้อื่น
 package api
@@ -1456,7 +1456,7 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/server.go (จุดแก้ไข Diff: ผูก TokenMaker และแยก Protected Routes)",
+          label: "simplebank/api/server.go",
           c: ` type Server struct {
  	store         *db.Store
 +	tokenMaker    token.Maker
@@ -1508,7 +1508,7 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
         {
           t: "code",
           lang: "go",
-          label: "simplebank/api/server.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อม errorResponse)",
+          label: "simplebank/api/server.go",
           c: `// โครงสร้าง Server และการผูก Routing พร้อมระบบ Authentication Token Middleware
 // ทำเพื่อแก้ปัญหา: จัดกลุ่มเส้นทาง API ระหว่าง Public Routes (ไม่ล็อกอิน) กับ Protected Routes (ต้องมี Token)
 package api
@@ -1586,7 +1586,7 @@ func errorResponse(err error) gin.H {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/main.go (จุดแก้ไข Diff: เพิ่ม Token Key/Duration และส่งเข้า NewServer)",
+          label: "simplebank/main.go",
           c: ` package main
  
  import (
@@ -1630,7 +1630,7 @@ func errorResponse(err error) gin.H {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อมระบบ Authentication)",
+          label: "simplebank/main.go",
           c: `package main
 
 import (
@@ -1866,7 +1866,7 @@ go: added github.com/spf13/viper v1.18.2`,
         {
           t: "code",
           lang: "env",
-          label: "simplebank/app.env (สร้างไฟล์ใหม่ที่ Root Directory)",
+          label: "simplebank/app.env",
           c: `DB_DRIVER=postgres
 DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
 SERVER_ADDRESS=0.0.0.0:8080
@@ -1880,7 +1880,7 @@ TOKEN_DURATION=15m`,
         {
           t: "code",
           lang: "go",
-          label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/util/config.go",
           c: `// จัดการ Configuration ด้วย Viper ตามหลักการ 12-Factor App
 // ทำเพื่อแก้ปัญหา: โหลดค่าการตั้งค่าจากไฟล์ .env และ Environment Variables แบบ Type-safe
 package util
@@ -1926,7 +1926,7 @@ func LoadConfig(path string) (config Config, err error) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/server.go (จุดแก้ไข Diff: เปลี่ยนมารับ config util.Config)",
+          label: "simplebank/api/server.go",
           c: ` package api
  
  import (
@@ -1973,7 +1973,7 @@ func LoadConfig(path string) (config Config, err error) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/api/user.go (จุดแก้ไข Diff: ดึง tokenDuration จาก server.config)",
+          label: "simplebank/api/user.go",
           c: ` 	// 4. ออก PASETO Token รับรองตัวตน (กำหนดอายุ 15 นาทีตาม Config)
 -	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.tokenDuration)
 +	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.TokenDuration)
@@ -1989,7 +1989,7 @@ func LoadConfig(path string) (config Config, err error) {
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/main.go (จุดแก้ไข Diff: โหลด Config จาก Viper แทนการ Hardcode)",
+          label: "simplebank/main.go",
           c: ` package main
  
  import (
@@ -2043,7 +2043,7 @@ func LoadConfig(path string) (config Config, err error) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังโหลด Config ผ่าน Viper)",
+          label: "simplebank/main.go",
           c: `package main
 
 import (
@@ -2096,7 +2096,7 @@ func main() {
         {
           t: "code",
           lang: "dockerfile",
-          label: "simplebank/Dockerfile (สร้างไฟล์ใหม่ที่ Root Directory)",
+          label: "simplebank/Dockerfile",
           c: `# ==========================================
 # Stage 1: Build Stage (คอมไพล์โค้ดเป็น Binary)
 # ==========================================
@@ -2171,7 +2171,7 @@ simplebank   latest   e3b0c44298fc   12 seconds ago   21.4MB
         {
           t: "code",
           lang: "yaml",
-          label: "simplebank/docker-compose.yml (สร้างไฟล์ใหม่ที่ Root Directory)",
+          label: "simplebank/docker-compose.yml",
           c: `version: "3.9"
 
 services:
@@ -2228,7 +2228,7 @@ services:
         {
           t: "code",
           lang: "bash",
-          label: "simplebank/test_e2e.sh (สคริปต์รันเทสต์ระบบจริงทั้งระบบในคำสั่งเดียว)",
+          label: "simplebank/test_e2e.sh",
           c: `#!/bin/bash
 set -e
 

@@ -5,7 +5,7 @@ export const simpleBankNav: NavCategory[] = [
     label: "1. บทนำ & รากฐาน",
     items: [
       { slug: "bank-overview", title: "ภาพรวมระบบ Simple Bank & สถาปัตยกรรม" },
-      { slug: "bank-go-backend-primer", title: "Go พื้นฐานสำหรับระบบ Backend" },
+      { slug: "bank-go-backend-primer", title: "Go จากศูนย์สำหรับระบบ Backend" },
     ],
   },
   {

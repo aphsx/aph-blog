@@ -52,7 +52,7 @@ simplebank/
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/db.go (สร้างไฟล์ใหม่ - ส่วนที่ 1: Connection Pool)",
+          label: "simplebank/db/db.go",
           c: `// จัดการการเชื่อมต่อฐานข้อมูล PostgreSQL ผ่าน database/sql พร้อมระบบ Connection Pooling
 // ทำเพื่อแก้ปัญหา: หากเปิด-ปิด Connection ทุกครั้งที่ยิงคิวรี เซิร์ฟเวอร์จะกินทรัพยากรสูงและช้ามาก
 // Connection Pool จะเตรียมท่อเชื่อมต่อสแตนด์บายไว้ล่วงหน้า ทำให้ยิงคิวรีได้รวดเร็วทันที
@@ -89,9 +89,9 @@ func NewDB(dataSourceName string) (*sql.DB, error) {
         {
           t: "ul",
           c: [
-            "**`_ \"github.com/lib/pq\"`**: เครื่องหมาย `_` (Blank Identifier) หมายถึงเรา Import แพ็กเกจนี้เข้ามาเพื่อให้มันรันฟังก์ชัน `init()` ลงทะเบียน PostgreSQL Driver ให้กับ `database/sql` โดยที่เราไม่ได้เรียกใช้ตัวแปรจากแพ็กเกจนี้ตรงๆ",
-            "**`sql.Open(...)`**: ฟังก์ชันนี้แค่ตรวจสอบว่ารูปแบบ URL ถูกต้องไหม แต่ยังไม่ได้คุยกับฐานข้อมูลจริง",
-            "**`db.Ping()`**: เป็นคำสั่งที่ส่งคำขอไปสะกิดฐานข้อมูลจริง เพื่อพิสูจน์ว่าเชื่อมต่อได้จริง ไม่ล่ม",
+            "**`_ \"github.com/lib/pq\"`**: ขีดล่างตัวเดียวกับใน `_, err` ตรงนี้แปลว่าดึงแพ็กเกจมาให้มันลงทะเบียนไดรเวอร์ PostgreSQL ตอนโปรแกรมเริ่ม แต่เราจะไม่เขียนชื่อ `pq` ในโค้ด ถ้าไม่ใส่ขีดล่าง Go จะฟ้องว่า import แล้วไม่ใช้",
+            "**`db, err := sql.Open(...)`**: รับสองค่า ฟังก์ชันนี้แค่ตรวจว่าสายเชื่อมต่อเขียนถูกแบบหรือไม่ ยังไม่ได้คุยกับฐานข้อมูล ถ้าพลาด `err` ไม่ใช่ nil แล้วเราคืน `nil, err` ทันที",
+            "**`if err := db.Ping(); err != nil`**: เรียก Ping แล้วเช็ค error ในบรรทัดเดียว ตัว `err` ตัวนี้ใช้ได้แค่ในบล็อก if Ping คือตัวที่สะกิดฐานข้อมูลจริง ถ้าไม่ผ่านแปลว่ายังต่อไม่ได้",
           ],
         },
 
@@ -103,7 +103,7 @@ func NewDB(dataSourceName string) (*sql.DB, error) {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/models.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/db/models.go",
           c: `// นิยาม Go Struct สำหรับเป็นพิมพ์เขียว (Model) ที่ตรงกับโครงสร้างตารางใน PostgreSQL
 // ทำเพื่อแก้ปัญหา: แปลงข้อมูลจากตารางฐานข้อมูล (Rows) ให้กลายเป็นตัวแปร Strong-type ใน Go ที่ตรวจสอบประเภทข้อมูลได้ตั้งแต่ตอนคอมไพล์
 package db
@@ -140,12 +140,12 @@ type Transfer struct {
         { t: "h2", c: "3. อินเทอร์เฟซ DBTX และ Queries Struct" },
         {
           t: "p",
-          c: "เพื่อให้โค้ดค้นหาข้อมูลสามารถใช้ได้ทั้งกับ `*sql.DB` (คิวรีทั่วไป) และ `*sql.Tx` (คิวรีภายใน Transaction) ให้เปิดไฟล์ `simplebank/db/db.go` เพื่อเพิ่ม `\"context\"` ใน import และเขียน DBTX / Queries ต่อท้ายฟังก์ชัน `NewDB`:",
+          c: "`DBTX` เป็น interface คือรายชื่อเมธอด ไม่ใช่คลาสแม่ ทั้ง `*sql.DB` (คิวรีทั่วไป) และ `*sql.Tx` (คิวรีใน transaction) มีเมธอดพวกนี้อยู่แล้ว จึงส่งเข้า `Queries` ได้ทั้งคู่ โดยไม่ต้องเขียนคำว่า implements เปิดไฟล์ `simplebank/db/db.go` เพิ่ม `\"context\"` ใน import แล้วเขียน DBTX / Queries ต่อท้ายฟังก์ชัน `NewDB`:",
         },
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/db/db.go (จุดแก้ไข Diff: เพิ่ม context และ DBTX / Queries)",
+          label: "simplebank/db/db.go",
           c: ` package db
  
  import (
@@ -185,7 +185,7 @@ type Transfer struct {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/db.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังเพิ่ม DBTX)",
+          label: "simplebank/db/db.go",
           c: `// จัดการการเชื่อมต่อฐานข้อมูล PostgreSQL พร้อม DBTX Interface สำหรับรองรับ Transaction
 package db
 
@@ -246,7 +246,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/account.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/db/account.go",
           c: `// ฟังก์ชัน CRUD สำหรับจัดการตาราง accounts ด้วย Parameterized Query
 // ทำเพื่อแก้ปัญหา: แยกคำสั่ง SQL ออกจากตัวแปรข้อมูล ป้องกัน SQL Injection ได้ 100%
 package db
@@ -417,7 +417,7 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/entry.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/db/entry.go",
           c: `// ฟังก์ชันจัดการบันทึกข้อมูลสมุดบัญชีแยกประเภท (Ledger) ในตาราง entries
 // ทำเพื่อแก้ปัญหา: บันทึกหลักฐานเงินเข้า-ออกของแต่ละบัญชีอย่างละเอียดทุกครั้งที่มีธุรกรรม
 package db
@@ -458,7 +458,7 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/transfer.go (สร้างไฟล์ใหม่)",
+          label: "simplebank/db/transfer.go",
           c: `// ฟังก์ชันจัดการบันทึกข้อมูลธุรกรรมการโอนเงินในตาราง transfers
 // ทำเพื่อแก้ปัญหา: บันทึกประวัติการโอนเงินระหว่าง 2 บัญชี พร้อมสร้าง Transfer ID สำหรับใช้เป็นเลขอ้างอิง
 package db
@@ -508,7 +508,7 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
         {
           t: "code",
           lang: "go",
-          label: "simplebank/main.go (สร้างไฟล์แรกเพื่อทดสอบ CRUD)",
+          label: "simplebank/main.go",
           c: `// ทดสอบเชื่อมต่อ PostgreSQL และยิงคำสั่ง CreateAccount + GetAccount ครั้งแรก
 // ทำเพื่อแก้ปัญหา: ให้ผู้เรียนเห็นการทำงานจริงของโค้ด Go ที่เพิ่งเขียน ก่อนจะไปต่อในบทที่ซับซ้อนขึ้น
 package main
@@ -659,14 +659,14 @@ func main() {
         { t: "h2", c: "การออกแบบ Store Struct & Transaction Manager ใน Go" },
         {
           t: "p",
-          c: "เราจะสร้าง `Store` struct ที่สืบทอดความสามารถของ `Queries` มาทั้งหมด และเพิ่มความสามารถในการเปิด Transaction จัดการ `BEGIN`, `COMMIT`, และ `ROLLBACK`:",
+          c: "เราจะสร้าง `Store` โดยฝัง `*Queries` ไว้ข้างใน (embedding จากบท Go จากศูนย์) เพื่อเรียกคำสั่ง SQL เดิมได้ทันที แล้วเติมตัวถือ connection กับฟังก์ชันเปิด transaction ที่คุม `BEGIN`, `COMMIT`, และ `ROLLBACK` Store ไม่ได้สืบทอดจาก Queries",
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/store.go (สร้างไฟล์ใหม่ - Transaction Manager กลาง)",
-          c: `// สร้าง Store struct สืบทอดความสามารถของ Queries มาทั้งหมด
-// และเพิ่มความสามารถในการเปิด Transaction จัดการ BEGIN, COMMIT, และ ROLLBACK
+          label: "simplebank/db/store.go",
+          c: `// Store ฝัง *Queries ไว้ข้างใน เมธอด SQL เดิมจึงเรียกผ่าน store ได้
+// แล้วเพิ่มการเปิด Transaction เพื่อคุม BEGIN, COMMIT, และ ROLLBACK
 
 // ทำเพื่อแก้ปัญหา: เวลาเขียนคำสั่ง Query หลายๆ ตัวเรียงกัน เราต้องการระบบเปิด-ปิด Transaction มาครอบไว้
 // เพื่อความปลอดภัยของข้อมูลตามหลัก ACID
@@ -721,6 +721,16 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 	// 5. ถ้าไม่มี Error เลย แปลว่าผ่าน ให้สั่ง Commit เพื่อบันทึกข้อมูลลงไปถาวร
 	return tx.Commit()
 }`,
+        },
+        {
+          t: "ul",
+          c: [
+            "**`type Store struct { *Queries }`**: ฟิลด์ที่ไม่มีชื่อ คือการฝัง `Queries` ไว้ใน `Store` เมธอดของ `Queries` เลยถูกยกขึ้นมาให้เรียกเป็น `store.CreateAccount(...)` ได้ Store ไม่ได้กลายเป็น Queries",
+            "**`Queries: New(db)`**: ตอนสร้าง ต้องยัดก้อน Queries เข้าช่องที่ฝังไว้ ชื่อช่องคือชื่อชนิด `Queries`",
+            "**`func (store *Store) execTx`**: เมธอดของ Store เอง ตัว `store` เป็น pointer จึงแก้ของก้อนเดิมได้ ลายเซ็น `fn func(*Queries) error` แปลว่าคนเรียกต้องส่งฟังก์ชันที่รับ `*Queries` แล้วคืน `error` เข้ามา",
+            "**`tx, err :=` แล้ว `if err != nil { return err }`**: รับสองค่า ถ้าเปิด transaction ไม่ได้ ก็ส่ง error กลับทันที ไม่ทำขั้นต่อไป",
+            "**`if rbErr := tx.Rollback(); rbErr != nil`**: ชื่อ `rbErr` ไม่ใช่ `err` เพราะ `err` ตัวนอกยังต้องใช้อยู่ รูปแบบนี้คือ `if err :=` จากบทพื้นฐาน แค่ตั้งชื่อใหม่เพื่อไม่ทับตัวแปรเดิม",
+          ],
         },
         {
           t: "h3", c: "ทำไม Callback Pattern นี้ถึงยอดเยี่ยม?" },
@@ -789,7 +799,7 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer.go (สร้างไฟล์ใหม่ - ส่วนที่ 1: TransferTxParams & Result)",
+          label: "simplebank/db/tx_transfer.go",
           c: `// นิยาม Struct สำหรับพารามิเตอร์ขาเข้า (Input) และผลลัพธ์ขาออก (Output) ของธุรกรรมการโอนเงิน
 // ทำเพื่อแก้ปัญหา: มัดรวมข้อมูลที่เกี่ยวข้องกับการโอนเงินเป็นก้อนเดียว เพื่อให้ส่งผ่านและตรวจสอบข้อมูลได้ง่ายและปลอดภัย
 package db
@@ -819,7 +829,7 @@ type TransferTxResult struct {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/account.go & db/entry.go & db/transfer.go (ทบทวน Params)",
+          label: "simplebank/db/account.go & db/entry.go & db/transfer.go",
           c: `// ตรวจสอบ Data Type ของพารามิเตอร์ทั้งหมดใน Data Access Layer
 // จุดสำคัญมาก: ทุกฟิลด์ที่เกี่ยวกับยอดเงิน (Amount) และรหัส (ID) ต้องเป็น int64 ให้ตรงกับคอลัมน์ BIGINT ในฐานข้อมูล
 // ห้ามประกาศ Amount เป็น int ธรรมดาเด็ดขาด เพราะ arg.Amount เป็น int64
@@ -858,7 +868,7 @@ type AddAccountBalanceParams struct {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer.go (เขียนต่อในไฟล์เดิม - ส่วนที่ 2: TransferTx Version 1)",
+          label: "simplebank/db/tx_transfer.go",
           c: `// TransferTx รวม 5 ขั้นตอนของการโอนเงินจริงเข้าด้วยกันใน 1 Transaction
 // ทำเพื่อแก้ปัญหา: ป้องกันเงินสูญหายระหว่างทาง (Partial Failure) หากตัดเงินต้นทางได้แต่ปลายทางล้มเหลว
 // ทุกขั้นตอนจะถูกครอบด้วย execTx หากขั้นตอนใดมี Error ระบบจะ Rollback คืนค่าเดิมทันที
@@ -948,7 +958,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
         {
           t: "code",
           lang: "go",
-          label: "simplebank/db/tx_transfer.go (Version 1: โค้ดเต็มไฟล์เดียวพร้อมรัน)",
+          label: "simplebank/db/tx_transfer.go",
           c: `package db
 
 import "context"

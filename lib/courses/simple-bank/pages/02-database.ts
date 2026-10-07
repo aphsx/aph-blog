@@ -72,7 +72,7 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;`,
         {
           t: "codeout",
           lang: "go",
-          label: "float_vs_bigint.go (เปรียบเทียบ: Float ❌ ห้ามใช้ vs Bigint ✅ ใช้จริง)",
+          label: "float_vs_bigint.go",
           code: `// สาธิตความแตกต่างระหว่างการใช้ Floating-Point (float64) เทียบกับ Integer (int64)
 // ทำเพื่อแก้ปัญหา: มาตรฐาน IEEE 754 ของ Float ทำให้เกิดความคลาดเคลื่อนในการคำนวณเงิน
 // ระบบธนาคารจึงต้องเก็บเงินเป็นจำนวนเต็มในหน่วยย่อยที่สุด (สตางค์/เซนต์) เสมอ
@@ -119,7 +119,7 @@ func main() {
         {
           t: "code",
           lang: "sql",
-          label: "simplebank/db/migration/000001_init_schema.up.sql (โค้ด DDL สร้างตาราง)",
+          label: "simplebank/db/migration/000001_init_schema.up.sql",
           c: `-- 1. ตาราง Accounts
 CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
