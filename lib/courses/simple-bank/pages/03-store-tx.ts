@@ -500,10 +500,110 @@ func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) 
 }`,
         },
         {
-          t: "ul",
-          c: [
-            "**ความพร้อมของ Data Access Layer**: ตอนนี้เรามีฟังก์ชันพื้นฐานครบทั้ง 3 ตารางแล้ว (`accounts`, `entries`, `transfers`) พร้อมสำหรับการนำไปร้อยเรียงกันในระดับ Transaction ในบทถัดไป!",
-          ],
+          t: "h2", c: "6. ทดสอบเชื่อมต่อและรัน CRUD จริงครั้งแรกด้วย `main.go`" },
+        {
+          t: "p",
+          c: "สำหรับคนที่เพิ่งเริ่มเขียน Go ครั้งแรก การเขียนโค้ด Data Layer มาหลายไฟล์ย่อมอยากเห็นผลลัพธ์ว่าโค้ดที่เขียนเชื่อมต่อกับ PostgreSQL ใน Docker และยิงคำสั่งได้จริงหรือไม่! เราจะสร้างไฟล์ `main.go` แผ่นแรกไว้ที่ Root Directory (`simplebank/main.go`) เพื่อทดสอบรันดูผลลัพธ์จริงทันที:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/main.go (สร้างไฟล์แรกเพื่อทดสอบ CRUD)",
+          c: `// ทดสอบเชื่อมต่อ PostgreSQL และยิงคำสั่ง CreateAccount + GetAccount ครั้งแรก
+// ทำเพื่อแก้ปัญหา: ให้ผู้เรียนเห็นการทำงานจริงของโค้ด Go ที่เพิ่งเขียน ก่อนจะไปต่อในบทที่ซับซ้อนขึ้น
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"simplebank/db"
+)
+
+const (
+	dbSource = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+)
+
+func main() {
+	// 1. เชื่อมต่อฐานข้อมูลผ่าน NewDB ที่เราเขียนไว้ใน db/db.go
+	conn, err := db.NewDB(dbSource)
+	if err != nil {
+		log.Fatal("❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้:", err)
+	}
+	defer conn.Close()
+
+	fmt.Println(">> 1. เชื่อมต่อ PostgreSQL สำเร็จ (Connection Pool พร้อมใช้งาน)!")
+
+	// 2. สร้างตัวแปร Queries สำหรับเรียกใช้ฟังก์ชัน CRUD
+	queries := db.New(conn)
+
+	// 3. กำหนด Context พร้อม Timeout 5 วินาทีเพื่อความปลอดภัย
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// 4. ทดลองสร้างบัญชีแรกของ Alice
+	arg := db.CreateAccountParams{
+		Owner:    "alice",
+		Balance:  1000, // เก็บ 1,000 หน่วยย่อย (เช่น 1,000 USD)
+		Currency: "USD",
+	}
+
+	account, err := queries.CreateAccount(ctx, arg)
+	if err != nil {
+		log.Fatal("❌ สร้างบัญชีล้มเหลว:", err)
+	}
+
+	fmt.Println(">> 2. สร้างบัญชีแรกของ Alice สำเร็จในตาราง accounts!")
+	fmt.Printf("      ID: %d | Owner: %s | Balance: %d %s\n\n",
+		account.ID, account.Owner, account.Balance, account.Currency)
+
+	// 5. ทดลองดึงข้อมูลบัญชีเดิมกลับมาตรวจสอบ (GetAccount)
+	fetchedAccount, err := queries.GetAccount(ctx, account.ID)
+	if err != nil {
+		log.Fatal("❌ ค้นหาบัญชีล้มเหลว:", err)
+	}
+
+	fmt.Println(">> 3. ดึงข้อมูลบัญชีเดิมกลับมาตรวจสอบ (GetAccount):")
+	fmt.Printf("      ยืนยันยอดเงินคงเหลือถูกต้อง: %d %s (ตรงกับที่บันทึกไว้ 100%%)\n",
+		fetchedAccount.Balance, fetchedAccount.Currency)
+}`,
+        },
+        {
+          t: "p",
+          c: "เปิด Terminal ที่โฟลเดอร์ `simplebank` แล้วสั่งรันด้วยคำสั่ง `go run main.go`:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "คำสั่งรัน go run main.go และผลลัพธ์ใน Terminal",
+          code: `go run main.go`,
+          out: `>> 1. เชื่อมต่อ PostgreSQL สำเร็จ (Connection Pool พร้อมใช้งาน)!
+>> 2. สร้างบัญชีแรกของ Alice สำเร็จในตาราง accounts!
+      ID: 1 | Owner: alice | Balance: 1000 USD
+
+>> 3. ดึงข้อมูลบัญชีเดิมกลับมาตรวจสอบ (GetAccount):
+      ยืนยันยอดเงินคงเหลือถูกต้อง: 1000 USD (ตรงกับที่บันทึกไว้ 100%)`,
+        },
+        {
+          t: "p",
+          c: "ลองเข้าไปส่องดูข้อมูลจริงใน PostgreSQL Container ด้วยคำสั่ง `psql`:",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ตรวจสอบแถวข้อมูลจริงใน PostgreSQL ผ่าน docker exec",
+          code: `docker exec -it postgres16 psql -U root -d simple_bank -c "SELECT * FROM accounts;"`,
+          out: ` id | owner | balance | currency |          created_at           
+----+-------+---------+----------+-------------------------------
+  1 | alice |    1000 | USD      | 2026-10-06 12:00:00.123456+00
+(1 row)`,
+        },
+        {
+          t: "callout",
+          title: "🎉 ก้าวแรกสำเร็จอย่างงดงาม!",
+          c: "ตอนนี้เรามีทั้งฐานข้อมูลที่รันบน Docker, ตารางที่ควบคุมด้วย Migration, และโค้ด Go Data Access Layer ที่สามารถคุยกับ PostgreSQL ได้จริง 100% ในบทถัดไป เราจะนำฟังก์ชันเหล่านี้มาร้อยเรียงเข้าด้วยกันภายใต้ **ACID Transaction Manager** เพื่อสร้างระบบโอนเงิน!",
         },
       ],
       en: [],

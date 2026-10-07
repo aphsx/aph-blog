@@ -344,12 +344,55 @@ func (server *Server) listAccounts(ctx *gin.Context) {
         { t: "h2", c: "5. ประกอบร่างและเปิดรันเซิร์ฟเวอร์ด้วย `main.go`" },
         {
           t: "p",
-          c: "หลังจากที่เราเขียน API Handlers สำหรับจัดการบัญชีครบถ้วนแล้ว ตอนนี้ถึงเวลาสร้างไฟล์ `main.go` ที่ Root Directory (`simplebank/main.go`) เพื่อเชื่อมต่อ Database เข้ากับ Gin Server และเปิดให้บริการจริง:",
+          c: "ในบทที่ 3 เราเคยสร้างไฟล์ `simplebank/main.go` ไว้เป็นสคริปต์สั้นๆ เพื่อทดสอบต่อ DB และยิง CRUD แต่ในบทนี้ ถึงเวลา **อัปเกรด `main.go`** ให้กลายเป็น Web Server เต็มรูปแบบ โดยการมัดรวม Store ส่งต่อให้ Gin ผ่าน `api.NewServer(store)` และสั่งเปิดบริการ HTTP บนพอร์ต 8080:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/main.go (จุดแก้ไข Diff: อัปเกรดจากสคริปต์ทดสอบสู่ Gin Server)",
+          c: ` package main
+
+ import (
++	"database/sql"
+ 	"log"
+
+ 	_ "github.com/lib/pq"
++	"simplebank/api"
+ 	db "simplebank/db"
+ )
+
+ const (
++	dbDriver      = "postgres"
+ 	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
++	serverAddress = "0.0.0.0:8080"
+ )
+
+ func main() {
+-	// 1. เชื่อมต่อฐานข้อมูลผ่าน NewDB
+-	conn, err := db.NewDB(dbSource)
++	conn, err := sql.Open(dbDriver, dbSource)
+ 	if err != nil {
+-		log.Fatal("❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้:", err)
++		log.Fatal("cannot connect to db:", err)
+ 	}
+
+-	// โค้ดเดิมในบทที่ 3: ทดลองยิง CreateAccount และ GetAccount ตรงๆ
+-	queries := db.New(conn)
+-	...
++	// โค้ดใหม่: ส่ง Store เข้า Gin Server แล้วเปิดบริการ HTTP
++	store := db.NewStore(conn)
++	server := api.NewServer(store)
++
++	err = server.Start(serverAddress)
++	if err != nil {
++		log.Fatal("cannot start server:", err)
++	}
+ }`,
         },
         {
           t: "code",
           lang: "go",
-          label: "simplebank/main.go (สร้างไฟล์ใหม่ที่ Root Directory)",
+          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังอัปเกรด)",
           c: `package main
 
 import (

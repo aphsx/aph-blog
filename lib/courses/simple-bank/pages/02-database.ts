@@ -262,10 +262,35 @@ Referenced by:
           c: "เราจะเขียนการเปลี่ยนแปลงของตารางลงในไฟล์ `.sql` ที่มีเลขเวอร์ชันกำกับ และเก็บไว้ใน Git เช่นเดียวกับ Source Code ทั่วไป โดยใช้เครื่องมือระดับสากลที่ชื่อว่า **golang-migrate**",
         },
 
-        { t: "h2", c: "1. เริ่มต้นสร้างโฟลเดอร์โปรเจกต์ & Go Module" },
+        { t: "h2", c: "1. ตรวจสอบสภาพแวดล้อม & เตรียมเครื่องมือ (Prerequisites)" },
         {
           t: "p",
-          c: "เปิด Terminal ขึ้นมา สร้างโฟลเดอร์หลักสำหรับโปรเจกต์ชื่อ `simplebank` และสั่งเริ่มต้น Go Module ด้วยคำสั่ง:",
+          c: "สำหรับคนที่เพิ่งเริ่มต้นเขียน Go หรือเพิ่งเคยใช้ Docker ให้ตรวจสอบความพร้อมของเครื่องมือใน Terminal ก่อนเริ่มต้น:",
+        },
+        {
+          t: "code",
+          lang: "bash",
+          label: "ตรวจสอบเวอร์ชันของ Go และ Docker บนเครื่อง",
+          c: `# 1. ตรวจสอบว่าติดตั้ง Go แล้วหรือยัง (แนะนำ Go 1.21 ขึ้นไป)
+go version
+
+# 2. ตรวจสอบว่าติดตั้ง Docker แล้วหรือยัง
+docker --version`,
+        },
+        {
+          t: "callout",
+          title: "⚠️ ปัญหาคลาสสิกที่มือใหม่เจอบ่อย & วิธีแก้",
+          c: `1. **"Cannot connect to the Docker daemon"**: เกิดจากยังไม่ได้เปิดโปรแกรม Docker Desktop ให้เปิดแอป Docker Desktop ขึ้นมาแล้วรอจนสถานะที่มุมซ้ายล่างขึ้นเป็นสีเขียว (Engine running)
+2. **"Bind for 0.0.0.0:5432 failed: port is already allocated"**: แปลว่าในเครื่องมี PostgreSQL รันค้างอยู่ ให้สั่งปิด service เก่า หรือแก้พอร์ตตอนสั่งรันเป็น \`-p 5433:5432\`
+3. **การติดตั้ง golang-migrate**: หากใช้ Mac สามารถสั่ง \`brew install golang-migrate\` ได้ทันที หรือหากใช้ Windows/Linux สามารถติดตั้งผ่านคำสั่ง Go ได้โดยตรง:
+   \`go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest\``,
+          warn: true,
+        },
+
+        { t: "h2", c: "2. เริ่มต้นสร้างโฟลเดอร์โปรเจกต์ & Go Module" },
+        {
+          t: "p",
+          c: "เปิด Terminal ขึ้นมา สร้างโฟลเดอร์หลักสำหรับโปรเจกต์ชื่อ `simplebank` และสั่งเริ่มต้น Go Module (คล้ายกับการรัน `npm init` ใน Node.js เพื่อสร้างไฟล์ `go.mod` มาคอยบันทึกแพ็กเกจ Dependencies ทั้งหมดของระบบ):",
         },
         {
           t: "code",
@@ -275,7 +300,7 @@ Referenced by:
 go mod init simplebank`,
         },
 
-        { t: "h2", c: "2. รัน PostgreSQL บนเครื่องด้วย Docker" },
+        { t: "h2", c: "3. รัน PostgreSQL บนเครื่องด้วย Docker" },
         {
           t: "p",
           c: "แทนที่จะต้องติดตั้งโปรแกรม PostgreSQL ลงบนเครื่องตรงๆ เราจะรันผ่าน Docker Container ซึ่งแยกสภาพแวดล้อมออกจากระบบปฏิบัติการอย่างสมบูรณ์ และพร้อมเริ่มใหม่ได้ทันทีในคำสั่งเดียว:",
@@ -298,21 +323,7 @@ go mod init simplebank`,
           ],
         },
 
-        { t: "h2", c: "3. ติดตั้งและใช้งาน `golang-migrate`" },
-        {
-          t: "p",
-          c: "ติดตั้งเครื่องมือ `migrate` CLI บนเครื่องของคุณ:",
-        },
-        {
-          t: "code",
-          lang: "bash",
-          label: "คำสั่งติดตั้ง golang-migrate",
-          c: `# สำหรับ macOS (ผ่าน Homebrew)
-brew install golang-migrate
-
-# หรือดาวน์โหลด Binary โดยตรงสำหรับ Linux/Windows
-# https://github.com/golang-migrate/migrate/releases`,
-        },
+        { t: "h2", c: "4. ติดตั้งและสร้างไฟล์ Migration ด้วย `golang-migrate`" },
         {
           t: "p",
           c: "สร้างไฟล์ Migration คู่แรกสำหรับโปรเจกต์ของเรา ด้วยคำสั่ง:",
@@ -337,7 +348,7 @@ simplebank/db/migration/000001_init_schema.down.sql`,
           ],
         },
 
-        { t: "h2", c: "4. เขียนไฟล์ Down Migration" },
+        { t: "h2", c: "5. เขียนไฟล์ Down Migration" },
         {
           t: "p",
           c: "ในไฟล์ `simplebank/db/migration/000001_init_schema.down.sql` เราต้องเขียนคำสั่งลบตาราง โดยต้องลบตารางที่มี Foreign Key อ้างอิงก่อนเสมอ (ลบย้อนศร):",
@@ -351,7 +362,7 @@ DROP TABLE IF EXISTS "transfers";
 DROP TABLE IF EXISTS "accounts";`,
         },
 
-        { t: "h2", c: "5. สร้าง `Makefile` รวมคำสั่งจัดการระบบ" },
+        { t: "h2", c: "6. สร้าง `Makefile` รวมคำสั่งจัดการระบบ" },
         {
           t: "p",
           c: "เพื่อไม่ให้เราต้องพิมพ์คำสั่ง Docker และ Migration ยาวๆ ซ้ำๆ ทุกวัน เราจะสร้างไฟล์ `Makefile` ไว้ที่ Root ของโปรเจกต์ (`simplebank/Makefile`) เพื่อเป็นศูนย์รวมคำสั่งสั้นๆ ที่เรียกใช้ง่าย:",
