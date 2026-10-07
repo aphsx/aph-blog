@@ -579,76 +579,7 @@ ok      simplebank/db   0.312s`,
           ],
         },
 
-        { t: "h2", c: "1. จัดการ Configuration ด้วย `spf13/viper`" },
-        {
-          t: "p",
-          c: "ในการสร้าง PASETO Token เราจำเป็นต้องใช้ Symmetric Key ขนาด 32 ไบต์ และระยะเวลาหมดอายุของตั๋ว (Token Duration) ซึ่งตามหลักสากล **เราต้องไม่ Hardcode คีย์เหล่านี้ลงในโค้ด Go เด็ดขาด** เราจะติดตั้งไลบรารี `spf13/viper` เพื่ออ่านค่าการตั้งค่าจากไฟล์ `app.env`:",
-        },
-        {
-          t: "code",
-          lang: "bash",
-          label: "ติดตั้ง spf13/viper",
-          c: `go get github.com/spf13/viper`,
-        },
-        {
-          t: "code",
-          lang: "env",
-          label: "simplebank/app.env (สร้างไฟล์ใหม่ที่ Root Directory)",
-          c: `DB_DRIVER=postgres
-DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
-SERVER_ADDRESS=0.0.0.0:8080
-TOKEN_SYMMETRIC_KEY=12345678901234567890123456789012
-ACCESS_TOKEN_DURATION=15m`,
-        },
-        {
-          t: "code",
-          lang: "go",
-          label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
-          c: `// จัดการโหลด Configuration ของระบบจากไฟล์ app.env และ Environment Variables ผ่าน Viper
-// ทำเพื่อแก้ปัญหา: หลีกเลี่ยงการ Hardcode ข้อมูลความลับ (Secret Key, DB Source, Port) ลงในโค้ด Go
-// ช่วยให้ระบบสามารถสลับการตั้งค่าระหว่าง Local, Test, และ Production ได้อย่างยืดหยุ่นโดยไม่ต้องคอมไพล์ใหม่
-package util
-
-import (
-	"time"
-
-	"github.com/spf13/viper"
-)
-
-// Config เก็บค่าการตั้งค่าทั้งหมดของแอปพลิเคชัน
-// ใช้ Struct Tag "mapstructure" เพื่อบอก Viper ว่าตัวแปรใน .env ตัวไหนตรงกับฟิลด์ใด
-type Config struct {
-	DBDriver            string        \`mapstructure:"DB_DRIVER"\`             // ชนิดฐานข้อมูล เช่น "postgres"
-	DBSource            string        \`mapstructure:"DB_SOURCE"\`             // Connection String ของ PostgreSQL
-	ServerAddress       string        \`mapstructure:"SERVER_ADDRESS"\`         // พอร์ตที่เปิดบริการ เช่น "0.0.0.0:8080"
-	TokenSymmetricKey   string        \`mapstructure:"TOKEN_SYMMETRIC_KEY"\`   // คีย์ลับ 32 ไบต์สำหรับเข้ารหัส PASETO
-	AccessTokenDuration time.Duration \`mapstructure:"ACCESS_TOKEN_DURATION"\` // อายุของ Token เช่น 15 นาที ("15m")
-}
-
-// LoadConfig อ่านการตั้งค่าจากโฟลเดอร์ path ที่กำหนด หรืออ่านทับจาก Environment Variables
-func LoadConfig(path string) (config Config, err error) {
-	// 1. ระบุตำแหน่งโฟลเดอร์ที่เก็บไฟล์คอนฟิก
-	viper.AddConfigPath(path)
-	// 2. ระบุชื่อไฟล์ (app) และประเภทไฟล์ (env) ซึ่งรวมกันเป็น app.env
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
-
-	// 3. เปิดระบบอ่านค่าจาก OS Environment ทับโดยอัตโนมัติ (หากมีตัวแปรชื่อตรงกันในระบบปฏิบัติการ)
-	viper.AutomaticEnv()
-
-	// 4. สั่งให้ Viper อ่านเนื้อหาไฟล์คอนฟิกเข้ามาในหน่วยความจำ
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
-	}
-
-	// 5. แปลงค่าการตั้งค่าที่อ่านได้ มาแกะใส่ตัวแปร Config Struct
-	err = viper.Unmarshal(&config)
-	return
-}`,
-        },
-
-        { t: "h2", c: "2. ออกแบบ Payload และ PasetoMaker ใน Go" },
+        { t: "h2", c: "1. ออกแบบ Payload และ PasetoMaker ใน Go" },
         {
           t: "p",
           c: "ติดตั้งแพ็กเกจที่จำเป็นสำหรับการสร้าง PASETO Token, UUID และการเข้ารหัสแบบ Symmetric:",
@@ -813,7 +744,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	return payload, nil
 }`,
         },
-        { t: "h2", c: "3. สร้าง Endpoint ล็อกอิน: `POST /users/login`" },
+        { t: "h2", c: "2. สร้าง Endpoint ล็อกอิน: `POST /users/login`" },
         {
           t: "p",
           c: "สร้าง Handler ล็อกอิน `POST /users/login` ใน `simplebank/api/user.go` เพื่อตรวจสอบรหัสผ่านและสร้าง PASETO Token ส่งกลับไปให้ผู้ใช้ โดยการแก้ไขไฟล์ `simplebank/api/user.go` เดิมมี 2 จุดสำคัญที่ต้องทำ:\n1. เพิ่ม `\"database/sql\"` เข้าไปใน `import` เพื่อใช้ตรวจสอบข้อผิดพลาด `sql.ErrNoRows` (เมื่อไม่พบชื่อผู้ใช้ในระบบ)\n2. เขียน Struct คำขอ/การตอบกลับ และฟังก์ชัน `loginUser` ต่อท้ายฟังก์ชัน `createUser` เดิม",
@@ -875,8 +806,8 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 +		return
 +	}
 +
-+	// 4. ออก PASETO Token รับรองตัวตน
-+	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
++	// 4. ออก PASETO Token รับรองตัวตน (กำหนดอายุ 15 นาทีตามที่ Server ระบุ)
++	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.tokenDuration)
 +	if err != nil {
 +		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 +		return
@@ -891,8 +822,8 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
         },
         {
           t: "callout",
-          title: "💡 การทำงานร่วมกันของ tokenMaker & config ใน Server struct",
-          c: "สังเกตว่าใน `loginUser` มีการเรียกใช้งาน `server.tokenMaker` และ `server.config.AccessTokenDuration`:\n- ตัวแปรทั้งสองนี้จะถูกผูกเข้ากับ `Server` struct ใน `simplebank/api/server.go`\n- เมื่อเราสร้าง Auth Middleware ในขั้นตอนที่ 4 และอัปเดต Handlers ในขั้นตอนที่ 5 เสร็จแล้ว ใน**ขั้นตอนที่ 6** เราจะทำการอัปเกรด `server.go` รวบยอด เพื่อลงทะเบียน Route `POST /users/login` และผูก Middleware ปกป้อง Endpoint อื่นๆ อย่างเป็นระบบ!",
+          title: "💡 การทำงานร่วมกันของ tokenMaker & tokenDuration ใน Server struct",
+          c: "สังเกตว่าใน `loginUser` มีการเรียกใช้งาน `server.tokenMaker` และ `server.tokenDuration`:\n- ตัวแปรทั้งสองนี้จะถูกผูกเข้ากับ `Server` struct ใน `simplebank/api/server.go`\n- เมื่อเราสร้าง Auth Middleware ในขั้นตอนที่ 3 และอัปเดต Handlers ในขั้นตอนที่ 4 เสร็จแล้ว ใน**ขั้นตอนที่ 5** เราจะทำการอัปเกรด `server.go` รวบยอด เพื่อลงทะเบียน Route `POST /users/login` และผูก Middleware ปกป้อง Endpoint อื่นๆ อย่างเป็นระบบ!",
         },
         {
           t: "code",
@@ -1007,8 +938,8 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	// 4. ออก PASETO Token รับรองตัวตน
-	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
+	// 4. ออก PASETO Token รับรองตัวตน (กำหนดอายุ 15 นาทีตามที่ Server ระบุ)
+	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.tokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -1022,7 +953,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 }`,
         },
 
-        { t: "h2", c: "4. การสร้าง Gin Authentication Middleware" },
+        { t: "h2", c: "3. การสร้าง Gin Authentication Middleware" },
         {
           t: "p",
           c: "เราจะสร้าง Middleware มาดักหน้าทุก Endpoint ที่ต้องการความปลอดภัย หากไม่มี Token หรือ Token ปลอม ระบบจะปฏิเสธคำขอทันทีด้วย **401 Unauthorized**:",
@@ -1517,34 +1448,34 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
 }`,
         },
 
-        { t: "h2", c: "6. นำทุก Route มาประกอบเข้าด้วยกันใน `simplebank/api/server.go`" },
+        { t: "h2", c: "5. นำทุก Route มาประกอบเข้าด้วยกันใน `simplebank/api/server.go`" },
         {
           t: "p",
-          c: "เมื่อเตรียมทั้ง Auth Middleware และ Handler ทุกตัวพร้อมแล้ว ให้นำมาผูกเข้าด้วยกันใน `simplebank/api/server.go` โดยเพิ่ม `config` และ `tokenMaker` ใน `Server` struct พร้อมแยก Public Routes (สมัครสมาชิก/ล็อกอิน) ออกจาก Protected Routes (บัญชีและการโอนเงิน):",
+          c: "เมื่อเตรียมทั้ง Auth Middleware และ Handler ทุกตัวพร้อมแล้ว ให้นำมาผูกเข้าด้วยกันใน `simplebank/api/server.go` โดยส่ง `tokenSymmetricKey` และ `tokenDuration` เข้ามาเพื่อสร้าง `tokenMaker` ใน `Server` struct พร้อมแยก Public Routes (สมัครสมาชิก/ล็อกอิน) ออกจาก Protected Routes (บัญชีและการโอนเงิน):",
         },
         {
           t: "code",
           lang: "diff",
           label: "simplebank/api/server.go (จุดแก้ไข Diff: ผูก TokenMaker และแยก Protected Routes)",
           c: ` type Server struct {
-+	config     util.Config
- 	store      *db.Store
-+	tokenMaker token.Maker
- 	router     *gin.Engine
+ 	store         *db.Store
++	tokenMaker    token.Maker
++	tokenDuration time.Duration
+ 	router        *gin.Engine
  }
  
 -func NewServer(store *db.Store) *Server {
 -	server := &Server{store: store}
-+func NewServer(config util.Config, store *db.Store) (*Server, error) {
-+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
++func NewServer(store *db.Store, tokenSymmetricKey string, tokenDuration time.Duration) (*Server, error) {
++	tokenMaker, err := token.NewPasetoMaker(tokenSymmetricKey)
 +	if err != nil {
 +		return nil, fmt.Errorf("cannot create token maker: %w", err)
 +	}
 +
 +	server := &Server{
-+		config:     config,
-+		store:      store,
-+		tokenMaker: tokenMaker,
++		store:         store,
++		tokenMaker:    tokenMaker,
++		tokenDuration: tokenDuration,
 +	}
  
  	router := gin.Default()
@@ -1584,34 +1515,34 @@ package api
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "simplebank/db"
 	"simplebank/token"
-	"simplebank/util"
 )
 
 type Server struct {
-	config     util.Config
-	store      *db.Store
-	tokenMaker token.Maker
-	router     *gin.Engine
+	store         *db.Store
+	tokenMaker    token.Maker
+	tokenDuration time.Duration
+	router        *gin.Engine
 }
 
-// NewServer รับ config และ store พร้อมสร้าง PasetoMaker สำหรับสร้างและตรวจสอบ Token
-func NewServer(config util.Config, store *db.Store) (*Server, error) {
-	// 1. สร้าง Instance ของ PasetoMaker จากคีย์ลับใน Config
-	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+// NewServer รับ store, tokenSymmetricKey และ tokenDuration พร้อมสร้าง PasetoMaker สำหรับสร้างและตรวจสอบ Token
+func NewServer(store *db.Store, tokenSymmetricKey string, tokenDuration time.Duration) (*Server, error) {
+	// 1. สร้าง Instance ของ PasetoMaker จากคีย์ลับสมมาตร 32 bytes
+	tokenMaker, err := token.NewPasetoMaker(tokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("ไม่สามารถสร้าง token maker ได้: %w", err)
 	}
 
 	server := &Server{
-		config:     config,
-		store:      store,
-		tokenMaker: tokenMaker,
+		store:         store,
+		tokenMaker:    tokenMaker,
+		tokenDuration: tokenDuration,
 	}
 
 	router := gin.Default()
@@ -1647,57 +1578,50 @@ func errorResponse(err error) gin.H {
 }`,
         },
 
-        { t: "h2", c: "7. อัปเดต `main.go` และสตาร์ตเซิร์ฟเวอร์ (Terminal 1)" },
+        { t: "h2", c: "6. อัปเดต `main.go` และสตาร์ตเซิร์ฟเวอร์ (Terminal 1)" },
         {
           t: "p",
-          c: "อัปเดตไฟล์ `simplebank/main.go` ให้โหลด Configuration จาก `app.env` ผ่าน `util.LoadConfig` แล้วส่ง `config` เข้าไปตอนสร้าง Server ด้วย `api.NewServer(config, store)`:",
+          c: "อัปเดตไฟล์ `simplebank/main.go` ให้ประกาศคีย์ลับ `tokenSymmetricKey` (32 อักขระ) และ `tokenDuration` (15 นาที) แล้วส่งเข้าไปตอนสร้าง Server ด้วย `api.NewServer(store, tokenSymmetricKey, tokenDuration)`:",
         },
         {
           t: "code",
           lang: "diff",
-          label: "simplebank/main.go (จุดแก้ไข Diff: โหลด Config ผ่าน Viper และส่งเข้า NewServer)",
+          label: "simplebank/main.go (จุดแก้ไข Diff: เพิ่ม Token Key/Duration และส่งเข้า NewServer)",
           c: ` package main
  
  import (
  	"database/sql"
  	"log"
++	"time"
  
  	_ "github.com/lib/pq"
  	"simplebank/api"
  	db "simplebank/db"
-+	"simplebank/util"
  )
  
--const (
--	dbDriver      = "postgres"
--	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
--	serverAddress = "0.0.0.0:8080"
--)
--
+ const (
+ 	dbDriver      = "postgres"
+ 	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+ 	serverAddress = "0.0.0.0:8080"
++	// คีย์ลับสมมาตร 32 อักขระสำหรับเข้ารหัส ChaCha20-Poly1305 ใน PASETO
++	tokenSymmetricKey = "12345678901234567890123456789012"
++	tokenDuration     = 15 * time.Minute
+ )
+ 
  func main() {
--	conn, err := sql.Open(dbDriver, dbSource)
-+	// 1. โหลดการตั้งค่าจากไฟล์ app.env ในโฟลเดอร์ Root
-+	config, err := util.LoadConfig(".")
-+	if err != nil {
-+		log.Fatal("cannot load config:", err)
-+	}
-+
-+	// 2. เชื่อมต่อฐานข้อมูลโดยใช้ค่าจาก Config
-+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+ 	conn, err := sql.Open(dbDriver, dbSource)
  	if err != nil {
  		log.Fatal("cannot connect to db:", err)
  	}
  
  	store := db.NewStore(conn)
 -	server := api.NewServer(store)
-+	server, err := api.NewServer(config, store)
++	server, err := api.NewServer(store, tokenSymmetricKey, tokenDuration)
 +	if err != nil {
 +		log.Fatal("cannot create server:", err)
 +	}
  
--	err = server.Start(serverAddress)
-+	// 3. สตาร์ตเซิร์ฟเวอร์ตามที่อยู่พอร์ตใน Config
-+	err = server.Start(config.ServerAddress)
+ 	err = server.Start(serverAddress)
  	if err != nil {
  		log.Fatal("cannot start server:", err)
  	}
@@ -1706,45 +1630,46 @@ func errorResponse(err error) gin.H {
         {
           t: "code",
           lang: "go",
-          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังโหลด Config ผ่าน Viper)",
+          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อมระบบ Authentication)",
           c: `package main
 
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	_ "github.com/lib/pq"
 	"simplebank/api"
 	db "simplebank/db"
-	"simplebank/util"
+)
+
+const (
+	dbDriver          = "postgres"
+	dbSource          = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+	serverAddress     = "0.0.0.0:8080"
+	tokenSymmetricKey = "12345678901234567890123456789012" // คีย์ลับ 32 bytes สำหรับ ChaCha20-Poly1305
+	tokenDuration     = 15 * time.Minute                  // อายุของ Token (15 นาที)
 )
 
 // จุดเริ่มต้นการทำงาน (Entry Point) ของระบบ Simple Bank ทั้งหมด
 func main() {
-	// 1. โหลดค่า Config จากไฟล์ app.env และ Environment Variables ผ่าน Viper
-	// ทำเพื่อ: ดึงค่า ServerAddress, TokenSymmetricKey, DBSource โดยไม่ Hardcode ไว้ในโค้ด
-	config, err := util.LoadConfig(".")
-	if err != nil {
-		log.Fatal("cannot load config:", err)
-	}
-
-	// 2. สร้าง Connection Pool เชื่อมต่อกับ PostgreSQL
-	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	// 1. สร้าง Connection Pool เชื่อมต่อกับ PostgreSQL
+	conn, err := sql.Open(dbDriver, dbSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
 
-	// 3. ห่อหุ้ม Connection ด้วย SQLStore สำหรับรองรับ Database Transactions (โอนเงิน)
+	// 2. ห่อหุ้ม Connection ด้วย SQLStore สำหรับรองรับ Database Transactions (โอนเงิน)
 	store := db.NewStore(conn)
 
-	// 4. สร้าง HTTP Server โดยผูก Routing, PasetoMaker, และ Middleware เข้ากับ Store
-	server, err := api.NewServer(config, store)
+	// 3. สร้าง HTTP Server โดยผูก Routing, PasetoMaker, และ Middleware เข้ากับ Store
+	server, err := api.NewServer(store, tokenSymmetricKey, tokenDuration)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
 
-	// 5. สตาร์ต HTTP Server ที่พอร์ตตามที่กำหนดไว้ใน Config (เช่น 0.0.0.0:8080)
-	err = server.Start(config.ServerAddress)
+	// 4. สตาร์ต HTTP Server ที่พอร์ต 8080
+	err = server.Start(serverAddress)
 	if err != nil {
 		log.Fatal("cannot start server:", err)
 	}
@@ -1767,7 +1692,7 @@ func main() {
 [GIN-debug] [WARNING] Listening and serving HTTP on 0.0.0.0:8080`,
         },
 
-        { t: "h2", c: "8. ทดสอบ API ครบวงจร (ตั้งค่า Request ใน Postman / API Client)" },
+        { t: "h2", c: "7. ทดสอบ API ครบวงจร (ตั้งค่า Request ใน Postman / API Client)" },
         {
           t: "p",
           c: "เปิด Postman หรือ API Client เพื่อทดสอบ Flow การทำงานจริงตั้งแต่การล็อกอินรับ PASETO Token ไปจนถึงการทำธุรกรรมโอนเงินที่มีเกราะป้องกันความปลอดภัย:",
@@ -1906,22 +1831,264 @@ Content-Type: application/json; charset=utf-8
   "bank-config-docker-prod": {
     slug: "bank-config-docker-prod",
     title: {
-      th: "Docker Deployment & Production Checklist",
-      en: "Multi-Stage Dockerfile, Docker Compose & Production Readiness",
+      th: "จัดการ Config ด้วย Viper, Docker & Production Checklist",
+      en: "Configuration with Viper, Multi-Stage Dockerfile & Production Readiness",
     },
     lead: {
-      th: "เขียน Multi-Stage Dockerfile ย่อขนาดแอป Go เหลือ 20MB, จัดการ Container ด้วย Docker Compose และเช็กลิสต์ความพร้อมก่อนรันจริงบน Production",
-      en: "Ultra-lean multi-stage Docker builds, docker-compose orchestration, and the production readiness checklist.",
+      th: "แยกการตั้งค่าด้วย spf13/viper ตามหลัก 12-Factor App, เขียน Multi-Stage Dockerfile ย่อขนาดแอป Go เหลือ 20MB, จัดการ Container ด้วย Docker Compose และเช็กลิสต์ความพร้อมก่อนรันจริงบน Production",
+      en: "Decouple configurations with spf13/viper (12-Factor App), ultra-lean multi-stage Docker builds, docker-compose orchestration, and production readiness.",
     },
     group: "7. Security, Auth & Production",
     blocks: {
       th: [
         {
           t: "p",
-          c: "ในการนำระบบซอฟต์แวร์ขึ้นไปรันบน Production สภาพแวดล้อมที่เสถียรและจำลองได้เหมือนเดิมทุกที่ (Reproducible Environment) เป็นสิ่งสำคัญอย่างยิ่ง เราจะนำเทคโนโลยี Container อย่าง Docker เข้ามาช่วยแพ็กแอปพลิเคชัน Go และฐานข้อมูลให้พร้อมรันได้ทันทีบนคลาวด์",
+          c: "ในการนำระบบซอฟต์แวร์ขึ้นไปรันบน Production สภาพแวดล้อมที่ยืดหยุ่นและจำลองได้เหมือนเดิมทุกที่ (Reproducible Environment) เป็นสิ่งสำคัญอย่างยิ่ง ก่อนที่เราจะแพ็กแอปพลิเคชันลงใน Container เราจำเป็นต้องแยกการตั้งค่าคอนฟิก (Configuration) ออกจากซอร์สโค้ดตามหลักการของ **12-Factor App** เพื่อให้สามารถปรับเปลี่ยน Connection String หรือ Secret Key ได้ผ่าน Environment Variables โดยไม่ต้องคอมไพล์โค้ดใหม่ทุกครั้ง",
         },
 
-        { t: "h2", c: "1. การเขียน Multi-Stage Dockerfile แบบมืออาชีพ" },
+        { t: "h2", c: "1. รวมศูนย์การตั้งค่าระบบด้วย `spf13/viper` (Configuration Management)" },
+        {
+          t: "p",
+          c: "ที่ผ่านมาใน `main.go` เรากำหนดค่าการเชื่อมต่อฐานข้อมูล (`dbSource`), พอร์ต (`serverAddress`), และ Secret Key สำหรับออก Token (`tokenSymmetricKey`) เอาไว้ในตัวแปรค่าคงที่ (`const`). แต่ในโลกความเป็นจริงตามหลักการ **12-Factor App**:\n- **ห้ามฝังรหัสผ่านหรือ Secret Key ในซอร์สโค้ด:** เพื่อป้องกันการเผลอ Commit ขึ้น Git หรือ Public Repository\n- **ปรับเปลี่ยนตามสภาพแวดล้อมได้ยืดหยุ่น:** ในเครื่อง Dev, Staging และ Production จะมี URL ฐานข้อมูลและพอร์ตที่ต่างกัน เราไม่ควรต้อง Re-compile ไบนารีใหม่ทุกครั้งที่ย้ายเครื่อง\n\nเราจึงนำ **Viper** (`github.com/spf13/viper`) ซึ่งเป็นไลบรารีจัดการ Config ที่ได้รับความนิยมสูงสุดในชุมชน Go เข้ามาช่วยอ่านค่าจากทั้งไฟล์ `.env` และ Environment Variables โดยอัตโนมัติ",
+        },
+        {
+          t: "codeout",
+          lang: "bash",
+          label: "ติดตั้งแพ็กเกจ Viper",
+          code: `go get github.com/spf13/viper`,
+          out: `go: downloading github.com/spf13/viper v1.18.2
+go: added github.com/spf13/viper v1.18.2`,
+        },
+        {
+          t: "p",
+          c: "สร้างไฟล์คอนฟิก `app.env` ไว้ที่โฟลเดอร์ Root ของโปรเจกต์ (อย่าลืมเพิ่ม `app.env` ลงใน `.gitignore` สำหรับ Production):",
+        },
+        {
+          t: "code",
+          lang: "env",
+          label: "simplebank/app.env (สร้างไฟล์ใหม่ที่ Root Directory)",
+          c: `DB_DRIVER=postgres
+DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+SERVER_ADDRESS=0.0.0.0:8080
+TOKEN_SYMMETRIC_KEY=12345678901234567890123456789012
+TOKEN_DURATION=15m`,
+        },
+        {
+          t: "p",
+          c: "สร้างตัวช่วยโหลด Config ใน `simplebank/util/config.go` โดยใช้ Struct Tag `mapstructure` เพื่อจับคู่ชื่อตัวแปรใน `.env` เข้ากับฟิลด์ใน Go struct แบบ Type-safe:",
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
+          c: `// จัดการ Configuration ด้วย Viper ตามหลักการ 12-Factor App
+// ทำเพื่อแก้ปัญหา: โหลดค่าการตั้งค่าจากไฟล์ .env และ Environment Variables แบบ Type-safe
+package util
+
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
+
+// Config เก็บค่าการตั้งค่าทั้งหมดของแอปพลิเคชัน
+// ค่าใน struct tag "mapstructure" จะผูกกับชื่อตัวแปรในไฟล์ app.env
+type Config struct {
+	DBDriver          string        \`mapstructure:"DB_DRIVER"\`
+	DBSource          string        \`mapstructure:"DB_SOURCE"\`
+	ServerAddress     string        \`mapstructure:"SERVER_ADDRESS"\`
+	TokenSymmetricKey string        \`mapstructure:"TOKEN_SYMMETRIC_KEY"\`
+	TokenDuration     time.Duration \`mapstructure:"TOKEN_DURATION"\`
+}
+
+// LoadConfig อ่านการตั้งค่าจากไฟล์ path หรือ Environment Variables
+func LoadConfig(path string) (config Config, err error) {
+	viper.AddConfigPath(path)
+	viper.SetConfigName("app")
+	viper.SetConfigType("env") // ค้นหา app.env
+
+	// AutomaticEnv ทำให้อ่านค่าจาก OS Environment Variables แทนได้โดยอัตโนมัติหากมีกำหนดไว้
+	viper.AutomaticEnv()
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+
+	err = viper.Unmarshal(&config)
+	return
+}`,
+        },
+        {
+          t: "p",
+          c: "อัปเดต `simplebank/api/server.go` ให้เก็บ `config util.Config` ใน `Server` struct และปรับ `NewServer` ให้รับ `config` แทนพารามิเตอร์แยก:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/server.go (จุดแก้ไข Diff: เปลี่ยนมารับ config util.Config)",
+          c: ` package api
+ 
+ import (
+ 	"fmt"
+-	"time"
+ 
+ 	"github.com/gin-gonic/gin"
+ 	"github.com/gin-gonic/gin/binding"
+ 	"github.com/go-playground/validator/v10"
+ 	db "simplebank/db"
+ 	"simplebank/token"
++	"simplebank/util"
+ )
+ 
+ type Server struct {
++	config        util.Config
+ 	store         *db.Store
+ 	tokenMaker    token.Maker
+-	tokenDuration time.Duration
+ 	router        *gin.Engine
+ }
+ 
+-func NewServer(store *db.Store, tokenSymmetricKey string, tokenDuration time.Duration) (*Server, error) {
+-	tokenMaker, err := token.NewPasetoMaker(tokenSymmetricKey)
++func NewServer(config util.Config, store *db.Store) (*Server, error) {
++	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("ไม่สามารถสร้าง token maker ได้: %w", err)
+ 	}
+ 
+ 	server := &Server{
++		config:        config,
+ 		store:         store,
+ 		tokenMaker:    tokenMaker,
+-		tokenDuration: tokenDuration,
+ 	}
+ 
+ 	router := gin.Default()`,
+        },
+        {
+          t: "p",
+          c: "ใน `simplebank/api/user.go` ปรับฟังก์ชัน `loginUser` ให้ดึงระยะเวลาหมดอายุของ Token จาก `server.config.TokenDuration`:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/api/user.go (จุดแก้ไข Diff: ดึง tokenDuration จาก server.config)",
+          c: ` 	// 4. ออก PASETO Token รับรองตัวตน (กำหนดอายุ 15 นาทีตาม Config)
+-	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.tokenDuration)
++	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.TokenDuration)
+ 	if err != nil {
+ 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+ 		return
+ 	}`,
+        },
+        {
+          t: "p",
+          c: "อัปเดต `simplebank/main.go` ให้ตัดค่าคงที่ `const` ทั้งหมดออก แล้วโหลดผ่าน `util.LoadConfig(\".\")`:",
+        },
+        {
+          t: "code",
+          lang: "diff",
+          label: "simplebank/main.go (จุดแก้ไข Diff: โหลด Config จาก Viper แทนการ Hardcode)",
+          c: ` package main
+ 
+ import (
+ 	"database/sql"
+ 	"log"
+-	"time"
+ 
+ 	_ "github.com/lib/pq"
+ 	"simplebank/api"
+ 	db "simplebank/db"
++	"simplebank/util"
+ )
+ 
+-const (
+-	dbDriver          = "postgres"
+-	dbSource          = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
+-	serverAddress     = "0.0.0.0:8080"
+-	tokenSymmetricKey = "12345678901234567890123456789012"
+-	tokenDuration     = 15 * time.Minute
+-)
+-
+ func main() {
+-	conn, err := sql.Open(dbDriver, dbSource)
++	// 1. โหลดค่าการตั้งค่าจากไฟล์ app.env หรือ Environment Variables
++	config, err := util.LoadConfig(".")
++	if err != nil {
++		log.Fatal("cannot load config:", err)
++	}
++
++	// 2. เชื่อมต่อฐานข้อมูลโดยใช้ค่าจาก Config
++	conn, err := sql.Open(config.DBDriver, config.DBSource)
+ 	if err != nil {
+ 		log.Fatal("cannot connect to db:", err)
+ 	}
+ 
+ 	store := db.NewStore(conn)
+-	server, err := api.NewServer(store, tokenSymmetricKey, tokenDuration)
++	server, err := api.NewServer(config, store)
+ 	if err != nil {
+ 		log.Fatal("cannot create server:", err)
+ 	}
+ 
+-	err = server.Start(serverAddress)
++	// 3. สตาร์ตเซิร์ฟเวอร์ที่ Port ตาม Config
++	err = server.Start(config.ServerAddress)
+ 	if err != nil {
+ 		log.Fatal("cannot start server:", err)
+ 	}
+ }`,
+        },
+        {
+          t: "code",
+          lang: "go",
+          label: "simplebank/main.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังโหลด Config ผ่าน Viper)",
+          c: `package main
+
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/lib/pq"
+	"simplebank/api"
+	db "simplebank/db"
+	"simplebank/util"
+)
+
+// จุดเริ่มต้นการทำงาน (Entry Point) ของระบบ Simple Bank ทั้งหมด
+func main() {
+	// 1. โหลดค่า Config จากไฟล์ app.env และ Environment Variables ผ่าน Viper
+	// ทำเพื่อ: ดึงค่า ServerAddress, TokenSymmetricKey, DBSource โดยไม่ Hardcode ไว้ในโค้ด
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	// 2. สร้าง Connection Pool เชื่อมต่อกับ PostgreSQL
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	// 3. ห่อหุ้ม Connection ด้วย SQLStore สำหรับรองรับ Database Transactions (โอนเงิน)
+	store := db.NewStore(conn)
+
+	// 4. สร้าง HTTP Server โดยผูก Routing, PasetoMaker, และ Middleware เข้ากับ Store
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
+
+	// 5. สตาร์ต HTTP Server ที่พอร์ตตามที่กำหนดไว้ใน Config (เช่น 0.0.0.0:8080)
+	err = server.Start(config.ServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
+}`,
+        },
+
+        { t: "h2", c: "2. การเขียน Multi-Stage Dockerfile แบบมืออาชีพ" },
         {
           t: "p",
           c: "หากเราใช้ Docker Image ของ Go ทั่วไปในการรัน ขนาดของ Container จะใหญ่ถึง 800MB–1GB ซึ่งเปลืองพื้นที่และดาวน์โหลดช้ามาก เราสามารถใช้เทคนิค **Multi-Stage Build** เพื่อคอมไพล์โค้ดใน Stage แรก แล้วก๊อปปี้เฉพาะไฟล์ไบนารีที่รันได้จริงไปใส่ใน Image ตัวจิ๋วอย่าง `alpine` ใน Stage ที่สอง:",
@@ -1996,7 +2163,7 @@ simplebank   latest   e3b0c44298fc   12 seconds ago   21.4MB
           c: "ขนาดของ Docker Image จะลดลงจากเกือบ 1,000 MB เหลือเพียงแค่ **~20 MB เท่านั้น!** ปลอดภัยกว่าเพราะไม่มี Compiler หรือเครื่องมือที่ไม่จำเป็นตกค้างอยู่ในระบบ ช่วยลดช่องโหว่จากการถูกโจมตี (Attack Surface)",
         },
 
-        { t: "h2", c: "2. ประกอบร่างด้วย `docker-compose.yml`" },
+        { t: "h2", c: "3. ประกอบร่างด้วย `docker-compose.yml`" },
         {
           t: "p",
           c: "ไฟล์ `docker-compose.yml` จะช่วยให้เราสามารถสตาร์ตทั้งเซิร์ฟเวอร์ Go และฐานข้อมูล PostgreSQL ขึ้นมาพร้อมกันได้ในคำสั่งเดียว:",
@@ -2031,8 +2198,13 @@ services:
     depends_on:
       - postgres`,
         },
+        {
+          t: "callout",
+          title: "💡 ความมหัศจรรย์ของ viper.AutomaticEnv()",
+          c: "สังเกตหรือไม่ว่าใน `docker-compose.yml` เรากำหนด `DB_SOURCE` ชี้ไปยัง `postgres:5432` แทน `localhost:5432` ใน `app.env` แต่เราไม่ต้องแก้ไฟล์ `app.env` เลย! เพราะคำสั่ง `viper.AutomaticEnv()` จะอ่านค่าจาก Environment Variable ใน Docker มาแทนที่ค่าในไฟล์ให้อัตโนมัติ",
+        },
 
-        { t: "h2", c: "3. Production Readiness Checklist สำหรับระบบการเงิน" },
+        { t: "h2", c: "4. Production Readiness Checklist สำหรับระบบการเงิน" },
         {
           t: "p",
           c: "ก่อนที่คุณจะนำระบบธนาคารขึ้นสู่อินเทอร์เน็ตจริง จงตรวจสอบเช็กลิสต์ความปลอดภัยเหล่านี้ให้ครบทุกข้อ:",
@@ -2048,7 +2220,7 @@ services:
           ],
         },
 
-        { t: "h2", c: "4. สคริปต์ทดสอบ End-to-End ครบวงจร (End-to-End Verification Script)" },
+        { t: "h2", c: "5. สคริปต์ทดสอบ End-to-End ครบวงจร (End-to-End Verification Script)" },
         {
           t: "p",
           c: "เพื่อพิสูจน์ว่าระบบ Simple Bank ของเราทำงานประสานกันตั้งแต่ชั้น Web API, Authentication Middleware, Business Logic Transaction, จนถึง PostgreSQL Database อย่างไร้รอยต่อ ให้เราสร้างสคริปต์ `test_e2e.sh` ที่จำลอง User Journey ของจริงตั้งแต่ต้นจนจบ:",

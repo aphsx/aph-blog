@@ -283,7 +283,8 @@ docker --version`,
           c: `1. **"Cannot connect to the Docker daemon"**: เกิดจากยังไม่ได้เปิดโปรแกรม Docker Desktop ให้เปิดแอป Docker Desktop ขึ้นมาแล้วรอจนสถานะที่มุมซ้ายล่างขึ้นเป็นสีเขียว (Engine running)
 2. **"Bind for 0.0.0.0:5432 failed: port is already allocated"**: แปลว่าในเครื่องมี PostgreSQL รันค้างอยู่ ให้สั่งปิด service เก่า หรือแก้พอร์ตตอนสั่งรันเป็น \`-p 5433:5432\`
 3. **การติดตั้ง golang-migrate**: หากใช้ Mac สามารถสั่ง \`brew install golang-migrate\` ได้ทันที หรือหากใช้ Windows/Linux สามารถติดตั้งผ่านคำสั่ง Go ได้โดยตรง:
-   \`go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest\``,
+   \`go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest\`
+4. **"command not found: migrate" หลังรัน go install**: เกิดจากโฟลเดอร์ไบนารีของ Go ยังไม่ได้ถูกเพิ่มใน PATH ให้รันคำสั่ง \`export PATH=$PATH:$(go env GOPATH)/bin\` ใน Terminal (หรือบันทึกลงใน \`~/.zshrc\` หรือ \`~/.bashrc\`) แล้วทดสอบด้วย \`migrate -version\` อีกครั้ง`,
           warn: true,
         },
 
