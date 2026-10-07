@@ -11,9 +11,14 @@ export const interviewPages: Record<string, Page> = {
       th: "รวม 10 คำถามสัมภาษณ์ยอดฮิตของบริษัทชั้นนำเกี่ยวกับระบบธนาคาร, Concurrency, Deadlock, Idempotency, และการขยายระบบสู่ Distributed Architecture สเกลล้านผู้ใช้",
       en: "Mastering top 10 backend interview questions on banking systems, concurrency, deadlocks, idempotency, and distributed architectures.",
     },
-    group: "8. เตรียมตัวสัมภาษณ์งาน",
+    group: "8. เล่าตอนสัมภาษณ์",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ระบบโอนได้แล้ว บทนี้ไม่เขียนฟีเจอร์ใหม่ มันคือวิธีเล่าของที่เพิ่งสร้าง เป็นคำตอบเรื่องเงินงอก ล็อกตาย และการโอนที่สำเร็จทั้งก้อน",
+        },
         {
           t: "p",
           c: "ในการสัมภาษณ์งานตำแหน่ง Backend Engineer (ตั้งแต่ระดับ Junior, Mid-Level จนถึง Senior/Staff) บริษัทเทคโนโลยีชั้นนำ เช่น Shopee, Grab, Agoda, LINE, ธนาคาร หรือแม้กระทั่ง Big Tech ระดับโลก มักจะหยิบยกโจทย์ **'ระบบโอนเงิน / การจัดการยอดเงิน (Money Transfer & Balance Management)'** มาเป็นข้อสอบหลักเสมอ",

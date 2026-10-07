@@ -11,9 +11,14 @@ export const testingPages: Record<string, Page> = {
       th: "เขียน Unit Test ทดสอบฟังก์ชัน CRUD ของบัญชีธนาคารอย่างเป็นระบบ ด้วย testing package และ testify/require พร้อมสร้างฟังก์ชันสุ่มข้อมูลจำลอง",
       en: "Writing comprehensive unit tests for account CRUD operations using Go's testing package and testify/require.",
     },
-    group: "5. Automated Testing & Concurrency Test",
+    group: "3. ให้ Go คุยกับฐานข้อมูล แล้วพิสูจน์",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ย้ายมาอยู่ทันทีหลัง CRUD เพราะเทสต์ในบทนี้ตรวจแค่สร้างบัญชี อ่านบัญชี และลบบัญชี ยังไม่มีการโอน และยังไม่ยิงพร้อมกัน เทสต์โอนพร้อมกันอยู่หลังบท deadlock",
+        },
         {
           t: "p",
           c: "ในระบบการเงิน คำพูดที่ว่า 'โค้ดของฉันเขียนเสร็จแล้ว ลองกดเล่นดูก็ปกติดี' เป็นสิ่งที่ไม่เพียงพอ คุณไม่สามารถปล่อยระบบขึ้น Production ได้โดยปราศจาก **Automated Tests (ชุดทดสอบอัตโนมัติ)** ที่ครอบคลุมทุกกรณี เพราะการแก้โค้ดเพียงบรรทัดเดียวในอนาคต อาจไปพังส่วนอื่นของระบบโดยไม่รู้ตัว (Regression)",
@@ -272,9 +277,14 @@ ok      simplebank/db   0.142s`,
       th: "เขียนโค้ด Go จำลองเหตุการณ์ยิงถล่มโอนเงินพร้อมกัน 5-10 คำสั่งขนาน พิสูจน์ Data Consistency และทดสอบว่าระบบทนทานต่อ Deadlock จริง 100%",
       en: "Writing parallel stress tests with goroutines and channels to prove consistency and verify zero deadlocks.",
     },
-    group: "5. Automated Testing & Concurrency Test",
+    group: "5. สองคนกดพร้อมกัน",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ล็อกแถวและลำดับการล็อกเขียนเสร็จแล้ว บทนี้เอา goroutine จากบท Go มาใช้จริง ยิงโอนพร้อมกันแล้วดูว่ายอดไม่เพี้ยน และโอนสวนทางแล้วไม่ค้าง บรรทัด `_, err := store.TransferTx(...)` คือการทิ้งผลโอน เก็บแค่ error",
+        },
         {
           t: "p",
           c: "นี่คือบททดสอบที่สำคัญที่สุดของระบบธนาคาร! Unit Test ปกติจะรันทีละคำสั่งตามลำดับ (Sequential) ซึ่งไม่สามารถตรวจจับ Race Condition หรือ Deadlock ได้เลย เราต้องจำลองสถานการณ์จริงโดยการปล่อย **หลาย Goroutines ยิงคำสั่งโอนเงินเข้าฐานข้อมูลในเสี้ยววินาทีเดียวกัน**",

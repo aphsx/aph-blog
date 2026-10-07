@@ -93,7 +93,7 @@ export const COURSE_METAS: CourseNavMeta[] = [
     id: "simple-bank",
     title: "Simple Bank in Go",
     description:
-      "สร้างระบบธนาคารจำลองด้วยภาษา Go และ PostgreSQL — เจาะลึก ACID Transactions, Row Locking, Deadlock Prevention, Concurrency Testing, และ RESTful API",
+      "สร้างระบบธนาคารจำลองด้วย Go และ PostgreSQL เรียงตามคำถาม: เงินอยู่ตารางไหน, โค้ดขยับเงินยังไง, สองคนกดพร้อมกันแล้วไม่พังยังไง, แล้วค่อยเปิดเป็น API",
     badge: "🏦",
     overviewSlug: "bank-overview",
     nav: simpleBankNav,

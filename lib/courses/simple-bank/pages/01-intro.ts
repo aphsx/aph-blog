@@ -11,7 +11,7 @@ export const introPages: Record<string, Page> = {
       th: "ทำไมโปรเจกต์ธนาคารจำลอง (Simple Bank) ถึงเป็นข้อสอบวัดกึ๋นของ Backend Engineer ระดับสากล — เจาะลึกโจทย์ปัญหา Data Consistency, ACID, และ Concurrency ที่ระบบจริงต้องเจอ",
       en: "Why building a Bank Simulation is the ultimate test for Backend Engineers — mastering Data Consistency, ACID, and Concurrency in Go.",
     },
-    group: "1. บทนำ & รากฐาน",
+    group: "1. ทำไมเงินถึงผิดไม่ได้",
     blocks: {
       th: [
         {
@@ -85,31 +85,24 @@ export const introPages: Record<string, Page> = {
 สถานะเงินในระบบ: ยอดเงินรวมของธนาคารติดลบ ขาดทุนทันที`,
         },
 
-        { t: "h2", c: "เส้นทางและสิ่งที่คุณจะได้ลงมือสร้างจริง" },
+        { t: "h2", c: "ทางเดินของคอร์ส" },
         {
           t: "p",
-          c: "ตลอดทั้งคอร์สนี้ คุณจะไม่ได้แค่ท่องทฤษฎี แต่จะเขียนโค้ด Go และ SQL ด้วยมือตัวเองทุกบรรทัด โดยมีขั้นตอนดังนี้:",
+          c: "ลำดับบทเรียงตามคำถามที่ต้องตอบก่อนจะไปข้อถัดไป ไม่ได้เรียงตามชื่อไลบรารี เทสต์สร้างบัญชีอยู่ทันทีหลังเขียน CRUD เพราะตอนนั้นพิสูจน์ได้แล้ว เทสต์โอนพร้อมกันอยู่หลังบท deadlock เพราะต้องมีโค้ดโอนที่กันล็อกตายก่อน โค้ดในบทหลัง ๆ เป็นโค้ดโปรเจกต์จริง กติกา Go ที่ยังไม่คุ้นให้อ่านจากบท Go จากศูนย์ก่อน",
         },
         {
-          t: "ul",
-          c: [
-            "**ออกแบบ Database Schema:** สร้างตาราง accounts, entries, และ transfers ด้วยหลักการ Double-Entry Ledger",
-            "**ควบคุมเวอร์ชันด้วย Migration:** ใช้เครื่องมือ `golang-migrate` คู่กับ Docker จัดการโครงสร้างฐานข้อมูลแบบมืออาชีพ",
-            "**เขียน Data Access Layer:** จัดการเชื่อมต่อ PostgreSQL ผ่าน Raw SQL และ Connection Pool",
-            "**ทำ ACID Transaction:** ห่อหุ้ม 5 สเต็ปของการโอนเงินไว้ใน 1 Transaction เดียวกัน",
-            "**แก้ปัญหา Race Condition ด้วย Row Lock:** ใช้ `SELECT ... FOR UPDATE` เพื่อล็อกแถวบัญชี",
-            "**ปลดล็อก Deadlock ด้วย Resource Ordering:** ใช้วิธีจัดเรียง Account ID ก่อนทำการล็อกแถวเสมอ",
-            "**เขียน Automated Concurrency Test:** ใช้ Goroutines ยิงถล่มโอนเงินพร้อมกัน 10-100 รายการ เพื่อทดสอบความทนทาน",
-            "**สร้าง RESTful Web API ด้วย Gin:** เขียน Endpoint รองรับการทำงานจริง พร้อมระบบ Data Validation",
-            "**เสริมเกราะความปลอดภัย:** ทำระบบสมัครสมาชิก แฮชรหัสผ่านด้วย Bcrypt และทำ Authentication ด้วย PASETO Token",
-            "**Deploy บน Docker:** เขียน Multi-Stage Dockerfile เพื่อย่อขนาด Container ให้พร้อมรันบน Cloud",
+          t: "table",
+          head: ["ช่วง", "คำถามที่บทนั้นตอบ", "อ่านจบแล้วคุณมีอะไร"],
+          rows: [
+            ["1. ทำไมเงินถึงผิดไม่ได้", "เงินผิดได้ยังไง และต้องอ่าน Go เป็นแค่ไหนก่อนลงมือ", "ภาพสามภัย และคำว่า `_, err`, struct, interface"],
+            ["2. เงินถูกเก็บยังไง", "ยอดเงินอยู่ตารางไหน และตารางนั้นเกิดบนเครื่องได้ยังไง", "schema สามตาราง และ PostgreSQL ใน Docker"],
+            ["3. ให้ Go คุยกับฐานข้อมูล แล้วพิสูจน์", "เปิดบัญชี อ่านยอด ลบบัญชี แล้วรู้ได้ไงว่าถูก", "CRUD ที่รันได้ และเทสต์ที่กดซ้ำได้"],
+            ["4. โอนให้สำเร็จทั้งก้อน", "หักต้นทางกับเพิ่มปลายทางจะเกิดครึ่งเดียวได้ไหม", "transaction ที่สำเร็จทั้งก้อนหรือไม่เกิดเลย"],
+            ["5. สองคนกดพร้อมกัน", "กดโอนวินาทีเดียวกันแล้วเงินงอกหรือระบบค้างได้ไหม", "การล็อกแถว ลำดับการล็อก และเทสต์ที่ยิงพร้อมกัน"],
+            ["6. เปิดประตูให้เรียกผ่านเว็บ", "คนนอกสั่งโอนผ่าน HTTP ได้ยังไงโดยไม่รับค่ามั่ว", "API และกฎกันโอนคนละสกุลเงิน"],
+            ["7. รู้ว่าใครกด และรันบนเครื่องจริง", "ใครเป็นเจ้าของคำสั่ง และโปรแกรมนี้สตาร์ตยังไง", "ผู้ใช้ รหัสผ่าน ตั๋ว และ Docker"],
+            ["8. เล่าตอนสัมภาษณ์", "ของที่เพิ่งสร้าง เล่าเป็นคำตอบได้ยังไง", "คำถามที่ระบบนี้ตอบได้"],
           ],
-        },
-
-        {
-          t: "callout",
-          title: "💡 สไตล์การสอนของคอร์สนี้",
-          c: "บทถัดไปเริ่มภาษา Go จากศูนย์ ไม่ต้องเคยเขียนมาก่อน เราจะแปลคำที่เจอซ้ำทั้งคอร์สให้ก่อน โดยเฉพาะ `_, err`, struct, interface และการฝัง struct ซึ่งไม่ใช่ inheritance แล้วค่อยเอาของพวกนี้ไปใช้ในโค้ดธนาคารทีละจุด",
         },
         { t: "h2", c: "สารบัญและบทเรียนทั้งหมด" },
         {
@@ -136,34 +129,34 @@ export const introPages: Record<string, Page> = {
               desc: "เชื่อมต่อ database/sql, Connection Pool, DBTX Interface และ CRUD สำหรับ Account",
             },
             {
-              title: "5. กลไก ACID & Transaction Manager →",
+              title: "5. Unit Test ระบบธนาคารด้วย Testify →",
+              slug: "bank-unit-testing",
+              desc: "พิสูจน์ CRUD ทันทีที่เขียนเสร็จ ด้วย testify/require ก่อนจะหุ้ม transaction",
+            },
+            {
+              title: "6. กลไก ACID & Transaction Manager →",
               slug: "bank-acid-and-tx",
               desc: "เจาะลึก 4 คุณสมบัติ ACID และสร้าง Store.execTx พร้อมระบบ Auto Rollback ใน Go",
             },
             {
-              title: "6. โค้ดระบบโอนเงิน 5 ขั้นตอน (TransferTx) →",
+              title: "7. โค้ดระบบโอนเงิน 5 ขั้นตอน (TransferTx) →",
               slug: "bank-money-transfer-logic",
               desc: "ร้อยเรียง 5 ขั้นตอนของการโอนเงินใน 1 Transaction พร้อมส่งผลลัพธ์ใหม่กลับให้ผู้ใช้",
             },
             {
-              title: "7. Race Condition & Row Locking (SELECT FOR UPDATE) →",
+              title: "8. Race Condition & Row Locking (SELECT FOR UPDATE) →",
               slug: "bank-concurrency-race-condition",
               desc: "ดักจับเงินงอกจาก Stale Read และการใช้ FOR NO KEY UPDATE ใน PostgreSQL",
             },
             {
-              title: "8. ไขปริศนา Deadlock & แก้ด้วย Resource Ordering →",
+              title: "9. ไขปริศนา Deadlock & แก้ด้วย Resource Ordering →",
               slug: "bank-deadlock-prevention",
               desc: "วิเคราะห์การโอนเงินสวนทาง และพิสูจน์วิธีแก้ Deadlock ด้วยการจัดลำดับ Account ID",
             },
             {
-              title: "9. Unit Test ระบบธนาคารด้วย Testify →",
-              slug: "bank-unit-testing",
-              desc: "เขียน Test ครอบคลุม CRUD ด้วย testify/require และ Random Data Generators",
-            },
-            {
               title: "10. ทดสอบ Concurrency & Deadlock ด้วย Goroutines →",
               slug: "bank-concurrency-testing",
-              desc: "ปล่อย Goroutines ยิงโอนเงินคู่ขนาน พิสูจน์ Consistency และรัน go test -race",
+              desc: "ยิงโอนพร้อมกันหลังมีล็อกและลำดับล็อกแล้ว แล้วรัน go test -race",
             },
             {
               title: "11. สร้าง REST API Server ด้วย Gin Framework →",
@@ -212,9 +205,14 @@ export const introPages: Record<string, Page> = {
       th: "ยังไม่เคยเขียน Go ก็เริ่มบทนี้ได้: อ่านไฟล์ทีละคำ, ฟังก์ชันที่คืนค่าคู่กับ error, ขีดล่างใน `_, err` คืออะไร, และทำไม Go ไม่มี inheritance",
       en: "Go from zero: how to read a file, why functions return a value plus error, what the blank identifier in `_, err` means, and why Go has no class inheritance.",
     },
-    group: "1. บทนำ & รากฐาน",
+    group: "1. ทำไมเงินถึงผิดไม่ได้",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "อ่านหัวข้อ 1 ถึง 4 ให้จบก่อนเปิดบทฐานข้อมูล หัวข้อ 5 ถึง 7 เป็น defer, context, และ goroutine จำคำแปลไว้พอ แล้วค่อยกลับมาตอนบท transaction กับบทเทสต์โอนพร้อมกัน",
+        },
         {
           t: "p",
           c: "บทนี้สมมติว่าคุณยังไม่เคยเขียน Go เป้าหมายไม่ใช่ท่องไวยากรณ์ทั้งภาษา แต่ให้อ่านโค้ดธนาคารในบทถัดไปแล้วรู้ว่าแต่ละคำแปลว่าอะไร ตัวอย่างทุกก้อนด้านล่างรันได้จริง และผลในกล่อง Output คือสิ่งที่โปรแกรมพิมพ์ออกมา",

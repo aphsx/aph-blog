@@ -11,9 +11,14 @@ export const securityProdPages: Record<string, Page> = {
       th: "เพิ่มตาราง users เพื่อผูกบัญชีธนาคารกับเจ้าของตัวจริง และเจาะลึกเทคนิคการแฮชรหัสผ่านด้วย bcrypt เพื่อป้องกันการโจมตีแบบ Brute-Force และ Rainbow Table",
       en: "Adding the users table to bind accounts to real owners and securing passwords with bcrypt hashing.",
     },
-    group: "7. Security, Auth & Production",
+    group: "7. รู้ว่าใครกด และรันบนเครื่องจริง",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "API รับคำสั่งได้แล้ว แต่ใครก็อ้างชื่อเจ้าของบัญชีได้ บทนี้มีผู้ใช้จริง และรหัสผ่านเก็บเป็นผลแฮชที่อ่านกลับเป็นรหัสเดิมไม่ได้",
+        },
         {
           t: "p",
           c: "ในระบบธนาคารจริง เราจะยอมให้ใครก็ได้มาพิมพ์ชื่อส่งๆ เช่น `owner: \"Alice\"` เพื่อเปิดบัญชีไม่ได้เด็ดขาด บัญชีทุกเล่มจะต้องผูกอยู่กับ **ผู้ใช้งานที่มีตัวตนจริง (Authenticated User)** ที่ผ่านการสมัครสมาชิกและยืนยันรหัสผ่านอย่างถูกต้อง",
@@ -436,7 +441,7 @@ Content-Type: application/json; charset=utf-8
         },
         {
           t: "p",
-          c: "หลังจากที่เรารัน Migration `000002_add_users.up.sql` เพิ่ม Foreign Key แล้ว หากเราสั่งรัน `go test ./db` ตอนนี้ Unit Test ของบทที่ 5 (`TestCreateAccount`, `TestTransferTx`) จะพังทันทีจากข้อผิดพลาด Foreign Key Violation:",
+          c: "หลังจากที่เรารัน Migration `000002_add_users.up.sql` เพิ่ม Foreign Key แล้ว หากเราสั่งรัน `go test ./db` ตอนนี้เทสต์สร้างบัญชีและเทสต์โอน (`TestCreateAccount`, `TestTransferTx`) จะพังทันทีจากข้อผิดพลาด Foreign Key Violation:",
         },
         {
           t: "codeout",
@@ -544,9 +549,14 @@ ok      simplebank/db   0.312s`,
       th: "ทำไมระบบสมัยใหม่จึงเลือกใช้ PASETO แทน JWT เพื่อปิดช่องโหว่ความปลอดภัย พร้อมเขียน Gin Authentication Middleware เพื่อป้องกันไม่ให้คนอื่นแอบมาโอนเงินแทนเรา",
       en: "Why modern backends choose PASETO over JWT to eliminate cipher agility flaws, plus building Gin Auth Middleware.",
     },
-    group: "7. Security, Auth & Production",
+    group: "7. รู้ว่าใครกด และรันบนเครื่องจริง",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "สมัครสมาชิกได้แล้ว บทนี้แจกตั๋วหลังล็อกอิน แล้วบังคับให้คำสั่งบัญชีพกตั๋วนั้นมา `Maker` เป็น interface จากบท Go จากศูนย์ คือสัญญาว่าต้องมีเมธอดสร้างตั๋วกับตรวจตั๋ว ไม่ใช่คลาสแม่",
+        },
         {
           t: "p",
           c: "หลังจากที่ผู้ใช้งานล็อกอินสำเร็จ เซิร์ฟเวอร์ต้องออก **Token (ตั๋วรับรองตัวตน)** ให้ผู้ใช้นำไปแนบใน Header `Authorization: Bearer <token>` ทุกครั้งที่ต้องการสั่งโอนเงินหรือดูข้อมูลบัญชี",
@@ -1838,9 +1848,14 @@ Content-Type: application/json; charset=utf-8
       th: "แยกการตั้งค่าด้วย spf13/viper ตามหลัก 12-Factor App, เขียน Multi-Stage Dockerfile ย่อขนาดแอป Go เหลือ 20MB, จัดการ Container ด้วย Docker Compose และเช็กลิสต์ความพร้อมก่อนรันจริงบน Production",
       en: "Decouple configurations with spf13/viper (12-Factor App), ultra-lean multi-stage Docker builds, docker-compose orchestration, and production readiness.",
     },
-    group: "7. Security, Auth & Production",
+    group: "7. รู้ว่าใครกด และรันบนเครื่องจริง",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ผู้ใช้ ตั๋ว และการโอนอยู่ครบแล้ว บทนี้ย้ายรหัสผ่านฐานข้อมูลกับกุญแจตั๋วออกจากโค้ด แล้วแพ็กโปรแกรมลง Docker ให้สตาร์ตซ้ำได้เหมือนเดิม",
+        },
         {
           t: "p",
           c: "ในการนำระบบซอฟต์แวร์ขึ้นไปรันบน Production สภาพแวดล้อมที่ยืดหยุ่นและจำลองได้เหมือนเดิมทุกที่ (Reproducible Environment) เป็นสิ่งสำคัญอย่างยิ่ง ก่อนที่เราจะแพ็กแอปพลิเคชันลงใน Container เราจำเป็นต้องแยกการตั้งค่าคอนฟิก (Configuration) ออกจากซอร์สโค้ดตามหลักการของ **12-Factor App** เพื่อให้สามารถปรับเปลี่ยน Connection String หรือ Secret Key ได้ผ่าน Environment Variables โดยไม่ต้องคอมไพล์โค้ดใหม่ทุกครั้ง",

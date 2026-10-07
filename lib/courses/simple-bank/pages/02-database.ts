@@ -11,9 +11,14 @@ export const databasePages: Record<string, Page> = {
       th: "ทำไมระบบธนาคารห้ามแก้ไขตัวเลขยอดเงินตรงๆ ในตาราง Account อย่างเดียว — เจาะลึกระบบ Ledger ที่ห้ามแก้ไขประวัติย้อนหลัง (Immutable) และออกแบบ 3 ตารางหลัก",
       en: "Why real banking systems never mutate account balances directly — mastering immutable ledgers and designing accounts, entries, and transfers tables.",
     },
-    group: "2. การออกแบบฐานข้อมูล & Ledger",
+    group: "2. เงินถูกเก็บยังไง",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "บท Go จบแล้ว บทนี้ยังไม่เปิดเซิร์ฟเวอร์ เราวาดว่าเงินอยู่สามตารางไหน และทำไมตัวเลขเงินต้องเป็นจำนวนเต็มหน่วยสตางค์",
+        },
         {
           t: "p",
           c: "ถ้าเราให้โปรแกรมเมอร์มือใหม่มาออกแบบระบบธนาคาร สิ่งแรกที่พวกเขามักจะทำคือ สร้างตาราง `accounts` มีคอลัมน์ `id` กับ `balance` แล้วเวลาโอนเงิน ก็เขียนคำสั่งง่ายๆ แบบนี้:",
@@ -249,9 +254,14 @@ Referenced by:
       th: "ติดตั้ง PostgreSQL ด้วย Docker และใช้ golang-migrate ควบคุมเวอร์ชันโครงสร้างฐานข้อมูลแบบ Code-as-Configuration แทนการเปิด GUI เข้าไปกดสร้างเอง",
       en: "Running PostgreSQL with Docker and version-controlling schemas with golang-migrate instead of manual GUI clicks.",
     },
-    group: "2. การออกแบบฐานข้อมูล & Ledger",
+    group: "2. เงินถูกเก็บยังไง",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "สามตารางในบทที่แล้วเป็นแบบบนกระดาษ บทนี้ทำให้ตารางนั้นเกิดจริงใน PostgreSQL ที่รันด้วย Docker และเก็บประวัติการเปลี่ยนโครงไว้ในไฟล์",
+        },
         {
           t: "p",
           c: "เวลาที่ทำงานในบริษัทซอฟต์แวร์ระดับมืออาชีพ จะไม่มีวิศวกรคนไหนเปิดโปรแกรมอย่าง DBeaver หรือ pgAdmin เข้าไปกดสร้างตารางหรือแก้คอลัมน์ใน Production Database ตรงๆ เด็ดขาด เพราะหากเพื่อนร่วมทีมต้องการรันโปรเจกต์บนเครื่องตัวเอง หรือเวลาต้อง Deploy ขึ้น Server ใหม่ ทุกคนจะไม่รู้เลยว่าโครงสร้างฐานข้อมูลมีอะไรเปลี่ยนไปบ้าง (เกิดปัญหา Schema Drift)",

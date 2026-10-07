@@ -11,9 +11,14 @@ export const concurrencyPages: Record<string, Page> = {
       th: "เจาะลึกปัญหา Race Condition เมื่อเงินถูกถอนพร้อมกันในเสี้ยววินาที และวิธีใช้คำสั่ง SELECT FOR UPDATE / NO KEY UPDATE ของ PostgreSQL เพื่อล็อกแถวข้อมูล",
       en: "Unraveling race conditions under concurrent requests and applying PostgreSQL pessimistic row locking.",
     },
-    group: "4. Concurrency & Deadlock Prevention",
+    group: "5. สองคนกดพร้อมกัน",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "โอนคนเดียวถูกแล้ว เพราะห้าขั้นอยู่ใน transaction เดียวกัน พอบัญชีเดียวกันถูกกดพร้อมกัน สองคำสั่งอ่านยอดเก่าพร้อมกันแล้วเงินงอก บทนี้ล็อกแถวก่อนอ่าน",
+        },
         {
           t: "p",
           c: "ลองจินตนาการถึงสถานการณ์จริงในวันเงินเดือนออก หรือจังหวะกดแย่งซื้อตั๋วคอนเสิร์ต: มีผู้ใช้งานกดยิงคำขอพร้อมกันเป็นร้อยๆ คำขอในเสี้ยววินาทีเดียวกัน หากระบบหลังบ้านของเราไม่มีการป้องกัน ข้อมูลตัวเลขในฐานข้อมูลจะพังพินาศทันทีจากปรากฏการณ์ที่เรียกว่า **Race Condition**",
@@ -135,9 +140,14 @@ Tx 2: UPDATE accounts SET balance = balance - 100 WHERE id = 1;`,
       th: "ทำไมบัญชี A โอนหา B พร้อมกับ B โอนหา A ถึงทำให้ระบบค้าง? — วิเคราะห์วงจร Deadlock และพิสูจน์วิธีแก้ปัญหาเชิงคณิตศาสตร์ด้วยการจัดลำดับ Account ID",
       en: "Why concurrent bidirectional transfers cause deadlocks and how strict resource ordering mathematically guarantees a cycle-free DAG.",
     },
-    group: "4. Concurrency & Deadlock Prevention",
+    group: "5. สองคนกดพร้อมกัน",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ล็อกแถวกันเงินงอกได้ แต่ A โอนให้ B ในจังหวะที่ B โอนให้ A จะล็อกตาย บทนี้บังคับให้ล็อกบัญชีเลขเล็กก่อนเสมอ บทถัดไปคือเทสต์ที่ยิงโอนสวนทางเพื่อพิสูจน์ว่าไม่ค้าง",
+        },
         {
           t: "p",
           c: "แม้เราจะใส่การล็อกแถวข้อมูลเพื่อแก้ Race Condition แล้ว แต่เราอาจกำลังเดินเข้าสู่กับดักที่ร้ายแรงกว่าเดิม นั่นคือ **Deadlock (ภาวะติดหล่มมรณะ)** ซึ่งเป็นอาการที่โปรเซสสองตัวต่างคนต่างรอให้โปรเซสอีกฝั่งปล่อยทรัพยากร จนไม่มีใครสามารถทำงานต่อได้",

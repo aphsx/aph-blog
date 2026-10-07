@@ -11,9 +11,14 @@ export const storeTxPages: Record<string, Page> = {
       th: "เชื่อมต่อ PostgreSQL ด้วย database/sql, จัดการ Connection Pool, และเขียน CRUD ผ่าน Parameterized Raw SQL เพื่อป้องกัน SQL Injection โดยไม่อิงกับ ORM เวทมนตร์",
       en: "Connecting to PostgreSQL with database/sql, managing connection pooling, and writing clean parameterized SQL CRUD without ORM magic.",
     },
-    group: "3. Data Store & ACID Transactions",
+    group: "3. ให้ Go คุยกับฐานข้อมูล แล้วพิสูจน์",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ฐานข้อมูลมีตารางแล้ว บทนี้คือครั้งแรกที่ Go คุยกับมัน คุณจะเจอ `_ \"github.com/lib/pq\"`, `if err :=` และ interface `DBTX` คำพวกนี้อธิบายไว้ในบท Go จากศูนย์ บทถัดไปจะเขียนเทสต์ว่าสร้างบัญชี อ่านบัญชี ลบบัญชี ได้จริง ก่อนจะไปหุ้มการโอนเป็น transaction",
+        },
         {
           t: "p",
           c: "ในการพัฒนาระบบที่มีความสำคัญระดับสูง เช่น ระบบธนาคารหรือระบบชำระเงิน หลายองค์กรเลือกที่จะ **ไม่ใช้ ORM (Object-Relational Mapping)** ตัวใหญ่ๆ เพราะ ORM มักสร้างคำสั่ง SQL เบื้องหลังที่เราควบคุมได้ยาก และซ่อนกลไกการล็อกฐานข้อมูลเอาไว้ การเขียน Raw SQL ใน Go ร่วมกับแพ็กเกจมาตรฐาน `database/sql` จะทำให้เราเห็นการทำงานทุกกระเบียดนิ้ว และสามารถรีดประสิทธิภาพออกมาได้สูงสุด",
@@ -412,7 +417,7 @@ func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]A
         { t: "h2", c: "5. การเขียนฟังก์ชัน CRUD สำหรับ Entries และ Transfers" },
         {
           t: "p",
-          c: "เพื่อให้ระบบพร้อมสำหรับการทำธุรกรรมโอนเงินแบบครบวงจรในบทถัดไป เราจำเป็นต้องมีฟังก์ชันสร้างบันทึก Ledger (`entries`) และประวัติการโอน (`transfers`):",
+          c: "เพื่อให้บทโอนเงินเรียกใช้ได้ เราเขียนฟังก์ชันสร้างบันทึก Ledger (`entries`) และประวัติการโอน (`transfers`) ไว้ในบทนี้ก่อน บทถัดไปยังไม่โอน มันเป็นเทสต์ของบัญชี:",
         },
         {
           t: "code",
@@ -603,7 +608,7 @@ func main() {
         {
           t: "callout",
           title: "🎉 ก้าวแรกสำเร็จอย่างงดงาม!",
-          c: "ตอนนี้เรามีทั้งฐานข้อมูลที่รันบน Docker, ตารางที่ควบคุมด้วย Migration, และโค้ด Go Data Access Layer ที่สามารถคุยกับ PostgreSQL ได้จริง 100% ในบทถัดไป เราจะนำฟังก์ชันเหล่านี้มาร้อยเรียงเข้าด้วยกันภายใต้ **ACID Transaction Manager** เพื่อสร้างระบบโอนเงิน!",
+          c: "ตอนนี้เรามีทั้งฐานข้อมูลที่รันบน Docker, ตารางที่ควบคุมด้วย Migration, และโค้ด Go ที่คุยกับ PostgreSQL ได้ บทถัดไปเขียนเทสต์ว่าสร้างบัญชี อ่านบัญชี และลบบัญชีได้จริง หลังจากนั้นค่อยหุ้มหลายคำสั่งเข้าด้วยกันเป็น transaction ของการโอนเงิน",
         },
       ],
       en: [],
@@ -620,9 +625,14 @@ func main() {
       th: "ถอดรหัสคุณสมบัติ ACID ทั้ง 4 ประการ และสร้าง Database Transaction Manager ในภาษา Go พร้อมระบบ Auto Rollback ที่ปลอดภัยเมื่อเกิดข้อผิดพลาด",
       en: "Deconstructing the 4 ACID guarantees and building a bulletproof Go Transaction Manager with automatic rollback.",
     },
-    group: "3. Data Store & ACID Transactions",
+    group: "4. โอนให้สำเร็จทั้งก้อน",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "CRUD ขยับทีละคำสั่ง และเทสต์บัญชีผ่านแล้ว บทนี้หุ้มหลายคำสั่งให้สำเร็จพร้อมกันหรือไม่เกิดเลย จุด `type Store struct { *Queries }` คือการฝัง struct จากบท Go จากศูนย์ ไม่ใช่การสืบทอด",
+        },
         {
           t: "p",
           c: "ในระบบธนาคาร ไม่มีคำว่า 'สำเร็จครึ่งเดียว' ถ้าคุณโอนเงิน 500 บาท การหักเงินจากบัญชีคุณ และการเพิ่มเงินในบัญชีเพื่อน **จะต้องเกิดขึ้นพร้อมกันอย่างสมบูรณ์ หรือไม่เกิดขึ้นเลยทั้งคู่** นี่คือที่มาของมาตรฐาน **ACID** ในระบบฐานข้อมูล",
@@ -762,9 +772,14 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
       th: "ลงมือเขียนฟังก์ชัน TransferTx ที่ร้อยเรียง 5 ขั้นตอนของการโอนเงินจริงเข้าด้วยกันใน 1 Transaction พร้อมส่งคืนข้อมูลบัญชีใหม่ให้ผู้ใช้ทราบทันที",
       en: "Implementing the 5-step atomic TransferTx method and returning updated balances in a single transaction.",
     },
-    group: "3. Data Store & ACID Transactions",
+    group: "4. โอนให้สำเร็จทั้งก้อน",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "มีตัวเปิด transaction แล้ว บทนี้ใส่ 5 ขั้นของการโอนเงินเข้าไปในก้อนนั้น ยังไม่กันคนกดพร้อมกัน เรื่องนั้นอยู่บทถัดไป",
+        },
         {
           t: "p",
           c: "มาถึงหัวใจหลักของระบบธนาคารแล้ว! การโอนเงินจากบัญชี A ไปยังบัญชี B ไม่ใช่แค่การเปลี่ยนตัวเลข แต่ต้องสร้างหลักฐานใน Ledger และบันทึกประวัติให้ครบถ้วน ซึ่งประกอบด้วย **5 ขั้นตอนที่ต้องสำเร็จพร้อมกัน** ดังนี้:",

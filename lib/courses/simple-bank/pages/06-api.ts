@@ -11,9 +11,14 @@ export const apiPages: Record<string, Page> = {
       th: "เชื่อมต่อ Data Store เข้ากับเว็บเซิร์ฟเวอร์ความเร็วสูงด้วย Gin Gonic, วางโครงสร้าง Dependency Injection, จัดการ HTTP Status Codes และทำ JSON Error Handling",
       en: "Connecting the store layer to a blazing-fast HTTP server with Gin Gonic, dependency injection, and clean error handling.",
     },
-    group: "6. RESTful Web API & Validation",
+    group: "6. เปิดประตูให้เรียกผ่านเว็บ",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "เงินในฐานข้อมูลถูก และเทสต์โอนพร้อมกันผ่านแล้ว บทนี้เปิดประตู HTTP ให้คนนอกเรียก บรรทัด `if err := ctx.ShouldBindJSON(&req); err != nil` คือรูปแบบสั้นจากบท Go จากศูนย์ บทนี้ยังไม่รู้ว่าใครเป็นคนกด เรื่องผู้ใช้กับตั๋วอยู่ช่วงถัดไป",
+        },
         {
           t: "p",
           c: "หลังจากที่เราสร้าง Data Store Layer และทดสอบจนมั่นใจแล้ว ขั้นตอนต่อไปคือการเปิดประตูให้โลกภายนอก (Web Browser, Mobile App, Microservices อื่นๆ) สามารถเข้ามาใช้งานระบบธนาคารของเราได้ผ่าน **RESTful HTTP API**",
@@ -533,9 +538,14 @@ Content-Type: application/json; charset=utf-8
       th: "สร้าง Custom Validator ใน Gin ตรวจสอบสกุลเงิน และเขียนกฎทางธุรกิจป้องกันความเสียหายจากการโอนเงินต่างสกุลโดยไม่มีอัตราแลกเปลี่ยน",
       en: "Implementing custom validators in Gin and enforcing currency-matching business rules.",
     },
-    group: "6. RESTful Web API & Validation",
+    group: "6. เปิดประตูให้เรียกผ่านเว็บ",
     blocks: {
       th: [
+        {
+          t: "callout",
+          title: "บทนี้อยู่ตรงไหนของทาง",
+          c: "ประตู HTTP เปิดแล้ว บทนี้กันค่าที่ไม่มีทางถูก โดยเฉพาะการโอนคนละสกุลเงิน เพราะตัวเลข 100 ของดอลลาร์กับ 100 ของบาทไม่ใช่เงินจำนวนเดียวกัน",
+        },
         {
           t: "p",
           c: "ลองคิดดูว่าจะเกิดอะไรขึ้นถ้ามีคนพยายามโอนเงิน **100 USD ไปยังบัญชีที่เก็บเป็นสกุล THB**? หากระบบของเราเพียงแค่นำตัวเลข 100 ไปตัดบัญชีต้นทางแล้วเพิ่ม 100 ในบัญชีปลายทาง ผู้รับจะได้เงินเพียง 100 บาท (ขาดทุนมหาศาล) หรือหากโอนกลับกัน ผู้รับจะได้ 100 ดอลลาร์ทั้งที่โอนมาแค่ 100 บาท! นี่คือช่องโหว่ร้ายแรงที่ระบบธนาคารต้องดักจับตั้งแต่ประตูหน้าบ้าน",
@@ -881,7 +891,7 @@ Content-Type: application/json; charset=utf-8
         {
           t: "callout",
           title: "🎉 สรุปความพร้อมระดับ Production ของ RESTful API",
-          c: "ยินดีด้วย! ถึงจุดนี้คุณได้สร้าง Web Service สำหรับระบบ Simple Bank ที่สมบูรณ์แบบ ทั้งการลงทะเบียนบัญชี, การดึงข้อมูลแบบแบ่งหน้า (Pagination), และการโอนเงินที่มีทั้ง Transaction ป้องกัน Deadlock และ Custom Validator ป้องกันข้อมูลผิดพลาด\n\nในบทถัดไป เราจะก้าวเข้าสู่ **หมวดที่ 7: HTTP API Testing & Mocking** เพื่อเขียน Unit Test ให้กับ REST API เหล่านี้โดยใช้ GoMock ทำให้ทดสอบได้รวดเร็วโดยไม่ต้องพึ่งพาฐานข้อมูลจริง!",
+          c: "ถึงจุดนี้มีประตู HTTP ที่สร้างบัญชี ดูรายการ และโอนเงินได้ พร้อมกันโอนคนละสกุลเงิน บทถัดไปยังไม่ทดสอบ API ด้วย mock แต่ทำให้รู้ว่าใครเป็นคนกด โดยมีผู้ใช้จริงและรหัสผ่านที่อ่านกลับไม่ได้",
         },
       ],
       en: [],
