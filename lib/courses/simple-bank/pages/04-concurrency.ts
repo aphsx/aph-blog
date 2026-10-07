@@ -383,7 +383,11 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
           t: "code",
           lang: "go",
           label: "simplebank/db/tx_transfer.go (Version 2 สมบูรณ์พร้อมรัน 100%)",
-          c: `package db
+          c: `// นิยาม: โครงสร้างข้อมูลและฟังก์ชัน TransferTx เวอร์ชัน 2 ป้องกัน Deadlock
+// ทำเพื่อแก้ปัญหา: บัญชี A โอนหา B สวนทางกับ B โอนหา A พร้อมกันทำให้เกิด Circular Wait (Deadlock)
+// กลยุทธ์แก้ไข: บังคับลำดับการขอล็อกแถว (Resource Ordering) ให้เริ่มจาก Account ID ค่าน้อยไปหามากเสมอ
+
+package db
 
 import "context"
 

@@ -604,7 +604,10 @@ ACCESS_TOKEN_DURATION=15m`,
           t: "code",
           lang: "go",
           label: "simplebank/util/config.go (สร้างไฟล์ใหม่)",
-          c: `package util
+          c: `// จัดการโหลด Configuration ของระบบจากไฟล์ app.env และ Environment Variables ผ่าน Viper
+// ทำเพื่อแก้ปัญหา: หลีกเลี่ยงการ Hardcode ข้อมูลความลับ (Secret Key, DB Source, Port) ลงในโค้ด Go
+// ช่วยให้ระบบสามารถสลับการตั้งค่าระหว่าง Local, Test, และ Production ได้อย่างยืดหยุ่นโดยไม่ต้องคอมไพล์ใหม่
+package util
 
 import (
 	"time"
@@ -612,26 +615,34 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config เก็บค่าการตั้งค่าทั้งหมดของแอปพลิเคชัน
+// ใช้ Struct Tag "mapstructure" เพื่อบอก Viper ว่าตัวแปรใน .env ตัวไหนตรงกับฟิลด์ใด
 type Config struct {
-	DBDriver            string        \`mapstructure:"DB_DRIVER"\`
-	DBSource            string        \`mapstructure:"DB_SOURCE"\`
-	ServerAddress       string        \`mapstructure:"SERVER_ADDRESS"\`
-	TokenSymmetricKey   string        \`mapstructure:"TOKEN_SYMMETRIC_KEY"\`
-	AccessTokenDuration time.Duration \`mapstructure:"ACCESS_TOKEN_DURATION"\`
+	DBDriver            string        \`mapstructure:"DB_DRIVER"\`             // ชนิดฐานข้อมูล เช่น "postgres"
+	DBSource            string        \`mapstructure:"DB_SOURCE"\`             // Connection String ของ PostgreSQL
+	ServerAddress       string        \`mapstructure:"SERVER_ADDRESS"\`         // พอร์ตที่เปิดบริการ เช่น "0.0.0.0:8080"
+	TokenSymmetricKey   string        \`mapstructure:"TOKEN_SYMMETRIC_KEY"\`   // คีย์ลับ 32 ไบต์สำหรับเข้ารหัส PASETO
+	AccessTokenDuration time.Duration \`mapstructure:"ACCESS_TOKEN_DURATION"\` // อายุของ Token เช่น 15 นาที ("15m")
 }
 
+// LoadConfig อ่านการตั้งค่าจากโฟลเดอร์ path ที่กำหนด หรืออ่านทับจาก Environment Variables
 func LoadConfig(path string) (config Config, err error) {
+	// 1. ระบุตำแหน่งโฟลเดอร์ที่เก็บไฟล์คอนฟิก
 	viper.AddConfigPath(path)
+	// 2. ระบุชื่อไฟล์ (app) และประเภทไฟล์ (env) ซึ่งรวมกันเป็น app.env
 	viper.SetConfigName("app")
-	viper.SetConfigType("env") // ค้นหาไฟล์ app.env
+	viper.SetConfigType("env")
 
-	viper.AutomaticEnv() // ดึงค่าจาก OS Environment ทับหากมีตัวแปรชื่อตรงกัน
+	// 3. เปิดระบบอ่านค่าจาก OS Environment ทับโดยอัตโนมัติ (หากมีตัวแปรชื่อตรงกันในระบบปฏิบัติการ)
+	viper.AutomaticEnv()
 
+	// 4. สั่งให้ Viper อ่านเนื้อหาไฟล์คอนฟิกเข้ามาในหน่วยความจำ
 	err = viper.ReadInConfig()
 	if err != nil {
 		return
 	}
 
+	// 5. แปลงค่าการตั้งค่าที่อ่านได้ มาแกะใส่ตัวแปร Config Struct
 	err = viper.Unmarshal(&config)
 	return
 }`,
@@ -656,7 +667,9 @@ func LoadConfig(path string) (config Config, err error) {
           t: "code",
           lang: "go",
           label: "simplebank/token/payload.go (สร้างไฟล์ใหม่)",
-          c: `package token
+          c: `// นิยาม Payload สำหรับบรรจุข้อมูลประจำตัวของผู้ใช้ที่ถูกเข้ารหัสไว้ใน Token
+// ทำเพื่อแก้ปัญหา: จัดเก็บตัวตน (Username) วันหมดอายุ (ExpiredAt) และ UUID เฉพาะตัว เพื่อใช้ระบุสิทธิ์ของผู้ใช้งานในระบบ
+package token
 
 import (
 	"errors"
@@ -665,22 +678,27 @@ import (
 	"github.com/google/uuid"
 )
 
+// ข้อผิดพลาดมาตรฐานเมื่อ Token หมดอายุหรือไม่ถูกต้อง
 var ErrExpiredToken = errors.New("ตั๋วรับรองหมดอายุแล้ว")
 var ErrInvalidToken = errors.New("ตั๋วรับรองไม่ถูกต้อง")
 
+// Payload เก็บข้อมูลสำคัญที่ผูกอยู่กับ Token แต่ละใบ
 type Payload struct {
-	ID        uuid.UUID \`json:"id"\`
-	Username  string    \`json:"username"\`
-	IssuedAt  time.Time \`json:"issued_at"\`
-	ExpiredAt time.Time \`json:"expired_at"\`
+	ID        uuid.UUID \`json:"id"\`         // รหัสเฉพาะของตั๋วใบนี้ (ใช้ป้องกันการนำตั๋วมาใช้ซ้ำ)
+	Username  string    \`json:"username"\`   // ชื่อผู้ใช้เจ้าของตั๋ว
+	IssuedAt  time.Time \`json:"issued_at"\`  // วันเวลาที่สร้างตั๋ว
+	ExpiredAt time.Time \`json:"expired_at"\` // วันเวลาที่ตั๋วหมดอายุ
 }
 
+// NewPayload สร้าง Payload ใหม่สำหรับผู้ใช้ พร้อมกำหนดระยะเวลาหมดอายุ
 func NewPayload(username string, duration time.Duration) (*Payload, error) {
+	// 1. สุ่มสร้าง UUID v4 สำหรับใช้เป็น Token ID ที่ไม่ซ้ำใครในโลก
 	tokenID, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
 	}
 
+	// 2. กำหนดเวลาเริ่มต้นและคำนวณเวลาหมดอายุ
 	payload := &Payload{
 		ID:        tokenID,
 		Username:  username,
@@ -690,12 +708,14 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 	return payload, nil
 }
 
+// Valid ตรวจสอบว่าตั๋วใบนี้ยังไม่หมดอายุใช่หรือไม่
 func (payload *Payload) Valid() error {
+	// 1. ถ้าเวลาปัจจุบันเลยเวลา ExpiredAt ไปแล้ว ให้แจ้งเตือนว่าตั๋วหมดอายุ
 	if time.Now().After(payload.ExpiredAt) {
 		return ErrExpiredToken
 	}
 	return nil
-}`,
+} `,
         },
         {
           t: "p",
@@ -705,13 +725,19 @@ func (payload *Payload) Valid() error {
           t: "code",
           lang: "go",
           label: "simplebank/token/maker.go (สร้างไฟล์ใหม่)",
-          c: `// Maker เป็น Interface สำหรับจัดการสร้างและตรวจสอบความถูกต้องของ Token
+          c: `// Maker คือ Interface สำหรับสร้างและตรวจสอบความถูกต้องของ Token รับรองตัวตน
+// ทำเพื่อแก้ปัญหา: ออกแบบตามหลัก Clean Architecture เพื่อให้สลับระบบ Token ได้อย่างอิสระ (เช่น สลับระหว่าง PASETO กับ JWT)
+// และช่วยให้ Mock ตัว Maker ได้อย่างง่ายดายในการเขียน Unit Test สำหรับ API Handlers
 package token
 
 import "time"
 
+// Maker เป็นสัญญา (Contract) ที่กำหนดว่าระบบจัดการ Token ต้องมีฟังก์ชันใดบ้าง
 type Maker interface {
+	// CreateToken สร้างตั๋ว Token ใหม่สำหรับ username ที่ระบุ พร้อมกำหนดเวลาหมดอายุ
 	CreateToken(username string, duration time.Duration) (string, error)
+
+	// VerifyToken ตรวจสอบความถูกต้องและถอดรหัส Token เพื่อคืนค่า Payload ของผู้ใช้ออกมา
 	VerifyToken(token string) (*Payload, error)
 }`,
         },
@@ -723,7 +749,9 @@ type Maker interface {
           t: "code",
           lang: "go",
           label: "simplebank/token/paseto_maker.go (สร้างไฟล์ใหม่)",
-          c: `package token
+          c: `// PasetoMaker จัดการสร้างและถอดรหัส PASETO Token (Platform-Agnostic Security Tokens) เวอร์ชัน 2 Local (Symmetric)
+// ทำเพื่อแก้ปัญหา: มอบระบบรักษาความปลอดภัยที่เหนือกว่า JWT โดยขจัดปัญหา 'None' algorithm attack และบังคับใช้ ChaCha20-Poly1305
+package token
 
 import (
 	"fmt"
@@ -733,17 +761,20 @@ import (
 	"github.com/o1egl/paseto"
 )
 
-// PasetoMaker จัดการ PASETO Token ด้วยการเข้ารหัสแบบ Symmetric
+// PasetoMaker จัดการ PASETO Token ด้วยการเข้ารหัสแบบ Symmetric (ใช้คีย์ลับเดียวในการทั้งเข้ารหัสและถอดรหัส)
 type PasetoMaker struct {
 	paseto       *paseto.V2
 	symmetricKey []byte
 }
 
+// NewPasetoMaker สร้าง PasetoMaker ใหม่ พร้อมตรวจสอบความยาวของคีย์ลับ
 func NewPasetoMaker(symmetricKey string) (Maker, error) {
+	// 1. ChaCha20-Poly1305 บังคับใช้คีย์ความยาว 32 ไบต์พอดี (chacha20poly1305.KeySize = 32)
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("ขนาด key ไม่ถูกต้อง: ต้องมีขนาด %d ไบต์พอดี", chacha20poly1305.KeySize)
 	}
 
+	// 2. สร้าง Instance ของ Paseto V2 และบันทึกคีย์ลับในรูป []byte
 	maker := &PasetoMaker{
 		paseto:       paseto.NewV2(),
 		symmetricKey: []byte(symmetricKey),
@@ -751,25 +782,34 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
+// CreateToken สร้าง Token โดยบรรจุ Payload เข้าไปแล้วเข้ารหัสด้วย Symmetric Key
 func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
+	// 1. สร้าง Payload ที่ระบุชื่อผู้ใช้และเวลาหมดอายุ
 	payload, err := NewPayload(username, duration)
 	if err != nil {
 		return "", err
 	}
+
+	// 2. เข้ารหัส Payload เป็นข้อความ Token แบบ Encrypted (v2.local)
 	return maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
 }
 
+// VerifyToken ถอดรหัส Token และตรวจสอบว่าตั๋วยังไม่หมดอายุ
 func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	payload := &Payload{}
+
+	// 1. ถอดรหัสข้อความ Token ด้วย Symmetric Key แล้วแกะใส่ struct Payload
 	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
 
+	// 2. ตรวจสอบว่าตั๋วหมดอายุไปแล้วหรือยังผ่าน payload.Valid()
 	err = payload.Valid()
 	if err != nil {
 		return nil, err
 	}
+
 	return payload, nil
 }`,
         },
@@ -991,7 +1031,10 @@ func (server *Server) loginUser(ctx *gin.Context) {
           t: "code",
           lang: "go",
           label: "simplebank/api/middleware.go (สร้างไฟล์ใหม่)",
-          c: `package api
+          c: `// Middleware ตรวจสอบตั๋วรับรองตัวตน (Authentication Middleware) สำหรับ Gin Framework
+// ทำเพื่อแก้ปัญหา: สกัดกั้นคำขอที่ไม่ได้รับอนุญาตก่อนที่จะหลุดเข้าไปถึง API Handlers ที่สำคัญ (เช่น การเปิดบัญชี หรือการโอนเงิน)
+// โดยจะดักจับ Authorization Header, ตรวจสอบประเภท Bearer, และถอดรหัส PASETO Token
+package api
 
 import (
 	"errors"
@@ -1003,13 +1046,15 @@ import (
 )
 
 const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeBearer = "bearer"
-	authorizationPayloadKey = "authorization_payload"
+	authorizationHeaderKey  = "authorization"        // ชื่อ Header ที่ Client ต้องแนบมาใน HTTP Request
+	authorizationTypeBearer = "bearer"               // ชนิดของตั๋วรับรอง ต้องขึ้นต้นด้วย Bearer เสมอ
+	authorizationPayloadKey = "authorization_payload" // คีย์สำหรับฝาก Payload ไว้ใน gin.Context เพื่อส่งต่อให้ Handlers
 )
 
+// authMiddleware รับ tokenMaker เพื่อนำมาใช้ตรวจสอบความถูกต้องของ Token
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		// 1. ดึงค่า Authorization Header ออกมาจากคำขอ
 		authHeader := ctx.GetHeader(authorizationHeaderKey)
 		if len(authHeader) == 0 {
 			err := errors.New("ไม่มีการแนบ Authorization Header")
@@ -1017,6 +1062,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
+		// 2. แยกข้อความออกเป็นส่วนๆ (คาดหวังรูปแบบ: "Bearer <token_string>")
 		fields := strings.Fields(authHeader)
 		if len(fields) < 2 {
 			err := errors.New("รูปแบบ Authorization Header ไม่ถูกต้อง")
@@ -1024,6 +1070,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
+		// 3. ตรวจสอบว่าคำนำหน้าเป็น "bearer" (ไม่สนใจตัวพิมพ์เล็ก-ใหญ่)
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != authorizationTypeBearer {
 			err := errors.New("ประเภทของ Authorization ต้องเป็น Bearer เท่านั้น")
@@ -1031,6 +1078,7 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
+		// 4. นำตัว Token ข้อความส่วนที่สองไปถอดรหัสและตรวจสอบความถูกต้องผ่าน tokenMaker
 		accessToken := fields[1]
 		payload, err := tokenMaker.VerifyToken(accessToken)
 		if err != nil {
@@ -1038,8 +1086,10 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			return
 		}
 
-		// บันทึก payload ของผู้ใช้ไว้ใน Context เพื่อให้ Handler ตัวถัดไปนำไปใช้งานต่อได้
+		// 5. เมื่อตั๋วถูกต้อง บันทึก payload ของผู้ใช้ไว้ใน gin.Context เพื่อให้ Handler ด้านในดึงไปใช้ต่อ
 		ctx.Set(authorizationPayloadKey, payload)
+
+		// 6. ส่งผ่านการควบคุมไปยัง Handler ลำดับถัดไป
 		ctx.Next()
 	}
 }`,
@@ -1205,7 +1255,8 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
           t: "code",
           lang: "go",
           label: "simplebank/api/account.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังผูกระบบความปลอดภัยและ Token)",
-          c: `// API Handler สำหรับจัดการบัญชี (POST /accounts, GET /accounts/:id, GET /accounts)
+          c: `// API Handler สำหรับจัดการบัญชี (POST /accounts, GET /accounts/:id, GET /accounts) ฉบับปลอดภัยระดับ Production
+// ทำเพื่อแก้ปัญหา: ผูกบัญชีกับตัวตนของผู้ใช้ที่ล็อกอินจริง ป้องกันการแอบสร้างบัญชีในนามผู้อื่น และป้องกันการแอบดูยอดเงินของลูกค้าคนอื่น
 package api
 
 import (
@@ -1223,26 +1274,31 @@ type createAccountRequest struct {
 }
 
 func (server *Server) createAccount(ctx *gin.Context) {
+	// 1. ตรวจสอบรูปแบบข้อมูลที่ส่งมาทาง JSON Payload
 	var req createAccountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	// 2. ดึงข้อมูลตัวตน (Username) จาก Token Payload ที่บันทึกไว้ใน gin.Context
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
+	// 3. เตรียมพารามิเตอร์โดยบังคับให้ Owner เป็น Username ของผู้ถือ Token เท่านั้น
 	arg := db.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Currency: req.Currency,
-		Balance:  0,
+		Balance:  0, // ยอดเงินเปิดบัญชีเริ่มต้นที่ 0 เสมอ
 	}
 
+	// 4. บันทึกบัญชีใหม่ลงฐานข้อมูล PostgreSQL ผ่าน Store
 	account, err := server.store.CreateAccount(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusForbidden, errorResponse(err))
 		return
 	}
 
+	// 5. ส่งข้อมูลบัญชีที่สร้างเสร็จสมบูรณ์กลับไปในรูปแบบ JSON พร้อม HTTP Status 201 Created
 	ctx.JSON(http.StatusCreated, account)
 }
 
@@ -1251,12 +1307,14 @@ type getAccountRequest struct {
 }
 
 func (server *Server) getAccount(ctx *gin.Context) {
+	// 1. แกะค่า ID จาก URI Parameter (เช่น /accounts/1)
 	var req getAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	// 2. ค้นหาข้อมูลบัญชีจากฐานข้อมูลตาม ID
 	account, err := server.store.GetAccount(ctx, req.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1267,6 +1325,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	// 3. ตรวจสอบสิทธิ์ความเป็นเจ้าของ: บัญชีนี้ต้องเป็นของเจ้าของ Token เท่านั้น
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if account.Owner != authPayload.Username {
 		err := errors.New("บัญชีนี้ไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์เข้าถึงข้อมูล")
@@ -1274,6 +1333,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	// 4. ส่งข้อมูลบัญชีกลับไปพร้อม HTTP Status 200 OK
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -1283,25 +1343,29 @@ type listAccountsRequest struct {
 }
 
 func (server *Server) listAccounts(ctx *gin.Context) {
+	// 1. แกะ Query Parameters สำหรับแบ่งหน้า (Pagination)
 	var req listAccountsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	// 2. ดึง Username จาก Token และคำนวณ Limit/Offset
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.ListAccountsParams{
-		Owner:  authPayload.Username,
+		Owner:  authPayload.Username, // กรองเฉพาะบัญชีของเจ้าของ Token
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}
 
+	// 3. ค้นหารายชื่อบัญชีจากฐานข้อมูล
 	accounts, err := server.store.ListAccounts(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	// 4. ส่งรายชื่อบัญชีกลับไปพร้อม HTTP Status 200 OK
 	ctx.JSON(http.StatusOK, accounts)
 }`,
         },
@@ -1361,7 +1425,8 @@ func (server *Server) listAccounts(ctx *gin.Context) {
           t: "code",
           lang: "go",
           label: "simplebank/api/transfer.go (โค้ดเต็มสมบูรณ์ของไฟล์หลังผูกระบบความปลอดภัยและ Token)",
-          c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers)
+          c: `// API Handler สำหรับจัดการการโอนเงิน (POST /transfers) ฉบับปลอดภัยระดับ Production
+// ทำเพื่อแก้ปัญหา: บังคับให้ผู้สั่งโอนต้องเป็นเจ้าของบัญชีต้นทางจริง ป้องกันการขโมยเงินหรือสั่งโอนเงินแทนผู้อื่น
 package api
 
 import (
@@ -1383,17 +1448,20 @@ type transferRequest struct {
 }
 
 func (server *Server) createTransfer(ctx *gin.Context) {
+	// 1. ตรวจสอบเงื่อนไขข้อมูลที่ส่งมาทาง JSON
 	var req transferRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	// 2. ตรวจสอบว่าบัญชีต้นทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
 	fromAccount, valid := server.validAccount(ctx, req.FromAccountID, req.Currency)
 	if !valid {
 		return
 	}
 
+	// 3. ตรวจสอบสิทธิ์ความเป็นเจ้าของบัญชีต้นทาง: ต้องตรงกับ Username ใน Token
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if fromAccount.Owner != authPayload.Username {
 		err := errors.New("บัญชีต้นทางไม่ได้เป็นของคุณ คุณไม่มีสิทธิ์โอนเงิน")
@@ -1401,27 +1469,33 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 		return
 	}
 
+	// 4. ตรวจสอบว่าบัญชีปลายทางมีอยู่จริง และสกุลเงินตรงกับคำขอโอนหรือไม่
 	_, valid = server.validAccount(ctx, req.ToAccountID, req.Currency)
 	if !valid {
 		return
 	}
 
+	// 5. เตรียมพารามิเตอร์สำหรับรัน Transaction การโอนเงิน
 	arg := db.TransferTxParams{
 		FromAccountID: fromAccount.ID,
 		ToAccountID:   req.ToAccountID,
 		Amount:        req.Amount,
 	}
 
+	// 6. ดำเนินการโอนเงินระดับธุรกรรม ACID ผ่านฟังก์ชัน TransferTx
 	result, err := server.store.TransferTx(ctx, arg)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
+	// 7. ส่งผลลัพธ์การโอนเงิน (Transfer, Entries, บัญชีที่อัปเดตแล้ว) กลับไปให้ผู้ใช้
 	ctx.JSON(http.StatusOK, result)
 }
 
+// validAccount ตรวจสอบว่าบัญชีมีอยู่จริงและสกุลเงินตรงกันหรือไม่
 func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {
+	// 1. ค้นหาบัญชีจากฐานข้อมูล
 	account, err := server.store.GetAccount(ctx, accountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1432,6 +1506,7 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
 		return account, false
 	}
 
+	// 2. ตรวจสอบว่าสกุลเงินของบัญชีตรงกับสกุลเงินที่ต้องการโอนหรือไม่
 	if account.Currency != currency {
 		err := fmt.Errorf("สกุลเงินของบัญชี [%d] คือ %s ไม่ตรงกับคำขอโอน %s", accountID, account.Currency, currency)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
@@ -1503,7 +1578,9 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
           t: "code",
           lang: "go",
           label: "simplebank/api/server.go (โค้ดเต็มสมบูรณ์ของไฟล์พร้อม errorResponse)",
-          c: `package api
+          c: `// โครงสร้าง Server และการผูก Routing พร้อมระบบ Authentication Token Middleware
+// ทำเพื่อแก้ปัญหา: จัดกลุ่มเส้นทาง API ระหว่าง Public Routes (ไม่ล็อกอิน) กับ Protected Routes (ต้องมี Token)
+package api
 
 import (
 	"fmt"
@@ -1523,11 +1600,12 @@ type Server struct {
 	router     *gin.Engine
 }
 
-// NewServer รับ config และ store พร้อมสร้าง PasetoMaker
+// NewServer รับ config และ store พร้อมสร้าง PasetoMaker สำหรับสร้างและตรวจสอบ Token
 func NewServer(config util.Config, store *db.Store) (*Server, error) {
+	// 1. สร้าง Instance ของ PasetoMaker จากคีย์ลับใน Config
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
-		return nil, fmt.Errorf("cannot create token maker: %w", err)
+		return nil, fmt.Errorf("ไม่สามารถสร้าง token maker ได้: %w", err)
 	}
 
 	server := &Server{
@@ -1538,16 +1616,16 @@ func NewServer(config util.Config, store *db.Store) (*Server, error) {
 
 	router := gin.Default()
 
-	// ลงทะเบียน custom validator tag "currency"
+	// 2. ลงทะเบียน Custom Validator สำหรับตรวจสอบสกุลเงิน (currency)
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency)
 	}
 
-	// 1. เส้นทางสาธารณะ (Public Routes): เข้าถึงได้โดยไม่ต้องแนบ Token
+	// 3. เส้นทางสาธารณะ (Public Routes): ใครก็เข้าถึงได้ เช่น สมัครสมาชิก หรือ ล็อกอิน
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 
-	// 2. เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ก่อนเสมอ
+	// 4. เส้นทางส่วนตัว (Protected Routes): ต้องผ่าน authMiddleware ตรวจสอบ Token ก่อนเสมอ
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 	authRoutes.POST("/accounts", server.createAccount)
 	authRoutes.GET("/accounts/:id", server.getAccount)
@@ -1641,26 +1719,31 @@ import (
 	"simplebank/util"
 )
 
+// จุดเริ่มต้นการทำงาน (Entry Point) ของระบบ Simple Bank ทั้งหมด
 func main() {
-	// 1. โหลดการตั้งค่าจากไฟล์ app.env ในโฟลเดอร์ Root
+	// 1. โหลดค่า Config จากไฟล์ app.env และ Environment Variables ผ่าน Viper
+	// ทำเพื่อ: ดึงค่า ServerAddress, TokenSymmetricKey, DBSource โดยไม่ Hardcode ไว้ในโค้ด
 	config, err := util.LoadConfig(".")
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
 
-	// 2. เชื่อมต่อฐานข้อมูลโดยใช้ค่าจาก Config
+	// 2. สร้าง Connection Pool เชื่อมต่อกับ PostgreSQL
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
 
+	// 3. ห่อหุ้ม Connection ด้วย SQLStore สำหรับรองรับ Database Transactions (โอนเงิน)
 	store := db.NewStore(conn)
+
+	// 4. สร้าง HTTP Server โดยผูก Routing, PasetoMaker, และ Middleware เข้ากับ Store
 	server, err := api.NewServer(config, store)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
 
-	// 3. สตาร์ตเซิร์ฟเวอร์ตามที่อยู่พอร์ตใน Config
+	// 5. สตาร์ต HTTP Server ที่พอร์ตตามที่กำหนดไว้ใน Config (เช่น 0.0.0.0:8080)
 	err = server.Start(config.ServerAddress)
 	if err != nil {
 		log.Fatal("cannot start server:", err)
@@ -1847,21 +1930,36 @@ Content-Type: application/json; charset=utf-8
           t: "code",
           lang: "dockerfile",
           label: "simplebank/Dockerfile (สร้างไฟล์ใหม่ที่ Root Directory)",
-          c: `# Build Stage: ทำการคอมไพล์โค้ด Go
+          c: `# ==========================================
+# Stage 1: Build Stage (คอมไพล์โค้ดเป็น Binary)
+# ==========================================
+# 1. ใช้ Go Image ตัวเต็มที่มี Golang Compiler และไลบรารีครบชุด
 FROM golang:1.22-alpine3.19 AS builder
 WORKDIR /app
+
+# 2. ก๊อปปี้เฉพาะ go.mod และ go.sum เพื่อดาวน์โหลด dependencies (ใช้ประโยชน์จาก Docker Layer Caching)
 COPY go.mod go.sum ./
 RUN go mod download
+
+# 3. ก๊อปปี้ Source Code ทั้งหมดแล้วคอมไพล์เป็น Static Binary ตัวเดียวจบ
 COPY . .
+# CGO_ENABLED=0 เพื่อสร้าง Standalone Binary ที่ไม่พึ่งพา C library ของโฮสต์
 RUN CGO_ENABLED=0 GOOS=linux go build -o main main.go
 
-# Run Stage: สร้าง Image รันจริงที่มีขนาดเล็กพิเศษ
+# ==========================================
+# Stage 2: Run Stage (Image รันจริงขนาดจิ๋ว ~20MB)
+# ==========================================
+# 4. ใช้ Alpine Linux น้ำหนักเบามาก (ขนาดเริ่มต้นเพียง ~5MB)
 FROM alpine:3.19
 WORKDIR /app
+
+# 5. ก๊อปปี้เฉพาะไฟล์ไบนารี 'main' ที่คอมไพล์เสร็จแล้วมาจาก Stage 1
 COPY --from=builder /app/main .
+# 6. ก๊อปปี้ไฟล์ Config และ Migration Files ที่ระบบจำเป็นต้องใช้
 COPY app.env .
 COPY db/migration ./db/migration
 
+# 7. ประกาศพอร์ตที่ Container ให้บริการ และคำสั่งเริ่มต้นทำงาน
 EXPOSE 8080
 CMD [ "/app/main" ]`,
         },
@@ -1908,7 +2006,9 @@ simplebank   latest   e3b0c44298fc   12 seconds ago   21.4MB
           lang: "yaml",
           label: "simplebank/docker-compose.yml (สร้างไฟล์ใหม่ที่ Root Directory)",
           c: `version: "3.9"
+
 services:
+  # เซอร์วิสฐานข้อมูล PostgreSQL 16
   postgres:
     image: postgres:16-alpine
     environment:
@@ -1918,6 +2018,7 @@ services:
     ports:
       - "5432:5432"
 
+  # เซอร์วิส API Backend ของ Go ที่เราสร้างขึ้น
   api:
     build:
       context: .
@@ -1925,6 +2026,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # ใช้ชื่อ service 'postgres' แทน 'localhost' เมื่อทั้งคู่รันอยู่ใน Docker Network เดียวกัน
       - DB_SOURCE=postgresql://root:secret@postgres:5432/simple_bank?sslmode=disable
     depends_on:
       - postgres`,

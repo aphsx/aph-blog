@@ -45,7 +45,10 @@ export const testingPages: Record<string, Page> = {
           t: "code",
           lang: "go",
           label: "simplebank/db/main_test.go",
-          c: `package db
+          c: `// นิยาม: ฟังก์ชัน TestMain สำหรับเตรียมการเชื่อมต่อฐานข้อมูลสำหรับชุดทดสอบทั้งหมดใน package db
+// ทำเพื่อแก้ปัญหา: ป้องกันการเปิด-ปิด database connection ซ้ำซ้อนในทุก test function และเตรียม testQueries ให้พร้อมใช้งาน
+
+package db
 
 import (
 	"database/sql"
@@ -87,7 +90,10 @@ func TestMain(m *testing.M) {
           t: "code",
           lang: "go",
           label: "simplebank/util/random.go",
-          c: `package util
+          c: `// นิยาม: ฟังก์ชันช่วยสุ่มข้อมูลจำลอง (Random Generators) สำหรับใช้งานในชุดทดสอบ
+// ทำเพื่อแก้ปัญหา: ป้องกันข้อมูลซ้ำชนกับ Unique/Primary Key ในฐานข้อมูล และทำให้แต่ละการทดสอบเป็นอิสระต่อกัน (Independent)
+
+package util
 
 import (
 	"math/rand"
@@ -138,7 +144,10 @@ func RandomCurrency() string {
           t: "code",
           lang: "go",
           label: "simplebank/db/account_test.go",
-          c: `package db
+          c: `// นิยาม: ชุดทดสอบ Unit Test สำหรับ CRUD Operations ของ Account (Create, Get, Delete, List)
+// ทำเพื่อแก้ปัญหา: ตรวจสอบความถูกต้องของการทำงานกับฐานข้อมูล และป้องกันการเกิด Regression เมื่อมีการแก้ไขโค้ด
+
+package db
 
 import (
 	"context"
