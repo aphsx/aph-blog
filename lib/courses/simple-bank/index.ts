@@ -9,6 +9,11 @@ import { apiPages } from "./pages/06-api";
 import { securityProdPages } from "./pages/07-security-prod";
 import { interviewPages } from "./pages/08-interview";
 
+// =============================================================================
+// ไฟล์: simple-bank/index.ts
+// หน้าที่: รวมหน้าบทเรียนทั้งหมดของคอร์ส Simple Bank เข้ากับ Metadata ของระบบ
+// =============================================================================
+
 const pages: Record<string, Page> = {
   ...introPages,
   ...databasePages,
