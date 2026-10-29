@@ -13,7 +13,7 @@ export const interviewPages: Record<string, Page> = {
       "en": "8.1 System Design & Backend Interview Masterclass"
     },
     "lead": {
-      "th": "สรุป 10 คำถามสัมภาษณ์ยอดฮิตเกี่ยวกับระบบธนาคาร, Concurrency, Deadlock, Idempotency, Saga Pattern, และการออกแบบสถาปัตยกรรมสเกลล้านผู้ใช้",
+      "th": "รวม 10 คำถามสัมภาษณ์ยอดฮิตของบริษัทชั้นนำเกี่ยวกับระบบธนาคาร, Concurrency, Deadlock, Idempotency, และการขยายระบบสู่ Distributed Architecture สเกลล้านผู้ใช้",
       "en": "Mastering top 10 backend interview questions on banking systems, concurrency, deadlocks, idempotency, and distributed architectures."
     },
     "group": "8. สรุปสถาปัตยกรรม & เตรียมสอบสัมภาษณ์",
@@ -22,157 +22,192 @@ export const interviewPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "🧭 แผนที่การเรียนรู้ (Where You Are & What You'll Build)",
-          "c": "• **สิ่งที่ทำสำเร็จแล้ว**: สร้าง ทดสอบ และแพ็กระบบ Simple Bank ขึ้น Docker ครบสมบูรณ์ทั้งโปรเจกต์แล้ว\n• **ภารกิจในบทนี้**: ถอดบทเรียนจากโค้ดที่คุณเพิ่งเขียนทั้งหมด ให้กลายเป็นคำตอบสัมภาษณ์งานระดับมืออาชีพ 10 ข้อ พร้อมศึกษาแนวทางขยายระบบสู่ระดับ Distributed Microservices"
-        },
-        {
-          "t": "h2",
-          "c": "1. หมวด Concurrency, Locking & Database Consistency (คำถามข้อที่ 1–4)"
-        },
-        {
-          "t": "h3",
-          "c": "คำถามที่ 1: ถ้าบัญชี A โอนให้ B พร้อมกับบัญชี B โอนให้ A ในเวลาเดียวกัน จะเกิดอะไรขึ้น และแก้ไขอย่างไร?"
+          "c": "• **สิ่งที่ทำสำเร็จแล้ว**: สร้าง ทดสอบ และแพ็กระบบ Simple Bank ขึ้น Docker ครบสมบูรณ์ทั้งโปรเจกต์แล้ว\n• **ภารกิจในบทนี้**: ถอดบทเรียนจากโค้ดที่คุณเพิ่งเขียนทั้งหมด ให้กลายเป็นคำตอบสัมภาษณ์งานระดับมืออาชีพ 10 ข้อ พร้อมศึกษาแนวทางขยายระบบสู่ระดับ Distributed Microservices\n• **หัวข้อสำคัญ**: Deadlock Resource Ordering, Pessimistic vs Optimistic Locking, `FOR NO KEY UPDATE`, Idempotency Key (Redis), Saga Pattern, Hot Accounts, และ Graceful Shutdown"
         },
         {
           "t": "p",
-          "c": "• **ปัญหาที่เกิดขึ้น**: เกิด **Deadlock แบบ Circular Wait (การรอกันเป็นวงกลม)** เพราะ Transaction แรกล็อกบัญชี A แล้วรอขอล็อกบัญชี B ในขณะที่ Transaction ที่สองล็อกบัญชี B แล้วรอขอล็อกบัญชี A\n• **วิธีแก้ไขระดับ Production**: ใช้หลักการ **Strict Resource Ordering (การจัดลำดับการขอล็อกทรัพยากร)** โดยบังคับให้ทุก Transaction ต้องล็อกบัญชีที่มีรหัส `Account ID` น้อยกว่าก่อนเสมอ ไม่ว่าใครจะเป็นผู้โอนหรือผู้รับ ทำให้ไม่มีทางเกิดวงจรการรอแบบงูกินหางได้ 100%"
+          "c": "ในการสัมภาษณ์งานตำแหน่ง Backend Engineer (ตั้งแต่ระดับ Junior, Mid-Level จนถึง Senior/Staff) บริษัทเทคโนโลยีชั้นนำ เช่น Shopee, Grab, Agoda, LINE, ธนาคาร หรือแม้กระทั่ง Big Tech ระดับโลก มักจะหยิบยกโจทย์ **'ระบบโอนเงิน / การจัดการยอดเงิน (Money Transfer & Balance Management)'** มาเป็นข้อสอบหลักเสมอ"
+        },
+        {
+          "t": "callout",
+          "title": "🎯 ทำไมผู้สัมภาษณ์ถึงชอบโจทย์นี้มาก?",
+          "c": "เพราะมันเป็นโจทย์ที่ 'คัดกรองโปรแกรมเมอร์ที่เขียนโค้ดเป็น ออกจากวิศวกรที่เข้าใจระบบจริง' โปรแกรมเมอร์ทั่วไปจะตอบได้แค่การเขียน CRUD หรือใช้ ORM พื้นฐาน แต่คำถามเรื่อง Race Condition, Deadlock, และ Data Consistency จะวัดได้ทันทีว่าคุณเข้าใจสิ่งที่เกิดขึ้นในระดับหน่วยความจำและฐานข้อมูลจริงหรือไม่"
+        },
+        {
+          "t": "h2",
+          "c": "1. Top 10 คำถามสัมภาษณ์ยอดฮิต & แนวทางการตอบให้ได้คะแนนเต็ม"
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 2: Pessimistic Locking กับ Optimistic Locking ต่างกันอย่างไร และระบบธนาคารควรเลือกแบบไหน?"
+          "c": "ข้อที่ 1: ถ้าบัญชี 1 โอนให้บัญชี 2 พร้อมกับบัญชี 2 โอนให้บัญชี 1 เกิดอะไรขึ้น และแก้อย่างไร?"
+        },
+        {
+          "t": "p",
+          "c": "เกิด deadlock แบบ circular wait งานหนึ่งถือบัญชี 1 แล้วรอบัญชี 2 อีกงานถือบัญชี 2 แล้วรอบัญชี 1 ไม่มีใครปล่อย ทางแก้ที่ใช้ได้ทุกฐานข้อมูลคือ resource ordering ล็อก account id ที่เล็กกว่าก่อนเสมอ ไม่ว่าบัญชีนั้นจะเป็นฝั่งโอนหรือฝั่งรับ วงรอจึงไม่ครบรอบ"
+        },
+        {
+          "t": "p",
+          "c": "ตัวล็อกในภาษา Go อย่าง `sync.Mutex` ล็อกได้แค่คนที่รันอยู่ในโปรเซสเดียวกัน ถ้ามีเซิร์ฟเวอร์หลายเครื่อง คำขอที่ไปอีกเครื่องไม่เห็นล็อกนั้น การจองที่ทุกเครื่องเห็นร่วมกันอยู่ที่แถวในฐานข้อมูล"
+        },
+        {
+          "t": "h3",
+          "c": "ข้อที่ 2: pessimistic locking กับ optimistic locking ต่างกันอย่างไร?"
+        },
+        {
+          "t": "p",
+          "c": "ทั้งสองแบบใช้ได้กับฐานข้อมูลที่แก้แถวพร้อมกันได้ pessimistic locking คือจอง row lock ก่อนแก้ เหมาะเมื่อคนแย่งยอดเดียวกันบ่อย เพราะถ้ายอมให้ชนแล้วค่อยลองใหม่ คนส่วนใหญ่จะชนซ้ำ optimistic locking คือไม่ล็อกตอนอ่าน แต่ตอนบันทึกเช็กว่าแถวยังเป็นเวอร์ชันเดิม เหมาะเมื่องานส่วนใหญ่ไม่ชนกัน เช่นแก้โปรไฟล์ ในตาราง `FOR UPDATE` คือตัวอย่าง pessimistic locking บน PostgreSQL"
         },
         {
           "t": "table",
           "head": [
-            "หัวข้อเปรียบเทียบ",
-            "Pessimistic Locking (ล็อกก่อนแก้)",
-            "Optimistic Locking (แก้ก่อนค่อยเช็กเวอร์ชัน)"
+            "หัวข้อ",
+            "Pessimistic Locking (มองโลกในแง่ร้าย)",
+            "Optimistic Locking (มองโลกในแง่ดี)"
           ],
           "rows": [
             [
               "กลไกการทำงาน",
-              "ใช้ `SELECT ... FOR NO KEY UPDATE` หรือ Atomic `UPDATE` เพื่อล็อกแถวทันที คนที่มาทีหลังต้องเข้าคิวรอจนกว่าจะ Commit",
-              "ไม่ล็อกแถวตอนอ่าน แต่ใช้คอลัมน์ `version` เช็กตอนอัปเดต (`WHERE id = $1 AND version = $2`) ถ้าเวอร์ชันเปลี่ยนไปแล้วให้ล้มเหลวแล้วสั่ง Retry"
+              "ใช้คำสั่ง `SELECT ... FOR UPDATE` หรือล็อกแถวที่ระดับ Database ทันที ใครจะมาแตะต้องรอคิวก่อน",
+              "ไม่ล็อกแถวตอนอ่าน แต่เพิ่มคอลัมน์ `version` หรือ `updated_at` ตอนบันทึกจะเช็ก `WHERE id = $1 AND version = $2` ถ้าเลขเวอร์ชันเปลี่ยนไปแล้ว จะถือว่าล้มเหลวและสั่ง Retry"
             ],
             [
-              "เหมาะกับงานแบบใด?",
-              "**เหมาะกับระบบการเงินและคลังสินค้าที่มีการแย่งสูง (High Contention)** เพราะไม่ต้องเสียทรัพยากร CPU รันคำสั่งแล้วล้มเหลวซ้ำๆ",
-              "**เหมาะกับระบบที่โอกาสชนกันต่ำ (Low Contention)** เช่น การแก้ไขข้อมูลโปรไฟล์หรือการตั้งค่าทั่วไป"
+              "กรณีที่เหมาะสม",
+              "**ระบบการเงิน บัญชีธนาคาร หรือสินค้า Flash Sale ที่มีการแย่งกันสูงมาก (High Contention)** เพราะหากใช้ Optimistic Locking คำสั่งส่วนใหญ่จะชนกันและล้มเหลวจนต้อง Retry ซ้ำๆ เปลือง CPU",
+              "**ระบบที่การชนกันต่ำ (Low Contention)** เช่น การแก้ไขข้อมูลโปรไฟล์ผู้ใช้, โพสต์บทความ, หรือระบบที่เน้นการอ่านเป็นหลัก (Read-Heavy)"
             ]
           ]
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 3: ทำไมใน PostgreSQL ถึงเลือกใช้ FOR NO KEY UPDATE แทน FOR UPDATE?"
+          "c": "ข้อที่ 3: ทำไม PostgreSQL ถึงใช้ `FOR NO KEY UPDATE` แทน `FOR UPDATE`?"
         },
         {
           "t": "p",
-          "c": "เพราะตาราง `transfers` และ `entries` มี **Foreign Key** ชี้มายัง `accounts(id)` เวลาที่เราสั่ง `INSERT INTO transfers` ฐานข้อมูลจะต้องขอ Lock เบาๆ เพื่อตรวจว่า `id` ของบัญชียังอยู่จริง หากเราใช้ `FOR UPDATE` (ซึ่งเป็น Lock ที่แรงที่สุด) มันจะไปบล็อกการตรวจ Foreign Key จนเกิดคอขวดและ Deadlock ได้ง่าย แต่การโอนเงินแก้ไขเฉพาะคอลัมน์ `balance` ไม่ได้แก้คอลัมน์ `id` การใช้ `FOR NO KEY UPDATE` จึงป้องกันการแก้ `balance` ซ้อนกันได้ครบถ้วนโดยไม่บล็อกการตรวจ Foreign Key"
-        },
-        {
-          "t": "h3",
-          "c": "คำถามที่ 4: ทำไมห้ามใช้ sync.Mutex ของภาษา Go ล็อกยอดเงินแทนการล็อกในฐานข้อมูล?"
+          "c": "`FOR UPDATE` หยุด race condition ได้ เพราะมันกันไม่ให้สองคนแก้ยอดเดียวกันพร้อมกัน การโอนไม่ได้ลบบัญชีและไม่ได้เปลี่ยน `id` lock ให้หนักเท่าการแก้ `balance` จึงพอ ถ้า lock หนักถึงขั้นบล็อก foreign key check การ insert ลง `transfers` ซึ่งต้องตรวจ foreign key จะไปต่อคิวโดยไม่จำเป็น"
         },
         {
           "t": "p",
-          "c": "เพราะ `sync.Mutex` ล็อกได้เฉพาะ Goroutines ที่รันอยู่ **ภายในโปรเซสของเซิร์ฟเวอร์เครื่องเดียวกัน (In-Memory Process)** เท่านั้น ในระบบจริงที่รัน Go API Server หลายเครื่องคู่ขนานกันหลัง Load Balancer (เช่น 5 Pods บน Kubernetes) คำขอที่วิ่งไปคนละเครื่องจะไม่เห็น `sync.Mutex` ของอีกเครื่องเลย ดังนั้นการล็อกข้อมูลเงินจึงต้องทำที่ระดับฐานข้อมูล (Database Row Lock) ที่ทุกเครื่องเชื่อมต่อร่วมกันเสมอ"
-        },
-        {
-          "t": "h2",
-          "c": "2. หมวดสถาปัตยกรรมขยายระบบ & ความปลอดภัย (คำถามข้อที่ 5–10)"
+          "c": "บน PostgreSQL `FOR UPDATE` เป็น row lock ที่หนักสุด `FOR NO KEY UPDATE` คือ row lock ที่กันการแก้คอลัมน์ที่ไม่ใช่ key แต่ไม่กัน foreign key check คำสองคำนี้เป็นของ PostgreSQL ฐานข้อมูลอื่นใช้คนละคำสั่ง ให้ถามว่า row lock ตอนแก้ยอดไปชนกับ foreign key check หรือไม่ การ `UPDATE` เฉพาะ `balance` บน PostgreSQL ได้ lock ระดับ `FOR NO KEY UPDATE` อยู่แล้ว โดยไม่ต้องพิมพ์คำนั้นเอง"
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 5: จะป้องกันปัญหาลูกค้ากดปุ่มโอนเงินซ้ำ 2 ครั้งติดกัน (Double Submit / Network Retry) ได้อย่างไร?"
+          "c": "ข้อที่ 4: ป้องกันปัญหาผู้ใช้งานกดปุ่มโอนเงินซ้ำ 2 ครั้งติดกัน (Double Submit) อย่างไร?"
         },
         {
           "t": "p",
-          "c": "ใช้กลไก **Idempotency Key** โดยให้แอปฝั่งหน้าบ้านสุ่มรหัส `Idempotency-Key` (UUID v4) แนบมาใน HTTP Header ทุกครั้งที่กดปุ่มโอนเงิน เซิร์ฟเวอร์จะนำคีย์นี้ไปบันทึกใน Redis ด้วยคำสั่ง `SET idempotency:<key> PROCESSING NX EX 120` หากมีคำขอซ้ำด้วยคีย์เดิมยิงเข้ามาอีก Redis จะปฏิเสธทันที ทำให้เซิร์ฟเวอร์ไม่ตัดเงินซ้ำสอง"
+          "c": "**แนวทางการตอบ:**\n'เราจะใช้หลักการ **Idempotency (การกระทำซ้ำแล้วได้ผลลัพธ์เดิม)** โดยให้ Client ส่ง **Idempotency Key** (เช่น UUID v4) แนบมาใน HTTP Header ทุกครั้งที่มีการกดยืนยันโอนเงิน:\n\n1. เมื่อเซิร์ฟเวอร์ได้รับคำขอ จะนำ Idempotency Key ไปทำ `SET key value NX EX 120` ใน **Redis** (ล็อกไว้ชั่วคราว 2 นาที)\n2. หาก Redis คืนค่าว่า Key นี้มีอยู่แล้ว แสดงว่าเป็นคำขอซ้ำ ระบบจะปฏิเสธหรือคืนค่าผลลัพธ์เดิมกลับไปโดยไม่ตัดเงินซ้ำสอง\n3. เมื่อ Database Transaction บันทึกสำเร็จ จึงบันทึกผลลัพธ์ลงใน Database พร้อม Idempotency Key นั้นอย่างถาวรครับ'"
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "จำลองคำสั่ง Redis Atomic Lock ป้องกัน Double Submit ใน Terminal",
+          "code": "# คำขอที่ 1 (ผู้ใช้กดโอนเงินครั้งแรก):\nredis-cli SET \"idempotency:tx:9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\" \"PROCESSING\" NX EX 120\n\n# คำขอที่ 2 (เสี้ยววินาทีถัดมา ผู้ใช้กดย้ำปุ่มเดิมด้วย Idempotency Key เดิม):\nredis-cli SET \"idempotency:tx:9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d\" \"PROCESSING\" NX EX 120",
+          "out": "# ผลลัพธ์คำขอที่ 1: ล็อกสำเร็จ เซิร์ฟเวอร์เริ่มทำ Transaction ใน PostgreSQL\nOK\n\n# ผลลัพธ์คำขอที่ 2: Redis คืนค่า nil ทันที! เซิร์ฟเวอร์ดักจับได้และคืน HTTP 409 Conflict หรือผลลัพธ์เดิม\n(nil)"
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 6: ถ้าบัญชีต้นทางกับบัญชีปลายทางอยู่คนละ Database (ข้ามธนาคารหรือแยก Microservices) จะจัดการอย่างไร?"
+          "c": "ข้อที่ 5: หากระบบถูกแยกเป็น Microservices และบัญชีอยู่คนละ Database จะจัดการโอนเงินอย่างไร?"
         },
         {
           "t": "p",
-          "c": "เมื่อข้ามฐานข้อมูลจะใช้ `BEGIN ... COMMIT` ก้อนเดียวไม่ได้ ต้องเปลี่ยนมาใช้ **Saga Pattern** ร่วมกับ **Transactional Outbox Pattern** โดยแบ่งเป็น Local Transaction ย่อยของแต่ละฝั่ง สื่อสารกันผ่าน Message Broker (เช่น Kafka) และหากการเพิ่มเงินฝั่งปลายทางล้มเหลว ระบบจะส่งคำสั่ง **Compensating Transaction (ทรานแซกชันชดเชย)** เพื่อคืนเงินกลับเข้าบัญชีต้นทางโดยอัตโนมัติ"
+          "c": "**แนวทางการตอบ:**\n'เมื่อข้ามฐานข้อมูล เราไม่สามารถใช้ Local ACID Transaction (`BEGIN...COMMIT`) ได้อีกต่อไป ทางเลือกในการจัดการมี 2 รูปแบบหลัก:\n\n1. **Two-Phase Commit (2PC):** มี Coordinator คอยสั่ง Prepare และ Commit ข้าม Database แต่ข้อเสียคือประสิทธิภาพต่ำและเสี่ยงต่อการค้างหาก Coordinator ล่ม\n2. **Saga Pattern (แนะนำ):** แบ่งการทำงานเป็น Local Transaction ย่อยๆ ของแต่ละ Service และใช้ **Compensating Transaction (ทรานแซกชันชดเชย)** ในการย้อนเงินกลับหากสเต็ปปลายทางล้มเหลว โดยสื่อสารผ่าน Message Queue (เช่น Apache Kafka) และประยุกต์ใช้ **Transactional Outbox Pattern** เพื่อการันตีว่าข้อความจะไม่สูญหายครับ'"
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 7: หากมีบัญชีรับบริจาคที่มีคนโอนเงินเข้าพร้อมกันวินาทีละ 10,000 ครั้ง (Hot Account) จะแก้ปัญหาคอขวดจากการแย่งล็อกแถวเดียวอย่างไร?"
+          "c": "ข้อที่ 6: ปัญหา Hot Account (เช่น บัญชีรับบริจาคที่มีคนโอนเข้าวินาทีละ 10,000 ครั้ง) จะแก้คอขวดอย่างไร?"
         },
         {
           "t": "p",
-          "c": "ใช้เทคนิค **Sub-Accounts (Sharded Counters)** หรือ **Batch Aggregation** โดยแทนที่จะอัปเดตแถวบัญชีหลักแถวเดียวทุกครั้งที่มีคนโอนเข้า ให้กระจายยอดเงินเข้าสู่บัญชีย่อยหลายๆ แถว (เช่น `acc_1_shard_01` ถึง `acc_1_shard_20`) หรือบันทึกเฉพาะแถว `entries` แบบ Append-Only แล้วรวบยอดอัปเดต `balance` ทุกๆ 1 วินาที"
+          "c": "**แนวทางการตอบ:**\n'หากมีคนโอนเงินเข้าบัญชีเดียวพร้อมกัน 10,000 คำสั่งต่อวินาที การล็อกแถวเดิมใน PostgreSQL จะกลายเป็นคอขวดทันที (Lock Contention) วิธีแก้มีดังนี้:\n\n1. **ฝั่งเงินเข้าไม่ต้องแย่งกันล็อก:** บันทึกประวัติเงินเข้าลงในตาราง `entries` ทันทีแบบ Append-Only (เพราะการ `INSERT` แถวใหม่ไม่แย่ง Lock กัน)\n2. **Sharded Counters / Distributed Sub-accounts:** แตกบัญชีหลักออกเป็นบัญชีย่อยในระบบภายใน เช่น บัญชี 101_A, 101_B, ... แล้วสุ่มกระจายเงินเข้าบัญชีย่อย จากนั้นค่อยมี Background Worker ทำการรวมยอด (Reconciliation) สรุปยอดรวมกลับมายังบัญชีหลักในภายหลัง\n3. **Batch Aggregation:** นำรายการเงินเข้าเข้าสู่ Queue (Kafka/Redis Stream) แล้วทำการรวบยอด (Batch) ทุกๆ 1 วินาที เช่น รวม 5,000 รายการ แล้วยิงคำสั่ง `UPDATE` เพิ่มยอดเงินทีเดียวครับ'"
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 8: อธิบายระดับการแยกตัวของ Transaction (Isolation Levels) ทั้ง 4 ระดับ"
+          "c": "ข้อที่ 7: อธิบาย Transaction Isolation Levels ทั้ง 4 ระดับ และปรากฏการณ์ความผิดพลาด"
         },
         {
           "t": "table",
           "head": [
-            "Isolation Level",
-            "Dirty Read (อ่านค่าที่ยังไม่ Commit)",
-            "Non-Repeatable Read (อ่านซ้ำค่าเปลี่ยน)",
-            "Phantom Read (อ่านซ้ำเจอแถวใหม่)"
+            "ระดับ (Isolation Level)",
+            "Dirty Read (อ่านข้อมูลที่ยังไม่ commit)",
+            "Non-Repeatable Read (อ่านซ้ำแล้วค่าเปลี่ยน)",
+            "Phantom Read (อ่านซ้ำแล้วเจอแถวใหม่โผล่มา)"
           ],
           "rows": [
             [
-              "1. Read Uncommitted",
+              "Read Uncommitted",
               "เกิดได้",
               "เกิดได้",
               "เกิดได้"
             ],
             [
-              "2. Read Committed (ค่าเริ่มต้นของ Postgres)",
+              "Read Committed (Default ของ Postgres)",
               "ป้องกันได้",
-              "เกิดได้ (จึงต้องใช้ Row Lock ช่วย)",
+              "เกิดได้",
               "เกิดได้"
             ],
             [
-              "3. Repeatable Read",
+              "Repeatable Read",
               "ป้องกันได้",
               "ป้องกันได้",
-              "ป้องกันได้ใน PostgreSQL (MVCC)"
+              "เกิดได้ (ใน Postgres ป้องกันได้เกือบหมด)"
             ],
             [
-              "4. Serializable",
-              "ป้องกันได้ 100%",
-              "ป้องกันได้ 100%",
-              "ป้องกันได้ 100% (แต่ต้องเขียนโค้ดรองรับการ Retry)"
+              "Serializable (เข้มงวดสูงสุด)",
+              "ป้องกันได้",
+              "ป้องกันได้",
+              "ป้องกันได้ 100% (แต่แลกกับความช้า)"
             ]
           ]
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 9: ทำไมจึงห้ามใช้ชนิดข้อมูล FLOAT เก็บเงิน และทำไมต้องใช้ PASETO แทน JWT?"
+          "c": "ข้อที่ 8: ทำไมระบบธนาคารถึงต้องเก็บเงินเป็นจำนวนเต็ม (Integer) และห้ามใช้ Float?"
         },
         {
           "t": "p",
-          "c": "• **ห้ามใช้ FLOAT**: เพราะเลขทศนิยมฐานสองตามมาตรฐาน IEEE 754 มีความคลาดเคลื่อนในการปัดเศษ (เช่น `0.1 + 0.2 = 0.30000000000000004`) จึงต้องเก็บเป็นจำนวนเต็ม `BIGINT` (`int64`) ในหน่วยย่อยที่สุด (สตางค์/เซนต์) เสมอ\n• **ใช้ PASETO แทน JWT**: เพราะ PASETO บังคับใช้อัลกอริทึมเข้ารหัสที่ปลอดภัยตามเวอร์ชัน (เช่น ChaCha20-Poly1305) ปิดช่องโหว่ `alg: none` และเข้ารหัสลับข้อมูลภายใน Payload ไม่ให้คนนอกแอบอ่านได้"
+          "c": "**แนวทางการตอบ:**\n'เนื่องจากมาตรฐาน IEEE 754 ของคอมพิวเตอร์ แทนค่าเลขทศนิยมด้วยฐานสอง ซึ่งไม่สามารถแทนค่าทศนิยมฐานสิบอย่าง 0.1 หรือ 0.2 ได้อย่างแม่นยำ (เช่น `0.1 + 0.2 = 0.30000000000000004`)\n\nในระบบการเงินระดับสากล เราจะเก็บตัวเลขเป็น **Smallest Currency Unit (หน่วยเงินย่อยที่สุด)** เสมอ เช่น บาทเก็บเป็นสตางค์ หรือดอลลาร์เก็บเป็นเซนต์ โดยใช้ชนิดข้อมูล `BIGINT` (64-bit integer) ซึ่งการันตีความถูกต้องแม่นยำ 100% ไร้ข้อผิดพลาดจากการปัดเศษครับ'"
         },
         {
           "t": "h3",
-          "c": "คำถามที่ 10: Graceful Shutdown สำคัญต่อระบบการเงินอย่างไรเวลา Deploy โค้ดใหม่?"
+          "c": "ข้อที่ 9: ทำไมใน Go ถึงนิยมใช้ `testify/require` มากกว่า `testify/assert` ในการทดสอบ Database?"
         },
         {
           "t": "p",
-          "c": "เวลาอัปเดตเวอร์ชันใหม่บนเซิร์ฟเวอร์ หากสั่งตัดโปรเซสทิ้งทันที คำสั่งโอนเงินที่กำลังรันอยู่กลางทางจะถูกตัดขาด การทำ **Graceful Shutdown** ด้วยการดักสัญญาณ `SIGTERM` แล้วเรียก `httpServer.Shutdown(ctx)` จะสั่งให้เซิร์ฟเวอร์หยุดรับคำขอใหม่ แต่รอให้คำขอโอนเงินที่ค้างอยู่ทำงานจน `COMMIT` เสร็จเรียบร้อยก่อนจึงค่อยปิดตัวลง"
+          "c": "**แนวทางการตอบ:**\n'`assert` เมื่อการตรวจสอบล้มเหลว จะเพียงแค่พ่นข้อความเตือน แต่จะปล่อยให้โค้ดบรรทัดถัดไปทำงานต่อ ซึ่งหากขั้นตอนการสร้างบัญชีล้มเหลว ตัวแปรบัญชีจะมีค่าเป็น nil การปล่อยให้โค้ดรันต่อไปจะทำให้โปรแกรมเกิด `panic: runtime error: invalid memory address or nil pointer dereference`\n\nส่วน `require` จะทำการเรียก `t.FailNow()` เพื่อหยุดการรันเทสต์ของฟังก์ชันนั้นทันที ทำให้ผลลัพธ์ของเทสต์ชัดเจนและไม่เกิด Panic ซ้อนครับ'"
+        },
+        {
+          "t": "codeout",
+          "lang": "text",
+          "label": "เปรียบเทียบผลลัพธ์ Terminal Test เมื่อสร้างบัญชีล้มเหลว (assert VS require)",
+          "code": "# เมื่อใช้ testify/assert: (รันต่อไปจนติด Nil Pointer Dereference Panic)\n=== RUN   TestCreateAccount\n    account_test.go:28: \n        \tError:      \tReceived unexpected error: pq: connection refused\n    panic: runtime error: invalid memory address or nil pointer dereference [recovered]\n        \tpanic: runtime error: invalid memory address or nil pointer dereference\n    goroutine 19 [running]:\n    simplebank/db_test.TestCreateAccount(0x140001149c0)\n        account_test.go:31 +0x1b4\n\n--- FAIL: TestCreateAccount (0.01s)\nFAIL\n\n--------------------------------------------------------------------------------\n\n# เมื่อใช้ testify/require: (หยุดทันทีด้วย FailNow ไม่พ่น Panic รกหน้าจอ)\n=== RUN   TestCreateAccount\n    account_test.go:28: \n        \tError:      \tReceived unexpected error: pq: connection refused\n        \tTest:       \tTestCreateAccount\n        \tMessages:   \tไม่สามารถสร้างบัญชีได้\n\n--- FAIL: TestCreateAccount (0.00s)\nFAIL",
+          "out": "สรุป: require ช่วยให้ Error Report ชี้ตรงจุดที่ผิดพลาดบรรทัดแรกทันที ไม่บดบังด้วย Nil Pointer Panic!"
+        },
+        {
+          "t": "h3",
+          "c": "ข้อที่ 10: Graceful Shutdown ในระบบเซิร์ฟเวอร์การเงินสำคัญอย่างไร?"
+        },
+        {
+          "t": "p",
+          "c": "**แนวทางการตอบ:**\n'เวลาที่เรา Deploy โค้ดเวอร์ชันใหม่บน Kubernetes เซิร์ฟเวอร์ตัวเก่าจะได้รับสัญญาณ `SIGTERM` หากเราสั่งปิดโปรเซสทันที คำสั่งโอนเงินที่กำลังค้างอยู่ใน Transaction อาจถูกตัดกลางคัน\n\nการทำ Graceful Shutdown ใน Go ด้วย `server.Shutdown(ctx)` จะสั่งให้เซิร์ฟเวอร์หยุดรับ Request ใหม่ แต่จะรอให้ Request เดิมที่กำลังประมวลผลอยู่ทำงานให้เสร็จสิ้นและ Commit ลง Database เรียบร้อยก่อนที่จะปิดโปรเซสลงอย่างปลอดภัยครับ'"
         },
         {
           "t": "h2",
-          "c": "3. แผนผังสถาปัตยกรรมระดับ Enterprise เมื่อขยายสู่สเกลใหญ่"
+          "c": "2. ภาพรวมสถาปัตยกรรมระดับ Production (High-Level Architecture)"
+        },
+        {
+          "t": "p",
+          "c": "นี่คือภาพจำลองสถาปัตยกรรมระดับสากลที่คุณสามารถนำไปใช้วาดบนไวท์บอร์ดเวลาสอบสัมภาษณ์รอบ System Design:"
         },
         {
           "t": "code",
           "lang": "text",
-          "label": "Enterprise Banking System Design Architecture",
-          "c": "                      [ Clients (Web / Mobile Apps) ]\n                                     |\n                                     v\n                        [ Cloudflare / AWS CloudFront ]\n                            (DDoS Protection & TLS)\n                                     |\n                                     v\n                          [ API Gateway / Envoy ]\n                      (Rate Limiting & Idempotency Key)\n                                     |\n                    +----------------+----------------+\n                    |                                 |\n                    v                                 v\n        [ Go API Pod 1 (Gin) ]            [ Go API Pod 2 (Gin) ]\n                    |                                 |\n                    +----------------+----------------+\n                                     |\n               +---------------------+---------------------+\n               |                                           |\n               v                                           v\n       [ Redis Cluster ]                          [ PostgreSQL Primary ]\n (Idempotency Lock, Rate Limit,               (ACID Transactions, Row Locks,\n       Session Blacklist)                         Double-Entry Ledger)\n                                                           |\n                                                (Streaming Replication)\n                                                           |\n                                                           v\n                                                  [ PostgreSQL Replica ]\n                                                   (Read-Only Statement)"
+          "label": "Enterprise Banking System Design",
+          "c": "                      [ Clients (Web / Mobile Apps) ]\n                                     |\n                                     v\n                        [ Cloudflare / AWS CloudFront ]\n                            (DDoS Protection & SSL)\n                                     |\n                                     v\n                          [ API Gateway / Envoy ]\n                      (Rate Limiting & Authentication)\n                                     |\n                    +----------------+----------------+\n                    |                                 |\n                    v                                 v\n        [ Go API Pod 1 (Gin) ]            [ Go API Pod 2 (Gin) ]\n                    |                                 |\n                    +----------------+----------------+\n                                     |\n               +---------------------+---------------------+\n               |                                           |\n               v                                           v\n       [ Redis Cluster ]                          [ PostgreSQL Primary ]\n (Idempotency, Token Blacklist,               (ACID Transactions, Row Locks,\n        Rate Limit Cache)                          Strict Ledger Tables)\n                                                           |\n                                                (Streaming Replication)\n                                                           |\n                                                           v\n                                                  [ PostgreSQL Replica ]\n                                                   (Read-Only Analytics)"
         },
         {
           "t": "callout",
-          "title": "🏆 บทสรุปส่งท้ายคอร์ส Simple Bank Masterclass",
-          "c": "คุณได้เดินทางตั้งแต่การปูพื้นฐานไวยากรณ์ภาษา Go ทั้ง 10 กลไก, การออกแบบฐานข้อมูลบัญชีแยกประเภท, การเขียน Raw SQL CRUD และ Unit Tests, การสร้าง Transaction Manager, การปราบ Race Condition และ Deadlock ด้วย Goroutines, ไปจนถึงการสร้าง Gin REST API, ระบบความปลอดภัย PASETO, และการแพ็กขึ้น Docker ครบทุกขั้นตอน ขอให้คุณนำความเข้าใจเชิงลึกชุดนี้ไปต่อยอดสร้างระบบจริงและประสบความสำเร็จในการทำงานสาย Backend Engineer ครับ!"
+          "title": "✅ สรุปสิ่งที่คุณทำสำเร็จในบทนี้ & ก้าวต่อไป",
+          "c": "🏆 **บทสรุปส่งท้ายคอร์ส Simple Bank Masterclass**: คุณได้เรียนรู้ตั้งแต่ไวยากรณ์ภาษา Go พื้นฐานทั้ง 10 กลไก, การออกแบบ Immutable Double-Entry Ledger, การเขียน Raw SQL CRUD และ Unit Tests, การสร้าง ACID Transaction Manager, การปราบ Race Condition และ Deadlock ด้วย Goroutines, ไปจนถึงการสร้าง Gin REST API, ระบบความปลอดภัย PASETO, และการแพ็กขึ้น Docker ครบทุกขั้นตอน ขอให้คุณนำความเข้าใจเชิงลึกชุดนี้ไปต่อยอดสร้างระบบจริงและประสบความสำเร็จในการทำงานสาย Backend Engineer ครับ!"
         }
       ],
       "en": []
