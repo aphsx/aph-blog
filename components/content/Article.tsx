@@ -9,38 +9,138 @@ import CopyButton from "./CopyButton";
 import PostmanPanel from "./PostmanPanel";
 import { parsePostmanBlock } from "@/lib/postman-parser";
 
-/* parse **bold** and *italic* (backticks already handled by renderInline) */
-function renderFormatted(text: string): ReactNode {
-  const parts = text.split(/(\*\*[^*]+?\*\*|\*[^*]+?\*)/g);
-  if (parts.length === 1) return text;
-  return parts.map((part, k) => {
-    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
-      return <strong key={k}>{part.slice(2, -2)}</strong>;
+type InlineNode =
+  | string
+  | { type: "code"; content: string }
+  | { type: "strong"; children: InlineNode[] }
+  | { type: "em"; children: InlineNode[] };
+
+/* Tokenizes inline markdown: `code`, **bold**, *italic* with proper nesting */
+function parseInlineTokens(text: string): InlineNode[] {
+  if (!text.includes("`") && !text.includes("*")) {
+    return [text];
+  }
+
+  const results: InlineNode[] = [];
+  let i = 0;
+  const len = text.length;
+  let textBuf = "";
+
+  const flushText = () => {
+    if (textBuf) {
+      results.push(textBuf);
+      textBuf = "";
     }
-    if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
-      return <em key={k}>{part.slice(1, -1)}</em>;
+  };
+
+  while (i < len) {
+    // 1. Inline code: `...`
+    if (text[i] === "`") {
+      const closeIdx = text.indexOf("`", i + 1);
+      if (closeIdx !== -1) {
+        flushText();
+        results.push({ type: "code", content: text.slice(i + 1, closeIdx) });
+        i = closeIdx + 1;
+        continue;
+      }
     }
-    return <Fragment key={k}>{part}</Fragment>;
+
+    // 2. Bold: **...** (can contain `code`)
+    if (text[i] === "*" && i + 1 < len && text[i + 1] === "*") {
+      let closeIdx = -1;
+      let inBacktick = false;
+      for (let j = i + 2; j < len - 1; j++) {
+        if (text[j] === "`") {
+          inBacktick = !inBacktick;
+        } else if (!inBacktick && text[j] === "*" && text[j + 1] === "*") {
+          closeIdx = j;
+          break;
+        }
+      }
+
+      if (closeIdx !== -1 && closeIdx > i + 2) {
+        flushText();
+        const inner = text.slice(i + 2, closeIdx);
+        results.push({ type: "strong", children: parseInlineTokens(inner) });
+        i = closeIdx + 2;
+        continue;
+      }
+    }
+
+    // 3. Italic: *...*
+    if (
+      text[i] === "*" &&
+      i + 1 < len &&
+      text[i + 1] !== "*" &&
+      text[i + 1] !== " " &&
+      (i === 0 || text[i - 1] === " " || text[i - 1] === "(" || text[i - 1] === "[" || text[i - 1] === "\n")
+    ) {
+      let closeIdx = -1;
+      let inBacktick = false;
+      for (let j = i + 1; j < len; j++) {
+        if (text[j] === "`") {
+          inBacktick = !inBacktick;
+        } else if (
+          !inBacktick &&
+          text[j] === "*" &&
+          text[j - 1] !== " " &&
+          text[j - 1] !== "*" &&
+          (j + 1 >= len || text[j + 1] !== "*")
+        ) {
+          closeIdx = j;
+          break;
+        }
+      }
+
+      if (closeIdx !== -1) {
+        flushText();
+        const inner = text.slice(i + 1, closeIdx);
+        results.push({ type: "em", children: parseInlineTokens(inner) });
+        i = closeIdx + 1;
+        continue;
+      }
+    }
+
+    textBuf += text[i];
+    i++;
+  }
+
+  flushText();
+  return results;
+}
+
+function renderInlineNodes(nodes: InlineNode[], keyPrefix = "n"): ReactNode {
+  if (nodes.length === 1 && typeof nodes[0] === "string") {
+    return nodes[0];
+  }
+  return nodes.map((n, idx) => {
+    const k = `${keyPrefix}-${idx}`;
+    if (typeof n === "string") {
+      return <Fragment key={k}>{n}</Fragment>;
+    }
+    if (n.type === "code") {
+      return (
+        <code
+          key={k}
+          className="rounded bg-code px-[0.3em] py-[0.12em] font-mono text-[0.85em]"
+        >
+          {n.content}
+        </code>
+      );
+    }
+    if (n.type === "strong") {
+      return <strong key={k}>{renderInlineNodes(n.children, `${k}-s`)}</strong>;
+    }
+    if (n.type === "em") {
+      return <em key={k}>{renderInlineNodes(n.children, `${k}-e`)}</em>;
+    }
+    return null;
   });
 }
 
-/* parse `inline code` → <code>, then **bold** / *italic* inside the non-code segments */
+/* parse `inline code`, **bold**, and *italic* with arbitrary nesting */
 function renderInline(text: string): ReactNode {
-  const segs = text.split("`");
-  // even segment count = unbalanced backtick → keep it literal, format only
-  if (segs.length % 2 === 0) return renderFormatted(text);
-  return segs.map((seg, i) =>
-    i % 2 === 1 ? (
-      <code
-        key={i}
-        className="rounded bg-code px-[0.3em] py-[0.12em] font-mono text-[0.85em]"
-      >
-        {seg}
-      </code>
-    ) : (
-      <Fragment key={i}>{renderFormatted(seg)}</Fragment>
-    ),
-  );
+  return renderInlineNodes(parseInlineTokens(text));
 }
 
 function renderText(text: string) {
@@ -434,7 +534,7 @@ async function renderBlock(
           id={id}
           className="mb-2 mt-8 scroll-mt-28 text-[1.375em] font-bold tracking-tight min-[768px]:mt-[2em] min-[768px]:text-[1.5em]"
         >
-          {b.c}
+          {renderInline(b.c)}
         </h2>
       );
     case "h3":
@@ -444,7 +544,7 @@ async function renderBlock(
           id={id}
           className="mb-2 mt-[1.8em] scroll-mt-28 text-[1.25em] font-semibold"
         >
-          {b.c}
+          {renderInline(b.c)}
         </h3>
       );
     case "ul":
