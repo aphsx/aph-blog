@@ -458,6 +458,30 @@ log: โอนสำเร็จ`,
             "**บทถัดไปใช้ของนี้ตรงไหน**: `DBTX` และ `Maker` เป็น interface `Store` ฝัง `*Queries` เพื่อเรียกคำสั่ง SQL เดิมได้ แล้วเติมความสามารถเปิด transaction เข้าไป",
           ],
         },
+        {
+          t: "callout",
+          title: "💡 Interface และการทำ Dependency Injection / Mocking ใน Simple Bank",
+          c: `ในระบบธนาคารจริง เราจะไม่ให้ HTTP Controller หรือ Handler ผูกติดกับฐานข้อมูล PostgreSQL โดยตรง แต่จะให้ขึ้นกับ **Store Interface** (Contract สัญญาการทำงาน):
+
+\`\`\`go
+// นิยามว่า "อะไรก็ตามที่มี Method CreateAccount และ GetAccount จะถือว่าเป็น Store"
+type Store interface {
+    CreateAccount(owner string, balance int64) (*Account, error)
+    GetAccount(id int64) (*Account, error)
+}
+
+// Controller ไม่ยึดติดกับ PostgreSQL แต่รับ Store Interface ผ่าน Constructor
+type AccountHandler struct {
+    store Store
+}
+
+func NewAccountHandler(store Store) *AccountHandler {
+    return &AccountHandler{store: store}
+}
+\`\`\`
+
+**ประโยชน์มหาศาล**: ใน Production เราส่ง \`*SQLStore\` ที่เชื่อมกับ PostgreSQL จริงเข้าไป แต่ตอนเขียน Unit Test เราสามารถสร้าง **Mock Database** จำลองคำตอบในหน่วยความจำได้ทันที ช่วยให้ทดสอบ Controller ได้รวดเร็วและเป็นอิสระ 100% โดยไม่ต้องเปิดฐานข้อมูลจริง!`,
+        },
 
         { t: "h2", c: "4. Struct, Pointer และ Value vs Pointer Receiver" },
         {
@@ -528,6 +552,27 @@ func main() {
             "**`acc := &Account{...}`**: เครื่องหมาย `&` ใช้เพื่อดึง Address ของ struct นั้นมา ทำให้ตัวแปร `acc` มีชนิดข้อมูลเป็น `*Account` (Pointer to Account)",
           ],
         },
+        {
+          t: "callout",
+          title: "📌 กฎเหล็กของ Simple Bank เรื่อง Pointer",
+          c: `ในภาษา Go การส่งข้อมูลแบ่งเป็น 2 ลักษณะสำคัญ:
+1. **Pass by Value (คัดลอกสำเนา)**: Go เป็นภาษา pass-by-value โดยค่าเริ่มต้น ถ้าคุณส่ง struct เข้าฟังก์ชัน Go จะ copy ข้อมูลทั้งชุดไปไว้ที่ memory ก้อนใหม่ การแก้ไขข้างในจะไม่มีผลกับตัวแปรต้นทาง
+2. **Pass by Reference (ส่ง Memory Address ผ่าน Pointer \`*\`)**: ส่งตำแหน่งที่อยู่บน RAM ไปด้วยเครื่องหมาย \`&\` เพื่อไม่ให้เปลืองหน่วยความจำ และเพื่อให้ฟังก์ชันนั้นสามารถแก้ไขค่าต้นทางได้
+
+\`\`\`go
+// ❌ Pass-by-value: แก้แล้วไม่มีผลกับตัวแปรเดิม (ยอดเงินยังคงเท่าเดิม)
+func deductFeeWrong(acc Account, fee int64) {
+    acc.Balance -= fee
+}
+
+// ✅ Pointer (*Account): แก้ไขข้อมูลที่ memory address นั้นโดยตรง
+func deductFeeCorrect(acc *Account, fee int64) {
+    acc.Balance -= fee
+}
+\`\`\`
+
+**กฎสำคัญสำหรับ Simple Bank**: โครงสร้างขนาดใหญ่หรือตัวจัดการทรัพยากรส่วนกลาง เช่น Database Connection Pool (\`*sql.DB\`), Transaction (\`*sql.Tx\`), หรือ Server instance (\`*Server\`) จะต้องส่งผ่าน **Pointer (\`*\`) เสมอ** เช่น \`func (s *Server) Start(...) error\` เพื่อให้แชร์ทรัพยากรตัวเดียวกันและไม่เปลืองแรม!`,
+        },
 
         { t: "h2", c: "5. `defer` ทำงานตอนฟังก์ชันกำลังจะจบ" },
         {
@@ -574,8 +619,23 @@ func main() {
         },
         {
           t: "callout",
-          title: "📌 กฎเหล็กของ defer",
-          c: "defer จะทำงานตามหลัก LIFO (Last-In, First-Out) คือคำสั่ง defer ตัวล่าสุดที่ถูกเรียก จะทำงานเป็นตัวแรกสุดตอนฟังก์ชันจบลง และแม้จะเกิด Panic หรือ Return ก่อนเวลา defer ก็จะถูกรันแน่นอน 100%",
+          title: "📌 กฎเหล็กของ defer และการนำไปใช้กับ Transaction Rollback",
+          c: `คำสั่ง \`defer\` จะทำงานตามหลัก LIFO (Last-In, First-Out) เสมอ และแม้ฟังก์ชันจะพังหรือเกิด Panic คำสั่ง defer ก็การันตีรันแน่นอน 100%
+
+ในระบบธนาคาร เราใช้ \`defer\` ควบคู่กับการควบคุม Database Transaction เพื่อการันตีว่าจะไม่มี Transaction ค้างในระบบ:
+
+\`\`\`go
+tx, err := db.BeginTx(ctx, nil)
+if err != nil {
+    return err
+}
+// ถ้าฟังก์ชัน return ก่อน tx.Commit() คำสั่ง Rollback จะทำงานอัตโนมัติ ป้องกัน Transaction ค้าง
+defer tx.Rollback()
+
+// ทำการโอนเงิน (ถ้ามี error กลางทางและ return err คำสั่ง defer tx.Rollback() จะทำงานทันที)...
+
+return tx.Commit() // เมื่อ Commit สำเร็จ Rollback ที่ตามหลังมาจะไม่มีผลเสียใดๆ
+\`\`\``,
         },
 
         { t: "h2", c: "6. `context.Context` คือใบสั่งให้ยกเลิกงานที่ช้าเกิน" },
@@ -695,6 +755,25 @@ func main() {
             "**`sync.WaitGroup`**: ตัวนับงาน (Counter) — เรียก `wg.Add(1)` ก่อนเริ่ม, เรียก `wg.Done()` เมื่อจบงาน, และเรียก `wg.Wait()` ในฟังก์ชันหลักเพื่อรอจนกว่านับถอยหลังถึง 0",
             "**`chan string`**: ท่อส่งข้อมูล (Channel) ที่ปลอดภัยในการส่งผ่านค่าระหว่าง Goroutines โดยไม่ต้องใช้ Mutex ล็อก",
           ],
+        },
+        {
+          t: "callout",
+          title: "💬 ปรัชญา Concurrency ของ Go: Channels สำหรับรวม Error",
+          c: `ในภาษา Go มีปรัชญาชื่อดังระดับโลกคือ:
+> *"Do not communicate by sharing memory; instead, share memory by communicating."*
+
+เวลาที่เราทดสอบการโอนเงินพร้อมกันหลายๆ Goroutines เราจะส่งข้อผิดพลาดและผลลัพธ์ผ่าน Channel เสมอ:
+\`\`\`go
+errs := make(chan error, 5) // Channel รองรับ error ได้ 5 ตัว
+
+go func() {
+    err := processPayment()
+    errs <- err // ส่งค่าเข้าไปใน channel จากเบื้องหลัง
+}()
+
+err := <-errs // ดึงค่าออกจาก channel ในฟังก์ชันหลักมาตรวจสอบ
+\`\`\`
+รูปแบบนี้คือแกนหลักที่เราจะใช้เขียน **Automated Concurrent Unit Tests** ในบทที่ 5 เพื่อจับ Deadlock และ Race Condition!`,
         },
         {
           t: "callout",
