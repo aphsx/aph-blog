@@ -8,6 +8,7 @@ import VizBlock from "@/components/viz/catalog";
 import CopyButton from "./CopyButton";
 import PostmanPanel from "./PostmanPanel";
 import { parsePostmanBlock } from "@/lib/postman-parser";
+import InteractiveQuiz from "./InteractiveQuiz";
 
 type InlineNode =
   | string
@@ -830,6 +831,8 @@ async function renderBlock(
     }
     case "viz":
       return <VizBlock key={i} id={b.id} />;
+    case "quiz":
+      return <InteractiveQuiz key={id} questions={b.c} />;
     case "image":
       return (
         <figure key={i} className="my-6">

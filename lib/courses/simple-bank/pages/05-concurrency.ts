@@ -97,14 +97,30 @@ export const concurrencyPages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ในโค้ด Test ด้านบน ทำไมเราต้องสร้าง unbuffered channel (c := make(chan int)) แล้วอ่านค่าในลูป n ครั้ง?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: ช่องทาง Unbuffered Channel จะทำหน้าที่เป็นจุดประสานงาน (Synchronization Point) ด้วย โดยฝั่ง Goroutine หลักจะยืนรอจนกว่า Goroutine ย่อยแต่ละตัวจะทำงานเสร็จและส่งข้อมูลออกมา ทำให้เรารับประกันได้ว่าจะไม่มี Goroutine ใดตกหล่นก่อนที่ฟังก์ชัน Test จะจบการทำงาน",
-            },
-          ],
+              "question": "ในโค้ด Concurrency Test ที่ยิง goroutine พร้อมกัน n ตัว ทำไมเราจึงส่งผลลัพธ์ผ่าน unbuffered channel แล้ว for-loop รออ่านค่า n ครั้ง?",
+              "options": [
+                {
+                  "text": "เพื่อทำ Synchronization ให้ goroutine หลักรอจนกระทั่ง goroutine ย่อยทั้ง n ตัวทำงานเสร็จสิ้นทั้งหมดก่อนปิดฟังก์ชันทดสอบ",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! Goroutine หลักจะบล็อกรอรับค่าจาก channel ทีละตัวจนครบ n รอบ เป็นการประสานงาน (sync) โดยไม่ต้องใช้ sleep เดาเวลา"
+                },
+                {
+                  "text": "เพราะ unbuffered channel ช่วยเร่งความเร็วของ network ให้ทำงานเร็วขึ้น 10 เท่า",
+                  "isCorrect": false,
+                  "explain": "ไม่จริง Channel เป็นกลไก IPC ภายใน Go process ไม่เกี่ยวกับความเร็ว network ของ database"
+                },
+                {
+                  "text": "เพื่อป้องกันไม่ให้ PostgreSQL รันเกิน 1 transaction",
+                  "isCorrect": false,
+                  "explain": "ผิด วัตถุประสงค์ของการทดสอบนี้คือต้องการให้ transaction วิ่งพร้อมกัน (concurrently) จริงๆ"
+                }
+              ],
+              "explain": "ใน Go การ sync goroutine สามารถทำได้ทั้ง sync.WaitGroup และ Channel แต่ Channel ได้เปรียบตรงที่ส่ง error หรือผลลัพธ์กลับมาตรวจได้ด้วย"
+            }
+          ]
         },
         {
           "t": "callout",
@@ -196,14 +212,30 @@ export const concurrencyPages: Record<string, Page> = {
           "c": "4. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: นอกจาก Atomic SQL Update แล้ว เราสามารถใช้คำสั่ง SQL ใดในการล็อกแถวข้อมูลเพื่ออ่านมาตรวจสอบก่อนได้?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เราสามารถใช้คำสั่ง `SELECT FOR UPDATE` (หรือ `SELECT FOR NO KEY UPDATE` ใน PostgreSQL) ซึ่งฐานข้อมูลจะอ่านข้อมูลพร้อมกับใส่ Exclusive Lock ไว้ที่แถวนั้นทันที ทำให้ Transaction อื่นๆ ที่พยายามจะอ่านเพื่อแก้ไขแถวเดียวกันต้องยืนรอจนกว่า Transaction แรกจะ Commit หรือ Rollback",
-            },
-          ],
+              "question": "นอกจากคำสั่ง Atomic SQL Update (UPDATE ... SET balance = balance + $1) แล้ว สามารถใช้คำสั่ง SQL ใดในการอ่านยอดเงินพร้อมล็อกแถวนั้นเพื่อป้องกัน Race Condition ได้?",
+              "options": [
+                {
+                  "text": "SELECT ... FOR UPDATE (หรือ FOR NO KEY UPDATE)",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! SELECT ... FOR UPDATE จะใส่ Row-level lock ทำให้ Transaction อื่นที่พยายามจะอ่านเพื่อแก้ไขแถวเดียวกันต้องรอจนกว่าเราจะ COMMIT หรือ ROLLBACK"
+                },
+                {
+                  "text": "SELECT DISTINCT ...",
+                  "isCorrect": false,
+                  "explain": "SELECT DISTINCT เป็นการตัดแถวที่ซ้ำซ้อน ไม่มีการล็อกข้อมูลใดๆ"
+                },
+                {
+                  "text": "SELECT ... ORDER BY balance DESC",
+                  "isCorrect": false,
+                  "explain": "ORDER BY เป็นเพียงการเรียงลำดับผลลัพธ์ ไม่ช่วยป้องกัน Race Condition"
+                }
+              ],
+              "explain": "ใน PostgreSQL แนะนำ SELECT ... FOR NO KEY UPDATE หากไม่มีการเปลี่ยนค่า Primary Key เพราะจะไม่ขัดแย้งกับ Foreign Key lock ของตารางลูก"
+            }
+          ]
         },
         {
           "t": "callout",
@@ -331,14 +363,30 @@ export const concurrencyPages: Record<string, Page> = {
           "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: กฎ 4 ข้อ (Coffman Conditions) ที่ทำให้เกิด Deadlock คืออะไร และการทำ Resource Ordering ไปทำลายข้อไหน?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เงื่อนไข 4 ข้อของ Coffman Conditions คือ:\n1. Mutual Exclusion (แย่งกันถือครอง)\n2. Hold and Wait (ถือของชิ้นหนึ่งไว้ แล้วยืนรออีกชิ้น)\n3. No Preemption (ไม่สามารถไปแย่งของจากมือคนอื่นได้)\n4. Circular Wait (เกิดการรอเป็นวงกลม)\n\nการทำ **Resource Ordering** (สั่งให้ทุกคนล็อกตามลำดับ ID เสมอ) เป็นการ **ทำลายข้อที่ 4 (Circular Wait)** อย่างสมบูรณ์ ทำให้ไม่มีทางเกิดวงกลมของการรอได้อีกต่อไป",
-            },
-          ],
+              "question": "ตามทฤษฎี Coffman Conditions การเรียงลำดับการล็อกตาม ID (Lock Ordering / Resource Ordering) เข้าไปทำลายเงื่อนไขข้อใดเพื่อกำจัด Deadlock อย่างถาวร?",
+              "options": [
+                {
+                  "text": "Circular Wait (การรอต่อกันเป็นวงกลม)",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! เมื่อทุกคนต้องขอทรัพยากรชิ้นหมายเลขน้อยก่อนหมายเลขมากเสมอ จะไม่มีทางเกิดวงกลมของลูกศรการรอ (Wait-for Graph Cycle) ได้อย่างเด็ดขาด"
+                },
+                {
+                  "text": "Mutual Exclusion (การห้ามใช้ทรัพยากรร่วมกัน)",
+                  "isCorrect": false,
+                  "explain": "ผิด Mutual Exclusion ยังคงอยู่ เพราะ Row lock ยังคงห้ามคนอื่นแก้พร้อมกัน"
+                },
+                {
+                  "text": "No Preemption (การไม่สามารถแย่งของจากมือคนอื่นได้)",
+                  "isCorrect": false,
+                  "explain": "ผิด Lock Ordering ไม่ได้ไปบังคับแย่ง lock จากใคร"
+                }
+              ],
+              "explain": "Deadlock จะเกิดได้ต้องครบทั้ง 4 เงื่อนไขของ Coffman: Mutual Exclusion, Hold & Wait, No Preemption, Circular Wait เพียงแค่ทำลาย Circular Wait ข้อเดียว Deadlock ก็หายไปทันที"
+            }
+          ]
         },
         {
           "t": "callout",

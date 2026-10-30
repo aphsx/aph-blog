@@ -98,14 +98,30 @@ export const transactionPages: Record<string, Page> = {
           "c": "4. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ถ้าฟังก์ชัน fn(q) ใน execTx ทำงานสำเร็จทุกบรรทัด แต่จังหวะสุดท้ายเน็ตเวิร์กขาดตอน tx.Commit() ฐานข้อมูลจะทำอย่างไร?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: ฐานข้อมูลจะ **ไม่บันทึกการเปลี่ยนแปลงใดๆ ทั้งสิ้น**! เพราะการเปลี่ยนแปลงทั้งหมดที่ทำภายใน Transaction จะมีผลสมบูรณ์ก็ต่อเมื่อคำสั่ง `COMMIT` เดินทางไปถึงและได้รับการยืนยันจาก PostgreSQL เท่านั้น หากสัญญาณขาดหายไประหว่างทาง PostgreSQL จะตัด Connection และทำการ Rollback ข้อมูลกลับอัตโนมัติ เพื่อรักษาคุณสมบัติ Atomicity",
-            },
-          ],
+              "question": "ถ้าฟังก์ชัน callback ภายใน execTx ทำงานสำเร็จทุกบรรทัด แต่จังหวะสุดท้ายเกิดเน็ตเวิร์กขาดตอนเรียก tx.Commit() ฐานข้อมูลจะทำอย่างไร?",
+              "options": [
+                {
+                  "text": "ฐานข้อมูลจะ Rollback การเปลี่ยนแปลงทั้งหมด ข้อมูลกลับสู่สภาพเดิมก่อนเริ่ม Transaction",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! เพราะตามหลัก Atomicity ของ ACID ข้อมูลจะมีผลถาวรเมื่อคำสั่ง COMMIT ไปถึงและบันทึกลง WAL เท่านั้น เมื่อ connection หลุดกลางคัน PostgreSQL จะทำการ rollback ให้ทันที"
+                },
+                {
+                  "text": "ฐานข้อมูลจะบันทึกข้อมูลไว้ครึ่งหนึ่งเฉพาะคำสั่งที่รันผ่านแล้ว",
+                  "isCorrect": false,
+                  "explain": "ผิด! นี่คือสิ่งที่ผิดกฎ Atomicity ('All or Nothing') ข้อมูลจะไม่ถูกบันทึกครึ่งๆ กลางๆ เด็ดขาด"
+                },
+                {
+                  "text": "ฐานข้อมูลจะค้างรอนาน 24 ชั่วโมงจนกว่า network จะต่อกลับมา",
+                  "isCorrect": false,
+                  "explain": "ไม่จริง PostgreSQL จะ timeout หรือตัด idle transaction ทิ้งและ rollback"
+                }
+              ],
+              "explain": "หลักการสำคัญของ ACID: ไม่สำเร็จ 100% ก็ต้องเป็น 0% เท่านั้น ห้ามมีสถานะกึ่งกลาง"
+            }
+          ]
         },
         {
           "t": "callout",
@@ -196,14 +212,30 @@ export const transactionPages: Record<string, Page> = {
           "c": "4. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ทำไมผลลัพธ์ TransferTxResult ถึงต้องส่งทั้งข้อมูล Transfer, Entries และ Accounts ล่าสุดกลับมาให้ผู้เรียกใช้งาน?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เพื่อให้ฝั่ง API Layer (Gin Framework) สามารถนำข้อมูลทั้งหมดไปจัดรูปแบบ JSON ตอบกลับลูกค้าได้ทันที (เช่น ตอบกลับว่าโอนสำเร็จแล้ว ยอดเงินคงเหลือล่าสุดของคุณคือเท่าใด) โดยไม่ต้องเสียเวลายิงคำสั่ง `SELECT` ซ้ำอีกรอบ ซึ่งช่วยลดภาระของฐานข้อมูลและลด Network Latency ได้อย่างมหาศาล",
-            },
-          ],
+              "question": "ทำไม TransferTxResult จึงต้องส่งทั้ง Transfer, FromEntry, ToEntry และ Accounts ล่าสุดกลับมาให้ caller?",
+              "options": [
+                {
+                  "text": "เพื่อให้ API layer ตอบ JSON กลับ client ได้ทันทีโดยไม่ต้องยิง SELECT ซ้ำ ช่วยลดภาระ DB และ latency",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! เนื่องจากคำสั่ง SQL เช่น AddAccountBalance หรือ CreateTransfer ใช้ RETURNING * ได้ข้อมูลล่าสุดทันที การส่งกลับก้อนผลลัพธ์ทำให้ API ไม่ต้อง query ซ้ำ"
+                },
+                {
+                  "text": "เพราะ Go ไม่อนุญาตให้คืนค่า struct ที่มีข้อมูลไม่ครบทุก field",
+                  "isCorrect": false,
+                  "explain": "ไม่เกี่ยวกัน Go คืน struct ที่เป็น zero-value ได้ตามปกติ"
+                },
+                {
+                  "text": "เพื่อบังคับให้ database ตรวจสอบ foreign key เพิ่มเติม",
+                  "isCorrect": false,
+                  "explain": "foreign key ตรวจสอบใน DB engine ระหว่างรัน query ไม่ได้ขึ้นกับ struct ฝั่ง Go"
+                }
+              ],
+              "explain": "การออกแบบ Transaction Result ที่ครบถ้วนทำให้ Frontend/Mobile ได้ยอดเงินคงเหลือและเลขอ้างอิงสลิปทันทีใน response เดียว"
+            }
+          ]
         },
         {
           "t": "callout",

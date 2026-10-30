@@ -85,14 +85,30 @@ export const securityProdPages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ทำไมเวลาทดสอบ CheckPassword เราถึงไม่สามารถเอา password ไปแฮชใหม่แล้วเทียบว่า hashed1 == hashed2 ด้วยเครื่องหมาย == ธรรมดาได้?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เพราะทุกครั้งที่เรียก `HashPassword` ตัว Bcrypt จะสุ่ม Salt ก้อนใหม่ขึ้นมาเสมอ ทำให้ผลลัพธ์ String ที่ได้จะเปลี่ยนไปทุกครั้งที่เรียก การตรวจสอบจึงต้องใช้ฟังก์ชัน `bcrypt.CompareHashAndPassword` ซึ่งจะไปแกะ Salt เดิมที่ฝังอยู่ใน Hash ตัวแรก แล้วนำมาคำนวณเปรียบเทียบในระดับไบนารี",
-            },
-          ],
+              "question": "ทำไมเราจึงไม่สามารถตรวจสอบรหัสผ่านโดยการเอา plaintext password ไปแฮชใหม่แล้วเทียบ hashed1 == hashed2 ตรงๆ ได้?",
+              "options": [
+                {
+                  "text": "เพราะ Bcrypt สุ่ม Salt ใหม่ทุกครั้งที่แฮช ทำให้สตริงแฮชที่ได้เปลี่ยนไปเสมอ จึงต้องใช้ bcrypt.CompareHashAndPassword",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! Bcrypt ฝัง Salt และ Cost เอาไว้ในผลลัพธ์แฮช การเทียบรหัสต้องใช้ CompareHashAndPassword เพื่อดึง Salt เดิมมาประมวลผลเทียบกัน"
+                },
+                {
+                  "text": "เพราะสตริงในภาษา Go ไม่รองรับการเปรียบเทียบด้วยเครื่องหมาย ==",
+                  "isCorrect": false,
+                  "explain": "ผิด ภาษา Go สามารถเทียบสตริงด้วย == ได้ตามปกติ"
+                },
+                {
+                  "text": "เพราะ Bcrypt แฮชได้เฉพาะตัวเลข ไม่รองรับตัวอักษร",
+                  "isCorrect": false,
+                  "explain": "ไม่จริง Bcrypt รับรหัสผ่านเป็น []byte ซึ่งรองรับตัวอักษรและอักขระพิเศษทุกรูปแบบ"
+                }
+              ],
+              "explain": "การใส่ Salt ช่วยป้องกันการโจมตีแบบ Rainbow Table ได้อย่างมีประสิทธิภาพสูงสุด"
+            }
+          ]
         },
         {
           "t": "callout",
@@ -193,14 +209,30 @@ export const securityProdPages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ความยาวของ Symmetric Key สำหรับ PASETO v4.local ต้องมีขนาดกี่ไบต์?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: ต้องมีขนาด **32 ไบต์ (256 บิต) พอดีเป๊ะ** ตามมาตรฐานการเข้ารหัส ChaCha20-Poly1305 หากส่งสตริงที่มีความยาวสั้นหรือยาวกว่า 32 ไบต์ ตัวฟังก์ชัน `NewPasetoMaker` จะปฏิเสธและพ่น Error ทันทีเพื่อความปลอดภัยสูงสุด",
-            },
-          ],
+              "question": "ขนาดความยาวของ Symmetric Key สำหรับ PASETO v4.local ตามมาตรฐาน ChaCha20-Poly1305 ต้องมีขนาดกี่ไบต์?",
+              "options": [
+                {
+                  "text": "32 ไบต์ (256 บิต) พอดี",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! ChaCha20-Poly1305 กำหนดขนาด symmetric key ไว้ที่ 32 ไบต์ หากสั้นหรือยาวกว่านั้น library จะ error ทันทีเพื่อความปลอดภัย"
+                },
+                {
+                  "text": "16 ไบต์ (128 บิต)",
+                  "isCorrect": false,
+                  "explain": "16 ไบต์เป็นขนาดของ AES-128 หรือ nonce ไม่ใช่คีย์ของ PASETO v4.local"
+                },
+                {
+                  "text": "ไม่จำกัดความยาว ยิ่งยาวกี่ไบต์ก็ได้",
+                  "isCorrect": false,
+                  "explain": "ผิด PASETO ออกแบบมาเพื่อปิดช่องโหว่ด้าน crypto agility จึงบังคับขนาดคีย์ที่แน่นอนตายตัว"
+                }
+              ],
+              "explain": "PASETO ป้องกันช่องโหว่ alg: 'none' ของ JWT โดยการระบุอัลกอริทึมที่ปลอดภัยไว้ในโปรโตคอลตั้งแต่ต้น"
+            }
+          ]
         },
         {
           "t": "callout",
@@ -303,14 +335,30 @@ export const securityProdPages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ใน docker-compose.yml ทำไมใน environment ของ api จึงต้องแก้ DB_SOURCE เป็น postgresql://root:secret@postgres:5432... แทนที่จะเป็น localhost:5432?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เพราะเมื่อ Container ทำงานอยู่ภายใน Docker Network เดียวกัน แต่ละ Container จะมี IP และ Loopback (`localhost`) เป็นของตัวเอง การอ้างอิงไปยัง Container อื่นจะต้องใช้ **'ชื่อ Service' (ในที่นี้คือชื่อ `postgres`)** ซึ่ง Docker จะมี Internal DNS ทำหน้าที่แปลงชื่อ service ให้ตรงกับ IP ภายใน Container ตัวนั้นโดยอัตโนมัติ",
-            },
-          ],
+              "question": "ใน docker-compose.yml ทำไมใน service api ถึงต้องชี้ DB_SOURCE ไปที่ postgres:5432 แทน localhost:5432?",
+              "options": [
+                {
+                  "text": "เพราะแต่ละ container มี localhost แยกเป็นของตนเอง การคุยข้าม container ต้องใช้ชื่อ service ที่ Docker DNS จัดการ resolve IP ให้",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! ภายใน Docker Network ชื่อ service 'postgres' จะถูกแปลงเป็น IP ภายในของ container ตัวนั้นโดยอัตโนมัติ"
+                },
+                {
+                  "text": "เพราะ localhost ถูกจองไว้เฉพาะสำหรับเว็บเบราว์เซอร์เท่านั้น",
+                  "isCorrect": false,
+                  "explain": "ผิด localhost หมายถึง loopback interface 127.0.0.1 ภายใน container นั้นๆ"
+                },
+                {
+                  "text": "เพราะ PostgreSQL ไม่อนุญาตให้เชื่อมต่อผ่าน localhost",
+                  "isCorrect": false,
+                  "explain": "ไม่จริง PostgreSQL รองรับ localhost ปกติเมื่อรันบน host เดียวกัน"
+                }
+              ],
+              "explain": "Service discovery ผ่าน Docker DNS เป็นหัวใจสำคัญของการเชื่อมต่อ microservices ใน Docker Network"
+            }
+          ]
         },
         {
           "t": "callout",

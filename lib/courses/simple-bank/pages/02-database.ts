@@ -109,12 +109,27 @@ export const databasePages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ทำไมเราต้องสร้าง INDEX บนคอลัมน์ `owner` ของตาราง `accounts` และ `account_id` ของตาราง `entries`?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เมื่อลูกค้าเปิดแอปพลิเคชัน ธนาคารจะต้องค้นหาว่า 'บัญชีของลูกค้ารายนี้มีอะไรบ้าง' (`WHERE owner = $1`) หรือ 'รายการเดินบัญชีย้อนหลังของบัญชีนี้มีอะไรบ้าง' (`WHERE account_id = $1`) การมี Index แบบ B-Tree จะทำให้ฐานข้อมูลกระโดดไปหาข้อมูลได้ทันทีในเวลา O(log N) แทนที่จะต้องสแกนอ่านข้อมูลทีละแถวทั้งตาราง (Full Table Scan O(N))",
+              "question": "ทำไมเราต้องสร้าง INDEX บนคอลัมน์ owner ของตาราง accounts และ account_id ของตาราง entries?",
+              "options": [
+                {
+                  "text": "เพื่อให้ฐานข้อมูลค้นหาข้อมูลได้เร็วระดับ O(log N) แทนที่จะต้องสแกนอ่านข้อมูลทั้งตาราง (Full Table Scan O(N))",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! บัญชีมักถูกค้นหาด้วย owner และรายการเดินบัญชีถูกค้นหาด้วย account_id การสร้าง B-Tree Index จะทำให้ค้นหาได้ทันทีในระดับ O(log N)",
+                },
+                {
+                  "text": "เพื่อป้องกันไม่ให้มีการลบข้อมูลในตาราง",
+                  "isCorrect": false,
+                  "explain": "Index ช่วยเรื่องความเร็วในการค้นหา ไม่ได้ทำหน้าที่ป้องกันการลบข้อมูล",
+                },
+                {
+                  "text": "เพื่อบังคับให้ค่าของ owner ห้ามซ้ำกัน",
+                  "isCorrect": false,
+                  "explain": "การห้ามซ้ำต้องสร้าง UNIQUE INDEX ไม่ใช่ INDEX ธรรมดา",
+                },
+              ],
             },
           ],
         },
@@ -241,12 +256,42 @@ export const databasePages: Record<string, Page> = {
           "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ทำไมใน Makefile จึงต้องใส่ .PHONY ไว้ด้านล่าง?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: ในระบบ Make หากเรามีไฟล์หรือโฟลเดอร์ที่มีชื่อตรงกับเป้าหมาย (เช่น มีโฟลเดอร์ชื่อ `test` หรือ `postgres` อยู่จริงในโปรเจกต์) Make จะคิดว่าเป้าหมายนั้นถูกสร้างเสร็จแล้วและไม่ยอมรันคำสั่ง การใส่ `.PHONY: test postgres ...` เป็นการบอก Make ว่าชื่อเหล่านี้คือ **'คำสั่งให้ทำ (Action)'** ไม่ใช่ไฟล์",
+              "question": "ทำไมใน Makefile จึงต้องใส่ .PHONY กำกับเป้าหมายอย่าง test, postgres, server ไว้?",
+              "options": [
+                {
+                  "text": "เพื่อบอก Make ว่าชื่อเหล่านี้คือคำสั่ง (Action) ป้องกันไม่ให้ Make สับสนหากมีไฟล์หรือโฟลเดอร์ชื่อเดียวกันอยู่ในโปรเจกต์",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! หากมีโฟลเดอร์ชื่อ test อยู่จริง Make จะคิดว่าเป้าหมายเสร็จแล้วและไม่ยอมรันคำสั่ง .PHONY จึงจำเป็นเพื่อบังคับให้รันเสมอ",
+                },
+                {
+                  "text": "เพื่อให้คำสั่งเหล่านั้นรันในโหมด Background เสมอ",
+                  "isCorrect": false,
+                  "explain": ".PHONY ไม่เกี่ยวกับ Background process ครับ",
+                },
+                {
+                  "text": "เพื่อซ่อนคำสั่งไม่ให้คนอื่นมองเห็นใน Makefile",
+                  "isCorrect": false,
+                  "explain": ".PHONY ไม่ได้เป็นการซ่อนคำสั่ง แต่เป็นการประกาศ Non-file targets",
+                },
+              ],
+            },
+            {
+              "question": "ในไฟล์ .down.sql ทำไมเราต้องลบตาราง transfers และ entries ก่อนที่จะลบตาราง accounts?",
+              "options": [
+                {
+                  "text": "เพราะตาราง transfers และ entries มี Foreign Key อ้างอิง ID ของ accounts อยู่ ถ้าลบ accounts ก่อน PostgreSQL จะปฏิเสธทันที",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! Foreign Key ป้องกันไม่ให้ตารางแม่ถูกลบในขณะที่ตารางลูกยังคงอ้างอิงอยู่ ดังนั้นการ rollback ต้องลบตารางลูกก่อนเสมอ",
+                },
+                {
+                  "text": "เพราะตาราง accounts มีขนาดไฟล์ใหญ่ที่สุด",
+                  "isCorrect": false,
+                  "explain": "ลำดับการ DROP TABLE ขึ้นอยู่กับ Dependency (Foreign Key) ไม่เกี่ยวกับขนาดของตาราง",
+                },
+              ],
             },
           ],
         },

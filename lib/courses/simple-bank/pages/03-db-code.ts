@@ -103,12 +103,27 @@ export const dbCodePages: Record<string, Page> = {
           "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ทำไมเราต้องใส่ defer rows.Close() ทันทีหลังจากที่ q.db.QueryContext สำเร็จ?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: เมื่อเรียก `QueryContext` ฐานข้อมูลจะจอง Connection 1 เส้นจาก Connection Pool ไว้เพื่อทยอยส่งแถวข้อมูล (Rows) มาให้ Go หากเราลืมเรียก `rows.Close()` เมื่อมีคำสั่งคิวรียิงเข้ามาเรื่อยๆ Connection ทั้งหมดใน Pool จะถูกยึดค้างไว้จนหมด (Connection Leak) ทำให้คำสั่งถัดๆ ไปต้องยืนรอจนระบบเซิร์ฟเวอร์ค้างไปในที่สุด",
+              "question": "ทำไมเราต้องใส่ defer rows.Close() ทันทีหลังจากที่ q.db.QueryContext สำเร็จ?",
+              "options": [
+                {
+                  "text": "เพื่อคืน Connection กลับเข้าสู่ Connection Pool ป้องกันปัญหา Connection Leak ที่ทำให้เซิร์ฟเวอร์ค้างเมื่อมีทราฟฟิกสูง",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! ขณะที่อ่าน rows ตัว Connection จะถูกจองไว้คนเดียว หากลืมปิด Connection ใน Pool จะหมดลงอย่างรวดเร็ว",
+                },
+                {
+                  "text": "เพื่อลบแถวข้อมูลออกจากฐานข้อมูล",
+                  "isCorrect": false,
+                  "explain": "rows.Close() เป็นการปิดตัวอ่านใน Go ไม่ได้ลบข้อมูลใน DB",
+                },
+                {
+                  "text": "เพื่อบันทึกการเปลี่ยนแปลง Transaction",
+                  "isCorrect": false,
+                  "explain": "การบันทึก Transaction ใช้ tx.Commit() ไม่ใช่ rows.Close()",
+                },
+              ],
             },
           ],
         },
@@ -217,14 +232,30 @@ export const dbCodePages: Record<string, Page> = {
           "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ความแตกต่างระหว่าง require.NoError(t, err) กับ assert.NoError(t, err) คืออะไร?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**:\n• `require`: ถ้าเงื่อนไขไม่ผ่าน (เช่น err != nil) การทดสอบจะ **หยุดทำงานทันที (t.FailNow)** เหมาะสำหรับขั้นตอนแรกๆ เช่น การเปิดฐานข้อมูลหรือการสร้างแถวข้อมูลหลัก ซึ่งถ้าขั้นตอนนี้พัง ขั้นตอนถัดไปก็ไม่มีประโยชน์ที่จะรันต่อ\n• `assert`: ถ้าไม่ผ่าน จะบันทึกว่ามี Error เกิดขึ้น แต่จะ **ยอมให้รันโค้ดบรรทัดต่อไปเรื่อยๆ** จนจบฟังก์ชัน",
-            },
-          ],
+              "question": "ความแตกต่างสำคัญระหว่าง require.NoError(t, err) กับ assert.NoError(t, err) คืออะไร?",
+              "options": [
+                {
+                  "text": "require สั่งหยุดการรันเทสต์ทันที (t.FailNow) เมื่อเงื่อนไขไม่ผ่าน ส่วน assert แค่บันทึกข้อผิดพลาดแต่รันบรรทัดต่อไปเรื่อยๆ จนจบ",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! ในการเทสต์ฐานข้อมูล หากขั้นเตรียมข้อมูลล้มเหลว (เช่น CreateAccount fail) ควรใช้ require เพื่อหยุดทันที ไม่ให้รันต่อจนเกิด nil pointer panic ใน assert ถัดไป"
+                },
+                {
+                  "text": "require ทำงานช้ากว่า assert เพราะต้องรอ network roundtrip",
+                  "isCorrect": false,
+                  "explain": "ไม่เกี่ยวข้องกัน ทั้งสองฟังก์ชันเป็นเพียง helper assertion ในหน่วยความจำของ testify"
+                },
+                {
+                  "text": "assert จะ rollback transaction ใน DB ให้อัตโนมัติ",
+                  "isCorrect": false,
+                  "explain": "ไม่มีการแตะต้องฐานข้อมูลทั้งสิ้น เป็นเพียงการตรวจสอบตัวแปร err != nil"
+                }
+              ],
+              "explain": "ข้อสอบจริงในการเขียน Unit Test: ใช้ require กับ Pre-requisite step ที่ห้ามพลาดเด็ดขาด และใช้ assert กับการตรวจสอบค่าผลลัพธ์ย่อยๆ ได้"
+            }
+          ]
         },
         {
           "t": "callout",

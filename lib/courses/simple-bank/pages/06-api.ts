@@ -96,14 +96,30 @@ export const apiPages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ความแตกต่างระหว่าง ShouldBindJSON, ShouldBindUri และ ShouldBindQuery ใน Gin คืออะไร?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**:\n• `ShouldBindJSON`: อ่านและ Parse ข้อมูลจาก **HTTP Request Body** ที่ส่งมาเป็น JSON\n• `ShouldBindUri`: อ่านข้อมูลจาก **URL Path Parameter** เช่น `/accounts/:id`\n• `ShouldBindQuery`: อ่านข้อมูลจาก **URL Query String** ด้านหลังเครื่องหมายคำถาม เช่น `/accounts?page_id=1&page_size=5`",
-            },
-          ],
+              "question": "หากต้องการอ่านค่า path parameter เช่น /accounts/:id ใน Gin ควรใช้เมธอดใด?",
+              "options": [
+                {
+                  "text": "c.ShouldBindUri(&req)",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! ShouldBindUri จะผูกค่าจาก URL path เช่น /accounts/:id ตาม tag `uri:\"id\"` ใน struct"
+                },
+                {
+                  "text": "c.ShouldBindJSON(&req)",
+                  "isCorrect": false,
+                  "explain": "ShouldBindJSON ใช้สำหรับ parse HTTP Request Body ที่ส่งมาในรูปแบบ JSON (เช่น POST / PUT)"
+                },
+                {
+                  "text": "c.ShouldBindQuery(&req)",
+                  "isCorrect": false,
+                  "explain": "ShouldBindQuery ใช้สำหรับ query string เช่น ?page_id=1&page_size=5 ตาม tag `form:\"...\"`"
+                }
+              ],
+              "explain": "Gin มี binder 3 แบบหลักที่ใช้บ่อย: ShouldBindJSON (Body), ShouldBindUri (Path), ShouldBindQuery (Query String)"
+            }
+          ]
         },
         {
           "t": "callout",
@@ -205,14 +221,30 @@ export const apiPages: Record<string, Page> = {
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
-          "t": "details",
-          "summary": "❓ คำถาม: ใน transferRequest แท็ก nefield=FromAccountID ทำหน้าที่อะไร?",
+          "t": "quiz",
           "c": [
             {
-              "t": "p",
-              "c": "**คำตอบ**: `nefield` ย่อมาจาก **Not Equal Field** หมายถึงค่าของฟิลด์นี้ (ToAccountID) จะต้องไม่เท่ากับฟิลด์ที่ระบุ (FromAccountID) ซึ่งป้องกันไม่ให้ผู้ใช้ส่งคำสั่งโอนเงินจากบัญชีตัวเองเข้าบัญชีตัวเองอย่างไร้ประโยชน์",
-            },
-          ],
+              "question": "ใน validator tag ของ struct เช่น binding:\"required,nefield=FromAccountID\" คำว่า nefield มีหน้าที่อะไร?",
+              "options": [
+                {
+                  "text": "ย่อมาจาก Not Equal Field บังคับให้ค่าฟิลด์นี้ต้องไม่เท่ากับฟิลด์เป้าหมาย (ป้องกันการโอนเงินเข้าบัญชีเดียวกัน)",
+                  "isCorrect": true,
+                  "explain": "ถูกต้อง! nefield=FromAccountID ป้องกันไม่ให้ to_account_id มีค่าซ้ำกับ from_account_id ตั้งแต่ขั้นตอน HTTP request validation ก่อนถึง DB"
+                },
+                {
+                  "text": "ย่อมาจาก Non-Empty Field บังคับให้ห้ามเป็นค่าว่าง",
+                  "isCorrect": false,
+                  "explain": "การห้ามเป็นค่าว่างใช้ tag required"
+                },
+                {
+                  "text": "ย่อมาจาก Numeric Exponent Field บังคับให้เป็นเลขยกกำลัง",
+                  "isCorrect": false,
+                  "explain": "ไม่ใช่ validator tag ของ validator.v10"
+                }
+              ],
+              "explain": "การกรองข้อมูลตั้งแต่ Request Body Validation ด้วย tag เช่น min, max, nefield ช่วยลดภาระ DB และดักจับ logic error ได้ตั้งแต่หน้าประตู API"
+            }
+          ]
         },
         {
           "t": "callout",

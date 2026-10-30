@@ -46,7 +46,16 @@ export type Block =
    * Collapsed answer fold. Closed by default.
    * Inside: teach from zero (ขออะไร → มือ → วิธีทำ → Interactive) then class Solution + Time/Space.
    */
-  | { t: "solution"; summary?: string; c: Block[] };
+  | { t: "solution"; summary?: string; c: Block[] }
+  /** Multiple-choice interactive quiz with instant feedback. */
+  | {
+      t: "quiz";
+      c: {
+        question: string;
+        options: { text: string; isCorrect: boolean; explain?: string }[];
+        explain?: string;
+      }[];
+    };
 
 /**
  * Per-locale map. Always write `th` first, then `en`.
