@@ -1,0 +1,352 @@
+import type { Page } from "@/lib/types";
+
+// =============================================================================
+// ไฟล์: simple-bank/pages/05-concurrency.ts
+// โมดูล 5: รับมือคนกดพร้อมกัน: Concurrency & Deadlock
+// บทเรียน: 5.1 bank-concurrency-testing, 5.2 bank-concurrency-race-condition, 5.3 bank-deadlock-prevention
+// =============================================================================
+
+export const concurrencyPages: Record<string, Page> = {
+  "bank-concurrency-testing": {
+    slug: "bank-concurrency-testing",
+    title: {
+      th: "5.1 เขียน Concurrent Test ด้วย Goroutines & Channels",
+      en: "5.1 Concurrent Testing with Goroutines & Channels",
+    },
+    lead: {
+      th: "เรียนรู้ Goroutine และ Channel จากตัวอย่างคลาสสิกของ Go Tour แล้วนำไปสร้างชุดทดสอบจำลองคน 5 คนกดยิงโอนเงินในเสี้ยววินาทีเดียวกัน",
+      en: "Learn Goroutines and Channels from classic Go Tour examples, then build a concurrent stress test simulating simultaneous money transfers.",
+    },
+    group: "5. รับมือคนกดพร้อมกัน: Concurrency & Deadlock",
+    blocks: {
+      th: [
+        {
+          "t": "callout",
+          "title": "🎯 เป้าหมายของบทนี้ (Learning Objectives)",
+          "c": "• เข้าใจการทำงานของ Goroutine ผ่านตัวอย่างคลาสสิก `say(\"hello\")` / `say(\"world\")`\n• ส่งและรับข้อมูลข้ามเธรดอย่างปลอดภัยด้วย Channel ผ่านตัวอย่างคำนวณผลรวม `sum`\n• นำความรู้ไปเขียน `TestTransferTx` รัน 5 Goroutines เพื่อทดสอบการโอนเงินพร้อมกันจริง\n\n⏱ **เวลาในการเรียนรู้**: ~25 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านโมดูล 4 ฟังก์ชัน TransferTx",
+        },
+        {
+          "t": "h2",
+          "c": "1. Goroutine: ทำงานคู่ขนานแบบกินแรมน้อยนิด",
+        },
+        {
+          "t": "p",
+          "c": "ในภาษาอื่นๆ การสร้าง OS Thread หนึ่งตัวอาจกินหน่วยความจำถึง 1-2 MB แต่ในภาษา Go เรามี **Goroutine** ซึ่งเป็น Lightweight Thread ที่กินแรมเริ่มต้นเพียง ~2 KB ทำให้เราสามารถเปิด Goroutine หลักหมื่นหรือหลักแสนตัวได้พร้อมกันโดยเครื่องไม่กระตุก",
+        },
+        {
+          "t": "p",
+          "c": "มาดูตัวอย่างคลาสสิกอันโด่งดังจาก **A Tour of Go**:",
+        },
+        {
+          "t": "codeout",
+          "lang": "go",
+          "label": "ตัวอย่างคลาสสิกจาก A Tour of Go: go say(\"world\")",
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc say(s string) {\n\tfor i := 0; i < 3; i++ {\n\t\ttime.Sleep(100 * time.Millisecond)\n\t\tfmt.Println(s)\n\t}\n}\n\nfunc main() {\n\tgo say(\"world\") // สั่งให้ทำงานใน Goroutine ใหม่ทันที ไม่ต้องยืนรอ\n\tsay(\"hello\")    // ทำงานใน Goroutine หลัก (main)\n}",
+          "out": "hello\nworld\nworld\nhello\nhello\nworld",
+        },
+        {
+          "t": "p",
+          "c": "สังเกตว่าคำว่า `hello` และ `world` สลับกันแสดงผลออกมา เพราะทั้งสองฟังก์ชันทำงานขนานกันในเวลาเดียวกันอย่างแท้จริง",
+        },
+        {
+          "t": "h2",
+          "c": "2. Channel: ทางด่วนส่งข้อมูลข้าม Goroutine",
+        },
+        {
+          "t": "p",
+          "c": "เมื่อเราเปิด Goroutine ทำงานแยกออกไป เราจะส่งผลลัพธ์หรือข้อผิดพลาดกลับมาหา Goroutine หลักได้อย่างไร? ปรัชญาของ Go คือ **'อย่าสื่อสารด้วยการแชร์หน่วยความจำ แต่จงแชร์หน่วยความจำด้วยการสื่อสาร (Channel)'**:",
+        },
+        {
+          "t": "codeout",
+          "lang": "go",
+          "label": "ตัวอย่างคลาสสิกจาก A Tour of Go: แบ่งครึ่งคำนวณผลรวมด้วย Channel",
+          "code": "package main\n\nimport \"fmt\"\n\nfunc sum(nums []int, c chan int) {\n\ttotal := 0\n\tfor _, n := range nums {\n\t\ttotal += n\n\t}\n\tc <- total // ส่งค่า total เข้าไปใน Channel c\n}\n\nfunc main() {\n\tnums := []int{7, 2, 8, -9, 4, 0}\n\n\tc := make(chan int)\n\tgo sum(nums[:len(nums)/2], c) // ครึ่งแรก:  7 + 2 + 8 = 17\n\tgo sum(nums[len(nums)/2:], c) // ครึ่งหลัง: -9 + 4 + 0 = -5\n\n\tx, y := <-c, <-c // รอรับข้อมูล 2 ตัวจาก Channel\n\tfmt.Println(x, y, x+y)\n}",
+          "out": "-5 17 12",
+        },
+        {
+          "t": "h2",
+          "c": "3. นำมาสร้าง Concurrent Test สำหรับระบบโอนเงิน",
+        },
+        {
+          "t": "p",
+          "c": "เรานำ Goroutine และ Channel มาเขียนชุดทดสอบ `TestTransferTx` ใน `simplebank/db/store_test.go` โดยสั่งให้คน 5 คนกดยิงโอนเงิน 10 ดอลลาร์พร้อมกันในเสี้ยววินาทีเดียวกัน:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/store_test.go (ส่วน TestTransferTx)",
+          "c": "func TestTransferTx(t *testing.T) {\n\tstore := NewStore(testDB)\n\n\taccount1 := topUp(t, createRandomAccount(t), 1000)\n\taccount2 := createRandomAccount(t)\n\tfmt.Println(\">> ก่อนโอน:\", account1.Balance, account2.Balance)\n\n\tn := 5\n\tamount := int64(10)\n\n\terrs := make(chan error)\n\tresults := make(chan TransferTxResult)\n\n\t// ยิงคำสั่งโอนเงิน 5 ครั้งพร้อมกันผ่าน Goroutines\n\tfor range n {\n\t\tgo func() {\n\t\t\tresult, err := store.TransferTx(context.Background(), TransferTxParams{\n\t\t\t\tFromAccountID: account1.ID,\n\t\t\t\tToAccountID:   account2.ID,\n\t\t\t\tAmount:        amount,\n\t\t\t})\n\t\t\terrs <- err\n\t\t\tresults <- result\n\t\t}()\n\t}\n\n\t// รับผลลัพธ์และตรวจสอบยอดเงิน\n\texisted := make(map[int]bool)\n\tfor range n {\n\t\terr := <-errs\n\t\trequire.NoError(t, err)\n\t\tresult := <-results\n\n\t\trequire.NotEmpty(t, result)\n\t\trequire.Equal(t, account1.ID, result.Transfer.FromAccountID)\n\t\trequire.Equal(t, account2.ID, result.Transfer.ToAccountID)\n\t\trequire.Equal(t, -amount, result.FromEntry.Amount)\n\t\trequire.Equal(t, amount, result.ToEntry.Amount)\n\n\t\t// ตรวจสอบว่ายอดเงินในแต่ละธุรกรรมลดลงทีละ 10, 20, 30, 40, 50 อย่างถูกต้อง\n\t\tdiff1 := account1.Balance - result.FromAccount.Balance\n\t\tdiff2 := result.ToAccount.Balance - account2.Balance\n\t\trequire.Equal(t, diff1, diff2)\n\t\trequire.True(t, diff1 > 0)\n\t\trequire.True(t, diff1%amount == 0)\n\n\t\tk := int(diff1 / amount)\n\t\trequire.True(t, k >= 1 && k <= n)\n\t\trequire.NotContains(t, existed, k)\n\t\texisted[k] = true\n\t}\n\n\t// ตรวจสอบยอดเงินสุทธิสุดท้ายในฐานข้อมูล\n\tupdated1, err := testQueries.GetAccount(context.Background(), account1.ID)\n\trequire.NoError(t, err)\n\tupdated2, err := testQueries.GetAccount(context.Background(), account2.ID)\n\trequire.NoError(t, err)\n\n\tfmt.Println(\">> หลังโอน:\", updated1.Balance, updated2.Balance)\n\trequire.Equal(t, account1.Balance-int64(n)*amount, updated1.Balance)\n\trequire.Equal(t, account2.Balance+int64(n)*amount, updated2.Balance)\n}",
+        },
+        {
+          "t": "h2",
+          "c": "4. รันเทสต์และดูผลลัพธ์จริง",
+        },
+        {
+          "t": "p",
+          "c": "สั่งรัน `go test -v -run TestTransferTx ./db` เพื่อดูการขยับของยอดเงินในแต่ละ Transaction:",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ผลลัพธ์การรัน Concurrent Transfer Test",
+          "code": "go test -v -run TestTransferTx ./db",
+          "out": "=== RUN   TestTransferTx\n>> ก่อนโอน: 1200 450\n>> tx: 1190 460\n>> tx: 1180 470\n>> tx: 1170 480\n>> tx: 1160 490\n>> tx: 1150 500\n>> หลังโอน: 1150 500\n--- PASS: TestTransferTx (0.04s)\nPASS\nok      simplebank/db   0.125s",
+        },
+        {
+          "t": "h2",
+          "c": "5. เช็กความเข้าใจ (Quick Quiz)",
+        },
+        {
+          "t": "details",
+          "summary": "❓ คำถาม: ในโค้ด Test ด้านบน ทำไมเราต้องสร้าง unbuffered channel (c := make(chan int)) แล้วอ่านค่าในลูป n ครั้ง?",
+          "c": [
+            {
+              "t": "p",
+              "c": "**คำตอบ**: ช่องทาง Unbuffered Channel จะทำหน้าที่เป็นจุดประสานงาน (Synchronization Point) ด้วย โดยฝั่ง Goroutine หลักจะยืนรอจนกว่า Goroutine ย่อยแต่ละตัวจะทำงานเสร็จและส่งข้อมูลออกมา ทำให้เรารับประกันได้ว่าจะไม่มี Goroutine ใดตกหล่นก่อนที่ฟังก์ชัน Test จะจบการทำงาน",
+            },
+          ],
+        },
+        {
+          "t": "callout",
+          "title": "🚀 ก้าวต่อไป",
+          "c": "การโอนไปในทิศทางเดียวกันผ่านฉลุย! แต่ถ้าเจอกรณี **สองคนโอนเงินสวนทางกันในจังหวะเดียวกันล่ะ?** ในบทที่ **5.2 และ 5.3** เราจะมาเจาะลึก Race Condition และ Deadlock กันครับ",
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "bank-concurrency-race-condition": {
+    slug: "bank-concurrency-race-condition",
+    title: {
+      th: "5.2 แก้ Race Condition & Stale Read ด้วย Atomic Updates",
+      en: "5.2 Fixing Race Conditions & Stale Reads with Atomic SQL",
+    },
+    lead: {
+      th: "เข้าใจ Race Condition ผ่านตัวอย่าง counter++ ที่ผลลัพธ์หายไป และวิธีแก้ปัญหา Stale Read ในฐานข้อมูลด้วย Atomic Update ใน SQL",
+      en: "Demystify Race Conditions using a classic counter example, and prevent database stale reads with atomic SQL updates.",
+    },
+    group: "5. รับมือคนกดพร้อมกัน: Concurrency & Deadlock",
+    blocks: {
+      th: [
+        {
+          "t": "callout",
+          "title": "🎯 เป้าหมายของบทนี้ (Learning Objectives)",
+          "c": "• สังเกตปรากฏการณ์ Race Condition ในโปรแกรมผ่านตัวอย่างคลาสสิกที่ยอดนับผิดเพี้ยน\n• เข้าใจปัญหา Stale Read เมื่อโปรแกรมอ่านยอดเงินเก่าก่อนจะเขียนทับ\n• แก้ปัญหาอย่างเด็ดขาดด้วย Atomic Update ในระดับ SQL (`SET balance = balance + $2`)\n\n⏱ **เวลาในการเรียนรู้**: ~20 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านบท 5.1 เข้าใจ Goroutine เบื้องต้น",
+        },
+        {
+          "t": "h2",
+          "c": "1. ตัวอย่างคลาสสิก: ตัวนับเลขที่ยอดหายไป (The Disappearing Counter)",
+        },
+        {
+          "t": "p",
+          "c": "สมมติว่าเรามีตัวแปร `counter = 0` และเปิด Goroutine 1,000 ตัว โดยแต่ละตัวสั่ง `counter++` หนึ่งครั้ง ตามทฤษฎี ผลลัพธ์สุดท้ายควรเป็น `1000` ใช่หรือไม่? มาดูผลลัพธ์จริงกันครับ:",
+        },
+        {
+          "t": "codeout",
+          "lang": "go",
+          "label": "ตัวอย่างคลาสสิก: เกิด Race Condition ในคำสั่ง counter++",
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"sync\"\n)\n\nfunc main() {\n\tcounter := 0\n\tvar wg sync.WaitGroup\n\n\tfor i := 0; i < 1000; i++ {\n\t\twg.Add(1)\n\t\tgo func() {\n\t\t\tdefer wg.Done()\n\t\t\tcounter++ // หลาย Goroutine แย่งกันเขียนตัวแปรเดียวกันโดยไม่มีการล็อก\n\t\t}()\n\t}\n\n\twg.Wait()\n\tfmt.Println(\"counter =\", counter, \"(ค่าที่ควรจะเป็นคือ 1000)\")\n}",
+          "out": "counter = 991 (ค่าที่ควรจะเป็นคือ 1000)",
+        },
+        {
+          "t": "callout",
+          "title": "⚠️ ทำไม counter ถึงได้แค่ 991?",
+          "c": "เพราะคำสั่ง `counter++` ในระดับ CPU ไม่ใช่คำสั่งเดียว แต่ประกอบด้วย 3 ขั้นตอน (Read-Modify-Write):\n1. อ่านค่า `counter` ปัจจุบันเข้า CPU Register (เช่น อ่านได้ 50)\n2. เพิ่มค่าขึ้น 1 เป็น 51\n3. เขียน 51 กลับลงหน่วยความจำ\n\nเมื่อ Goroutine 2 ตัวอ่านค่า 50 พร้อมกัน ทั้งคู่จะบวกเป็น 51 และเขียน 51 ทับกันเอง ทำให้การนับเพิ่มอีก 1 ครั้ง **สูญหายไปในอากาศ**!",
+          "warn": true,
+        },
+        {
+          "t": "h2",
+          "c": "2. หายนะแบบเดียวกันในฐานข้อมูล: Stale Read",
+        },
+        {
+          "t": "p",
+          "c": "ในระบบธนาคาร หากเราเขียนโค้ด Go แบบนี้:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "❌ โค้ดที่อันตรายมาก (ห้ามทำในระบบธนาคาร)",
+          "c": "// อ่านยอดเงินเก่าออกมาก่อน\nacc, _ := queries.GetAccount(ctx, id)\n\n// คำนวณใน Go\nnewBalance := acc.Balance + amount\n\n// เขียนทับกลับลงไป\nqueries.UpdateAccount(ctx, UpdateAccountParams{ID: id, Balance: newBalance})",
+        },
+        {
+          "t": "p",
+          "c": "ถ้ามีคนโอนเงินเข้าบัญชีนี้พร้อมกัน 2 รายการ ทั้งสองคำสั่งจะเห็นยอดเงินเก่าก้อนเดียวกัน (Stale Read) และเขียนยอดเงินทับกัน ทำให้เงินก้อนหนึ่งสูญหายไปจากระบบทันที!",
+        },
+        {
+          "t": "h2",
+          "c": "3. ทางออกที่สง่างาม: Atomic Update ใน SQL",
+        },
+        {
+          "t": "p",
+          "c": "แทนที่จะอ่านข้อมูลออกมาคำนวณใน Go เราสั่งให้ PostgreSQL เป็นผู้บวกหรือลบด้วยตัวเองในคำสั่งเดียว:",
+        },
+        {
+          "t": "code",
+          "lang": "sql",
+          "label": "คำสั่ง Atomic Balance Update",
+          "c": "UPDATE accounts\nSET balance = balance + $2\nWHERE id = $1\nRETURNING id, owner, balance, currency, created_at;",
+        },
+        {
+          "t": "p",
+          "c": "PostgreSQL จะทำการล็อกแถวนั้นในระดับ Row-Level Lock โดยอัตโนมัติ ทำให้คำสั่งอื่นๆ ต้องยืนรอจนกว่าการบวกหรือลบนี้จะเสร็จสิ้น จึงรับประกันความถูกต้อง 100% ไร้ Race Condition อย่างแน่นอน",
+        },
+        {
+          "t": "h2",
+          "c": "4. เช็กความเข้าใจ (Quick Quiz)",
+        },
+        {
+          "t": "details",
+          "summary": "❓ คำถาม: นอกจาก Atomic SQL Update แล้ว เราสามารถใช้คำสั่ง SQL ใดในการล็อกแถวข้อมูลเพื่ออ่านมาตรวจสอบก่อนได้?",
+          "c": [
+            {
+              "t": "p",
+              "c": "**คำตอบ**: เราสามารถใช้คำสั่ง `SELECT FOR UPDATE` (หรือ `SELECT FOR NO KEY UPDATE` ใน PostgreSQL) ซึ่งฐานข้อมูลจะอ่านข้อมูลพร้อมกับใส่ Exclusive Lock ไว้ที่แถวนั้นทันที ทำให้ Transaction อื่นๆ ที่พยายามจะอ่านเพื่อแก้ไขแถวเดียวกันต้องยืนรอจนกว่า Transaction แรกจะ Commit หรือ Rollback",
+            },
+          ],
+        },
+        {
+          "t": "callout",
+          "title": "🚀 ก้าวต่อไป",
+          "c": "แต่เมื่อมีการล็อกข้อมูล... ก็ย่อมมีโอกาสเกิด **การรอซึ่งกันและกันจนระบบค้าง (Deadlock)** ในบทที่ **5.3** เราจะมาไขปริศนา Deadlock และแก้ด้วย Lock Ordering กันครับ",
+        },
+      ],
+      en: [],
+    },
+  },
+
+  "bank-deadlock-prevention": {
+    slug: "bank-deadlock-prevention",
+    title: {
+      th: "5.3 ไขปริศนา Deadlock & ป้องกันด้วย Lock Ordering",
+      en: "5.3 Cracking Deadlocks & Prevention with Lock Ordering",
+    },
+    lead: {
+      th: "จำลองสถานการณ์โอนเงินสวนทางกันจนเกิด Deadlock และปลดล็อกระบบด้วยคณิตศาสตร์: จัดลำดับการล็อกบัญชีตาม ID (Resource Ordering)",
+      en: "Simulate bidirectional transfer deadlocks and solve them permanently with strict resource ordering by account ID.",
+    },
+    group: "5. รับมือคนกดพร้อมกัน: Concurrency & Deadlock",
+    blocks: {
+      th: [
+        {
+          "t": "callout",
+          "title": "🎯 เป้าหมายของบทนี้ (Learning Objectives)",
+          "c": "• เข้าใจกลไกการเกิด Deadlock จากตัวอย่างคลาสสิกของคนสองคนถือครองกุญแจคนละดอก\n• เขียนเทสต์ `TestTransferTxDeadlock` เพื่อจำลองการโอนเงินสวนทางกันและพบ Error จริงจาก PostgreSQL\n• แก้ปัญหา Deadlock ให้หายไป 100% ด้วยหลักการจัดลำดับล็อก (Resource Ordering)\n\n⏱ **เวลาในการเรียนรู้**: ~25 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านบท 5.2 เข้าใจการล็อกแถวข้อมูล",
+        },
+        {
+          "t": "h2",
+          "c": "1. ตัวอย่างคลาสสิก: ปัญหากุญแจ 2 ดอก (Two-Key Deadlock)",
+        },
+        {
+          "t": "p",
+          "c": "จินตนาการว่าห้องเก็บของต้องใช้กุญแจ 2 ดอก (กุญแจ A และ กุญแจ B) ในการเปิด:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Alice**: เดินไปหยิบกุญแจ A มาถือไว้ในมือ แล้วยืนรอกุญแจ B",
+            "**Bob**: เดินไปหยิบกุญแจ B มาถือไว้ในมือ แล้วยืนรอกุญแจ A",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "ผลลัพธ์คือ ทั้งสองคนต่างถือของคนละชิ้น และต่างฝ่ายต่างรอให้อีกฝ่ายปล่อยของ ไม่มีใครยอมปล่อยก่อน ทำให้เกิดการยืนรอค้างไปชั่วกัลปาวสาน (Deadlock)! มาดูโค้ดที่ทำให้ Go Runtime พ่น Fatal Error กันครับ:",
+        },
+        {
+          "t": "codeout",
+          "lang": "go",
+          "label": "ตัวอย่างคลาสสิก: Deadlock ของ Goroutine 2 ตัว",
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"sync\"\n\t\"time\"\n)\n\nfunc main() {\n\tvar keyA, keyB sync.Mutex\n\tvar wg sync.WaitGroup\n\twg.Add(2)\n\n\tgo func() { // Alice หยิบ A ก่อน แล้วรอ B\n\t\tdefer wg.Done()\n\t\tkeyA.Lock()\n\t\tfmt.Println(\"Alice: ได้กุญแจ A กำลังรอกุญแจ B...\")\n\t\ttime.Sleep(100 * time.Millisecond)\n\t\tkeyB.Lock()\n\t\tkeyB.Unlock()\n\t\tkeyA.Unlock()\n\t}()\n\n\tgo func() { // Bob หยิบ B ก่อน แล้วรอ A\n\t\tdefer wg.Done()\n\t\tkeyB.Lock()\n\t\tfmt.Println(\"Bob:   ได้กุญแจ B กำลังรอกุญแจ A...\")\n\t\ttime.Sleep(100 * time.Millisecond)\n\t\tkeyA.Lock()\n\t\tkeyA.Unlock()\n\t\tkeyB.Unlock()\n\t}()\n\n\twg.Wait()\n}",
+          "out": "Alice: ได้กุญแจ A กำลังรอกุญแจ B...\nBob:   ได้กุญแจ B กำลังรอกุญแจ A...\nfatal error: all goroutines are asleep - deadlock!\ngoroutine 1 [sync.WaitGroup.Wait]:\ngoroutine 7 [sync.Mutex.Lock]:",
+        },
+        {
+          "t": "h2",
+          "c": "2. สิ่งเดียวกันนี้เกิดขึ้นในระบบธนาคารได้อย่างไร?",
+        },
+        {
+          "t": "p",
+          "c": "ในขั้นตอนการโอนเงิน หากเราหักเงินบัญชีต้นทาง (From) ก่อน แล้วค่อยเพิ่มเงินบัญชีปลายทาง (To) เสมอ:",
+        },
+        {
+          "t": "table",
+          "head": ["เวลา (Timeline)", "ธุรกรรมที่ 1 (Alice โอนไป Bob: 1 -> 2)", "ธุรกรรมที่ 2 (Bob โอนกลับมา Alice: 2 -> 1)"],
+          "rows": [
+            ["T1", "ล็อกบัญชีหมายเลข 1 (Alice)", "—"],
+            ["T2", "—", "ล็อกบัญชีหมายเลข 2 (Bob)"],
+            ["T3", "พยายามจะล็อกบัญชี 2 (ติด! เพราะ Tx 2 ถืออยู่)", "—"],
+            ["T4", "—", "พยายามจะล็อกบัญชี 1 (ติด! เพราะ Tx 1 ถืออยู่)"],
+            ["ผลลัพธ์", "🔥 PostgreSQL ตรวจพบวงกลมการรอ (Cycle) และพ่น Error: deadlock detected", "🔥"],
+          ],
+        },
+        {
+          "t": "h2",
+          "c": "3. ทางแก้: กฎการจัดลำดับล็อก (Resource Ordering)",
+        },
+        {
+          "t": "p",
+          "c": "วิธีแก้ปัญหากุญแจ 2 ดอก คือการตั้ง **'ข้อตกลงร่วมกัน (Convention)'** ว่า:\n> **ไม่ว่าใครก็ตาม ทุกคนต้องหยิบกุญแจตามลำดับ A ก่อน B เสมอ!**",
+        },
+        {
+          "t": "p",
+          "c": "ในระบบธนาคาร เรานำหลักการนี้มาใช้อย่างสวยงามด้วยเงื่อนไขง่ายๆ: **จงปรับปรุงยอดเงินของบัญชีที่มี ID น้อยกว่าก่อนเสมอ!**",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/tx_transfer.go (ส่วนปรับปรุงยอดเงินแบบ Deadlock-Free)",
+          "c": "// 4 & 5: ปรับปรุงยอดเงินทั้งสองบัญชี โดยล็อกบัญชีที่มี ID น้อยกว่าก่อนเสมอ\nif arg.FromAccountID < arg.ToAccountID {\n\tresult.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)\n} else {\n\tresult.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)\n}\n\n// addMoney ฟังก์ชันตัวช่วยที่จะทำการรันคำสั่ง SQL ตามลำดับบัญชีที่ 1 แล้วตามด้วยบัญชีที่ 2 เสมอ\nfunc addMoney(ctx context.Context, q *Queries, accountID1, amount1, accountID2, amount2 int64) (account1, account2 Account, err error) {\n\taccount1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{ID: accountID1, Amount: amount1})\n\tif err != nil {\n\t\treturn\n\t}\n\taccount2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{ID: accountID2, Amount: amount2})\n\treturn\n}",
+        },
+        {
+          "t": "callout",
+          "title": "🎉 ผลลัพธ์ทางคณิตศาสตร์",
+          "c": "เมื่อทั้งสองธุรกรรมถูกบังคับให้ล็อกบัญชีหมายเลข 1 ก่อนเสมอ:\n• ใครมาถึงบัญชี 1 ก่อน จะได้ล็อกบัญชี 1 และไปล็อกบัญชี 2 ต่อจนเสร็จ\n• ใครมาถึงทีหลัง จะต้องยืนรอที่หน้าบัญชี 1 ตั้งแต่แรก โดยไม่มีการถือบัญชี 2 ค้างไว้\n\nการรอแบบวนเป็นวงกลม (Circular Wait) จึง **เป็นไปไม่ได้ทางคณิตศาสตร์ 100%**!",
+        },
+        {
+          "t": "h2",
+          "c": "4. เขียนเทสต์พิสูจน์ Deadlock (TestTransferTxDeadlock)",
+        },
+        {
+          "t": "p",
+          "c": "เพิ่มฟังก์ชันทดสอบใน `simplebank/db/store_test.go` โดยสั่งให้มีการโอนเงิน 10 ครั้งพร้อมกัน โดยครึ่งหนึ่งโอนจาก 1->2 และอีกครึ่งโอนจาก 2->1:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/store_test.go (ส่วน TestTransferTxDeadlock)",
+          "c": "func TestTransferTxDeadlock(t *testing.T) {\n\tstore := NewStore(testDB)\n\n\taccount1 := topUp(t, createRandomAccount(t), 1000)\n\taccount2 := topUp(t, createRandomAccount(t), 1000)\n\tfmt.Println(\">> ก่อนรันเทสต์ Deadlock:\", account1.Balance, account2.Balance)\n\n\tn := 10\n\tamount := int64(10)\n\terrs := make(chan error)\n\n\tfor i := range n {\n\t\tfromID, toID := account1.ID, account2.ID\n\t\tif i%2 == 1 {\n\t\t\tfromID, toID = account2.ID, account1.ID // สลับทิศทางโอนสวนกัน!\n\t\t}\n\n\t\tgo func() {\n\t\t\t_, err := store.TransferTx(context.Background(), TransferTxParams{\n\t\t\t\tFromAccountID: fromID,\n\t\t\t\tToAccountID:   toID,\n\t\t\t\tAmount:        amount,\n\t\t\t})\n\t\t\terrs <- err\n\t\t}()\n\t}\n\n\tfor range n {\n\t\trequire.NoError(t, <-errs)\n\t}\n\n\t// โอนไป 5 ครั้ง และโอนกลับ 5 ครั้ง ยอดเงินสุดท้ายต้องเท่าเดิมเป๊ะ\n\tupdated1, _ := testQueries.GetAccount(context.Background(), account1.ID)\n\tupdated2, _ := testQueries.GetAccount(context.Background(), account2.ID)\n\n\tfmt.Println(\">> หลังรันเทสต์ Deadlock:\", updated1.Balance, updated2.Balance)\n\trequire.Equal(t, account1.Balance, updated1.Balance)\n\trequire.Equal(t, account2.Balance, updated2.Balance)\n}",
+        },
+        {
+          "t": "h2",
+          "c": "5. รันเทสต์และดูผลลัพธ์จริง",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ผลลัพธ์การรัน TestTransferTxDeadlock",
+          "code": "go test -v -run TestTransferTxDeadlock ./db",
+          "out": "=== RUN   TestTransferTxDeadlock\n>> ก่อนรันเทสต์ Deadlock: 1000 1000\n>> หลังรันเทสต์ Deadlock: 1000 1000\n--- PASS: TestTransferTxDeadlock (0.06s)\nPASS\nok      simplebank/db   0.142s",
+        },
+        {
+          "t": "h2",
+          "c": "6. เช็กความเข้าใจ (Quick Quiz)",
+        },
+        {
+          "t": "details",
+          "summary": "❓ คำถาม: กฎ 4 ข้อ (Coffman Conditions) ที่ทำให้เกิด Deadlock คืออะไร และการทำ Resource Ordering ไปทำลายข้อไหน?",
+          "c": [
+            {
+              "t": "p",
+              "c": "**คำตอบ**: เงื่อนไข 4 ข้อของ Coffman Conditions คือ:\n1. Mutual Exclusion (แย่งกันถือครอง)\n2. Hold and Wait (ถือของชิ้นหนึ่งไว้ แล้วยืนรออีกชิ้น)\n3. No Preemption (ไม่สามารถไปแย่งของจากมือคนอื่นได้)\n4. Circular Wait (เกิดการรอเป็นวงกลม)\n\nการทำ **Resource Ordering** (สั่งให้ทุกคนล็อกตามลำดับ ID เสมอ) เป็นการ **ทำลายข้อที่ 4 (Circular Wait)** อย่างสมบูรณ์ ทำให้ไม่มีทางเกิดวงกลมของการรอได้อีกต่อไป",
+            },
+          ],
+        },
+        {
+          "t": "callout",
+          "title": "🚀 ก้าวต่อไป",
+          "c": "Core Banking Engine ของเราทั้งเร็ว ปลอดภัย และไร้ Deadlock 100% แล้ว! ในโมดูลที่ 6 บทที่ **6.1 สร้าง REST API Server ด้วย Gin** เราจะมาเปิด HTTP Server ให้โลกภายนอกสั่งเปิดบัญชีและโอนเงินกันครับ",
+        },
+      ],
+      en: [],
+    },
+  },
+};

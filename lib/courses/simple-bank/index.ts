@@ -1,13 +1,14 @@
 import type { Course, Page } from "@/lib/types";
 import { COURSE_META_MAP } from "../metadata";
-import { introPages } from "./pages/01-intro";
+import { startPages } from "./pages/00-start";
+import { goPages } from "./pages/01-go";
 import { databasePages } from "./pages/02-database";
-import { storeTxPages } from "./pages/03-store-tx";
-import { concurrencyPages } from "./pages/04-concurrency";
-import { testingPages } from "./pages/05-testing";
+import { dbCodePages } from "./pages/03-db-code";
+import { transactionPages } from "./pages/04-transactions";
+import { concurrencyPages } from "./pages/05-concurrency";
 import { apiPages } from "./pages/06-api";
 import { securityProdPages } from "./pages/07-security-prod";
-import { interviewPages } from "./pages/08-interview";
+import { wrapupPages } from "./pages/08-wrapup";
 
 // =============================================================================
 // ไฟล์: simple-bank/index.ts
@@ -15,14 +16,15 @@ import { interviewPages } from "./pages/08-interview";
 // =============================================================================
 
 const pages: Record<string, Page> = {
-  ...introPages,
+  ...startPages,
+  ...goPages,
   ...databasePages,
-  ...storeTxPages,
+  ...dbCodePages,
+  ...transactionPages,
   ...concurrencyPages,
-  ...testingPages,
   ...apiPages,
   ...securityProdPages,
-  ...interviewPages,
+  ...wrapupPages,
 };
 
 export const simpleBankCourse: Course = {
