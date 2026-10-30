@@ -159,18 +159,33 @@ function renderText(text: string) {
 const prose =
   "text-base leading-[1.75] text-[#1c1e21] min-[768px]:text-[18px] [&_p]:my-4 [&_ul]:my-4 [&_ol]:my-4 [&_ul]:pl-6 [&_ol]:pl-6 [&_li]:my-[0.35em] [&_strong]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-[0.5rem] [&_blockquote]:border-border [&_blockquote]:pl-4 [&_blockquote]:text-muted";
 
+import {
+  SiGo,
+  SiPostgresql,
+  SiDocker,
+  SiGnubash,
+  SiPython,
+  SiJson,
+  SiYaml,
+} from "react-icons/si";
+import { VscFileCode, VscDiff } from "react-icons/vsc";
+
 function parseFileLabel(label?: string, lang?: string) {
+  const defaultFiles: Record<string, string> = {
+    go: "main.go",
+    sql: "query.sql",
+    bash: "terminal",
+    sh: "terminal",
+    shell: "terminal",
+    diff: "changes.diff",
+    python: "main.py",
+    json: "config.json",
+    yaml: "docker-compose.yml",
+    yml: "docker-compose.yml",
+    dockerfile: "Dockerfile",
+  };
+
   if (!label) {
-    const defaultFiles: Record<string, string> = {
-      go: "main.go",
-      sql: "query.sql",
-      bash: "script.sh",
-      sh: "script.sh",
-      diff: "changes.diff",
-      python: "main.py",
-      json: "config.json",
-      yaml: "config.yaml",
-    };
     return {
       fileName: defaultFiles[lang || ""] || "code",
       breadcrumbs: [] as string[],
@@ -178,11 +193,11 @@ function parseFileLabel(label?: string, lang?: string) {
     };
   }
 
-  // Example: "simplebank/db/tx_transfer.go (Version 2 สมบูรณ์พร้อมรัน 100%)"
-  const m = label.match(/^([^\s(]+)(?:\s*\((.*)\))?$/);
-  if (m && (m[1].includes("/") || m[1].includes("."))) {
-    const fullPath = m[1];
-    const note = m[2] || "";
+  // If label is a full path or file name e.g. "simplebank/db/tx_transfer.go (ส่วนเพิ่ม)"
+  const fileWithNoteMatch = label.match(/^([^\s(]+)(?:\s*\((.*)\))?$/);
+  if (fileWithNoteMatch && (fileWithNoteMatch[1].includes("/") || fileWithNoteMatch[1].includes("."))) {
+    const fullPath = fileWithNoteMatch[1];
+    const note = fileWithNoteMatch[2] || "";
     const parts = fullPath.split("/").filter(Boolean);
     const fileName = parts[parts.length - 1] || fullPath;
     return {
@@ -192,15 +207,32 @@ function parseFileLabel(label?: string, lang?: string) {
     };
   }
 
-  // Description with parens, e.g. "ทดสอบยิง curl (เปรียบเทียบ 200 vs 404)"
-  const noteMatch = label.match(/\((.*)\)$/);
-  const note = noteMatch ? noteMatch[1] : "";
-  const cleanLabel = label.replace(/\s*\(.*\)$/, "").trim();
+  // If label has an explanatory note in parens e.g. "คำนวณพื้นที่ (Shape)"
+  // Extract pure file name for tab and note for description badge
+  const parenMatch = label.match(/^(.*?)\s*\((.*?)\)$/);
+  if (parenMatch) {
+    const mainDesc = parenMatch[1].trim();
+    const subNote = parenMatch[2].trim();
+    // Check if subNote looks like a code identifier or filename e.g. "Shape" -> "shape.go"
+    if (/^[A-Za-z0-9_-]+$/.test(subNote) && (lang === "go" || lang === "golang")) {
+      return {
+        fileName: `${subNote.toLowerCase()}.go`,
+        breadcrumbs: [] as string[],
+        note: mainDesc,
+      };
+    }
+    return {
+      fileName: defaultFiles[lang || ""] || "code",
+      breadcrumbs: [] as string[],
+      note: `${mainDesc} (${subNote})`,
+    };
+  }
 
+  // Pure label description e.g. "ตัวอย่างคำนวณ" -> show realistic filename in tab, label as note
   return {
-    fileName: cleanLabel,
+    fileName: defaultFiles[lang || ""] || "code",
     breadcrumbs: [] as string[],
-    note,
+    note: label.trim(),
   };
 }
 
@@ -210,60 +242,50 @@ function FileIcon({ lang, fileName }: { lang?: string; fileName?: string }) {
 
   // Diff
   if (l === "diff" || f.endsWith(".diff") || f.endsWith(".patch")) {
-    return (
-      <svg className="h-3.5 w-3.5 shrink-0 text-[#a371f7]" viewBox="0 0 16 16" fill="currentColor">
-        <path fillRule="evenodd" d="M8.75 1.5a.75.75 0 0 0-1.5 0v5h-5a.75.75 0 0 0 0 1.5h5v5a.75.75 0 0 0 1.5 0v-5h5a.75.75 0 0 0 0-1.5h-5v-5z" />
-      </svg>
-    );
+    return <VscDiff className="h-4 w-4 shrink-0 text-[#a371f7]" />;
   }
 
-  // Go
+  // Go / Golang
   if (l === "go" || l === "golang" || f.endsWith(".go")) {
-    return (
-      <svg className="h-3.5 w-3.5 shrink-0 text-[#00add8]" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M1.983 12.336c0-.528.093-1.036.279-1.523.186-.487.447-.912.784-1.275.337-.363.743-.652 1.218-.867.476-.215 1.01-.322 1.603-.322.616 0 1.168.107 1.656.322.488.215.897.504 1.227.867.33.363.582.788.756 1.275.174.487.261.995.261 1.523 0 .54-.087 1.054-.261 1.542-.174.488-.426.911-.756 1.269-.33.358-.739.641-1.227.849-.488.208-1.04.312-1.656.312-.593 0-1.127-.104-1.603-.312a3.486 3.486 0 0 1-1.218-.849c-.337-.358-.598-.781-.784-1.269a4.28 4.28 0 0 1-.279-1.542zM13.62 10.228h4.524v1.895h-2.312v4.862H13.62v-6.757zm6.757 0h2.212v6.757h-2.212v-6.757z"/>
-      </svg>
-    );
+    return <SiGo className="h-4 w-4 shrink-0 text-[#00add8]" />;
   }
 
-  // SQL
+  // Docker
+  if (l === "dockerfile" || f === "dockerfile" || f.endsWith(".dockerfile") || f.includes("docker-compose")) {
+    return <SiDocker className="h-4 w-4 shrink-0 text-[#2496ed]" />;
+  }
+
+  // SQL / Postgres
   if (l === "sql" || f.endsWith(".sql")) {
-    return (
-      <svg className="h-3.5 w-3.5 shrink-0 text-[#336791]" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M8 1c3.866 0 7 1.343 7 3s-3.134 3-7 3-7-1.343-7-3 3.134-3 7-3zm0 5c2.97 0 5.617-.803 6.643-2C13.617 2.803 10.97 2 8 2s-5.617.803-6.643 2C2.383 5.197 5.03 6 8 6zm7 2c-.172.934-1.517 1.838-3.535 2.378A6.994 6.994 0 0 1 8 11a6.994 6.994 0 0 1-3.465-.622C2.517 9.838 1.172 8.934 1 8V5.874c.732.68 1.884 1.23 3.238 1.594A8.986 8.986 0 0 0 8 8c1.328 0 2.585-.187 3.762-.532 1.354-.364 2.506-.914 3.238-1.594V8zm0 4c-.172.934-1.517 1.838-3.535 2.378A6.994 6.994 0 0 1 8 15a6.994 6.994 0 0 1-3.465-.622C2.517 13.838 1.172 12.934 1 12V9.874c.732.68 1.884 1.23 3.238 1.594A8.986 8.986 0 0 0 8 12c1.328 0 2.585-.187 3.762-.532 1.354-.364 2.506-.914 3.238-1.594V12z"/>
-      </svg>
-    );
+    return <SiPostgresql className="h-4 w-4 shrink-0 text-[#336791]" />;
   }
 
   // Bash / Shell
-  if (l === "bash" || l === "sh" || l === "shell" || f.endsWith(".sh") || f === "makefile") {
-    return (
-      <svg className="h-3.5 w-3.5 shrink-0 text-[#4eaa25]" viewBox="0 0 16 16" fill="currentColor">
-        <path fillRule="evenodd" d="M1.5 2.5a1 1 0 0 1 1-1h11a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-11zm1.5.5v10h10V3H3zm2.146 2.146a.5.5 0 0 1 .708 0l2.5 2.5a.5.5 0 0 1 0 .708l-2.5 2.5a.5.5 0 0 1-.708-.708L7.293 8 5.146 5.854a.5.5 0 0 1 0-.708zM9 9.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
-      </svg>
-    );
+  if (l === "bash" || l === "sh" || l === "shell" || f.endsWith(".sh") || f === "terminal" || f === "makefile") {
+    return <SiGnubash className="h-4 w-4 shrink-0 text-[#4eaa25]" />;
   }
 
   // Python
   if (l === "python" || l === "py" || f.endsWith(".py")) {
-    return (
-      <svg className="h-3.5 w-3.5 shrink-0 text-[#3776ab]" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M7.92 1.5c-3.1 0-2.92 1.34-2.92 1.34l.01 1.39h2.97v.42H3.85S2 4.44 2 7.55s1.61 3.03 1.61 3.03h.96V9.22s-.05-1.61 1.59-1.61h2.73s1.54-.02 1.54-1.5V3.03S10.64 1.5 7.92 1.5zm-1.07.82a.5.5 0 1 1 0 1 .5.5 0 0 1 0-1zm1.23 12.18c3.1 0 2.92-1.34 2.92-1.34l-.01-1.39H8.02v-.42h4.13s1.85.21 1.85-2.9-1.61-3.03-1.61-3.03h-.96v1.36s.05 1.61-1.59 1.61H7.11s-1.54.02-1.54 1.5v3.08s-.21 1.53 2.51 1.53zm1.07-.82a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1z"/>
-      </svg>
-    );
+    return <SiPython className="h-4 w-4 shrink-0 text-[#3776ab]" />;
+  }
+
+  // JSON
+  if (l === "json" || f.endsWith(".json")) {
+    return <SiJson className="h-4 w-4 shrink-0 text-[#cbcb41]" />;
+  }
+
+  // YAML
+  if (l === "yaml" || l === "yml" || f.endsWith(".yaml") || f.endsWith(".yml")) {
+    return <SiYaml className="h-4 w-4 shrink-0 text-[#cb171e]" />;
   }
 
   // Default File / Code
-  return (
-    <svg className="h-3.5 w-3.5 shrink-0 text-[#858585]" viewBox="0 0 16 16" fill="currentColor">
-      <path fillRule="evenodd" d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
-      <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
-    </svg>
-  );
+  return <VscFileCode className="h-4 w-4 shrink-0 text-[#858585]" />;
 }
 
 /**
- * VS Code-style Header: macOS traffic light window controls + Editor Tab + Breadcrumb path
+ * VS Code-style Header: macOS traffic light window controls + Editor Tab + Clean file path
  */
 function CodeChrome({
   label,
@@ -281,20 +303,20 @@ function CodeChrome({
   const isDiff = lang === "diff" || parsed.note.toLowerCase().includes("diff");
 
   return (
-    <div className="border-b border-[#2d2d2d] bg-[#252526]">
-      {/* Top Tab Bar (VS Code window header) */}
+    <div className="border-b border-[#2d2d2d] bg-[#1f1f20]">
+      {/* Top Tab Bar (Clean VS Code Editor Header) */}
       <div className="flex h-9 items-center overflow-x-auto no-scrollbar">
         {/* macOS window controls */}
         <div className="flex items-center gap-1.5 px-3 shrink-0">
-          <span className="h-3 w-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/40 shadow-xs" />
-          <span className="h-3 w-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/40 shadow-xs" />
-          <span className="h-3 w-3 rounded-full bg-[#27c93f] border border-[#1aab29]/40 shadow-xs" />
+          <span className="h-3 w-3 rounded-full bg-[#ff5f56]/90 border border-[#e0443e]/40 shadow-xs" />
+          <span className="h-3 w-3 rounded-full bg-[#ffbd2e]/90 border border-[#dea123]/40 shadow-xs" />
+          <span className="h-3 w-3 rounded-full bg-[#27c93f]/90 border border-[#1aab29]/40 shadow-xs" />
         </div>
 
-        {/* Active VS Code Tab */}
-        <div className="flex h-full items-center gap-2 border-t-2 border-t-[#0078d4] bg-[#1e1e1e] border-r border-[#2d2d2d] px-3.5 text-[0.8em] shrink-0">
+        {/* Active Editor Tab */}
+        <div className="flex h-full items-center gap-2 border-t-2 border-t-[#0078d4] bg-[#181819] border-r border-[#2d2d2d] px-3.5 text-[0.8em] shrink-0">
           <FileIcon lang={lang} fileName={parsed.fileName} />
-          <span className="font-mono text-[#d4d4d4] font-medium tracking-tight">
+          <span className="font-mono text-[#e0e0e0] font-medium tracking-tight">
             {parsed.fileName}
           </span>
           {isDiff && (
@@ -302,21 +324,12 @@ function CodeChrome({
               M
             </span>
           )}
-          <span className="ml-1 text-[1.1em] text-[#858585] leading-none select-none hover:text-[#d4d4d4]">
-            ×
-          </span>
         </div>
 
-        {/* Extra Note badge if any */}
+        {/* Note / Context description (Clean & Subtle, non-intrusive) */}
         {parsed.note && (
-          <div className="hidden sm:flex items-center px-3 truncate">
-            <span
-              className={`truncate rounded px-2 py-0.5 text-[0.72em] font-medium ${
-                isDiff
-                  ? "border border-[#8957e5]/40 bg-[#8957e5]/10 text-[#d2a8ff]"
-                  : "border border-[#3c3c3c] bg-[#1e1e1e] text-[#a0a0a0]"
-              }`}
-            >
+          <div className="hidden md:flex items-center px-3 truncate max-w-md">
+            <span className="text-[0.75em] text-[#8e8e93] truncate font-normal">
               {parsed.note}
             </span>
           </div>
@@ -325,7 +338,7 @@ function CodeChrome({
         {/* Right side tools */}
         <div className="ml-auto flex shrink-0 items-center gap-2 px-3">
           {showLang && (
-            <span className="rounded border border-[#3c3c3c] bg-[#1e1e1e] px-2 py-0.5 font-mono text-[0.68em] font-bold uppercase tracking-wider text-[#858585]">
+            <span className="rounded border border-[#333333] bg-[#181819] px-2 py-0.5 font-mono text-[0.66em] font-semibold uppercase tracking-wider text-[#999999]">
               {lang}
             </span>
           )}
@@ -333,9 +346,9 @@ function CodeChrome({
         </div>
       </div>
 
-      {/* VS Code Breadcrumb Bar (if path has multiple parts) */}
+      {/* Breadcrumb Bar (only when path has multiple subdirectories) */}
       {parsed.breadcrumbs.length > 1 && (
-        <div className="flex items-center gap-1.5 border-t border-[#2d2d2d] bg-[#1e1e1e] px-3.5 py-1 text-[0.72em] text-[#858585]">
+        <div className="flex items-center gap-1.5 border-t border-[#2d2d2d] bg-[#181819] px-3.5 py-1 text-[0.72em] text-[#858585]">
           {parsed.breadcrumbs.map((crumb, idx) => (
             <Fragment key={idx}>
               {idx > 0 && <span className="text-[#555555]">›</span>}

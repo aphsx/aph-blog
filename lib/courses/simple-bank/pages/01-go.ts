@@ -231,7 +231,7 @@ export const goPages: Record<string, Page> = {
           "t": "codeout",
           "lang": "go",
           "label": "ตัวอย่างคลาสสิก: Interface รูปทรงเรขาคณิต (Shape)",
-          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"math\"\n)\n\n// กำหนดสัญญา (Contract) ว่าใครมีเมธอด Area() จะถือว่าเป็น Shape ทั้งหมด\nttype Shape interface {\n\tArea() float64\n}\n\ntype Rect struct{ W, H float64 }\ntype Circle struct{ R float64 }\n\nfunc (r Rect) Area() float64   { return r.W * r.H }\nfunc (c Circle) Area() float64 { return math.Pi * c.R * c.R }\n\nfunc printArea(s Shape) {\n\tfmt.Printf(\"%T คำนวณพื้นที่ได้ = %.2f\\n\", s, s.Area())\n}\n\nfunc main() {\n\tprintArea(Rect{W: 3, H: 4})\n\tprintArea(Circle{R: 2})\n}",
+          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"math\"\n)\n\n// กำหนดสัญญา (Contract) ว่าใครมีเมธอด Area() จะถือว่าเป็น Shape ทั้งหมด\ntype Shape interface {\n\tArea() float64\n}\n\ntype Rect struct{ W, H float64 }\ntype Circle struct{ R float64 }\n\nfunc (r Rect) Area() float64   { return r.W * r.H }\nfunc (c Circle) Area() float64 { return math.Pi * c.R * c.R }\n\nfunc printArea(s Shape) {\n\tfmt.Printf(\"%T คำนวณพื้นที่ได้ = %.2f\\n\", s, s.Area())\n}\n\nfunc main() {\n\tprintArea(Rect{W: 3, H: 4})\n\tprintArea(Circle{R: 2})\n}",
           "out": "main.Rect คำนวณพื้นที่ได้ = 12.00\nmain.Circle คำนวณพื้นที่ได้ = 12.57",
         },
         {
