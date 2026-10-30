@@ -261,523 +261,393 @@ export const introPages: Record<string, Page> = {
   "bank-go-backend-primer": {
     "slug": "bank-go-backend-primer",
     "title": {
-      "th": "1.2 Go จากศูนย์สำหรับระบบ Backend (ครบทุกกลไกที่ใช้ในโปรเจกต์)",
-      "en": "1.2 Go from Zero for Backend Systems (Complete Mechanics Guide)"
+      "th": "1.2 Go จากศูนย์สำหรับระบบ Backend (Core Mechanics & Mental Models)",
+      "en": "1.2 Go from Zero for Backend Systems (Core Mechanics & Mental Models)"
     },
     "lead": {
-      "th": "คู่มือปูพื้นฐานภาษา Go ฉบับสมบูรณ์สำหรับผู้เริ่มต้น: เจาะลึกครบทั้ง 10 กลไกสำคัญ ตั้งแต่ Struct, Pointer, Method Receiver, Interface, Embedding, Slice/Map, Closure, Defer, Context ไปจนถึง Goroutines และ Channels",
-      "en": "Complete beginner-friendly guide to all 10 Go mechanics used in Simple Bank: Structs, Pointers, Method Receivers, Interfaces, Embedding, Slices/Maps, Closures, Defer, Context, Goroutines, and Channels."
+      "th": "คู่มือเปลี่ยนวิธีคิดสู่ภาษา Go สำหรับวิศวกรระบบ Backend: เจาะลึกโมเดลหน่วยความจำ Pointer, สถาปัตยกรรมไร้ Class (Struct Embedding), ปรัชญา Error ไร้ Try-Catch, ไปจนถึง Concurrency 10,000 คำขอพร้อมกันอย่างปลอดภัย",
+      "en": "Master Go's core mechanics through a backend engineering lens: Memory mental models, Pointer mechanics, Class-free composition, explicit error handling, and high-concurrency Goroutines."
     },
     "group": "1. ปูพื้นฐานระบบการเงิน & ภาษา Go จากศูนย์",
     "blocks": {
       "th": [
         {
           "t": "callout",
-          "title": "🧭 แผนที่การเรียนรู้ (Where You Are & What You'll Build)",
-          "c": "• **สิ่งที่ทำสำเร็จแล้ว**: เข้าใจภาพรวมสถาปัตยกรรม 3 เลเยอร์ของ Simple Bank และโจทย์ปัญหาของระบบการเงิน\n• **ภารกิจในบทนี้**: ทำความเข้าใจไวยากรณ์และกลไกของภาษา Go ทั้ง 10 เรื่องที่ถูกใช้งานจริงในโปรเจกต์ Simple Bank พร้อมโค้ดตัวอย่างที่รันได้จริงทุกหัวข้อ\n• **วิธีเรียนบทนี้ให้ได้ผลที่สุด**: อ่านหัวข้อที่ 1–6 ให้เข้าใจภาพรวมก่อนเริ่มบทฐานข้อมูล ส่วนหัวข้อที่ 7–10 (Closure, Defer, Context, Goroutine & Channel) สามารถอ่านทำความคุ้นเคยไว้ก่อน แล้วกลับมาทบทวนซ้ำเมื่อถึงบท Transaction และ Concurrency ได้เลย"
+          "title": "🧭 เข็มทิศวิธีคิด & แผนที่การเรียนรู้ (Backend Engineer's Mental Compass)",
+          "c": "• **ลบภาพจำเดิม**: ภาษา Go ไม่ได้ถูกสร้างมาให้เหมือน Python, Java หรือ Node.js การเขียน Go ให้เข้าใจต้องเริ่มจากการเปลี่ยน **'วิธีคิด (Mental Model)'** จากระบบ OOP แบบคลาสและระบบ Exception ที่ซ่อนความผิดพลาด มาเป็นระบบที่ **ชัดเจน ตรงไปตรงมา คาดเดาง่าย (Explicit & Predictable)**\n• **ภารกิจในบทนี้**: เราจะเจาะลึก 10 กลไกสำคัญของ Go ผ่านมุมมองของวิศวกร Backend โดยแบ่งเป็น 4 องก์ (Acts) ตั้งแต่หน่วยความจำบน RAM จนถึงระบบ Concurrency ระดับหมื่นคำขอพร้อมกัน\n• **วิธีเรียนรู้**: โค้ดทุกตัวอย่างในบทนี้เป็นโค้ดที่รันได้จริง พร้อมผลลัพธ์ Terminal และคำอธิบายเชื่อมโยงสู่ไฟล์จริงในโปรเจกต์ Simple Bank ที่เราจะได้ลงมือเขียนในบทถัดไป"
         },
         {
           "t": "h2",
-          "c": "พจนานุกรมไวยากรณ์ Go 12 คำสำคัญที่คุณจะเจอตลอดทั้งคอร์ส"
+          "c": "0. ปรัชญาภาษา Go: ทำไมระบบ Backend & Cloud ระดับโลกถึงสร้างด้วย Go?"
         },
         {
           "t": "p",
-          "c": "หากคุณไม่เคยเขียนภาษา Go มาก่อน ตารางสรุปด้านล่างนี้คือ 'แผนที่คำแปล' ของสัญลักษณ์และคีย์เวิร์ดทั้งหมดที่จะปรากฏในโค้ดระบบธนาคารของเรา:"
+          "c": "Google ออกแบบภาษา Go ขึ้นมาเพื่อแก้ปัญหาของระบบ Backend สเกลยักษ์ที่ภาษาในอดีตสร้างภาระไว้: C++ คอมไพล์ช้าและจัดการหน่วยความจำยาก, Java มีความซับซ้อนของ Class Hierarchy สูงและกินแรมมหาศาล, ส่วน Python / Node.js ก็ติดคอขวดด้าน CPU และขาด Type Safety ในระดับคอมไพเลอร์\n\nหัวใจของ Go คือ **'No Magic (ไม่มีเวทมนตร์แอบแฝง)'** — ไม่มี Inheritance ซับซ้อน, ไม่มี Exception กระโดดข้ามหัว, ไม่มี Runtime VM หนักๆ ทุกอย่างคอมไพล์เป็น Single Binary ไฟล์เดียวที่สตาร์ตเร็วระดับมิลลิวินาที และกินแรมเริ่มต้นเพียงไม่กี่เมกะไบต์:"
         },
         {
           "t": "table",
           "head": [
-            "ไวยากรณ์ในโค้ด",
-            "ชื่อเรียกทางเทคนิค",
-            "ความหมายแบบเข้าใจง่าย",
-            "จุดที่นำไปใช้จริงใน Simple Bank"
+            "มิติการทำงาน",
+            "ภาษาอื่น (Python / Java / Node.js)",
+            "ภาษา Go (ทำไมถึงเหมาะกับ Backend?)"
           ],
           "rows": [
             [
-              "name := value",
-              "Short Variable Declaration",
-              "สร้างตัวแปรใหม่พร้อมกำหนดค่าและให้ Go เดาชนิดข้อมูลให้อัตโนมัติ",
-              "ใช้ประกาศตัวแปรภายในฟังก์ชันทุกไฟล์"
+              "รูปแบบการทำงาน (Runtime)",
+              "ต้องพึ่งพา Interpreter / JVM / V8 Engine มี Warm-up time",
+              "คอมไพล์ตรงเป็น Native Machine Code ไฟล์เดียว รันได้ทันที ไม่ต้องลง Runtime ใน Docker"
             ],
             [
-              "(Account, error)",
-              "Multiple Return Values",
-              "ฟังก์ชันใน Go คืนค่าผลลัพธ์คู่กับก้อนรายงานปัญหา (error) พร้อมกันได้",
-              "ใช้ในฟังก์ชัน CRUD และ Transaction ทุกตัว"
+              "โมเดล Concurrency",
+              "Java ใช้ OS Thread (กินแรม ~1-2MB/เธรด), Node.js เป็น Single-Thread Event Loop",
+              "Goroutine ขนาดจิ๋ว (~2KB) รันพร้อมกันได้หลักหมื่นถึงแสนตัวบนเครื่องเดียว"
             ],
             [
-              "_, err := fn()",
-              "Blank Identifier (_)",
-              "เครื่องหมาย _ คือถังขยะ ใช้รับค่าที่ไม่ได้ใช้ทิ้งไป (เพราะ Go ห้ามประกาศตัวแปรทิ้งไว้เฉยๆ)",
-              "ใช้ใน ExecContext และเทสต์ที่สนเฉพาะ error"
+              "การจัดการข้อผิดพลาด",
+              "ใช้ Exception (`try / catch`) ที่อาจระเบิดข้ามฟังก์ชันโดยไม่รู้ตัว",
+              "Explicit Error Value (`val, err`) บังคับให้ตรวจสอบข้อผิดพลาดอย่างชัดเจนทุกจุด"
             ],
             [
-              "*Account และ &acc",
-              "Pointer & Address-of",
-              "* คือตัวชี้ตำแหน่งหน่วยความจำ, & คือการดึงตำแหน่งหน่วยความจำของตัวแปร",
-              "ใช้ส่ง *sql.DB, *Server และรับค่าใน row.Scan(&i.ID)"
-            ],
-            [
-              "func (s *Server) Start()",
-              "Method & Pointer Receiver",
-              "ผูกฟังก์ชันเข้ากับ Struct (ทำหน้าที่แทน Class Method ในภาษาอื่น)",
-              "ใช้สร้างเมธอดของ Queries, Store, และ Server"
-            ],
-            [
-              "type Store struct { *Queries }",
-              "Struct Embedding",
-              "วาง Struct ซ้อนใน Struct เพื่อยกเมธอดข้างในขึ้นมาเรียกใช้โดยตรง (แทน Inheritance)",
-              "ใช้ใน db/store.go เพื่อให้ Store เรียกเมธอดของ Queries ได้"
-            ],
-            [
-              "type Maker interface",
-              "Interface (Implicit)",
-              "สัญญาว่าต้องมีเมธอดอะไรบ้าง ไม่ต้องพิมพ์คำว่า implements",
-              "ใช้ทำ DBTX Interface และ Token Maker Interface"
-            ],
-            [
-              "[]Account และ append()",
-              "Slice (Dynamic Array)",
-              "รายการข้อมูลที่ยืดหยุ่นเพิ่มขนาดได้ด้วยคำสั่ง append()",
-              "ใช้เก็บรายการบัญชีในฟังก์ชัน ListAccounts"
-            ],
-            [
-              "map[int]bool",
-              "Map (Key-Value Hash Table)",
-              "ตารางเก็บคู่ Key และ Value สำหรับค้นหาข้อมูลด้วยความเร็วสูง",
-              "ใช้เช็กในเทสต์ว่าการโอนเงินแต่ละรอบไม่ซ้ำกัน"
-            ],
-            [
-              "v, ok := x.(string)",
-              "Type Assertion (Comma-ok)",
-              "แกะค่าออกจากตัวแปรชนิดครอบจักรวาล (interface{}) อย่างปลอดภัย",
-              "ใช้ดึงค่า Currency ใน Validator และดึง Token Payload ใน Gin"
-            ],
-            [
-              "fn func(*Queries) error",
-              "Higher-Order Function / Closure",
-              "การส่ง 'ฟังก์ชันทั้งก้อน' เข้าไปเป็นพารามิเตอร์ของอีกฟังก์ชันหนึ่ง",
-              "ใช้ใน execTx เพื่อห่อหุ้มคำสั่ง SQL ด้วย Transaction"
-            ],
-            [
-              "go fn() และ ch <- v",
-              "Goroutine & Channel",
-              "go คือสั่งรันงานคู่ขนานเบื้องหลัง, <- คือส่งหรือดึงข้อมูลผ่านท่อ Channel",
-              "ใช้ยิงทดสอบการโอนเงินพร้อมกัน 10 คำสั่งในบทที่ 5"
+              "โครงสร้างสถาปัตยกรรม",
+              "Class Inheritance (`extends`) ลึกหลายชั้น เกิดปัญหา Fragile Base Class",
+              "Composition (`Struct Embedding`) และ Implicit Interface ยืดหยุ่นและ Mock เทสต์ง่าย"
             ]
           ]
         },
         {
           "t": "h2",
-          "c": "กลไกที่ 1: โครงสร้างไฟล์ Go, การสร้างตัวแปร (:=) และชนิดข้อมูล (int64)"
+          "c": "องก์ที่ 1: หน่วยความจำ & โครงสร้างข้อมูล (Memory & Structs)"
+        },
+        {
+          "t": "h3",
+          "c": "กลไกที่ 1: Pass-by-Value vs Pointer (* vs &) — ถ่ายเอกสารสำเนา หรือ ส่งพิกัดจริง?"
         },
         {
           "t": "p",
-          "c": "ไฟล์ภาษา Go ทุกไฟล์จะต้องเริ่มต้นด้วย `package` (บอกชื่อหมวดหมู่ของไฟล์) ตามด้วย `import` (ดึงเครื่องมือมาตรฐานหรือไลบรารีอื่นมาใช้) และตามด้วยฟังก์ชันการทำงาน เครื่องหมายที่สำคัญที่สุดคือ `:=` กับ `=`:"
+          "c": "นี่คือจุดที่ทำให้ผู้เริ่มต้นเขียน Go สับสนมากที่สุด หากคุณเข้าใจภาพนี้ โค้ด Go ทั้งหมดจะกระจ่างทันที:\n\nตามค่าเริ่มต้น ภาษา Go ทำงานแบบ **Pass-by-Value (ส่งสำเนาเสมอ)** เมื่อคุณส่งตัวแปรหรือ Struct เข้าไปในฟังก์ชัน Go จะ **ถ่ายเอกสารก๊อบปี้ข้อมูลขึ้นมาใหม่อีกชุดหนึ่งบนหน่วยความจำ RAM** ฟังก์ชันปลายทางจะได้แค่กระดาษสำเนาไปขีดเขียน ซึ่งไม่มีผลกระทบใดๆ กับเอกสารต้นฉบับเลย!\n\nหากคุณต้องการให้ฟังก์ชันแก้ไขข้อมูลต้นฉบับได้ หรือต้องการส่งก้อนข้อมูลขนาดใหญ่ (เช่น ข้อมูลการเชื่อมต่อฐานข้อมูล `*sql.DB`) โดยไม่ต้องเปลืองแรมถ่ายเอกสารซ้ำ คุณต้องส่ง **Pointer (พิกัดที่อยู่บน RAM)**:"
+        },
+        {
+          "t": "callout",
+          "title": "💡 ปริศนาที่ทุกคนเคยสงสัย: ทำไม row.Scan(&i.ID, &i.Balance) ในบทที่ 3 ต้องใส่ & ทุกตัว?",
+          "c": "ลองนึกภาพ: ฟังก์ชัน `row.Scan` คือพนักงานไปรษณีย์ที่ถือข้อมูลจากฐานข้อมูลมาส่งให้คุณ\n\n• ถ้าคุณเขียน `row.Scan(i.ID, i.Balance)`: คุณกำลังยื่น **'ภาพถ่ายกล่องเปล่า'** ให้พนักงานไปรษณีย์ พนักงานก็หยอดของใส่ภาพถ่ายนั้น เมื่อฟังก์ชันจบลง ตัวแปร `i.ID` ตัวจริงของคุณก็ยังคงเป็นเลข 0 ว่างเปล่าเหมือนเดิม!\n• แต่เมื่อคุณเขียน `row.Scan(&i.ID, &i.Balance)`: เครื่องหมาย `&` แปลว่าคุณยื่น **'พิกัดที่อยู่บ้านบน GPS'** ให้พนักงาน พนักงานจึงสามารถเดินไปยังตำแหน่งตู้จดหมายจริงบน RAM ของคุณ และหยอดข้อมูลจาก Database ใส่ลงในตัวแปรตัวจริงของคุณได้อย่างถูกต้อง 100%!"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 1: read_a_file.go",
-          "code": "// =============================================================================\n// ไฟล์: read_a_file.go\n// หน้าที่: แสดงโครงสร้างพื้นฐานของไฟล์ Go และการประกาศตัวแปรด้วย := เทียบกับ =\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\nfunc main() {\n\t// ขั้นตอนที่ 1: ใช้ := สำหรับ \"สร้างตัวแปรใหม่ครั้งแรก\" พร้อมกำหนดค่าเริ่มต้น\n\towner := \"Alice\"\n\tbalance := int64(1000) // ใช้ int64 (จำนวนเต็ม 64 บิต) เก็บเงินเสมอ\n\n\tfmt.Println(\"ก่อนฝากเงิน:\", owner, \"มียอดคงเหลือ\", balance, \"สตางค์\")\n\n\t// ขั้นตอนที่ 2: เมื่อตัวแปรมีอยู่แล้ว การเปลี่ยนค่าในภายหลังต้องใช้ = ตัวเดียว (ห้ามใช้ := ซ้ำ)\n\tbalance = balance + 500\n\tfmt.Println(\"หลังฝากเงิน:\", owner, \"มียอดคงเหลือ\", balance, \"สตางค์\")\n}",
-          "out": "ก่อนฝากเงิน: Alice มียอดคงเหลือ 1000 สตางค์\nหลังฝากเงิน: Alice มียอดคงเหลือ 1500 สตางค์"
+          "label": "01_pointer_and_scan.go",
+          "code": "// =============================================================================\n// ไฟล์: 01_pointer_and_scan.go\n// หน้าที่: เปรียบเทียบ Pass-by-Value กับ Pass-by-Pointer และจำลองกลไก row.Scan\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\ntype Account struct {\n\tID      int64\n\tBalance int64\n}\n\n// 1. Pass-by-Value: ส่งสำเนา การแก้ไขไม่มีผลกับตัวแปรต้นฉบับ\nfunc UpdateByValue(acc Account) {\n\tacc.Balance += 500\n}\n\n// 2. Pass-by-Pointer: ส่งพิกัดหน่วยความจำ (&) แก้ไขตัวแปรต้นฉบับได้โดยตรง\nfunc UpdateByPointer(acc *Account) {\n\tacc.Balance += 500\n}\n\n// 3. จำลองการทำงานของ row.Scan ใน database/sql\n// รับพิกัดหน่วยความจำ (*int64) เพื่อนำค่าจากฐานข้อมูลไปหยอดใส่ตัวแปรต้นฉบับ\nfunc SimulateDbScan(idDest *int64, balanceDest *int64) {\n\t*idDest = 101       // หยอด ID จากแถวข้อมูลใน DB\n\t*balanceDest = 2500 // หยอด Balance จากแถวข้อมูลใน DB\n}\n\nfunc main() {\n\tuserAcc := Account{ID: 1, Balance: 1000}\n\n\t// ทดสอบ Pass-by-Value\n\tUpdateByValue(userAcc)\n\tfmt.Printf(\"1) หลัง UpdateByValue: Balance = %d (ไม่เปลี่ยน เพราะแก้ในสำเนา!)\\n\", userAcc.Balance)\n\n\t// ทดสอบ Pass-by-Pointer (ส่ง &userAcc)\n\tUpdateByPointer(&userAcc)\n\tfmt.Printf(\"2) หลัง UpdateByPointer(&userAcc): Balance = %d (เปลี่ยนจริง!)\\n\", userAcc.Balance)\n\n\t// ทดสอบ SimulateDbScan (เสมือน row.Scan(&dest.ID, &dest.Balance))\n\tvar scannedAcc Account\n\tSimulateDbScan(&scannedAcc.ID, &scannedAcc.Balance)\n\tfmt.Printf(\"3) หลัง SimulateDbScan(&ID, &Balance): ID = %d, Balance = %d\\n\", scannedAcc.ID, scannedAcc.Balance)\n}",
+          "out": "1) หลัง UpdateByValue: Balance = 1000 (ไม่เปลี่ยน เพราะแก้ในสำเนา!)\n2) หลัง UpdateByPointer(&userAcc): Balance = 1500 (เปลี่ยนจริง!)\n3) หลัง SimulateDbScan(&ID, &Balance): ID = 101, Balance = 2500"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 ถอดรหัสสัญลักษณ์ * vs & และกฎเหล็กสำหรับ Backend"
         },
         {
           "t": "ul",
           "c": [
-            "**`package main`**: บอกว่าไฟล์นี้คือจุดเริ่มต้นของโปรแกรมที่สั่งรันได้เอง ในโปรเจกต์ธนาคารจริงเราจะแยกไฟล์ตามโฟลเดอร์ เช่น โฟลเดอร์ `db/` จะใช้หัวไฟล์ว่า `package db` และโฟลเดอร์ `api/` จะใช้ `package api`",
-            "**`:=` vs `=`**: ใช้ `:=` เมื่อต้องการประกาศตัวแปรใหม่เท่านั้น หากต้องการอัปเดตค่าตัวแปรที่มีอยู่แล้วต้องใช้ `=` เสมอ",
-            "**`int64` สำหรับเก็บเงิน**: ใน Go มีทั้ง `int`, `int32`, และ `int64` เนื่องจากฐานข้อมูล PostgreSQL เก็บยอดเงินและรหัส ID เป็น `BIGINT` (64 บิต) เราจึงต้องใช้ `int64` เสมอเพื่อให้ชนิดข้อมูลตรงกัน 100%"
+            "**`&` (Address-of Operator)**: วางหน้าตัวแปรเพื่อขอ \"พิกัดที่อยู่บน RAM\" (เช่น `&acc` คือขอพิกัดของตัวแปร `acc`)",
+            "**`*` ในการประกาศชนิดข้อมูล (`*Account`)**: ระบุว่าตัวแปรนี้ไม่ใช่ก้อนข้อมูลธรรมดา แต่เป็นตัวแปรที่ใช้เก็บ \"พิกัดที่อยู่\" เพื่อชี้ไปยัง Struct `Account`",
+            "**`*` ในการเข้าถึงค่า (`*ptr = value`)**: เรียกว่า Dereferencing คือการเดินตามพิกัดไปเปิดกล่องจริงบน RAM เพื่ออ่านหรือเขียนค่า",
+            "**กฎเหล็กในโปรเจกต์ Simple Bank**: ออบเจกต์จัดการระบบที่เป็นตัวควบคุมกลาง เช่น `*sql.DB`, `*Queries`, `*Store`, `*Server`, และ `*gin.Context` เราจะส่งต่อด้วย Pointer (`*`) เสมอ เพื่อให้ทุกเลเยอร์ทำงานกับตัวควบคุมตัวจริงร่วมกันทั้งระบบ"
           ]
         },
         {
-          "t": "h2",
-          "c": "กลไกที่ 2: ฟังก์ชันคืนหลายค่า, การจัดการ Error, Blank Identifier (_) และ Named Return"
+          "t": "h3",
+          "c": "กลไกที่ 2: Struct & Method Receiver — Go ทำงานแบบ OOP ได้อย่างไรโดยไร้ class?"
         },
         {
           "t": "p",
-          "c": "ภาษา Go ไม่มี `try / catch` เหมือนภาษาอื่น แต่บังคับให้ฟังก์ชันที่อาจเกิดข้อผิดพลาดต้อง **คืนค่าผลลัพธ์คู่กับ `error` ออกมาพร้อมกัน** เพื่อให้ผู้เขียนโค้ดตรวจสอบข้อผิดพลาดทุกครั้งอย่างชัดเจน นอกจากนี้ยังมีรูปแบบการเขียนรับค่าและการคืนค่าที่ต้องรู้ 4 รูปแบบ:"
+          "c": "ในภาษา Go **ไม่มีคีย์เวิร์ด `class`** แต่ Go ใช้ `type ... struct` เป็นกล่องเก็บข้อมูล (State) แล้วผูกฟังก์ชันเข้ากับ Struct นั้นด้วยกลไกที่เรียกว่า **Method Receiver (ตัวรับเมธอด)** ซึ่งสังเกตได้จากวงเล็บหน้าชื่อฟังก์ชัน เช่น `func (a *Account) Deposit(...)`:"
         },
         {
           "t": "table",
           "head": [
-            "รูปแบบคำสั่ง",
-            "ความหมายและการทำงาน",
-            "ใช้เมื่อไหร่ใน Simple Bank"
+            "รูปแบบ Receiver",
+            "ตัวอย่างไวยากรณ์",
+            "พฤติกรรมในหน่วยความจำ",
+            "เลือกใช้เมื่อไหร่?"
           ],
           "rows": [
             [
-              "left, err := Withdraw(1000, 400)",
-              "รับทั้งค่าผลลัพธ์ตัวแรก (left) และตัวรายงานปัญหา (err)",
-              "เมื่อต้องนำผลลัพธ์ (เช่น ข้อมูลบัญชีที่สร้างเสร็จ) ไปใช้งานต่อ"
+              "Value Receiver",
+              "func (a Account) GetBalance()",
+              "Go ถ่ายเอกสารสำเนาของ Struct เข้ามาในเมธอด",
+              "เมื่อต้องการ 'อ่านข้อมูลอย่างเดียว' และ Struct มีขนาดเล็กมาก ป้องกันไม่ให้ใครเผลอแก้ไขค่าต้นฉบับ"
             ],
             [
-              "_, err := Withdraw(1000, 400)",
-              "ใช้ _ ทิ้งผลลัพธ์ตัวแรก และเก็บมาเฉพาะ err",
-              "เมื่อไม่ต้องการใช้ค่าตัวแรก สนใจแค่ว่าคำสั่งทำงานสำเร็จหรือพัง"
-            ],
-            [
-              "if err := Ping(); err != nil { ... }",
-              "เรียกฟังก์ชันและเช็ก err จบในบรรทัดเดียว (err มีผลเฉพาะในบล็อก if)",
-              "เมื่อฟังก์ชันคืนค่า error ตัวเดียว เช่น db.Ping() หรือ ctx.ShouldBindJSON()"
-            ],
-            [
-              "func add(...) (acc Account, err error)",
-              "Named Return Values: ตั้งชื่อตัวแปรขาออกไว้ที่หัวฟังก์ชัน ใช้คำสั่ง return เปล่าๆ ได้",
-              "ใช้ในฟังก์ชัน addMoney (บทที่ 5) และ LoadConfig (บทที่ 7)"
+              "Pointer Receiver",
+              "func (a *Account) Deposit()",
+              "Go ส่งพิกัดหน่วยความจำ (&) ของ Struct เข้ามาโดยตรง",
+              "เมื่อต้องการ 'แก้ไขค่าใน Struct' (เช่น ฝากเงิน, เปลี่ยนสถานะ) หรือเมื่อ Struct มีฟิลด์เยอะเพื่อหลีกเลี่ยงต้นทุนการคัดลอกข้อมูล"
             ]
           ]
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 2: error_and_named_return.go",
-          "code": "// =============================================================================\n// ไฟล์: error_and_named_return.go\n// หน้าที่: สาธิตการคืนค่าคู่กับ error, การใช้ _, และการคืนค่าแบบ Named Return\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// Withdraw คืนค่า 2 ตัวโดยตั้งชื่อตัวแปรขาออกไว้ล่วงหน้า (Named Return: newBalance และ err)\nfunc Withdraw(balance int64, amount int64) (newBalance int64, err error) {\n\t// ขั้นตอนที่ 1: ตรวจสอบว่ายอดเงินพอหรือไม่\n\tif balance < amount {\n\t\terr = errors.New(\"ยอดเงินคงเหลือไม่เพียงพอ\")\n\t\treturn // Naked return: ส่งค่า newBalance (0) และ err ปัจจุบันออกไปทันที\n\t}\n\n\t// ขั้นตอนที่ 2: คำนวณยอดเงินใหม่ (err เป็น nil โดยอัตโนมัติ)\n\tnewBalance = balance - amount\n\treturn\n}\n\nfunc main() {\n\t// รูปแบบที่ 1: เก็บทั้งยอดเงินใหม่และ error\n\tbal, err := Withdraw(1000, 400)\n\tif err != nil {\n\t\tfmt.Println(\"เกิดข้อผิดพลาด:\", err)\n\t} else {\n\t\tfmt.Println(\"1) ถอนสำเร็จ ยอดคงเหลือ:\", bal)\n\t}\n\n\t// รูปแบบที่ 2: ใช้ _ ทิ้งยอดเงิน เพราะต้องการตรวจสอบแค่ error\n\t_, err = Withdraw(1000, 1500)\n\tif err != nil {\n\t\tfmt.Println(\"2) ดักจับข้อผิดพลาดสำเร็จ:\", err)\n\t}\n}",
-          "out": "1) ถอนสำเร็จ ยอดคงเหลือ: 600\n2) ดักจับข้อผิดพลาดสำเร็จ: ยอดเงินคงเหลือไม่เพียงพอ"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างเพิ่มเติม 2.1: blank_and_err.go (เปรียบเทียบการรับค่าทั้ง 3 รูปแบบ)",
-          "code": "// =============================================================================\n// ไฟล์: blank_and_err.go\n// หน้าที่: โค้ดส่วนประกอบของ blank_and_err.go\n// แก้ปัญหา: ออกแบบตามมาตรฐาน Clean Architecture สำหรับระบบธนาคาร\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// คืนสองค่า: ยอดคงเหลือใหม่ และ error\nfunc Withdraw(balance int64, amount int64) (int64, error) {\n\tif balance < amount {\n\t\treturn 0, errors.New(\"ยอดเงินไม่พอ\")\n\t}\n\treturn balance - amount, nil\n}\n\nfunc Ping() error {\n\treturn errors.New(\"ต่อฐานข้อมูลไม่ได้\")\n}\n\nfunc main() {\n\t// ช่องที่ 1 = ยอดเงิน, ช่องที่ 2 = error\n\tleft, err := Withdraw(1000, 400)\n\tfmt.Println(\"1) เก็บทั้งสองค่า:\", left, err)\n\n\t// _ ทิ้งช่องที่ 1 เหลือแค่ err\n\t// err มีอยู่แล้วจากบรรทัดบน จึงใช้ = ไม่ใช่ :=\n\t_, err = Withdraw(1000, 1500)\n\tfmt.Println(\"2) ทิ้งยอดเงิน เหลือแค่ err:\", err)\n\n\t// สร้าง err เฉพาะในเงื่อนไข ใช้ข้างนอก if ไม่ได้\n\tif err := Ping(); err != nil {\n\t\tfmt.Println(\"3) if err := ... :\", err)\n\t}\n}",
-          "out": "1) เก็บทั้งสองค่า: 600 <nil>\n2) ทิ้งยอดเงิน เหลือแค่ err: ยอดเงินไม่พอ\n3) if err := ... : ต่อฐานข้อมูลไม่ได้"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างเพิ่มเติม 2.1: blank_and_err.go (เปรียบเทียบการรับค่าทั้ง 3 รูปแบบ)",
-          "code": "// =============================================================================\n// ไฟล์: blank_and_err.go\n// หน้าที่: โค้ดส่วนประกอบของ blank_and_err.go\n// แก้ปัญหา: ออกแบบตามมาตรฐาน Clean Architecture สำหรับระบบธนาคาร\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// คืนสองค่า: ยอดคงเหลือใหม่ และ error\nfunc Withdraw(balance int64, amount int64) (int64, error) {\n\tif balance < amount {\n\t\treturn 0, errors.New(\"ยอดเงินไม่พอ\")\n\t}\n\treturn balance - amount, nil\n}\n\nfunc Ping() error {\n\treturn errors.New(\"ต่อฐานข้อมูลไม่ได้\")\n}\n\nfunc main() {\n\t// ช่องที่ 1 = ยอดเงิน, ช่องที่ 2 = error\n\tleft, err := Withdraw(1000, 400)\n\tfmt.Println(\"1) เก็บทั้งสองค่า:\", left, err)\n\n\t// _ ทิ้งช่องที่ 1 เหลือแค่ err\n\t// err มีอยู่แล้วจากบรรทัดบน จึงใช้ = ไม่ใช่ :=\n\t_, err = Withdraw(1000, 1500)\n\tfmt.Println(\"2) ทิ้งยอดเงิน เหลือแค่ err:\", err)\n\n\t// สร้าง err เฉพาะในเงื่อนไข ใช้ข้างนอก if ไม่ได้\n\tif err := Ping(); err != nil {\n\t\tfmt.Println(\"3) if err := ... :\", err)\n\t}\n}",
-          "out": "1) เก็บทั้งสองค่า: 600 <nil>\n2) ทิ้งยอดเงิน เหลือแค่ err: ยอดเงินไม่พอ\n3) if err := ... : ต่อฐานข้อมูลไม่ได้"
+          "label": "02_struct_and_receiver.go",
+          "code": "// =============================================================================\n// ไฟล์: 02_struct_and_receiver.go\n// หน้าที่: นิยาม Struct, สร้างเมธอดแบบ Value vs Pointer Receiver และ Struct Tags\n// =============================================================================\npackage main\n\nimport (\n\t\"encoding/json\"\n\t\"fmt\"\n)\n\n// Account นิยามโครงสร้างข้อมูล พร้อม Struct Tags สำหรับแปลงเป็น JSON\ntype Account struct {\n\tID       int64  `json:\"id\"`\n\tOwner    string `json:\"owner\"`\n\tBalance  int64  `json:\"balance\"`\n\tCurrency string `json:\"currency\"`\n}\n\n// Value Receiver (a Account): อ่านข้อมูลอย่างเดียว ไม่แก้ไขสถานะ\nfunc (a Account) GetBalance() int64 {\n\treturn a.Balance\n}\n\n// Pointer Receiver (a *Account): แก้ไขยอดเงินในบัญชีตัวจริง\nfunc (a *Account) Deposit(amount int64) {\n\ta.Balance += amount\n}\n\nfunc main() {\n\tacc := &Account{ID: 1, Owner: \"alice\", Balance: 1000, Currency: \"THB\"}\n\n\tfmt.Printf(\"ยอดเงินเริ่มต้น: %d %s\\n\", acc.GetBalance(), acc.Currency)\n\n\t// เรียก Pointer Receiver เพื่อฝากเงิน\n\tacc.Deposit(500)\n\tfmt.Printf(\"ยอดเงินหลังฝาก (Deposit 500): %d %s\\n\", acc.GetBalance(), acc.Currency)\n\n\t// แปลง Struct เป็น JSON อัตโนมัติตาม Struct Tag\n\tjsonData, _ := json.Marshal(acc)\n\tfmt.Println(\"JSON Output:\", string(jsonData))\n}",
+          "out": "ยอดเงินเริ่มต้น: 1000 THB\nยอดเงินหลังฝาก (Deposit 500): 1500 THB\nJSON Output: {\"id\":1,\"owner\":\"alice\",\"balance\":1500,\"currency\":\"THB\"}"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 Struct Tags: สะพานเชื่อมระหว่าง Go กับ JSON และ Database"
         },
         {
           "t": "ul",
           "c": [
-            "**`nil`**: คือค่าว่างของ `error` หาก `err == nil` แปลว่าทำงานสำเร็จไร้ปัญหา แต่ถ้า `err != nil` แปลว่าเกิดข้อผิดพลาด ต้องหยุดและจัดการทันที",
-            "**`_` (Blank Identifier)**: ใน Go ถ้าคุณประกาศตัวแปรรับค่ามาแล้วไม่ได้นำไปใช้ คอมไพเลอร์จะฟ้อง Error ไม่ยอมให้คอมไพล์ เครื่องหมาย `_` จึงทำหน้าที่บอกคอมไพเลอร์ว่า 'จงใจทิ้งค่านี้'",
-            "**`_ \"github.com/lib/pq\"`**: หากเห็น `_` อยู่หน้า `import` แปลว่าเราต้องการโหลดแพ็กเกจนั้นให้ทำงานเบื้องหลังตอนเปิดโปรแกรม (เช่น ลงทะเบียนไดรเวอร์ PostgreSQL) โดยที่เราไม่ได้เรียกชื่อแพ็กเกจ `pq` ตรงๆ ในโค้ด",
-            "**Named Return & Naked `return`**: เมื่อเราระบุชื่อตัวแปรไว้ที่หัวฟังก์ชัน เช่น `(newBalance int64, err error)` Go จะสร้างตัวแปรทั้งสองรอไว้ให้ทันที เมื่อพิมพ์ `return` เปล่าๆ Go จะส่งค่าล่าสุดของตัวแปรทั้งสองออกไปโดยอัตโนมัติ"
+            "**Struct Tag (ข้อความใน Backticks)**: สังเกตด้านหลังฟิลด์ เช่น `` `json:\"balance\"` `` นี่คือ Metadata ที่บอกแพ็กเกจ JSON ของ Go ว่า เวลาแปลง Struct เป็น JSON (Serialization) ให้ตั้งชื่อคีย์ใน JSON ว่า `balance` ตัวพิมพ์เล็กตามมาตรฐาน REST API",
+            "**การกำหนดสิทธิ์การมองเห็น (Public vs Private)**: ใน Go ตัวแปรหรือฟิลด์ที่ขึ้นต้นด้วย **ตัวพิมพ์ใหญ่ (Capital letter)** เช่น `Balance`, `Owner` จะเป็น Public (แพ็กเกจอื่นมองเห็นและแปลงเป็น JSON ได้) หากขึ้นต้นด้วยตัวพิมพ์เล็กจะเป็น Private (มีผลเฉพาะภายในแพ็กเกจนั้น)"
           ]
         },
         {
           "t": "h2",
-          "c": "กลไกที่ 3: Struct, Pointer (* vs &) และ Method Receiver"
-        },
-        {
-          "t": "p",
-          "c": "นี่คือเรื่องที่ผู้เริ่มต้นสับสนมากที่สุดเวลาอ่านโค้ด Go: **เมื่อไหร่ต้องใส่ `*` เมื่อไหร่ต้องใส่ `&` และทำไมหน้าชื่อฟังก์ชันถึงมีวงเล็บ `(a *Account)`?**"
-        },
-        {
-          "t": "p",
-          "c": "โดยค่าเริ่มต้น Go ส่งข้อมูลแบบ **Pass-by-Value (ถ่ายเอกสารสำเนาใหม่ทุกครั้ง)** หากคุณส่ง Struct เข้าฟังก์ชันธรรมดา ฟังก์ชันนั้นจะได้กระดาษสำเนาไปขีดเขียน ซึ่งไม่มีผลกับเอกสารต้นฉบับเลย หากต้องการแก้ไขข้อมูลต้นฉบับ หรือต้องการส่งออบเจกต์ขนาดใหญ่ (เช่น Database Pool) โดยไม่ก๊อบปี้ซ้ำ เราต้องส่ง **Pointer (ตำแหน่งที่อยู่บนหน่วยความจำ RAM)**:"
-        },
-        {
-          "t": "table",
-          "head": [
-            "สัญลักษณ์",
-            "ชื่อเรียก",
-            "เปรียบเทียบให้เห็นภาพ",
-            "ตัวอย่างการใช้งานจริงใน Simple Bank"
-          ],
-          "rows": [
-            [
-              "Account",
-              "Struct Value (ข้อมูลก้อนจริง)",
-              "ตัวบ้านจริงที่เก็บข้อมูลอยู่ข้างใน",
-              "var i Account (สร้างกล่องเปล่าเตรียมรับข้อมูลแถวจาก DB)"
-            ],
-            [
-              "&i",
-              "Address-of Operator (&)",
-              "การเขียน 'พิกัดที่อยู่บ้าน' ของตัวแปร i ลงบนกระดาษ",
-              "row.Scan(&i.ID, &i.Balance) ส่งพิกัดให้ DB เอาข้อมูลมาหยอดใส่ตัวแปร i"
-            ],
-            [
-              "*Account",
-              "Pointer Type (*)",
-              "ชนิดข้อมูลที่เก็บ 'พิกัดที่อยู่' เพื่อชี้ไปยังตัวบ้านจริง",
-              "func (s *Server) Start() เมธอดที่ชี้ไปยัง Server ตัวจริงโดยไม่ก๊อบปี้"
-            ]
-          ]
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างที่ 3: struct_pointer_receiver.go",
-          "code": "// =============================================================================\n// ไฟล์: struct_pointer_receiver.go\n// หน้าที่: เปรียบเทียบการทำงานระหว่าง Value Receiver (สำเนา) กับ Pointer Receiver (ตัวจริง)\n// แก้ปัญหา: เข้าใจว่าทำไมเมธอดของ Server, Store, และ Queries ต้องใช้เครื่องหมาย *\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// Account คือ Struct (กล่องเก็บข้อมูลบัญชี) พร้อม Struct Tag สำหรับแปลงเป็น JSON\ntype Account struct {\n\tID      int64  `json:\"id\"`\n\tOwner   string `json:\"owner\"`\n\tBalance int64  `json:\"balance\"`\n}\n\n// ❌ 1. Value Receiver (a Account): รับค่าเป็น \"สำเนา\" การแก้ไขข้างในไม่กระทบตัวจริง\nfunc (a Account) DepositCopy(amount int64) {\n\ta.Balance += amount\n}\n\n// ✅ 2. Pointer Receiver (a *Account): รับ \"พิกัดหน่วยความจำ\" แก้ไขยอดเงินตัวจริงได้ทันที\nfunc (a *Account) DepositReal(amount int64) {\n\ta.Balance += amount\n}\n\n// ScanRow จำลองการทำงานของ row.Scan ในฐานข้อมูล ที่รับพิกัด (&) ไปเติมค่า\nfunc ScanRow(idPtr *int64, balancePtr *int64) {\n\t*idPtr = 99       // เอาเลข 99 ไปใส่ที่พิกัดของ ID\n\t*balancePtr = 500 // เอาเลข 500 ไปใส่ที่พิกัดของ Balance\n}\n\nfunc main() {\n\t// ขั้นตอนที่ 1: สร้างตัวแปร Account และทดสอบส่งพิกัด (&) ให้ฟังก์ชันเติมค่าให้\n\tvar acc Account\n\tScanRow(&acc.ID, &acc.Balance)\n\tfmt.Printf(\"1) หลัง ScanRow(&acc): ID=%d, Balance=%d\\n\", acc.ID, acc.Balance)\n\n\t// ขั้นตอนที่ 2: เรียกเมธอดแบบ Value Receiver (ยอดเงินต้นฉบับไม่เปลี่ยน)\n\tacc.DepositCopy(1000)\n\tfmt.Printf(\"2) หลัง DepositCopy(1000): Balance=%d (ไม่เปลี่ยน เพราะแก้ในสำเนา!)\\n\", acc.Balance)\n\n\t// ขั้นตอนที่ 3: เรียกเมธอดแบบ Pointer Receiver (ยอดเงินต้นฉบับเปลี่ยนจริง)\n\tacc.DepositReal(1000)\n\tfmt.Printf(\"3) หลัง DepositReal(1000): Balance=%d (เปลี่ยนจริง!)\\n\", acc.Balance)\n}",
-          "out": "1) หลัง ScanRow(&acc): ID=99, Balance=500\n2) หลัง DepositCopy(1000): Balance=500 (ไม่เปลี่ยน เพราะแก้ในสำเนา!)\n3) หลัง DepositReal(1000): Balance=1500 (เปลี่ยนจริง!)"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างเพิ่มเติม 3.1: struct_pointer.go (เปรียบเทียบ DepositCopy vs Deposit บน Struct)",
-          "code": "// =============================================================================\n// ไฟล์: struct_pointer.go\n// หน้าที่: นิยาม Account struct และเปรียบเทียบการทำงานระหว่าง Value Receiver กับ Pointer Receiver\n// แก้ปัญหา: เข้าใจว่าเมื่อไหร่ต้องส่ง Pointer เพื่อแก้ไขข้อมูลในก้อนเดิม และเมื่อไหร่ส่ง Value ที่เป็นการคัดลอกสำเนา\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// Account คือโครงสร้างข้อมูลจำลองบัญชีธนาคาร\ntype Account struct {\n\tID      int64  `json:\"id\"`\n\tOwner   string `json:\"owner\"`\n\tBalance int64  `json:\"balance\"`\n}\n\n// DepositCopy รับค่าแบบสำเนา (Value Receiver)\n// ข้อจำกัด: การเปลี่ยนแปลงตัวแปร a ภายในฟังก์ชันนี้จะกระทบแค่สำเนา ก้อนต้นฉบับในหน่วยความจำจะไม่เปลี่ยน\nfunc (a Account) DepositCopy(amount int64) {\n\ta.Balance += amount\n}\n\n// Deposit รับค่าแบบ Pointer (*Account) เพื่อเข้าถึงตำแหน่งหน่วยความจำโดยตรง\n// ประโยชน์: แก้ไข Balance ของบัญชีต้นฉบับได้โดยตรง ไม่ต้องคัดลอกข้อมูลทั้งก้อน\nfunc (a *Account) Deposit(amount int64) {\n\ta.Balance += amount\n}\n\n// GetBalance รับค่าสำเนา (Account) เพื่อเข้ามาอ่านข้อมูลเพียงอย่างเดียว โดยไม่แก้ไขค่าใดๆ\nfunc (a Account) GetBalance() int64 {\n\treturn a.Balance\n}\n\nfunc main() {\n\t// 1. สร้างบัญชีใหม่พร้อมยอดเงินเริ่มต้น 1,000 บาท\n\tacc := &Account{ID: 1, Owner: \"Alice\", Balance: 1000}\n\n\t// 2. ทดสอบ Value Receiver (ส่งสำเนา): ยอดเงินก้อนเดิมต้องไม่ขยับ\n\tfmt.Println(\">> 1. ทดสอบ Value Receiver (ส่งสำเนา):\")\n\tacc.DepositCopy(500)\n\tfmt.Printf(\"   ยอดเงินหลัง DepositCopy: %d บาท (ก้อนเดิมไม่เปลี่ยน!)\\n\\n\", acc.GetBalance())\n\n\t// 3. ทดสอบ Pointer Receiver (ส่ง Pointer): ยอดเงินก้อนเดิมจะถูกอัปเดตจริงเป็น 1,500 บาท\n\tfmt.Println(\">> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):\")\n\tacc.Deposit(500)\n\tfmt.Printf(\"   ยอดเงินหลัง Deposit: %d บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)\\n\", acc.GetBalance())\n}",
-          "out": ">> 1. ทดสอบ Value Receiver (ส่งสำเนา):\n   ยอดเงินหลัง DepositCopy: 1000 บาท (ก้อนเดิมไม่เปลี่ยน!)\n\n>> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):\n   ยอดเงินหลัง Deposit: 1500 บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างเพิ่มเติม 3.1: struct_pointer.go (เปรียบเทียบ DepositCopy vs Deposit บน Struct)",
-          "code": "// =============================================================================\n// ไฟล์: struct_pointer.go\n// หน้าที่: นิยาม Account struct และเปรียบเทียบการทำงานระหว่าง Value Receiver กับ Pointer Receiver\n// แก้ปัญหา: เข้าใจว่าเมื่อไหร่ต้องส่ง Pointer เพื่อแก้ไขข้อมูลในก้อนเดิม และเมื่อไหร่ส่ง Value ที่เป็นการคัดลอกสำเนา\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// Account คือโครงสร้างข้อมูลจำลองบัญชีธนาคาร\ntype Account struct {\n\tID      int64  `json:\"id\"`\n\tOwner   string `json:\"owner\"`\n\tBalance int64  `json:\"balance\"`\n}\n\n// DepositCopy รับค่าแบบสำเนา (Value Receiver)\n// ข้อจำกัด: การเปลี่ยนแปลงตัวแปร a ภายในฟังก์ชันนี้จะกระทบแค่สำเนา ก้อนต้นฉบับในหน่วยความจำจะไม่เปลี่ยน\nfunc (a Account) DepositCopy(amount int64) {\n\ta.Balance += amount\n}\n\n// Deposit รับค่าแบบ Pointer (*Account) เพื่อเข้าถึงตำแหน่งหน่วยความจำโดยตรง\n// ประโยชน์: แก้ไข Balance ของบัญชีต้นฉบับได้โดยตรง ไม่ต้องคัดลอกข้อมูลทั้งก้อน\nfunc (a *Account) Deposit(amount int64) {\n\ta.Balance += amount\n}\n\n// GetBalance รับค่าสำเนา (Account) เพื่อเข้ามาอ่านข้อมูลเพียงอย่างเดียว โดยไม่แก้ไขค่าใดๆ\nfunc (a Account) GetBalance() int64 {\n\treturn a.Balance\n}\n\nfunc main() {\n\t// 1. สร้างบัญชีใหม่พร้อมยอดเงินเริ่มต้น 1,000 บาท\n\tacc := &Account{ID: 1, Owner: \"Alice\", Balance: 1000}\n\n\t// 2. ทดสอบ Value Receiver (ส่งสำเนา): ยอดเงินก้อนเดิมต้องไม่ขยับ\n\tfmt.Println(\">> 1. ทดสอบ Value Receiver (ส่งสำเนา):\")\n\tacc.DepositCopy(500)\n\tfmt.Printf(\"   ยอดเงินหลัง DepositCopy: %d บาท (ก้อนเดิมไม่เปลี่ยน!)\\n\\n\", acc.GetBalance())\n\n\t// 3. ทดสอบ Pointer Receiver (ส่ง Pointer): ยอดเงินก้อนเดิมจะถูกอัปเดตจริงเป็น 1,500 บาท\n\tfmt.Println(\">> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):\")\n\tacc.Deposit(500)\n\tfmt.Printf(\"   ยอดเงินหลัง Deposit: %d บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)\\n\", acc.GetBalance())\n}",
-          "out": ">> 1. ทดสอบ Value Receiver (ส่งสำเนา):\n   ยอดเงินหลัง DepositCopy: 1000 บาท (ก้อนเดิมไม่เปลี่ยน!)\n\n>> 2. ทดสอบ Pointer Receiver (ส่ง Pointer):\n   ยอดเงินหลัง Deposit: 1500 บาท (ก้อนเดิมเปลี่ยนสำเร็จ!)"
+          "c": "องก์ที่ 2: ความน่าเชื่อถือระดับระบบการเงิน (Errors & Resource Safety)"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "กลไกที่ 3: ปรัชญา Error ของ Go — ทำไม Go ถึงปฏิเสธ try / catch?"
+        },
+        {
+          "t": "p",
+          "c": "ในภาษาอย่าง Java, Python หรือ TypeScript เมื่อเกิดข้อผิดพลาด โปรแกรมจะขว้าง Exception (`throw new Error()`) ซึ่งเปรียบเสมือน 'ลูกระเบิดล่องหน' ที่กระโดดข้ามบรรทัดโค้ดข้ามเลเยอร์ไปหาบล็อก `catch` ที่ไหนสักแห่ง หากวิศวกรลืมครอบ `catch` ไว้ โปรแกรมจะแครชทันที หรือที่เลวร้ายกว่านั้นคือ มันกระโดดข้ามคำสั่งบันทึกบัญชี ทำให้ระบบการเงินเสียสมดุล\n\nGo ออกแบบด้วยแนวคิดว่า: **'ข้อผิดพลาดไม่ใช่ข้อยกเว้น แต่คือผลลัพธ์ปกติของการทำงาน (Errors are Values)'** ฟังก์ชันใน Go จึงคืนค่าผลลัพธ์คู่กับ `error` เสมอในรูปแบบ `(Value, error)`:"
+        },
+        {
+          "t": "callout",
+          "title": "⚠️ กฎเหล็กของระบบธนาคาร: เช็ก Error ก่อนจับต้องข้อมูลเสมอ!",
+          "c": "ใน Simple Bank ทุกคำสั่งที่คุยกับฐานข้อมูล (SQL) หรือคุยข้ามเครือข่าย (HTTP) จะคืนค่า `error` ออกมาด้วยเสมอ หาก `err != nil` (ไม่เท่ากับว่างเปล่า) แปลว่าเกิดข้อผิดพลาด คุณต้องหยุดการทำงานทันทีแล้วส่งรายงานปัญหาออกไป ห้ามนำข้อมูลในช่องแรกไปใช้งานต่อเด็ดขาด!",
+          "warn": true
+        },
+        {
+          "t": "codeout",
+          "lang": "go",
+          "label": "03_explicit_error_handling.go",
+          "code": "// =============================================================================\n// ไฟล์: 03_explicit_error_handling.go\n// หน้าที่: แสดงกลไก Multiple Return Values, การดักจับ error และ blank identifier (_)\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// Withdraw หักเงินจากบัญชี โดยคืนค่าทั้งยอดเงินคงเหลือใหม่ และก้อน error\nfunc Withdraw(balance int64, amount int64) (int64, error) {\n\tif amount <= 0 {\n\t\treturn 0, errors.New(\"จำนวนเงินที่ถอนต้องมากกว่า 0\")\n\t}\n\tif balance < amount {\n\t\treturn 0, errors.New(\"ยอดเงินคงเหลือไม่เพียงพอสำหรับการถอน\")\n\t}\n\treturn balance - amount, nil\n}\n\nfunc main() {\n\tcurrentBalance := int64(1000)\n\n\t// กรณีที่ 1: ถอนเงินสำเร็จ (err เป็น nil)\n\tnewBal, err := Withdraw(currentBalance, 400)\n\tif err != nil {\n\t\tfmt.Println(\"ถอนเงินล้มเหลว:\", err)\n\t\treturn\n\t}\n\tfmt.Printf(\"1) ถอนเงินสำเร็จ ยอดคงเหลือใหม่: %d บาท\\n\", newBal)\n\n\t// กรณีที่ 2: ถอนเกินวงเงิน (err != nil ตรวจสอบทันทีก่อนให้เงินออก)\n\t_, err = Withdraw(newBal, 1500)\n\tif err != nil {\n\t\tfmt.Printf(\"2) ระบบดักจับข้อผิดพลาดสำเร็จ: %v\\n\", err)\n\t}\n\n\t// กรณีที่ 3: Short statement if เช็ก error จบในบรรทัดเดียว\n\tif _, err := Withdraw(newBal, -50); err != nil {\n\t\tfmt.Printf(\"3) ตรวจสอบพารามิเตอร์ผิดพลาด: %v\\n\", err)\n\t}\n}",
+          "out": "1) ถอนเงินสำเร็จ ยอดคงเหลือใหม่: 600 บาท\n2) ระบบดักจับข้อผิดพลาดสำเร็จ: ยอดเงินคงเหลือไม่เพียงพอสำหรับการถอน\n3) ตรวจสอบพารามิเตอร์ผิดพลาด: จำนวนเงินที่ถอนต้องมากกว่า 0"
+        },
+        {
+          "t": "h3",
+          "c": "🔍 Blank Identifier (_) และ Blank Import ในการใช้งานจริง"
         },
         {
           "t": "ul",
           "c": [
-            "**Method Receiver คืออะไร?**: สังเกตวงเล็บ `(a *Account)` ที่อยู่ระหว่างคีย์เวิร์ด `func` กับชื่อเมธอด `DepositReal` นี่คือวิธีที่ Go ใช้ผูกฟังก์ชันเข้ากับ Struct เพื่อให้เรียกใช้งานแบบ `acc.DepositReal(1000)` ได้เหมือน Object-Oriented",
-            "**ทำไม `row.Scan(&i.ID, ...)` ในบทที่ 3 ต้องใส่ `&` ทุกตัว?**: เพราะฟังก์ชัน `Scan` ของไลบรารี `database/sql` ต้องการนำข้อมูลที่อ่านได้จากฐานข้อมูลไป **ยัดใส่ตัวแปร `i` ของเรา** เราจึงต้องส่งพิกัดที่อยู่ (`&i.ID`, `&i.Balance`) เข้าไปให้ `Scan` เขียนข้อมูลลงในตัวแปรของเราได้โดยตรง",
-            "**กฎเหล็กใน Simple Bank**: ออบเจกต์ควบคุมระบบทุกตัว เช่น `*Queries`, `*Store`, `*Server`, `*sql.DB`, และ `*gin.Context` จะใช้ Pointer (`*`) เสมอเพื่ออ้างอิงตัวจริงตัวเดียวกันทั้งโปรแกรม"
+            "**เครื่องหมายถังขยะ `_` (Blank Identifier)**: คอมไพเลอร์ของ Go เข้มงวดมาก หากคุณประกาศตัวแปรขึ้นมาแล้วไม่ได้นำไปใช้ โค้ดจะไม่ยอมคอมไพล์เด็ดขาด เครื่องหมาย `_` จึงมีไว้บอกคอมไพเลอร์ว่า 'ฉันจงใจทิ้งค่านั้นไป' เช่น `_, err = Withdraw(...)` เมื่อเราสนใจแค่ว่าถอนเงินสำเร็จหรือไม่ แต่ไม่ต้องการเก็บยอดเงินใหม่",
+            "**Blank Import (`_ \"github.com/lib/pq\"`)**: ในบทที่ 3 เราจะเห็นคำสั่งนี้ที่หัวไฟล์ `db.go` เครื่องหมาย `_` หน้าแพ็กเกจหมายถึง เราต้องการโหลดแพ็กเกจนี้เข้ามาเพื่อให้ฟังก์ชัน `init()` ภายในของมันทำงานเพื่อลงทะเบียน PostgreSQL Driver เข้าสู่ระบบ แต่เราไม่ได้ต้องการเรียกใช้ฟังก์ชันในแพ็กเกจ `pq` โดยตรง"
           ]
         },
         {
-          "t": "h2",
-          "c": "กลไกที่ 4: Go ไม่มี Class Inheritance — การใช้ Struct Embedding"
+          "t": "h3",
+          "c": "กลไกที่ 4: คำสั่ง defer — กฎเหล็กป้องกัน Connection รั่วในระบบ Production"
         },
         {
           "t": "p",
-          "c": "ในภาษาอย่าง Java หรือ Python เราคุ้นเคยกับการสืบทอดคลาส (`class Store extends Queries`) แต่ภาษา Go **ตัดระบบ Inheritance ทิ้งทั้งหมด** เพื่อลดความซับซ้อน แล้วใช้กลไกที่เรียกว่า **Composition / Struct Embedding (การฝัง Struct ซ้อนเข้าไปตรงๆ)** แทน:"
+          "c": "ในระบบ Backend สิ่งที่น่ากลัวที่สุดคือ **'Resource Leak'** เช่น คุณเปิดการเชื่อมต่อฐานข้อมูล (`rows, err := db.QueryContext(...)`) หรือเปิดไฟล์ แต่ลืมสั่งปิด (`rows.Close()`) เมื่อมีคำขอเข้ามาหลายพันครั้ง Connection Pool ของฐานข้อมูลจะเต็มและเซิร์ฟเวอร์จะค้างสนิทตอนตี 3!\n\nคำสั่ง `defer` ถูกสร้างมาเพื่อแก้ปัญหานี้โดยเฉพาะ โดยมันจะ **จดจำคำสั่งบรรทัดนั้นไว้ แล้วนำไปรันในจังหวะสุดท้ายก่อนที่ฟังก์ชันจะส่งค่ากลับ (return) เสมอ** ไม่ว่าฟังก์ชันจะจบแบบปกติหรือพังกลางคันเพราะเกิด Error ก็ตาม:"
+        },
+        {
+          "t": "callout",
+          "title": "🧠 Mental Model ของ defer: 'ซื้อตั๋วรถไฟปุ๊บ จองตั๋วขากลับใส่กระเป๋าทันที'",
+          "c": "หลักปฏิบัติที่ดีที่สุด (Best Practice) ของ Go คือ: **ทันทีที่คุณเปิดใช้งาน Resource สำเร็จ ให้เขียนคำสั่ง `defer Resource.Close()` ในบรรทัดถัดไปทันที!** คุณจะได้ไม่ต้องกังวลว่าจะลืมปิดที่ท้ายฟังก์ชันอีกต่อไป"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 4: struct_embedding.go",
-          "code": "// =============================================================================\n// ไฟล์: struct_embedding.go\n// หน้าที่: สาธิตการฝัง Struct (Embedding) เพื่อให้ Store เรียกเมธอดของ Queries ได้ทันที\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// Queries ทำหน้าที่รันคำสั่ง SQL พื้นฐานรายตาราง\ntype Queries struct{}\n\nfunc (q *Queries) GetAccount(id int64) string {\n\treturn fmt.Sprintf(\"ดึงข้อมูลบัญชี ID=%d จาก Queries สำเร็จ\", id)\n}\n\n// Store ฝัง *Queries เข้าไปโดยไม่ตั้งชื่อฟิลด์ (เรียกว่า Struct Embedding)\ntype Store struct {\n\t*Queries // เมธอดทั้งหมดของ Queries จะถูกยกขึ้นมาให้ Store เรียกใช้ได้โดยตรง!\n\tdbName   string\n}\n\n// TransferTx เป็นเมธอดระดับ Transaction ที่เพิ่มเข้ามาใน Store\nfunc (s *Store) TransferTx() string {\n\treturn \"รันธุรกรรมโอนเงิน 5 ขั้นตอนผ่าน Store\"\n}\n\nfunc main() {\n\tstore := &Store{\n\t\tQueries: &Queries{},\n\t\tdbName:  \"simple_bank_db\",\n\t}\n\n\t// เรียกเมธอดของ Queries ผ่านตัวแปร store ได้โดยตรง เสมือนเป็นเมธอดของตัวเอง!\n\tfmt.Println(\"1)\", store.GetAccount(1))\n\t// และเรียกเมธอดของ Store เองได้ตามปกติ\n\tfmt.Println(\"2)\", store.TransferTx())\n}",
-          "out": "1) ดึงข้อมูลบัญชี ID=1 จาก Queries สำเร็จ\n2) รันธุรกรรมโอนเงิน 5 ขั้นตอนผ่าน Store"
+          "label": "04_defer_lifo_safety.go",
+          "code": "// =============================================================================\n// ไฟล์: 04_defer_lifo_safety.go\n// หน้าที่: สาธิตการทำงานของ defer ในการเก็บกวาด Resource และพฤติกรรม LIFO\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// SimulateQueryDatabase จำลองฟังก์ชันที่เปิด Connection แล้วอาจพังกลางคัน\nfunc SimulateQueryDatabase(shouldFail bool) error {\n\tfmt.Println(\"1. เปิด Connection เชื่อมต่อฐานข้อมูลสำเร็จ\")\n\n\t// สั่ง defer ปิด Connection ทันทีที่เปิดได้ ป้องกันการลืมปิด 100%!\n\tdefer fmt.Println(\"4. [defer #1] คืน Connection กลับเข้าสระ (รันทีหลังสุด)\")\n\tdefer fmt.Println(\"3. [defer #2] บันทึก Audit Log จบการทำงาน (รันก่อนแบบ LIFO)\")\n\n\tfmt.Println(\"2. กำลังประมวลผลคำสั่ง SQL คิวรียอดเงิน...\")\n\n\tif shouldFail {\n\t\treturn errors.New(\"เกิด Timeout ระหว่างดึงข้อมูล!\")\n\t}\n\n\treturn nil\n}\n\nfunc main() {\n\tfmt.Println(\"--- กรณีคำสั่งเกิด Error กลางทาง ---\")\n\terr := SimulateQueryDatabase(true)\n\tif err != nil {\n\t\tfmt.Println(\"5. ผลลัพธ์ฟังก์ชันหลัก:\", err)\n\t}\n}",
+          "out": "--- กรณีคำสั่งเกิด Error กลางทาง ---\n1. เปิด Connection เชื่อมต่อฐานข้อมูลสำเร็จ\n2. กำลังประมวลผลคำสั่ง SQL คิวรียอดเงิน...\n3. [defer #2] บันทึก Audit Log จบการทำงาน (รันก่อนแบบ LIFO)\n4. [defer #1] คืน Connection กลับเข้าสระ (รันทีหลังสุด)\n5. ผลลัพธ์ฟังก์ชันหลัก: เกิด Timeout ระหว่างดึงข้อมูล!"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 พฤติกรรมแบบ LIFO (กองจาน) ของ defer"
         },
         {
           "t": "ul",
           "c": [
-            "**`type Store struct { *Queries }`**: การวางชนิดข้อมูล `*Queries` ลงใน Struct โดยไม่เขียนชื่อฟิลด์ข้างหน้า คือการสั่งให้ Go **ยกเมธอดทั้งหมดของ `Queries` ขึ้นมาอยู่บน `Store` (Method Promotion)**",
-            "**ผลลัพธ์ในโปรเจกต์จริง**: ในบทที่ 4 เราจะสร้าง `Store` ที่ฝัง `*Queries` เอาไว้ ทำให้ตัว `Server` ในบทที่ 6 ถือก้อน `store` เพียงตัวเดียว แต่สามารถเรียกได้ทั้ง `store.GetAccount()` (มาจาก `Queries`) และ `store.TransferTx()` (มาจาก `Store`) ได้อย่างไร้รอยต่อ!"
+            "**LIFO (Last-In, First-Out)**: หากมีคำสั่ง `defer` หลายตัวในฟังก์ชันเดียวกัน Go จะรันคำสั่งที่ประกาศ 'ทีหลังสุด' ให้ทำงาน 'ก่อนเพื่อน' เหมือนกองจานที่จานใบบนสุดถูกหยิบออกก่อน",
+            "**จุดใช้งานจริงในโปรเจกต์**: ใช้ `defer rows.Close()` ในการคิวรีฐานข้อมูล (บทที่ 3.1), ใช้ `defer cancel()` ในการจัดการ Timeout ของ Context (บทที่ 4), และใช้ `defer wg.Done()` ในการนับงานของ Goroutine (บทที่ 5.3)"
           ]
         },
         {
           "t": "h2",
-          "c": "กลไกที่ 5: Interface, Implicit Implementation และ Dependency Injection"
+          "c": "องก์ที่ 3: สถาปัตยกรรมระบบแบบ Clean & Decoupled"
+        },
+        {
+          "t": "h3",
+          "c": "กลไกที่ 5: ไร้ Inheritance — ออกแบบระบบด้วย Struct Embedding (Composition)"
         },
         {
           "t": "p",
-          "c": "ในภาษา Go `interface` คือ **'ใบสัญญา (Contract)'** ที่ระบุเฉพาะชื่อเมธอด พารามิเตอร์ และค่าที่คืนกลับ ความพิเศษของ Go คือ **ไม่ต้องพิมพ์คำว่า `implements`** ขอแค่ Struct ใดก็ตามมีเมธอดครบตามที่ระบุในสัญญา Struct นั้นจะถือว่าผ่านเกณฑ์ของ Interface นั้นโดยอัตโนมัติ (Implicit Implementation):"
+          "c": "ในภาษาเชิงวัตถุดั้งเดิม การแชร์โค้ดมักใช้การสืบทอดคลาส (`class Store extends Queries`) แต่วิศวกรพบว่าการสืบทอดลึกๆ ทำให้ระบบเปราะบาง แก้ไขคลาสแม่แล้วคลาสด้านล่างพังทั้งยวง (Fragile Base Class)\n\nภาษา Go ตัดระบบ Inheritance ทิ้งทั้งหมด แล้วยึดหลัก **'Composition over Inheritance (ประกอบร่างแทนการสืบทอด)'** ผ่านกลไกที่เรียกว่า **Struct Embedding** คือการนำ Struct อื่นมาฝังไว้ข้างในโดยไม่ตั้งชื่อฟิลด์ ทำให้เมธอดทั้งหมดของก้อนข้างในถูกยกขึ้นมาเป็นของตัวนอกโดยอัตโนมัติ (Method Promotion):"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 5: interface_di.go",
-          "code": "// =============================================================================\n// ไฟล์: interface_di.go\n// หน้าที่: สาธิตการใช้ Interface เพื่อรองรับการทำงานหลายรูปแบบ (เช่น DBTX และ Token Maker)\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// DBTX คือ Interface สัญญาว่า \"ใครที่มีเมธอด QueryRow จะสามารถส่งเข้ามาใช้งานกับ Queries ได้\"\ntype DBTX interface {\n\tQueryRow(sql string) string\n}\n\n// 1. PoolDB จำลอง *sql.DB (การเชื่อมต่อปกติ)\ntype PoolDB struct{}\n\nfunc (p *PoolDB) QueryRow(sql string) string {\n\treturn \"[PoolDB] รันคำสั่งปกติ: \" + sql\n}\n\n// 2. TxDB จำลอง *sql.Tx (การเชื่อมต่อภายใน Transaction)\ntype TxDB struct{}\n\nfunc (t *TxDB) QueryRow(sql string) string {\n\treturn \"[TxDB ใน Transaction] รันคำสั่งแบบล็อก ACID: \" + sql\n}\n\n// Queries รับ DBTX Interface ทำให้รับได้ทั้ง PoolDB และ TxDB โดยไม่ต้องเขียนโค้ดซ้ำสองชุด!\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc (q *Queries) CreateAccount() {\n\tfmt.Println(q.db.QueryRow(\"INSERT INTO accounts...\"))\n}\n\nfunc main() {\n\t// ใช้งานกับ Connection Pool ปกติ\n\tnormalQueries := &Queries{db: &PoolDB{}}\n\tnormalQueries.CreateAccount()\n\n\t// ใช้งานกับ Transaction โดยใช้โค้ด Queries ตัวเดิมเป๊ะ!\n\ttxQueries := &Queries{db: &TxDB{}}\n\ttxQueries.CreateAccount()\n}",
-          "out": "[PoolDB] รันคำสั่งปกติ: INSERT INTO accounts...\n[TxDB ใน Transaction] รันคำสั่งแบบล็อก ACID: INSERT INTO accounts..."
+          "label": "05_struct_embedding_store.go",
+          "code": "// =============================================================================\n// ไฟล์: 05_struct_embedding_store.go\n// หน้าที่: แสดงการฝัง Struct Embedding (Method Promotion) ที่ใช้จริงใน Store Layer\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// Queries รับผิดชอบคำสั่ง CRUD ทั่วไปรายตาราง\ntype Queries struct{}\n\nfunc (q *Queries) GetAccount(id int64) string {\n\treturn fmt.Sprintf(\"ดึงข้อมูลบัญชี ID = %d จาก Queries สำเร็จ\", id)\n}\n\nfunc (q *Queries) UpdateBalance(id int64, amount int64) string {\n\treturn fmt.Sprintf(\"อัปเดตยอดเงินบัญชี ID = %d ด้วยจำนวน %d\", id, amount)\n}\n\n// Store ฝัง *Queries เข้ามาแบบ Struct Embedding (ไม่ต้องตั้งชื่อฟิลด์)\ntype Store struct {\n\t*Queries // เมธอดทั้งหมดของ Queries จะถูกยกขึ้นมาเป็นของ Store โดยอัตโนมัติ!\n\tdbName   string\n}\n\n// TransferTx เมธอดระดับธุรกรรมที่ Store เพิ่มเติมเข้ามา\nfunc (s *Store) TransferTx(fromID, toID int64, amount int64) string {\n\treturn fmt.Sprintf(\"[Transaction ACID] โอนเงิน %d บาท จาก ID %d -> ID %d\", amount, fromID, toID)\n}\n\nfunc main() {\n\tstore := &Store{\n\t\tQueries: &Queries{},\n\t\tdbName:  \"simple_bank\",\n\t}\n\n\t// 1. เรียกใช้เมธอดของ Queries ผ่านตัวแปร store ได้โดยตรง (Method Promotion)!\n\tfmt.Println(\"1)\", store.GetAccount(1))\n\tfmt.Println(\"2)\", store.UpdateBalance(1, -200))\n\n\t// 2. เรียกใช้เมธอดระดับ Transaction ของ Store เอง\n\tfmt.Println(\"3)\", store.TransferTx(1, 2, 200))\n}",
+          "out": "1) ดึงข้อมูลบัญชี ID = 1 จาก Queries สำเร็จ\n2) อัปเดตยอดเงินบัญชี ID = 1 ด้วยจำนวน -200\n3) [Transaction ACID] โอนเงิน 200 บาท จาก ID 1 -> ID 2"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 การนำ Struct Embedding ไปใช้ใน Simple Bank (บทที่ 4)"
         },
         {
           "t": "ul",
           "c": [
-            "**แก้ปัญหาใหญ่ในบทที่ 3 (`DBTX`)**: ในไลบรารีมาตรฐานของ Go ตัวเชื่อมต่อปกติ (`*sql.DB`) กับตัวทรานแซกชัน (`*sql.Tx`) เป็นคนละชนิดข้อมูลกัน แต่ทั้งคู่มีเมธอดชื่อเดียวกันเป๊ะ คือ `ExecContext`, `QueryContext`, และ `QueryRowContext` เราจึงสร้าง `type DBTX interface` ขึ้นมารับ ทำให้โค้ด SQL CRUD ทุกไฟล์เขียนแค่ครั้งเดียว แต่รันได้ทั้งแบบปกติและแบบอยู่ใน Transaction!",
-            "**แก้ปัญหาใหญ่ในบทที่ 7 (`token.Maker`)**: เราสร้าง `type Maker interface` ที่มีเมธอด `CreateToken` และ `VerifyToken` ทำให้ระบบ API ไม่ยึดติดว่าเบื้องหลังใช้ JWT หรือ PASETO"
+            "**โครงสร้างของ Store**: ในบทที่ 4 เราจะสร้าง `type Store struct { *Queries; db *sql.DB }`",
+            "**ทำไมถึงยอดเยี่ยม?**: ตัวแปร `store` จะได้รับเมธอด CRUD รายตารางทั้งหมดจาก `*Queries` (เช่น `store.CreateAccount`, `store.GetAccount`) โดยที่เราไม่ต้องเขียนโค้ด Forwarding ซ้ำแม้แต่บรรทัดเดียว ในขณะเดียวกัน `Store` ก็สามารถสร้างเมธอดระดับสูงอย่าง `store.TransferTx` เพิ่มเติมเข้าไปได้โดยตรง"
           ]
         },
         {
-          "t": "h2",
-          "c": "กลไกที่ 6: Slice ([]T), Map (map[K]V), Variadic (...) และ Type Assertion"
+          "t": "h3",
+          "c": "กลไกที่ 6: Implicit Interface — มนต์เสน่ห์ของการ Decouple & Test Mocking"
         },
         {
           "t": "p",
-          "c": "ในการจัดการชุดข้อมูลหลายแถวและการตรวจสอบชนิดข้อมูลตอนรันไทม์ โปรเจกต์ Simple Bank จะใช้โครงสร้างข้อมูล 4 ตัวนี้:"
+          "c": "ในภาษาอย่าง Java คุณต้องเขียน `class PostgreSQLStore implements StoreInterface` อย่างชัดเจน แต่ในภาษา Go **ไม่มีคีย์เวิร์ด `implements`**!\n\nGo ใช้ระบบ **Implicit Interface (การปฏิบัติตามสัญญาโดยนัย)** ตามสุภาษิตที่ว่า *'ถ้ามันเดินเหมือนเป็ด และร้องเหมือนเป็ด Go จะถือว่ามันคือเป็ด!'* ขอเพียงแค่ Struct ของคุณมีเมธอดที่มีชื่อ พารามิเตอร์ และค่าคืนกลับตรงกับที่ Interface ระบุไว้ Go จะถือว่า Struct นั้นผ่านเกณฑ์ของ Interface นั้นทันที:"
+        },
+        {
+          "t": "callout",
+          "title": "🎯 โจทย์ใหญ่ระดับสถาปัตยกรรมในบทที่ 3: ปัญหาของ *sql.DB เทียบกับ *sql.Tx",
+          "c": "ในไลบรารีมาตรฐานของ Go ตัวจัดการการเชื่อมต่อปกติ (`*sql.DB`) กับตัวจัดการธุรกรรมการโอนเงิน (`*sql.Tx`) เป็น Struct คนละตัวกันโดยสิ้นเชิง!\n\nแต่ทั้งคู่มีเมธอดหน้าตาเหมือนกันเป๊ะ คือ `QueryRowContext`, `ExecContext`, และ `QueryContext`\n\nถ้าไม่มี Interface คุณจะต้องเขียนโค้ด CRUD สองชุดซ้ำซ้อนกัน: ชุดหนึ่งสำหรับรันแบบปกติ และอีกชุดสำหรับรันใน Transaction!\n\n**วิธีแก้ระดับเซียน**: เราสร้าง `type DBTX interface` ขึ้นมาตัวเดียว ทำให้ `Queries` รับ `DBTX` เข้าไป และสามารถทำงานร่วมกับทั้ง `*sql.DB` และ `*sql.Tx` ได้อย่างไร้รอยต่อโดยใช้โค้ดชุดเดียวกัน 100%!"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 6: slice_map_assertion.go",
-          "code": "// =============================================================================\n// ไฟล์: slice_map_assertion.go\n// หน้าที่: สาธิต Slice (append), Map, Variadic (...interface{}), และ Type Assertion\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// PrintArgs รับค่ากี่ตัวก็ได้และเป็นชนิดใดก็ได้ผ่าน ...interface{} (Variadic Empty Interface)\nfunc PrintArgs(query string, args ...interface{}) {\n\tfmt.Printf(\"1) คำสั่ง SQL: %s | จำนวนพารามิเตอร์ที่ส่งมา: %d ตัว -> %v\\n\", query, len(args), args)\n}\n\nfunc main() {\n\t// 1. ทดสอบ Variadic (...interface{})\n\tPrintArgs(\"SELECT * FROM accounts WHERE owner=$1 AND balance>$2\", \"alice\", 1000)\n\n\t// 2. ทดสอบ Slice ([]string) และการต่อท้ายด้วย append()\n\tvar owners []string\n\towners = append(owners, \"alice\")\n\towners = append(owners, \"bob\")\n\tfmt.Println(\"2) รายชื่อใน Slice:\", owners, \"(จำนวน:\", len(owners), \"คน)\")\n\n\t// 3. ทดสอบ Map (map[int]bool) ใช้เช็กว่าเลขรอบการโอนเงินเคยปรากฏหรือยัง\n\texisted := make(map[int]bool)\n\texisted[1] = true\n\tfmt.Println(\"3) รอบที่ 1 เคยทำหรือยัง?:\", existed[1], \"| รอบที่ 2 เคยทำหรือยัง?:\", existed[2])\n\n\t// 4. ทดสอบ Type Assertion (แกะค่าจาก interface{} ออกมาเป็นชนิดข้อมูลจริง)\n\tvar rawValue interface{} = \"USD\"\n\tif currency, ok := rawValue.(string); ok {\n\t\tfmt.Println(\"4) แกะค่า Type Assertion สำเร็จ สกุลเงินคือ:\", currency)\n\t}\n}",
-          "out": "1) คำสั่ง SQL: SELECT * FROM accounts WHERE owner=$1 AND balance>$2 | จำนวนพารามิเตอร์ที่ส่งมา: 2 ตัว -> [alice 1000]\n2) รายชื่อใน Slice: [alice bob] (จำนวน: 2 คน)\n3) รอบที่ 1 เคยทำหรือยัง?: true | รอบที่ 2 เคยทำหรือยัง?: false\n4) แกะค่า Type Assertion สำเร็จ สกุลเงินคือ: USD"
+          "label": "06_implicit_interface_dbtx.go",
+          "code": "// =============================================================================\n// ไฟล์: 06_implicit_interface_dbtx.go\n// หน้าที่: แสดงการใช้ DBTX Interface เพื่อรวม Connection Pool เข้ากับ Transaction\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// DBTX คือ Interface กลางที่ระบุเฉพาะเมธอด QueryRow ที่ทั้ง Pool และ Tx มีเหมือนกัน\ntype DBTX interface {\n\tQueryRow(sql string) string\n}\n\n// 1. ConnectionPool จำลอง *sql.DB (การเชื่อมต่อปกติ)\ntype ConnectionPool struct{}\n\nfunc (p *ConnectionPool) QueryRow(sql string) string {\n\treturn \"[Pool ปกติ] รันคำสั่งเดี่ยว: \" + sql\n}\n\n// 2. TransactionRunner จำลอง *sql.Tx (การเชื่อมต่อภายใน Transaction)\ntype TransactionRunner struct{}\n\nfunc (t *TransactionRunner) QueryRow(sql string) string {\n\treturn \"[Transaction ล็อกข้อมูล] รันคำสั่งภายใต้ ACID: \" + sql\n}\n\n// Queries ถือ DBTX Interface ทำให้รับได้ทั้ง ConnectionPool และ TransactionRunner\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc (q *Queries) GetAccountBalance(id int64) {\n\tresult := q.db.QueryRow(fmt.Sprintf(\"SELECT balance FROM accounts WHERE id = %d\", id))\n\tfmt.Println(result)\n}\n\nfunc main() {\n\t// รันแบบคำสั่งเดี่ยวผ่าน Connection Pool\n\tnormalQueries := &Queries{db: &ConnectionPool{}}\n\tfmt.Print(\"1) \")\n\tnormalQueries.GetAccountBalance(1)\n\n\t// รันแบบคำสั่งภายใน Transaction โดยใช้โค้ด Queries ตัวเดียวกัน 100%!\n\ttxQueries := &Queries{db: &TransactionRunner{}}\n\tfmt.Print(\"2) \")\n\ttxQueries.GetAccountBalance(1)\n}",
+          "out": "1) [Pool ปกติ] รันคำสั่งเดี่ยว: SELECT balance FROM accounts WHERE id = 1\n2) [Transaction ล็อกข้อมูล] รันคำสั่งภายใต้ ACID: SELECT balance FROM accounts WHERE id = 1"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 ประโยชน์ของ Interface ในการทำ Unit Testing & Security"
         },
         {
           "t": "ul",
           "c": [
-            "**`...interface{}` (Variadic Empty Interface)**: จุดสามจุด `...` แปลว่ารับพารามิเตอร์ได้ตั้งแต่ 0 ถึงหลายตัว ส่วน `interface{}` (หรือ `any`) แปลว่ารับข้อมูลชนิดใดก็ได้ (ทั้ง `int64`, `string`, `time.Time`) คุณจะเห็นสิ่งนี้ใน `DBTX` ตอนส่งค่าเข้า Placeholder `$1, $2, $3`",
-            "**`var items []Account` และ `append(items, i)`**: ใช้ในฟังก์ชัน `ListAccounts` (บทที่ 3.1) เพื่อวนลูปเก็บแถวบัญชีทีละแถวใส่รายการแล้วส่งกลับเป็น JSON Array",
-            "**`existed := make(map[int]bool)`**: ใช้ใน `TestTransferTx` (บทที่ 5.3) เพื่อบันทึกว่าลำดับการหักเงินรอบที่ `k` เคยเกิดขึ้นไปแล้วหรือยัง",
-            "**`rawValue.(string)` และ `ctx.MustGet(...).(*token.Payload)`**: เรียกว่า **Type Assertion** คือการแปลงข้อมูลจากกล่องกลาง (`interface{}`) กลับมาเป็นชนิดข้อมูลจริง เพื่อนำฟิลด์ข้างในไปใช้งานต่อ"
+            "**Mocking Database (บทที่ 6)**: เมื่อเขียน Gin API เราสามารถสร้าง `MockStore` ที่จำลองการตอบกลับของฐานข้อมูลโดยไม่ต้องต่อ PostgreSQL จริง ทำให้รัน Unit Test ได้เร็วระดับเสี้ยววินาที",
+            "**Token Maker (บทที่ 7)**: เรานิยาม `type Maker interface` ที่มีฟังก์ชันสร้างและตรวจ Token ทำให้ระบบ API สลับไปมาระหว่าง JWT กับ PASETO ได้อย่างง่ายดายโดยไม่ต้องแก้โค้ด Business Logic"
           ]
         },
         {
-          "t": "h2",
-          "c": "กลไกที่ 7: Higher-Order Functions & Closures (ฟังก์ชันซ้อนฟังก์ชัน)"
+          "t": "h3",
+          "c": "กลไกที่ 7: Slices, Maps, Variadic (...any), และ Type Assertion"
         },
         {
           "t": "p",
-          "c": "ในภาษา Go ฟังก์ชันถือเป็นข้อมูลชั้นหนึ่ง (First-Class Citizen) แปลว่าเราสามารถ **ส่งฟังก์ชันทั้งก้อนเข้าไปเป็นพารามิเตอร์ของอีกฟังก์ชันหนึ่ง (Callback)** หรือ **สร้างฟังก์ชันที่คืนค่าออกมาเป็นฟังก์ชันอีกตัว (Closure)** ได้ ซึ่ง Simple Bank ใช้ท่านี้ใน 2 จุดที่สำคัญที่สุดของระบบ:"
+          "c": "ในการจัดการข้อมูลแบบกลุ่มและการรับส่งค่าใน API Backend เราจะใช้งาน 4 โครงสร้างข้อมูลพื้นฐานนี้อย่างเข้มข้น:"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 7: closure_and_callback.go",
-          "code": "// =============================================================================\n// ไฟล์: closure_and_callback.go\n// หน้าที่: สาธิต Callback Function (ต้นแบบของ execTx) และ Closure (ต้นแบบของ Middleware)\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// execTx จำลอง Transaction Manager ที่รับฟังก์ชัน fn เข้ามารันตรงกลางระหว่าง BEGIN และ COMMIT/ROLLBACK\nfunc execTx(fn func() error) error {\n\tfmt.Println(\"[DB] 1. BEGIN TRANSACTION\")\n\n\t// รันฟังก์ชันงานย่อยที่ผู้เรียกส่งเข้ามา\n\terr := fn()\n\tif err != nil {\n\t\tfmt.Println(\"[DB] 2. ตรวจพบ Error -> สั่ง ROLLBACK อัตโนมัติ!\")\n\t\treturn err\n\t}\n\n\tfmt.Println(\"[DB] 2. งานสำเร็จครบถ้วน -> สั่ง COMMIT!\")\n\treturn nil\n}\n\nfunc main() {\n\tfmt.Println(\"--- เคสที่ 1: โอนเงินสำเร็จ ---\")\n\t_ = execTx(func() error {\n\t\tfmt.Println(\"   -> หักเงิน Alice 100 บาท และเพิ่มเงิน Bob 100 บาท\")\n\t\treturn nil\n\t})\n\n\tfmt.Println(\"\\n--- เคสที่ 2: โอนเงินล้มเหลวกลางคัน ---\")\n\t_ = execTx(func() error {\n\t\tfmt.Println(\"   -> หักเงิน Alice 100 บาทแล้ว แต่บัญชีปลายทางล่ม!\")\n\t\treturn errors.New(\"ปลายทางไม่พร้อมใช้งาน\")\n\t})\n}",
-          "out": "--- เคสที่ 1: โอนเงินสำเร็จ ---\n[DB] 1. BEGIN TRANSACTION\n   -> หักเงิน Alice 100 บาท และเพิ่มเงิน Bob 100 บาท\n[DB] 2. งานสำเร็จครบถ้วน -> สั่ง COMMIT!\n\n--- เคสที่ 2: โอนเงินล้มเหลวกลางคัน ---\n[DB] 1. BEGIN TRANSACTION\n   -> หักเงิน Alice 100 บาทแล้ว แต่บัญชีปลายทางล่ม!\n[DB] 2. ตรวจพบ Error -> สั่ง ROLLBACK อัตโนมัติ!"
+          "label": "07_slices_maps_assertions.go",
+          "code": "// =============================================================================\n// ไฟล์: 07_slices_maps_assertions.go\n// หน้าที่: แสดงการใช้งาน Slice (append), Map, และ Type Assertion (Comma-ok)\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\n// GetContextValue จำลองการดึงค่าออกจาก Gin Context (ctx.MustGet คืนค่าเป็น any / interface{})\nfunc GetContextValue(key string) any {\n\tif key == \"auth_role\" {\n\t\treturn \"bank_manager\"\n\t}\n\treturn nil\n}\n\nfunc main() {\n\t// 1. Slice ([]string): รายการข้อมูลยืดหยุ่นขยายขนาดอัตโนมัติด้วย append\n\tvar accounts []string\n\taccounts = append(accounts, \"ACC-001\")\n\taccounts = append(accounts, \"ACC-002\", \"ACC-003\")\n\tfmt.Println(\"1) Slice รายการบัญชี:\", accounts, \"| ความยาว:\", len(accounts))\n\n\t// 2. Map (map[string]int64): Hash Table ค้นหาข้อมูลด้วยความเร็ว O(1)\n\tbalances := make(map[string]int64)\n\tbalances[\"ACC-001\"] = 5000\n\tbalances[\"ACC-002\"] = 1200\n\tfmt.Println(\"2) Map ยอดเงิน ACC-001:\", balances[\"ACC-001\"], \"บาท\")\n\n\t// 3. Type Assertion ด้วย comma-ok: แกะข้อมูลออกจาก any อย่างปลอดภัย 100%\n\trawVal := GetContextValue(\"auth_role\")\n\tif role, ok := rawVal.(string); ok {\n\t\tfmt.Printf(\"3) Type Assertion สำเร็จ: ผู้ใช้มีสิทธิ์ระดับ '%s'\\n\", role)\n\t} else {\n\t\tfmt.Println(\"3) Type Assertion ล้มเหลว ข้อมูลไม่ใช่ string!\")\n\t}\n}",
+          "out": "1) Slice รายการบัญชี: [ACC-001 ACC-002 ACC-003] | ความยาว: 3\n2) Map ยอดเงิน ACC-001: 5000 บาท\n3) Type Assertion สำเร็จ: ผู้ใช้มีสิทธิ์ระดับ 'bank_manager'"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 ถอดรหัส Type Assertion และ Comma-ok Idiom"
         },
         {
           "t": "ul",
           "c": [
-            "**`fn func() error`**: พารามิเตอร์ `fn` ไม่ใช่ตัวแปรธรรมดา แต่เป็นฟังก์ชันที่ผู้เรียกส่งเข้ามาให้ `execTx` ช่วยครอบ `BEGIN` และ `ROLLBACK/COMMIT` ให้",
-            "**Closure (การมองเห็นตัวแปรด้านนอก)**: สังเกตว่าในบทที่ 4.2 ตอนที่เราเขียน `store.execTx(ctx, func(q *Queries) error { result.Transfer, err = ... })` ตัวฟังก์ชันด้านในสามารถเข้าถึงและเขียนค่าลงในตัวแปร `result` และ `arg` ที่อยู่นอกตัวเองได้โดยตรง คุณสมบัตินี้เรียกว่า **Closure**"
+            "**`any` (หรือ `interface{}`)**: คือชนิดข้อมูลครอบจักรวาลใน Go ที่สามารถเก็บข้อมูลชนิดใดก็ได้ (เปรียบเหมือนกล่องพัสดุปิดผนึก)",
+            "**Type Assertion (`v.(Type)`)**: คือการแกะกล่องพัสดุเพื่อแปลงข้อมูลกลับมาเป็นชนิดข้อมูลจริง เช่น `payload := raw.(*token.Payload)`",
+            "**Comma-ok Pattern**: สังเกตตัวแปร `ok` ใน `role, ok := rawVal.(string)` หากข้อมูลตรงชนิดจริง `ok` จะเป็น `true` แต่ถ้าไม่ตรง `ok` จะเป็น `false` ช่วยป้องกันไม่ให้โปรแกรม Panic แครชกลางคัน!"
           ]
         },
         {
           "t": "h2",
-          "c": "กลไกที่ 8: คำสั่ง defer (การเก็บกวาดทรัพยากรแบบ LIFO)"
+          "c": "องก์ที่ 4: Concurrency & Request Lifecycle (ขุมพลังความเร็วสูง)"
+        },
+        {
+          "t": "h3",
+          "c": "กลไกที่ 8: context.Context — สายสัญญาณควบคุมชีวิตของคำขอ (Timeout & Cancellation)"
         },
         {
           "t": "p",
-          "c": "คำสั่ง `defer` ใช้สั่งให้ Go จดจำคำสั่งบรรทัดนั้นไว้ แล้วนำมารัน **ในจังหวะสุดท้ายก่อนที่ฟังก์ชันกำลังจะจบลง (return)** เสมอ ไม่ว่าฟังก์ชันจะจบแบบปกติหรือจบเพราะเกิด Error กลางทาง:"
+          "c": "ถ้าคุณสังเกตโค้ดของ Go Backend คุณจะพบว่าพารามิเตอร์ตัวแรกของแทบทุกฟังก์ชันคือ `ctx context.Context` เสมอ!\n\nทำไมต้องส่ง `ctx` ไปทุกหนทุกแห่ง? ลองจินตนาการสถานการณ์จริง:\nลูกค้าเปิดแอปธนาคารแล้วกดยิงคำขอดึงรายการเดินบัญชีย้อนหลัง 5 ปี (คำสั่ง SQL นี้ต้องใช้เวลาประมวลผล 3 วินาที) แต่หลังจากผ่านไป 0.5 วินาที ลูกค้าเกิดเปลี่ยนใจกดปิดแอปไปแล้ว\n\n• **ถ้าไม่มี Context**: เซิร์ฟเวอร์และ PostgreSQL จะยังคงก้มหน้าก้มตารันคำสั่ง SQL ต่อไปจนครบ 3 วินาที เปลืองทั้ง CPU, RAM และค้าง Lock แถวข้อมูลอย่างไร้ประโยชน์!\n• **เมื่อมี Context**: เว็บเซิร์ฟเวอร์จะตรวจพบว่าการเชื่อมต่อหลุด และส่งสัญญาณ `ctx.Done()` ไปยังฐานข้อมูลทันที PostgreSQL จะยกเลิกคำสั่ง SQL กลางคันและคืนทรัพยากรทันที!"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 8: defer_lifo.go",
-          "code": "// =============================================================================\n// ไฟล์: defer_lifo.go\n// หน้าที่: สาธิตการทำงานของ defer ในการคืนทรัพยากรตามลำดับ LIFO (Last-In, First-Out)\n// =============================================================================\npackage main\n\nimport \"fmt\"\n\nfunc QueryAccounts() {\n\tfmt.Println(\"1. เปิดการเชื่อมต่อฐานข้อมูล (rows)\")\n\t// ทันทีที่เปิด Resource สำเร็จ ให้สั่ง defer ปิดไว้ล่วงหน้าทันที ป้องกันการลืมปิด!\n\tdefer fmt.Println(\"4. [defer #1] ปิด rows.Close() คืน Connection เข้าสระ (รันทีหลังสุด)\")\n\tdefer fmt.Println(\"3. [defer #2] บันทึกเวลาจบการทำงาน (ประกาศทีหลัง รันก่อนแบบ LIFO)\")\n\n\tfmt.Println(\"2. กำลังอ่านข้อมูลบัญชี Alice และ Bob...\")\n}\n\nfunc main() {\n\tQueryAccounts()\n}",
-          "out": "1. เปิดการเชื่อมต่อฐานข้อมูล (rows)\n2. กำลังอ่านข้อมูลบัญชี Alice และ Bob...\n3. [defer #2] บันทึกเวลาจบการทำงาน (ประกาศทีหลัง รันก่อนแบบ LIFO)\n4. [defer #1] ปิด rows.Close() คืน Connection เข้าสระ (รันทีหลังสุด)"
+          "label": "08_context_timeout_lifecycle.go",
+          "code": "// =============================================================================\n// ไฟล์: 08_context_timeout_lifecycle.go\n// หน้าที่: แสดงการใช้ context.Context ในการตัดคำสั่ง SQL ที่ใช้เวลานานเกินกำหนด\n// =============================================================================\npackage main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\n// HeavyDatabaseQuery จำลองคำสั่งค้นหาข้อมูลที่ต้องใช้เวลา 100ms\nfunc HeavyDatabaseQuery(ctx context.Context) error {\n\tfmt.Println(\">> เริ่มค้นหาข้อมูลรายงานบัญชีขนาดใหญ่ (ใช้เวลา 100ms)...\")\n\n\tselect {\n\tcase <-time.After(100 * time.Millisecond):\n\t\tfmt.Println(\"   ค้นหาข้อมูลสำเร็จสมบูรณ์!\")\n\t\treturn nil\n\tcase <-ctx.Done(): // รับสัญญาณยกเลิกเมื่อครบกำหนดเวลา (Timeout) หรือลูกค้ายกเลิกคำขอ\n\t\treturn ctx.Err()\n\t}\n}\n\nfunc main() {\n\t// ตั้งเวลา Deadline สูงสุดของคำขอไว้ที่ 40ms เท่านั้น (น้อยกว่าเวลาทำงานจริง 100ms)\n\tctx, cancel := context.WithTimeout(context.Background(), 40*time.Millisecond)\n\tdefer cancel() // คืนทรัพยากรตัวจับเวลาเมื่อเสร็จสิ้น\n\n\terr := HeavyDatabaseQuery(ctx)\n\tif err != nil {\n\t\tfmt.Printf(\">> ระบบสั่งตัดการทำงานอัตโนมัติ: %v\\n\", err)\n\t\tfmt.Println(\">> PostgreSQL หยุดคำสั่งทันที ไม่สิ้นเปลือง CPU หรือค้าง Lock ในฐานข้อมูล!\")\n\t}\n}",
+          "out": ">> เริ่มค้นหาข้อมูลรายงานบัญชีขนาดใหญ่ (ใช้เวลา 100ms)...\n>> ระบบสั่งตัดการทำงานอัตโนมัติ: context deadline exceeded\n>> PostgreSQL หยุดคำสั่งทันที ไม่สิ้นเปลือง CPU หรือค้าง Lock ในฐานข้อมูล!"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 การส่งต่อ Context ใน Simple Bank จาก API สู่ฐานข้อมูล"
         },
         {
           "t": "ul",
           "c": [
-            "**ใช้จริงใน `ListAccounts` (บทที่ 3.1)**: ทันทีที่เราเรียก `rows, err := q.db.QueryContext(...)` ผ่าน เราจะบรรทัดถัดไปว่า `defer rows.Close()` ทันที เพื่อการันตีว่า Connection จะถูกคืนกลับเข้า Pool 100% แม้ระหว่างอ่านข้อมูลจะเกิด Error ก็ตาม",
-            "**ใช้จริงใน `Worker` (บทที่ 5.3)**: ใช้ `defer wg.Done()` เพื่อการันตีว่าเมื่อ Goroutine ทำงานจบ ตัวนับงานจะถูกลดลงเสมอ"
+            "**`context.Background()`**: Context ตั้งต้นที่ไม่มีวันหมดอายุ ใช้ใน `main.go` หรือในชุดทดสอบ Unit Test (`account_test.go`)",
+            "**การส่งต่อในระบบจริง**: เมื่อ HTTP Request วิ่งเข้ามาที่ Gin (`ctx *gin.Context`) ตัว Gin Context สามารถทำหน้าที่เป็น `context.Context` ได้ทันที เราจึงส่งต่อเข้า `store.TransferTx(ctx, arg)` และส่งต่อไปถึงคำสั่ง SQL ใน `q.db.ExecContext(ctx, ...)` เป็นลูกโซ่ที่คอยคุ้มกันคำขอตลอดทั้งเส้นทาง"
           ]
         },
         {
-          "t": "h2",
-          "c": "กลไกที่ 9: context.Context — ใบสั่งควบคุมเวลา (Timeout & Cancellation)"
+          "t": "h3",
+          "c": "กลไกที่ 9: Goroutines & Channels — รับมือ 10,000 คำขอพร้อมกันอย่างปลอดภัย"
         },
         {
           "t": "p",
-          "c": "ในโค้ดของ Simple Bank แทบทุกฟังก์ชันจะมีพารามิเตอร์ตัวแรกสุดคือ `ctx context.Context` เสมอ หน้าที่ของมันคือเป็น **'สายสัญญาณควบคุมเวลาและการยกเลิกงาน'** เช่น ถ้าลูกค้ากดปิดแอปมือถือไปแล้ว หรือคิวรีฐานข้อมูลค้างนานเกินเวลาที่กำหนด `ctx` จะส่งสัญญาณสั่งยกเลิกคำสั่ง SQL ทันทีเพื่อไม่ให้เซิร์ฟเวอร์ค้าง:"
+          "c": "นี่คือจุดขายที่แข็งแกร่งที่สุดของภาษา Go: การประมวลผลคำขอคู่ขนาน (Concurrency) ด้วย **Goroutine** ร่วมกับ **Channel**\n\n• **Goroutine**: คือเธรดขนาดจิ๋วที่บริหารโดย Go Runtime กินแรมเริ่มต้นเพียงประมาณ **2KB** (เทียบกับ OS Thread ปกติที่กิน 1–2MB) ทำให้เซิร์ฟเวอร์ Go สามารถสร้างงานคู่ขนานได้เป็นแสนตัวพร้อมกันโดยเครื่องไม่หน่วง\n• **Channel (`chan`)**: คือท่อส่งข้อมูลระหว่าง Goroutines ตามคติประจำใจของ Go ที่ว่า: *'อย่าสื่อสารด้วยการแชร์หน่วยความจำ แต่จงแชร์หน่วยความจำด้วยการสื่อสาร (Do not communicate by sharing memory; instead, share memory by communicating)'*"
+        },
+        {
+          "t": "callout",
+          "title": "💡 คำถามที่ผู้เรียนสงสัยมากที่สุด: ทำไมใน TestTransferTx (บทที่ 5.3) ถึงไม่ใช้ sync.WaitGroup?",
+          "c": "ในบทที่ 5.3 เราจะเขียนเทสต์เพื่อทดสอบว่า เมื่อมีคนสั่งโอนเงินพร้อมกัน 5 ครั้งในเสี้ยววินาทีเดียวกัน ระบบจะต้องไม่มี Deadlock และยอดเงินต้องถูกต้อง 100%\n\nผู้เริ่มต้นมักสงสัยว่า: *'ทำไมในโค้ดถึงสั่ง `go func() { ... }` 5 รอบ แล้วตามด้วยลูป `for i := 0; i < n; i++` เพื่ออ่าน Channel โดยไม่มี `sync.WaitGroup` เลย โปรแกรมไม่ปิดไปก่อนหรือ?'*\n\n**คำตอบคือ**: เพราะคำสั่งอ่านข้อมูลจาก Channel (`<-errs` และ `<-results`) มีคุณสมบัติ **Blocking (หยุดรอ)** เสมอ! ลูปอ่านข้อมูลจะหยุดรออัตโนมัติจนกว่า Goroutine แต่ละตัวจะส่งผลลัพธ์เข้ามา การวนลูปให้ครบ `n` ครั้งจึงเป็นการการันตี 100% ว่า Goroutine ทุกตัวทำงานเสร็จสิ้นแล้วโดยสมบูรณ์!"
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างที่ 9: context_timeout.go",
-          "code": "// =============================================================================\n// ไฟล์: context_timeout.go\n// หน้าที่: สาธิตการใช้ context.Context ตัดการทำงานอัตโนมัติเมื่อคิวรีใช้เวลานานเกินกำหนด\n// =============================================================================\npackage main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc SlowQuery(ctx context.Context) error {\n\tfmt.Println(\">> เริ่มต้นคิวรีข้อมูลขนาดใหญ่ (ต้องใช้เวลา 200ms)...\")\n\tselect {\n\tcase <-time.After(200 * time.Millisecond):\n\t\tfmt.Println(\"   คิวรีสำเร็จ!\")\n\t\treturn nil\n\tcase <-ctx.Done(): // สัญญาณแจ้งเตือนเมื่อหมดเวลา (Timeout) หรือถูกสั่งยกเลิก\n\t\treturn ctx.Err()\n\t}\n}\n\nfunc main() {\n\t// ตั้งเวลา Timeout สูงสุดไว้ที่ 50ms เท่านั้น\n\tctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)\n\tdefer cancel()\n\n\tif err := SlowQuery(ctx); err != nil {\n\t\tfmt.Println(\">> ระบบตัดการทำงานอัตโนมัติ:\", err)\n\t}\n}",
-          "out": ">> เริ่มต้นคิวรีข้อมูลขนาดใหญ่ (ต้องใช้เวลา 200ms)...\n>> ระบบตัดการทำงานอัตโนมัติ: context deadline exceeded"
+          "label": "09_goroutine_channel_blocking.go",
+          "code": "// =============================================================================\n// ไฟล์: 09_goroutine_channel_blocking.go\n// หน้าที่: แสดงการรัน Goroutines คู่ขนาน และใช้ Blocking Channel รวบรวมผลลัพธ์\n// =============================================================================\npackage main\n\nimport (\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc main() {\n\tn := 3\n\t// สร้าง Channel แบบ Unbuffered สำหรับรับ error และผลลัพธ์ยอดเงิน\n\terrs := make(chan error)\n\tresults := make(chan int64)\n\n\tfmt.Printf(\">> ปล่อย %d Goroutines โอนเงินพร้อมกันในเสี้ยววินาทีเดียวกัน...\\n\", n)\n\n\t// แตก Goroutine 3 ตัวไปทำงานคู่ขนานกันใน Background\n\tfor i := 1; i <= n; i++ {\n\t\tgo func(workerID int) {\n\t\t\ttime.Sleep(10 * time.Millisecond) // จำลองเวลาประมวลผลคำสั่งโอนเงิน\n\n\t\t\t// ส่งผลลัพธ์เข้าท่อ Channel ด้วยลูกศรชี้เข้า (ch <- value)\n\t\t\terrs <- nil\n\t\t\tresults <- int64(workerID * 200)\n\t\t}(i)\n\t}\n\n\t// วนลูปอ่านข้อมูลออกจากท่อ Channel จำนวน n รอบ\n\t// บรรทัด <-errs และ <-results มีพฤติกรรม Blocking (หยุดรออัตโนมัติจนกว่าจะมีข้อมูลส่งมา)\n\t// จึงทำให้ฟังก์ชันหลักรอจน Goroutine ทุกตัวทำงานเสร็จ โดยไม่ต้องง้อ sync.WaitGroup!\n\tfor i := 1; i <= n; i++ {\n\t\terr := <-errs\n\t\tamount := <-results\n\t\tfmt.Printf(\"   [รับผลลัพธ์รอบที่ %d] err = %v | ยอดเงินที่ประมวลผล = %d บาท\\n\", i, err, amount)\n\t}\n\n\tfmt.Println(\">> สิ้นสุด: ได้รับผลลัพธ์จากทุก Goroutine ครบถ้วนและปลอดภัย!\")\n}",
+          "out": ">> ปล่อย 3 Goroutines โอนเงินพร้อมกันในเสี้ยววินาทีเดียวกัน...\n   [รับผลลัพธ์รอบที่ 1] err = <nil> | ยอดเงินที่ประมวลผล = 200 บาท\n   [รับผลลัพธ์รอบที่ 2] err = <nil> | ยอดเงินที่ประมวลผล = 400 บาท\n   [รับผลลัพธ์รอบที่ 3] err = <nil> | ยอดเงินที่ประมวลผล = 600 บาท\n>> สิ้นสุด: ได้รับผลลัพธ์จากทุก Goroutine ครบถ้วนและปลอดภัย!"
         },
         {
           "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
+          "c": "🔍 ถอดรหัสทิศทางลูกศรของ Channel"
         },
         {
           "t": "ul",
           "c": [
-            "**`context.Background()`**: คือ Context ตั้งต้นแบบเปล่าๆ (ไม่มีวันหมดอายุ) มักใช้ใน `main.go` หรือในไฟล์ Unit Test (`account_test.go`)",
-            "**`*gin.Context` ในบทที่ 6**: เมื่อคำขอวิ่งเข้ามาทาง HTTP ผ่าน Gin ตัวแปร `ctx *gin.Context` จะบรรจุทั้งข้อมูล HTTP Request และเป็น `context.Context` ในตัวเดียวกัน จึงส่งต่อเข้า `server.store.CreateAccount(ctx, arg)` ได้โดยตรง!"
+            "**`ch <- value` (ลูกศรพุ่งเข้าหาชื่อ Channel)**: นำข้อมูลจากขวามือหย่อนลงไปในท่อ Channel ด้านซ้าย",
+            "**`value := <-ch` (ลูกศรพุ่งออกจากชื่อ Channel)**: ดึงข้อมูลที่ไหลออกมาจากท่อ Channel มาเก็บไว้ในตัวแปรซ้ายมือ",
+            "**Unbuffered Channel (`make(chan T)`)**: ท่อแบบไม่มีที่พัก ผู้ส่งและผู้รับต้องมาถึงพร้อมกันจึงจะส่งของได้",
+            "**Buffered Channel (`make(chan T, 3)`)**: ท่อที่มีกล่องพักข้อมูลได้ 3 ชิ้น ผู้ส่งสามารถหย่อนของทิ้งไว้ได้ทันที 3 ชิ้นโดยไม่ต้องรอผู้รับ"
           ]
         },
         {
-          "t": "h2",
-          "c": "กลไกที่ 10: Concurrency ครบวงจร — Goroutines, Channels และทำไม <-chan ถึงรอ Goroutine ได้โดยไม่ต้องง้อ WaitGroup"
+          "t": "h3",
+          "c": "กลไกที่ 10: Closures & Higher-Order Functions ใน Transaction Manager"
         },
         {
           "t": "p",
-          "c": "นี่คือหัวใจสำคัญที่สุดที่จะทำให้คุณเข้าใจบทที่ 5 (Concurrency & Deadlock Testing) อย่างทะลุปรุโปร่ง! มาทำความเข้าใจเครื่องมือทั้ง 3 ตัวและการทำงานร่วมกัน:"
+          "c": "ในภาษา Go ฟังก์ชันถือเป็นข้อมูลชนิดหนึ่ง (First-Class Citizen) ทำให้เราสามารถส่งฟังก์ชันเข้าไปเป็นพารามิเตอร์ของอีกฟังก์ชันหนึ่งได้ ซึ่งโปรเจกต์ Simple Bank ใช้คุณสมบัตินี้สร้างระบบ **Transaction Sandwich** ในบทที่ 4:\n\n• ขนมปังแผ่นบน: สั่ง `BEGIN TRANSACTION`\n• ไส้แซนด์วิชตรงกลาง: รันคำสั่งโอนเงินตามที่ผู้เรียกส่งเข้ามา (Callback Function)\n• ขนมปังแผ่นล่าง: ถ้ามี Error ให้สั่ง `ROLLBACK` อัตโนมัติ แต่ถ้าสำเร็จครบทุกคำสั่งให้สั่ง `COMMIT`\n\nความมหัศจรรย์คือฟังก์ชันไส้ในที่ส่งเข้าไป สามารถมองเห็นและแก้ไขตัวแปร `result` ที่อยู่นอกตัวเองได้โดยตรง คุณสมบัตินี้เรียกว่า **Closure**:"
         },
         {
-          "t": "table",
-          "head": [
-            "เครื่องมือ Concurrency",
-            "คำสั่งในโค้ด",
-            "กลไกการทำงานจริงในหน่วยความจำ"
-          ],
-          "rows": [
-            [
-              "1. Goroutine",
-              "go func() { ... }()",
-              "แตกเธรดขนาดจิ๋ว (เริ่มต้นเพียง ~2KB) ไปรันฟังก์ชันนั้นแบบคู่ขนานใน Background ทันทีโดยไม่บล็อกบรรทัดถัดไป"
-            ],
-            [
-              "2. Unbuffered Channel",
-              "errs := make(chan error)",
-              "ท่อส่งข้อมูลแบบไม่มีที่พัก: คนส่ง (errs <- err) และคนรับ (<-errs) จะต้องมาเจอกันพร้อมกัน ถ้าคนส่งยังส่งไม่มา คนรับจะ 'หยุดรอ (Block)' อัตโนมัติ!"
-            ],
-            [
-              "3. Buffered Channel",
-              "ch := make(chan string, 3)",
-              "ท่อส่งข้อมูลที่มีกล่องพัก 3 ช่อง: คนส่งสามารถหย่อนข้อมูลใส่ท่อได้ทันที 3 ชิ้นโดยไม่ต้องรอคนรับ"
-            ],
-            [
-              "4. sync.WaitGroup",
-              "wg.Add(1) / wg.Done() / wg.Wait()",
-              "ตัวนับจำนวนงานคู่ขนาน ใช้เมื่อเราต้องการรอให้ทุก Goroutine ทำงานจบโดยไม่ได้ดึงค่าผ่าน Channel ทีละรอบ"
-            ]
+          "t": "codeout",
+          "lang": "go",
+          "label": "10_closure_transaction_manager.go",
+          "code": "// =============================================================================\n// ไฟล์: 10_closure_transaction_manager.go\n// หน้าที่: แสดงการใช้ Closure สร้าง Transaction Sandwich (BEGIN -> Callback -> COMMIT/ROLLBACK)\n// =============================================================================\npackage main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\n// execTx ทำหน้าที่เป็น Sandwich Manager ดูแล BEGIN และ COMMIT / ROLLBACK ให้อัตโนมัติ\nfunc execTx(fn func() error) error {\n\tfmt.Println(\"[Store Engine] 1. เริ่มต้นคำสั่ง: BEGIN TRANSACTION\")\n\n\t// รันฟังก์ชันไส้ในที่ผู้เรียกส่งเข้ามา (Callback)\n\terr := fn()\n\tif err != nil {\n\t\tfmt.Println(\"[Store Engine] 2. ตรวจพบข้อผิดพลาด -> ดำเนินการ ROLLBACK อัตโนมัติ!\")\n\t\treturn err\n\t}\n\n\tfmt.Println(\"[Store Engine] 2. ทุกคำสั่งผ่านฉลุย -> สั่ง COMMIT บันทึกข้อมูลถาวร!\")\n\treturn nil\n}\n\nfunc main() {\n\tvar transferResult string\n\n\tfmt.Println(\"--- 1. ทดสอบธุรกรรมโอนเงินที่ทำงานสำเร็จ ---\")\n\terr := execTx(func() error {\n\t\t// ฟังก์ชันด้านในสามารถเขียนค่าใส่ตัวแปร transferResult ที่อยู่ด้านนอกได้ (Closure)\n\t\tfmt.Println(\"   [SQL] หักเงินบัญชี A 500 บาท และเพิ่มเงินบัญชี B 500 บาท\")\n\t\ttransferResult = \"โอนสำเร็จ 500 บาท\"\n\t\treturn nil\n\t})\n\tfmt.Printf(\"ผลลัพธ์ธุรกรรม: %s (err = %v)\\n\\n\", transferResult, err)\n\n\tfmt.Println(\"--- 2. ทดสอบธุรกรรมที่พังกลางคัน (Auto Rollback) ---\")\n\terr = execTx(func() error {\n\t\tfmt.Println(\"   [SQL] หักเงินบัญชี A 500 บาท สำเร็จ\")\n\t\tfmt.Println(\"   [SQL] บัญชีปลายทาง B ไม่พร้อมใช้งาน!\")\n\t\treturn errors.New(\"บัญชีปลายทางถูกระงับ\")\n\t})\n\tfmt.Printf(\"ผลลัพธ์ธุรกรรม: ล้มเหลวและถูกคืนค่าทั้งหมด (err = %v)\\n\", err)\n}",
+          "out": "--- 1. ทดสอบธุรกรรมโอนเงินที่ทำงานสำเร็จ ---\n[Store Engine] 1. เริ่มต้นคำสั่ง: BEGIN TRANSACTION\n   [SQL] หักเงินบัญชี A 500 บาท และเพิ่มเงินบัญชี B 500 บาท\n[Store Engine] 2. ทุกคำสั่งผ่านฉลุย -> สั่ง COMMIT บันทึกข้อมูลถาวร!\nผลลัพธ์ธุรกรรม: โอนสำเร็จ 500 บาท (err = <nil>)\n\n--- 2. ทดสอบธุรกรรมที่พังกลางคัน (Auto Rollback) ---\n[Store Engine] 1. เริ่มต้นคำสั่ง: BEGIN TRANSACTION\n   [SQL] หักเงินบัญชี A 500 บาท สำเร็จ\n   [SQL] บัญชีปลายทาง B ไม่พร้อมใช้งาน!\n[Store Engine] 2. ตรวจพบข้อผิดพลาด -> ดำเนินการ ROLLBACK อัตโนมัติ!\nผลลัพธ์ธุรกรรม: ล้มเหลวและถูกคืนค่าทั้งหมด (err = บัญชีปลายทางถูกระงับ)"
+        },
+        {
+          "t": "h3",
+          "c": "🔍 เบื้องหลังของ store.execTx ในบทที่ 4.2"
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ป้องกัน Human Error 100%**: ด้วยแพทเทิร์น `execTx` นี้ ผู้พัฒนาในทีมจะไม่ต้องเขียนคำสั่ง `BEGIN`, `COMMIT`, หรือ `ROLLBACK` ด้วยตัวเองซ้ำๆ อีกต่อไป ลดความเสี่ยงที่คนจะลืม Rollback เมื่อเกิดข้อผิดพลาดได้อย่างสมบูรณ์แบบ",
+            "**Closure เก็บผลลัพธ์**: สังเกตว่าใน `TransferTx` ตัวฟังก์ชัน callback ด้านในจะกำหนดค่าให้ `result.Transfer = ...` และ `result.FromAccount = ...` ซึ่งตัวแปร `result` เป็นตัวแปรที่ประกาศไว้ในฟังก์ชันภายนอก เมื่อ `execTx` ทำงานเสร็จ ตัวแปร `result` นั้นก็จะมีข้อมูลครบถ้วนพร้อมส่งกลับไปให้ API ทันที"
           ]
         },
         {
           "t": "callout",
-          "title": "💡 คำถามที่มือใหม่งงบ่อยที่สุด: ทำไมใน TestTransferTx (บทที่ 5.3) ถึงไม่ใช้ sync.WaitGroup?",
-          "c": "ในบทที่ 5.3 เวลาเราปล่อย Goroutine 5 ตัวไปโอนเงินพร้อมกัน (`n := 5`) เราสร้างท่อ `errs := make(chan error)` และ `results := make(chan TransferTxResult)`\n\nจากนั้นในฟังก์ชันหลัก เราเขียนลูป `for i := 0; i < n; i++` แล้วสั่งดึงค่าจากท่อด้วย `err := <-errs` และ `result := <-results` จำนวน 5 รอบ!\n\nเนื่องจากคำสั่งดึงค่าจากท่อ (`<-errs`) มีคุณสมบัติ **Blocking (หยุดรอจนกว่าจะมีของส่งออกมาจากท่อ)** การวนลูปดึงค่าให้ครบ `n` รอบจึงทำหน้าที่ **บังคับให้ฟังก์ชันหลักหยุดรอจนกว่า Goroutine ทั้ง 5 ตัวจะส่งผลลัพธ์กลับมาครบทุกตัวโดยอัตโนมัติ** จึงไม่จำเป็นต้องเขียน `sync.WaitGroup` ซ้ำซ้อนนั่นเอง!"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างที่ 10: goroutines_and_channels.go (รูปแบบเดียวกับที่ใช้ใน TestTransferTx)",
-          "code": "// =============================================================================\n// ไฟล์: goroutines_and_channels.go\n// หน้าที่: สาธิตการปล่อยหลาย Goroutines ทำงานพร้อมกัน และใช้ Channel รวบรวมผลลัพธ์\n// แก้ปัญหา: เข้าใจกลไก Blocking ของ Channel (<-ch) ที่ใช้ในชุดทดสอบการโอนเงินคู่ขนาน\n// =============================================================================\npackage main\n\nimport (\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc main() {\n\tn := 3\n\t// ขั้นตอนที่ 1: สร้างท่อ Channel สำหรับรับ error และผลลัพธ์ยอดเงิน\n\terrs := make(chan error)\n\tresults := make(chan int64)\n\n\tfmt.Println(\">> ปล่อย 3 Goroutines โอนเงินพร้อมกันในเสี้ยววินาทีเดียวกัน...\")\n\n\t// ขั้นตอนที่ 2: วนลูปแตก Goroutine 3 ตัวด้วย Anonymous Function: go func(i int) { ... }(i)\n\tfor i := 1; i <= n; i++ {\n\t\tgo func(workerID int) {\n\t\t\t// จำลองการคุยกับฐานข้อมูล\n\t\t\ttime.Sleep(10 * time.Millisecond)\n\n\t\t\t// ส่ง error (nil = สำเร็จ) และยอดเงินที่โอนสำเร็จเข้าท่อ Channel\n\t\t\terrs <- nil\n\t\t\tresults <- int64(workerID * 100)\n\t\t}(i)\n\t}\n\n\t// ขั้นตอนที่ 3: วนลูปดึงข้อมูลออกจากท่อให้ครบ n รอบ\n\t// บรรทัด <-errs และ <-results จะหยุดรอ (Block) จนกว่า Goroutine จะส่งค่ามาครบทั้ง 3 ตัว!\n\tfor i := 1; i <= n; i++ {\n\t\terr := <-errs\n\t\tamount := <-results\n\t\tfmt.Printf(\"   [รอบรับผลที่ %d] err=%v | ยอดโอนที่เสร็จ=%d บาท\\n\", i, err, amount)\n\t}\n\n\tfmt.Println(\">> รับผลลัพธ์ครบทั้ง 3 Goroutines อย่างปลอดภัย!\")\n}",
-          "out": ">> ปล่อย 3 Goroutines โอนเงินพร้อมกันในเสี้ยววินาทีเดียวกัน...\n   [รอบรับผลที่ 1] err=<nil> | ยอดโอนที่เสร็จ=100 บาท\n   [รอบรับผลที่ 2] err=<nil> | ยอดโอนที่เสร็จ=200 บาท\n   [รอบรับผลที่ 3] err=<nil> | ยอดโอนที่เสร็จ=300 บาท\n>> รับผลลัพธ์ครบทั้ง 3 Goroutines อย่างปลอดภัย!"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างเพิ่มเติม 10.1: concurrency_demo.go (การใช้ Goroutine คู่กับ sync.WaitGroup และ Buffered Channel)",
-          "code": "// =============================================================================\n// ไฟล์: concurrency_demo.go\n// หน้าที่: สาธิตการทำงานคู่ขนานด้วย Goroutines, Channels, และ sync.WaitGroup\n// แก้ปัญหา: การประมวลผลงานหลายชิ้นพร้อมกันโดยไม่บล็อก และส่งข้อมูลผลลัพธ์กลับมาอย่างปลอดภัยโดยไม่ต้องใช้ Lock\n// =============================================================================\npackage main\n\nimport (\n\t\"fmt\"\n\t\"sync\"\n\t\"time\"\n)\n\n// Worker จำลองคนงานที่ทำงานแบบ Asynchronous ใน Goroutine\nfunc Worker(id int, ch chan<- string, wg *sync.WaitGroup) {\n\t// 1. แจ้งเตือน WaitGroup เมื่องานเสร็จสิ้น (รันผ่าน defer เพื่อความแน่นอน)\n\tdefer wg.Done()\n\n\t// 2. จำลองเวลาประมวลผลธุรกรรม\n\ttime.Sleep(time.Duration(id*10) * time.Millisecond)\n\n\t// 3. ส่งข้อมูลผลลัพธ์ผ่าน Channel ไปยังฟังก์ชันหลัก\n\tch <- fmt.Sprintf(\"Goroutine #%d: ประมวลผลธุรกรรมสำเร็จ\", id)\n}\n\nfunc main() {\n\tvar wg sync.WaitGroup\n\tresultChan := make(chan string, 3) // สร้าง Channel แบบ Buffered ขนาด 3 ช่อง\n\n\t// 1. ปล่อย 3 Goroutines ให้ทำงานคู่ขนานกันในเวลาเดียวกัน\n\tfmt.Println(\">> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...\")\n\tfor i := 1; i <= 3; i++ {\n\t\twg.Add(1) // เพิ่มตัวนับงานใน WaitGroup ทีละ 1\n\t\tgo Worker(i, resultChan, &wg)\n\t}\n\n\t// 2. รอจนกว่าคนงานทั้ง 3 คนจะทำงานเสร็จ (ตัวนับลดลงเหลือ 0)\n\twg.Wait()\n\tclose(resultChan) // ปิด Channel เมื่อส่งข้อมูลครบถ้วน ป้องกัน Deadlock\n\n\t// 3. วนลูปอ่านข้อมูลผลลัพธ์ทั้งหมดที่ส่งออกมาจาก Channel\n\tfmt.Println(\">> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:\")\n\tfor msg := range resultChan {\n\t\tfmt.Println(\"  \", msg)\n\t}\n}",
-          "out": ">> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...\n>> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:\n   Goroutine #1: ประมวลผลธุรกรรมสำเร็จ\n   Goroutine #2: ประมวลผลธุรกรรมสำเร็จ\n   Goroutine #3: ประมวลผลธุรกรรมสำเร็จ"
-        },
-        {
-          "t": "codeout",
-          "lang": "go",
-          "label": "ตัวอย่างเพิ่มเติม 10.1: concurrency_demo.go (การใช้ Goroutine คู่กับ sync.WaitGroup และ Buffered Channel)",
-          "code": "// =============================================================================\n// ไฟล์: concurrency_demo.go\n// หน้าที่: สาธิตการทำงานคู่ขนานด้วย Goroutines, Channels, และ sync.WaitGroup\n// แก้ปัญหา: การประมวลผลงานหลายชิ้นพร้อมกันโดยไม่บล็อก และส่งข้อมูลผลลัพธ์กลับมาอย่างปลอดภัยโดยไม่ต้องใช้ Lock\n// =============================================================================\npackage main\n\nimport (\n\t\"fmt\"\n\t\"sync\"\n\t\"time\"\n)\n\n// Worker จำลองคนงานที่ทำงานแบบ Asynchronous ใน Goroutine\nfunc Worker(id int, ch chan<- string, wg *sync.WaitGroup) {\n\t// 1. แจ้งเตือน WaitGroup เมื่องานเสร็จสิ้น (รันผ่าน defer เพื่อความแน่นอน)\n\tdefer wg.Done()\n\n\t// 2. จำลองเวลาประมวลผลธุรกรรม\n\ttime.Sleep(time.Duration(id*10) * time.Millisecond)\n\n\t// 3. ส่งข้อมูลผลลัพธ์ผ่าน Channel ไปยังฟังก์ชันหลัก\n\tch <- fmt.Sprintf(\"Goroutine #%d: ประมวลผลธุรกรรมสำเร็จ\", id)\n}\n\nfunc main() {\n\tvar wg sync.WaitGroup\n\tresultChan := make(chan string, 3) // สร้าง Channel แบบ Buffered ขนาด 3 ช่อง\n\n\t// 1. ปล่อย 3 Goroutines ให้ทำงานคู่ขนานกันในเวลาเดียวกัน\n\tfmt.Println(\">> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...\")\n\tfor i := 1; i <= 3; i++ {\n\t\twg.Add(1) // เพิ่มตัวนับงานใน WaitGroup ทีละ 1\n\t\tgo Worker(i, resultChan, &wg)\n\t}\n\n\t// 2. รอจนกว่าคนงานทั้ง 3 คนจะทำงานเสร็จ (ตัวนับลดลงเหลือ 0)\n\twg.Wait()\n\tclose(resultChan) // ปิด Channel เมื่อส่งข้อมูลครบถ้วน ป้องกัน Deadlock\n\n\t// 3. วนลูปอ่านข้อมูลผลลัพธ์ทั้งหมดที่ส่งออกมาจาก Channel\n\tfmt.Println(\">> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:\")\n\tfor msg := range resultChan {\n\t\tfmt.Println(\"  \", msg)\n\t}\n}",
-          "out": ">> ปล่อย 3 Goroutines ทำงานคู่ขนานพร้อมกัน...\n>> ได้รับผลลัพธ์จาก Channel ครบทั้งหมด:\n   Goroutine #1: ประมวลผลธุรกรรมสำเร็จ\n   Goroutine #2: ประมวลผลธุรกรรมสำเร็จ\n   Goroutine #3: ประมวลผลธุรกรรมสำเร็จ"
-        },
-        {
-          "t": "h3",
-          "c": "🔍 เจาะลึกการทำงานของโค้ดทีละจุด (Code Breakdown)"
-        },
-        {
-          "t": "ul",
-          "c": [
-            "**`go func(workerID int) { ... }(i)`**: คือการประกาศฟังก์ชันไร้ชื่อ (Anonymous Function) แล้วสั่งรันเป็น Goroutine ทันทีด้วยวงเล็บ `(i)` ด้านท้ายสุด",
-            "**`errs <- nil` (ส่งค่าเข้าท่อ)**: ลูกศรชี้เข้าหาชื่อตัวแปรท่อ แปลว่าหย่อนข้อมูลจากขวาเข้าไปในท่อด้านซ้าย",
-            "**`err := <-errs` (ดึงค่าออกจากท่อ)**: ลูกศรชี้ออกจากท่อไปหาตัวแปรซ้ายมือ แปลว่าดึงข้อมูลออกจากท่อมาเก็บไว้ในตัวแปร `err`"
-          ]
-        },
-        {
-          "t": "callout",
-          "title": "✅ สรุปสิ่งที่คุณทำสำเร็จในบทนี้ & ก้าวต่อไป",
-          "c": "• ตอนนี้คุณมีอาวุธครบมือทั้ง 10 กลไกของภาษา Go แล้ว ไม่ว่าจะเป็น `_, err`, Struct & Pointer (`*`, `&`), Method Receiver, Embedding, Interface, Slice/Map, Closure, `defer`, `context.Context`, และ `Goroutine + Channel`\n• **ก้าวต่อไป (บทที่ 2.1)**: เราจะเริ่มเข้าสู่โปรเจกต์ Simple Bank ของจริง โดยเริ่มจากการออกแบบโครงสร้างฐานข้อมูลบัญชีแยกประเภท (Immutable Double-Entry Ledger) ทั้ง 3 ตารางกันครับ!"
+          "title": "✅ เช็กลิสต์ความพร้อม & แผนผังกลไก Go ในโปรเจกต์ Simple Bank",
+          "c": "ขอแสดงความยินดีด้วย! ตอนนี้คุณมีโมเดลความคิดของวิศวกร Go Backend ครบทั้ง 10 กลไกแล้ว:\n\n1. **Pointer & Address-of (`*`, `&`)**: เข้าใจแล้วว่าทำไม `row.Scan(&i.ID)` ต้องส่งพิกัด RAM\n2. **Struct & Method Receiver**: เข้าใจแล้วว่าทำไมเมธอดระบบต้องใช้ `func (s *Store)`\n3. **Explicit Error Handling**: เข้าใจแล้วว่าทำไมเราเช็ก `if err != nil` ทุกจุดแทน try/catch\n4. **คำสั่ง `defer`**: เข้าใจแล้วว่าทำไมต้อง `defer rows.Close()` ทันทีหลังเปิด connection\n5. **Struct Embedding**: เข้าใจแล้วว่า `Store` ยกเมธอดของ `Queries` ขึ้นมาได้อย่างไร\n6. **Implicit Interface**: เข้าใจแล้วว่า `DBTX` interface ช่วยรวมโค้ด CRUD กับ Transaction ได้อย่างไร\n7. **Slices, Maps, Type Assertion**: เข้าใจการจัดการ Array, Hash table, และการแกะข้อมูลจาก Gin Context\n8. **`context.Context`**: เข้าใจแล้วว่าสายสัญญาณ Timeout & Cancellation ช่วยตัด Zombie Query ในฐานข้อมูลอย่างไร\n9. **Goroutines & Channels**: เข้าใจโมเดล 2KB เธรดและกลไก Blocking ของ Channel ในชุดทดสอบการโอนเงิน\n10. **Transaction Closures**: เข้าใจการทำ Sandwich Pattern ด้วย `execTx`\n\n🎯 **ก้าวต่อไป (บทที่ 2.1)**: พื้นฐานพร้อม อาวุธพร้อม! เราจะเริ่มลงมือสร้างโปรเจกต์ Simple Bank ของจริง โดยเริ่มจากการออกแบบโครงสร้างฐานข้อมูลบัญชีแยกประเภทคู่ (Immutable Double-Entry Ledger) ทั้ง 3 ตารางกันครับ!"
         }
       ],
       "en": []
