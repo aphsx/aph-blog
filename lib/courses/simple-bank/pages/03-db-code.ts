@@ -134,16 +134,26 @@ export const dbCodePages: Record<string, Page> = {
           ],
         },
         {
-          "t": "details",
-          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/db.go (รวมทั้ง 2 ส่วน พร้อมคัดลอก)",
-          "c": [
-            {
-              "t": "code",
-              "lang": "go",
-              "label": "simplebank/db/db.go",
-              "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// Open เปิดการเชื่อมต่อไปยัง PostgreSQL พร้อมกำหนดค่า Connection Pool\nfunc Open(dsn string) (*sql.DB, error) {\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// DBTX คือ Interface กลางที่รวมเมธอดรันคำสั่ง SQL ที่มีทั้งใน *sql.DB และ *sql.Tx\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\n// Queries เป็นตัวรวมคำสั่ง SQL ทั้งหมด โดยสามารถรับได้ทั้ง DB ปกติ หรือ Tx ก็ได้\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
-            },
-          ],
+          "t": "p",
+          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/db/db.go` (รวมทั้ง 2 ส่วน พร้อมคัดลอกใช้งาน):**",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/db.go (ฉบับสมบูรณ์)",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// Open เปิดการเชื่อมต่อไปยัง PostgreSQL พร้อมกำหนดค่า Connection Pool\nfunc Open(dsn string) (*sql.DB, error) {\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// DBTX คือ Interface กลางที่รวมเมธอดรันคำสั่ง SQL ที่มีทั้งใน *sql.DB และ *sql.Tx\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\n// Queries เป็นตัวรวมคำสั่ง SQL ทั้งหมด โดยสามารถรับได้ทั้ง DB ปกติ หรือ Tx ก็ได้\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
+        },
+        {
+          "t": "callout",
+          "title": "⚡ ทำไม VS Code ถึงฟ้อง missing go.sum entry (puddle/v2)?",
+          "c": "เมื่อบันทึกไฟล์ที่มี `import _ \"github.com/jackc/pgx/v5/stdlib\"` ตัว Go Compiler / Language Server อาจแสดงเส้นสีแดงว่า:\n> `missing go.sum entry for module providing package github.com/jackc/puddle/v2`\n\nนี่เป็นเรื่องปกติ! เพราะ `stdlib` มีแพ็กเกจย่อยที่ต้องพึ่งพา เช่น `puddle/v2` (ระบบ Connection Pool ภายในของ pgx) ซึ่งยังไม่ได้ถูกดาวน์โหลดบันทึก Hash ลงใน `go.sum` ให้เราสั่งรัน **`go mod tidy`** ใน Terminal ทันที:",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "สั่งรันเพื่อดึง dependencies ย่อยทั้งหมดและอัปเดต go.sum",
+          "code": "go mod tidy",
+          "out": "go: downloading github.com/jackc/puddle/v2 v2.2.2\ngo: downloading github.com/jackc/pgpassfile v1.0.0\ngo: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761",
         },
         {
           "t": "h2",
@@ -189,16 +199,14 @@ export const dbCodePages: Record<string, Page> = {
           ],
         },
         {
-          "t": "details",
-          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/account.go (รวมทุกฟังก์ชัน พร้อมคัดลอก)",
-          "c": [
-            {
-              "t": "code",
-              "lang": "go",
-              "label": "simplebank/db/account.go",
-              "c": "package db\n\nimport \"context\"\n\nconst accountColumns = \"id, owner, balance, currency, created_at\"\n\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\nfunc (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {\n\tquery := `INSERT INTO accounts (owner, balance, currency)\nVALUES ($1, $2, $3)\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.Owner, arg.Balance, arg.Currency)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts WHERE id = $1`\n\trow := q.db.QueryRowContext(ctx, query, id)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\ntype ListAccountsParams struct {\n\tOwner  string\n\tLimit  int32\n\tOffset int32\n}\n\nfunc (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts\nWHERE owner = $1\nORDER BY id\nLIMIT $2 OFFSET $3`\n\n\trows, err := q.db.QueryContext(ctx, query, arg.Owner, arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\n\taccounts := []Account{}\n\tfor rows.Next() {\n\t\tvar a Account\n\t\tif err := rows.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\taccounts = append(accounts, a)\n\t}\n\treturn accounts, rows.Err()\n}\n\ntype AddAccountBalanceParams struct {\n\tID     int64\n\tAmount int64\n}\n\n// AddAccountBalance เพิ่มหรือลดยอดเงินแบบ Atomic ด้วยคำสั่ง SQL ในแถวเดียว\nfunc (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {\n\tquery := `UPDATE accounts\nSET balance = balance + $2\nWHERE id = $1\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.ID, arg.Amount)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) DeleteAccount(ctx context.Context, id int64) error {\n\t_, err := q.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = $1`, id)\n\treturn err\n}",
-            },
-          ],
+          "t": "p",
+          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/db/account.go` (รวมฟังก์ชัน CRUD ทั้งหมด พร้อมคัดลอกใช้งาน):**",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/account.go (ฉบับสมบูรณ์)",
+          "c": "package db\n\nimport \"context\"\n\nconst accountColumns = \"id, owner, balance, currency, created_at\"\n\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\nfunc (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {\n\tquery := `INSERT INTO accounts (owner, balance, currency)\nVALUES ($1, $2, $3)\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.Owner, arg.Balance, arg.Currency)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts WHERE id = $1`\n\trow := q.db.QueryRowContext(ctx, query, id)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\ntype ListAccountsParams struct {\n\tOwner  string\n\tLimit  int32\n\tOffset int32\n}\n\nfunc (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts\nWHERE owner = $1\nORDER BY id\nLIMIT $2 OFFSET $3`\n\n\trows, err := q.db.QueryContext(ctx, query, arg.Owner, arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\n\taccounts := []Account{}\n\tfor rows.Next() {\n\t\tvar a Account\n\t\tif err := rows.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\taccounts = append(accounts, a)\n\t}\n\treturn accounts, rows.Err()\n}\n\ntype AddAccountBalanceParams struct {\n\tID     int64\n\tAmount int64\n}\n\n// AddAccountBalance เพิ่มหรือลดยอดเงินแบบ Atomic ด้วยคำสั่ง SQL ในแถวเดียว\nfunc (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {\n\tquery := `UPDATE accounts\nSET balance = balance + $2\nWHERE id = $1\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.ID, arg.Amount)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) DeleteAccount(ctx context.Context, id int64) error {\n\t_, err := q.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = $1`, id)\n\treturn err\n}",
         },
         {
           "t": "h2",
@@ -336,16 +344,14 @@ export const dbCodePages: Record<string, Page> = {
           "c": "func TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\t// เมื่อลบแล้ว ลองดึงซ้ำอีกครั้งจะต้องได้รับ Error ว่าไม่พบข้อมูล (sql.ErrNoRows)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
         },
         {
-          "t": "details",
-          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/account_test.go (พร้อมคัดลอก)",
-          "c": [
-            {
-              "t": "code",
-              "lang": "go",
-              "label": "simplebank/db/account_test.go",
-              "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}\n\nfunc TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
-            },
-          ],
+          "t": "p",
+          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/db/account_test.go` (รวมทุก Test Cases พร้อมคัดลอกใช้งาน):**",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/account_test.go (ฉบับสมบูรณ์)",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}\n\nfunc TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
         },
         {
           "t": "h2",
