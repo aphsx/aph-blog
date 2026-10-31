@@ -47,6 +47,13 @@ export const securityProdPages: Record<string, Page> = {
           "c": "ติดตั้งแพ็กเกจ `golang.org/x/crypto/bcrypt` แล้วสร้างไฟล์ `simplebank/util/password.go`:",
         },
         {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ติดตั้งไลบรารี bcrypt",
+          "code": "go get golang.org/x/crypto/bcrypt",
+          "out": "go: added golang.org/x/crypto v0.45.0",
+        },
+        {
           "t": "code",
           "lang": "go",
           "label": "simplebank/util/password.go",
@@ -196,6 +203,13 @@ export const securityProdPages: Record<string, Page> = {
           "c": "ติดตั้งแพ็กเกจ `aidanwoods.dev/go-paseto` แล้วสร้างตัวสร้างและตรวจสอบ Token ใน `simplebank/token/paseto_maker.go`:",
         },
         {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ติดตั้งไลบรารี go-paseto",
+          "code": "go get aidanwoods.dev/go-paseto",
+          "out": "go: added aidanwoods.dev/go-paseto v1.6.0",
+        },
+        {
           "t": "code",
           "lang": "go",
           "label": "simplebank/token/paseto_maker.go",
@@ -227,17 +241,17 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/api/user.go (ส่วน loginUser)",
-          "c": "type loginUserRequest struct {\n\tUsername string `json:\"username\" binding:\"required,alphanum\"`\n\tPassword string `json:\"password\" binding:\"required,min=6\"`\n}\n\ntype loginUserResponse struct {\n\tAccessToken string  `json:\"access_token\"`\n\tUser        db.User `json:\"user\"`\n}\n\nfunc (server *Server) loginUser(ctx *gin.Context) {\n\tvar req loginUserRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tuser, err := server.store.GetUser(ctx, req.Username)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tif err := util.CheckPassword(req.Password, user.HashedPassword); err != nil {\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\taccessToken, _, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, loginUserResponse{\n\t\tAccessToken: accessToken,\n\t\tUser:        user,\n\t})\n}",
+          "c": "type loginUserRequest struct {\n\tUsername string `json:\"username\" binding:\"required,alphanum\"`\n\tPassword string `json:\"password\" binding:\"required,min=6\"`\n}\n\ntype loginUserResponse struct {\n\tAccessToken string  `json:\"access_token\"`\n\tUser        db.User `json:\"user\"`\n}\n\nfunc (server *Server) loginUser(ctx *gin.Context) {\n\tvar req loginUserRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tuser, err := server.store.GetUser(ctx, req.Username)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tif err := util.CheckPassword(req.Password, user.HashedPassword); err != nil {\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\taccessToken, _, err := server.tokenMaker.CreateToken(user.Username, server.tokenDuration)\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, loginUserResponse{\n\t\tAccessToken: accessToken,\n\t\tUser:        user,\n\t})\n}",
         },
         {
           "t": "p",
-          "c": "และใน `server.go` เราจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ Middleware นี้:",
+          "c": "และใน `simplebank/api/server.go` เราอัปเดต `Server` struct ให้เก็บ `tokenMaker` พร้อมระยะเวลาอายุ Token (`tokenDuration`) และจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ Middleware นี้:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/server.go (ส่วนจัดกลุ่ม Route ปลอดภัย)",
-          "c": "// Route สาธารณะ\nrouter.POST(\"/users\", server.createUser)\nrouter.POST(\"/users/login\", server.loginUser)\n\n// Route ที่ต้องมี Token ยืนยันตัวตนเสมอ\nauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\nauth.POST(\"/accounts\", server.createAccount)\nauth.GET(\"/accounts/:id\", server.getAccount)\nauth.GET(\"/accounts\", server.listAccounts)\nauth.POST(\"/transfers\", server.createTransfer)",
+          "label": "simplebank/api/server.go (เพิ่ม PasetoMaker และจัดกลุ่ม Route ปลอดภัย)",
+          "c": "type Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\t// Route สาธารณะ (ไม่ต้องใช้ Token)\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\t// Route ที่ต้องมี Token ยืนยันตัวตนเสมอ\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}",
         },
         {
           "t": "callout",
@@ -325,6 +339,13 @@ export const securityProdPages: Record<string, Page> = {
           "c": "เราใช้ไลบรารี **Viper** ในการอ่านค่าจากไฟล์ `app.env` ในระหว่างพัฒนา และยอมให้ Environment Variable จริงในเซิร์ฟเวอร์เขียนทับ (Override) ได้อัตโนมัติใน `simplebank/util/config.go`:",
         },
         {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ติดตั้งไลบรารี Viper",
+          "code": "go get github.com/spf13/viper",
+          "out": "go: added github.com/spf13/viper v1.21.0",
+        },
+        {
           "t": "code",
           "lang": "go",
           "label": "simplebank/util/config.go",
@@ -338,7 +359,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/main.go (ฉบับ Production)",
-          "c": "package main\n\nimport (\n\t\"log\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n\t\"simplebank/util\"\n)\n\nfunc main() {\n\tconfig, err := util.LoadConfig(\".\")\n\tif err != nil {\n\t\tlog.Fatal(\"cannot load config:\", err)\n\t}\n\n\tconn, err := db.Open(config.DBSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n\tserver, err := api.NewServer(config, store)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot create server:\", err)\n\t}\n\n\tif err := server.Start(config.HTTPServerAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
+          "c": "package main\n\nimport (\n\t\"log\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n\t\"simplebank/util\"\n)\n\nfunc main() {\n\tconfig, err := util.LoadConfig(\".\")\n\tif err != nil {\n\t\tlog.Fatal(\"cannot load config:\", err)\n\t}\n\n\tconn, err := db.Open(config.DBSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n\tserver, err := api.NewServer(config.TokenSymmetricKey, config.AccessTokenDuration, store)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot create server:\", err)\n\t}\n\n\tif err := server.Start(config.HTTPServerAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
         },
         {
           "t": "h2",

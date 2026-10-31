@@ -53,8 +53,13 @@ export const dbCodePages: Record<string, Page> = {
           "t": "codeout",
           "lang": "bash",
           "label": "ดาวน์โหลดไลบรารี pgx v5 เข้าสู่โปรเจกต์",
-          "code": "go get github.com/jackc/pgx/v5\ngo mod tidy",
+          "code": "go get github.com/jackc/pgx/v5",
           "out": "go: added github.com/jackc/pgx/v5 v5.11.0",
+        },
+        {
+          "t": "callout",
+          "title": "💡 ข้อควรระวังเรื่อง go get vs go mod tidy",
+          "c": "สังเกตว่าตอนที่เราเพิ่งรัน `go get` แต่ยังไม่ได้สร้างไฟล์ `.go` ที่ทำการ `import` แพ็กเกจนั้น **อย่าเพิ่งสั่ง `go mod tidy` ทันที!** เพราะคำสั่ง `go mod tidy` มีหน้าที่กวาดลบแพ็กเกจที่ยังไม่ได้ถูกเรียกใช้ในโค้ดออกจาก `go.mod` ให้เราเขียนโค้ดจนเสร็จก่อนแล้วค่อยรัน `go mod tidy` เพื่อจัดระเบียบในตอนท้ายครับ",
         },
         {
           "t": "h2",
@@ -200,7 +205,7 @@ export const dbCodePages: Record<string, Page> = {
           "t": "codeout",
           "lang": "bash",
           "label": "ติดตั้ง Testify",
-          "code": "go get github.com/stretchr/testify\ngo mod tidy",
+          "code": "go get github.com/stretchr/testify",
           "out": "go: added github.com/stretchr/testify v1.11.1",
         },
         {

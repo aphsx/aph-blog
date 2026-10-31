@@ -45,7 +45,7 @@ export const apiPages: Record<string, Page> = {
           "t": "codeout",
           "lang": "bash",
           "label": "ดาวน์โหลดไลบรารี Gin",
-          "code": "go get github.com/gin-gonic/gin\ngo mod tidy",
+          "code": "go get github.com/gin-gonic/gin",
           "out": "go: added github.com/gin-gonic/gin v1.11.0",
         },
         {
