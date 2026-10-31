@@ -80,14 +80,14 @@ export const dbCodePages: Record<string, Page> = {
         {
           "t": "codeout",
           "lang": "bash",
-          "label": "ดาวน์โหลดไดรเวอร์ pgx v5 เข้าสู่โปรเจกต์",
-          "code": "go get github.com/jackc/pgx/v5",
-          "out": "go: added github.com/jackc/pgx/v5 v5.11.0",
+          "label": "ดาวน์โหลดไดรเวอร์ pgx v5 stdlib เข้าสู่โปรเจกต์",
+          "code": "go get github.com/jackc/pgx/v5/stdlib",
+          "out": "go: added github.com/jackc/pgpassfile v1.0.0\ngo: added github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761\ngo: added github.com/jackc/pgx/v5 v5.12.0\ngo: added github.com/jackc/puddle/v2 v2.2.3\ngo: added golang.org/x/sync v0.22.0\ngo: added golang.org/x/text v0.41.0",
         },
         {
           "t": "callout",
-          "title": "💡 ข้อควรระวังเรื่อง go get vs go mod tidy",
-          "c": "ตอนที่เพิ่งรัน `go get` แต่ยังไม่ได้เขียนไฟล์ `.go` ที่ทำการ `import` แพ็กเกจนั้น **อย่าเพิ่งสั่ง `go mod tidy` ทันที!** เพราะ `go mod tidy` จะกวาดลบแพ็กเกจที่ยังไม่ได้ถูกเรียกใช้ในโค้ดออกจาก `go.mod` ให้เราเขียนโค้ดจนเสร็จก่อนแล้วค่อยรัน `go mod tidy` ในตอนท้ายครับ",
+          "title": "💡 ทำไมต้องระบุ /stdlib ต่อท้ายตอน go get?",
+          "c": "หากเรารันแค่ `go get github.com/jackc/pgx/v5` ตัว Go จะดึงเฉพาะแพ็กเกจหลัก แต่จะยังไม่ได้ดาวน์โหลด `puddle/v2` (ไลบรารีสระเชื่อมต่อที่ `stdlib` ต้องใช้ภายใน) ลงใน `go.sum` ทำให้เวลาเขียน `import .../stdlib` ในโค้ด VS Code จะฟ้องสีแดงว่า `missing go.sum entry for puddle/v2` ทันที การระบุ `/stdlib` ให้ตรงกับแพ็กเกจที่เราจะใช้งานจริงจึงช่วยดึง dependencies ย่อยทั้งหมดมาให้อย่างครบถ้วน 100% ตั้งแต่แรกครับ",
         },
         {
           "t": "h2",
@@ -359,13 +359,13 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สั่งรันเทสต์ด้วยคำสั่ง `go test -v -cover`:",
+          "c": "ก่อนเริ่มรันเทสต์ ให้สั่ง **`go mod tidy`** หนึ่งครั้งเพื่อให้ Go จัดระเบียบและดึง dependencies ย่อยของ Testify ลงใน `go.sum` ให้ครบถ้วน จากนั้นสั่งรันเทสต์ด้วยคำสั่ง `go test -v -cover ./db`:",
         },
         {
           "t": "codeout",
           "lang": "bash",
-          "label": "ผลลัพธ์การรัน Unit Test ของแพ็กเกจ db",
-          "code": "go test -v -cover ./db",
+          "label": "จัดระเบียบ dependencies และสั่งรัน Unit Test ของแพ็กเกจ db",
+          "code": "go mod tidy\ngo test -v -cover ./db",
           "out": "=== RUN   TestCreateAccount\n--- PASS: TestCreateAccount (0.01s)\n=== RUN   TestGetAccount\n--- PASS: TestGetAccount (0.01s)\n=== RUN   TestAddAccountBalance\n--- PASS: TestAddAccountBalance (0.01s)\n=== RUN   TestDeleteAccount\n--- PASS: TestDeleteAccount (0.01s)\nPASS\ncoverage: 85.7% of statements\nok      simplebank/db   0.082s",
         },
         {
