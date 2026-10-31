@@ -64,29 +64,31 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. เขียน Handlers สำหรับ Accounts (account.go)",
+          "c": "3. เขียน Handlers สำหรับ Accounts (account.go): 3 ช่องทางรับข้อมูลของ Gin",
         },
         {
           "t": "p",
-          "c": "เวลาที่ Client ส่ง HTTP Request เข้ามา ข้อมูลสามารถถูกส่งมาได้ 3 ช่องทาง ซึ่งใน Gin จะมีฟังก์ชัน **Binder** และ **Struct Tag** แยกตามช่องทางอย่างชัดเจน:",
-        },
-        {
-          "t": "ul",
-          "c": [
-            "**1. JSON Body (`ctx.ShouldBindJSON(&req)` + แท็ก `` `json:\"...\"` ``)**: ใช้สำหรับดึงข้อมูลจากก้อน JSON ใน Request Body ของคำสั่ง `POST` หรือ `PUT` เช่น ข้อมูลเปิดบัญชีใหม่",
-            "**2. URL Path Parameter (`ctx.ShouldBindUri(&req)` + แท็ก `` `uri:\"...\"` ``)**: ใช้สำหรับดึงตัวแปรที่ฝังอยู่ใน URL Path เช่น `/accounts/:id` (เมื่อส่ง `/accounts/5` เข้ามา ฟิลด์ที่มีแท็ก `uri:\"id\"` จะได้รับค่า `5` ทันที)",
-            "**3. Query String (`ctx.ShouldBindQuery(&req)` + แท็ก `` `form:\"...\"` ``)**: ใช้สำหรับดึงค่าหลังเครื่องหมายคำถาม `?` บน URL เช่น `/accounts?page_id=1&page_size=5` สำหรับทำระบบแบ่งหน้า (Pagination)",
-          ],
+          "c": "เวลาที่ Client ส่ง HTTP Request เข้ามา ข้อมูลจะถูกส่งมาใน 3 ช่องทาง ซึ่งในไฟล์ `simplebank/api/account.go` เราจะใช้ฟังก์ชัน **Binder** ของ Gin แยกตามช่องทางดังนี้ครับ",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/api/account.go` โดยแยก Request Struct ของทั้ง 3 รูปแบบ และตอบกลับ HTTP Status Code ที่เหมาะสม (`200 OK`, `400 Bad Request` เมื่อพารามิเตอร์ผิด, `404 Not Found` เมื่อไม่พบบัญชี `sql.ErrNoRows`, และ `500 Internal Server Error`):",
+          "c": "**ช่องทางที่ 3.1: รับข้อมูลจาก JSON Body (`ShouldBindJSON` + แท็ก `` `json:\"...\"` ``)**\nใช้กับคำสั่ง `POST /accounts` เมื่อลูกค้าส่ง JSON มาขอเปิดบัญชีใหม่:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/account.go",
-          "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n)\n\ntype createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,oneof=USD EUR THB\"`\n}\n\nfunc (server *Server) createAccount(ctx *gin.Context) {\n\tvar req createAccountRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.CreateAccount(ctx, db.CreateAccountParams{\n\t\tOwner:    req.Owner,\n\t\tBalance:  0,\n\t\tCurrency: req.Currency,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}\n\ntype getAccountRequest struct {\n\tID int64 `uri:\"id\" binding:\"required,min=1\"`\n}\n\nfunc (server *Server) getAccount(ctx *gin.Context) {\n\tvar req getAccountRequest\n\tif err := ctx.ShouldBindUri(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.GetAccount(ctx, req.ID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}\n\ntype listAccountsRequest struct {\n\tPageID   int32 `form:\"page_id\" binding:\"required,min=1\"`\n\tPageSize int32 `form:\"page_size\" binding:\"required,min=5,max=10\"`\n}\n\nfunc (server *Server) listAccounts(ctx *gin.Context) {\n\tvar req listAccountsRequest\n\tif err := ctx.ShouldBindQuery(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccounts, err := server.store.ListAccounts(ctx, db.ListAccountsParams{\n\t\tOwner:  \"\", // ในบทที่ 7 เมื่อมี auth จะดึงเฉพาะของเจ้าของ\n\t\tLimit:  req.PageSize,\n\t\tOffset: (req.PageID - 1) * req.PageSize,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, accounts)\n}",
+          "label": "simplebank/api/account.go (ส่วนที่ 1: เปิดบัญชีใหม่ด้วย ShouldBindJSON)",
+          "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n)\n\ntype createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,oneof=USD EUR THB\"`\n}\n\nfunc (server *Server) createAccount(ctx *gin.Context) {\n\tvar req createAccountRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.CreateAccount(ctx, db.CreateAccountParams{\n\t\tOwner:    req.Owner,\n\t\tBalance:  0,\n\t\tCurrency: req.Currency,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` สำหรับดูข้อมูลบัญชีรายตัว (`GET /accounts/:id`) และดึงรายการบัญชีแบบแบ่งหน้า (`GET /accounts?page_id=1&page_size=5`):",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/account.go (ส่วนที่ 2: ดึงบัญชีด้วย ShouldBindUri และ ShouldBindQuery)",
+          "c": "type getAccountRequest struct {\n\tID int64 `uri:\"id\" binding:\"required,min=1\"`\n}\n\nfunc (server *Server) getAccount(ctx *gin.Context) {\n\tvar req getAccountRequest\n\tif err := ctx.ShouldBindUri(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.GetAccount(ctx, req.ID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err)) // 404 Not Found เมื่อไม่พบบัญชี\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}\n\ntype listAccountsRequest struct {\n\tPageID   int32 `form:\"page_id\" binding:\"required,min=1\"`\n\tPageSize int32 `form:\"page_size\" binding:\"required,min=5,max=10\"`\n}\n\nfunc (server *Server) listAccounts(ctx *gin.Context) {\n\tvar req listAccountsRequest\n\tif err := ctx.ShouldBindQuery(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccounts, err := server.store.ListAccounts(ctx, db.ListAccountsParams{\n\t\tOwner:  \"\", // ในบทที่ 7 เมื่อมี auth จะดึงเฉพาะของเจ้าของ\n\t\tLimit:  req.PageSize,\n\t\tOffset: (req.PageID - 1) * req.PageSize,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, accounts)\n}",
         },
         {
           "t": "h2",

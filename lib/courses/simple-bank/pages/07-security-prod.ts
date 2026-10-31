@@ -200,7 +200,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "ติดตั้งแพ็กเกจ `aidanwoods.dev/go-paseto` แล้วสร้างตัวสร้างและตรวจสอบ Token ใน `simplebank/token/paseto_maker.go`:",
+          "c": "ติดตั้งแพ็กเกจ `aidanwoods.dev/go-paseto` แล้วสร้างไฟล์ `simplebank/token/paseto_maker.go` โดยแบ่งออกเป็น 2 ส่วน:",
         },
         {
           "t": "codeout",
@@ -210,10 +210,24 @@ export const securityProdPages: Record<string, Page> = {
           "out": "go: added aidanwoods.dev/go-paseto v1.6.0",
         },
         {
+          "t": "p",
+          "c": "**ส่วนที่ 2.1: โครงสร้าง `Payload` และฟังก์ชัน `NewPasetoMaker`**\nตรวจสอบความยาวกุญแจลับให้ครบ 32 ไบต์ตั้งแต่วินาทีแรกที่สร้าง:",
+        },
+        {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/token/paseto_maker.go",
-          "c": "package token\n\nimport (\n\t\"errors\"\n\t\"time\"\n\t\"aidanwoods.dev/go-paseto\"\n)\n\nvar (\n\tErrInvalidToken = errors.New(\"token is invalid\")\n\tErrExpiredToken = errors.New(\"token has expired\")\n)\n\ntype Payload struct {\n\tUsername  string    `json:\"username\"`\n\tIssuedAt  time.Time `json:\"issued_at\"`\n\tExpiredAt time.Time `json:\"expired_at\"`\n}\n\ntype PasetoMaker struct {\n\tkey paseto.V4SymmetricKey\n}\n\nfunc NewPasetoMaker(symmetricKey string) (*PasetoMaker, error) {\n\tkey, err := paseto.V4SymmetricKeyFromBytes([]byte(symmetricKey))\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\treturn &PasetoMaker{key: key}, nil\n}\n\nfunc (m *PasetoMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {\n\tnow := time.Now()\n\tpayload := &Payload{Username: username, IssuedAt: now, ExpiredAt: now.Add(duration)}\n\n\tt := paseto.NewToken()\n\tt.SetIssuedAt(payload.IssuedAt)\n\tt.SetExpiration(payload.ExpiredAt)\n\tt.SetString(\"username\", username)\n\n\treturn t.V4Encrypt(m.key, nil), payload, nil\n}\n\nfunc (m *PasetoMaker) VerifyToken(tokenString string) (*Payload, error) {\n\tparser := paseto.NewParserWithoutExpiryCheck()\n\tt, err := parser.ParseV4Local(m.key, tokenString, nil)\n\tif err != nil {\n\t\treturn nil, ErrInvalidToken\n\t}\n\n\tusername, err := t.GetString(\"username\")\n\tif err != nil {\n\t\treturn nil, ErrInvalidToken\n\t}\n\texpiredAt, _ := t.GetExpiration()\n\tif time.Now().After(expiredAt) {\n\t\treturn nil, ErrExpiredToken\n\t}\n\tissuedAt, _ := t.GetIssuedAt()\n\n\treturn &Payload{Username: username, IssuedAt: issuedAt, ExpiredAt: expiredAt}, nil\n}",
+          "label": "simplebank/token/paseto_maker.go (ส่วนที่ 1: Payload และ NewPasetoMaker)",
+          "c": "package token\n\nimport (\n\t\"errors\"\n\t\"time\"\n\t\"aidanwoods.dev/go-paseto\"\n)\n\nvar (\n\tErrInvalidToken = errors.New(\"token is invalid\")\n\tErrExpiredToken = errors.New(\"token has expired\")\n)\n\ntype Payload struct {\n\tUsername  string    `json:\"username\"`\n\tIssuedAt  time.Time `json:\"issued_at\"`\n\tExpiredAt time.Time `json:\"expired_at\"`\n}\n\ntype PasetoMaker struct {\n\tkey paseto.V4SymmetricKey\n}\n\nfunc NewPasetoMaker(symmetricKey string) (*PasetoMaker, error) {\n\tkey, err := paseto.V4SymmetricKeyFromBytes([]byte(symmetricKey))\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\treturn &PasetoMaker{key: key}, nil\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 2.2: เมธอด `CreateToken` (เข้ารหัสออกบัตรผ่าน) และ `VerifyToken` (ถอดรหัสและเช็กวันหมดอายุ)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/token/paseto_maker.go`:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/token/paseto_maker.go (ส่วนที่ 2: CreateToken และ VerifyToken)",
+          "c": "func (m *PasetoMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {\n\tnow := time.Now()\n\tpayload := &Payload{Username: username, IssuedAt: now, ExpiredAt: now.Add(duration)}\n\n\tt := paseto.NewToken()\n\tt.SetIssuedAt(payload.IssuedAt)\n\tt.SetExpiration(payload.ExpiredAt)\n\tt.SetString(\"username\", username)\n\n\treturn t.V4Encrypt(m.key, nil), payload, nil\n}\n\nfunc (m *PasetoMaker) VerifyToken(tokenString string) (*Payload, error) {\n\tparser := paseto.NewParserWithoutExpiryCheck()\n\tt, err := parser.ParseV4Local(m.key, tokenString, nil)\n\tif err != nil {\n\t\treturn nil, ErrInvalidToken\n\t}\n\n\tusername, err := t.GetString(\"username\")\n\tif err != nil {\n\t\treturn nil, ErrInvalidToken\n\t}\n\texpiredAt, _ := t.GetExpiration()\n\tif time.Now().After(expiredAt) {\n\t\treturn nil, ErrExpiredToken\n\t}\n\tissuedAt, _ := t.GetIssuedAt()\n\n\treturn &Payload{Username: username, IssuedAt: issuedAt, ExpiredAt: expiredAt}, nil\n}",
         },
         {
           "t": "h2",

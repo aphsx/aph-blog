@@ -199,13 +199,27 @@ export const transactionPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/tx_transfer.go` โดยนำขั้นตอนทั้ง 5 มาครอบด้วย `s.execTx`:",
+          "c": "สร้างไฟล์ `simplebank/db/tx_transfer.go` โดยแบ่งออกเป็น 2 ส่วนคือ **โครงสร้างข้อมูลขาเข้า/ขาออก** และ **ฟังก์ชันดำเนินการโอนเงิน**:",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 3.1: นิยาม `TransferTxParams` (ขาเข้า) และ `TransferTxResult` (ขาออก)**\nเราออกแบบให้ผลลัพธ์ส่งกลับทั้งใบเสร็จ `Transfer`, รายการเดินบัญชี `FromEntry`/`ToEntry`, และข้อมูลบัญชีล่าสุด `FromAccount`/`ToAccount` เพื่อให้ API นำไปตอบกลับลูกค้าได้ทันทีในครั้งเดียวโดยไม่ต้องคิวรีซ้ำ:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/tx_transfer.go",
-          "c": "package db\n\nimport \"context\"\n\ntype TransferTxParams struct {\n\tFromAccountID int64 `json:\"from_account_id\"`\n\tToAccountID   int64 `json:\"to_account_id\"`\n\tAmount        int64 `json:\"amount\"`\n}\n\ntype TransferTxResult struct {\n\tTransfer    Transfer `json:\"transfer\"`\n\tFromAccount Account  `json:\"from_account\"`\n\tToAccount   Account  `json:\"to_account\"`\n\tFromEntry   Entry    `json:\"from_entry\"`\n\tToEntry     Entry    `json:\"to_entry\"`\n}\n\n// TransferTx ดำเนินการโอนเงิน 5 ขั้นตอนภายใน 1 Transaction\nfunc (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {\n\tvar result TransferTxResult\n\n\terr := s.execTx(ctx, func(q *Queries) error {\n\t\tvar err error\n\n\t\t// 1. บันทึก Transfer\n\t\tresult.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{\n\t\t\tFromAccountID: arg.FromAccountID,\n\t\t\tToAccountID:   arg.ToAccountID,\n\t\t\tAmount:        arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 2. บันทึก From Entry (เงินออกเป็นลบ)\n\t\tresult.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.FromAccountID,\n\t\t\tAmount:    -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 3. บันทึก To Entry (เงินเข้าเป็นบวก)\n\t\tresult.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.ToAccountID,\n\t\t\tAmount:    arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 4. หักเงินผู้โอน\n\t\tresult.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\t\tID:     arg.FromAccountID,\n\t\t\tAmount: -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 5. เพิ่มเงินผู้รับ\n\t\tresult.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\t\tID:     arg.ToAccountID,\n\t\t\tAmount: arg.Amount,\n\t\t})\n\t\treturn err\n\t})\n\n\treturn result, err\n}",
+          "label": "simplebank/db/tx_transfer.go (ส่วนที่ 1: Struct ขาเข้าและผลลัพธ์ขาออก)",
+          "c": "package db\n\nimport \"context\"\n\ntype TransferTxParams struct {\n\tFromAccountID int64 `json:\"from_account_id\"`\n\tToAccountID   int64 `json:\"to_account_id\"`\n\tAmount        int64 `json:\"amount\"`\n}\n\ntype TransferTxResult struct {\n\tTransfer    Transfer `json:\"transfer\"`\n\tFromAccount Account  `json:\"from_account\"`\n\tToAccount   Account  `json:\"to_account\"`\n\tFromEntry   Entry    `json:\"from_entry\"`\n\tToEntry     Entry    `json:\"to_entry\"`\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 3.2: ฟังก์ชัน `TransferTx` มัดรวม 5 ขั้นตอนภายใต้ `s.execTx`**\nเขียนต่อท้ายในไฟล์ `simplebank/db/tx_transfer.go` หากขั้นตอนใดขั้นตอนหนึ่งคืนค่า `err != nil` ฟังก์ชันจะหยุดทันทีและ `execTx` จะสั่ง `Rollback()` ข้อมูลทั้งหมดกลับสู่สภาพเดิมอัตโนมัติ:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/tx_transfer.go (ส่วนที่ 2: ฟังก์ชัน TransferTx)",
+          "c": "// TransferTx ดำเนินการโอนเงิน 5 ขั้นตอนภายใน 1 Transaction\nfunc (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {\n\tvar result TransferTxResult\n\n\terr := s.execTx(ctx, func(q *Queries) error {\n\t\tvar err error\n\n\t\t// ขั้นที่ 1: บันทึกใบเสร็จโอนเงิน (Transfer)\n\t\tresult.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{\n\t\t\tFromAccountID: arg.FromAccountID,\n\t\t\tToAccountID:   arg.ToAccountID,\n\t\t\tAmount:        arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// ขั้นที่ 2: บันทึกสมุดบัญชีฝั่งผู้โอน (เงินออกเป็นค่าลบ -Amount)\n\t\tresult.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.FromAccountID,\n\t\t\tAmount:    -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// ขั้นที่ 3: บันทึกสมุดบัญชีฝั่งผู้รับ (เงินเข้าเป็นค่าบวก +Amount)\n\t\tresult.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.ToAccountID,\n\t\t\tAmount:    arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// ขั้นที่ 4: หักยอดเงินในบัญชีผู้โอน\n\t\tresult.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\t\tID:     arg.FromAccountID,\n\t\t\tAmount: -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// ขั้นที่ 5: เพิ่มยอดเงินในบัญชีผู้รับ\n\t\tresult.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\t\tID:     arg.ToAccountID,\n\t\t\tAmount: arg.Amount,\n\t\t})\n\t\treturn err\n\t})\n\n\treturn result, err\n}",
         },
         {
           "t": "h2",

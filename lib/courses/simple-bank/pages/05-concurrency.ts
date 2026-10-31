@@ -65,28 +65,43 @@ export const concurrencyPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. นำมาสร้าง Concurrent Test สำหรับระบบโอนเงิน",
+          "c": "3. นำมาสร้าง Concurrent Test สำหรับระบบโอนเงิน (store_test.go)",
         },
         {
           "t": "p",
-          "c": "เรานำ Goroutine และ Channel มาเขียนชุดทดสอบ `TestTransferTx` ใน `simplebank/db/store_test.go` โดยสั่งให้คน `n = 5` คนกดยิงโอนเงิน `amount = 10` ดอลลาร์จากบัญชีที่ 1 ไปยังบัญชีที่ 2 พร้อมกันในเสี้ยววินาทีเดียวกัน:",
+          "c": "เรานำ Goroutine และ Channel มาเขียนชุดทดสอบ `TestTransferTx` ในไฟล์ `simplebank/db/store_test.go` โดยแบ่งออกเป็น 2 จังหวะคือ **จังหวะยิงคำสั่งโอนพร้อมกัน** และ **จังหวะตรวจสอบความถูกต้องของผลลัพธ์**:",
         },
         {
           "t": "p",
-          "c": "**ทำความเข้าใจกลไกการตรวจสอบในโค้ดเทสต์นี้ก่อนลงมือเขียน:**",
-        },
-        {
-          "t": "ul",
-          "c": [
-            "**การประสานงาน (Synchronization) ด้วย Unbuffered Channel**: เราสร้าง `errs := make(chan error)` และ `results := make(chan TransferTxResult)` โดยไม่ระบุขนาดบัฟเฟอร์ แล้วสั่งเปิด 5 Goroutines ให้ทำงานพร้อมกัน จากนั้นใน Goroutine หลัก เราวนลูป `for range n` เพื่อดึงค่าออกจาก Channel (`<-errs` และ `<-results`) ครบ 5 รอบ ซึ่งจะบังคับให้ฟังก์ชันเทสต์รอจนกว่าทั้ง 5 Goroutines จะทำงานเสร็จสมบูรณ์โดยไม่ต้องเดาเวลาด้วย `time.Sleep`",
-            "**การตรวจเช็กขั้นบันไดของยอดเงิน (`diff1`, `diff2`, และ `k`)**: เนื่องจากมีการโอนเงินครั้งละ `10` จำนวน 5 ครั้ง ยอดเงินของบัญชีต้นทางจะต้องลดลงเป็นลำดับขั้น คือหายไป `10, 20, 30, 40, 50` ดอลลาร์ตามลำดับ Transaction ที่เสร็จก่อน-หลัง\n  • `diff1 := account1.Balance - result.FromAccount.Balance` คือยอดเงินรวมที่ลดลงไป ณ จังหวะนั้น\n  • เมื่อนำ `k := int(diff1 / amount)` มาหารด้วย 10 ค่า `k` ที่ได้จะต้องเป็นเลขจำนวนเต็ม `1, 2, 3, 4, 5` ไม่ซ้ำกันเลย เราจึงใช้ `existed := make(map[int]bool)` มาคอยเช็กว่ามีครบทุกขั้นบันไดจริงๆ ไม่มียอดเงินทับกัน!",
-          ],
+          "c": "**ส่วนที่ 3.1: เปิด 5 Goroutines ยิงคำสั่งโอนเงินพร้อมกันและส่งผลลัพธ์เข้า Channel**",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/store_test.go",
-          "c": "package db\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n)\n\n// topUp เติมเงินเริ่มต้นให้บัญชีเพื่อความแน่ใจว่ามียอดเงินเพียงพอสำหรับการทดสอบโอนหลายครั้ง\nfunc topUp(t *testing.T, acc Account, amount int64) Account {\n\tupdated, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc.ID,\n\t\tAmount: amount,\n\t})\n\trequire.NoError(t, err)\n\treturn updated\n}\n\nfunc TestTransferTx(t *testing.T) {\n\tstore := NewStore(testDB)\n\n\taccount1 := topUp(t, createRandomAccount(t), 1000)\n\taccount2 := createRandomAccount(t)\n\tfmt.Println(\">> ก่อนโอน:\", account1.Balance, account2.Balance)\n\n\tn := 5\n\tamount := int64(10)\n\n\terrs := make(chan error)\n\tresults := make(chan TransferTxResult)\n\n\t// ยิงคำสั่งโอนเงิน 5 ครั้งพร้อมกันผ่าน Goroutines\n\tfor range n {\n\t\tgo func() {\n\t\t\tresult, err := store.TransferTx(context.Background(), TransferTxParams{\n\t\t\t\tFromAccountID: account1.ID,\n\t\t\t\tToAccountID:   account2.ID,\n\t\t\t\tAmount:        amount,\n\t\t\t})\n\t\t\terrs <- err\n\t\t\tresults <- result\n\t\t}()\n\t}\n\n\t// รับผลลัพธ์และตรวจสอบยอดเงิน\n\texisted := make(map[int]bool)\n\tfor range n {\n\t\terr := <-errs\n\t\trequire.NoError(t, err)\n\t\tresult := <-results\n\n\t\trequire.NotEmpty(t, result)\n\t\trequire.Equal(t, account1.ID, result.Transfer.FromAccountID)\n\t\trequire.Equal(t, account2.ID, result.Transfer.ToAccountID)\n\t\trequire.Equal(t, -amount, result.FromEntry.Amount)\n\t\trequire.Equal(t, amount, result.ToEntry.Amount)\n\n\t\t// ตรวจสอบว่ายอดเงินในแต่ละธุรกรรมลดลงทีละ 10, 20, 30, 40, 50 อย่างถูกต้อง\n\t\tfmt.Println(\">> tx:\", result.FromAccount.Balance, result.ToAccount.Balance)\n\t\tdiff1 := account1.Balance - result.FromAccount.Balance\n\t\tdiff2 := result.ToAccount.Balance - account2.Balance\n\t\trequire.Equal(t, diff1, diff2)\n\t\trequire.True(t, diff1 > 0)\n\t\trequire.True(t, diff1%amount == 0)\n\n\t\tk := int(diff1 / amount)\n\t\trequire.True(t, k >= 1 && k <= n)\n\t\trequire.NotContains(t, existed, k)\n\t\texisted[k] = true\n\t}\n\n\t// ตรวจสอบยอดเงินสุทธิสุดท้ายในฐานข้อมูล\n\tupdated1, err := testQueries.GetAccount(context.Background(), account1.ID)\n\trequire.NoError(t, err)\n\tupdated2, err := testQueries.GetAccount(context.Background(), account2.ID)\n\trequire.NoError(t, err)\n\n\tfmt.Println(\">> หลังโอน:\", updated1.Balance, updated2.Balance)\n\trequire.Equal(t, account1.Balance-int64(n)*amount, updated1.Balance)\n\trequire.Equal(t, account2.Balance+int64(n)*amount, updated2.Balance)\n}",
+          "label": "simplebank/db/store_test.go (ส่วนที่ 1: ยิงคำสั่งโอนเงินคู่ขนาน)",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n)\n\n// topUp เติมเงินเริ่มต้นให้บัญชีเพื่อความแน่ใจว่ามียอดเงินเพียงพอสำหรับการทดสอบโอนหลายครั้ง\nfunc topUp(t *testing.T, acc Account, amount int64) Account {\n\tupdated, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc.ID,\n\t\tAmount: amount,\n\t})\n\trequire.NoError(t, err)\n\treturn updated\n}\n\nfunc TestTransferTx(t *testing.T) {\n\tstore := NewStore(testDB)\n\n\taccount1 := topUp(t, createRandomAccount(t), 1000)\n\taccount2 := createRandomAccount(t)\n\tfmt.Println(\">> ก่อนโอน:\", account1.Balance, account2.Balance)\n\n\tn := 5\n\tamount := int64(10)\n\n\terrs := make(chan error)\n\tresults := make(chan TransferTxResult)\n\n\t// 1. ยิงคำสั่งโอนเงิน 5 ครั้งพร้อมกันผ่าน Goroutines\n\tfor range n {\n\t\tgo func() {\n\t\t\tresult, err := store.TransferTx(context.Background(), TransferTxParams{\n\t\t\t\tFromAccountID: account1.ID,\n\t\t\t\tToAccountID:   account2.ID,\n\t\t\t\tAmount:        amount,\n\t\t\t})\n\t\t\terrs <- err\n\t\t\tresults <- result\n\t\t}()\n\t}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Unbuffered Channel (`make(chan error)`)**: ใช้เป็นท่อประสานงาน (Synchronization) เมื่อ Goroutine ย่อยแต่ละตัวโอนเงินเสร็จ มันจะส่ง `err` และ `result` เข้าท่อมาให้ Goroutine หลัก",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 3.2: วนลูปรอรับผลลัพธ์ทั้ง 5 รายการและตรวจสอบขั้นบันไดของยอดเงิน**\nเขียนต่อท้ายภายในฟังก์ชัน `TestTransferTx`:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/store_test.go (ส่วนที่ 2: ตรวจสอบผลลัพธ์และขั้นบันไดยอดเงิน)",
+          "c": "\t// 2. รอรับผลลัพธ์ครบ 5 รอบ และตรวจสอบความถูกต้องของแต่ละธุรกรรม\n\texisted := make(map[int]bool)\n\tfor range n {\n\t\terr := <-errs\n\t\trequire.NoError(t, err)\n\t\tresult := <-results\n\n\t\trequire.NotEmpty(t, result)\n\t\trequire.Equal(t, account1.ID, result.Transfer.FromAccountID)\n\t\trequire.Equal(t, account2.ID, result.Transfer.ToAccountID)\n\t\trequire.Equal(t, -amount, result.FromEntry.Amount)\n\t\trequire.Equal(t, amount, result.ToEntry.Amount)\n\n\t\t// ตรวจสอบว่ายอดเงินในแต่ละธุรกรรมลดลงทีละ 10, 20, 30, 40, 50 อย่างถูกต้อง\n\t\tfmt.Println(\">> tx:\", result.FromAccount.Balance, result.ToAccount.Balance)\n\t\tdiff1 := account1.Balance - result.FromAccount.Balance\n\t\tdiff2 := result.ToAccount.Balance - account2.Balance\n\t\trequire.Equal(t, diff1, diff2)\n\t\trequire.True(t, diff1 > 0)\n\t\trequire.True(t, diff1%amount == 0)\n\n\t\tk := int(diff1 / amount)\n\t\trequire.True(t, k >= 1 && k <= n)\n\t\trequire.NotContains(t, existed, k)\n\t\texisted[k] = true\n\t}\n\n\t// 3. ตรวจสอบยอดเงินสุทธิสุดท้ายในฐานข้อมูล\n\tupdated1, err := testQueries.GetAccount(context.Background(), account1.ID)\n\trequire.NoError(t, err)\n\tupdated2, err := testQueries.GetAccount(context.Background(), account2.ID)\n\trequire.NoError(t, err)\n\n\tfmt.Println(\">> หลังโอน:\", updated1.Balance, updated2.Balance)\n\trequire.Equal(t, account1.Balance-int64(n)*amount, updated1.Balance)\n\trequire.Equal(t, account2.Balance+int64(n)*amount, updated2.Balance)\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ทำไมต้องเช็ก `diff1`, `diff2` และ `k`?**: เมื่อโอนเงินครั้งละ `10` จำนวน 5 ครั้ง ยอดเงินของบัญชีต้นทางจะต้องลดลงเป็นขั้นบันได คือหายไป `10, 20, 30, 40, 50` ดอลลาร์ตามลำดับ เมื่อนำ `k := int(diff1 / amount)` มาหารด้วย 10 ค่า `k` ที่ได้จะต้องเป็นเลข `1, 2, 3, 4, 5` ไม่ซ้ำกันเลย เราจึงใช้ `existed[k]` เช็กว่าไม่มีธุรกรรมไหนแอบอ่านยอดเงินเก่ามาทับกัน!",
+          ],
         },
         {
           "t": "h2",

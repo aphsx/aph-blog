@@ -43,18 +43,38 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "2. รู้จักกับ pgx v5: ทำไมมี database/sql แล้วยังต้องลง Driver เพิ่ม?",
+          "c": "2. แปลงตาราง SQL เป็น Go Struct (models.go)",
         },
         {
           "t": "p",
-          "c": "ผู้เรียนหลายคนมักสงสัยว่า ในเมื่อภาษา Go มีแพ็กเกจมาตรฐานชื่อ `database/sql` มาให้ในตัวอยู่แล้ว ทำไมเราถึงยังต้องดาวน์โหลดไลบรารีข้างนอกเพิ่มอีก? คำตอบอยู่ที่การแบ่งหน้าที่กันทำงานครับ:",
+          "c": "ในบทที่ 2 เราได้สร้างตาราง `accounts`, `entries`, และ `transfers` ใน PostgreSQL ไปแล้ว ก้าวแรกที่ง่ายที่สุดคือการสร้าง Go Struct มารองรับข้อมูลของทั้ง 3 ตารางนี้ในไฟล์ `simplebank/db/models.go`:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/models.go",
+          "c": "package db\n\nimport \"time\"\n\ntype Account struct {\n\tID        int64     `json:\"id\"`\n\tOwner     string    `json:\"owner\"`\n\tBalance   int64     `json:\"balance\"`\n\tCurrency  string    `json:\"currency\"`\n\tCreatedAt time.Time `json:\"created_at\"`\n}\n\ntype Entry struct {\n\tID        int64     `json:\"id\"`\n\tAccountID int64     `json:\"account_id\"`\n\tAmount    int64     `json:\"amount\"`\n\tCreatedAt time.Time `json:\"created_at\"`\n}\n\ntype Transfer struct {\n\tID            int64     `json:\"id\"`\n\tFromAccountID int64     `json:\"from_account_id\"`\n\tToAccountID   int64     `json:\"to_account_id\"`\n\tAmount        int64     `json:\"amount\"`\n\tCreatedAt     time.Time `json:\"created_at\"`\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ชนิดข้อมูลตรงกันเป๊ะ**: คอลัมน์ `bigserial` และ `bigint` ใน SQL จับคู่กับ `int64` ใน Go, `varchar` จับคู่กับ `string`, และ `timestamptz` จับคู่กับ `time.Time`",
+            "**Struct Tag `` `json:\"...\"` ``**: กำหนดชื่อคีย์เวลาแปลง Struct นี้เป็น JSON ในบทที่ 6 (เช่น แปลง `CreatedAt` เป็น `\"created_at\"` แบบ snake_case ตามมาตรฐาน API)",
+          ],
+        },
+        {
+          "t": "h2",
+          "c": "3. ติดตั้งไดรเวอร์ pgx v5: ทำไมมี database/sql แล้วยังต้องลงเพิ่ม?",
+        },
+        {
+          "t": "p",
+          "c": "แม้ภาษา Go จะมีแพ็กเกจมาตรฐานชื่อ `database/sql` มาให้ในตัว แต่เราจำเป็นต้องติดตั้ง **Database Driver** เพิ่มเติมเพราะมีการแบ่งหน้าที่กันอย่างชัดเจน:",
         },
         {
           "t": "ul",
           "c": [
             "**`database/sql` (โครงสร้างคำสั่งกลางของ Go)**: เปรียบเสมือน **'พวงมาลัยและแป้นเหยียบรถยนต์'** ที่มีฟังก์ชันมาตรฐานอย่าง `Query`, `Exec`, `BeginTx` และระบบจัดการ Connection Pool มาให้พร้อมสรรพ **แต่มันพูดภาษาเครือข่ายเฉพาะตัวของฐานข้อมูลแต่ละยี่ห้อ (เช่น PostgreSQL, MySQL, Oracle) ไม่เป็น!**",
-            "**`pgx v5` (`github.com/jackc/pgx/v5` — Database Driver)**: เปรียบเสมือน **'ล่ามแปลภาษาและเครื่องยนต์สำหรับ PostgreSQL โดยเฉพาะ'** ทำหน้าที่แปลงคำสั่งจาก `database/sql` ให้กลายเป็นสัญญาณเครือข่าย (PostgreSQL Wire Protocol) ยิงไปที่พอร์ต `5432` แล้วแปลข้อมูลที่ PostgreSQL ตอบกลับมาให้เป็นตัวแปร Go",
-            "**ทำไมต้องเป็น `pgx v5`?**: ในอดีตโปรเจกต์ยุคเก่ามักใช้ไลบรารี `lib/pq` ซึ่งปัจจุบันได้ยุติการพัฒนาฟีเจอร์ใหม่ไปแล้ว (Maintenance Mode) ปัจจุบัน **`pgx/v5`** จึงกลายเป็นมาตรฐานอันดับ 1 ของวงการ Go ที่ทั้งเร็วกว่า ประหยัดแรมกว่า และรองรับฟีเจอร์ของ PostgreSQL 16 ได้อย่างสมบูรณ์แบบ",
+            "**`pgx v5` (`github.com/jackc/pgx/v5` — Database Driver)**: เปรียบเสมือน **'ล่ามแปลภาษาและเครื่องยนต์สำหรับ PostgreSQL โดยเฉพาะ'** ทำหน้าที่แปลงคำสั่งจาก `database/sql` ให้กลายเป็นสัญญาณเครือข่ายยิงไปที่พอร์ต `5432` แล้วแปลข้อมูลที่ PostgreSQL ตอบกลับมาให้เป็นตัวแปร Go (ปัจจุบัน `pgx/v5` คือมาตรฐานอันดับ 1 แทนที่ `lib/pq` ตัวเก่าที่ยุติการพัฒนาไปแล้ว)",
           ],
         },
         {
@@ -67,47 +87,51 @@ export const dbCodePages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "💡 ข้อควรระวังเรื่อง go get vs go mod tidy",
-          "c": "สังเกตว่าตอนที่เราเพิ่งรัน `go get` แต่ยังไม่ได้สร้างไฟล์ `.go` ที่ทำการ `import` แพ็กเกจนั้น **อย่าเพิ่งสั่ง `go mod tidy` ทันที!** เพราะคำสั่ง `go mod tidy` มีหน้าที่กวาดลบแพ็กเกจที่ยังไม่ได้ถูกเรียกใช้ในโค้ดออกจาก `go.mod` ให้เราเขียนโค้ดจนเสร็จก่อนแล้วค่อยรัน `go mod tidy` เพื่อจัดระเบียบในตอนท้ายครับ",
+          "c": "ตอนที่เพิ่งรัน `go get` แต่ยังไม่ได้เขียนไฟล์ `.go` ที่ทำการ `import` แพ็กเกจนั้น **อย่าเพิ่งสั่ง `go mod tidy` ทันที!** เพราะ `go mod tidy` จะกวาดลบแพ็กเกจที่ยังไม่ได้ถูกเรียกใช้ในโค้ดออกจาก `go.mod` ให้เราเขียนโค้ดจนเสร็จก่อนแล้วค่อยรัน `go mod tidy` ในตอนท้ายครับ",
         },
         {
           "t": "h2",
-          "c": "3. สร้างไฟล์เชื่อมต่อฐานข้อมูล (db.go): แยกเข้าใจเป็น 2 ส่วน",
+          "c": "4. เปิดสายเชื่อมต่อและสร้างตัวหุ้มคำสั่ง SQL (db.go)",
         },
         {
           "t": "p",
-          "c": "เราจะสร้างไฟล์ `simplebank/db/db.go` ซึ่งภายในไฟล์นี้ประกอบด้วยโค้ดสำคัญ 2 ส่วนที่ทำหน้าที่ต่างกัน มาค่อยๆ แกะทีละส่วนกันครับ:",
+          "c": "ในไฟล์ `simplebank/db/db.go` มีโค้ดสำคัญ 2 ส่วนย่อย มาดูโค้ดและคำอธิบายทีละส่วนกันครับ",
         },
         {
           "t": "p",
-          "c": "**ส่วนที่ 3.1: ฟังก์ชัน `Open(dsn string)` — สูตรมาตรฐาน 3 ขั้นตอนของการเปิด Database ใน Go**\nเวลาเขียน Go เชื่อมต่อฐานข้อมูลทุกโปรเจกต์ในโลกจริง วิศวกรจะใช้แพทเทิร์นมาตรฐาน (Boilerplate Template) 3 ขั้นตอนนี้เสมอ:\n1. **เตรียมไดรเวอร์ด้วย `sql.Open(\"pgx\", dsn)`**: คำว่า **`dsn` (Data Source Name)** ก็คือที่อยู่ของฐานข้อมูล (Connection String เช่น `postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable` ที่เราเคยใส่ใน `Makefile` บทที่แล้ว) และสังเกตว่าด้านบนเราใส่ `_ \"github.com/jackc/pgx/v5/stdlib\"` (มีขีดล่าง `_` นำหน้า) เพื่อให้แพ็กเกจ `pgx` แอบลงทะเบียนชื่อ `\"pgx\"` เข้ากับ `database/sql` อัตโนมัติ\n2. **ตั้งขนาดสระเก็บสายเชื่อมต่อ (Connection Pool)**: การต่อสายไปหา Database ใหม่ทุกครั้งที่มีคนกดโอนเงินนั้นช้ามาก ตัว `*sql.DB` จึงทำหน้าที่เปิดสายรอไว้ล่วงหน้าเป็นสระ (Pool) โดยเรากำหนด 3 ค่ามาตรฐานคือ:\n   • `SetMaxOpenConns(25)`: จำกัดสายที่ใช้งานพร้อมกันสูงสุดไม่เกิน 25 สาย เพื่อป้องกันไม่ให้ PostgreSQL ทำงานหนักจนล่ม\n   • `SetMaxIdleConns(25)`: เก็บสายที่ว่างงานแล้วรอไว้ในสระ 25 สาย เวลามีคำสั่งใหม่มาจะได้หยิบใช้ทันทีไม่ต้องต่อสายใหม่\n   • `SetConnMaxLifetime(5 * time.Minute)`: รีไซเคิลสายเก่าทุกๆ 5 นาที ป้องกันสายค้าง\n3. **เคาะประตูเช็กสายด้วย `conn.Ping()`**: ความลับของ Go คือคำสั่ง `sql.Open` ในข้อ 1 **ยังไม่ได้ต่อสายไปหา PostgreSQL จริงๆ!** มันแค่ตรวจดูตัวอักษรเฉยๆ เราจึงต้องสั่ง `conn.Ping()` ปิดท้ายเสมอ เพื่อยิงสัญญาณไปเคาะประตูเช็กว่า PostgreSQL เปิดทำงานอยู่และรหัสผ่านถูกต้องจริงๆ",
-        },
-        {
-          "t": "p",
-          "c": "**ส่วนที่ 3.2: โครงสร้าง `DBTX` และ `Queries` — ตัวหุ้มคำสั่ง SQL ที่รองรับทั้งโหมดปกติและ Transaction**\nใน `database/sql` เวลาเราจะสั่งรัน SQL มันจะมีคำสั่งอยู่ 3 ตัวแยกตามสิ่งที่ต้องการได้กลับมา:\n• **`QueryRowContext`**: ใช้เมื่อต้องการข้อมูลกลับมา **แถวเดียว** (เช่น ค้นหาบัญชีจาก `id` หรือ `INSERT ... RETURNING`)\n• **`QueryContext`**: ใช้เมื่อต้องการข้อมูลกลับมา **หลายแถว** (เช่น ดึงรายการบัญชี 10 บัญชี)\n• **`ExecContext`**: ใช้เมื่อยิงคำสั่งที่ **ไม่ต้องการอ่านแถวข้อมูลกลับมา** (เช่น `DELETE` ลบบัญชี)\n\nความเจ๋งคือทั้งตัวเชื่อมต่อปกติ (`*sql.DB`) และตัวทำ Transaction (`*sql.Tx` ที่เราจะใช้ในบทที่ 4) ต่างมีเมธอดทั้ง 3 ตัวนี้เหมือนกันเป๊ะ! เราจึงสร้าง Interface ชื่อ `DBTX` และ Struct ชื่อ `Queries` ขึ้นมาครอบไว้ (ซึ่งเป็นแพทเทิร์นมาตรฐานเดียวกับที่เครื่องมือสร้างโค้ดระดับโลกอย่าง `sqlc` ใช้) ทำให้ฟังก์ชัน SQL ที่เราจะเขียนต่อจากนี้สามารถรันได้ทั้งแบบปกติและแบบ Transaction โดยไม่ต้องเขียนโค้ดซ้ำสองรอบ!",
-        },
-        {
-          "t": "p",
-          "c": "นำทั้ง 2 ส่วนมารวมกันในไฟล์ `simplebank/db/db.go` ดังนี้:",
+          "c": "**ส่วนที่ 4.1: ฟังก์ชัน `Open(dsn string)` (Template มาตรฐาน 3 ขั้นตอนของการเปิด Database ใน Go)**",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/db.go",
-          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// --- ส่วนที่ 1: สูตรมาตรฐานการเปิด Connection Pool ---\nfunc Open(dsn string) (*sql.DB, error) {\n\t// 1. เตรียมไดรเวอร์ด้วย DSN (Connection String)\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\t// 2. กำหนดขนาดสระเก็บสายเชื่อมต่อ (Connection Pool)\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\t// 3. ยิงสัญญาณเคาะเช็กว่าฐานข้อมูลเชื่อมต่อได้จริง\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// --- ส่วนที่ 2: โครงสร้าง DBTX และ Queries สำหรับรันคำสั่ง SQL ---\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
+          "label": "simplebank/db/db.go (ส่วนที่ 1: เปิด Connection Pool)",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\nfunc Open(dsn string) (*sql.DB, error) {\n\t// ขั้นที่ 1: เตรียมไดรเวอร์ด้วย DSN (Connection String)\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\t// ขั้นที่ 2: กำหนดขนาดสระเก็บสายเชื่อมต่อ (Connection Pool)\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\t// ขั้นที่ 3: ยิงสัญญาณเคาะเช็กว่าฐานข้อมูลเชื่อมต่อได้จริง\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}",
         },
         {
-          "t": "h2",
-          "c": "4. สร้างโมเดลข้อมูล (models.go)",
+          "t": "ul",
+          "c": [
+            "**`_ \"github.com/jackc/pgx/v5/stdlib\"` (Blank Import)**: ขีดล่าง `_` หน้า import บอก Go ให้รันฟังก์ชันเริ่มต้นของ `pgx` เบื้องหลัง เพื่อลงทะเบียนตัวเองเข้ากับ `database/sql` ในชื่อ `\"pgx\"`",
+            "**ขั้นที่ 1 (`sql.Open`)**: รับค่า **`dsn` (Data Source Name)** ซึ่งก็คือ URL ที่อยู่ฐานข้อมูล (เช่น `postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable`) แต่ระวังว่าคำสั่งนี้ **ยังไม่ได้ต่อสายไปหา Database จริงๆ** แค่เตรียมตัวแปรในหน่วยความจำเท่านั้น",
+            "**ขั้นที่ 2 (`SetMax...` Connection Pool)**: เพื่อไม่ให้เสียเวลาต่อสายใหม่ทุกครั้งที่มีคนโอนเงิน เราตั้งค่าสระเก็บสายให้เปิดพร้อมกันสูงสุด 25 สาย (`MaxOpenConns`), เก็บสายว่างรอใช้ซ้ำ 25 สาย (`MaxIdleConns`), และรีไซเคิลสายทุก 5 นาที (`ConnMaxLifetime`)",
+            "**ขั้นที่ 3 (`conn.Ping()`)**: ยิงสัญญาณไปเคาะประตูเช็ก PostgreSQL จริงๆ ว่าเปิดทำงานอยู่และรหัสผ่านถูกต้อง",
+          ],
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/models.go` เพื่อให้ตรงกับ Schema ในฐานข้อมูล (แท็ก `` `json:\"...\"` `` ด้านหลังช่วยให้แปลงเป็น JSON ส่งออกทาง API ในโมดูลที่ 6 ได้ทันที):",
+          "c": "**ส่วนที่ 4.2: โครงสร้าง `DBTX` และ `Queries` (ตัวหุ้มคำสั่ง SQL ที่ใช้ได้ทั้งโหมดปกติและ Transaction)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/db/db.go` เดียวกันเลย:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/models.go",
-          "c": "package db\n\nimport \"time\"\n\ntype Account struct {\n\tID        int64     `json:\"id\"`\n\tOwner     string    `json:\"owner\"`\n\tBalance   int64     `json:\"balance\"`\n\tCurrency  string    `json:\"currency\"`\n\tCreatedAt time.Time `json:\"created_at\"`\n}\n\ntype Entry struct {\n\tID        int64     `json:\"id\"`\n\tAccountID int64     `json:\"account_id\"`\n\tAmount    int64     `json:\"amount\"`\n\tCreatedAt time.Time `json:\"created_at\"`\n}\n\ntype Transfer struct {\n\tID            int64     `json:\"id\"`\n\tFromAccountID int64     `json:\"from_account_id\"`\n\tToAccountID   int64     `json:\"to_account_id\"`\n\tAmount        int64     `json:\"amount\"`\n\tCreatedAt     time.Time `json:\"created_at\"`\n}",
+          "label": "simplebank/db/db.go (ส่วนที่ 2: DBTX Interface และ Queries)",
+          "c": "// DBTX คือ Interface กลางที่รวม 3 เมธอดหลักที่มีอยู่ในทั้ง *sql.DB และ *sql.Tx\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\n// Queries ห่อหุ้ม DBTX เอาไว้ เพื่อให้เมธอด CRUD ทั้งหมดเกาะอยู่ที่ Struct นี้\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ทำไมต้องมี 3 เมธอดใน `DBTX`?**: เพราะใน `database/sql` เวลาสั่งรัน SQL จะแยกใช้ตามผลลัพธ์ที่ต้องการ:\n  1. `QueryRowContext`: ดึงข้อมูลกลับมา **แถวเดียว** (เช่น `SELECT ... WHERE id = $1` หรือ `INSERT ... RETURNING`)\n  2. `QueryContext`: ดึงข้อมูลกลับมา **หลายแถว** (เช่น ดึงรายการบัญชีหลายแถว)\n  3. `ExecContext`: รันคำสั่งโดย **ไม่ต้องการอ่านแถวข้อมูลกลับมา** (เช่น `DELETE` ลบบัญชี)",
+            "**ทำไมต้องสร้าง `DBTX` มาคั่นกลาง?**: เพราะทั้ง `*sql.DB` (การเชื่อมต่อปกติ) และ `*sql.Tx` (โหมดมัดรวม Transaction ในบทที่ 4) ต่างมีเมธอดทั้ง 3 ตัวนี้เหมือนกันเป๊ะ! การรับผ่าน Interface `DBTX` (ซึ่งเป็นแพทเทิร์นเดียวกับที่เครื่องมือระดับโลกอย่าง `sqlc` ใช้) ทำให้เราเขียนฟังก์ชัน CRUD แค่ครั้งเดียว แต่นำไปรันได้ทั้งในโหมดปกติและโหมดโอนเงิน!",
+          ],
         },
         {
           "t": "h2",
@@ -115,26 +139,42 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "ก่อนลงมือเขียนโค้ดใน `account.go` ให้ทำความเข้าใจ 4 เทคนิคสำคัญที่จะใช้ในไฟล์นี้:",
-        },
-        {
-          "t": "ul",
-          "c": [
-            "**Parameterized Query (`$1, $2, $3`)**: ห้ามนำสตริงของผู้ใช้มาต่อกันด้วย `+` หรือ `fmt.Sprintf` ใน SQL เด็ดขาด เพราะจะเกิดช่องโหว่ **SQL Injection** ใน PostgreSQL เราใช้สัญลักษณ์ `$1, $2, $3` เป็นตัวแทนตำแหน่งพารามิเตอร์ แล้วส่งค่าตามเข้าไปในฟังก์ชันอย่างปลอดภัย",
-            "**คำสั่ง `RETURNING` ของ PostgreSQL**: ปกติเวลาสั่ง `INSERT` หรือ `UPDATE` เราจะไม่รู้ว่าฐานข้อมูลสร้าง `id` อะไรให้ หรือ `created_at` เป็นเวลาใด หากต่อท้ายด้วย `RETURNING id, owner, balance, currency, created_at` ตัว PostgreSQL จะส่งแถวข้อมูลล่าสุดกลับมาให้ทันทีในคำสั่งเดียวโดยไม่ต้องยิง `SELECT` ซ้ำอีกรอบ",
-            "**`row.Scan(&a.ID, ...)`**: นำค่าแต่ละคอลัมน์ที่ได้จากฐานข้อมูลมายัดใส่ตัวแปรใน Go Struct (ต้องส่งเป็น Pointer `&` เสมอ เพื่อให้ `Scan` แก้ไขค่าในตัวแปรของเราได้)",
-            "**`defer rows.Close()` (สำคัญมาก!)**: เมื่อเรียกใช้ `QueryContext` เพื่อดึงข้อมูลหลายแถว สายเชื่อมต่อ (Connection) เส้นนั้นจะถูกจองไว้กับตัวแปร `rows` จนกว่าจะอ่านเสร็จ เราจึงต้องสั่ง `defer rows.Close()` ทันทีเพื่อรับประกันว่าเมื่อจบฟังก์ชัน สายเชื่อมต่อจะถูกคืนกลับเข้าสู่ Connection Pool เสมอ หากลืมใส่เพียงจุดเดียว สายใน Pool ทั้ง 25 เส้นจะถูกยึดค้างจนหมด (Connection Leak) และเซิร์ฟเวอร์จะค้างทันที!",
-          ],
+          "c": "เราจะสร้างไฟล์ `simplebank/db/account.go` โดยแบ่งออกเป็น 2 กลุ่มคำสั่งตามลักษณะการทำงาน:",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/account.go` ดังนี้:",
+          "c": "**กลุ่มที่ 5.1: คำสั่งที่ทำงานกับข้อมูลแถวเดียว (`CreateAccount`, `GetAccount`, `AddAccountBalance`, `DeleteAccount`)**",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/account.go",
-          "c": "package db\n\nimport \"context\"\n\nconst accountColumns = \"id, owner, balance, currency, created_at\"\n\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\nfunc (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {\n\tquery := `INSERT INTO accounts (owner, balance, currency)\nVALUES ($1, $2, $3)\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.Owner, arg.Balance, arg.Currency)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts WHERE id = $1`\n\trow := q.db.QueryRowContext(ctx, query, id)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\ntype ListAccountsParams struct {\n\tOwner  string\n\tLimit  int32\n\tOffset int32\n}\n\nfunc (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts\nWHERE owner = $1\nORDER BY id\nLIMIT $2 OFFSET $3`\n\n\trows, err := q.db.QueryContext(ctx, query, arg.Owner, arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\n\taccounts := []Account{}\n\tfor rows.Next() {\n\t\tvar a Account\n\t\tif err := rows.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\taccounts = append(accounts, a)\n\t}\n\treturn accounts, rows.Err()\n}\n\ntype AddAccountBalanceParams struct {\n\tID     int64\n\tAmount int64\n}\n\n// AddAccountBalance เพิ่มหรือลดยอดเงินแบบ Atomic ด้วยคำสั่ง SQL ในแถวเดียว\nfunc (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {\n\tquery := `UPDATE accounts\nSET balance = balance + $2\nWHERE id = $1\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.ID, arg.Amount)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) DeleteAccount(ctx context.Context, id int64) error {\n\t_, err := q.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = $1`, id)\n\treturn err\n}",
+          "label": "simplebank/db/account.go (ส่วนที่ 1: จัดการข้อมูลแถวเดียว)",
+          "c": "package db\n\nimport \"context\"\n\nconst accountColumns = \"id, owner, balance, currency, created_at\"\n\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\nfunc (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {\n\tquery := `INSERT INTO accounts (owner, balance, currency)\nVALUES ($1, $2, $3)\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.Owner, arg.Balance, arg.Currency)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts WHERE id = $1`\n\trow := q.db.QueryRowContext(ctx, query, id)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\ntype AddAccountBalanceParams struct {\n\tID     int64\n\tAmount int64\n}\n\nfunc (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {\n\tquery := `UPDATE accounts\nSET balance = balance + $2\nWHERE id = $1\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.ID, arg.Amount)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) DeleteAccount(ctx context.Context, id int64) error {\n\t_, err := q.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = $1`, id)\n\treturn err\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`$1, $2, $3` (Parameterized Query)**: ใช้ตัวเลขแทนตำแหน่งตัวแปรเสมอ ป้องกันช่องโหว่ **SQL Injection** 100% (ห้ามใช้ `+` หรือ `fmt.Sprintf` ต่อสตริง SQL เองเด็ดขาด)",
+            "**`RETURNING`**: สั่งให้ PostgreSQL คืนค่าแถวที่เพิ่ง `INSERT` หรือ `UPDATE` (รวมถึง `id` และ `created_at` ที่ DB สร้างให้) กลับมาทันทีในคำสั่งเดียว ไม่ต้องยิง `SELECT` ซ้ำ",
+            "**`row.Scan(&a.ID, ...)`**: กวาดข้อมูลแต่ละคอลัมน์ลงในตัวแปร Struct `a` โดยต้องส่งเป็น Pointer (`&`) เสมอ",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "**กลุ่มที่ 5.2: คำสั่งที่ดึงข้อมูลหลายแถว (`ListAccounts`) และการป้องกัน Connection Leak**\nเขียนต่อท้ายลงในไฟล์ `simplebank/db/account.go`:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/account.go (ส่วนที่ 2: ดึงรายการบัญชีหลายแถว)",
+          "c": "type ListAccountsParams struct {\n\tOwner  string\n\tLimit  int32\n\tOffset int32\n}\n\nfunc (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts\nWHERE owner = $1\nORDER BY id\nLIMIT $2 OFFSET $3`\n\n\trows, err := q.db.QueryContext(ctx, query, arg.Owner, arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close() // สำคัญมาก: คืนสายเชื่อมต่อกลับเข้า Pool เสมอเมื่อจบฟังก์ชัน!\n\n\taccounts := []Account{}\n\tfor rows.Next() {\n\t\tvar a Account\n\t\tif err := rows.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\taccounts = append(accounts, a)\n\t}\n\treturn accounts, rows.Err()\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`LIMIT $2 OFFSET $3`**: ใช้ทำระบบแบ่งหน้า (Pagination) โดย `LIMIT` คือจำนวนรายการต่อหน้า และ `OFFSET` คือจำนวนแถวที่จะข้ามไป",
+            "**ทำไมต้องมี `defer rows.Close()`?**: ขณะที่เราวนลูป `for rows.Next()` เพื่ออ่านข้อมูลทีละแถว สายเชื่อมต่อ (Connection) เส้นนั้นจะถูกล็อกไว้กับตัวแปร `rows` ตลอดเวลา การใส่ `defer rows.Close()` ทันทีหลังจากเช็ก `err != nil` จะรับประกันว่าเมื่อฟังก์ชันจบลง สายเชื่อมต่อจะถูกปลดล็อกและคืนกลับเข้าสู่ Connection Pool เสมอ หากลืมบรรทัดนี้ สายทั้ง 25 เส้นใน Pool จะถูกยึดค้างจนหมด (Connection Leak) และเซิร์ฟเวอร์จะค้างทันที!",
+          ],
         },
         {
           "t": "h2",
@@ -249,13 +289,27 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/account_test.go` โดยเขียนฟังก์ชันตัวช่วย `createRandomAccount` เพื่อนำไปใช้ทดสอบทั้ง Create, Get, AddBalance, Delete, และ List:",
+          "c": "เราจะสร้างไฟล์ `simplebank/db/account_test.go` โดยแบ่งออกเป็น 2 ส่วนเพื่อให้ดูแลรักษาง่าย:",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 4.1: ฟังก์ชันตัวช่วย `createRandomAccount(t *testing.T)`**\nเนื่องจากไม่ว่าเราจะทดสอบดึงข้อมูล (`Get`), แก้ไขยอดเงิน (`AddBalance`), หรือลบบัญชี (`Delete`) เราจำเป็นต้องมีบัญชีตั้งต้นในฐานข้อมูลก่อนเสมอ แทนที่จะเขียนโค้ดสร้างบัญชีซ้ำๆ ในทุกเทสต์ เราจึงแยกออกมาเป็นฟังก์ชันตัวช่วยตัวเดียว:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/account_test.go",
-          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}\n\nfunc TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
+          "label": "simplebank/db/account_test.go (ส่วนที่ 1: ฟังก์ชันสร้างบัญชีสุ่ม)",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\n\trequire.NotZero(t, account.ID)        // PostgreSQL ต้องสร้าง ID ให้ (ไม่เป็น 0)\n\trequire.NotZero(t, account.CreatedAt) // PostgreSQL ต้องใส่วันเวลาให้\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 4.2: ทดสอบการดึงข้อมูล บวกเงิน และลบบัญชี (`TestGetAccount`, `TestAddAccountBalance`, `TestDeleteAccount`)**\nเขียนต่อท้ายในไฟล์ `simplebank/db/account_test.go` โดยเรียกใช้ `createRandomAccount(t)` เพื่อสร้างบัญชีใหม่สดๆ ในทุกการทดสอบ:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/account_test.go (ส่วนที่ 2: ทดสอบ Get, AddBalance, Delete)",
+          "c": "func TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\t// เมื่อลบแล้ว ลองดึงซ้ำอีกครั้งจะต้องได้รับ Error ว่าไม่พบข้อมูล (sql.ErrNoRows)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
         },
         {
           "t": "h2",
