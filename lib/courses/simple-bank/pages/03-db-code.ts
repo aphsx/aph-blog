@@ -71,30 +71,29 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. เชื่อมต่อฐานข้อมูล & Connection Pooling (db.go)",
+          "c": "3. สร้างไฟล์เชื่อมต่อฐานข้อมูล (db.go): แยกเข้าใจเป็น 2 ส่วน",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/db.go` โดยเขียนฟังก์ชัน `Open` ที่ทำการตั้งค่า Connection Pool ให้พร้อมรองรับทราฟฟิกสูง และนิยาม `DBTX` Interface:",
+          "c": "เราจะสร้างไฟล์ `simplebank/db/db.go` ซึ่งภายในไฟล์นี้ประกอบด้วยโค้ดสำคัญ 2 ส่วนที่ทำหน้าที่ต่างกัน มาค่อยๆ แกะทีละส่วนกันครับ:",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 3.1: ฟังก์ชัน `Open(dsn string)` — สูตรมาตรฐาน 3 ขั้นตอนของการเปิด Database ใน Go**\nเวลาเขียน Go เชื่อมต่อฐานข้อมูลทุกโปรเจกต์ในโลกจริง วิศวกรจะใช้แพทเทิร์นมาตรฐาน (Boilerplate Template) 3 ขั้นตอนนี้เสมอ:\n1. **เตรียมไดรเวอร์ด้วย `sql.Open(\"pgx\", dsn)`**: คำว่า **`dsn` (Data Source Name)** ก็คือที่อยู่ของฐานข้อมูล (Connection String เช่น `postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable` ที่เราเคยใส่ใน `Makefile` บทที่แล้ว) และสังเกตว่าด้านบนเราใส่ `_ \"github.com/jackc/pgx/v5/stdlib\"` (มีขีดล่าง `_` นำหน้า) เพื่อให้แพ็กเกจ `pgx` แอบลงทะเบียนชื่อ `\"pgx\"` เข้ากับ `database/sql` อัตโนมัติ\n2. **ตั้งขนาดสระเก็บสายเชื่อมต่อ (Connection Pool)**: การต่อสายไปหา Database ใหม่ทุกครั้งที่มีคนกดโอนเงินนั้นช้ามาก ตัว `*sql.DB` จึงทำหน้าที่เปิดสายรอไว้ล่วงหน้าเป็นสระ (Pool) โดยเรากำหนด 3 ค่ามาตรฐานคือ:\n   • `SetMaxOpenConns(25)`: จำกัดสายที่ใช้งานพร้อมกันสูงสุดไม่เกิน 25 สาย เพื่อป้องกันไม่ให้ PostgreSQL ทำงานหนักจนล่ม\n   • `SetMaxIdleConns(25)`: เก็บสายที่ว่างงานแล้วรอไว้ในสระ 25 สาย เวลามีคำสั่งใหม่มาจะได้หยิบใช้ทันทีไม่ต้องต่อสายใหม่\n   • `SetConnMaxLifetime(5 * time.Minute)`: รีไซเคิลสายเก่าทุกๆ 5 นาที ป้องกันสายค้าง\n3. **เคาะประตูเช็กสายด้วย `conn.Ping()`**: ความลับของ Go คือคำสั่ง `sql.Open` ในข้อ 1 **ยังไม่ได้ต่อสายไปหา PostgreSQL จริงๆ!** มันแค่ตรวจดูตัวอักษรเฉยๆ เราจึงต้องสั่ง `conn.Ping()` ปิดท้ายเสมอ เพื่อยิงสัญญาณไปเคาะประตูเช็กว่า PostgreSQL เปิดทำงานอยู่และรหัสผ่านถูกต้องจริงๆ",
+        },
+        {
+          "t": "p",
+          "c": "**ส่วนที่ 3.2: โครงสร้าง `DBTX` และ `Queries` — ตัวหุ้มคำสั่ง SQL ที่รองรับทั้งโหมดปกติและ Transaction**\nใน `database/sql` เวลาเราจะสั่งรัน SQL มันจะมีคำสั่งอยู่ 3 ตัวแยกตามสิ่งที่ต้องการได้กลับมา:\n• **`QueryRowContext`**: ใช้เมื่อต้องการข้อมูลกลับมา **แถวเดียว** (เช่น ค้นหาบัญชีจาก `id` หรือ `INSERT ... RETURNING`)\n• **`QueryContext`**: ใช้เมื่อต้องการข้อมูลกลับมา **หลายแถว** (เช่น ดึงรายการบัญชี 10 บัญชี)\n• **`ExecContext`**: ใช้เมื่อยิงคำสั่งที่ **ไม่ต้องการอ่านแถวข้อมูลกลับมา** (เช่น `DELETE` ลบบัญชี)\n\nความเจ๋งคือทั้งตัวเชื่อมต่อปกติ (`*sql.DB`) และตัวทำ Transaction (`*sql.Tx` ที่เราจะใช้ในบทที่ 4) ต่างมีเมธอดทั้ง 3 ตัวนี้เหมือนกันเป๊ะ! เราจึงสร้าง Interface ชื่อ `DBTX` และ Struct ชื่อ `Queries` ขึ้นมาครอบไว้ (ซึ่งเป็นแพทเทิร์นมาตรฐานเดียวกับที่เครื่องมือสร้างโค้ดระดับโลกอย่าง `sqlc` ใช้) ทำให้ฟังก์ชัน SQL ที่เราจะเขียนต่อจากนี้สามารถรันได้ทั้งแบบปกติและแบบ Transaction โดยไม่ต้องเขียนโค้ดซ้ำสองรอบ!",
+        },
+        {
+          "t": "p",
+          "c": "นำทั้ง 2 ส่วนมารวมกันในไฟล์ `simplebank/db/db.go` ดังนี้:",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/db.go",
-          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// Open เปิดการเชื่อมต่อไปยัง PostgreSQL พร้อมกำหนดค่า Connection Pool\nfunc Open(dsn string) (*sql.DB, error) {\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// DBTX คือ Interface กลางที่รวมเมธอดรันคำสั่ง SQL ที่มีทั้งใน *sql.DB และ *sql.Tx\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\n// Queries เป็นตัวรวมคำสั่ง SQL ทั้งหมด โดยสามารถรับได้ทั้ง DB ปกติ หรือ Tx ก็ได้\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
-        },
-        {
-          "t": "p",
-          "c": "**เจาะลึกจุดสำคัญในโค้ด `db.go` ที่ต้องเข้าใจ:**",
-        },
-        {
-          "t": "ul",
-          "c": [
-            "**`_ \"github.com/jackc/pgx/v5/stdlib\"` (Blank Import)**: เครื่องหมายขีดล่าง `_` หน้า import บอก Go ว่าเราไม่ได้เรียกใช้ฟังก์ชันจากแพ็กเกจนี้ในโค้ดโดยตรง แต่ต้องการให้ฟังก์ชัน `init()` ของมันทำงานเบื้องหลัง เพื่อแอบลงทะเบียนตัวเองเข้ากับ `database/sql` ในชื่อไดรเวอร์ `\"pgx\"`",
-            "**`sql.Open` vs `conn.Ping()`**: คำสั่ง `sql.Open` ยังไม่ได้ต่อสายไปยังฐานข้อมูลจริงๆ แค่เตรียมโครงสร้างในหน่วยความจำเท่านั้น เราจึงต้องเรียก `conn.Ping()` เพื่อทดสอบยิงสัญญาณไปเช็กว่าฐานข้อมูลเปิดอยู่และรหัสผ่านถูกต้องจริงๆ",
-            "**Connection Pool (`SetMaxOpenConns`, `SetMaxIdleConns`, `SetConnMaxLifetime`)**: การเปิดสายเชื่อมต่อฐานข้อมูลใหม่ทุกครั้งที่มี Request เข้ามานั้นช้ามาก `*sql.DB` จึงทำหน้าที่เป็น **สระเก็บสายเชื่อมต่อ (Connection Pool)** โดยเราจำกัดไม่ให้เปิดสายพร้อมกันเกิน 25 สาย (`MaxOpenConns`) เพื่อไม่ให้ PostgreSQL ล่ม เก็บสายที่ว่างไว้รอใช้งานซ้ำ 25 สาย (`MaxIdleConns`) และรีไซเคิลสายทุกๆ 5 นาที (`ConnMaxLifetime`)",
-            "**ทำไม `DBTX` ต้องมี 3 เมธอดนี้?**: ใน `database/sql` การรันคำสั่ง SQL แบ่งออกเป็น 3 รูปแบบหลัก ซึ่งทั้ง `*sql.DB` (โหมดปกติ) และ `*sql.Tx` (โหมด Transaction) ต่างมีเมธอดทั้ง 3 ตัวนี้เหมือนกันเป๊ะ:\n  1. `QueryRowContext`: ใช้เมื่อคาดหวังผลลัพธ์กลับมา **แถวเดียว** (เช่น `SELECT ... WHERE id = $1` หรือ `INSERT ... RETURNING`)\n  2. `QueryContext`: ใช้เมื่อคาดหวังผลลัพธ์กลับมา **หลายแถว** (เช่น `SELECT` รายการบัญชีแบบแบ่งหน้า)\n  3. `ExecContext`: ใช้เมื่อยิงคำสั่งที่ **ไม่ต้องการอ่านแถวข้อมูลกลับมา** (เช่น `DELETE` หรือ `UPDATE` ที่ไม่มี `RETURNING`)",
-          ],
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// --- ส่วนที่ 1: สูตรมาตรฐานการเปิด Connection Pool ---\nfunc Open(dsn string) (*sql.DB, error) {\n\t// 1. เตรียมไดรเวอร์ด้วย DSN (Connection String)\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\t// 2. กำหนดขนาดสระเก็บสายเชื่อมต่อ (Connection Pool)\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\t// 3. ยิงสัญญาณเคาะเช็กว่าฐานข้อมูลเชื่อมต่อได้จริง\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// --- ส่วนที่ 2: โครงสร้าง DBTX และ Queries สำหรับรันคำสั่ง SQL ---\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
         },
         {
           "t": "h2",
