@@ -134,6 +134,18 @@ export const dbCodePages: Record<string, Page> = {
           ],
         },
         {
+          "t": "details",
+          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/db.go (รวมทั้ง 2 ส่วน พร้อมคัดลอก)",
+          "c": [
+            {
+              "t": "code",
+              "lang": "go",
+              "label": "simplebank/db/db.go",
+              "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// Open เปิดการเชื่อมต่อไปยัง PostgreSQL พร้อมกำหนดค่า Connection Pool\nfunc Open(dsn string) (*sql.DB, error) {\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// DBTX คือ Interface กลางที่รวมเมธอดรันคำสั่ง SQL ที่มีทั้งใน *sql.DB และ *sql.Tx\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\n// Queries เป็นตัวรวมคำสั่ง SQL ทั้งหมด โดยสามารถรับได้ทั้ง DB ปกติ หรือ Tx ก็ได้\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
+            },
+          ],
+        },
+        {
           "t": "h2",
           "c": "5. เขียนคำสั่ง CRUD สำหรับ Account (account.go)",
         },
@@ -174,6 +186,18 @@ export const dbCodePages: Record<string, Page> = {
           "c": [
             "**`LIMIT $2 OFFSET $3`**: ใช้ทำระบบแบ่งหน้า (Pagination) โดย `LIMIT` คือจำนวนรายการต่อหน้า และ `OFFSET` คือจำนวนแถวที่จะข้ามไป",
             "**ทำไมต้องมี `defer rows.Close()`?**: ขณะที่เราวนลูป `for rows.Next()` เพื่ออ่านข้อมูลทีละแถว สายเชื่อมต่อ (Connection) เส้นนั้นจะถูกล็อกไว้กับตัวแปร `rows` ตลอดเวลา การใส่ `defer rows.Close()` ทันทีหลังจากเช็ก `err != nil` จะรับประกันว่าเมื่อฟังก์ชันจบลง สายเชื่อมต่อจะถูกปลดล็อกและคืนกลับเข้าสู่ Connection Pool เสมอ หากลืมบรรทัดนี้ สายทั้ง 25 เส้นใน Pool จะถูกยึดค้างจนหมด (Connection Leak) และเซิร์ฟเวอร์จะค้างทันที!",
+          ],
+        },
+        {
+          "t": "details",
+          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/account.go (รวมทุกฟังก์ชัน พร้อมคัดลอก)",
+          "c": [
+            {
+              "t": "code",
+              "lang": "go",
+              "label": "simplebank/db/account.go",
+              "c": "package db\n\nimport \"context\"\n\nconst accountColumns = \"id, owner, balance, currency, created_at\"\n\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\nfunc (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {\n\tquery := `INSERT INTO accounts (owner, balance, currency)\nVALUES ($1, $2, $3)\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.Owner, arg.Balance, arg.Currency)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) GetAccount(ctx context.Context, id int64) (Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts WHERE id = $1`\n\trow := q.db.QueryRowContext(ctx, query, id)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\ntype ListAccountsParams struct {\n\tOwner  string\n\tLimit  int32\n\tOffset int32\n}\n\nfunc (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {\n\tquery := `SELECT ` + accountColumns + ` FROM accounts\nWHERE owner = $1\nORDER BY id\nLIMIT $2 OFFSET $3`\n\n\trows, err := q.db.QueryContext(ctx, query, arg.Owner, arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\n\taccounts := []Account{}\n\tfor rows.Next() {\n\t\tvar a Account\n\t\tif err := rows.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\taccounts = append(accounts, a)\n\t}\n\treturn accounts, rows.Err()\n}\n\ntype AddAccountBalanceParams struct {\n\tID     int64\n\tAmount int64\n}\n\n// AddAccountBalance เพิ่มหรือลดยอดเงินแบบ Atomic ด้วยคำสั่ง SQL ในแถวเดียว\nfunc (q *Queries) AddAccountBalance(ctx context.Context, arg AddAccountBalanceParams) (Account, error) {\n\tquery := `UPDATE accounts\nSET balance = balance + $2\nWHERE id = $1\nRETURNING ` + accountColumns\n\n\trow := q.db.QueryRowContext(ctx, query, arg.ID, arg.Amount)\n\tvar a Account\n\terr := row.Scan(&a.ID, &a.Owner, &a.Balance, &a.Currency, &a.CreatedAt)\n\treturn a, err\n}\n\nfunc (q *Queries) DeleteAccount(ctx context.Context, id int64) error {\n\t_, err := q.db.ExecContext(ctx, `DELETE FROM accounts WHERE id = $1`, id)\n\treturn err\n}",
+            },
           ],
         },
         {
@@ -310,6 +334,18 @@ export const dbCodePages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/db/account_test.go (ส่วนที่ 2: ทดสอบ Get, AddBalance, Delete)",
           "c": "func TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\t// เมื่อลบแล้ว ลองดึงซ้ำอีกครั้งจะต้องได้รับ Error ว่าไม่พบข้อมูล (sql.ErrNoRows)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
+        },
+        {
+          "t": "details",
+          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/account_test.go (พร้อมคัดลอก)",
+          "c": [
+            {
+              "t": "code",
+              "lang": "go",
+              "label": "simplebank/db/account_test.go",
+              "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}\n\nfunc TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
+            },
+          ],
         },
         {
           "t": "h2",

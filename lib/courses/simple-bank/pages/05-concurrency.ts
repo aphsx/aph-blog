@@ -104,6 +104,18 @@ export const concurrencyPages: Record<string, Page> = {
           ],
         },
         {
+          "t": "details",
+          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/store_test.go (ณ จุดนี้ พร้อมคัดลอก)",
+          "c": [
+            {
+              "t": "code",
+              "lang": "go",
+              "label": "simplebank/db/store_test.go",
+              "c": "package db\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n)\n\nfunc topUp(t *testing.T, acc Account, amount int64) Account {\n\tupdated, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc.ID,\n\t\tAmount: amount,\n\t})\n\trequire.NoError(t, err)\n\treturn updated\n}\n\nfunc TestTransferTx(t *testing.T) {\n\tstore := NewStore(testDB)\n\n\taccount1 := topUp(t, createRandomAccount(t), 1000)\n\taccount2 := createRandomAccount(t)\n\tfmt.Println(\">> ก่อนโอน:\", account1.Balance, account2.Balance)\n\n\tn := 5\n\tamount := int64(10)\n\n\terrs := make(chan error)\n\tresults := make(chan TransferTxResult)\n\n\tfor range n {\n\t\tgo func() {\n\t\t\tresult, err := store.TransferTx(context.Background(), TransferTxParams{\n\t\t\t\tFromAccountID: account1.ID,\n\t\t\t\tToAccountID:   account2.ID,\n\t\t\t\tAmount:        amount,\n\t\t\t})\n\t\t\terrs <- err\n\t\t\tresults <- result\n\t\t}()\n\t}\n\n\texisted := make(map[int]bool)\n\tfor range n {\n\t\terr := <-errs\n\t\trequire.NoError(t, err)\n\t\tresult := <-results\n\n\t\trequire.NotEmpty(t, result)\n\t\trequire.Equal(t, account1.ID, result.Transfer.FromAccountID)\n\t\trequire.Equal(t, account2.ID, result.Transfer.ToAccountID)\n\t\trequire.Equal(t, -amount, result.FromEntry.Amount)\n\t\trequire.Equal(t, amount, result.ToEntry.Amount)\n\n\t\tfmt.Println(\">> tx:\", result.FromAccount.Balance, result.ToAccount.Balance)\n\t\tdiff1 := account1.Balance - result.FromAccount.Balance\n\t\tdiff2 := result.ToAccount.Balance - account2.Balance\n\t\trequire.Equal(t, diff1, diff2)\n\t\trequire.True(t, diff1 > 0)\n\t\trequire.True(t, diff1%amount == 0)\n\n\t\tk := int(diff1 / amount)\n\t\trequire.True(t, k >= 1 && k <= n)\n\t\trequire.NotContains(t, existed, k)\n\t\texisted[k] = true\n\t}\n\n\tupdated1, err := testQueries.GetAccount(context.Background(), account1.ID)\n\trequire.NoError(t, err)\n\tupdated2, err := testQueries.GetAccount(context.Background(), account2.ID)\n\trequire.NoError(t, err)\n\n\tfmt.Println(\">> หลังโอน:\", updated1.Balance, updated2.Balance)\n\trequire.Equal(t, account1.Balance-int64(n)*amount, updated1.Balance)\n\trequire.Equal(t, account2.Balance+int64(n)*amount, updated2.Balance)\n}",
+            },
+          ],
+        },
+        {
           "t": "h2",
           "c": "4. รันเทสต์และดูผลลัพธ์จริง",
         },
@@ -373,6 +385,18 @@ export const concurrencyPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/db/tx_transfer.go (ส่วนปรับปรุงยอดเงินแบบ Deadlock-Free)",
           "c": "// 4 & 5: ปรับปรุงยอดเงินทั้งสองบัญชี โดยล็อกบัญชีที่มี ID น้อยกว่าก่อนเสมอ\nif arg.FromAccountID < arg.ToAccountID {\n\tresult.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)\n} else {\n\tresult.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)\n}\n\n// addMoney ฟังก์ชันตัวช่วยที่จะทำการรันคำสั่ง SQL ตามลำดับบัญชีที่ 1 แล้วตามด้วยบัญชีที่ 2 เสมอ\nfunc addMoney(ctx context.Context, q *Queries, accountID1, amount1, accountID2, amount2 int64) (account1, account2 Account, err error) {\n\taccount1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{ID: accountID1, Amount: amount1})\n\tif err != nil {\n\t\treturn\n\t}\n\taccount2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{ID: accountID2, Amount: amount2})\n\treturn\n}",
+        },
+        {
+          "t": "details",
+          "summary": "📄 ดูโค้ดฉบับเต็มของไฟล์ simplebank/db/tx_transfer.go (หลังแก้ Deadlock แล้ว พร้อมคัดลอก)",
+          "c": [
+            {
+              "t": "code",
+              "lang": "go",
+              "label": "simplebank/db/tx_transfer.go",
+              "c": "package db\n\nimport \"context\"\n\ntype TransferTxParams struct {\n\tFromAccountID int64 `json:\"from_account_id\"`\n\tToAccountID   int64 `json:\"to_account_id\"`\n\tAmount        int64 `json:\"amount\"`\n}\n\ntype TransferTxResult struct {\n\tTransfer    Transfer `json:\"transfer\"`\n\tFromAccount Account  `json:\"from_account\"`\n\tToAccount   Account  `json:\"to_account\"`\n\tFromEntry   Entry    `json:\"from_entry\"`\n\tToEntry     Entry    `json:\"to_entry\"`\n}\n\n// TransferTx ดำเนินการโอนเงิน 5 ขั้นตอนภายใน 1 Transaction พร้อมป้องกัน Deadlock\nfunc (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {\n\tvar result TransferTxResult\n\n\terr := s.execTx(ctx, func(q *Queries) error {\n\t\tvar err error\n\n\t\t// 1. บันทึก Transfer\n\t\tresult.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{\n\t\t\tFromAccountID: arg.FromAccountID,\n\t\t\tToAccountID:   arg.ToAccountID,\n\t\t\tAmount:        arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 2. บันทึก From Entry (เงินออกเป็นลบ)\n\t\tresult.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.FromAccountID,\n\t\t\tAmount:    -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 3. บันทึก To Entry (เงินเข้าเป็นบวก)\n\t\tresult.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.ToAccountID,\n\t\t\tAmount:    arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 4 & 5: ปรับปรุงยอดเงินทั้งสองบัญชี โดยล็อกบัญชีที่มี ID น้อยกว่าก่อนเสมอ (Lock Ordering)\n\t\tif arg.FromAccountID < arg.ToAccountID {\n\t\t\tresult.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)\n\t\t} else {\n\t\t\tresult.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)\n\t\t}\n\t\treturn err\n\t})\n\n\treturn result, err\n}\n\nfunc addMoney(ctx context.Context, q *Queries, accountID1, amount1, accountID2, amount2 int64) (account1, account2 Account, err error) {\n\taccount1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{ID: accountID1, Amount: amount1})\n\tif err != nil {\n\t\treturn\n\t}\n\taccount2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{ID: accountID2, Amount: amount2})\n\treturn\n}",
+            },
+          ],
         },
         {
           "t": "callout",
