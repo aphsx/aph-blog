@@ -188,8 +188,8 @@ export const goPages: Record<string, Page> = {
       en: "1.2 Go for Backend: Method, Interface, Defer & Context",
     },
     lead: {
-      th: "เจาะลึก 4 เสาหลักที่ระบบ Backend ต้องพึ่งพา: การเขียน Method Receiver, Interface และ DBTX, การคืนทรัพยากรด้วย Defer และการจัดการ Timeout ด้วย Context",
-      en: "The 4 pillars of Go backend development: Method receivers, Interfaces & DBTX pattern, Defer cleanup, and Context timeouts.",
+      th: "เจาะลึก 4 เสาหลักที่ระบบ Backend ต้องพึ่งพา: การเขียน Method Receiver, Interface สำหรับสลับโหมด DB/Transaction, การคืนสายเชื่อมต่อด้วย Defer และการส่งต่อ Context",
+      en: "The 4 pillars of Go backend development: Method receivers, Interfaces & DBTX pattern, Defer cleanup, and Context propagation.",
     },
     group: "1. ปูพื้นฐานภาษา Go สำหรับ Backend",
     blocks: {
@@ -197,82 +197,107 @@ export const goPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "🎯 เป้าหมายของบทนี้ (Learning Objectives)",
-          "c": "• เข้าใจความแตกต่างระหว่าง Value Receiver และ Pointer Receiver ใน Method\n• เข้าใจปรัชญาของ Interface ใน Go ผ่านตัวอย่างคลาสสิก Shape และเห็นภาพการนำไปใช้สร้าง DBTX Interface\n• รู้วิธีใช้ `defer` คืนทรัพยากรแบบ LIFO และการใช้ `context.WithTimeout` จัดการคิวรีที่ช้าผิดปกติ\n\n⏱ **เวลาในการเรียนรู้**: ~25 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านบท 1.1 ไวยากรณ์ Go พื้นฐาน",
+          "c": "• เข้าใจความแตกต่างระหว่าง Value Receiver และ Pointer Receiver เวลาผูกฟังก์ชันเข้ากับ Struct\n• เข้าใจการทำงานของ Interface ใน Go ผ่านการจำลอง `Queries` ที่รับได้ทั้ง DB ปกติและ Transaction (`DBTX`)\n• รู้วิธีใช้ `defer` เพื่อรับประกันการคืนสายเชื่อมต่อฐานข้อมูลเสมอแม้เกิด Error กลางทาง\n• เข้าใจว่า `ctx context.Context` คืออะไร ส่งมาจากต้นทางไหน และทำไมต้องเป็นพารามิเตอร์ตัวแรกของฟังก์ชันเสมอ\n\n⏱ **เวลาในการเรียนรู้**: ~25 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านบท 1.1 ไวยากรณ์ Go พื้นฐาน",
         },
         {
           "t": "h2",
-          "c": "1. Method Receiver: การผูกฟังก์ชันเข้ากับ Struct",
+          "c": "1. Method Receiver: การผูกฟังก์ชันให้เป็นความสามารถของ Struct",
         },
         {
           "t": "p",
-          "c": "ใน Go เราสามารถเพิ่มพฤติกรรม (Method) ให้กับ Struct ได้โดยการใส่ **Receiver** ไว้ข้างหน้าชื่อฟังก์ชัน ซึ่งมี 2 รูปแบบที่ต้องระวังอย่างยิ่ง:",
+          "c": "ในภาษา Go เราสามารถผูกฟังก์ชันให้กลายเป็น **เมธอด (Method)** ของ Struct ได้โดยการใส่ **Receiver** ไว้ข้างหน้าชื่อฟังก์ชัน เช่น `func (a *Account) Deposit(...)` ซึ่งมี 2 รูปแบบที่ต้องระวัง:",
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างคลาสสิก: บั๊กเมื่อลืมใส่ Pointer ใน Receiver",
-          "code": "package main\n\nimport \"fmt\"\n\ntype Account struct {\n\tOwner   string\n\tBalance int64\n}\n\n// ❌ Value Receiver: ทำงานบนสำเนา การเปลี่ยนค่า Balance จะหายไปทันทีเมื่อจบฟังก์ชัน!\nfunc (a Account) DepositBug(amount int64) {\n\ta.Balance += amount\n}\n\n// ✅ Pointer Receiver: ชี้ไปยังตัวจริง ยอดเงินจะเพิ่มขึ้นจริง\nfunc (a *Account) Deposit(amount int64) {\n\ta.Balance += amount\n}\n\nfunc main() {\n\tacc := Account{Owner: \"bob\", Balance: 100}\n\n\tacc.DepositBug(50)\n\tfmt.Println(\"เรียก DepositBug (Value):  \", acc.Balance)\n\n\tacc.Deposit(50)\n\tfmt.Println(\"เรียก Deposit (Pointer):   \", acc.Balance)\n}",
+          "label": "เปรียบเทียบ Value Receiver vs Pointer Receiver",
+          "code": "package main\n\nimport \"fmt\"\n\ntype Account struct {\n\tOwner   string\n\tBalance int64\n}\n\n// ❌ Value Receiver (a Account): ทำงานบนสำเนา การเปลี่ยนค่าจะหายไปเมื่อจบฟังก์ชัน!\nfunc (a Account) DepositBug(amount int64) {\n\ta.Balance += amount\n}\n\n// ✅ Pointer Receiver (a *Account): ชี้ไปยังตัวจริง ยอดเงินเพิ่มขึ้นจริง\nfunc (a *Account) Deposit(amount int64) {\n\ta.Balance += amount\n}\n\nfunc main() {\n\tacc := Account{Owner: \"bob\", Balance: 100}\n\n\tacc.DepositBug(50)\n\tfmt.Println(\"เรียก DepositBug (Value):  \", acc.Balance)\n\n\tacc.Deposit(50)\n\tfmt.Println(\"เรียก Deposit (Pointer):   \", acc.Balance)\n}",
           "out": "เรียก DepositBug (Value):   100\nเรียก Deposit (Pointer):    150",
         },
         {
           "t": "callout",
-          "title": "💡 กฎการเลือกใช้ Receiver",
-          "c": "• ถ้าเมธอดนั้นต้อง **แก้ไขข้อมูล (Mutate)** ใน Struct → **ต้องใช้ Pointer Receiver `(a *Account)`**\n• ถ้าเมธอดนั้นแค่ **อ่านข้อมูล (Read-only)** หรือแสดงผลข้อความ String → สามารถใช้ Value Receiver `(a Account)` ได้",
+          "title": "🏦 ในบทที่ 3 เราจะใช้สิ่งนี้ตรงไหน?",
+          "c": "ในบทที่ 3 เราจะสร้างตัวรวมคำสั่ง SQL ชื่อ `Queries` แล้วผูกฟังก์ชัน CRUD ทั้งหมดเข้ากับ `*Queries` ด้วย Pointer Receiver เช่น:\n```go\nfunc (q *Queries) CreateAccount(...) (Account, error)\nfunc (q *Queries) GetAccount(...) (Account, error)\n```\nเพื่อให้ทุกฟังก์ชันสามารถหยิบสายเชื่อมต่อฐานข้อมูลที่เก็บไว้ข้างใน `q` ออกมาใช้งานได้ทันทีโดยไม่ต้องส่งสายเชื่อมต่อเป็นพารามิเตอร์ซ้ำๆ ทุกครั้งครับ",
         },
         {
           "t": "h2",
-          "c": "2. Interface: ไม่ต้องมีคำว่า implements",
+          "c": "2. Interface: สลับโหมด DB ปกติกับ Transaction ได้โดยไม่ต้องเขียนโค้ดซ้ำ",
         },
         {
           "t": "p",
-          "c": "Interface ในภาษา Go มีเอกลักษณ์ที่พิเศษมาก คือเป็นการทำ **Implicit Implementation (การผูกแบบอัตโนมัติ)** ขอเพียงแค่ Struct นั้นมี Method ครบตามที่ Interface ระบุไว้ ก็จะถือว่าใช้งาน Interface นั้นได้ทันทีโดยไม่ต้องเขียนคีย์เวิร์ด `implements`:",
+          "c": "โจทย์ใหญ่ของระบบธนาคารคือ: เรามีฟังก์ชันคำสั่ง SQL เช่น `CreateAccount` หรือ `AddAccountBalance` ซึ่งบางครั้งเราอยากรันผ่าน **การเชื่อมต่อฐานข้อมูลปกติ (`NormalDB`)** แต่ในจังหวะโอนเงิน 5 ขั้นตอน เราอยากรันฟังก์ชันเดิมนี้ผ่าน **โหมดมัดรวมธุรกรรม (`TxDB`)** แทน",
+        },
+        {
+          "t": "p",
+          "c": "ถ้าไม่มี **Interface** เราจะต้องก๊อปปี้ฟังก์ชัน SQL ทุกตัวแยกเป็น 2 เวอร์ชัน! แต่ใน Go ขอเพียงแค่ Struct สองตัวมีชื่อเมธอดเหมือนกันเป๊ะ เราสามารถสร้าง `interface` มาเป็น **'ปลั๊กกลาง'** ที่เสียบตัวไหนเข้ามาก็ทำงานได้ทันที (โดยไม่ต้องพิมพ์คำว่า `implements`):",
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างคลาสสิก: Interface รูปทรงเรขาคณิต (Shape)",
-          "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"math\"\n)\n\n// กำหนดสัญญา (Contract) ว่าใครมีเมธอด Area() จะถือว่าเป็น Shape ทั้งหมด\ntype Shape interface {\n\tArea() float64\n}\n\ntype Rect struct{ W, H float64 }\ntype Circle struct{ R float64 }\n\nfunc (r Rect) Area() float64   { return r.W * r.H }\nfunc (c Circle) Area() float64 { return math.Pi * c.R * c.R }\n\nfunc printArea(s Shape) {\n\tfmt.Printf(\"%T คำนวณพื้นที่ได้ = %.2f\\n\", s, s.Area())\n}\n\nfunc main() {\n\tprintArea(Rect{W: 3, H: 4})\n\tprintArea(Circle{R: 2})\n}",
-          "out": "main.Rect คำนวณพื้นที่ได้ = 12.00\nmain.Circle คำนวณพื้นที่ได้ = 12.57",
+          "label": "จำลองสถาปัตยกรรม DBTX และ Queries ของ Simple Bank แบบย่อส่วน",
+          "code": "package main\n\nimport \"fmt\"\n\n// 1. สร้างปลั๊กกลาง (Interface): ใครที่มีเมธอด ExecSQL ถือว่าเป็น DBTX ทั้งหมด\ntype DBTX interface {\n\tExecSQL(query string)\n}\n\n// 2. โหมดเชื่อมต่อฐานข้อมูลปกติ มีเมธอด ExecSQL\ntype NormalDB struct{}\n\nfunc (db NormalDB) ExecSQL(query string) {\n\tfmt.Println(\"[โหมด DB ปกติ]      รันคำสั่ง:\", query)\n}\n\n// 3. โหมด Transaction (โอนเงิน) ก็มีเมธอด ExecSQL เหมือนกันเป๊ะ\ntype TxDB struct{}\n\nfunc (tx TxDB) ExecSQL(query string) {\n\tfmt.Println(\"[โหมด Transaction] รันคำสั่ง:\", query)\n}\n\n// 4. Queries เก็บปลั๊กกลาง DBTX เอาไว้ ไม่ผูกติดกับตัวใดตัวหนึ่ง\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc (q *Queries) CreateAccount(owner string) {\n\tq.db.ExecSQL(\"INSERT INTO accounts VALUES (\" + owner + \")\")\n}\n\nfunc main() {\n\t// ใช้งานในโหมดปกติ\n\tnormalQueries := &Queries{db: NormalDB{}}\n\tnormalQueries.CreateAccount(\"alice\")\n\n\t// นำฟังก์ชัน CreateAccount ตัวเดิมไปรันในโหมด Transaction ได้ทันที!\n\ttxQueries := &Queries{db: TxDB{}}\n\ttxQueries.CreateAccount(\"bob\")\n}",
+          "out": "[โหมด DB ปกติ]      รันคำสั่ง: INSERT INTO accounts VALUES (alice)\n[โหมด Transaction] รันคำสั่ง: INSERT INTO accounts VALUES (bob)",
         },
         {
           "t": "callout",
-          "title": "🏦 แล้วสิ่งนี้ไปใช้ตรงไหนในโปรเจกต์ Simple Bank?",
-          "c": "ในบทที่ 3 เราจะต้องเขียนฟังก์ชันยิงคำสั่ง SQL ซึ่งบางครั้งเราต้องการยิงผ่านการเชื่อมต่อฐานข้อมูลปกติ (`*sql.DB`) แต่บางครั้งในขั้นตอนโอนเงิน เราต้องการยิงคำสั่งเหล่านั้นผ่าน Transaction (`*sql.Tx`)\n\nด้วยพลังของ Interface เราสามารถสร้าง Interface ชื่อ `DBTX` ขึ้นมา:\n```go\ntype DBTX interface {\n    ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n    QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n    QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n```\nทั้ง `*sql.DB` และ `*sql.Tx` ใน Go ต่างมีทั้ง 3 เมธอดนี้อยู่แล้ว ทำให้ฟังก์ชัน CRUD ของเราสามารถรับ `DBTX` เข้ามา แล้วนำไปรันได้ทั้งแบบธรรมดาและแบบ Transaction ได้อย่างไร้รอยต่อโดยไม่ต้องเขียนโค้ดซ้ำ!",
+          "title": "💡 จำโครงสร้างในโค้ดข้างบนไว้ให้ดี!",
+          "c": "โค้ดจำลอง 30 บรรทัดข้างบนนี้คือ **โครงสร้างเดียวกับที่เราจะเขียนจริงในบทที่ 3 และบทที่ 4 แบบ 100%**! ในของจริง ของในไลบรารีมาตรฐาน Go ทั้ง `*sql.DB` (โหมดปกติ) และ `*sql.Tx` (โหมด Transaction) ต่างมีเมธอดรัน SQL ชื่อ `ExecContext`, `QueryContext`, และ `QueryRowContext` เหมือนกันเป๊ะ เราจึงสร้าง `type DBTX interface` มารับได้ทั้งคู่โดยเขียนโค้ด CRUD แค่ชุดเดียวครับ",
         },
         {
           "t": "h2",
-          "c": "3. Defer: การคืนทรัพยากรแบบ LIFO",
+          "c": "3. Defer: รับประกันการคืนสายเชื่อมต่อฐานข้อมูลเสมอ (LIFO)",
         },
         {
           "t": "p",
-          "c": "คำสั่ง `defer` ใช้สำหรับสั่งให้ฟังก์ชันทำงานในจังหวะสุดท้าย **ก่อนที่ฟังก์ชันแม่จะจบการทำงาน (Return)** เสมอ ไม่ว่าฟังก์ชันนั้นจะจบแบบปกติหรือเกิด Error กลางทางก็ตาม โดยทำงานแบบ Last-In, First-Out (LIFO - ตัวที่สั่ง defer ทีหลังสุดจะทำงานก่อน):",
+          "c": "ในระบบฐานข้อมูลจะมีสระเก็บสายเชื่อมต่อ (Connection Pool) ที่มีจำนวนจำกัด เช่น 25 เส้น เมื่อฟังก์ชันใดยืมสายไปดึงข้อมูลหลายแถว แล้วเกิด Error กลางคันจนเผลอ `return` ออกไปก่อนปิดสาย สายเส้นนั้นจะค้างเติ่งไม่ถูกคืนเข้าสระ (เรียกว่า **Connection Leak**) จนเซิร์ฟเวอร์ล่มทั้งระบบ",
+        },
+        {
+          "t": "p",
+          "c": "คำสั่ง **`defer`** จึงมีไว้เพื่อสั่งว่า: **'ไม่ว่าฟังก์ชันนี้จะจบลงแบบปกติ หรือพังเพราะ Error ตรงบรรทัดไหนก็ตาม ให้รันคำสั่งปิดทรัพยากรนี้เป็นสิ่งสุดท้ายก่อนออกจากฟังก์ชันเสมอ!'** (หากมีหลาย `defer` จะทำงานย้อนกลับแบบ **LIFO: Last-In, First-Out** คือตัวที่สั่งทีหลังสุดจะทำงานก่อน):",
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างคลาสสิก: ลำดับการทำงานของ defer (LIFO)",
-          "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"เริ่มต้นทำงาน\")\n\tfor i := 1; i <= 3; i++ {\n\t\tdefer fmt.Println(\"defer หมายเลข:\", i)\n\t}\n\tfmt.Println(\"จบการทำงานของ main\")\n}",
-          "out": "เริ่มต้นทำงาน\nจบการทำงานของ main\ndefer หมายเลข: 3\ndefer หมายเลข: 2\ndefer หมายเลข: 1",
-        },
-        {
-          "t": "callout",
-          "title": "📌 การใช้งานจริงใน Backend",
-          "c": "เราจะใช้ `defer` ทันทีหลังเปิดทรัพยากรเสมอ เพื่อรับประกันว่าจะไม่มี Connection รั่วไหล (Connection Leak):\n```go\nconn, err := db.Open(dsn)\nif err != nil {\n    return err\n}\ndefer conn.Close() // รับประกันว่าจะถูกปิดแน่นอนเมื่อจบฟังก์ชัน\n```",
+          "label": "การใช้ defer เพื่อรับประกันการคืนสายเชื่อมต่อแม้เกิด Error กลางทาง",
+          "code": "package main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nfunc listAccounts(shouldFail bool) error {\n\tfmt.Println(\"1. ยืมสายเชื่อมต่อจาก Pool มาเริ่มอ่านข้อมูล (rows)\")\n\n\t// จองคิวคืนสายเชื่อมต่อไว้ล่วงหน้าทันที!\n\tdefer fmt.Println(\"3. [defer ทำงานอัตโนมัติ] ปิด rows และคืนสายเชื่อมต่อกลับเข้า Pool สำเร็จ!\")\n\n\tif shouldFail {\n\t\tfmt.Println(\"2. ❌ เกิดข้อผิดพลาดระหว่างอ่านข้อมูล! สั่ง return ออกทันที\")\n\t\treturn errors.New(\"scan error\")\n\t}\n\n\tfmt.Println(\"2. ✅ อ่านข้อมูลครบทุกแถวสำเร็จ\")\n\treturn nil\n}\n\nfunc main() {\n\tfmt.Println(\"--- กรณีทำงานเกิด Error กลางคัน ---\")\n\t_ = listAccounts(true)\n}",
+          "out": "--- กรณีทำงานเกิด Error กลางคัน ---\n1. ยืมสายเชื่อมต่อจาก Pool มาเริ่มอ่านข้อมูล (rows)\n2. ❌ เกิดข้อผิดพลาดระหว่างอ่านข้อมูล! สั่ง return ออกทันที\n3. [defer ทำงานอัตโนมัติ] ปิด rows และคืนสายเชื่อมต่อกลับเข้า Pool สำเร็จ!",
         },
         {
           "t": "h2",
-          "c": "4. Context: ควบคุม Lifecycle และ Timeout ของ Request",
+          "c": "4. Context (ctx): สายสัญญาณควบคุมเวลาที่ส่งต่อจากต้นน้ำสู่ฐานข้อมูล",
         },
         {
           "t": "p",
-          "c": "ในระบบเครือข่ายและฐานข้อมูล เราไม่สามารถปล่อยให้คำสั่ง SQL ค้างรอได้ตลอดไป ถ้าฐานข้อมูลช้าหรือเน็ตเวิร์กหลุด คำสั่งควรจะตัดจบภายในเวลาที่กำหนด (Timeout) เราใช้ `context.Context` ในการควบคุมเรื่องนี้:",
+          "c": "เมื่อคุณเปิดอ่านโค้ด Go Backend หรือโค้ดในบทที่ 3 คุณจะเห็นว่าแทบทุกฟังก์ชันต้องรับพารามิเตอร์ตัวแรกสุดหน้าตาแบบนี้เสมอ:\n`func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams)`",
+        },
+        {
+          "t": "p",
+          "c": "หลายคนสงสัยว่า **`ctx context.Context` คืออะไร และใครเป็นคนส่งเข้ามา?**\nให้จินตนาการว่า `ctx` คือ **'สายสัญญาณควบคุมเวลาและการยกเลิกคำสั่ง'** ที่ผูกติดไปกับคำขอของลูกค้าตั้งแต่ก้าวแรกที่เข้ามาในเซิร์ฟเวอร์:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ถ้าไม่มี `ctx`**: สมมติลูกค้ากดดูรายการเดินบัญชีผ่านมือถือ แต่จังหวะนั้นเน็ตลูกค้าหลุดหรือลูกค้ากดปิดแอปหนีไปแล้ว ถ้าไม่มี `ctx` ฐานข้อมูล PostgreSQL จะไม่รู้เรื่องเลยและยังคงก้มหน้าก้มตารันคำสั่ง SQL ค้นหาข้อมูลต่อไปเรื่อยๆ จนเปลือง CPU ฟรี",
+            "**เมื่อส่ง `ctx` ต่อไปให้ทุกฟังก์ชัน**: ทันทีที่ลูกค้าปิดแอป หรือคำสั่ง SQL ใช้เวลานานเกินกำหนด (Timeout เช่น เกิน 2 วินาที) สายสัญญาณ `ctx` จะส่งสัญญาณ **ยกเลิก (Cancel)** ทะลุไปถึงฐานข้อมูลเพื่อให้หยุดทำงานทันที!",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "**แล้วต้นทางของ `ctx` สร้างมาจากไหน? มี 2 ต้นทางหลักที่เราจะได้ใช้จริง:**",
+        },
+        {
+          "t": "ol",
+          "c": [
+            "**`context.Background()` (Context ตั้งต้นเปล่าๆ ไม่มีวันหมดเวลา)**: ใช้เมื่อเราเป็นคนเริ่มรันโปรแกรมเองโดยยังไม่มีกำหนดเวลา เช่น ตอนเริ่มต้นฟังก์ชัน `main()` หรือตอนรัน **Unit Test ในบทที่ 3.2**",
+            "**`context.WithTimeout(parentCtx, เวลา)` หรือ Context จาก HTTP Request (บทที่ 6)**: ใช้ห่อ Context ตั้งต้นเพื่อกำหนดเพดานเวลาตายตัว เช่น ห้ามรันคำสั่งฐานข้อมูลเกิน 2 วินาที",
+          ],
         },
         {
           "t": "codeout",
           "lang": "go",
-          "label": "ตัวอย่างคลาสสิก: การตั้ง Timeout ด้วย context.WithTimeout",
-          "code": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\nfunc slowQuery(ctx context.Context, d time.Duration) error {\n\tselect {\n\tcase <-time.After(d):\n\t\treturn nil // คิวรีเสร็จทันเวลา\n\tcase <-ctx.Done():\n\t\treturn ctx.Err() // หมดเวลาก่อน หรือถูกยกเลิก\n\t}\n}\n\nfunc main() {\n\t// กำหนดเพดานเวลา 1 วินาที\n\tctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)\n\tdefer cancel()\n\n\tfmt.Println(\"คิวรีเร็ว (100ms):\", slowQuery(ctx, 100*time.Millisecond))\n\tfmt.Println(\"คิวรียาว (3s):   \", slowQuery(ctx, 3*time.Second))\n}",
-          "out": "คิวรีเร็ว (100ms): <nil>\nคิวรียาว (3s):    context deadline exceeded",
+          "label": "จำลองการส่งต่อ ctx และ Parameter Struct เข้าสู่ฟังก์ชัน CreateAccount",
+          "code": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\n// มัดรวมข้อมูลขาเข้าไว้ใน Struct (Parameter Struct) เพื่อให้ตอนเรียกใช้ระบุชื่อฟิลด์ชัดเจน\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\n// ฟังก์ชันรับ ctx เป็นตัวแรกเสมอ ตามด้วยก้อนข้อมูล arg\nfunc CreateAccount(ctx context.Context, arg CreateAccountParams) error {\n\t// ตรวจสอบว่าสายสัญญาณ ctx ถูกยกเลิกหรือหมดเวลาไปหรือยัง\n\tif err := ctx.Err(); err != nil {\n\t\treturn fmt.Errorf(\"ยกเลิกการสร้างบัญชีของ %s เพราะ: %w\", arg.Owner, err)\n\t}\n\n\tfmt.Printf(\"✅ สร้างบัญชีสำเร็จ -> เจ้าของ: %s, ยอดเงิน: %d %s\\n\", arg.Owner, arg.Balance, arg.Currency)\n\treturn nil\n}\n\nfunc main() {\n\t// กรณีที่ 1: ส่ง context.Background() (เช่น ตอนรัน Unit Test ในบทที่ 3.2)\n\tbgCtx := context.Background()\n\t_ = CreateAccount(bgCtx, CreateAccountParams{\n\t\tOwner:    \"alice\",\n\t\tBalance:  1000,\n\t\tCurrency: \"USD\",\n\t})\n\n\t// กรณีที่ 2: ตั้งเวลา Timeout ไว้แค่ 10 มิลลิวินาที แต่ระบบช้าไป 50 มิลลิวินาที\n\ttimeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)\n\tdefer cancel()\n\n\ttime.Sleep(50 * time.Millisecond) // จำลองว่าเซิร์ฟเวอร์ทำงานช้าจนเกินเวลา\n\terr := CreateAccount(timeoutCtx, CreateAccountParams{\n\t\tOwner:    \"bob\",\n\t\tBalance:  500,\n\t\tCurrency: \"THB\",\n\t})\n\tfmt.Println(\"❌ ผลลัพธ์เมื่อเกินเวลา:\", err)\n}",
+          "out": "✅ สร้างบัญชีสำเร็จ -> เจ้าของ: alice, ยอดเงิน: 1000 USD\n❌ ผลลัพธ์เมื่อเกินเวลา: ยกเลิกการสร้างบัญชีของ bob เพราะ: context deadline exceeded",
         },
         {
           "t": "h2",
