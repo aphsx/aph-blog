@@ -80,6 +80,11 @@ export const securityProdPages: Record<string, Page> = {
           "c": "ALTER TABLE IF EXISTS accounts DROP CONSTRAINT IF EXISTS owner_currency_key;\nALTER TABLE IF EXISTS accounts DROP CONSTRAINT IF EXISTS accounts_owner_fkey;\nDROP TABLE IF EXISTS users;",
         },
         {
+          "t": "callout",
+          "title": "⚠️ ข้อควรระวัง: ล้างข้อมูลทดสอบเก่าก่อนรัน make migrateup",
+          "c": "เนื่องจากในโมดูลที่ 3–6 เราสร้างบัญชีทดสอบไว้ในฐานข้อมูล ซึ่งชื่อเจ้าของบัญชีเหล่านั้นยังไม่มีตัวตนอยู่ในตาราง `users` ใหม่ หากสั่ง `make migrateup` ทันที PostgreSQL จะปฏิเสธและฟ้อง Error ว่า `violates foreign key constraint \"accounts_owner_fkey\"` ทันที!\n\nให้เปิด Terminal แล้วสั่งล้างข้อมูลเก่าออกก่อนรัน Migrate เสมอ:\n```bash\ndocker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts CASCADE;\"\nmake migrateup\n```",
+        },
+        {
           "t": "h2",
           "c": "4. สร้าง CRUD และ Endpoint สมัครสมาชิก (POST /users)",
         },
@@ -300,7 +305,27 @@ export const securityProdPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "🔒 กฎความปลอดภัยระดับบัญชี (Authorization Rule)",
-          "c": "เมื่อ Alice ส่งคำสั่งโอนเงิน ตัว Handler `createTransfer` จะตรวจสอบว่า `fromAccount.Owner == payload.Username` เสมอ ทำให้ Alice ไม่มีทางแอบยิงคำสั่งสั่งตัดเงินออกจากบัญชีของ Bob ได้อีกต่อไป!",
+          "c": "เมื่อมีระบบล็อกอินแล้ว เราต้องอัปเดต Handlers เดิมใน `api/account.go` และ `api/transfer.go` ให้ดึงตัวตนผู้ใช้จาก Token (`ctx.MustGet(authPayloadKey).(*token.Payload)`) เสมอ:\n1. **`createAccount`**: ไม่ต้องรับ `owner` จาก JSON Body อีกต่อไป แต่ใช้ `authPayload.Username` เป็นเจ้าของบัญชีทันที\n2. **`getAccount` & `createTransfer`**: ตรวจสอบว่า `account.Owner == authPayload.Username` เสมอ Alice จะไม่มีทางแอบดูบัญชีคนอื่นหรือแอบสั่งตัดเงินออกจากบัญชีของ Bob ได้อีกต่อไป\n3. **`listAccounts`**: ส่ง `authPayload.Username` ไปยังฐานข้อมูลเพื่อดึงเฉพาะรายการบัญชีของผู้ใช้ที่กำลังล็อกอินอยู่เท่านั้น",
+        },
+        {
+          "t": "p",
+          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/api/account.go` (อัปเดตระบบสิทธิ์เจ้าของบัญชี Authorization):**",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/account.go (ฉบับสมบูรณ์ ป้องกันสิทธิ์เจ้าของบัญชี)",
+          "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n\t\"simplebank/token\"\n)\n\ntype createAccountRequest struct {\n\tCurrency string `json:\"currency\" binding:\"required,currency\"`\n}\n\nfunc (server *Server) createAccount(ctx *gin.Context) {\n\tvar req createAccountRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tauthPayload := ctx.MustGet(authPayloadKey).(*token.Payload)\n\taccount, err := server.store.CreateAccount(ctx, db.CreateAccountParams{\n\t\tOwner:    authPayload.Username,\n\t\tBalance:  0,\n\t\tCurrency: req.Currency,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}\n\ntype getAccountRequest struct {\n\tID int64 `uri:\"id\" binding:\"required,min=1\"`\n}\n\nfunc (server *Server) getAccount(ctx *gin.Context) {\n\tvar req getAccountRequest\n\tif err := ctx.ShouldBindUri(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.GetAccount(ctx, req.ID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tauthPayload := ctx.MustGet(authPayloadKey).(*token.Payload)\n\tif account.Owner != authPayload.Username {\n\t\terr := errors.New(\"account doesn't belong to the authenticated user\")\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}\n\ntype listAccountsRequest struct {\n\tPageID   int32 `form:\"page_id\" binding:\"required,min=1\"`\n\tPageSize int32 `form:\"page_size\" binding:\"required,min=5,max=10\"`\n}\n\nfunc (server *Server) listAccounts(ctx *gin.Context) {\n\tvar req listAccountsRequest\n\tif err := ctx.ShouldBindQuery(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tauthPayload := ctx.MustGet(authPayloadKey).(*token.Payload)\n\taccounts, err := server.store.ListAccounts(ctx, db.ListAccountsParams{\n\t\tOwner:  authPayload.Username,\n\t\tLimit:  req.PageSize,\n\t\tOffset: (req.PageID - 1) * req.PageSize,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, accounts)\n}",
+        },
+        {
+          "t": "p",
+          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/api/transfer.go` (อัปเดตระบบตรวจสอบสิทธิ์ผู้โอน Authorization):**",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/transfer.go (ฉบับสมบูรณ์ ป้องกันสิทธิ์การโอน)",
+          "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/jackc/pgx/v5/pgconn\"\n\tdb \"simplebank/db\"\n\t\"simplebank/token\"\n)\n\ntype transferRequest struct {\n\tFromAccountID int64  `json:\"from_account_id\" binding:\"required,min=1\"`\n\tToAccountID   int64  `json:\"to_account_id\" binding:\"required,min=1,nefield=FromAccountID\"`\n\tAmount        int64  `json:\"amount\" binding:\"required,gt=0\"`\n\tCurrency      string `json:\"currency\" binding:\"required,currency\"`\n}\n\nfunc (server *Server) createTransfer(ctx *gin.Context) {\n\tvar req transferRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tfromAccount, ok := server.validAccount(ctx, req.FromAccountID, req.Currency)\n\tif !ok {\n\t\treturn\n\t}\n\n\tauthPayload := ctx.MustGet(authPayloadKey).(*token.Payload)\n\tif fromAccount.Owner != authPayload.Username {\n\t\terr := errors.New(\"from account doesn't belong to the authenticated user\")\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\tif _, ok := server.validAccount(ctx, req.ToAccountID, req.Currency); !ok {\n\t\treturn\n\t}\n\n\tresult, err := server.store.TransferTx(ctx, db.TransferTxParams{\n\t\tFromAccountID: req.FromAccountID,\n\t\tToAccountID:   req.ToAccountID,\n\t\tAmount:        req.Amount,\n\t})\n\tif err != nil {\n\t\tvar pgErr *pgconn.PgError\n\t\tif errors.As(err, &pgErr) && pgErr.Code == \"23514\" {\n\t\t\tctx.JSON(http.StatusBadRequest, errorResponse(errors.New(\"เงินในบัญชีไม่พอสำหรับการโอน\")))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, result)\n}\n\nfunc (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {\n\taccount, err := server.store.GetAccount(ctx, accountID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf(\"ไม่พบบัญชีหมายเลข %d\", accountID)))\n\t\t\treturn account, false\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn account, false\n\t}\n\n\tif account.Currency != currency {\n\t\terr := fmt.Errorf(\"สกุลเงินของบัญชี [%d] ไม่ตรงกัน: %s vs %s\", account.ID, account.Currency, currency)\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn account, false\n\t}\n\treturn account, true\n}",
         },
         {
           "t": "h2",
