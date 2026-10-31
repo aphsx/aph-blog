@@ -197,7 +197,7 @@ export const goPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "🎯 เป้าหมายของบทนี้ (Learning Objectives)",
-          "c": "• เข้าใจความแตกต่างระหว่าง Value Receiver และ Pointer Receiver เวลาผูกฟังก์ชันเข้ากับ Struct\n• เข้าใจการทำงานของ Interface ใน Go ผ่านการจำลอง `Queries` ที่รับได้ทั้ง DB ปกติและ Transaction (`DBTX`)\n• รู้วิธีใช้ `defer` เพื่อรับประกันการคืนสายเชื่อมต่อฐานข้อมูลเสมอแม้เกิด Error กลางทาง\n• เข้าใจว่า `ctx context.Context` คืออะไร ส่งมาจากต้นทางไหน และทำไมต้องเป็นพารามิเตอร์ตัวแรกของฟังก์ชันเสมอ\n\n⏱ **เวลาในการเรียนรู้**: ~25 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านบท 1.1 ไวยากรณ์ Go พื้นฐาน",
+          "c": "• เข้าใจความแตกต่างระหว่าง Value Receiver และ Pointer Receiver เวลาผูกฟังก์ชันเข้ากับ Struct\n• เข้าใจการทำงานของ Interface ใน Go ผ่านการจำลอง `Queries` ที่รับได้ทั้ง DB ปกติและ Transaction (`DBTX`)\n• เข้าใจ Struct Embedding (Composition) และ Closure (ส่งฟังก์ชันเป็นพารามิเตอร์) เพื่อใช้สร้าง `Store` และ `execTx`\n• รู้วิธีใช้ `defer` เพื่อรับประกันการคืนสายเชื่อมต่อฐานข้อมูลเสมอแม้เกิด Error กลางทาง\n• เข้าใจว่า `ctx context.Context` คืออะไร ส่งมาจากต้นทางไหน และทำไมต้องเป็นพารามิเตอร์ตัวแรกของฟังก์ชันเสมอ\n\n⏱ **เวลาในการเรียนรู้**: ~25 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านบท 1.1 ไวยากรณ์ Go พื้นฐาน",
         },
         {
           "t": "h2",
@@ -245,7 +245,29 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. Defer: รับประกันการคืนสายเชื่อมต่อฐานข้อมูลเสมอ (LIFO)",
+          "c": "3. Struct Embedding & Closure: รวมร่าง Struct และส่งฟังก์ชันเป็นตัวแปร",
+        },
+        {
+          "t": "p",
+          "c": "ในภาษา Go ไม่มีคำว่า `extends` หรือการสืบทอดคลาสแบบ OOP ดั้งเดิม แต่ใช้แนวคิด **Composition (การนำชิ้นส่วนมาประกอบร่างกัน)** ผ่านการฝัง Struct เข้าไปในอีก Struct หนึ่งโดยไม่ต้องตั้งชื่อฟิลด์ เรียกว่า **Struct Embedding**:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Struct Embedding (`*Queries` ใน `Store`)**: เมื่อเราฝัง `*Queries` เข้าไปใน `Store` ตรงๆ เมธอดทุกตัวของ `Queries` จะถูกเลื่อนขั้น (**Method Promotion**) ให้กลายเป็นเมธอดของ `Store` โดยอัตโนมัติ ทำให้เราเรียก `store.CreateAccount(...)` ได้ทันทีโดยไม่ต้องเขียน `store.Queries.CreateAccount(...)`",
+            "**First-Class Function & Closure (`fn func(*Queries) error`)**: ใน Go เราสามารถส่ง 'ฟังก์ชันทั้งก้อน' เข้าไปเป็นพารามิเตอร์ของอีกฟังก์ชันหนึ่งได้! ในระบบธนาคารเราจะใช้เทคนิคนี้สร้างฟังก์ชันแม่ `execTx` ที่คอยเปิดและปิด Transaction ให้โดยอัตโนมัติ ส่วนข้างในอยากให้รันคำสั่ง SQL อะไรบ้าง ก็แค่ส่งเข้าไปในรูปฟังก์ชันย่อย (`fn`)",
+          ],
+        },
+        {
+          "t": "codeout",
+          "lang": "go",
+          "label": "ตัวอย่าง Struct Embedding และ Closure Callback (ต้นแบบของ Store และ execTx)",
+          "code": "package main\n\nimport \"fmt\"\n\ntype Queries struct{}\n\nfunc (q *Queries) CreateAccount(owner string) {\n\tfmt.Println(\"  -> Run SQL: CreateAccount for\", owner)\n}\n\n// Store embeds *Queries: all Queries methods are promoted to Store automatically\ntype Store struct {\n\t*Queries\n}\n\n// execTx accepts a callback function (fn) and wraps it with BEGIN and COMMIT\nfunc (s *Store) execTx(fn func(q *Queries) error) {\n\tfmt.Println(\"[1] BEGIN Transaction\")\n\t_ = fn(s.Queries) // Execute the callback function passed by caller\n\tfmt.Println(\"[2] COMMIT Transaction\")\n}\n\nfunc main() {\n\tstore := &Store{Queries: &Queries{}}\n\n\t// 1. Direct call via Struct Embedding (Method Promotion)\n\tfmt.Println(\"--- Normal Mode ---\")\n\tstore.CreateAccount(\"alice\")\n\n\t// 2. Wrapped call via Closure Callback\n\tfmt.Println(\"--- Transaction Mode ---\")\n\tstore.execTx(func(q *Queries) error {\n\t\tq.CreateAccount(\"bob\")\n\t\tq.CreateAccount(\"charlie\")\n\t\treturn nil\n\t})\n}",
+          "out": "--- Normal Mode ---\n  -> Run SQL: CreateAccount for alice\n--- Transaction Mode ---\n[1] BEGIN Transaction\n  -> Run SQL: CreateAccount for bob\n  -> Run SQL: CreateAccount for charlie\n[2] COMMIT Transaction",
+        },
+        {
+          "t": "h2",
+          "c": "4. Defer: รับประกันการคืนสายเชื่อมต่อฐานข้อมูลเสมอ (LIFO)",
         },
         {
           "t": "p",
@@ -264,7 +286,7 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. Context (ctx): สายสัญญาณควบคุมเวลาที่ส่งต่อจากต้นน้ำสู่ฐานข้อมูล",
+          "c": "5. Context (ctx): สายสัญญาณควบคุมเวลาที่ส่งต่อจากต้นน้ำสู่ฐานข้อมูล",
         },
         {
           "t": "p",
@@ -301,7 +323,7 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "5. เช็กความเข้าใจ (Quick Quiz)",
+          "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
           "t": "quiz",

@@ -54,7 +54,11 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "แทนที่จะสร้างตัวแปร Global DB ลอยๆ เราจะห่อหุ้มทรัพยากรทั้งหมด (Store, Router, Config) ไว้ใน `Server` struct เดียวใน `simplebank/api/server.go`:",
+          "c": "คำว่า **Dependency Injection (DI)** ฟังดูเหมือนศัพท์วิชาการยากๆ แต่ความหมายจริงๆ เรียบง่ายมากครับ:\n• **ถ้าไม่ใช้ DI**: ฟังก์ชันสร้าง Server แอบไปเปิดต่อ Database เองข้างในแบบตายตัว ทำให้เวลาเขียน Unit Test เราไม่สามารถสลับฐานข้อมูลจำลองเข้าไปทดสอบได้เลย\n• **การใช้ DI**: คือการ **'ส่งของที่ต้องใช้ (`store *db.Store`) เข้ามาทางพารามิเตอร์ตอนสร้าง `NewServer(store)`'** แทนการประกาศตัวแปร Global DB ลอยๆ",
+        },
+        {
+          "t": "p",
+          "c": "เรารวมทรัพยากรที่ API ต้องใช้ไว้ใน `Server` struct เดียวในไฟล์ `simplebank/api/server.go` ดังนี้:",
         },
         {
           "t": "code",

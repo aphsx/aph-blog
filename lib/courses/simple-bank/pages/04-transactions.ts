@@ -23,15 +23,44 @@ export const transactionPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "🎯 เป้าหมายของบทนี้ (Learning Objectives)",
-          "c": "• เข้าใจคุณสมบัติทั้ง 4 ของ ACID (Atomicity, Consistency, Isolation, Durability) ผ่านสถานการณ์โอนเงินจริง\n• สร้าง `Store` struct ที่ผสานคำสั่ง SQL ของ `Queries` เข้ากับความสามารถเปิด Transaction ของ `*sql.DB`\n• เขียนฟังก์ชัน `execTx` โดยใช้ Go Closure เพื่อจัดการ Begin, Commit และ Auto-Rollback อย่างปลอดภัยในที่เดียว\n\n⏱ **เวลาในการเรียนรู้**: ~20 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านโมดูล 3 การเขียน CRUD",
+          "c": "• เข้าใจว่า **Database Transaction** คืออะไร และทำไมการรันคำสั่ง SQL แยกทีละบรรทัดแบบปกติถึงทำให้เงินลูกค้าสูญหายได้\n• เข้าใจคุณสมบัติทั้ง 4 ของ ACID (Atomicity, Consistency, Isolation, Durability) ผ่านสถานการณ์โอนเงินจริง\n• เข้าใจโครงสร้าง `Store` struct ว่าทำไมต้องประกอบร่าง `*Queries` (Struct Embedding) คู่กับ `db *sql.DB`\n• เขียนฟังก์ชัน `execTx` โดยใช้ Go Closure เพื่อจัดการ Begin, Commit และ Auto-Rollback อย่างปลอดภัยในที่เดียว\n\n⏱ **เวลาในการเรียนรู้**: ~20 นาที | **สิ่งที่ต้องรู้มาก่อน**: ผ่านโมดูล 3 การเขียน CRUD",
         },
         {
           "t": "h2",
-          "c": "1. ACID คืออะไร และปกป้องเงินของเราอย่างไร?",
+          "c": "1. Database Transaction คืออะไร และทำไมถึงจำเป็น?",
         },
         {
           "t": "p",
-          "c": "การโอนเงินไม่ใช่คำสั่ง SQL บรรทัดเดียว แต่เป็นการทำงานร่วมกันของ 5 คำสั่งย่อย ถ้าเซิร์ฟเวอร์เกิดไฟดับหรือสาย LAN หลุดตอนที่ทำไปได้ 3 คำสั่ง เงินจะหายไปทันที คุณสมบัติ **ACID** คือพันธสัญญาของฐานข้อมูล Relational Database ที่เข้ามารับประกันความปลอดภัยนี้:",
+          "c": "ในบทที่ 3 เวลาเราเรียกฟังก์ชันอย่าง `CreateAccount` หรือ `AddAccountBalance` แต่ละคำสั่งจะทำงานแบบ **Auto-Commit (บันทึกผลลงฐานข้อมูลทันทีที่รันจบบรรทัดนั้น)** ซึ่งเหมาะกับงานเดี่ยวๆ ที่จบในคำสั่งเดียว",
+        },
+        {
+          "t": "p",
+          "c": "แต่สำหรับ **'การโอนเงิน'** มันไม่ใช่คำสั่ง SQL บรรทัดเดียวจบ! ในระบบธนาคาร การโอนเงิน 1 ครั้งต้องรันคำสั่ง SQL ถึง **5 ขั้นตอนติดต่อกัน** (สร้างใบเสร็จ Transfer -> ลงสมุดบัญชีฝั่งคนโอน `-10` -> ลงสมุดบัญชีฝั่งคนรับ `+10` -> หักยอดเงินคนโอน -> เพิ่มยอดเงินคนรับ) ลองจินตนาการดูว่า **ถ้าไม่มี Transaction แล้วเกิดเหตุไม่คาดฝันขึ้นกลางทางจะเกิดอะไรขึ้น?**",
+        },
+        {
+          "t": "code",
+          "lang": "text",
+          "label": "💥 จำลองหายนะเมื่อรัน 5 ขั้นตอนแบบไม่มี Transaction (Auto-Commit ทีละบรรทัด)",
+          "c": "ขั้นที่ 1: INSERT INTO transfers (from: Alice, to: Bob, amount: 100)  --> ✅ บันทึกสำเร็จ!\nขั้นที่ 2: INSERT INTO entries (account: Alice, amount: -100)         --> ✅ บันทึกสำเร็จ!\nขั้นที่ 3: INSERT INTO entries (account: Bob, amount: +100)           --> ✅ บันทึกสำเร็จ!\nขั้นที่ 4: UPDATE accounts SET balance = balance - 100 (Alice)        --> ✅ หักเงิน Alice สำเร็จ!\n⚡ [ทันใดนั้น! สายเน็ตเวิร์กกระตุก หรือ Database เซิร์ฟเวอร์รีสตาร์ตพอดี]\nขั้นที่ 5: UPDATE accounts SET balance = balance + 100 (Bob)          --> ❌ ล้มเหลว! คำสั่งไปไม่ถึง DB\n\nสรุปผลลัพธ์: เงินของ Alice ถูกหักหายไป 100 บาทถาวร แต่เงินไม่เคยเข้าบัญชีของ Bob เลย!",
+        },
+        {
+          "t": "p",
+          "c": "เพื่อป้องกันหายนะนี้ ฐานข้อมูลจึงมีกลไกที่เรียกว่า **Database Transaction (การมัดรวมธุรกรรม)** คือการเอาคำสั่ง SQL หลายๆ คำสั่งมาใส่ไว้ใน **'กล่องนิรภัยใบเดียวกัน'** โดยเปิดกล่องด้วยคำสั่ง **`BEGIN`** จากนั้นรันคำสั่งย่อยทั้ง 5 ขั้นตอนข้างใน:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ถ้าผ่านครบทั้ง 5 ขั้นตอน**: เราจะสั่ง **`COMMIT`** เพื่อประทับตรายืนยันและบันทึกทุกอย่างลงฮาร์ดดิสก์พร้อมกันในเสี้ยววินาทีเดียว",
+            "**แต่ถ้าพังแม้แต่ขั้นตอนเดียว (หรือไฟดับกลางคัน)**: เราจะสั่ง **`ROLLBACK`** (หรือฐานข้อมูลทำให้เองอัตโนมัติ) เพื่อย้อนเวลาล้างสิ่งที่ทำไปในขั้นที่ 1–4 ทิ้งทั้งหมด ให้ข้อมูลทุกตารางกลับสู่สภาพเดิม 100% เสมือนไม่เคยมีการกดโอนเงินเกิดขึ้นเลย!",
+          ],
+        },
+        {
+          "t": "h2",
+          "c": "2. กฎเหล็ก 4 ข้อของ Transaction: คุณสมบัติ ACID",
+        },
+        {
+          "t": "p",
+          "c": "คำว่า **ACID** คือมาตรฐานสากล 4 ข้อของระบบฐานข้อมูล Relational Database (เช่น PostgreSQL) ที่รับประกันว่ากล่อง Transaction ของเราจะปลอดภัยไร้ที่ติในทุกสถานการณ์:",
         },
         {
           "t": "table",
@@ -39,48 +68,70 @@ export const transactionPages: Record<string, Page> = {
           "rows": [
             [
               "A - Atomicity (เป็นเนื้อเดียว แบ่งแยกไม่ได้)",
-              "All or Nothing: สำเร็จทั้งหมด หรือไม่เกิดขึ้นเลย",
+              "All or Nothing: สำเร็จทั้งหมด 100% หรือไม่เกิดขึ้นเลย (0%)",
               "หากหักเงินจาก Alice สำเร็จ แต่เกิด Error ก่อนจะเพิ่มเงินให้ Bob ระบบต้องยกเลิก (Rollback) ทุกอย่างกลับสู่จุดเริ่มต้น เสมือนไม่เคยมีอะไรเกิดขึ้น",
             ],
             [
               "C - Consistency (ความถูกต้องสอดคล้องตามกฎ)",
-              "ข้อมูลต้องเป็นไปตามกฎและ Constraints เสมอ",
-              "ยอดเงินรวมก่อนโอนกับหลังโอนต้องเท่ากันเสมอ และยอดเงินห้ามติดลบตามกฎ `CHECK (balance >= 0)`",
+              "ข้อมูลก่อนและหลังจบ Transaction ต้องเป็นไปตามกฎและ Constraints เสมอ",
+              "ยอดเงินรวมในระบบก่อนโอนกับหลังโอนต้องเท่ากันเป๊ะ และยอดเงินห้ามติดลบตามกฎ `CHECK (balance >= 0)`",
             ],
             [
               "I - Isolation (แยกส่วนไม่กวนกัน)",
               "ธุรกรรมที่รันพร้อมกันต้องไม่เห็นข้อมูลครึ่งๆ กลางๆ ของกันและกัน",
-              "ในระหว่างที่ Alice กำลังโอนเงินให้ Bob คนอื่นที่ดึงข้อมูลยอดเงินจะต้องเห็นยอดเดิม จนกว่าธุรกรรมจะ Commit เสร็จสมบูรณ์",
+              "ในระหว่างที่ Alice กำลังโอนเงินให้ Bob (ทำไปได้ 3 จาก 5 ขั้นตอน) คนอื่นที่ดึงข้อมูลยอดเงินจะต้องยังไม่เห็นยอดที่ถูกตัดครึ่งๆ กลางๆ จนกว่าจะ Commit เสร็จสมบูรณ์",
             ],
             [
               "D - Durability (คงทนถาวร)",
-              "เมื่อตอบว่าสำเร็จแล้ว ข้อมูลต้องอยู่ตลอดไปแม้เซิร์ฟเวอร์จะดับ",
-              "เมื่อคำสั่ง Commit เสร็จสิ้น ข้อมูลถูกบันทึกลงดิสก์ (WAL) เรียบร้อยแล้ว แม้ปลั๊กไฟจะถูกดึงในมิลลิวินาทีถัดมา ข้อมูลก็ไม่สูญหาย",
+              "เมื่อตอบว่า Commit สำเร็จแล้ว ข้อมูลต้องอยู่ตลอดไปแม้เซิร์ฟเวอร์จะไฟดับ",
+              "เมื่อคำสั่ง Commit เสร็จสิ้น ข้อมูลถูกบันทึกลงดิสก์ (Write-Ahead Log: WAL) เรียบร้อยแล้ว แม้ปลั๊กไฟจะถูกดึงในมิลลิวินาทีถัดมา เงินก็ไม่สูญหาย",
             ],
           ],
         },
         {
           "t": "h2",
-          "c": "2. แพทเทิร์น Store & Transaction Manager",
+          "c": "3. ทำไมต้องสร้าง Store struct? (เบื้องหลังการรวมร่าง *Queries กับ *sql.DB)",
         },
         {
           "t": "p",
-          "c": "ในบทที่ 3 เรามี `Queries` สำหรับรันคำสั่ง CRUD ทั่วไป แต่ `Queries` มีแค่ `DBTX` ตัวเดียว มันไม่สามารถสั่ง `BeginTx` ได้ ดังนั้น เราจึงสร้าง Struct ใหม่ชื่อ `Store` ขึ้นมา ซึ่งรวบรวมทั้งสองสิ่งเข้าด้วยกัน:",
+          "c": "คำถามสำคัญที่หลายคนสงสัยคือ: **'ในเมื่อเรามี `Queries` จากบทที่ 3 อยู่แล้ว ทำไมเราถึงใช้ `Queries` เปิด Transaction เลยไม่ได้ และต้องสร้าง `Store` struct ขึ้นมาทำไม?'** มาดูข้อจำกัดของ `Queries` กันครับ:",
         },
         {
           "t": "ul",
           "c": [
-            "**`*Queries` (Struct Embedding)**: ทำให้ `Store` มีเมธอดทุกตัวของ `Queries` โดยอัตโนมัติ (เช่น `store.GetAccount(...)`)",
-            "**`db *sql.DB`**: ตัวเชื่อมต่อฐานข้อมูลหลัก ที่มีความสามารถในการเปิด Transaction (`db.BeginTx`)",
+            "**ข้อจำกัดของ `Queries` ตัวเดิม**: ย้อนกลับไปดูในไฟล์ `db.go` ตัว `Queries` เก็บฟิลด์ `db DBTX` ซึ่งเป็นเพียง Interface ที่มีแค่ 3 เมธอดสำหรับยิงคำสั่ง SQL เดี่ยวๆ (`ExecContext`, `QueryContext`, `QueryRowContext`) **แต่มันไม่มีเมธอด `BeginTx()` สำหรับสั่งเปิด Transaction!**",
+            "**ใครคือคนที่มีเมธอด `BeginTx()`?**: คนที่สั่งเปิดกล่อง Transaction ได้คือตัวจัดการฐานข้อมูลตัวจริงอย่าง **`*sql.DB`** เท่านั้น",
           ],
         },
         {
+          "t": "p",
+          "c": "ดังนั้น เพื่อให้ชั้นฐานข้อมูลของเราเก่งครบเครื่อง ทั้ง **'ยิงคำสั่ง CRUD เดี่ยวๆ ได้เหมือนเดิม'** และ **'สั่งเปิด Transaction มัดรวมหลายคำสั่งได้ด้วย'** เราจึงสร้าง Struct ใหม่ชื่อ **`Store`** ที่นำทั้ง 2 ชิ้นส่วนมาประกอบร่างกัน:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "โครงสร้างของ Store struct (ประกอบร่าง *Queries คู่กับ *sql.DB)",
+          "c": "type Store struct {\n\t*Queries         // 1. Struct Embedding: สืบทอดคำสั่ง SQL เดี่ยวๆ ทั้งหมดมาไว้ที่ Store โดยตรง\n\tdb       *sql.DB // 2. Real DB Pool: เก็บสายเชื่อมต่อตัวจริงไว้สำหรับสั่ง db.BeginTx() เปิด Transaction\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ชิ้นที่ 1: `*Queries` (เขียนแบบไม่ตั้งชื่อฟิลด์ = Struct Embedding)**: ตามที่เราเรียนในบทที่ 1.2 การฝัง `*Queries` ลงไปแบบนี้ ทำให้เมธอด CRUD ทุกตัวของ `Queries` (เช่น `CreateAccount`, `GetAccount`, `AddAccountBalance`) **ถูกเลื่อนขั้นขึ้นมาเป็นเมธอดของ `Store` โดยอัตโนมัติ** เวลาใช้งานโหมดปกติจึงเรียก `store.GetAccount(...)` ได้ทันที",
+            "**ชิ้นที่ 2: `db *sql.DB` (ตัวเปิด Transaction)**: เก็บตัวเชื่อมต่อฐานข้อมูลหลักไว้ข้างใน เพื่อให้ `Store` สามารถเรียกคำสั่ง `s.db.BeginTx(ctx, nil)` เพื่อเปิดโหมด Transaction (`*sql.Tx`) ได้เมื่อต้องการโอนเงิน",
+          ],
+        },
+        {
+          "t": "callout",
+          "title": "🔄 ภาพรวมการทำงานร่วมกัน: โหมดปกติ vs โหมด Transaction ใน Store",
+          "c": "เมื่อเราสร้าง `store := NewStore(conn)` ขึ้นมา 1 ตัว มันจะทำงานได้ 2 โหมดอย่างลงตัว:\n• **โหมดที่ 1 (รันคำสั่งเดี่ยว เช่น เปิดบัญชี/ดูยอดเงิน)**: เรียก `store.CreateAccount(...)` → วิ่งผ่าน `*Queries` ตัวหลักที่ฝังอยู่ → ยิงลง `*sql.DB` ตรงๆ (Auto-Commit ทันที)\n• **โหมดที่ 2 (มัดรวมหลายคำสั่ง เช่น โอนเงิน)**: เรียก `store.execTx(...)` → ใช้ `store.db.BeginTx()` เปิดกล่องธุรกรรม ได้ตัวแปร `tx` (`*sql.Tx`) ออกมา → นำ `tx` ไปห่อเป็น **`q := New(tx)`** (`*Queries` ตัวใหม่เฉพาะกิจที่ผูกกับ Transaction นี้) → คำสั่ง SQL ทุกตัวที่เรียกผ่าน `q` จะวิ่งอยู่ใน Transaction เดียวกันทั้งหมด!",
+        },
+        {
           "t": "h2",
-          "c": "3. สร้าง execTx ด้วย Callback Closure Pattern",
+          "c": "4. สร้างฟังก์ชัน execTx ด้วย Callback Closure Pattern (store.go)",
         },
         {
           "t": "p",
-          "c": "แทนที่จะต้องเขียน `tx.Begin()`, ตรวจสอบ Error, สั่ง `tx.Rollback()`, และ `tx.Commit()` ซ้ำๆ ทุกที่ เราจะรวมตรรกะนี้ไว้ในฟังก์ชันตัวช่วย `execTx` เพียงแห่งเดียวใน `simplebank/db/store.go`:",
+          "c": "แทนที่เราจะต้องเขียนโค้ดเปิด `BeginTx`, คอยเช็ก `if err != nil` เพื่อสั่ง `Rollback()`, และสั่ง `Commit()` ซ้ำๆ ในทุกฟังก์ชันที่มีการทำธุรกรรม เราจะเขียนฟังก์ชันแม่ชื่อ **`execTx`** ไว้เพียงจุดเดียวในไฟล์ `simplebank/db/store.go` แล้วรับขั้นตอนการทำงานเข้ามาเป็นฟังก์ชัน Callback (`fn func(*Queries) error`):",
         },
         {
           "t": "code",
@@ -90,25 +141,20 @@ export const transactionPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "**แกะรอยการทำงานของแต่ละคำสั่งภายใน `execTx`:**",
+          "c": "**แกะรอยการทำงานทีละบรรทัดภายใน `execTx`:**",
         },
         {
           "t": "ul",
           "c": [
-            "**`tx, err := s.db.BeginTx(ctx, nil)`**: คำสั่งของแพ็กเกจมาตรฐาน `database/sql` สำหรับสั่งเปิด Transaction ใหม่กับฐานข้อมูล โดยคืนค่าตัวแปร `tx` (`*sql.Tx`) กลับมา (พารามิเตอร์ตัวที่สองที่ใส่ `nil` คือ `*sql.TxOptions` แปลว่าให้ใช้ระดับ Isolation Level มาตรฐานของ PostgreSQL คือ `Read Committed` โดยไม่ต้องตั้งค่าพิเศษ)",
-            "**`q := New(tx)`**: นำตัวแปร `tx` ที่เพิ่งเปิดได้ ไปสร้างเป็นตัวหุ้มคำสั่ง SQL (`*Queries`) ตัวใหม่ เพื่อให้ทุกคำสั่งที่รันผ่าน `q` ตัวนี้ถูกมัดรวมอยู่ใน Transaction เดียวกัน",
-            "**`if err := fn(q); err != nil` และ `tx.Rollback()`**: เรียกใช้งานฟังก์ชัน Callback `fn(q)` ที่บรรจุขั้นตอนการทำงานข้างใน หากมีขั้นตอนใดส่ง Error กลับมา จะสั่ง **`tx.Rollback()`** (คำสั่งของ `*sql.Tx`) เพื่อยกเลิกสิ่งที่ทำไปแล้วทั้งหมดให้กลับสู่สภาพเดิมทันที",
-            "**`return tx.Commit()`**: หากทุกขั้นตอนใน `fn(q)` ทำงานผ่านฉลุยโดยไม่มี Error จะสั่ง **`tx.Commit()`** เพื่อยืนยันและบันทึกข้อมูลทั้งหมดลงฐานข้อมูลอย่างถาวร",
+            "**`tx, err := s.db.BeginTx(ctx, nil)`**: สั่งเปิดกล่อง Transaction ใหม่ผ่าน `s.db` (`*sql.DB`) โดยคืนค่าตัวแปรธุรกรรม `tx` ชนิด `*sql.Tx` กลับมา (พารามิเตอร์ตัวที่สองที่ใส่ `nil` คือ `*sql.TxOptions` แปลว่าให้ใช้ระดับ Isolation Level มาตรฐานของ PostgreSQL คือ `Read Committed` โดยไม่ต้องตั้งค่าพิเศษ)",
+            "**`q := New(tx)`**: **บรรทัดพระเอกของสถาปัตยกรรมนี้!** เรานำตัวแปร `tx` (`*sql.Tx`) ที่เพิ่งเปิดได้ ส่งเข้าไปใน `New(tx)` เพื่อสร้างตัวหุ้มคำสั่ง SQL (`*Queries`) ตัวใหม่เฉพาะกิจขึ้นมา เนื่องจากทั้ง `*sql.DB` และ `*sql.Tx` ต่างอิมพลีเมนต์ `DBTX` Interface เหมือนกันเป๊ะ จึงเสียบ `tx` เข้าไปแทน `db` ได้ทันที! ผลลัพธ์คือทุกคำสั่ง SQL ที่เรียกผ่าน `q` ตัวนี้จะถูกบังคับให้วิ่งอยู่ภายใต้ Transaction `tx` เดียวกันทั้งหมด",
+            "**`if err := fn(q); err != nil` และ `tx.Rollback()`**: โยน `q` ตัวใหม่นี้เข้าไปให้ฟังก์ชัน `fn(q)` ทำงาน (เช่น รัน 5 ขั้นตอนของการโอนเงิน) หากมีขั้นตอนใดขั้นตอนหนึ่งส่ง Error กลับมา จะสั่ง **`tx.Rollback()`** เพื่อยกเลิกสิ่งที่ทำไปแล้วทั้งหมดให้กลับสู่สภาพเดิมทันที (และถ้าเกิดเหตุสุดวิสัยที่แม้แต่คำสั่ง Rollback เองก็ยังพัง เช่น เน็ตหลุดพอดี ก็จะรวบทั้ง `err` ต้นเหตุและ `rbErr` ส่งกลับไปให้ครบถ้วน)",
+            "**`return tx.Commit()`**: หากทุกขั้นตอนใน `fn(q)` ทำงานผ่านฉลุย (คืนค่า `nil`) จะสั่ง **`tx.Commit()`** เพื่อยืนยันและบันทึกข้อมูลทั้งหมดลงฐานข้อมูลอย่างถาวร",
           ],
         },
         {
-          "t": "callout",
-          "title": "💡 ทำไม New(tx) ถึงใช้งานกับ New(db) ได้?",
-          "c": "ย้อนกลับไปที่บทเรียน 1.2 เรื่อง **Interface**!\nเพราะฟังก์ชัน `New(db DBTX)` รับ Interface `DBTX` เข้ามา และทั้ง `*sql.DB` และ `*sql.Tx` ต่างมีเมธอด `ExecContext`, `QueryContext`, `QueryRowContext` ครบถ้วน ทำให้เราส่ง `tx` เข้าไปใน `New(tx)` ได้ทันทีอย่างสวยงาม",
-        },
-        {
           "t": "h2",
-          "c": "4. เช็กความเข้าใจ (Quick Quiz)",
+          "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
           "t": "quiz",
@@ -233,6 +279,12 @@ export const transactionPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/db/tx_transfer.go (ส่วนที่ 2: ฟังก์ชัน TransferTx)",
           "c": "// TransferTx performs a money transfer from one account to another.\n// It creates a transfer record, adds account entries, and updates accounts balance within a single transaction.\nfunc (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {\n\tvar result TransferTxResult\n\n\terr := s.execTx(ctx, func(q *Queries) error {\n\t\tvar err error\n\n\t\t// 1. Create transfer record\n\t\tresult.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{\n\t\t\tFromAccountID: arg.FromAccountID,\n\t\t\tToAccountID:   arg.ToAccountID,\n\t\t\tAmount:        arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 2. Create debit entry for sender (negative amount)\n\t\tresult.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.FromAccountID,\n\t\t\tAmount:    -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 3. Create credit entry for receiver (positive amount)\n\t\tresult.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{\n\t\t\tAccountID: arg.ToAccountID,\n\t\t\tAmount:    arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 4. Deduct amount from sender account\n\t\tresult.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\t\tID:     arg.FromAccountID,\n\t\t\tAmount: -arg.Amount,\n\t\t})\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\n\t\t// 5. Add amount to receiver account\n\t\tresult.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\t\tID:     arg.ToAccountID,\n\t\t\tAmount: arg.Amount,\n\t\t})\n\t\treturn err\n\t})\n\n\treturn result, err\n}",
+        },
+        {
+          "t": "callout",
+          "title": "⚠️ กฎเหล็กใน Closure ของ execTx: ต้องเรียกผ่านตัวแปร q เท่านั้น!",
+          "c": "สังเกตภายใน `s.execTx(ctx, func(q *Queries) error { ... })` เราต้องเรียกคำสั่ง SQL ทั้ง 5 ขั้นตอนผ่านตัวแปร **`q`** (เช่น `q.CreateTransfer`, `q.AddAccountBalance`) เสมอ เพราะ `q` คือตัวที่ผูกอยู่กับ Transaction (`*sql.Tx`) ที่เพิ่งเปิดขึ้นมา\n\n**ห้ามเผลอเรียกผ่าน `s.` (เช่น `s.CreateTransfer`) ข้างในนี้เด็ดขาด!** เพราะ `s.` จะวิ่งไปใช้ `*sql.DB` ตัวนอก (Auto-Commit) ทำให้คำสั่งนั้นหลุดออกไปอยู่นอกกล่อง Transaction และไม่ถูก Rollback เมื่อเกิดข้อผิดพลาดครับ",
+          "warn": true,
         },
         {
           "t": "p",
