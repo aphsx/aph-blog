@@ -181,7 +181,7 @@ export const transactionPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/entry.go",
-          "c": "package db\n\nimport \"context\"\n\ntype CreateEntryParams struct {\n\tAccountID int64\n\tAmount    int64\n}\n\nfunc (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {\n\tconst query = `INSERT INTO entries (account_id, amount)\nVALUES ($1, $2)\nRETURNING id, account_id, amount, created_at`\n\n\trow := q.db.QueryRowContext(ctx, query, arg.AccountID, arg.Amount)\n\tvar e Entry\n\terr := row.Scan(&e.ID, &e.AccountID, &e.Amount, &e.CreatedAt)\n\treturn e, err\n}",
+          "c": "package db\n\nimport \"context\"\n\ntype CreateEntryParams struct {\n\tAccountID int64\n\tAmount    int64\n}\n\nfunc (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {\n\tconst query = `\n\t\tINSERT INTO entries (account_id, amount)\n\t\tVALUES ($1, $2)\n\t\tRETURNING id, account_id, amount, created_at\n\t`\n\n\trow := q.db.QueryRowContext(ctx, query, arg.AccountID, arg.Amount)\n\tvar e Entry\n\terr := row.Scan(&e.ID, &e.AccountID, &e.Amount, &e.CreatedAt)\n\treturn e, err\n}",
         },
         {
           "t": "p",
@@ -191,7 +191,7 @@ export const transactionPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/transfer.go",
-          "c": "package db\n\nimport \"context\"\n\ntype CreateTransferParams struct {\n\tFromAccountID int64\n\tToAccountID   int64\n\tAmount        int64\n}\n\nfunc (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {\n\tconst query = `INSERT INTO transfers (from_account_id, to_account_id, amount)\nVALUES ($1, $2, $3)\nRETURNING id, from_account_id, to_account_id, amount, created_at`\n\n\trow := q.db.QueryRowContext(ctx, query, arg.FromAccountID, arg.ToAccountID, arg.Amount)\n\tvar t Transfer\n\terr := row.Scan(&t.ID, &t.FromAccountID, &t.ToAccountID, &t.Amount, &t.CreatedAt)\n\treturn t, err\n}",
+          "c": "package db\n\nimport \"context\"\n\ntype CreateTransferParams struct {\n\tFromAccountID int64\n\tToAccountID   int64\n\tAmount        int64\n}\n\nfunc (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {\n\tconst query = `\n\t\tINSERT INTO transfers (from_account_id, to_account_id, amount)\n\t\tVALUES ($1, $2, $3)\n\t\tRETURNING id, from_account_id, to_account_id, amount, created_at\n\t`\n\n\trow := q.db.QueryRowContext(ctx, query, arg.FromAccountID, arg.ToAccountID, arg.Amount)\n\tvar t Transfer\n\terr := row.Scan(&t.ID, &t.FromAccountID, &t.ToAccountID, &t.Amount, &t.CreatedAt)\n\treturn t, err\n}",
         },
         {
           "t": "h2",
