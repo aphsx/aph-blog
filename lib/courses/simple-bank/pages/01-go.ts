@@ -216,8 +216,8 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "callout",
-          "title": "🏦 ในบทที่ 3 เราจะใช้สิ่งนี้ตรงไหน?",
-          "c": "ในบทที่ 3 เราจะสร้างตัวรวมคำสั่ง SQL ชื่อ `Queries` แล้วผูกฟังก์ชัน CRUD ทั้งหมดเข้ากับ `*Queries` ด้วย Pointer Receiver เช่น:\n```go\nfunc (q *Queries) CreateAccount(...) (Account, error)\nfunc (q *Queries) GetAccount(...) (Account, error)\n```\nเพื่อให้ทุกฟังก์ชันสามารถหยิบสายเชื่อมต่อฐานข้อมูลที่เก็บไว้ข้างใน `q` ออกมาใช้งานได้ทันทีโดยไม่ต้องส่งสายเชื่อมต่อเป็นพารามิเตอร์ซ้ำๆ ทุกครั้งครับ",
+          "title": "🏦 การนำไปใช้จริงในระบบฐานข้อมูลธนาคาร",
+          "c": "เวลาเราสร้างตัวรวมคำสั่ง SQL ชื่อ `Queries` เราจะผูกฟังก์ชันจัดการข้อมูลทั้งหมดเข้ากับ `*Queries` ด้วย Pointer Receiver เช่น:\n```go\nfunc (q *Queries) CreateAccount(...) (Account, error)\nfunc (q *Queries) GetAccount(...) (Account, error)\n```\nเพื่อให้ทุกฟังก์ชันสามารถหยิบสายเชื่อมต่อฐานข้อมูลที่เก็บไว้ข้างใน `q` ออกมาใช้งานได้ทันทีโดยไม่ต้องส่งสายเชื่อมต่อเป็นพารามิเตอร์ซ้ำๆ ทุกครั้งครับ",
         },
         {
           "t": "h2",
@@ -225,7 +225,7 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "โจทย์ใหญ่ของระบบธนาคารคือ: เรามีฟังก์ชันคำสั่ง SQL เช่น `CreateAccount` หรือ `AddAccountBalance` ซึ่งบางครั้งเราอยากรันผ่าน **การเชื่อมต่อฐานข้อมูลปกติ (`NormalDB`)** แต่ในจังหวะโอนเงิน 5 ขั้นตอน เราอยากรันฟังก์ชันเดิมนี้ผ่าน **โหมดมัดรวมธุรกรรม (`TxDB`)** แทน",
+          "c": "โจทย์ใหญ่ของระบบธนาคารคือ: เรามีฟังก์ชันคำสั่ง SQL เช่น `CreateAccount` หรือ `AddAccountBalance` ซึ่งบางครั้งเราอยากรันผ่าน **การเชื่อมต่อฐานข้อมูลปกติ (`NormalDB`)** แต่ในจังหวะโอนเงินหลายขั้นตอน เราอยากรันฟังก์ชันเดิมนี้ผ่าน **โหมดมัดรวมธุรกรรม (`TxDB`)** แทน",
         },
         {
           "t": "p",
@@ -240,8 +240,8 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "callout",
-          "title": "💡 จำโครงสร้างในโค้ดข้างบนไว้ให้ดี!",
-          "c": "โค้ดจำลอง 30 บรรทัดข้างบนนี้คือ **โครงสร้างเดียวกับที่เราจะเขียนจริงในบทที่ 3 และบทที่ 4 แบบ 100%**! ในของจริง ของในไลบรารีมาตรฐาน Go ทั้ง `*sql.DB` (โหมดปกติ) และ `*sql.Tx` (โหมด Transaction) ต่างมีเมธอดรัน SQL ชื่อ `ExecContext`, `QueryContext`, และ `QueryRowContext` เหมือนกันเป๊ะ เราจึงสร้าง `type DBTX interface` มารับได้ทั้งคู่โดยเขียนโค้ด CRUD แค่ชุดเดียวครับ",
+          "title": "💡 นี่คือหัวใจของการออกแบบชั้นฐานข้อมูลใน Go!",
+          "c": "ในไลบรารีมาตรฐาน `database/sql` ของ Go ทั้งตัวเชื่อมต่อปกติ (`*sql.DB`) และตัวจัดการ Transaction (`*sql.Tx`) ต่างมีเมธอดรันคำสั่ง SQL ชื่อ `ExecContext`, `QueryContext`, และ `QueryRowContext` เหมือนกันเป๊ะ เราจึงใช้แพทเทิร์น `DBTX interface` แบบในโค้ดจำลองด้านบนนี้เพื่อให้เขียนฟังก์ชัน SQL เพียงชุดเดียวแล้วรองรับได้ทั้งสองโหมดครับ",
         },
         {
           "t": "h2",
@@ -268,7 +268,7 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "เมื่อคุณเปิดอ่านโค้ด Go Backend หรือโค้ดในบทที่ 3 คุณจะเห็นว่าแทบทุกฟังก์ชันต้องรับพารามิเตอร์ตัวแรกสุดหน้าตาแบบนี้เสมอ:\n`func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams)`",
+          "c": "ในการเขียนโค้ด Go เชื่อมต่อฐานข้อมูลหรือบริการภายนอก คุณจะเห็นว่าทุกฟังก์ชันรับพารามิเตอร์ตัวแรกสุดหน้าตาแบบนี้เสมอ:\n`func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams)`",
         },
         {
           "t": "p",
@@ -283,20 +283,20 @@ export const goPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "**แล้วต้นทางของ `ctx` สร้างมาจากไหน? มี 2 ต้นทางหลักที่เราจะได้ใช้จริง:**",
+          "c": "**แล้วต้นทางของ `ctx` สร้างมาจากไหน? มี 2 สถานการณ์หลักในการใช้งานจริง:**",
         },
         {
           "t": "ol",
           "c": [
-            "**`context.Background()` (Context ตั้งต้นเปล่าๆ ไม่มีวันหมดเวลา)**: ใช้เมื่อเราเป็นคนเริ่มรันโปรแกรมเองโดยยังไม่มีกำหนดเวลา เช่น ตอนเริ่มต้นฟังก์ชัน `main()` หรือตอนรัน **Unit Test ในบทที่ 3.2**",
-            "**`context.WithTimeout(parentCtx, เวลา)` หรือ Context จาก HTTP Request (บทที่ 6)**: ใช้ห่อ Context ตั้งต้นเพื่อกำหนดเพดานเวลาตายตัว เช่น ห้ามรันคำสั่งฐานข้อมูลเกิน 2 วินาที",
+            "**`context.Background()` (Context ตั้งต้นเปล่าๆ ไม่มีวันหมดเวลา)**: ใช้เมื่อเราเป็นคนสั่งรันคำสั่งเองภายในโปรแกรมโดยไม่ได้มาจากผู้ใช้ภายนอก เช่น ตอนเริ่มต้นฟังก์ชัน `main()` หรือตอนเขียนชุดทดสอบ (Unit Test)",
+            "**`context.WithTimeout(parentCtx, เวลา)` หรือ Context ที่มากับคำขอ API**: ใช้กำหนดเพดานเวลาตายตัว (เช่น ห้ามรันคำสั่งเกิน 2 วินาที) หรือผูกกับสถานะการเชื่อมต่อของผู้ใช้ที่ยิง HTTP Request เข้ามา",
           ],
         },
         {
           "t": "codeout",
           "lang": "go",
           "label": "จำลองการส่งต่อ ctx และ Parameter Struct เข้าสู่ฟังก์ชัน CreateAccount",
-          "code": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\n// มัดรวมข้อมูลขาเข้าไว้ใน Struct (Parameter Struct) เพื่อให้ตอนเรียกใช้ระบุชื่อฟิลด์ชัดเจน\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\n// ฟังก์ชันรับ ctx เป็นตัวแรกเสมอ ตามด้วยก้อนข้อมูล arg\nfunc CreateAccount(ctx context.Context, arg CreateAccountParams) error {\n\t// ตรวจสอบว่าสายสัญญาณ ctx ถูกยกเลิกหรือหมดเวลาไปหรือยัง\n\tif err := ctx.Err(); err != nil {\n\t\treturn fmt.Errorf(\"ยกเลิกการสร้างบัญชีของ %s เพราะ: %w\", arg.Owner, err)\n\t}\n\n\tfmt.Printf(\"✅ สร้างบัญชีสำเร็จ -> เจ้าของ: %s, ยอดเงิน: %d %s\\n\", arg.Owner, arg.Balance, arg.Currency)\n\treturn nil\n}\n\nfunc main() {\n\t// กรณีที่ 1: ส่ง context.Background() (เช่น ตอนรัน Unit Test ในบทที่ 3.2)\n\tbgCtx := context.Background()\n\t_ = CreateAccount(bgCtx, CreateAccountParams{\n\t\tOwner:    \"alice\",\n\t\tBalance:  1000,\n\t\tCurrency: \"USD\",\n\t})\n\n\t// กรณีที่ 2: ตั้งเวลา Timeout ไว้แค่ 10 มิลลิวินาที แต่ระบบช้าไป 50 มิลลิวินาที\n\ttimeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)\n\tdefer cancel()\n\n\ttime.Sleep(50 * time.Millisecond) // จำลองว่าเซิร์ฟเวอร์ทำงานช้าจนเกินเวลา\n\terr := CreateAccount(timeoutCtx, CreateAccountParams{\n\t\tOwner:    \"bob\",\n\t\tBalance:  500,\n\t\tCurrency: \"THB\",\n\t})\n\tfmt.Println(\"❌ ผลลัพธ์เมื่อเกินเวลา:\", err)\n}",
+          "code": "package main\n\nimport (\n\t\"context\"\n\t\"fmt\"\n\t\"time\"\n)\n\n// มัดรวมข้อมูลขาเข้าไว้ใน Struct (Parameter Struct) เพื่อให้ตอนเรียกใช้ระบุชื่อฟิลด์ชัดเจน\ntype CreateAccountParams struct {\n\tOwner    string\n\tBalance  int64\n\tCurrency string\n}\n\n// ฟังก์ชันรับ ctx เป็นตัวแรกเสมอ ตามด้วยก้อนข้อมูล arg\nfunc CreateAccount(ctx context.Context, arg CreateAccountParams) error {\n\t// ตรวจสอบว่าสายสัญญาณ ctx ถูกยกเลิกหรือหมดเวลาไปหรือยัง\n\tif err := ctx.Err(); err != nil {\n\t\treturn fmt.Errorf(\"ยกเลิกการสร้างบัญชีของ %s เพราะ: %w\", arg.Owner, err)\n\t}\n\n\tfmt.Printf(\"✅ สร้างบัญชีสำเร็จ -> เจ้าของ: %s, ยอดเงิน: %d %s\\n\", arg.Owner, arg.Balance, arg.Currency)\n\treturn nil\n}\n\nfunc main() {\n\t// กรณีที่ 1: ส่ง context.Background() (ไม่มีกำหนดเวลา เช่น ตอนเริ่มโปรแกรมหรือรันเทสต์)\n\tbgCtx := context.Background()\n\t_ = CreateAccount(bgCtx, CreateAccountParams{\n\t\tOwner:    \"alice\",\n\t\tBalance:  1000,\n\t\tCurrency: \"USD\",\n\t})\n\n\t// กรณีที่ 2: ตั้งเวลา Timeout ไว้แค่ 10 มิลลิวินาที แต่ระบบช้าไป 50 มิลลิวินาที\n\ttimeoutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)\n\tdefer cancel()\n\n\ttime.Sleep(50 * time.Millisecond) // จำลองว่าเซิร์ฟเวอร์ทำงานช้าจนเกินเวลา\n\terr := CreateAccount(timeoutCtx, CreateAccountParams{\n\t\tOwner:    \"bob\",\n\t\tBalance:  500,\n\t\tCurrency: \"THB\",\n\t})\n\tfmt.Println(\"❌ ผลลัพธ์เมื่อเกินเวลา:\", err)\n}",
           "out": "✅ สร้างบัญชีสำเร็จ -> เจ้าของ: alice, ยอดเงิน: 1000 USD\n❌ ผลลัพธ์เมื่อเกินเวลา: ยกเลิกการสร้างบัญชีของ bob เพราะ: context deadline exceeded",
         },
         {
