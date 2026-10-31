@@ -63,6 +63,15 @@ export const apiPages: Record<string, Page> = {
           "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n)\n\ntype Server struct {\n\tstore  *db.Store\n\trouter *gin.Engine\n}\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\n\tserver.router = router\n\treturn server\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**`gin.Default()`**: คำสั่งของ Gin สำหรับสร้างตัวจัดการเส้นทาง (`*gin.Engine`) ที่แถมระบบพื้นฐานมาให้ครบมือ ทั้งตัวพิมพ์ Log ทุกครั้งที่มีคนยิง API และตัวป้องกันเซิร์ฟเวอร์ดับเมื่อเกิด Panic (Recovery)",
+            "**`router.POST(...)` / `router.GET(...)`**: ผูกเส้นทาง URL เข้ากับฟังก์ชัน Handler ของเรา โดยเครื่องหมาย `:` เช่น `/accounts/:id` คือการบอก Gin ว่าตำแหน่งนี้เป็นตัวแปรบน URL",
+            "**`server.router.Run(address)`**: สั่งเปิด HTTP Server เพื่อรอรับคำขอตามพอร์ตที่ระบุ (เช่น `0.0.0.0:8080`)",
+            "**`gin.H` ใน `errorResponse`**: `gin.H` คือชนิดข้อมูลทางลัดของ Gin (ย่อมาจาก `map[string]any`) ช่วยให้เราสร้างก้อนข้อมูล JSON ตอบกลับแบบสั้นๆ เช่น `{\"error\": \"...\"}` ได้โดยไม่ต้องประกาศ Struct ใหม่",
+          ],
+        },
+        {
           "t": "h2",
           "c": "3. เขียน Handlers สำหรับ Accounts (account.go): 3 ช่องทางรับข้อมูลของ Gin",
         },
@@ -81,6 +90,14 @@ export const apiPages: Record<string, Page> = {
           "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n)\n\ntype createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,oneof=USD EUR THB\"`\n}\n\nfunc (server *Server) createAccount(ctx *gin.Context) {\n\tvar req createAccountRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.CreateAccount(ctx, db.CreateAccountParams{\n\t\tOwner:    req.Owner,\n\t\tBalance:  0,\n\t\tCurrency: req.Currency,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**`ctx *gin.Context`**: ตัวแปรพระเอกของ Gin ที่รวมทั้งข้อมูลคำขอขาเข้า (Request) และคำสั่งตอบกลับขาออกไว้ในตัวเดียว (และเนื่องจาก `*gin.Context` มีคุณสมบัติเป็น `context.Context` ของ Go ในตัว เราจึงส่ง `ctx` ตัวนี้เข้าไปใน `server.store.CreateAccount(ctx, ...)` ได้โดยตรง)",
+            "**`ctx.ShouldBindJSON(&req)`**: คำสั่งของ Gin ที่อ่าน JSON Body ขาเข้าแล้วแปลงใส่ตัวแปร `req` พร้อมตรวจเช็กกฎในแท็ก `binding:\"...\"` ให้เสร็จสรรพ หากข้อมูลไม่ครบจะคืนค่า `err` ออกมาทันที",
+            "**`ctx.JSON(statusCode, data)`**: คำสั่งของ Gin สำหรับแปลง Struct หรือ `gin.H` ให้เป็น JSON แล้วส่งกลับไปหาผู้เรียกพร้อมรหัส HTTP Status (เช่น `http.StatusOK` = 200 หรือ `http.StatusBadRequest` = 400 จากแพ็กเกจมาตรฐาน `net/http`)",
+          ],
+        },
+        {
           "t": "p",
           "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` สำหรับดูข้อมูลบัญชีรายตัว (`GET /accounts/:id`) และดึงรายการบัญชีแบบแบ่งหน้า (`GET /accounts?page_id=1&page_size=5`):",
         },
@@ -89,6 +106,12 @@ export const apiPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/api/account.go (ส่วนที่ 2: ดึงบัญชีด้วย ShouldBindUri และ ShouldBindQuery)",
           "c": "type getAccountRequest struct {\n\tID int64 `uri:\"id\" binding:\"required,min=1\"`\n}\n\nfunc (server *Server) getAccount(ctx *gin.Context) {\n\tvar req getAccountRequest\n\tif err := ctx.ShouldBindUri(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.GetAccount(ctx, req.ID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err)) // Return 404 when account does not exist\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}\n\ntype listAccountsRequest struct {\n\tPageID   int32 `form:\"page_id\" binding:\"required,min=1\"`\n\tPageSize int32 `form:\"page_size\" binding:\"required,min=5,max=10\"`\n}\n\nfunc (server *Server) listAccounts(ctx *gin.Context) {\n\tvar req listAccountsRequest\n\tif err := ctx.ShouldBindQuery(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccounts, err := server.store.ListAccounts(ctx, db.ListAccountsParams{\n\t\tOwner:  \"\", // Filter by authenticated user once auth is enabled\n\t\tLimit:  req.PageSize,\n\t\tOffset: (req.PageID - 1) * req.PageSize,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, accounts)\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`errors.Is(err, sql.ErrNoRows)` ใน `getAccount`**: `sql.ErrNoRows` คือตัวแปร Error มาตรฐานของแพ็กเกจ `database/sql` ที่จะถูกส่งออกมาเมื่อเราสั่งคิวรีหาแถวเดียว (`QueryRowContext`) แล้วไม่มีหมายเลขบัญชีนั้นอยู่ในฐานข้อมูล เราจึงดักจับเพื่อตอบกลับเป็น `404 Not Found` (หาบัญชีไม่เจอ) แทนที่จะปล่อยให้กลายเป็น `500 Internal Server Error` (เซิร์ฟเวอร์พัง)",
+          ],
         },
         {
           "t": "p",
@@ -207,7 +230,7 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/api/validator.go` เพื่อเชื่อมต่อฟังก์ชันตรวจสอบเข้ากับระบบ Binding ของ Gin:",
+          "c": "เบื้องหลังระบบตรวจเช็กแท็ก `binding:\"...\"` ของ Gin นั้น ใช้ไลบรารีชื่อ **`github.com/go-playground/validator/v10`** เป็นเครื่องยนต์หลักอยู่แล้ว (ถูกดาวน์โหลดติดมาพร้อมกับ Gin ตั้งแต่วันแรก จึงเรียก `import` ได้เลยโดยไม่ต้องสั่ง `go get` เพิ่ม)\n\nสร้างไฟล์ `simplebank/api/validator.go` เพื่อเขียนฟังก์ชันตรวจสอบสกุลเงินตามรูปแบบ `validator.Func`:",
         },
         {
           "t": "code",
@@ -216,14 +239,27 @@ export const apiPages: Record<string, Page> = {
           "c": "package api\n\nimport (\n\t\"github.com/go-playground/validator/v10\"\n\t\"simplebank/util\"\n)\n\n// validCurrency checks if the input currency is supported by the application\nvar validCurrency validator.Func = func(fl validator.FieldLevel) bool {\n\tif currency, ok := fl.Field().Interface().(string); ok {\n\t\treturn util.IsSupportedCurrency(currency)\n\t}\n\treturn false\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**`fl validator.FieldLevel`**: ตัวแปรที่ `validator/v10` ส่งเข้ามาให้เพื่อใช้ดึงข้อมูลของฟิลด์ที่กำลังถูกตรวจสอบ",
+            "**`fl.Field().Interface().(string)`**: ดึงค่าที่ผู้ใช้ส่งเข้ามาแล้วแปลงชนิดข้อมูล (Type Assertion) ให้เป็น `string` หากเป็นข้อความสตริงจริงก็จะส่งต่อไปเช็กใน `util.IsSupportedCurrency(currency)`",
+          ],
+        },
+        {
           "t": "p",
-          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ทำการลงทะเบียนตัวตรวจเช็กนี้เข้ากับ Gin และเพิ่ม Route `POST /transfers` (พร้อมเปลี่ยนแท็กสกุลเงินใน `createAccountRequest` จาก `oneof=USD EUR THB` เป็น `currency`):",
+          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ดึงตัว Validator Engine ของ Gin ออกมาลงทะเบียนกฎชื่อ `\"currency\"` และเพิ่ม Route `POST /transfers` (พร้อมเปลี่ยนแท็กสกุลเงินใน `createAccountRequest` จาก `oneof=USD EUR THB` เป็น `currency`):",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/api/server.go (ลงทะเบียน Validator และ Route โอนเงิน)",
-          "c": "func NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}",
+          "c": "import (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`binding.Validator.Engine().(*validator.Validate)`**: ขอดึงเครื่องยนต์ `validator/v10` ที่ซ่อนอยู่ข้างใน `gin/binding` ออกมา แล้วใช้คำสั่ง **`v.RegisterValidation(\"currency\", validCurrency)`** เพื่อผูกชื่อแท็ก `currency` เข้ากับฟังก์ชัน `validCurrency` ของเรา",
+          ],
         },
         {
           "t": "h2",
@@ -238,7 +274,7 @@ export const apiPages: Record<string, Page> = {
           "c": [
             "**1. ป้องกันการโอนเงินเข้าบัญชีตัวเองด้วย `nefield=FromAccountID`**: ในแท็ก Validation ของ `ToAccountID` เราใส่ `binding:\"required,min=1,nefield=FromAccountID\"` ซึ่งคำว่า **`nefield` (Not Equal Field)** จะบังคับให้ค่าของ `ToAccountID` ต้องไม่ซ้ำกับค่าในฟิลด์ `FromAccountID` ตั้งแต่ด่านหน้าสุดก่อนถึงฐานข้อมูล",
             "**2. ตรวจสอบสกุลเงินของทั้ง 2 บัญชี (`validAccount`)**: ก่อนเรียก `TransferTx` เราเขียนฟังก์ชัน `validAccount` ดึงข้อมูลบัญชีต้นทางและปลายทางมาเช็กว่ามีอยู่จริง และทั้งคู่ใช้สกุลเงินตรงกับที่ระบุมาใน Request (เช่น ห้ามโอนเงิน USD เข้าบัญชี THB ข้ามสกุลโดยตรง)",
-            "**3. ดักจับ PostgreSQL Error Code `\"23514\"` (`check_violation`)**: จำกฎเหล็ก `CHECK (balance >= 0)` ในตาราง `accounts` ตอนบทที่ 2 ได้ไหมครับ? หากลูกค้าพยายามโอนเงินเกินยอดคงเหลือในบัญชี PostgreSQL จะปฏิเสธคำสั่งและส่งรหัสข้อผิดพลาดมาตรฐาน SQLSTATE **`23514` (`check_violation`)** กลับมา เราสามารถใช้ `errors.As(err, &pgErr)` แกะรหัสนี้เพื่อตอบกลับเป็น `400 Bad Request (เงินในบัญชีไม่พอ)` แทนที่จะเป็น `500 Internal Server Error`",
+            "**3. ดักจับ PostgreSQL Error Code `\"23514\"` ผ่าน `pgconn.PgError` (ของ `pgx/v5`)**: จำกฎเหล็ก `CHECK (balance >= 0)` ในตาราง `accounts` ตอนบทที่ 2 ได้ไหมครับ? หากลูกค้าโอนเงินเกินยอดคงเหลือ PostgreSQL จะตีกลับรหัสข้อผิดพลาดมาตรฐาน SQLSTATE **`23514` (`check_violation`)** แต่เนื่องจากแพ็กเกจกลาง `database/sql` ของ Go ไม่รู้จักโครงสร้างรหัส Error เฉพาะของ PostgreSQL และโปรเจกต์ของเราใช้ไดรเวอร์ **`pgx/v5`** เชื่อมต่อกับ PostgreSQL อยู่เบื้องหลัง ตัว Error ที่ส่งกลับมาจึงถูกห่อมาในชนิด **`*pgconn.PgError`** (จากแพ็กเกจ `github.com/jackc/pgx/v5/pgconn` ที่ติดมาตอนเราลง `pgx/v5`) เราจึงใช้ `errors.As(err, &pgErr)` แกะรหัส `pgErr.Code == \"23514\"` ออกมาเพื่อตอบกลับเป็น `400 Bad Request (เงินในบัญชีไม่พอ)` ได้อย่างแม่นยำ",
           ],
         },
         {

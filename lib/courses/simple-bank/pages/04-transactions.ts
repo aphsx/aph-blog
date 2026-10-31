@@ -89,6 +89,19 @@ export const transactionPages: Record<string, Page> = {
           "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"fmt\"\n)\n\n// Store provides all functions to execute db queries and transactions\ntype Store struct {\n\t*Queries\n\tdb *sql.DB\n}\n\nfunc NewStore(db *sql.DB) *Store {\n\treturn &Store{\n\t\tQueries: New(db),\n\t\tdb:      db,\n\t}\n}\n\n// execTx executes a function within a database transaction with automatic rollback\nfunc (s *Store) execTx(ctx context.Context, fn func(*Queries) error) error {\n\ttx, err := s.db.BeginTx(ctx, nil)\n\tif err != nil {\n\t\treturn err\n\t}\n\n\t// Create a new Queries instance bound to the active transaction\n\tq := New(tx)\n\n\tif err := fn(q); err != nil {\n\t\tif rbErr := tx.Rollback(); rbErr != nil {\n\t\t\treturn fmt.Errorf(\"tx err: %v, rollback err: %v\", err, rbErr)\n\t\t}\n\t\treturn err\n\t}\n\n\treturn tx.Commit()\n}",
         },
         {
+          "t": "p",
+          "c": "**แกะรอยการทำงานของแต่ละคำสั่งภายใน `execTx`:**",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`tx, err := s.db.BeginTx(ctx, nil)`**: คำสั่งของแพ็กเกจมาตรฐาน `database/sql` สำหรับสั่งเปิด Transaction ใหม่กับฐานข้อมูล โดยคืนค่าตัวแปร `tx` (`*sql.Tx`) กลับมา (พารามิเตอร์ตัวที่สองที่ใส่ `nil` คือ `*sql.TxOptions` แปลว่าให้ใช้ระดับ Isolation Level มาตรฐานของ PostgreSQL คือ `Read Committed` โดยไม่ต้องตั้งค่าพิเศษ)",
+            "**`q := New(tx)`**: นำตัวแปร `tx` ที่เพิ่งเปิดได้ ไปสร้างเป็นตัวหุ้มคำสั่ง SQL (`*Queries`) ตัวใหม่ เพื่อให้ทุกคำสั่งที่รันผ่าน `q` ตัวนี้ถูกมัดรวมอยู่ใน Transaction เดียวกัน",
+            "**`if err := fn(q); err != nil` และ `tx.Rollback()`**: เรียกใช้งานฟังก์ชัน Callback `fn(q)` ที่บรรจุขั้นตอนการทำงานข้างใน หากมีขั้นตอนใดส่ง Error กลับมา จะสั่ง **`tx.Rollback()`** (คำสั่งของ `*sql.Tx`) เพื่อยกเลิกสิ่งที่ทำไปแล้วทั้งหมดให้กลับสู่สภาพเดิมทันที",
+            "**`return tx.Commit()`**: หากทุกขั้นตอนใน `fn(q)` ทำงานผ่านฉลุยโดยไม่มี Error จะสั่ง **`tx.Commit()`** เพื่อยืนยันและบันทึกข้อมูลทั้งหมดลงฐานข้อมูลอย่างถาวร",
+          ],
+        },
+        {
           "t": "callout",
           "title": "💡 ทำไม New(tx) ถึงใช้งานกับ New(db) ได้?",
           "c": "ย้อนกลับไปที่บทเรียน 1.2 เรื่อง **Interface**!\nเพราะฟังก์ชัน `New(db DBTX)` รับ Interface `DBTX` เข้ามา และทั้ง `*sql.DB` และ `*sql.Tx` ต่างมีเมธอด `ExecContext`, `QueryContext`, `QueryRowContext` ครบถ้วน ทำให้เราส่ง `tx` เข้าไปใน `New(tx)` ได้ทันทีอย่างสวยงาม",

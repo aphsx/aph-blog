@@ -326,6 +326,13 @@ export const dbCodePages: Record<string, Page> = {
           "c": "package util\n\nimport (\n\t\"math/rand/v2\"\n\t\"strings\"\n)\n\nconst alphabet = \"abcdefghijklmnopqrstuvwxyz\"\n\n// RandomInt generates a random integer between min and max inclusive\nfunc RandomInt(min, max int64) int64 {\n\treturn min + rand.Int64N(max-min+1)\n}\n\n// RandomString generates a random lowercase alphabetic string of length n\nfunc RandomString(n int) string {\n\tvar sb strings.Builder\n\tfor range n {\n\t\tsb.WriteByte(alphabet[rand.IntN(len(alphabet))])\n\t}\n\treturn sb.String()\n}\n\nfunc RandomOwner() string    { return RandomString(6) }\nfunc RandomMoney() int64    { return RandomInt(0, 1000) }\nfunc RandomCurrency() string {\n\tcurrencies := []string{\"USD\", \"EUR\", \"THB\"}\n\treturn currencies[rand.IntN(len(currencies))]\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**`math/rand/v2` (`rand.Int64N`, `rand.IntN`)**: แพ็กเกจสุ่มตัวเลขมาตรฐานรุ่นใหม่ของ Go ที่สุ่มค่าตั้งแต่ `0` ไปจนถึงก่อนเลขที่ระบุ โดยสุ่มเปลี่ยนค่าให้เองอัตโนมัติทุกครั้งที่รัน",
+            "**`strings.Builder` (`sb.WriteByte`)**: เครื่องมือมาตรฐานของ Go สำหรับนำตัวอักษรมาต่อกันเป็นข้อความยาวๆ ในหน่วยความจำอย่างรวดเร็ว โดยไม่ต้องสร้างตัวแปร String ใหม่ซ้ำๆ ทุกครั้งที่วนลูป",
+          ],
+        },
+        {
           "t": "h2",
           "c": "3. เตรียมฐานข้อมูลก่อนเริ่มรันเทสต์ (main_test.go)",
         },
@@ -338,6 +345,13 @@ export const dbCodePages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/db/main_test.go",
           "c": "package db\n\nimport (\n\t\"database/sql\"\n\t\"log\"\n\t\"os\"\n\t\"testing\"\n)\n\nconst defaultTestDBSource = \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\"\n\nvar testDB *sql.DB\nvar testQueries *Queries\n\nfunc TestMain(m *testing.M) {\n\tdsn := os.Getenv(\"DB_SOURCE\")\n\tif dsn == \"\" {\n\t\tdsn = defaultTestDBSource\n\t}\n\n\tvar err error\n\ttestDB, err = Open(dsn)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db: \", err)\n\t}\n\ttestQueries = New(testDB)\n\n\tos.Exit(m.Run())\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`os.Getenv(\"DB_SOURCE\")`**: คำสั่งมาตรฐานของ Go สำหรับอ่านค่า Environment Variable จากระบบ หากไม่ได้ตั้งค่าไว้จะใช้ค่าเริ่มต้น `defaultTestDBSource` ที่ชี้ไปยัง Docker บนเครื่องแทน",
+            "**`m.Run()` และ `os.Exit(...)`**: เมื่อเราเปิดสายเชื่อมต่อ `testDB` และเตรียม `testQueries` เสร็จแล้ว คำสั่ง `m.Run()` (จากแพ็กเกจ `testing`) จะทำหน้าที่สั่งรันฟังก์ชัน `Test...` ทั้งหมดในโฟลเดอร์นี้ แล้วส่งรหัสผลลัพธ์ (ผ่าน = 0, ตก = 1) ให้ `os.Exit` ปิดโปรแกรมอย่างสมบูรณ์",
+          ],
         },
         {
           "t": "h2",

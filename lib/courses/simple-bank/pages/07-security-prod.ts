@@ -60,6 +60,13 @@ export const securityProdPages: Record<string, Page> = {
           "c": "package util\n\nimport (\n\t\"fmt\"\n\n\t\"golang.org/x/crypto/bcrypt\"\n)\n\n// HashPassword returns the bcrypt hash of the password\nfunc HashPassword(password string) (string, error) {\n\thashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to hash password: %w\", err)\n\t}\n\treturn string(hashed), nil\n}\n\n// CheckPassword checks if the provided password matches the hashed password\nfunc CheckPassword(password, hashed string) error {\n\treturn bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**`bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)`**: คำสั่งของแพ็กเกจ `bcrypt` ที่รับรหัสผ่านแบบ `[]byte` เข้าไปสุ่มผสม Salt และแฮชตามระดับความยากมาตรฐาน (`bcrypt.DefaultCost` คือ Cost 10)",
+            "**`bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))`**: คำสั่งสำหรับตรวจสอบตอนล็อกอิน โดยมันจะดึงค่า Salt ที่ฝังอยู่ใน `hashed` ออกมาคำนวณเทียบกับ `password` ที่ผู้ใช้กรอก หากตรงกันจะคืนค่า `nil` (ไม่มี Error)",
+          ],
+        },
+        {
           "t": "h2",
           "c": "3. เพิ่มตาราง Users ด้วย Migration",
         },
@@ -235,6 +242,13 @@ export const securityProdPages: Record<string, Page> = {
           "c": "func (m *PasetoMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {\n\tnow := time.Now()\n\tpayload := &Payload{\n\t\tUsername:  username,\n\t\tIssuedAt:  now,\n\t\tExpiredAt: now.Add(duration),\n\t}\n\n\tt := paseto.NewToken()\n\tt.SetIssuedAt(payload.IssuedAt)\n\tt.SetExpiration(payload.ExpiredAt)\n\tt.SetString(\"username\", username)\n\n\treturn t.V4Encrypt(m.key, nil), payload, nil\n}\n\nfunc (m *PasetoMaker) VerifyToken(tokenString string) (*Payload, error) {\n\tparser := paseto.NewParserWithoutExpiryCheck()\n\tt, err := parser.ParseV4Local(m.key, tokenString, nil)\n\tif err != nil {\n\t\treturn nil, ErrInvalidToken\n\t}\n\n\tusername, err := t.GetString(\"username\")\n\tif err != nil {\n\t\treturn nil, ErrInvalidToken\n\t}\n\texpiredAt, _ := t.GetExpiration()\n\tif time.Now().After(expiredAt) {\n\t\treturn nil, ErrExpiredToken\n\t}\n\tissuedAt, _ := t.GetIssuedAt()\n\n\treturn &Payload{\n\t\tUsername:  username,\n\t\tIssuedAt:  issuedAt,\n\t\tExpiredAt: expiredAt,\n\t}, nil\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**`paseto.NewToken()` และ `t.V4Encrypt(m.key, nil)`**: คำสั่งของไลบรารี `go-paseto` สำหรับสร้างก้อนข้อมูล บรรจุเวลาออกบัตร (`SetIssuedAt`), วันหมดอายุ (`SetExpiration`), และชื่อผู้ใช้ (`SetString`) จากนั้นสั่ง `V4Encrypt` เข้ารหัสด้วยกุญแจ `m.key` ออกมาเป็นสตริง `v4.local...`",
+            "**`paseto.NewParserWithoutExpiryCheck()` และ `parser.ParseV4Local(...)`**: สั่งถอดรหัสสตริง Token ด้วยกุญแจลับ โดยที่เราเลือกใช้ตัวถอดรหัสแบบยังไม่เช็กวันหมดอายุอัตโนมัติ เพื่อให้เราสามารถแยกแยะ Error ได้ชัดเจน 2 กรณี คือ ถอดรหัสไม่ผ่านเลย = **บัตรปลอม (`ErrInvalidToken`)** แต่ถ้าถอดรหัสผ่านแล้วค่อยมาเช็ก `time.Now().After(expiredAt)` เอง = **บัตรจริงแต่หมดอายุแล้ว (`ErrExpiredToken`)**",
+          ],
+        },
+        {
           "t": "p",
           "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/token/paseto_maker.go` (รวมทั้ง 2 ส่วน พร้อมคัดลอกใช้งาน):**",
         },
@@ -257,6 +271,14 @@ export const securityProdPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/api/middleware.go",
           "c": "package api\n\nimport (\n\t\"errors\"\n\t\"net/http\"\n\t\"strings\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"simplebank/token\"\n)\n\nconst authPayloadKey = \"auth_payload\"\n\nfunc authMiddleware(tokenMaker *token.PasetoMaker) gin.HandlerFunc {\n\treturn func(ctx *gin.Context) {\n\t\theader := ctx.GetHeader(\"Authorization\")\n\t\tfields := strings.Fields(header)\n\n\t\tif len(fields) != 2 || strings.ToLower(fields[0]) != \"bearer\" {\n\t\t\tctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(errors.New(\"authorization header missing or malformed\")))\n\t\t\treturn\n\t\t}\n\n\t\tpayload, err := tokenMaker.VerifyToken(fields[1])\n\t\tif err != nil {\n\t\t\tctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))\n\t\t\treturn\n\t\t}\n\n\t\t// Store authentication payload in context for downstream handlers\n\t\tctx.Set(authPayloadKey, payload)\n\t\tctx.Next()\n\t}\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`ctx.GetHeader(\"Authorization\")` และ `strings.Fields(header)`**: อ่านค่า Header ที่ส่งมา (เช่น `\"Bearer v4.local.xxx\"`) แล้วใช้ `strings.Fields` (แพ็กเกจ `strings` มาตรฐานของ Go) หั่นข้อความตามช่องว่างออกเป็น 2 ท่อน คือคำว่า `\"Bearer\"` และตัว Token",
+            "**`ctx.AbortWithStatusJSON(http.StatusUnauthorized, ...)`**: คำสั่งของ Gin สำหรับ **'สั่งสกัดกั้นทันที'** หากบัตรผ่านไม่ถูกต้อง โดยจะส่ง HTTP 401 กลับไปหาผู้ใช้และหยุดไม่ให้คำขอนี้วิ่งทะลุเข้าไปถึง Handler ด้านในเด็ดขาด",
+            "**`ctx.Set(authPayloadKey, payload)` และ `ctx.Next()`**: เมื่อตรวจบัตรผ่านแล้ว เราใช้ `ctx.Set` ฝากข้อมูลผู้ใช้งาน (`payload`) เก็บไว้ในกระเป๋าของ `gin.Context` ภายใต้ชื่อคีย์ `\"auth_payload\"` แล้วเรียก `ctx.Next()` เพื่อเปิดประตูให้วิ่งเข้าสู่ฟังก์ชัน Handler หลักต่อไป",
+          ],
         },
         {
           "t": "h2",
@@ -305,7 +327,7 @@ export const securityProdPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "🔒 กฎความปลอดภัยระดับบัญชี (Authorization Rule)",
-          "c": "เมื่อมีระบบล็อกอินแล้ว เราต้องอัปเดต Handlers เดิมใน `api/account.go` และ `api/transfer.go` ให้ดึงตัวตนผู้ใช้จาก Token (`ctx.MustGet(authPayloadKey).(*token.Payload)`) เสมอ:\n1. **`createAccount`**: ไม่ต้องรับ `owner` จาก JSON Body อีกต่อไป แต่ใช้ `authPayload.Username` เป็นเจ้าของบัญชีทันที\n2. **`getAccount` & `createTransfer`**: ตรวจสอบว่า `account.Owner == authPayload.Username` เสมอ Alice จะไม่มีทางแอบดูบัญชีคนอื่นหรือแอบสั่งตัดเงินออกจากบัญชีของ Bob ได้อีกต่อไป\n3. **`listAccounts`**: ส่ง `authPayload.Username` ไปยังฐานข้อมูลเพื่อดึงเฉพาะรายการบัญชีของผู้ใช้ที่กำลังล็อกอินอยู่เท่านั้น",
+          "c": "เมื่อมีระบบล็อกอินแล้ว เราต้องอัปเดต Handlers เดิมใน `api/account.go` และ `api/transfer.go` ให้ดึงตัวตนผู้ใช้ที่ Middleware ฝากไว้ ออกมาด้วยคำสั่ง **`ctx.MustGet(authPayloadKey).(*token.Payload)`** (โดย `ctx.MustGet` ของ Gin จะหยิบค่าจากคีย์ที่ฝากไว้ใน `ctx.Set` แล้วใช้ `.(*token.Payload)` แปลงชนิดข้อมูลกลับมาเป็น Struct `Payload` ของเรา):\n1. **`createAccount`**: ไม่ต้องรับ `owner` จาก JSON Body อีกต่อไป แต่ใช้ `authPayload.Username` เป็นเจ้าของบัญชีทันที\n2. **`getAccount` & `createTransfer`**: ตรวจสอบว่า `account.Owner == authPayload.Username` เสมอ Alice จะไม่มีทางแอบดูบัญชีคนอื่นหรือแอบสั่งตัดเงินออกจากบัญชีของ Bob ได้อีกต่อไป\n3. **`listAccounts`**: ส่ง `authPayload.Username` ไปยังฐานข้อมูลเพื่อดึงเฉพาะรายการบัญชีของผู้ใช้ที่กำลังล็อกอินอยู่เท่านั้น",
         },
         {
           "t": "p",
@@ -419,6 +441,15 @@ export const securityProdPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/util/config.go",
           "c": "package util\n\nimport (\n\t\"time\"\n\n\t\"github.com/spf13/viper\"\n)\n\ntype Config struct {\n\tDBSource            string        `mapstructure:\"DB_SOURCE\"`\n\tHTTPServerAddress   string        `mapstructure:\"HTTP_SERVER_ADDRESS\"`\n\tTokenSymmetricKey   string        `mapstructure:\"TOKEN_SYMMETRIC_KEY\"`\n\tAccessTokenDuration time.Duration `mapstructure:\"ACCESS_TOKEN_DURATION\"`\n}\n\nfunc LoadConfig(path string) (config Config, err error) {\n\tviper.AddConfigPath(path)\n\tviper.SetConfigName(\"app\")\n\tviper.SetConfigType(\"env\")\n\n\tviper.AutomaticEnv() // Automatically read environment variables to override config file values\n\n\tif err = viper.ReadInConfig(); err != nil {\n\t\treturn\n\t}\n\terr = viper.Unmarshal(&config)\n\treturn\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ทำไมถึงใช้แท็ก `` `mapstructure:\"...\"` `` แทนที่จะเป็น `json`?**: เพราะเบื้องหลังของไลบรารี **Viper** ใช้แพ็กเกจย่อยที่ชื่อว่า `mapstructure` ในการแปลงค่าจากไฟล์ตั้งค่าทุกรูปแบบ (ทั้ง `.env`, `.yaml`, `.json`) ให้เข้าสู่ตัวแปร Go Struct เราจึงต้องระบุชื่อแท็กตามที่ Viper กำหนด",
+            "**`viper.AddConfigPath(path)` / `SetConfigName(\"app\")` / `SetConfigType(\"env\")`**: บอกให้ Viper ไปค้นหาไฟล์ที่ชื่อว่า `app.env` ในโฟลเดอร์ที่ระบุ",
+            "**`viper.AutomaticEnv()`**: คำสั่งสำคัญที่บอกให้ Viper ตรวจสอบตัวแปร Environment Variables ของเครื่องเซิร์ฟเวอร์ด้วย หากบนเซิร์ฟเวอร์จริงมีการตั้งค่าตัวแปรชื่อตรงกัน (เช่น `DB_SOURCE`) ให้ใช้ค่าของเซิร์ฟเวอร์ทับค่าในไฟล์ `app.env` ทันที",
+            "**`viper.ReadInConfig()` และ `viper.Unmarshal(&config)`**: สั่งอ่านไฟล์ตั้งค่าขึ้นมา แล้วเทค่าทั้งหมดลงในฟิลด์ของตัวแปร `config` (แถมแปลงข้อความ `\"15m\"` ให้กลายเป็น `time.Duration` 15 นาทีให้อัตโนมัติ)",
+          ],
         },
         {
           "t": "p",
