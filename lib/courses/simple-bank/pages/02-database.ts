@@ -37,7 +37,7 @@ export const databasePages: Record<string, Page> = {
           "t": "code",
           "lang": "sql",
           "label": "❌ คำสั่งที่ห้ามทำเด็ดขาดในระบบธนาคารจริง",
-          "c": "-- แบบที่อันตรายมาก!\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;",
+          "c": "-- Anti-pattern: direct balance mutation without audit trail\nUPDATE accounts SET balance = balance - 100 WHERE id = 1;\nUPDATE accounts SET balance = balance + 100 WHERE id = 2;",
         },
         {
           "t": "callout",

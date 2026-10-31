@@ -57,7 +57,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/util/password.go",
-          "c": "package util\n\nimport (\n\t\"fmt\"\n\n\t\"golang.org/x/crypto/bcrypt\"\n)\n\n// HashPassword แปลงรหัสผ่าน Plaintext ให้เป็น Bcrypt Hash\nfunc HashPassword(password string) (string, error) {\n\thashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to hash password: %w\", err)\n\t}\n\treturn string(hashed), nil\n}\n\n// CheckPassword เปรียบเทียบรหัสผ่านที่ส่งมากับ Hash ในฐานข้อมูล\nfunc CheckPassword(password, hashed string) error {\n\treturn bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))\n}",
+          "c": "package util\n\nimport (\n\t\"fmt\"\n\n\t\"golang.org/x/crypto/bcrypt\"\n)\n\n// HashPassword returns the bcrypt hash of the password\nfunc HashPassword(password string) (string, error) {\n\thashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)\n\tif err != nil {\n\t\treturn \"\", fmt.Errorf(\"failed to hash password: %w\", err)\n\t}\n\treturn string(hashed), nil\n}\n\n// CheckPassword checks if the provided password matches the hashed password\nfunc CheckPassword(password, hashed string) error {\n\treturn bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))\n}",
         },
         {
           "t": "h2",
@@ -71,7 +71,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "sql",
           "label": "simplebank/db/migration/000002_add_users.up.sql",
-          "c": "CREATE TABLE users (\n  username        varchar     PRIMARY KEY,\n  hashed_password varchar     NOT NULL,\n  full_name       varchar     NOT NULL,\n  email           varchar     UNIQUE NOT NULL,\n  created_at      timestamptz NOT NULL DEFAULT now()\n);\n\n-- ผูกบัญชีเข้ากับผู้ใช้งานจริง\nALTER TABLE accounts ADD FOREIGN KEY (owner) REFERENCES users (username);\n\n-- บังคับว่า 1 คนจะมีได้แค่ 1 บัญชีต่อสกุลเงินเท่านั้น (เช่น มีบัญชี USD ได้แค่บัญชีเดียว)\nALTER TABLE accounts ADD CONSTRAINT owner_currency_key UNIQUE (owner, currency);",
+          "c": "CREATE TABLE users (\n  username        varchar     PRIMARY KEY,\n  hashed_password varchar     NOT NULL,\n  full_name       varchar     NOT NULL,\n  email           varchar     UNIQUE NOT NULL,\n  created_at      timestamptz NOT NULL DEFAULT now()\n);\n\n-- Link account ownership to users table\nALTER TABLE accounts ADD FOREIGN KEY (owner) REFERENCES users (username);\n\n-- Ensure one account per currency for each owner\nALTER TABLE accounts ADD CONSTRAINT owner_currency_key UNIQUE (owner, currency);",
         },
         {
           "t": "code",
@@ -96,7 +96,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/models.go (ส่วน User Model)",
-          "c": "type User struct {\n\tUsername       string    `json:\"username\"`\n\tHashedPassword string    `json:\"-\"` // แท็ก json:\"-\" จะตัดฟิลด์นี้ทิ้งอัตโนมัติเมื่อ Serialize ออกเป็น JSON\n\tFullName       string    `json:\"full_name\"`\n\tEmail          string    `json:\"email\"`\n\tCreatedAt      time.Time `json:\"created_at\"`\n}",
+          "c": "type User struct {\n\tUsername       string    `json:\"username\"`\n\tHashedPassword string    `json:\"-\"` // Exclude password hash from JSON responses\n\tFullName       string    `json:\"full_name\"`\n\tEmail          string    `json:\"email\"`\n\tCreatedAt      time.Time `json:\"created_at\"`\n}",
         },
         {
           "t": "p",
@@ -256,7 +256,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/api/middleware.go",
-          "c": "package api\n\nimport (\n\t\"errors\"\n\t\"net/http\"\n\t\"strings\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"simplebank/token\"\n)\n\nconst authPayloadKey = \"auth_payload\"\n\nfunc authMiddleware(tokenMaker *token.PasetoMaker) gin.HandlerFunc {\n\treturn func(ctx *gin.Context) {\n\t\theader := ctx.GetHeader(\"Authorization\")\n\t\tfields := strings.Fields(header)\n\n\t\tif len(fields) != 2 || strings.ToLower(fields[0]) != \"bearer\" {\n\t\t\tctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(errors.New(\"authorization header missing or malformed\")))\n\t\t\treturn\n\t\t}\n\n\t\tpayload, err := tokenMaker.VerifyToken(fields[1])\n\t\tif err != nil {\n\t\t\tctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))\n\t\t\treturn\n\t\t}\n\n\t\t// ฝาก Payload ไว้ใน Context เพื่อให้ Handler ตัวถัดไปดึงไปดูได้ว่าใครกำลังล็อกอินอยู่\n\t\tctx.Set(authPayloadKey, payload)\n\t\tctx.Next()\n\t}\n}",
+          "c": "package api\n\nimport (\n\t\"errors\"\n\t\"net/http\"\n\t\"strings\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"simplebank/token\"\n)\n\nconst authPayloadKey = \"auth_payload\"\n\nfunc authMiddleware(tokenMaker *token.PasetoMaker) gin.HandlerFunc {\n\treturn func(ctx *gin.Context) {\n\t\theader := ctx.GetHeader(\"Authorization\")\n\t\tfields := strings.Fields(header)\n\n\t\tif len(fields) != 2 || strings.ToLower(fields[0]) != \"bearer\" {\n\t\t\tctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(errors.New(\"authorization header missing or malformed\")))\n\t\t\treturn\n\t\t}\n\n\t\tpayload, err := tokenMaker.VerifyToken(fields[1])\n\t\tif err != nil {\n\t\t\tctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))\n\t\t\treturn\n\t\t}\n\n\t\t// Store authentication payload in context for downstream handlers\n\t\tctx.Set(authPayloadKey, payload)\n\t\tctx.Next()\n\t}\n}",
         },
         {
           "t": "h2",
@@ -280,7 +280,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/api/server.go (เพิ่ม PasetoMaker และจัดกลุ่ม Route ปลอดภัย)",
-          "c": "type Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\t// Route สาธารณะ (ไม่ต้องใช้ Token)\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\t// Route ที่ต้องมี Token ยืนยันตัวตนเสมอ\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}",
+          "c": "type Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\t// Public routes\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\t// Protected routes requiring authentication token\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}",
         },
         {
           "t": "p",
@@ -418,7 +418,7 @@ export const securityProdPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/util/config.go",
-          "c": "package util\n\nimport (\n\t\"time\"\n\n\t\"github.com/spf13/viper\"\n)\n\ntype Config struct {\n\tDBSource            string        `mapstructure:\"DB_SOURCE\"`\n\tHTTPServerAddress   string        `mapstructure:\"HTTP_SERVER_ADDRESS\"`\n\tTokenSymmetricKey   string        `mapstructure:\"TOKEN_SYMMETRIC_KEY\"`\n\tAccessTokenDuration time.Duration `mapstructure:\"ACCESS_TOKEN_DURATION\"`\n}\n\nfunc LoadConfig(path string) (config Config, err error) {\n\tviper.AddConfigPath(path)\n\tviper.SetConfigName(\"app\")\n\tviper.SetConfigType(\"env\")\n\n\tviper.AutomaticEnv() // อ่าน Environment Variables จริงมาทับได้ทันที\n\n\tif err = viper.ReadInConfig(); err != nil {\n\t\treturn\n\t}\n\terr = viper.Unmarshal(&config)\n\treturn\n}",
+          "c": "package util\n\nimport (\n\t\"time\"\n\n\t\"github.com/spf13/viper\"\n)\n\ntype Config struct {\n\tDBSource            string        `mapstructure:\"DB_SOURCE\"`\n\tHTTPServerAddress   string        `mapstructure:\"HTTP_SERVER_ADDRESS\"`\n\tTokenSymmetricKey   string        `mapstructure:\"TOKEN_SYMMETRIC_KEY\"`\n\tAccessTokenDuration time.Duration `mapstructure:\"ACCESS_TOKEN_DURATION\"`\n}\n\nfunc LoadConfig(path string) (config Config, err error) {\n\tviper.AddConfigPath(path)\n\tviper.SetConfigName(\"app\")\n\tviper.SetConfigType(\"env\")\n\n\tviper.AutomaticEnv() // Automatically read environment variables to override config file values\n\n\tif err = viper.ReadInConfig(); err != nil {\n\t\treturn\n\t}\n\terr = viper.Unmarshal(&config)\n\treturn\n}",
         },
         {
           "t": "p",
