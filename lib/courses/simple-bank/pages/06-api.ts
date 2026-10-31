@@ -78,11 +78,21 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. ทดสอบยิง API (Postman / HTTP Client)",
+          "c": "4. เชื่อมต่อ API Server ใน main.go และทดสอบยิง API",
         },
         {
           "t": "p",
-          "c": "ทดสอบสั่งเปิดบัญชีใหม่ผ่าน HTTP POST:",
+          "c": "อัปเดตไฟล์ `simplebank/main.go` เพื่อเชื่อมต่อฐานข้อมูล สร้าง Store และสั่งรัน HTTP Server บนพอร์ต 8080:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/main.go",
+          "c": "package main\n\nimport (\n\t\"log\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n)\n\nconst (\n\tdbSource      = \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\"\n\tserverAddress = \"0.0.0.0:8080\"\n)\n\nfunc main() {\n\tconn, err := db.Open(dbSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n\tserver := api.NewServer(store)\n\n\tif err := server.Start(serverAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
+        },
+        {
+          "t": "p",
+          "c": "สั่งรันเซิร์ฟเวอร์ด้วย `make server` (หรือ `go run main.go`) แล้วทดสอบสั่งเปิดบัญชีใหม่ผ่าน HTTP POST:",
         },
         {
           "t": "codeout",
@@ -183,13 +193,13 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ทำการลงทะเบียนตัวตรวจเช็กนี้เข้ากับ Gin:",
+          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ทำการลงทะเบียนตัวตรวจเช็กนี้เข้ากับ Gin และเพิ่ม Route `POST /transfers` (พร้อมเปลี่ยนแท็กสกุลเงินใน `createAccountRequest` จาก `oneof=USD EUR THB` เป็น `currency`):",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/server.go (ลงทะเบียน Validator)",
-          "c": "if v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\tv.RegisterValidation(\"currency\", validCurrency)\n}",
+          "label": "simplebank/api/server.go (ลงทะเบียน Validator และ Route โอนเงิน)",
+          "c": "func NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}",
         },
         {
           "t": "h2",

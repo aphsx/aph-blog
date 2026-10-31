@@ -229,23 +229,23 @@ UPDATE accounts SET balance = balance + 100 WHERE id = 2;
 CREATE TABLE "accounts" (
   "id" bigserial PRIMARY KEY,
   "owner" varchar NOT NULL,
-  "balance" bigint NOT NULL,
+  "balance" bigint NOT NULL CHECK ("balance" >= 0),
   "currency" varchar NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "entries" (
   "id" bigserial PRIMARY KEY,
-  "account_id" bigint NOT NULL REFERENCES "accounts" ("id") ON DELETE CASCADE,
+  "account_id" bigint NOT NULL REFERENCES "accounts" ("id"),
   "amount" bigint NOT NULL, -- ติดลบถ้าเงินออก เป็นบวกถ้าเงินเข้า
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE "transfers" (
   "id" bigserial PRIMARY KEY,
-  "from_account_id" bigint NOT NULL REFERENCES "accounts" ("id") ON DELETE CASCADE,
-  "to_account_id" bigint NOT NULL REFERENCES "accounts" ("id") ON DELETE CASCADE,
-  "amount" bigint NOT NULL, -- ต้องมากกว่า 0 เสมอ
+  "from_account_id" bigint NOT NULL REFERENCES "accounts" ("id"),
+  "to_account_id" bigint NOT NULL REFERENCES "accounts" ("id"),
+  "amount" bigint NOT NULL CHECK ("amount" > 0), -- ต้องมากกว่า 0 เสมอ
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 

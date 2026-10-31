@@ -58,7 +58,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ Migration คู่ที่ 2 `000002_add_users.up.sql` เพื่อสร้างตาราง `users` และผูก Foreign Key เข้ากับ `accounts`:",
+          "c": "สร้างไฟล์ Migration คู่ที่ 2 (`000002_add_users.up.sql` และ `000002_add_users.down.sql`) เพื่อสร้างตาราง `users` และผูก Foreign Key เข้ากับ `accounts`:",
         },
         {
           "t": "code",
@@ -67,18 +67,44 @@ export const securityProdPages: Record<string, Page> = {
           "c": "CREATE TABLE users (\n  username        varchar     PRIMARY KEY,\n  hashed_password varchar     NOT NULL,\n  full_name       varchar     NOT NULL,\n  email           varchar     UNIQUE NOT NULL,\n  created_at      timestamptz NOT NULL DEFAULT now()\n);\n\n-- ผูกบัญชีเข้ากับผู้ใช้งานจริง\nALTER TABLE accounts ADD FOREIGN KEY (owner) REFERENCES users (username);\n\n-- บังคับว่า 1 คนจะมีได้แค่ 1 บัญชีต่อสกุลเงินเท่านั้น (เช่น มีบัญชี USD ได้แค่บัญชีเดียว)\nALTER TABLE accounts ADD CONSTRAINT owner_currency_key UNIQUE (owner, currency);",
         },
         {
+          "t": "code",
+          "lang": "sql",
+          "label": "simplebank/db/migration/000002_add_users.down.sql",
+          "c": "ALTER TABLE IF EXISTS accounts DROP CONSTRAINT IF EXISTS owner_currency_key;\nALTER TABLE IF EXISTS accounts DROP CONSTRAINT IF EXISTS accounts_owner_fkey;\nDROP TABLE IF EXISTS users;",
+        },
+        {
           "t": "h2",
-          "c": "4. สร้าง Endpoint สมัครสมาชิก (POST /users)",
+          "c": "4. สร้าง CRUD และ Endpoint สมัครสมาชิก (POST /users)",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/api/user.go` โดยมีจุดที่ต้องระวังคือ **ห้ามส่ง Hashed Password กลับไปใน JSON Response เด็ดขาด**:",
+          "c": "เพิ่ม Struct `User` ลงใน `simplebank/db/models.go` โดยมีจุดที่ต้องระวังคือ **ห้ามส่ง Hashed Password กลับไปใน JSON Response เด็ดขาด** (ใช้แท็ก `json:\"-\"`):",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/models.go (ส่วน User Model)",
           "c": "type User struct {\n\tUsername       string    `json:\"username\"`\n\tHashedPassword string    `json:\"-\"` // แท็ก json:\"-\" จะตัดฟิลด์นี้ทิ้งอัตโนมัติเมื่อ Serialize ออกเป็น JSON\n\tFullName       string    `json:\"full_name\"`\n\tEmail          string    `json:\"email\"`\n\tCreatedAt      time.Time `json:\"created_at\"`\n}",
+        },
+        {
+          "t": "p",
+          "c": "จากนั้นสร้างไฟล์ `simplebank/db/user.go` สำหรับบันทึกและดึงข้อมูลผู้ใช้งาน:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/user.go",
+          "c": "package db\n\nimport \"context\"\n\ntype CreateUserParams struct {\n\tUsername       string\n\tHashedPassword string\n\tFullName       string\n\tEmail          string\n}\n\nfunc (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {\n\tconst query = `INSERT INTO users (username, hashed_password, full_name, email)\nVALUES ($1, $2, $3, $4)\nRETURNING username, hashed_password, full_name, email, created_at`\n\n\trow := q.db.QueryRowContext(ctx, query, arg.Username, arg.HashedPassword, arg.FullName, arg.Email)\n\tvar u User\n\terr := row.Scan(&u.Username, &u.HashedPassword, &u.FullName, &u.Email, &u.CreatedAt)\n\treturn u, err\n}\n\nfunc (q *Queries) GetUser(ctx context.Context, username string) (User, error) {\n\tconst query = `SELECT username, hashed_password, full_name, email, created_at FROM users WHERE username = $1`\n\trow := q.db.QueryRowContext(ctx, query, username)\n\tvar u User\n\terr := row.Scan(&u.Username, &u.HashedPassword, &u.FullName, &u.Email, &u.CreatedAt)\n\treturn u, err\n}",
+        },
+        {
+          "t": "p",
+          "c": "และสร้าง HTTP Handler สำหรับสมัครสมาชิกใน `simplebank/api/user.go`:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/user.go (ส่วน createUser)",
+          "c": "package api\n\nimport (\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n\t\"simplebank/util\"\n)\n\ntype createUserRequest struct {\n\tUsername string `json:\"username\" binding:\"required,alphanum\"`\n\tPassword string `json:\"password\" binding:\"required,min=6\"`\n\tFullName string `json:\"full_name\" binding:\"required\"`\n\tEmail    string `json:\"email\" binding:\"required,email\"`\n}\n\nfunc (server *Server) createUser(ctx *gin.Context) {\n\tvar req createUserRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\thashedPassword, err := util.HashPassword(req.Password)\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tuser, err := server.store.CreateUser(ctx, db.CreateUserParams{\n\t\tUsername:       req.Username,\n\t\tHashedPassword: hashedPassword,\n\t\tFullName:       req.FullName,\n\t\tEmail:          req.Email,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, user)\n}",
         },
         {
           "t": "h2",
@@ -187,11 +213,21 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. ปกป้อง Endpoints สำคัญ (Accounts & Transfers)",
+          "c": "4. ระบบล็อกอิน (POST /users/login) & ปกป้อง Endpoints สำคัญ",
         },
         {
           "t": "p",
-          "c": "ใน `server.go` เราจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ Middleware นี้:",
+          "c": "เพิ่ม Handler `loginUser` ใน `simplebank/api/user.go` เพื่อตรวจสอบรหัสผ่านด้วย `util.CheckPassword` และออก PASETO Token ให้ผู้ใช้งาน:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/user.go (ส่วน loginUser)",
+          "c": "type loginUserRequest struct {\n\tUsername string `json:\"username\" binding:\"required,alphanum\"`\n\tPassword string `json:\"password\" binding:\"required,min=6\"`\n}\n\ntype loginUserResponse struct {\n\tAccessToken string  `json:\"access_token\"`\n\tUser        db.User `json:\"user\"`\n}\n\nfunc (server *Server) loginUser(ctx *gin.Context) {\n\tvar req loginUserRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tuser, err := server.store.GetUser(ctx, req.Username)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tif err := util.CheckPassword(req.Password, user.HashedPassword); err != nil {\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\taccessToken, _, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, loginUserResponse{\n\t\tAccessToken: accessToken,\n\t\tUser:        user,\n\t})\n}",
+        },
+        {
+          "t": "p",
+          "c": "และใน `server.go` เราจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ Middleware นี้:",
         },
         {
           "t": "code",
@@ -272,6 +308,16 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
+          "c": "สร้างไฟล์ `simplebank/app.env` ที่รูทของโปรเจกต์เพื่อเก็บค่าเริ่มต้นสำหรับการรันบนเครื่อง:",
+        },
+        {
+          "t": "code",
+          "lang": "ini",
+          "label": "simplebank/app.env",
+          "c": "DB_SOURCE=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\nHTTP_SERVER_ADDRESS=0.0.0.0:8080\nTOKEN_SYMMETRIC_KEY=12345678901234567890123456789012\nACCESS_TOKEN_DURATION=15m",
+        },
+        {
+          "t": "p",
           "c": "เราใช้ไลบรารี **Viper** ในการอ่านค่าจากไฟล์ `app.env` ในระหว่างพัฒนา และยอมให้ Environment Variable จริงในเซิร์ฟเวอร์เขียนทับ (Override) ได้อัตโนมัติใน `simplebank/util/config.go`:",
         },
         {
@@ -279,6 +325,16 @@ export const securityProdPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/util/config.go",
           "c": "package util\n\nimport (\n\t\"time\"\n\t\"github.com/spf13/viper\"\n)\n\ntype Config struct {\n\tDBSource            string        `mapstructure:\"DB_SOURCE\"`\n\tHTTPServerAddress   string        `mapstructure:\"HTTP_SERVER_ADDRESS\"`\n\tTokenSymmetricKey   string        `mapstructure:\"TOKEN_SYMMETRIC_KEY\"`\n\tAccessTokenDuration time.Duration `mapstructure:\"ACCESS_TOKEN_DURATION\"`\n}\n\nfunc LoadConfig(path string) (config Config, err error) {\n\tviper.AddConfigPath(path)\n\tviper.SetConfigName(\"app\")\n\tviper.SetConfigType(\"env\")\n\n\tviper.AutomaticEnv() // อ่าน Environment Variables จริงมาทับได้ทันที\n\n\tif err = viper.ReadInConfig(); err != nil {\n\t\treturn\n\t}\n\terr = viper.Unmarshal(&config)\n\treturn\n}",
+        },
+        {
+          "t": "p",
+          "c": "สุดท้าย อัปเดตไฟล์ `simplebank/main.go` ให้ดึงค่าจาก `util.LoadConfig(\".\")` แทนค่าคงที่แบบ Hardcode:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/main.go (ฉบับ Production)",
+          "c": "package main\n\nimport (\n\t\"log\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n\t\"simplebank/util\"\n)\n\nfunc main() {\n\tconfig, err := util.LoadConfig(\".\")\n\tif err != nil {\n\t\tlog.Fatal(\"cannot load config:\", err)\n\t}\n\n\tconn, err := db.Open(config.DBSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n\tserver, err := api.NewServer(config, store)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot create server:\", err)\n\t}\n\n\tif err := server.Start(config.HTTPServerAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
         },
         {
           "t": "h2",
