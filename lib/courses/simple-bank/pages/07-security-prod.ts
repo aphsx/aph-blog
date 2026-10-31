@@ -189,6 +189,10 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
+          "c": "ใน PASETO เวอร์ชัน 4 โหมด Local (`v4.local`) ระบบใช้อัลกอริทึมเข้ารหัสแบบสมมาตร **XChaCha20-Poly1305** ซึ่งมีกฎเหล็กด้านความปลอดภัยว่า **กุญแจลับ (Symmetric Key) จะต้องมีความยาวเท่ากับ 32 ไบต์ (256 บิต) พอดีเป๊ะ!** หากส่งคีย์ที่สั้นหรือยาวกว่า 32 ไบต์เข้าไป ฟังก์ชัน `V4SymmetricKeyFromBytes` จะปฏิเสธและคืนค่า Error ทันทีเพื่อป้องกันการใช้คีย์ที่อ่อนแอ",
+        },
+        {
+          "t": "p",
           "c": "ติดตั้งแพ็กเกจ `aidanwoods.dev/go-paseto` แล้วสร้างตัวสร้างและตรวจสอบ Token ใน `simplebank/token/paseto_maker.go`:",
         },
         {
@@ -359,11 +363,22 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. รวมระบบด้วย Docker Compose",
+          "c": "3. รวมระบบด้วย Docker Compose: เครือข่ายภายใน & ลำดับการสตาร์ต",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `docker-compose.yml` เพื่อให้ทุก Service (Postgres, Migration, และ Go API) สตาร์ตร่วมกันตามลำดับที่ถูกต้องด้วย Healthcheck:",
+          "c": "เมื่อเรารันหลาย Container พร้อมกันด้วย **Docker Compose** มีกลไกสำคัญ 2 เรื่องที่ต้องเข้าใจก่อนเขียนไฟล์ `docker-compose.yml`:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**1. Docker Internal DNS (`postgres:5432` vs `localhost:5432`)**: ตอนรันโค้ด Go บนเครื่องตัวเอง เราต่อฐานข้อมูลไปที่ `localhost:5432` ได้ แต่เมื่อนำ Go API เข้าไปรันใน Container ของตัวเอง คำว่า `localhost` ของ Container `api` จะหมายถึงตัวมันเอง ไม่ใช่เครื่องโฮสต์และไม่ใช่ Container `postgres`! ใน Docker Compose ทุก Service จะอยู่ในวงแลนเสมือนเดียวกันและมี **Docker DNS** ที่แปลงชื่อ Service ให้เป็น IP ภายในโดยอัตโนมัติ ดังนั้นใน `docker-compose.yml` เราจึงต้องเปลี่ยน Host จาก `localhost:5432` เป็น **`postgres:5432`** (ตามชื่อ Service `postgres`)",
+            "**2. การควบคุมลำดับการสตาร์ตด้วย `healthcheck` และ `depends_on`**: หากสั่งรันทั้ง 3 ตัวพร้อมกัน ตัว `migrate` และ `api` มักจะบูตเสร็จภายในเสี้ยววินาที ในขณะที่ `postgres` ยังเตรียมระบบไฟล์ไม่เสร็จ ทำให้เกิด Error เชื่อมต่อไม่ได้ เราจึงต้องตั้ง `healthcheck` ใช้คำสั่ง `pg_isready` เช็กจนกว่าฐานข้อมูลจะพร้อมรับคำสั่งจริงๆ (`service_healthy`) แล้วจึงให้ `migrate` เริ่มรันตาราง และเมื่อ `migrate` ทำงานจบด้วยรหัส 0 (`service_completed_successfully`) จึงค่อยอนุญาตให้ `api` สตาร์ตขึ้นมาเป็นลำดับสุดท้าย",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "สร้างไฟล์ `simplebank/docker-compose.yml` ดังนี้:",
         },
         {
           "t": "code",

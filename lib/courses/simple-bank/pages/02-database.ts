@@ -92,7 +92,23 @@ export const databasePages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. เขียนคำสั่ง SQL สร้างตาราง (DDL)",
+          "c": "4. ความสัมพันธ์ระหว่างตาราง (Foreign Keys) และดัชนี (Indexes)",
+        },
+        {
+          "t": "p",
+          "c": "นอกจากการตั้งกฎในแต่ละคอลัมน์แล้ว ระบบฐานข้อมูลที่ดีต้องมีการเชื่อมความสัมพันธ์และเร่งความเร็วในการค้นหาด้วย 2 กลไกสำคัญ:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Foreign Key (`REFERENCES accounts (id)`)**: บังคับว่าทุกแถวใน `entries` และ `transfers` ต้องอ้างอิงไปยัง `id` ของบัญชีที่มีอยู่จริงในตาราง `accounts` เท่านั้น ห้ามมีรายการเดินบัญชีลอยๆ ที่ไม่มีเจ้าของเด็ดขาด และสังเกตว่าเรา **ไม่ใส่ `ON DELETE CASCADE`** เพื่อป้องกันไม่ให้ประวัติธุรกรรมทางการเงินถูกลบหายไปหากมีใครเผลอสั่งลบบัญชี",
+            "**Database Index (`CREATE INDEX ON ...`)**: หากไม่มี Index เวลาลูกค้าเปิดแอปดูรายการเดินบัญชีของตัวเอง ฐานข้อมูลจะต้องไล่อ่านข้อมูลตั้งแต่แถวแรกยันแถวสุดท้าย (เรียกว่า **Full Table Scan** หรือ `O(N)`) ซึ่งถ้าธนาคารมี 100 ล้านรายการ ระบบจะค้างทันที การสร้าง **B-Tree Index** บนคอลัมน์ที่ใช้ค้นหาบ่อยๆ เช่น `owner`, `account_id`, `from_account_id`, `to_account_id` จะช่วยให้ฐานข้อมูลกระโดดไปยังข้อมูลที่ต้องการได้ทันทีด้วยความเร็วระดับ `O(log N)`",
+            "**Composite Index (`CREATE INDEX ON transfers (from_account_id, to_account_id)`)**: ดัชนีแบบจับคู่ 2 คอลัมน์ ช่วยให้การค้นหาประวัติว่า 'บัญชี A เคยโอนเงินให้บัญชี B กี่ครั้ง' ทำงานได้รวดเร็วขึ้นอย่างมหาศาล",
+          ],
+        },
+        {
+          "t": "h2",
+          "c": "5. เขียนคำสั่ง SQL สร้างตาราง (DDL)",
         },
         {
           "t": "p",
@@ -106,7 +122,7 @@ export const databasePages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "5. เช็กความเข้าใจ (Quick Quiz)",
+          "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
           "t": "quiz",
@@ -197,12 +213,26 @@ export const databasePages: Record<string, Page> = {
           "out": "f3b890a8274191c95b4c483a99e120f2b3c10a11e2f98124\n(database simple_bank created successfully)",
         },
         {
+          "t": "p",
+          "c": "**แกะความหมายของพารามิเตอร์แต่ละตัวในคำสั่ง Docker ข้างต้น:**",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`--name postgres16`**: ตั้งชื่อ Container ว่า `postgres16` เพื่อให้อ้างอิงชื่อนี้ในคำสั่งถัดไปได้ง่ายๆ ไม่ต้องจำรหัส Container ID ยาวๆ",
+            "**`-p 5432:5432`**: ทำการเชื่อมโยงพอร์ต (Port Mapping) จากพอร์ต `5432` ของเครื่องเรา (Host) เข้าไปยังพอร์ต `5432` ภายใน Container เพื่อให้โค้ด Go บนเครื่องเราเชื่อมต่อเข้าไปหาฐานข้อมูลได้",
+            "**`-e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret`**: ส่งค่าตัวแปรสภาพแวดล้อม (Environment Variables) เข้าไปกำหนดชื่อผู้ใช้สูงสุดเป็น `root` และรหัสผ่านเป็น `secret`",
+            "**`-d postgres:16-alpine`**: แฟล็ก `-d` (Detached Mode) สั่งให้รันอยู่เบื้องหลังโดยไม่ยึดหน้าจอ Terminal ค้างไว้ และเลือกใช้อิมเมจ `postgres:16-alpine` ที่มีขนาดเล็กและประหยัดแรม",
+            "**`docker exec -it postgres16 createdb ...`**: สั่งให้เข้าไปรันคำสั่ง `createdb` ข้างใน Container `postgres16` ที่กำลังทำงานอยู่ เพื่อสร้างฐานข้อมูลเปล่าที่ชื่อว่า `simple_bank`",
+          ],
+        },
+        {
           "t": "h2",
           "c": "3. เตรียมไฟล์ Migration Up และ Down",
         },
         {
           "t": "p",
-          "c": "สร้างโฟลเดอร์ `simplebank/db/migration/` และสร้างไฟล์ 2 ไฟล์นี้:",
+          "c": "ก่อนอื่นให้ติดตั้งเครื่องมือ CLI ของ **`golang-migrate`** สำหรับรันไฟล์ Migration (บน macOS ใช้ `brew install golang-migrate` หรือบน Windows ใช้ `scoop install migrate` หรือดาวน์โหลดผ่าน Go ด้วย `go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest`)\n\nจากนั้นสร้างโฟลเดอร์ `simplebank/db/migration/` และสร้างไฟล์คู่แรกดังนี้:",
         },
         {
           "t": "code",
@@ -219,16 +249,32 @@ export const databasePages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "⚠️ กฎเหล็กลำดับการ DROP TABLE",
-          "c": "ในไฟล์ `.down.sql` ต้องลบตารางที่มี Foreign Key ก่อนเสมอ! หากคุณพยายาม `DROP TABLE accounts;` ก่อน จะเกิด Error ทันที เพราะตาราง `entries` และ `transfers` ยังอ้างอิง ID ของ accounts อยู่",
+          "c": "ในไฟล์ `.down.sql` ต้องลบตารางลูกที่มี Foreign Key (`transfers` และ `entries`) ก่อนเสมอ! หากคุณพยายาม `DROP TABLE accounts;` ซึ่งเป็นตารางแม่ก่อน PostgreSQL จะปฏิเสธและพ่น Error ทันที เพราะตารางลูกยังอ้างอิง ID ของ `accounts` อยู่",
           "warn": true,
         },
         {
           "t": "h2",
-          "c": "4. รวมคำสั่งด้วย Makefile",
+          "c": "4. รู้จักกับ Makefile: รวมคำสั่งยาวให้สั้นนิดเดียว",
         },
         {
           "t": "p",
-          "c": "แทนที่จะต้องพิมพ์ Connection String ยาวๆ ทุกครั้ง เราสร้างไฟล์ `Makefile` ไว้ที่รูทของโปรเจกต์ เพื่อให้เรียกใช้งานได้ง่ายๆ ด้วยคำสั่งสั้นๆ เช่น `make migrateup`:",
+          "c": "สังเกตไหมครับว่าคำสั่ง `docker run`, `docker exec` หรือคำสั่ง `migrate` นั้นยาวมากและจำยาก ถ้าต้องพิมพ์เองทุกครั้งมีโอกาสพิมพ์ผิดสูงมาก วิศวกรซอฟต์แวร์จึงนิยมใช้ไฟล์ชื่อ **`Makefile`** มาเก็บชุดคำสั่งที่ใช้บ่อยไว้เป็นคำสั่งลัดสั้นๆ",
+        },
+        {
+          "t": "p",
+          "c": "**โครงสร้างพื้นฐานของ Makefile ที่ต้องรู้ก่อนเขียน:**",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**ตัวแปร (Variables)**: เช่น `DB_URL=...` สามารถประกาศไว้ด้านบนสุด แล้วเรียกใช้ในคำสั่งด้านล่างด้วยไวยากรณ์ `$(DB_URL)` เพื่อไม่ต้องพิมพ์ Connection String ซ้ำหลายรอบ",
+            "**เป้าหมาย (Target)**: เขียนในรูปแบบ `ชื่อคำสั่ง:` แล้วขึ้นบรรทัดใหม่ด้วยการกดปุ่ม **Tab (ห้ามเคาะ Spacebar เด็ดขาด)** ตามด้วยคำสั่ง CLI ที่ต้องการให้รัน เวลาเรียกใช้ก็แค่พิมพ์ `make <ชื่อคำสั่ง>` เช่น `make postgres` หรือ `make migrateup`",
+            "**`.PHONY`**: ปกติแล้วโปรแกรม `make` ถูกออกแบบมาในยุคภาษา C เพื่อเช็กว่ามี 'ไฟล์' ชื่อเดียวกับ Target ถูกสร้างขึ้นมาหรือยัง ถ้าบังเอิญในโปรเจกต์ของเรามีโฟลเดอร์หรือไฟล์ที่ชื่อว่า `test` หรือ `server` อยู่จริง ตัว `make` จะเข้าใจผิดว่างานเสร็จแล้วและไม่ยอมรันคำสั่งให้! เราจึงต้องประกาศ `.PHONY: postgres createdb ...` กำกับไว้เสมอ เพื่อบอก `make` อย่างชัดเจนว่าชื่อเหล่านี้คือ **'ชื่อคำสั่งลัด (Action)'** ไม่ใช่ชื่อไฟล์ ให้รันคำสั่งข้างในทุกครั้งที่เรียกเสมอ",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "สร้างไฟล์ `simplebank/Makefile` ไว้ที่รูทของโปรเจกต์ดังนี้:",
         },
         {
           "t": "code",
@@ -242,14 +288,14 @@ export const databasePages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "เมื่อสั่งรัน `make migrateup` เครื่องมือจะอ่านไฟล์ในโฟลเดอร์ migration และยิงคำสั่งเข้าไปยัง PostgreSQL:",
+          "c": "ตอนนี้เราสามารถสั่งรัน `make migrateup` สั้นๆ ใน Terminal ได้เลย ตัว `make` จะไปเรียกคำสั่ง `migrate` เต็มๆ เพื่ออ่านไฟล์ในโฟลเดอร์ `db/migration` และสร้างตารางทั้ง 3 ลงใน PostgreSQL ทันที:",
         },
         {
           "t": "codeout",
           "lang": "bash",
-          "label": "ผลลัพธ์การรันคำสั่ง migrateup",
-          "code": "migrate -path db/migration -database \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\" -verbose up",
-          "out": "2026/10/30 14:00:00 Starting version 1\n2026/10/30 14:00:00 Applied 1/u 000001_init_schema.up.sql (15.2ms)\n2026/10/30 14:00:00 Finished in 20.1ms",
+          "label": "ผลลัพธ์การรันคำสั่ง make migrateup",
+          "code": "make migrateup",
+          "out": "migrate -path db/migration -database \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\" -verbose up\n2026/10/30 14:00:00 Starting version 1\n2026/10/30 14:00:00 Applied 1/u 000001_init_schema.up.sql (15.2ms)\n2026/10/30 14:00:00 Finished in 20.1ms",
         },
         {
           "t": "h2",

@@ -68,7 +68,19 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/api/account.go` โดยแยก Request Struct และรับมือกับ HTTP Status Code ที่ถูกต้อง (เช่น 200, 400, 404, 500):",
+          "c": "เวลาที่ Client ส่ง HTTP Request เข้ามา ข้อมูลสามารถถูกส่งมาได้ 3 ช่องทาง ซึ่งใน Gin จะมีฟังก์ชัน **Binder** และ **Struct Tag** แยกตามช่องทางอย่างชัดเจน:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**1. JSON Body (`ctx.ShouldBindJSON(&req)` + แท็ก `` `json:\"...\"` ``)**: ใช้สำหรับดึงข้อมูลจากก้อน JSON ใน Request Body ของคำสั่ง `POST` หรือ `PUT` เช่น ข้อมูลเปิดบัญชีใหม่",
+            "**2. URL Path Parameter (`ctx.ShouldBindUri(&req)` + แท็ก `` `uri:\"...\"` ``)**: ใช้สำหรับดึงตัวแปรที่ฝังอยู่ใน URL Path เช่น `/accounts/:id` (เมื่อส่ง `/accounts/5` เข้ามา ฟิลด์ที่มีแท็ก `uri:\"id\"` จะได้รับค่า `5` ทันที)",
+            "**3. Query String (`ctx.ShouldBindQuery(&req)` + แท็ก `` `form:\"...\"` ``)**: ใช้สำหรับดึงค่าหลังเครื่องหมายคำถาม `?` บน URL เช่น `/accounts?page_id=1&page_size=5` สำหรับทำระบบแบ่งหน้า (Pagination)",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "สร้างไฟล์ `simplebank/api/account.go` โดยแยก Request Struct ของทั้ง 3 รูปแบบ และตอบกลับ HTTP Status Code ที่เหมาะสม (`200 OK`, `400 Bad Request` เมื่อพารามิเตอร์ผิด, `404 Not Found` เมื่อไม่พบบัญชี `sql.ErrNoRows`, และ `500 Internal Server Error`):",
         },
         {
           "t": "code",
@@ -207,7 +219,19 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/api/transfer.go` โดยมีตรรกะตรวจสอบ 3 ชั้น:\n1. ตรวจสอบ Validation ขาเข้า (`FromAccountID != ToAccountID`, `Amount > 0`, สกุลเงินถูกต้อง)\n2. ตรวจสอบว่าบัญชีต้นทางและปลายทางมีอยู่จริง และมีสกุลเงินตรงกับที่ขอโอน (ห้ามโอน USD ไปเข้าบัญชี THB โดยตรง)\n3. เรียกใช้งาน `store.TransferTx`:",
+          "c": "ในไฟล์ `simplebank/api/transfer.go` เราจะวางปราการป้องกันความผิดพลาด 3 จุดสำคัญ:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**1. ป้องกันการโอนเงินเข้าบัญชีตัวเองด้วย `nefield=FromAccountID`**: ในแท็ก Validation ของ `ToAccountID` เราใส่ `binding:\"required,min=1,nefield=FromAccountID\"` ซึ่งคำว่า **`nefield` (Not Equal Field)** จะบังคับให้ค่าของ `ToAccountID` ต้องไม่ซ้ำกับค่าในฟิลด์ `FromAccountID` ตั้งแต่ด่านหน้าสุดก่อนถึงฐานข้อมูล",
+            "**2. ตรวจสอบสกุลเงินของทั้ง 2 บัญชี (`validAccount`)**: ก่อนเรียก `TransferTx` เราเขียนฟังก์ชัน `validAccount` ดึงข้อมูลบัญชีต้นทางและปลายทางมาเช็กว่ามีอยู่จริง และทั้งคู่ใช้สกุลเงินตรงกับที่ระบุมาใน Request (เช่น ห้ามโอนเงิน USD เข้าบัญชี THB ข้ามสกุลโดยตรง)",
+            "**3. ดักจับ PostgreSQL Error Code `\"23514\"` (`check_violation`)**: จำกฎเหล็ก `CHECK (balance >= 0)` ในตาราง `accounts` ตอนบทที่ 2 ได้ไหมครับ? หากลูกค้าพยายามโอนเงินเกินยอดคงเหลือในบัญชี PostgreSQL จะปฏิเสธคำสั่งและส่งรหัสข้อผิดพลาดมาตรฐาน SQLSTATE **`23514` (`check_violation`)** กลับมา เราสามารถใช้ `errors.As(err, &pgErr)` แกะรหัสนี้เพื่อตอบกลับเป็น `400 Bad Request (เงินในบัญชีไม่พอ)` แทนที่จะเป็น `500 Internal Server Error`",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "สร้างไฟล์ `simplebank/api/transfer.go` ดังนี้:",
         },
         {
           "t": "code",

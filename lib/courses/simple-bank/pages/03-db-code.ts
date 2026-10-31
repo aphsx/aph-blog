@@ -71,12 +71,25 @@ export const dbCodePages: Record<string, Page> = {
           "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"time\"\n\n\t_ \"github.com/jackc/pgx/v5/stdlib\" // ลงทะเบียนไดรเวอร์ \"pgx\" เข้ากับ database/sql\n)\n\n// Open เปิดการเชื่อมต่อไปยัง PostgreSQL พร้อมกำหนดค่า Connection Pool\nfunc Open(dsn string) (*sql.DB, error) {\n\tconn, err := sql.Open(\"pgx\", dsn)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\n\tconn.SetMaxOpenConns(25)\n\tconn.SetMaxIdleConns(25)\n\tconn.SetConnMaxLifetime(5 * time.Minute)\n\n\tif err := conn.Ping(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn conn, nil\n}\n\n// DBTX คือ Interface กลางที่รวมเมธอดรันคำสั่ง SQL ที่มีทั้งใน *sql.DB และ *sql.Tx\ntype DBTX interface {\n\tExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)\n\tQueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)\n\tQueryRowContext(ctx context.Context, query string, args ...any) *sql.Row\n}\n\n// Queries เป็นตัวรวมคำสั่ง SQL ทั้งหมด โดยสามารถรับได้ทั้ง DB ปกติ หรือ Tx ก็ได้\ntype Queries struct {\n\tdb DBTX\n}\n\nfunc New(db DBTX) *Queries {\n\treturn &Queries{db: db}\n}",
         },
         {
+          "t": "p",
+          "c": "**เจาะลึกจุดสำคัญในโค้ด `db.go` ที่ต้องเข้าใจ:**",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`_ \"github.com/jackc/pgx/v5/stdlib\"` (Blank Import)**: เครื่องหมายขีดล่าง `_` หน้า import บอก Go ว่าเราไม่ได้เรียกใช้ฟังก์ชันจากแพ็กเกจนี้ในโค้ดโดยตรง แต่ต้องการให้ฟังก์ชัน `init()` ของมันทำงานเบื้องหลัง เพื่อแอบลงทะเบียนตัวเองเข้ากับ `database/sql` ในชื่อไดรเวอร์ `\"pgx\"`",
+            "**`sql.Open` vs `conn.Ping()`**: คำสั่ง `sql.Open` ยังไม่ได้ต่อสายไปยังฐานข้อมูลจริงๆ แค่เตรียมโครงสร้างในหน่วยความจำเท่านั้น เราจึงต้องเรียก `conn.Ping()` เพื่อทดสอบยิงสัญญาณไปเช็กว่าฐานข้อมูลเปิดอยู่และรหัสผ่านถูกต้องจริงๆ",
+            "**Connection Pool (`SetMaxOpenConns`, `SetMaxIdleConns`, `SetConnMaxLifetime`)**: การเปิดสายเชื่อมต่อฐานข้อมูลใหม่ทุกครั้งที่มี Request เข้ามานั้นช้ามาก `*sql.DB` จึงทำหน้าที่เป็น **สระเก็บสายเชื่อมต่อ (Connection Pool)** โดยเราจำกัดไม่ให้เปิดสายพร้อมกันเกิน 25 สาย (`MaxOpenConns`) เพื่อไม่ให้ PostgreSQL ล่ม เก็บสายที่ว่างไว้รอใช้งานซ้ำ 25 สาย (`MaxIdleConns`) และรีไซเคิลสายทุกๆ 5 นาที (`ConnMaxLifetime`)",
+            "**ทำไม `DBTX` ต้องมี 3 เมธอดนี้?**: ใน `database/sql` การรันคำสั่ง SQL แบ่งออกเป็น 3 รูปแบบหลัก ซึ่งทั้ง `*sql.DB` (โหมดปกติ) และ `*sql.Tx` (โหมด Transaction) ต่างมีเมธอดทั้ง 3 ตัวนี้เหมือนกันเป๊ะ:\n  1. `QueryRowContext`: ใช้เมื่อคาดหวังผลลัพธ์กลับมา **แถวเดียว** (เช่น `SELECT ... WHERE id = $1` หรือ `INSERT ... RETURNING`)\n  2. `QueryContext`: ใช้เมื่อคาดหวังผลลัพธ์กลับมา **หลายแถว** (เช่น `SELECT` รายการบัญชีแบบแบ่งหน้า)\n  3. `ExecContext`: ใช้เมื่อยิงคำสั่งที่ **ไม่ต้องการอ่านแถวข้อมูลกลับมา** (เช่น `DELETE` หรือ `UPDATE` ที่ไม่มี `RETURNING`)",
+          ],
+        },
+        {
           "t": "h2",
           "c": "4. สร้างโมเดลข้อมูล (models.go)",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/models.go` เพื่อให้ตรงกับ Schema ในฐานข้อมูล:",
+          "c": "สร้างไฟล์ `simplebank/db/models.go` เพื่อให้ตรงกับ Schema ในฐานข้อมูล (แท็ก `` `json:\"...\"` `` ด้านหลังช่วยให้แปลงเป็น JSON ส่งออกทาง API ในโมดูลที่ 6 ได้ทันที):",
         },
         {
           "t": "code",
@@ -90,7 +103,20 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/account.go` โดยใช้คำสั่งแบบ Parameterized (`$1, $2, ...`) ป้องกัน SQL Injection เสมอ:",
+          "c": "ก่อนลงมือเขียนโค้ดใน `account.go` ให้ทำความเข้าใจ 4 เทคนิคสำคัญที่จะใช้ในไฟล์นี้:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Parameterized Query (`$1, $2, $3`)**: ห้ามนำสตริงของผู้ใช้มาต่อกันด้วย `+` หรือ `fmt.Sprintf` ใน SQL เด็ดขาด เพราะจะเกิดช่องโหว่ **SQL Injection** ใน PostgreSQL เราใช้สัญลักษณ์ `$1, $2, $3` เป็นตัวแทนตำแหน่งพารามิเตอร์ แล้วส่งค่าตามเข้าไปในฟังก์ชันอย่างปลอดภัย",
+            "**คำสั่ง `RETURNING` ของ PostgreSQL**: ปกติเวลาสั่ง `INSERT` หรือ `UPDATE` เราจะไม่รู้ว่าฐานข้อมูลสร้าง `id` อะไรให้ หรือ `created_at` เป็นเวลาใด หากต่อท้ายด้วย `RETURNING id, owner, balance, currency, created_at` ตัว PostgreSQL จะส่งแถวข้อมูลล่าสุดกลับมาให้ทันทีในคำสั่งเดียวโดยไม่ต้องยิง `SELECT` ซ้ำอีกรอบ",
+            "**`row.Scan(&a.ID, ...)`**: นำค่าแต่ละคอลัมน์ที่ได้จากฐานข้อมูลมายัดใส่ตัวแปรใน Go Struct (ต้องส่งเป็น Pointer `&` เสมอ เพื่อให้ `Scan` แก้ไขค่าในตัวแปรของเราได้)",
+            "**`defer rows.Close()` (สำคัญมาก!)**: เมื่อเรียกใช้ `QueryContext` เพื่อดึงข้อมูลหลายแถว สายเชื่อมต่อ (Connection) เส้นนั้นจะถูกจองไว้กับตัวแปร `rows` จนกว่าจะอ่านเสร็จ เราจึงต้องสั่ง `defer rows.Close()` ทันทีเพื่อรับประกันว่าเมื่อจบฟังก์ชัน สายเชื่อมต่อจะถูกคืนกลับเข้าสู่ Connection Pool เสมอ หากลืมใส่เพียงจุดเดียว สายใน Pool ทั้ง 25 เส้นจะถูกยึดค้างจนหมด (Connection Leak) และเซิร์ฟเวอร์จะค้างทันที!",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "สร้างไฟล์ `simplebank/db/account.go` ดังนี้:",
         },
         {
           "t": "code",
@@ -157,11 +183,18 @@ export const dbCodePages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "1. ติดตั้ง Testify",
+          "c": "1. ติดตั้ง Testify: รู้จักกับ assert vs require",
         },
         {
           "t": "p",
-          "c": "แพ็กเกจ `testing` ดั้งเดิมของ Go บังคับให้เขียน `if err != nil { t.Errorf(...) }` ซ้ำๆ ทุกบรรทัด ในโปรเจกต์ระดับมืออาชีพจึงนิยมใช้ **Testify** ซึ่งมีฟังก์ชันช่วยตรวจสอบ (Assertion) เช่น `require.NoError`, `require.Equal` ที่กระชับและชัดเจน:",
+          "c": "แพ็กเกจ `testing` ดั้งเดิมของ Go บังคับให้เขียน `if err != nil { t.Errorf(...) }` ซ้ำๆ ทุกบรรทัด ในโปรเจกต์ระดับมืออาชีพจึงนิยมใช้ไลบรารี **Testify** ซึ่งมีแพ็กเกจย่อยสำหรับตรวจสอบผลลัพธ์ (Assertion) อยู่ 2 ตัวที่ต้องเลือกใช้ให้ถูกจังหวะ:",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`github.com/stretchr/testify/assert`**: เมื่อตรวจพบว่าค่าไม่ตรงตามเงื่อนไข จะทำเครื่องหมายว่าเทสต์ตก (Fail) **แต่ยังคงรันบรรทัดถัดไปในฟังก์ชันเทสต์นั้นต่อจนจบ** เหมาะกับการเช็กค่าหลายๆ ฟิลด์พร้อมกันโดยไม่ต้องการให้หยุดกลางคัน",
+            "**`github.com/stretchr/testify/require`**: เมื่อตรวจพบว่าเงื่อนไขไม่ผ่าน จะสั่ง **`t.FailNow()` เพื่อหยุดรันฟังก์ชันเทสต์นั้นทันที!** ในการทดสอบฐานข้อมูลเรานิยมใช้ `require` เป็นหลัก เพราะถ้าขั้นตอนแรกอย่างการสร้างบัญชี (`CreateAccount`) พังตั้งแต่ต้น หรือเกิด Error จากฐานข้อมูล การฝืนรันบรรทัดต่อไปเพื่อเช็กยอดเงินก็ไม่มีประโยชน์และอาจทำให้เกิด Panic ซ้ำซ้อนได้",
+          ],
         },
         {
           "t": "codeout",
