@@ -385,6 +385,13 @@ export const concurrencyPages: Record<string, Page> = {
           "c": "// 4 & 5: Update balances in order of smaller account ID first (lock ordering)\nif arg.FromAccountID < arg.ToAccountID {\n\tresult.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)\n} else {\n\tresult.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)\n}\n\n// addMoney updates balances in consistent order\nfunc addMoney(\n\tctx context.Context,\n\tq *Queries,\n\taccountID1 int64,\n\tamount1 int64,\n\taccountID2 int64,\n\tamount2 int64,\n) (account1 Account, account2 Account, err error) {\n\taccount1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\tID:     accountID1,\n\t\tAmount: amount1,\n\t})\n\tif err != nil {\n\t\treturn\n\t}\n\n\taccount2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{\n\t\tID:     accountID2,\n\t\tAmount: amount2,\n\t})\n\treturn\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**ทำไมในบล็อก `else` ถึงสลับตัวแปรรับค่าเป็น `result.ToAccount, result.FromAccount`?**: เพราะในกรณีที่ `ToAccountID` มีเลขน้อยกว่า เราส่ง `ToAccountID` (พร้อมยอดบวก `+arg.Amount`) เข้าไปเป็น `accountID1` ตัวแรกใน `addMoney` เพื่อล็อกบัญชีก่อน ผลลัพธ์ตัวแรกที่ `addMoney` คืนกลับมาจึงเป็นของบัญชีผู้รับ (`result.ToAccount`) และตัวที่สองจึงเป็นของบัญชีผู้โอน (`result.FromAccount`)",
+            "**Named Return Values `(account1 Account, account2 Account, err error)`**: ใน Go เราสามารถตั้งชื่อตัวแปรผลลัพธ์ไว้ตรงหัวฟังก์ชันได้เลย ทำให้ข้างในฟังก์ชันเขียนแค่คำว่า `return` เปล่าๆ (Naked Return) แล้ว Go จะส่งค่าปัจจุบันของ `account1`, `account2`, และ `err` กลับออกไปให้โดยอัตโนมัติ",
+          ],
+        },
+        {
           "t": "p",
           "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/db/tx_transfer.go` (เวอร์ชันสมบูรณ์ ป้องกัน Deadlock 100% พร้อมคัดลอกใช้งาน):**",
         },
@@ -405,13 +412,20 @@ export const concurrencyPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "เพิ่มฟังก์ชันทดสอบใน `simplebank/db/store_test.go` โดยสั่งให้มีการโอนเงิน 10 ครั้งพร้อมกัน โดยครึ่งหนึ่งโอนจาก 1->2 และอีกครึ่งโอนจาก 2->1:",
+          "c": "เพิ่มฟังก์ชันทดสอบ `TestTransferTxDeadlock` ต่อท้ายในไฟล์ `simplebank/db/store_test.go` โดยจำลองการโอนเงินสวนทางกันพร้อมๆ กัน 10 Goroutines (5 ตัวโอนจากบัญชี `1 -> 2` และอีก 5 ตัวโอนสวนกลับจาก `2 -> 1`):",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/store_test.go (ส่วน TestTransferTxDeadlock)",
           "c": "func TestTransferTxDeadlock(t *testing.T) {\n\tstore := NewStore(testDB)\n\n\taccount1 := topUp(t, createRandomAccount(t), 1000)\n\taccount2 := topUp(t, createRandomAccount(t), 1000)\n\tfmt.Println(\">> ก่อนรันเทสต์ Deadlock:\", account1.Balance, account2.Balance)\n\n\tn := 10\n\tamount := int64(10)\n\terrs := make(chan error)\n\n\t// 1. Run concurrent transfer transactions in both directions\n\tfor i := range n {\n\t\tfromID, toID := account1.ID, account2.ID\n\t\tif i%2 == 1 {\n\t\t\tfromID, toID = account2.ID, account1.ID // reverse direction to test concurrent transfers\n\t\t}\n\n\t\tgo func() {\n\t\t\t_, err := store.TransferTx(context.Background(), TransferTxParams{\n\t\t\t\tFromAccountID: fromID,\n\t\t\t\tToAccountID:   toID,\n\t\t\t\tAmount:        amount,\n\t\t\t})\n\t\t\terrs <- err\n\t\t}()\n\t}\n\n\t// 2. Check errors from channels\n\tfor range n {\n\t\trequire.NoError(t, <-errs)\n\t}\n\n\t// 3. Check final balances (transfers each way should cancel out)\n\tupdated1, _ := testQueries.GetAccount(context.Background(), account1.ID)\n\tupdated2, _ := testQueries.GetAccount(context.Background(), account2.ID)\n\n\tfmt.Println(\">> หลังรันเทสต์ Deadlock:\", updated1.Balance, updated2.Balance)\n\trequire.Equal(t, account1.Balance, updated1.Balance)\n\trequire.Equal(t, account2.Balance, updated2.Balance)\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`if i%2 == 1` (สลับฝั่งผู้โอนและผู้รับในรอบเลขคี่)**: รอบเลขคู่ (`0, 2, 4, 6, 8`) จะโอนจาก `account1 -> account2` ส่วนรอบเลขคี่ (`1, 3, 5, 7, 9`) จะสลับค่าโอนสวนกลับจาก `account2 -> account1` ในเวลาเดียวกัน",
+            "**ทำไมยอดเงินสุดท้ายถึงเท่ากับยอดก่อนโอนเป๊ะ (`require.Equal(t, account1.Balance, updated1.Balance)`)?**: เพราะมีการโอนออก 5 ครั้ง (ครั้งละ 10 = `-50`) และมีเงินโอนเข้า 5 ครั้ง (ครั้งละ 10 = `+50`) หักล้างกันเหลือ `0` พอดี หากครบทั้ง 10 Goroutines โดยไม่มี Error (`<-errs` เป็น `nil` ทั้งหมด) และยอดเงินกลับมาเท่าเดิม แปลว่าระบบของเราปลอด Deadlock และคำนวณเงินไม่ตกหล่น 100%",
+          ],
         },
         {
           "t": "h2",

@@ -230,11 +230,11 @@ export const transactionPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "2. เตรียมคำสั่ง CRUD สำหรับ entries และ transfers",
+          "c": "2. เตรียมคำสั่ง CRUD สำหรับตาราง entries และ transfers",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/entry.go` เพื่อบันทึกประวัติการเดินบัญชี:",
+          "c": "ในโมดูลที่ 3 เราเพิ่งสร้างไฟล์ `db/account.go` สำหรับจัดการตาราง `accounts` ไปเพียงตารางเดียว แต่การโอนเงิน 5 ขั้นตอนต้องมีการบันทึกข้อมูลลงในตาราง `entries` (สมุดบัญชีแยกประเภท) และตาราง `transfers` (ประวัติการโอน) ด้วย เราจึงต้องสร้างไฟล์คำสั่ง SQL พื้นฐานอีก 2 ไฟล์เพื่อผูกเมธอด `CreateEntry` และ `CreateTransfer` เข้ากับ `*Queries` เสียก่อน\n\nสร้างไฟล์ `simplebank/db/entry.go` สำหรับเพิ่มแถวรายการเดินบัญชีลงตาราง `entries`:",
         },
         {
           "t": "code",
@@ -244,7 +244,7 @@ export const transactionPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "และสร้างไฟล์ `simplebank/db/transfer.go` เพื่อบันทึกประวัติธุรกรรมการโอน:",
+          "c": "และสร้างไฟล์ `simplebank/db/transfer.go` สำหรับเพิ่มแถวใบเสร็จการโอนลงตาราง `transfers`:",
         },
         {
           "t": "code",
@@ -254,25 +254,25 @@ export const transactionPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. เขียนฟังก์ชัน TransferTx (tx_transfer.go)",
+          "c": "3. มัดรวม 5 ขั้นตอนในฟังก์ชัน TransferTx (db/tx_transfer.go)",
         },
         {
           "t": "p",
-          "c": "สร้างไฟล์ `simplebank/db/tx_transfer.go` โดยแบ่งออกเป็น 2 ส่วนคือ **โครงสร้างข้อมูลขาเข้า/ขาออก** และ **ฟังก์ชันดำเนินการโอนเงิน**:",
+          "c": "เมื่อเรามีฟังก์ชัน SQL ย่อยครบทั้ง 3 ตารางแล้ว (`db/account.go`, `db/entry.go`, `db/transfer.go`) เราจะสร้างไฟล์ใหม่ชื่อ **`simplebank/db/tx_transfer.go`** เพื่อทำหน้าที่เป็นตัวควบคุมจังหวะ (Orchestrator) ที่เปิดกล่อง Transaction ด้วย `s.execTx` แล้วเรียกใช้ฟังก์ชันจากทั้ง 3 ไฟล์ข้างต้นเรียงกัน 5 ขั้นตอน:",
         },
         {
           "t": "p",
-          "c": "**ส่วนที่ 3.1: นิยาม `TransferTxParams` (ขาเข้า) และ `TransferTxResult` (ขาออก)**\nเราออกแบบให้ผลลัพธ์ส่งกลับทั้งใบเสร็จ `Transfer`, รายการเดินบัญชี `FromEntry`/`ToEntry`, และข้อมูลบัญชีล่าสุด `FromAccount`/`ToAccount` เพื่อให้ API นำไปตอบกลับลูกค้าได้ทันทีในครั้งเดียวโดยไม่ต้องคิวรีซ้ำ:",
+          "c": "**ส่วนที่ 3.1: นิยาม `TransferTxParams` (ขาเข้า) และ `TransferTxResult` (ขาออก)**\nเราออกแบบให้ผลลัพธ์ส่งกลับทั้งใบเสร็จ `Transfer`, รายการเดินบัญชี `FromEntry`/`ToEntry`, และข้อมูลบัญชีล่าสุด `FromAccount`/`ToAccount` เพื่อให้ชั้น API นำไปตอบกลับลูกค้าได้ทันทีในครั้งเดียวโดยไม่ต้องคิวรีซ้ำ:",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/tx_transfer.go (ส่วนที่ 1: Struct ขาเข้าและผลลัพธ์ขาออก)",
-          "c": "package db\n\nimport \"context\"\n\ntype TransferTxParams struct {\n\tFromAccountID int64 `json:\"from_account_id\"`\n\tToAccountID   int64 `json:\"to_account_id\"`\n\tAmount        int64 `json:\"amount\"`\n}\n\ntype TransferTxResult struct {\n\tTransfer    Transfer `json:\"transfer\"`\n\tFromAccount Account  `json:\"from_account\"`\n\tToAccount   Account  `json:\"to_account\"`\n\tFromEntry   Entry    `json:\"from_entry\"`\n\tToEntry     Entry    `json:\"to_entry\"`\n}",
+          "c": "package db\n\ntype TransferTxParams struct {\n\tFromAccountID int64 `json:\"from_account_id\"`\n\tToAccountID   int64 `json:\"to_account_id\"`\n\tAmount        int64 `json:\"amount\"`\n}\n\ntype TransferTxResult struct {\n\tTransfer    Transfer `json:\"transfer\"`\n\tFromAccount Account  `json:\"from_account\"`\n\tToAccount   Account  `json:\"to_account\"`\n\tFromEntry   Entry    `json:\"from_entry\"`\n\tToEntry     Entry    `json:\"to_entry\"`\n}",
         },
         {
           "t": "p",
-          "c": "**ส่วนที่ 3.2: ฟังก์ชัน `TransferTx` มัดรวม 5 ขั้นตอนภายใต้ `s.execTx`**\nเขียนต่อท้ายในไฟล์ `simplebank/db/tx_transfer.go` หากขั้นตอนใดขั้นตอนหนึ่งคืนค่า `err != nil` ฟังก์ชันจะหยุดทันทีและ `execTx` จะสั่ง `Rollback()` ข้อมูลทั้งหมดกลับสู่สภาพเดิมอัตโนมัติ:",
+          "c": "**ส่วนที่ 3.2: ฟังก์ชัน `TransferTx` มัดรวม 5 ขั้นตอนภายใต้ `s.execTx`**\nเขียนต่อท้ายในไฟล์ `simplebank/db/tx_transfer.go` (พร้อมเพิ่ม `import \"context\"` ด้านบนของไฟล์) หากขั้นตอนใดขั้นตอนหนึ่งคืนค่า `err != nil` ฟังก์ชันจะหยุดทันทีและ `execTx` จะสั่ง `Rollback()` ข้อมูลทั้งหมดกลับสู่สภาพเดิมอัตโนมัติ:",
         },
         {
           "t": "code",
