@@ -189,13 +189,13 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "**ขั้นที่ 2: สั่งรัน API Server**\nสั่งรันเซิร์ฟเวอร์ใน Terminal ด้วย `make server` (หรือ `go run main.go`) ทิ้งไว้:",
+          "c": "**ขั้นที่ 2: จัดระเบียบ `go.mod` และสั่งรัน API Server**\nสั่งรัน `go mod tidy` เพื่อดึง dependencies ย่อยของ Gin ลงใน `go.sum` ให้ครบถ้วน จากนั้นสั่งรันเซิร์ฟเวอร์ด้วย `make server` (หรือ `go run main.go`) ทิ้งไว้:",
         },
         {
           "t": "codeout",
           "lang": "bash",
-          "label": "สั่งรัน Gin HTTP Server ที่พอร์ต 8080",
-          "code": "make server",
+          "label": "จัดระเบียบ dependencies และสั่งรัน Gin HTTP Server ที่พอร์ต 8080",
+          "code": "go mod tidy\nmake server",
           "out": "go run main.go\n[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)\n[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080",
         },
         {
@@ -332,7 +332,7 @@ export const apiPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/api/server.go (ลงทะเบียน Custom Validator ชื่อ currency)",
-          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\n\tserver.router = router\n\treturn server\n}",
+          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\ntype Server struct {\n\tstore  *db.Store\n\trouter *gin.Engine\n}\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\n\tserver.router = router\n\treturn server\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
         },
         {
           "t": "ul",
@@ -342,12 +342,12 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "และกลับไปอัปเดต `createAccountRequest` ในไฟล์ `simplebank/api/account.go` ให้เปลี่ยนจาก `oneof=USD EUR THB` มาใช้แท็ก `currency` ใหม่ของเราได้เลย:",
+          "c": "และกลับไปเปิดไฟล์ `simplebank/api/account.go` แก้ไขเฉพาะ Struct `createAccountRequest` ด้านบนสุดของไฟล์ ให้เปลี่ยนจาก `oneof=USD EUR THB` มาใช้แท็ก `currency` ใหม่ของเรา (โค้ดฟังก์ชันอื่นๆ ด้านล่างของ `api/account.go` คงไว้เหมือนเดิมทั้งหมด):",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/account.go (อัปเดตแท็กสกุลเงินเป็น currency)",
+          "label": "simplebank/api/account.go (แก้เฉพาะ createAccountRequest ด้านบนสุดของไฟล์)",
           "c": "type createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,currency\"`\n}",
         },
         {
@@ -400,13 +400,13 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "**ขั้นที่ 1: รีสตาร์ต API Server (ป้องกัน `404 page not found` ใน Postman)**\nเนื่องจาก `go run main.go` ที่เราเปิดค้างไว้ตั้งแต่บทที่ 6.1 ยังไม่รู้จัก Route `POST /transfers` ที่เพิ่งเพิ่มเข้ามา ให้กลับไปที่หน้าต่าง Terminal ที่รันเซิร์ฟเวอร์อยู่ กด **`Ctrl + C`** เพื่อหยุดตัวเก่า แล้วสั่งรัน `make server` ใหม่อีกครั้ง สังเกตว่าจะมีบรรทัด `POST /transfers` โผล่ขึ้นมา:",
+          "c": "**ขั้นที่ 1: รีสตาร์ต API Server (ป้องกัน `404 page not found` ใน Postman)**\nเนื่องจาก `go run main.go` ที่เราเปิดค้างไว้ตั้งแต่บทที่ 6.1 ยังไม่รู้จัก Route `POST /transfers` ที่เพิ่งเพิ่มเข้ามา ให้กลับไปที่หน้าต่าง Terminal ที่รันเซิร์ฟเวอร์อยู่ กด **`Ctrl + C`** เพื่อหยุดตัวเก่า แล้วสั่งรัน `go mod tidy` และ `make server` ใหม่อีกครั้ง สังเกตว่าจะมีบรรทัด `POST /transfers` โผล่ขึ้นมา:",
         },
         {
           "t": "codeout",
           "lang": "bash",
-          "label": "กด Ctrl+C หยุดเซิร์ฟเวอร์เดิม แล้วสั่ง make server ใหม่",
-          "code": "make server",
+          "label": "กด Ctrl+C หยุดเซิร์ฟเวอร์เดิม แล้วสั่ง go mod tidy และ make server ใหม่",
+          "code": "go mod tidy\nmake server",
           "out": "go run main.go\n[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)\n[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (3 handlers)\n[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080",
         },
         {

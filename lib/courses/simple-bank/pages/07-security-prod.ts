@@ -97,13 +97,13 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "เมื่อมีตาราง `users` ในฐานข้อมูลแล้ว เราจะไล่สร้างโค้ดตามโครงสร้าง 3 เลเยอร์เดิม คือเริ่มจากนิยาม Struct ใน `db/models.go` → เขียนคำสั่ง SQL ใน `db/user.go` → แล้วสร้าง HTTP Handler ใน `api/user.go` เพื่อรับคำขอสมัครสมาชิกแล้วเรียกใช้ฟังก์ชันจากชั้น `db/`\n\nเริ่มจากเพิ่ม Struct `User` ลงในไฟล์ `simplebank/db/models.go` โดยมีจุดสำคัญด้านความปลอดภัยคือ **ห้ามส่ง Hashed Password ออกไปใน JSON Response เด็ดขาด** (ใช้แท็ก `json:\"-\"`):",
+          "c": "เมื่อมีตาราง `users` ในฐานข้อมูลแล้ว เราจะไล่สร้างโค้ดตามโครงสร้าง 3 เลเยอร์เดิม คือเริ่มจากนิยาม Struct ใน `db/models.go` → เขียนคำสั่ง SQL ใน `db/user.go` → สร้าง HTTP Handler ใน `api/user.go` → และลงทะเบียน Route `POST /users` ใน `api/server.go`\n\nเริ่มจากเพิ่ม Struct `User` ต่อท้ายในไฟล์ `simplebank/db/models.go` โดยมีจุดสำคัญด้านความปลอดภัยคือ **ห้ามส่ง Hashed Password ออกไปใน JSON Response เด็ดขาด** (ใช้แท็ก `json:\"-\"`):",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/models.go (ส่วน User Model)",
-          "c": "type User struct {\n\tUsername       string    `json:\"username\"`\n\tHashedPassword string    `json:\"-\"` // exclude from JSON\n\tFullName       string    `json:\"full_name\"`\n\tEmail          string    `json:\"email\"`\n\tCreatedAt      time.Time `json:\"created_at\"`\n}",
+          "label": "simplebank/db/models.go (ฉบับสมบูรณ์: เพิ่ม User struct ต่อท้าย)",
+          "c": "package db\n\nimport \"time\"\n\ntype Account struct {\n\tID        int64     `json:\"id\"`\n\tOwner     string    `json:\"owner\"`\n\tBalance   int64     `json:\"balance\"`\n\tCurrency  string    `json:\"currency\"`\n\tCreatedAt time.Time `json:\"created_at\"`\n}\n\ntype Entry struct {\n\tID        int64     `json:\"id\"`\n\tAccountID int64     `json:\"account_id\"`\n\tAmount    int64     `json:\"amount\"`\n\tCreatedAt time.Time `json:\"created_at\"`\n}\n\ntype Transfer struct {\n\tID            int64     `json:\"id\"`\n\tFromAccountID int64     `json:\"from_account_id\"`\n\tToAccountID   int64     `json:\"to_account_id\"`\n\tAmount        int64     `json:\"amount\"`\n\tCreatedAt     time.Time `json:\"created_at\"`\n}\n\ntype User struct {\n\tUsername       string    `json:\"username\"`\n\tHashedPassword string    `json:\"-\"` // exclude from JSON\n\tFullName       string    `json:\"full_name\"`\n\tEmail          string    `json:\"email\"`\n\tCreatedAt      time.Time `json:\"created_at\"`\n}",
         },
         {
           "t": "p",
@@ -117,7 +117,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สุดท้าย สร้างไฟล์ `simplebank/api/user.go` เพื่อเป็นด่านหน้ารับ JSON จากผู้สมัคร นำรหัสผ่านไปแฮชด้วย `util.HashPassword` แล้วเรียก `server.store.CreateUser` จาก `db/user.go` ให้บันทึกลงฐานข้อมูล:",
+          "c": "จากนั้น สร้างไฟล์ `simplebank/api/user.go` เพื่อเป็นด่านหน้ารับ JSON จากผู้สมัคร นำรหัสผ่านไปแฮชด้วย `util.HashPassword` แล้วเรียก `server.store.CreateUser` จาก `db/user.go` ให้บันทึกลงฐานข้อมูล:",
         },
         {
           "t": "code",
@@ -134,15 +134,25 @@ export const securityProdPages: Record<string, Page> = {
           ],
         },
         {
-          "t": "callout",
-          "title": "🧪 อัปเดต createRandomAccount ใน db/account_test.go ให้รองรับ Foreign Key ใหม่",
-          "c": "เมื่อเราเพิ่มกฎ Foreign Key บังคับว่า `accounts.owner` ต้องมีตัวตนอยู่ในตาราง `users` เสมอ หากเราสั่งรัน `make test` ตอนนี้ ฟังก์ชัน `createRandomAccount` เดิมใน `simplebank/db/account_test.go` ที่สุ่มชื่อลอยๆ จะพังทันที! ให้อัปเดต `createRandomAccount` ให้สร้าง User ลงตาราง `users` ก่อนนำไปเปิดบัญชีดังนี้ครับ:",
+          "t": "p",
+          "c": "**ผูกเส้นทาง `POST /users` ในไฟล์ `simplebank/api/server.go`:**\nเปิดไฟล์ `simplebank/api/server.go` แล้วเพิ่มบรรทัด **`router.POST(\"/users\", server.createUser)`** เข้าไปใน `NewServer` เพื่อให้เปิดรับการสมัครสมาชิกผ่าน API ได้ทันที:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/db/account_test.go (อัปเดต createRandomAccount ให้สร้าง User ก่อน)",
-          "c": "func createRandomUser(t *testing.T) User {\n\thashedPassword, err := util.HashPassword(util.RandomString(6))\n\trequire.NoError(t, err)\n\n\targ := CreateUserParams{\n\t\tUsername:       util.RandomOwner(),\n\t\tHashedPassword: hashedPassword,\n\t\tFullName:       util.RandomOwner(),\n\t\tEmail:          util.RandomString(6) + \"@email.com\",\n\t}\n\n\tuser, err := testQueries.CreateUser(context.Background(), arg)\n\trequire.NoError(t, err)\n\treturn user\n}\n\nfunc createRandomAccount(t *testing.T) Account {\n\tuser := createRandomUser(t)\n\n\targ := CreateAccountParams{\n\t\tOwner:    user.Username, // ผูกกับ user ที่สร้างจริงในตาราง users\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}",
+          "label": "simplebank/api/server.go (เพิ่ม router.POST(\"/users\", server.createUser))",
+          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\ntype Server struct {\n\tstore  *db.Store\n\trouter *gin.Engine\n}\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
+        },
+        {
+          "t": "callout",
+          "title": "🧪 อัปเดต createRandomAccount ใน db/account_test.go ให้รองรับ Foreign Key ใหม่",
+          "c": "เมื่อเราเพิ่มกฎ Foreign Key บังคับว่า `accounts.owner` ต้องมีตัวตนอยู่ในตาราง `users` เสมอ หากเราสั่งรัน `make test` ตอนนี้ ฟังก์ชัน `createRandomAccount` เดิมใน `simplebank/db/account_test.go` ที่สุ่มชื่อลอยๆ จะพังทันที! ให้อัปเดตไฟล์ `simplebank/db/account_test.go` โดยเพิ่มฟังก์ชัน `createRandomUser` เพื่อสร้าง User ลงตาราง `users` ก่อนนำไปเปิดบัญชีดังนี้ครับ:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/account_test.go (ฉบับสมบูรณ์: รองรับ Foreign Key ของตาราง users)",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomUser(t *testing.T) User {\n\thashedPassword, err := util.HashPassword(util.RandomString(6))\n\trequire.NoError(t, err)\n\n\targ := CreateUserParams{\n\t\tUsername:       util.RandomOwner(),\n\t\tHashedPassword: hashedPassword,\n\t\tFullName:       util.RandomOwner(),\n\t\tEmail:          util.RandomString(6) + \"@email.com\",\n\t}\n\n\tuser, err := testQueries.CreateUser(context.Background(), arg)\n\trequire.NoError(t, err)\n\treturn user\n}\n\nfunc createRandomAccount(t *testing.T) Account {\n\tuser := createRandomUser(t)\n\n\targ := CreateAccountParams{\n\t\tOwner:    user.Username, // ผูกกับ user ที่สร้างจริงในตาราง users\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}\n\nfunc TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
         },
         {
           "t": "h2",
@@ -327,24 +337,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "และใน `simplebank/api/server.go` เราอัปเดต `Server` struct ให้เก็บ `tokenMaker` พร้อมระยะเวลาอายุ Token (`tokenDuration`) และจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ Middleware นี้:",
-        },
-        {
-          "t": "code",
-          "lang": "go",
-          "label": "simplebank/api/server.go (เพิ่ม PasetoMaker และจัดกลุ่ม Route ปลอดภัย)",
-          "c": "type Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\t// public routes\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\t// protected routes\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}",
-        },
-        {
-          "t": "ul",
-          "c": [
-            "**Public Routes (`router.POST(\"/users\", ...)` และ `/users/login`)**: ลงทะเบียนไว้กับ `router` ตัวหลักโดยตรง เพื่อให้ใครก็ได้สามารถสมัครสมาชิกและล็อกอินเพื่อขอรับ Token ได้โดยยังไม่ต้องแนบบัตรผ่าน",
-            "**Protected Routes (`auth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))`)**: คำสั่ง `router.Group(\"/\").Use(...)` คือการสร้างกลุ่มเส้นทางที่มี `authMiddleware` ยืนเฝ้าอยู่หน้าประตู ทุก Endpoint ที่ลงทะเบียนผ่านตัวแปร `auth.` (`/accounts`, `/transfers`) จะถูกบังคับให้ตรวจ PASETO Token ก่อนวิ่งเข้าสู่ Handler เสมอ",
-          ],
-        },
-        {
-          "t": "p",
-          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/api/user.go` (รวมทั้ง createUser และ loginUser พร้อมคัดลอกใช้งาน):**",
+          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/api/user.go` (รวมทั้ง `createUser` และ `loginUser` พร้อมคัดลอกใช้งาน):**",
         },
         {
           "t": "code",
@@ -354,13 +347,20 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "📄 **โค้ดฉบับเต็มของไฟล์ `simplebank/api/server.go` (อัปเดตระบบ Authentication ครบถ้วน พร้อมคัดลอกใช้งาน):**",
+          "c": "ขั้นต่อมา ในไฟล์ `simplebank/api/server.go` เราอัปเดต `Server` struct ให้เก็บ `tokenMaker` พร้อมระยะเวลาอายุ Token (`tokenDuration`) ลงทะเบียน Route `POST /users/login` และจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ `authMiddleware`:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/server.go (ฉบับสมบูรณ์)",
-          "c": "package api\n\nimport (\n\t\"fmt\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n\t\"simplebank/token\"\n)\n\ntype Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
+          "label": "simplebank/api/server.go (ฉบับสมบูรณ์: เพิ่ม PasetoMaker และจัดกลุ่ม Route ปลอดภัย)",
+          "c": "package api\n\nimport (\n\t\"fmt\"\n\t\"time\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n\t\"simplebank/token\"\n)\n\ntype Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\t// public routes\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\t// protected routes\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Public Routes (`router.POST(\"/users\", ...)` และ `/users/login`)**: ลงทะเบียนไว้กับ `router` ตัวหลักโดยตรง เพื่อให้ใครก็ได้สามารถสมัครสมาชิกและล็อกอินเพื่อขอรับ Token ได้โดยยังไม่ต้องแนบบัตรผ่าน",
+            "**Protected Routes (`auth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))`)**: คำสั่ง `router.Group(\"/\").Use(...)` คือการสร้างกลุ่มเส้นทางที่มี `authMiddleware` ยืนเฝ้าอยู่หน้าประตู ทุก Endpoint ที่ลงทะเบียนผ่านตัวแปร `auth.` (`/accounts`, `/transfers`) จะถูกบังคับให้ตรวจ PASETO Token ก่อนวิ่งเข้าสู่ Handler เสมอ",
+          ],
         },
         {
           "t": "callout",
@@ -399,7 +399,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "**ทดสอบด้วย Postman (สมัครสมาชิก → ล็อกอินรับ Token → เปิดบัญชีด้วย Token):**\n*(หมายเหตุ: หากคุณสั่งรัน `make test` ในบทที่ 7.1 ไปแล้ว ให้รัน `docker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts, users RESTART IDENTITY CASCADE;\"` เพื่อล้างข้อมูลเทสต์และรีเซ็ตเลข `id` ให้เริ่มที่ `1` ก่อน)*\n\nรีสตาร์ตเซิร์ฟเวอร์ (`Ctrl + C` แล้ว `make server`) จากนั้นเปิด **Postman** แล้วยิง API ตามลำดับนี้ครับ:",
+          "c": "**ทดสอบด้วย Postman (สมัครสมาชิก → ล็อกอินรับ Token → เปิดบัญชีด้วย Token):**\n*(หมายเหตุ: หากคุณสั่งรัน `make test` ในบทที่ 7.1 ไปแล้ว ให้รัน `docker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts, users RESTART IDENTITY CASCADE;\"` เพื่อล้างข้อมูลเทสต์และรีเซ็ตเลข `id` ให้เริ่มที่ `1` ก่อน)*\n\nหยุดเซิร์ฟเวอร์ตัวเก่า (`Ctrl + C`) แล้วรัน `go mod tidy` ตามด้วย `make server` เพื่อเปิดเซิร์ฟเวอร์ตัวใหม่ จากนั้นเปิด **Postman** แล้วยิง API ตามลำดับนี้ครับ (สังเกตว่าใน **Postman 3** ตอนเปิดบัญชี เราส่งแค่ `{\"currency\": \"USD\"}` โดยไม่ต้องส่ง `owner` แล้ว เพราะระบบจะดึงชื่อเจ้าของบัญชีจาก PASETO Token ของคนที่ล็อกอินให้อัตโนมัติ):",
         },
         {
           "t": "codeout",
@@ -598,13 +598,13 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สั่งรัน `docker compose up --build` แล้วดูบริการทั้ง 3 รันขึ้นมาพร้อมเพรียงกัน:",
+          "c": "ก่อนสั่งบิลด์ Docker Compose อย่าลืม **กด `Ctrl + C` เพื่อปิด `make server`** ที่รันค้างไว้บนเครื่องก่อนหน้านี้ (เพื่อไม่ให้พอร์ต `8080` ชนกัน) และรัน `go mod tidy` เพื่อให้ไฟล์ `go.sum` อัปเดตไลบรารี Viper ให้ครบถ้วน จากนั้นสั่งรัน `docker compose up --build` แล้วดูบริการทั้ง 3 รันขึ้นมาพร้อมเพรียงกัน:",
         },
         {
           "t": "codeout",
           "lang": "bash",
-          "label": "ผลลัพธ์การสั่งรัน docker compose up",
-          "code": "docker compose up --build",
+          "label": "อัปเดต go.sum และสั่งรัน docker compose up",
+          "code": "go mod tidy\ndocker compose up --build",
           "out": "[+] Building 4.2s (13/13) FINISHED\n[+] Running 3/3\n ✔ Container simplebank-postgres-1  Healthy\n ✔ Container simplebank-migrate-1   Exited (0)\n ✔ Container simplebank-api-1       Started\nsimplebank-api-1  | [GIN-debug] [WARNING] Running in \"debug\" mode. Switch to \"release\" mode in production.\nsimplebank-api-1  | 2026/10/30 14:40:00 server listening on 0.0.0.0:8080",
         },
         {
