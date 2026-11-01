@@ -369,17 +369,31 @@ export const dbCodePages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/account_test.go (ส่วนที่ 1: ฟังก์ชันสร้างบัญชีสุ่ม)",
-          "c": "package db\n\nimport (\n\t\"context\"\n\t\"database/sql\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\n\trequire.NotZero(t, account.ID)        // auto-generated ID\n\trequire.NotZero(t, account.CreatedAt) // auto-generated timestamp\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}",
+          "c": "package db\n\nimport (\n\t\"context\"\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/require\"\n\t\"simplebank/util\"\n)\n\nfunc createRandomAccount(t *testing.T) Account {\n\targ := CreateAccountParams{\n\t\tOwner:    util.RandomOwner(),\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\n\trequire.NotZero(t, account.ID)        // auto-generated ID\n\trequire.NotZero(t, account.CreatedAt) // auto-generated timestamp\n\treturn account\n}\n\nfunc TestCreateAccount(t *testing.T) {\n\tcreateRandomAccount(t)\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`require.NoError(t, err)` และ `require.NotEmpty(t, account)`**: ตรวจเช็กด่านแรกว่าคำสั่ง SQL ต้องไม่เกิด Error และ Struct บัญชีที่ได้กลับมาต้องไม่ว่างเปล่า",
+            "**`require.Equal(t, expected, actual)`**: เทียบว่าชื่อเจ้าของ ยอดเงิน และสกุลเงินที่บันทึกใน DB ตรงกับค่าที่เราสุ่มส่งเข้าไปเป๊ะ",
+            "**`require.NotZero(t, account.ID)`**: ยืนยันว่า PostgreSQL ได้สร้างหมายเลขบัญชี (`bigserial`) และเวลา (`created_at`) กลับมาให้จริงๆ (ไม่ใช่ค่าเริ่มต้น 0)",
+          ],
         },
         {
           "t": "p",
-          "c": "**ส่วนที่ 4.2: ทดสอบการดึงข้อมูล บวกเงิน และลบบัญชี (`TestGetAccount`, `TestAddAccountBalance`, `TestDeleteAccount`)**\nเขียนต่อท้ายในไฟล์ `simplebank/db/account_test.go` โดยเรียกใช้ `createRandomAccount(t)` เพื่อสร้างบัญชีใหม่สดๆ ในทุกการทดสอบ:",
+          "c": "**ส่วนที่ 4.2: ทดสอบการดึงข้อมูล บวกเงิน และลบบัญชี (`TestGetAccount`, `TestAddAccountBalance`, `TestDeleteAccount`)**\nเขียนต่อท้ายในไฟล์ `simplebank/db/account_test.go` (พร้อมเพิ่ม `\"database/sql\"` ใน `import` ด้านบน) โดยเรียกใช้ `createRandomAccount(t)` เพื่อสร้างบัญชีใหม่สดๆ ในทุกการทดสอบ:",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/db/account_test.go (ส่วนที่ 2: ทดสอบ Get, AddBalance, Delete)",
           "c": "func TestGetAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.ID, acc2.ID)\n\trequire.Equal(t, acc1.Owner, acc2.Owner)\n\trequire.Equal(t, acc1.Balance, acc2.Balance)\n}\n\nfunc TestAddAccountBalance(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\tacc2, err := testQueries.AddAccountBalance(context.Background(), AddAccountBalanceParams{\n\t\tID:     acc1.ID,\n\t\tAmount: 10,\n\t})\n\trequire.NoError(t, err)\n\trequire.Equal(t, acc1.Balance+10, acc2.Balance)\n}\n\nfunc TestDeleteAccount(t *testing.T) {\n\tacc1 := createRandomAccount(t)\n\terr := testQueries.DeleteAccount(context.Background(), acc1.ID)\n\trequire.NoError(t, err)\n\n\t// verify account is deleted\n\tacc2, err := testQueries.GetAccount(context.Background(), acc1.ID)\n\trequire.ErrorIs(t, err, sql.ErrNoRows)\n\trequire.Empty(t, acc2)\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`require.ErrorIs(t, err, sql.ErrNoRows)` ใน `TestDeleteAccount`**: หลังจากสั่งลบบัญชีไปแล้ว เราลองเรียก `GetAccount` ซ้ำอีกครั้งเพื่อพิสูจน์ว่าบัญชีหายไปจริงๆ โดยคาดหวังว่าจะต้องเจอ Error มาตรฐาน `sql.ErrNoRows` (หาแถวไม่เจอ) และข้อมูล `acc2` ต้องว่างเปล่า (`require.Empty`)",
+          ],
         },
         {
           "t": "p",

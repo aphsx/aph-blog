@@ -80,6 +80,11 @@ export const apiPages: Record<string, Page> = {
           "c": "3. เขียน Handlers สำหรับ Accounts (account.go): 3 ช่องทางรับข้อมูลของ Gin",
         },
         {
+          "t": "callout",
+          "title": "🔗 คลายข้อสงสัย: สร้าง api/account.go แล้ว โค้ดเดิมใน db/account.go ยังใช้อยู่ไหม?",
+          "c": "**ยังใช้เหมือนเดิม 100% ครับ! ไม่ได้เขียนทับและไม่ได้ทิ้งของเก่า** แต่เป็นการแบ่งหน้าที่ตามสถาปัตยกรรม Clean Architecture:\n• **`simplebank/db/account.go` (พนักงานห้องนิรภัยหลังบ้าน)**: รู้วิธีคุยกับ PostgreSQL ด้วยภาษา SQL (`INSERT`, `SELECT`, `UPDATE`) แต่พูดภาษาเว็บ (HTTP/JSON) ไม่เป็น\n• **`simplebank/api/account.go` (พนักงานต้อนรับหน้าเคาน์เตอร์)**: ทำหน้าที่รับ JSON จากลูกค้า ตรวจเอกสารเบื้องต้น (`binding`) แล้ว **ส่งงานต่อให้โค้ดในโฟลเดอร์ `db/` ทำงานจริง** ผ่านคำสั่ง `server.store.CreateAccount(...)`, `server.store.GetAccount(...)` และ `server.store.ListAccounts(...)` ครับ",
+        },
+        {
           "t": "p",
           "c": "เวลาที่ Client ส่ง HTTP Request เข้ามา ข้อมูลจะถูกส่งมาใน 3 ช่องทาง ซึ่งในไฟล์ `simplebank/api/account.go` เราจะใช้ฟังก์ชัน **Binder** ของ Gin แยกตามช่องทางดังนี้ครับ",
         },
@@ -91,19 +96,21 @@ export const apiPages: Record<string, Page> = {
           "t": "code",
           "lang": "go",
           "label": "simplebank/api/account.go (ส่วนที่ 1: เปิดบัญชีใหม่ด้วย ShouldBindJSON)",
-          "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n)\n\ntype createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,oneof=USD EUR THB\"`\n}\n\nfunc (server *Server) createAccount(ctx *gin.Context) {\n\tvar req createAccountRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.CreateAccount(ctx, db.CreateAccountParams{\n\t\tOwner:    req.Owner,\n\t\tBalance:  0,\n\t\tCurrency: req.Currency,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}",
+          "c": "package api\n\nimport (\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n)\n\ntype createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,oneof=USD EUR THB\"`\n}\n\nfunc (server *Server) createAccount(ctx *gin.Context) {\n\tvar req createAccountRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\taccount, err := server.store.CreateAccount(ctx, db.CreateAccountParams{\n\t\tOwner:    req.Owner,\n\t\tBalance:  0,\n\t\tCurrency: req.Currency,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, account)\n}",
         },
         {
           "t": "ul",
           "c": [
+            "**`createAccountRequest` และแท็ก `binding:\"...\"`**: พิมพ์เขียวกรองข้อมูลขาเข้า โดย `binding:\"required\"` บังคับว่าห้ามส่งค่าว่าง ส่วน `oneof=USD EUR THB` (คั่นด้วยช่องว่าง) บังคับว่าค่าที่ส่งมาต้องตรงกับสกุลเงินใดสกุลเงินหนึ่งใน 3 ตัวนี้เท่านั้น และสังเกตว่า **เราไม่เปิดรับฟิลด์ `Balance` จาก JSON ขาเข้า แต่บังคับใส่ `Balance: 0` ในโค้ดเสมอ** เพื่อป้องกันไม่ให้ลูกค้าเสกยอดเงินเริ่มต้นเองตอนเปิดบัญชี",
             "**`ctx *gin.Context`**: ตัวแปรพระเอกของ Gin ที่รวมทั้งข้อมูลคำขอขาเข้า (Request) และคำสั่งตอบกลับขาออกไว้ในตัวเดียว (และเนื่องจาก `*gin.Context` มีคุณสมบัติเป็น `context.Context` ของ Go ในตัว เราจึงส่ง `ctx` ตัวนี้เข้าไปใน `server.store.CreateAccount(ctx, ...)` ได้โดยตรง)",
-            "**`ctx.ShouldBindJSON(&req)`**: คำสั่งของ Gin ที่อ่าน JSON Body ขาเข้าแล้วแปลงใส่ตัวแปร `req` พร้อมตรวจเช็กกฎในแท็ก `binding:\"...\"` ให้เสร็จสรรพ หากข้อมูลไม่ครบจะคืนค่า `err` ออกมาทันที",
-            "**`ctx.JSON(statusCode, data)`**: คำสั่งของ Gin สำหรับแปลง Struct หรือ `gin.H` ให้เป็น JSON แล้วส่งกลับไปหาผู้เรียกพร้อมรหัส HTTP Status (เช่น `http.StatusOK` = 200 หรือ `http.StatusBadRequest` = 400 จากแพ็กเกจมาตรฐาน `net/http`)",
+            "**`ctx.ShouldBindJSON(&req)`**: คำสั่งของ Gin ที่อ่าน JSON Body ขาเข้าแล้วแปลงใส่ตัวแปร `req` (ต้องส่งเป็น Pointer `&req` เพื่อให้แก้ไขค่าข้างในได้) พร้อมตรวจเช็กกฎในแท็ก `binding` ให้เสร็จสรรพ",
+            "**ทำไม `if err != nil` จุดแรกคืน `400` แต่จุดที่สองคืน `500`?**:\n  • ด่านแรก (`http.StatusBadRequest` = **400**): ข้อมูลจากลูกค้าไม่ครบหรือผิดกติกา (ความผิดฝั่งผู้เรียก)\n  • ด่านที่สอง (`http.StatusInternalServerError` = **500**): ข้อมูลผ่านด่านตรวจมาถูกต้องแล้ว แต่ตอนเรียก `server.store.CreateAccount` (ซึ่งวิ่งไปรัน SQL ใน `db/account.go`) เกิดปัญหาจากระบบฐานข้อมูลของเราเอง",
+            "**`ctx.JSON(http.StatusOK, account)`**: แปลง Struct `account` ที่ได้จากชั้น `db` ให้เป็น JSON แล้วส่งกลับไปหาผู้เรียกพร้อมรหัส `200 OK`",
           ],
         },
         {
           "t": "p",
-          "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` สำหรับดูข้อมูลบัญชีรายตัว (`GET /accounts/:id`) และดึงรายการบัญชีแบบแบ่งหน้า (`GET /accounts?page_id=1&page_size=5`):",
+          "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` (พร้อมเพิ่ม `\"database/sql\"` และ `\"errors\"` ใน `import` ด้านบนของไฟล์) สำหรับดูข้อมูลบัญชีรายตัว (`GET /accounts/:id`) และดึงรายการบัญชีแบบแบ่งหน้า (`GET /accounts?page_id=1&page_size=5`):",
         },
         {
           "t": "code",
@@ -114,7 +121,9 @@ export const apiPages: Record<string, Page> = {
         {
           "t": "ul",
           "c": [
+            "**`uri:\"id\" binding:\"required,min=1\"` + `ctx.ShouldBindUri(&req)`**: ดึงค่าจากตัวแปร `:id` บน URL Path (เช่น `/accounts/5`) มาแปลงเป็นตัวเลข `int64` พร้อมบังคับด้วย `min=1` ว่าเลขบัญชีต้องตั้งแต่ 1 ขึ้นไป (ห้ามส่ง 0 หรือเลขติดลบ)",
             "**`errors.Is(err, sql.ErrNoRows)` ใน `getAccount`**: `sql.ErrNoRows` คือตัวแปร Error มาตรฐานของแพ็กเกจ `database/sql` ที่จะถูกส่งออกมาเมื่อเราสั่งคิวรีหาแถวเดียว (`QueryRowContext`) แล้วไม่มีหมายเลขบัญชีนั้นอยู่ในฐานข้อมูล เราจึงดักจับเพื่อตอบกลับเป็น `404 Not Found` (หาบัญชีไม่เจอ) แทนที่จะปล่อยให้กลายเป็น `500 Internal Server Error` (เซิร์ฟเวอร์พัง)",
+            "**`form:\"page_id\"` + `ctx.ShouldBindQuery(&req)` และสูตรคำนวณ `Offset`**: ดึงค่าจาก Query String หลังเครื่องหมาย `?` (เช่น `?page_id=2&page_size=5` โดยบังคับขนาดหน้า `min=5,max=10` ไม่ให้ดึงทีละล้านแถวจน DB ค้าง) ส่วนสูตร **`Offset: (req.PageID - 1) * req.PageSize`** คือการคำนวณจำนวนแถวที่ต้องข้ามไป เช่น หน้า 1 ข้าม `(1-1)*5 = 0` แถว, หน้า 2 ข้าม `(2-1)*5 = 5` แถวแรก",
           ],
         },
         {
@@ -251,7 +260,7 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ดึงตัว Validator Engine ของ Gin ออกมาลงทะเบียนกฎชื่อ `\"currency\"` และเพิ่ม Route `POST /transfers` (พร้อมเปลี่ยนแท็กสกุลเงินใน `createAccountRequest` จาก `oneof=USD EUR THB` เป็น `currency`):",
+          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ดึงตัว Validator Engine ของ Gin ออกมาลงทะเบียนกฎชื่อ `\"currency\"` และเพิ่ม Route `POST /transfers`:",
         },
         {
           "t": "code",
@@ -266,12 +275,22 @@ export const apiPages: Record<string, Page> = {
           ],
         },
         {
+          "t": "p",
+          "c": "และกลับไปอัปเดต `createAccountRequest` ในไฟล์ `simplebank/api/account.go` ให้เปลี่ยนจาก `oneof=USD EUR THB` มาใช้แท็ก `currency` ใหม่ของเราได้เลย:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/account.go (อัปเดตแท็กสกุลเงินเป็น currency)",
+          "c": "type createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,currency\"`\n}",
+        },
+        {
           "t": "h2",
           "c": "3. สร้าง Endpoint โอนเงิน (transfer.go)",
         },
         {
           "t": "p",
-          "c": "ในไฟล์ `simplebank/api/transfer.go` เราจะวางปราการป้องกันความผิดพลาด 3 จุดสำคัญ:",
+          "c": "ในไฟล์ `simplebank/api/transfer.go` จะทำหน้าที่เป็นด่านหน้า HTTP ที่รับคำสั่งโอนเงินมาตรวจสอบความถูกต้อง 3 ด่านสำคัญ ก่อนส่งต่อไปเรียก **`server.store.TransferTx`** (โค้ด Transaction 5 ขั้นตอนแบบไร้ Deadlock ที่เราสร้างไว้ใน `db/tx_transfer.go` โมดูลที่ 4–5):",
         },
         {
           "t": "ul",

@@ -126,6 +126,25 @@ export const securityProdPages: Record<string, Page> = {
           "c": "package api\n\nimport (\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\tdb \"simplebank/db\"\n\t\"simplebank/util\"\n)\n\ntype createUserRequest struct {\n\tUsername string `json:\"username\" binding:\"required,alphanum\"`\n\tPassword string `json:\"password\" binding:\"required,min=6\"`\n\tFullName string `json:\"full_name\" binding:\"required\"`\n\tEmail    string `json:\"email\" binding:\"required,email\"`\n}\n\nfunc (server *Server) createUser(ctx *gin.Context) {\n\tvar req createUserRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\thashedPassword, err := util.HashPassword(req.Password)\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tuser, err := server.store.CreateUser(ctx, db.CreateUserParams{\n\t\tUsername:       req.Username,\n\t\tHashedPassword: hashedPassword,\n\t\tFullName:       req.FullName,\n\t\tEmail:          req.Email,\n\t})\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, user)\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**แท็ก Validation สำหรับข้อมูลผู้ใช้**:\n  • `binding:\"required,alphanum\"`: บังคับว่า `username` ต้องเป็นตัวอักษรภาษาอังกฤษหรือตัวเลขเท่านั้น (ห้ามมีเว้นวรรคหรืออักขระพิเศษ)\n  • `binding:\"required,min=6\"`: บังคับรหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร\n  • `binding:\"required,email\"`: ตรวจสอบรูปแบบอีเมลมาตรฐาน (ต้องมี `@` และโดเมนถูกต้อง)",
+            "**การทำงานร่วมกันของ `api/user.go` และ `db/user.go`**: เช่นเดียวกับระบบบัญชี ไฟล์ `api/user.go` ทำหน้าที่รับ JSON และนำรหัสผ่านไปแฮชด้วย `util.HashPassword` ก่อนส่งต่อให้ `server.store.CreateUser(...)` (ซึ่งก็คือฟังก์ชันใน `db/user.go` ที่สืบทอดมาอยู่ใน `Store`) บันทึกลง PostgreSQL",
+            "**ความปลอดภัยตอนส่งกลับ `ctx.JSON(http.StatusOK, user)`**: เนื่องจากใน `db/models.go` เราใส่แท็ก `` `json:\"-\"` `` ไว้ที่ฟิลด์ `HashedPassword` ตอนที่ Gin แปลง `user` เป็น JSON ส่งกลับไปหาลูกค้า ฟิลด์รหัสผ่านจึงถูกตัดทิ้งโดยอัตโนมัติ 100%",
+          ],
+        },
+        {
+          "t": "callout",
+          "title": "🧪 อัปเดต createRandomAccount ใน db/account_test.go ให้รองรับ Foreign Key ใหม่",
+          "c": "เมื่อเราเพิ่มกฎ Foreign Key บังคับว่า `accounts.owner` ต้องมีตัวตนอยู่ในตาราง `users` เสมอ หากเราสั่งรัน `make test` ตอนนี้ ฟังก์ชัน `createRandomAccount` เดิมใน `simplebank/db/account_test.go` ที่สุ่มชื่อลอยๆ จะพังทันที! ให้อัปเดต `createRandomAccount` ให้สร้าง User ลงตาราง `users` ก่อนนำไปเปิดบัญชีดังนี้ครับ:",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/db/account_test.go (อัปเดต createRandomAccount ให้สร้าง User ก่อน)",
+          "c": "func createRandomUser(t *testing.T) User {\n\thashedPassword, err := util.HashPassword(util.RandomString(6))\n\trequire.NoError(t, err)\n\n\targ := CreateUserParams{\n\t\tUsername:       util.RandomOwner(),\n\t\tHashedPassword: hashedPassword,\n\t\tFullName:       util.RandomOwner(),\n\t\tEmail:          util.RandomString(6) + \"@email.com\",\n\t}\n\n\tuser, err := testQueries.CreateUser(context.Background(), arg)\n\trequire.NoError(t, err)\n\treturn user\n}\n\nfunc createRandomAccount(t *testing.T) Account {\n\tuser := createRandomUser(t)\n\n\targ := CreateAccountParams{\n\t\tOwner:    user.Username, // ผูกกับ user ที่สร้างจริงในตาราง users\n\t\tBalance:  util.RandomMoney(),\n\t\tCurrency: util.RandomCurrency(),\n\t}\n\n\taccount, err := testQueries.CreateAccount(context.Background(), arg)\n\trequire.NoError(t, err)\n\trequire.NotEmpty(t, account)\n\trequire.Equal(t, arg.Owner, account.Owner)\n\trequire.Equal(t, arg.Balance, account.Balance)\n\trequire.Equal(t, arg.Currency, account.Currency)\n\trequire.NotZero(t, account.ID)\n\trequire.NotZero(t, account.CreatedAt)\n\treturn account\n}",
+        },
+        {
           "t": "h2",
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
