@@ -314,6 +314,14 @@ export const securityProdPages: Record<string, Page> = {
           "c": "type loginUserRequest struct {\n\tUsername string `json:\"username\" binding:\"required,alphanum\"`\n\tPassword string `json:\"password\" binding:\"required,min=6\"`\n}\n\ntype loginUserResponse struct {\n\tAccessToken string  `json:\"access_token\"`\n\tUser        db.User `json:\"user\"`\n}\n\nfunc (server *Server) loginUser(ctx *gin.Context) {\n\tvar req loginUserRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tuser, err := server.store.GetUser(ctx, req.Username)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(err))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tif err := util.CheckPassword(req.Password, user.HashedPassword); err != nil {\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\taccessToken, _, err := server.tokenMaker.CreateToken(user.Username, server.tokenDuration)\n\tif err != nil {\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, loginUserResponse{\n\t\tAccessToken: accessToken,\n\t\tUser:        user,\n\t})\n}",
         },
         {
+          "t": "ul",
+          "c": [
+            "**ดึงข้อมูลผู้ใช้ (`server.store.GetUser`)**: เรียกฟังก์ชัน `GetUser` จากไฟล์ `db/user.go` เพื่อค้นหาผู้ใช้ด้วย `req.Username` หากไม่มีชื่อนี้ในระบบ (`sql.ErrNoRows`) จะตอบกลับ `404 Not Found`",
+            "**ตรวจสอบรหัสผ่าน (`util.CheckPassword`)**: นำรหัสผ่านที่ส่งมาไปเทียบกับ `user.HashedPassword` ที่ดึงมาจากฐานข้อมูลด้วย Bcrypt หากไม่ตรงกันจะตีกลับด้วยรหัส `401 Unauthorized` (`http.StatusUnauthorized`)",
+            "**ออกบัตรผ่าน (`server.tokenMaker.CreateToken`)**: เมื่อรหัสผ่านถูกต้อง จะเรียก `tokenMaker` (จาก `token/paseto_maker.go`) สร้าง PASETO Token ที่มีอายุตาม `server.tokenDuration` แล้วส่งกลับไปพร้อมข้อมูล `user` ใน `loginUserResponse`",
+          ],
+        },
+        {
           "t": "p",
           "c": "และใน `simplebank/api/server.go` เราอัปเดต `Server` struct ให้เก็บ `tokenMaker` พร้อมระยะเวลาอายุ Token (`tokenDuration`) และจัดกลุ่ม Route ที่ต้องล็อกอินไว้ภายใต้ Middleware นี้:",
         },
@@ -322,6 +330,13 @@ export const securityProdPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/api/server.go (เพิ่ม PasetoMaker และจัดกลุ่ม Route ปลอดภัย)",
           "c": "type Server struct {\n\tstore         *db.Store\n\ttokenMaker    *token.PasetoMaker\n\ttokenDuration time.Duration\n\trouter        *gin.Engine\n}\n\nfunc NewServer(symmetricKey string, tokenDuration time.Duration, store *db.Store) (*Server, error) {\n\ttokenMaker, err := token.NewPasetoMaker(symmetricKey)\n\tif err != nil {\n\t\treturn nil, fmt.Errorf(\"cannot create token maker: %w\", err)\n\t}\n\n\tserver := &Server{\n\t\tstore:         store,\n\t\ttokenMaker:    tokenMaker,\n\t\ttokenDuration: tokenDuration,\n\t}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\t// public routes\n\trouter.POST(\"/users\", server.createUser)\n\trouter.POST(\"/users/login\", server.loginUser)\n\n\t// protected routes\n\tauth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))\n\tauth.POST(\"/accounts\", server.createAccount)\n\tauth.GET(\"/accounts/:id\", server.getAccount)\n\tauth.GET(\"/accounts\", server.listAccounts)\n\tauth.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server, nil\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**Public Routes (`router.POST(\"/users\", ...)` และ `/users/login`)**: ลงทะเบียนไว้กับ `router` ตัวหลักโดยตรง เพื่อให้ใครก็ได้สามารถสมัครสมาชิกและล็อกอินเพื่อขอรับ Token ได้โดยยังไม่ต้องแนบบัตรผ่าน",
+            "**Protected Routes (`auth := router.Group(\"/\").Use(authMiddleware(server.tokenMaker))`)**: คำสั่ง `router.Group(\"/\").Use(...)` คือการสร้างกลุ่มเส้นทางที่มี `authMiddleware` ยืนเฝ้าอยู่หน้าประตู ทุก Endpoint ที่ลงทะเบียนผ่านตัวแปร `auth.` (`/accounts`, `/transfers`) จะถูกบังคับให้ตรวจ PASETO Token ก่อนวิ่งเข้าสู่ Handler เสมอ",
+          ],
         },
         {
           "t": "p",
@@ -500,6 +515,14 @@ export const securityProdPages: Record<string, Page> = {
           "lang": "dockerfile",
           "label": "simplebank/Dockerfile",
           "c": "# Stage 1: Build\nFROM golang:1.27-alpine AS builder\nWORKDIR /app\nCOPY go.mod go.sum ./\nRUN go mod download\nCOPY . .\nRUN CGO_ENABLED=0 go build -o simplebank main.go\n\n# Stage 2: Run (Production Runner)\nFROM alpine:3.22\nWORKDIR /app\nCOPY --from=builder /app/simplebank .\nCOPY app.env .\nEXPOSE 8080\nCMD [\"/app/simplebank\"]",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`COPY go.mod go.sum ./` และ `RUN go mod download` ก่อน `COPY . .`**: เทคนิคทำ **Docker Layer Caching** เพื่อให้ Docker ดาวน์โหลดไลบรารีเก็บไว้ในแคชก่อน หากวันหน้าเราแก้ไขเฉพาะไฟล์โค้ด `.go` โดยไม่ได้เพิ่มไลบรารีใหม่ ตอนสั่งบิลด์รอบถัดไป Docker จะข้ามขั้นดาวน์โหลดไลบรารีทันที ทำให้บิลด์เสร็จในไม่กี่วินาที",
+            "**`CGO_ENABLED=0 go build -o simplebank main.go`**: ปิดการใช้งาน C-binding (`CGO_ENABLED=0`) เพื่อบังคับให้ Go คอมไพล์ทุกอย่างรวมเป็นไฟล์ไบนารีเดี่ยวแบบ Static (`simplebank`) ที่นำไปรันบน Linux เปล่าๆ ได้โดยไม่ต้องพึ่งไลบรารีภาษา C ของระบบ",
+            "**`COPY --from=builder /app/simplebank .`**: ใน Stage ที่ 2 (`alpine:3.22`) เราคัดลอกเฉพาะไฟล์ไบนารี `simplebank` ที่คอมไพล์เสร็จแล้วจาก Stage `builder` มาวาง พร้อมไฟล์ `app.env` แล้วสั่งรันด้วย `CMD [\"/app/simplebank\"]`",
+          ],
         },
         {
           "t": "h2",
