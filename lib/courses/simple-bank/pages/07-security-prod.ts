@@ -89,7 +89,7 @@ export const securityProdPages: Record<string, Page> = {
         {
           "t": "callout",
           "title": "⚠️ ข้อควรระวัง: ล้างข้อมูลทดสอบเก่าก่อนรัน make migrateup",
-          "c": "เนื่องจากในโมดูลที่ 3–6 เราสร้างบัญชีทดสอบไว้ในฐานข้อมูล ซึ่งชื่อเจ้าของบัญชีเหล่านั้นยังไม่มีตัวตนอยู่ในตาราง `users` ใหม่ หากสั่ง `make migrateup` ทันที PostgreSQL จะปฏิเสธและฟ้อง Error ว่า `violates foreign key constraint \"accounts_owner_fkey\"` ทันที!\n\nให้เปิด Terminal แล้วสั่งล้างข้อมูลเก่าออกก่อนรัน Migrate เสมอ:\n```bash\ndocker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts CASCADE;\"\nmake migrateup\n```",
+          "c": "เนื่องจากในโมดูลที่ 3–6 เราสร้างบัญชีทดสอบไว้ในฐานข้อมูล ซึ่งชื่อเจ้าของบัญชีเหล่านั้นยังไม่มีตัวตนอยู่ในตาราง `users` ใหม่ หากสั่ง `make migrateup` ทันที PostgreSQL จะปฏิเสธและฟ้อง Error ว่า `violates foreign key constraint \"accounts_owner_fkey\"` ทันที!\n\nให้เปิด Terminal แล้วสั่งล้างข้อมูลเก่า (พร้อมรีเซ็ตเลข `id` ด้วย `RESTART IDENTITY`) ออกก่อนรัน Migrate เสมอ:\n```bash\ndocker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts RESTART IDENTITY CASCADE;\"\nmake migrateup\n```",
         },
         {
           "t": "h2",
@@ -399,7 +399,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "**ทดสอบด้วย Postman (สมัครสมาชิก → ล็อกอินรับ Token → เปิดบัญชีด้วย Token):**\nรีสตาร์ตเซิร์ฟเวอร์ (`Ctrl + C` แล้ว `make server`) จากนั้นเปิด **Postman** แล้วยิง API ตามลำดับนี้ครับ:",
+          "c": "**ทดสอบด้วย Postman (สมัครสมาชิก → ล็อกอินรับ Token → เปิดบัญชีด้วย Token):**\n*(หมายเหตุ: หากคุณสั่งรัน `make test` ในบทที่ 7.1 ไปแล้ว ให้รัน `docker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts, users RESTART IDENTITY CASCADE;\"` เพื่อล้างข้อมูลเทสต์และรีเซ็ตเลข `id` ให้เริ่มที่ `1` ก่อน)*\n\nรีสตาร์ตเซิร์ฟเวอร์ (`Ctrl + C` แล้ว `make server`) จากนั้นเปิด **Postman** แล้วยิง API ตามลำดับนี้ครับ:",
         },
         {
           "t": "codeout",
