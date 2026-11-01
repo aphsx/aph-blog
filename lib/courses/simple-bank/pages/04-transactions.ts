@@ -153,6 +153,10 @@ export const transactionPages: Record<string, Page> = {
           ],
         },
         {
+          "t": "viz",
+          "id": "bank-store-tx-flow",
+        },
+        {
           "t": "h2",
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },

@@ -117,6 +117,10 @@ export const apiPages: Record<string, Page> = {
           ],
         },
         {
+          "t": "viz",
+          "id": "bank-gin-binding-flow",
+        },
+        {
           "t": "p",
           "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` (พร้อมเพิ่ม `\"database/sql\"` และ `\"errors\"` ใน `import` ด้านบนของไฟล์) เพื่อเชื่อมต่อไปยังฟังก์ชัน `GetAccount` และ `ListAccounts` ของ `db/account.go`:",
         },
@@ -133,6 +137,10 @@ export const apiPages: Record<string, Page> = {
             "**`errors.Is(err, sql.ErrNoRows)` ใน `getAccount`**: `sql.ErrNoRows` คือตัวแปร Error มาตรฐานของแพ็กเกจ `database/sql` ที่จะถูกส่งออกมาเมื่อเราสั่งคิวรีหาแถวเดียว (`QueryRowContext`) แล้วไม่มีหมายเลขบัญชีนั้นอยู่ในฐานข้อมูล เราจึงดักจับเพื่อตอบกลับเป็น `404 Not Found` (หาบัญชีไม่เจอ) แทนที่จะปล่อยให้กลายเป็น `500 Internal Server Error` (เซิร์ฟเวอร์พัง)",
             "**`form:\"page_id\"` + `ctx.ShouldBindQuery(&req)` และสูตรคำนวณ `Offset`**: ดึงค่าจาก Query String หลังเครื่องหมาย `?` (เช่น `?page_id=2&page_size=5` โดยบังคับขนาดหน้า `min=5,max=10` ไม่ให้ดึงทีละล้านแถวจน DB ค้าง) ส่วนสูตร **`Offset: (req.PageID - 1) * req.PageSize`** คือการคำนวณจำนวนแถวที่ต้องข้ามไป เช่น หน้า 1 ข้าม `(1-1)*5 = 0` แถว, หน้า 2 ข้าม `(2-1)*5 = 5` แถวแรก",
           ],
+        },
+        {
+          "t": "viz",
+          "id": "bank-gin-3channels-viz",
         },
         {
           "t": "p",
@@ -299,6 +307,10 @@ export const apiPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/api/account.go (อัปเดตแท็กสกุลเงินเป็น currency)",
           "c": "type createAccountRequest struct {\n\tOwner    string `json:\"owner\" binding:\"required\"`\n\tCurrency string `json:\"currency\" binding:\"required,currency\"`\n}",
+        },
+        {
+          "t": "viz",
+          "id": "bank-custom-validator-flow",
         },
         {
           "t": "h2",

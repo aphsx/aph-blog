@@ -96,6 +96,14 @@ export const VIZ_IDS = [
   "dsa-divide-conquer-tree",
   "dsa-backtrack-pruning",
   "dsa-fib-overlapping",
+  // Simple Bank Course Visualizers
+  "bank-sql-scan-flow",
+  "bank-store-tx-flow",
+  "bank-gin-binding-flow",
+  "bank-gin-3channels-viz",
+  "bank-custom-validator-flow",
+  "bank-auth-middleware-flow",
+  "bank-viper-config-flow",
 ] as const;
 
 export type VizId = (typeof VIZ_IDS)[number];

@@ -188,6 +188,10 @@ export const dbCodePages: Record<string, Page> = {
           ],
         },
         {
+          "t": "viz",
+          "id": "bank-sql-scan-flow",
+        },
+        {
           "t": "p",
           "c": "**ส่วนที่ 5.2: [R] Read — ดึงข้อมูลแถวเดียว (`GetAccount`) และดึงหลายแถว (`ListAccounts`)**\nเขียนต่อท้ายลงในไฟล์เดิม โดยเปรียบเทียบการดึงข้อมูล **1 แถว** กับ **หลายแถว (Pagination)**:",
         },

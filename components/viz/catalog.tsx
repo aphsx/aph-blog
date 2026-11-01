@@ -145,6 +145,15 @@ export const vizCatalog: Record<VizId, ComponentType> = {
   "dsa-divide-conquer-tree": load(() => import("@/components/viz/dsa/RecursionViz").then((m) => m.DivideConquerTreeViz)),
   "dsa-backtrack-pruning": load(() => import("@/components/viz/dsa/RecursionViz").then((m) => m.BacktrackPruningViz)),
   "dsa-fib-overlapping": load(() => import("@/components/viz/dsa/RecursionViz").then((m) => m.FibOverlappingViz)),
+
+  // Simple Bank Course
+  "bank-sql-scan-flow": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankSqlScanFlowViz)),
+  "bank-store-tx-flow": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankStoreTxFlowViz)),
+  "bank-gin-binding-flow": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankGinBindingFlowViz)),
+  "bank-gin-3channels-viz": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankGin3ChannelsViz)),
+  "bank-custom-validator-flow": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankCustomValidatorFlowViz)),
+  "bank-auth-middleware-flow": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankAuthMiddlewareFlowViz)),
+  "bank-viper-config-flow": load(() => import("@/components/viz/SimpleBankViz").then((m) => m.BankViperConfigFlowViz)),
 };
 
 export default function VizBlock({ id }: { id: VizId }) {

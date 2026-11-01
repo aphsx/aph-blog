@@ -300,6 +300,10 @@ export const securityProdPages: Record<string, Page> = {
           ],
         },
         {
+          "t": "viz",
+          "id": "bank-auth-middleware-flow",
+        },
+        {
           "t": "h2",
           "c": "4. ระบบล็อกอิน (POST /users/login) & ปกป้อง Endpoints สำคัญ",
         },
@@ -484,6 +488,10 @@ export const securityProdPages: Record<string, Page> = {
             "**`viper.AutomaticEnv()`**: คำสั่งสำคัญที่บอกให้ Viper ตรวจสอบตัวแปร Environment Variables ของเครื่องเซิร์ฟเวอร์ด้วย หากบนเซิร์ฟเวอร์จริงมีการตั้งค่าตัวแปรชื่อตรงกัน (เช่น `DB_SOURCE`) ให้ใช้ค่าของเซิร์ฟเวอร์ทับค่าในไฟล์ `app.env` ทันที",
             "**`viper.ReadInConfig()` และ `viper.Unmarshal(&config)`**: สั่งอ่านไฟล์ตั้งค่าขึ้นมา แล้วเทค่าทั้งหมดลงในฟิลด์ของตัวแปร `config` (แถมแปลงข้อความ `\"15m\"` ให้กลายเป็น `time.Duration` 15 นาทีให้อัตโนมัติ)",
           ],
+        },
+        {
+          "t": "viz",
+          "id": "bank-viper-config-flow",
         },
         {
           "t": "p",
