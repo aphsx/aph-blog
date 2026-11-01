@@ -73,24 +73,12 @@ export function parsePostmanBlock(code: string, out: string, blockLabel?: string
   return codeChunks.map((chunk, index) => {
     const rawOut = outChunks[index] || outChunks[0] || "";
     const method = (chunk.method as "GET" | "POST" | "PUT" | "DELETE" | "PATCH") || "GET";
-    const fullUrl = chunk.url;
+    let cleanUrl = chunk.url.replace(/\s+HTTP\/[0-9.]+$/i, "").trim();
 
-    // Parse query params
-    const queryParams: Array<{ key: string; value: string }> = [];
-    if (fullUrl.includes("?")) {
-      const queryStr = fullUrl.split("?")[1] || "";
-      const pairs = queryStr.split("&");
-      for (const pair of pairs) {
-        const [k, v] = pair.split("=");
-        if (k) {
-          queryParams.push({ key: decodeURIComponent(k), value: decodeURIComponent(v || "") });
-        }
-      }
-    }
-
-    // Parse request headers & body
+    // Parse request headers & body first so we can extract Host header if URL is relative
     const reqLines = chunk.raw.split(/\r?\n/);
     const reqHeaders: Array<{ key: string; value: string }> = [];
+    let hostHeader = "";
     let inReqHeaders = false;
     let reqBodyStartIndex = -1;
 
@@ -107,10 +95,36 @@ export function parsePostmanBlock(code: string, out: string, blockLabel?: string
         }
         const headerMatch = line.match(/^([^:]+):\s*(.+)$/);
         if (headerMatch) {
-          reqHeaders.push({ key: headerMatch[1].trim(), value: headerMatch[2].trim() });
+          const hKey = headerMatch[1].trim();
+          const hVal = headerMatch[2].trim();
+          if (hKey.toLowerCase() === "host") {
+            hostHeader = hVal;
+          } else {
+            reqHeaders.push({ key: hKey, value: hVal });
+          }
         } else if (!line.startsWith("#")) {
           reqBodyStartIndex = i;
           break;
+        }
+      }
+    }
+
+    if (cleanUrl.startsWith("/")) {
+      const host = hostHeader || "localhost:8080";
+      const protocol = host.startsWith("http://") || host.startsWith("https://") ? "" : "http://";
+      cleanUrl = `${protocol}${host}${cleanUrl}`;
+    }
+    const fullUrl = cleanUrl;
+
+    // Parse query params
+    const queryParams: Array<{ key: string; value: string }> = [];
+    if (fullUrl.includes("?")) {
+      const queryStr = fullUrl.split("?")[1] || "";
+      const pairs = queryStr.split("&");
+      for (const pair of pairs) {
+        const [k, v] = pair.split("=");
+        if (k) {
+          queryParams.push({ key: decodeURIComponent(k), value: decodeURIComponent(v || "") });
         }
       }
     }
@@ -174,15 +188,16 @@ export function parsePostmanBlock(code: string, out: string, blockLabel?: string
     const size = byteLength > 1024 ? `${(byteLength / 1024).toFixed(1)} KB` : `${byteLength} B`;
     const time = statusCode === 201 ? "16 ms" : statusCode === 400 ? "4 ms" : statusCode === 404 ? "6 ms" : "12 ms";
 
-    // Tab label
-    let tabLabel = `${method} ${fullUrl.replace(/^https?:\/\/[^\/]+/, "")}`;
+    // Tab label (strip leading method prefix since UI badge already displays the method)
+    let tabLabel = fullUrl.replace(/^https?:\/\/[^\/]+/, "") || "/";
     if (tabLabel.length > 28) {
       tabLabel = tabLabel.substring(0, 26) + "…";
     }
+    const cleanTitle = (chunk.title || tabLabel).replace(/^(GET|POST|PUT|DELETE|PATCH)\s+/i, "");
 
     return {
       id: `case-${index}`,
-      title: chunk.title || tabLabel,
+      title: cleanTitle,
       tabLabel,
       method,
       url: fullUrl,

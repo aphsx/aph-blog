@@ -165,8 +165,8 @@ export default function PostmanPanel({ label, cases, locale = "th" }: PostmanPan
         </div>
       </div>
 
-      {/* 2. Optional Label Banner */}
-      {label && (
+      {/* 2. Optional Label Banner (only when multiple tabs share a collection label) */}
+      {label && cases.length > 1 && (
         <div className="bg-[#f1f5f9]/70 border-b border-[#e2e8f0] px-4 py-1.5 text-xs text-slate-600 flex items-center justify-between">
           <span className="font-medium text-slate-700 truncate">{label}</span>
           <span className="text-[10px] font-mono text-slate-400">HTTP/1.1 API Client</span>
