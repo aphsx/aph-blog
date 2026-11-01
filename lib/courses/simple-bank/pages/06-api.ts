@@ -176,13 +176,53 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "สั่งรันเซิร์ฟเวอร์ด้วย `make server` (หรือ `go run main.go`) แล้วทดสอบสั่งเปิดบัญชีใหม่ผ่าน HTTP POST:",
+          "c": "**เตรียมฐานข้อมูลและทดสอบยิง API ด้วย Postman ทีละขั้นตอน:**\n\n**ขั้นที่ 1: ล้างข้อมูลสุ่มจาก Unit Test เพื่อให้เลขบัญชีเริ่มนับ `id: 1` ใหม่**\nเนื่องจากในโมดูลที่ 3–5 เรารัน `make test` สร้างและลบบัญชีสุ่มไปหลายสิบแถว (โดยเฉพาะ `TestDeleteAccount` ที่ลบบัญชีหมายเลขแรกสุดทิ้งไปแล้ว) หากต้องการให้เวลาสร้างบัญชีใน Postman ได้เลข `id: 1` และ `id: 2` ตรงกับตัวอย่างเป๊ะๆ ให้รันคำสั่งรีเซ็ตตารางใน Terminal ก่อน 1 ครั้ง:",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ล้างข้อมูลเทสต์เก่าและรีเซ็ตลำดับ ID ให้เริ่มนับ 1 ใหม่",
+          "code": "docker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts RESTART IDENTITY CASCADE;\"",
+          "out": "TRUNCATE TABLE",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 2: สั่งรัน API Server**\nสั่งรันเซิร์ฟเวอร์ใน Terminal ด้วย `make server` (หรือ `go run main.go`) ทิ้งไว้:",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "สั่งรัน Gin HTTP Server ที่พอร์ต 8080",
+          "code": "make server",
+          "out": "go run main.go\n[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)\n[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 3: เปิดโปรแกรม Postman ยิง `POST /accounts` สร้างไว้ 2 บัญชี (`alice` และ `bob`)**\nใน **Postman** ให้เลือก Method เป็น **`POST`**, ใส่ URL เป็น `http://localhost:8080/accounts`, ไปที่แท็บ **Body** → เลือก **raw** → เปลี่ยนชนิดด้านขวาเป็น **JSON** แล้วกด **Send** เพื่อสร้างบัญชีของ `alice` (`id: 1`) และ `bob` (`id: 2`) เตรียมไว้สำหรับทดสอบโอนเงินในบทถัดไป:",
         },
         {
           "t": "codeout",
           "lang": "http",
-          "label": "POST /accounts - เปิดบัญชีใหม่",
+          "label": "Postman ใบที่ 1: POST http://localhost:8080/accounts (สร้างบัญชี alice ได้ id: 1)",
           "code": "POST /accounts HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"owner\": \"alice\",\n  \"currency\": \"USD\"\n}",
+          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"id\": 1,\n  \"owner\": \"alice\",\n  \"balance\": 0,\n  \"currency\": \"USD\",\n  \"created_at\": \"2026-10-30T14:30:00Z\"\n}",
+        },
+        {
+          "t": "codeout",
+          "lang": "http",
+          "label": "Postman ใบที่ 2: POST http://localhost:8080/accounts (สร้างบัญชี bob ได้ id: 2)",
+          "code": "POST /accounts HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"owner\": \"bob\",\n  \"currency\": \"USD\"\n}",
+          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"id\": 2,\n  \"owner\": \"bob\",\n  \"balance\": 0,\n  \"currency\": \"USD\",\n  \"created_at\": \"2026-10-30T14:30:05Z\"\n}",
+        },
+        {
+          "t": "p",
+          "c": "และลองเปลี่ยน Method ใน Postman เป็น **`GET`** ยิงไปที่ `http://localhost:8080/accounts/1` เพื่อทดสอบดึงข้อมูลบัญชี:",
+        },
+        {
+          "t": "codeout",
+          "lang": "http",
+          "label": "Postman: GET http://localhost:8080/accounts/1 (ดึงข้อมูลบัญชีที่ 1)",
+          "code": "GET /accounts/1 HTTP/1.1\nHost: localhost:8080",
           "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"id\": 1,\n  \"owner\": \"alice\",\n  \"balance\": 0,\n  \"currency\": \"USD\",\n  \"created_at\": \"2026-10-30T14:30:00Z\"\n}",
         },
         {
@@ -289,8 +329,8 @@ export const apiPages: Record<string, Page> = {
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/server.go (ลงทะเบียน Validator และ Route โอนเงิน)",
-          "c": "import (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}",
+          "label": "simplebank/api/server.go (ฉบับสมบูรณ์: ลงทะเบียน Validator และ Route โอนเงิน)",
+          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\ntype Server struct {\n\tstore  *db.Store\n\trouter *gin.Engine\n}\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
         },
         {
           "t": "ul",
@@ -340,14 +380,55 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. ทดสอบยิงคำสั่งโอนเงินผ่าน API",
+          "c": "4. ทดสอบยิงคำสั่งโอนเงินผ่าน API ด้วย Postman",
+        },
+        {
+          "t": "p",
+          "c": "ก่อนจะเปิด **Postman** แล้วยิง `POST http://localhost:8080/transfers` มี **3 จุดสำคัญ** ที่ต้องทำตามลำดับ (หากข้ามขั้นตอนใดขั้นตอนหนึ่ง เวลากด Send ใน Postman จะได้ `404 Not Found` หรือ `400 Bad Request` ทันที):",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 1: รีสตาร์ต API Server (ป้องกัน `404 page not found` ใน Postman)**\nเนื่องจาก `go run main.go` ที่เราเปิดค้างไว้ตั้งแต่บทที่ 6.1 ยังไม่รู้จัก Route `POST /transfers` ที่เพิ่งเพิ่มเข้ามา ให้กลับไปที่หน้าต่าง Terminal ที่รันเซิร์ฟเวอร์อยู่ กด **`Ctrl + C`** เพื่อหยุดตัวเก่า แล้วสั่งรัน `make server` ใหม่อีกครั้ง สังเกตว่าจะมีบรรทัด `POST /transfers` โผล่ขึ้นมา:",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "กด Ctrl+C หยุดเซิร์ฟเวอร์เดิม แล้วสั่ง make server ใหม่",
+          "code": "make server",
+          "out": "go run main.go\n[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts/:id             --> simplebank/api.(*Server).getAccount-fm (3 handlers)\n[GIN-debug] GET    /accounts                 --> simplebank/api.(*Server).listAccounts-fm (3 handlers)\n[GIN-debug] POST   /transfers                --> simplebank/api.(*Server).createTransfer-fm (3 handlers)\n[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 2: ทดสอบกดโอนเงินใน Postman ตอนที่ยอดเงินยังเป็น `0` (พิสูจน์การดัก Error `23514`)**\n• หากในบทที่ 6.1 คุณเพิ่งกดสร้างบัญชีใน Postman ไว้แค่บัญชีเดียว (`id: 1`) อย่าลืมยิง `POST http://localhost:8080/accounts` สร้างบัญชีที่ 2 (`bob`, สกุลเงิน `USD`) ให้มี `id: 2` ก่อน (ไม่อย่างนั้น `validAccount` จะตีกลับ `404 Not Found: {\"error\": \"ไม่พบบัญชีหมายเลข 2\"}`)\n• และเนื่องจาก `POST /accounts` สร้างบัญชีใหม่ด้วยยอดเงินเริ่มต้น **`balance: 0`** เสมอ หากคุณลองเปิด **Postman** ตั้ง Method เป็น **`POST`** ไปที่ `http://localhost:8080/transfers` (แท็บ **Body** → **raw** → **JSON**) แล้วกด **Send** ตอนนี้เลย ระบบจะชนกฎ `CHECK (balance >= 0)` ของ PostgreSQL (รหัส `23514`) และตอบกลับข้อความที่เราเพิ่งเขียนดักไว้ทันที:",
         },
         {
           "t": "codeout",
           "lang": "http",
-          "label": "POST /transfers - โอนเงินสำเร็จ",
+          "label": "Postman: ลองยิง POST http://localhost:8080/transfers ตอนที่ balance ยังเป็น 0",
           "code": "POST /transfers HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"from_account_id\": 1,\n  \"to_account_id\": 2,\n  \"amount\": 100,\n  \"currency\": \"USD\"\n}",
-          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"transfer\": {\n    \"id\": 1,\n    \"from_account_id\": 1,\n    \"to_account_id\": 2,\n    \"amount\": 100,\n    \"created_at\": \"2026-10-30T14:35:00Z\"\n  },\n  \"from_account\": {\n    \"id\": 1,\n    \"owner\": \"alice\",\n    \"balance\": 900,\n    \"currency\": \"USD\",\n    \"created_at\": \"2026-10-30T14:30:00Z\"\n  },\n  \"to_account\": {\n    \"id\": 2,\n    \"owner\": \"bob\",\n    \"balance\": 600,\n    \"currency\": \"USD\",\n    \"created_at\": \"2026-10-30T14:31:00Z\"\n  }\n}",
+          "out": "HTTP/1.1 400 Bad Request\nContent-Type: application/json; charset=utf-8\n\n{\n  \"error\": \"เงินในบัญชีไม่พอสำหรับการโอน\"\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 3: เติมเงินตั้งต้นเข้าบัญชี แล้วกด Send ใน Postman อีกครั้ง**\nเนื่องจากระบบของเรายังไม่ได้เปิด Endpoint สำหรับฝากเงินสด (เพื่อความปลอดภัย) ให้รันคำสั่ง SQL สั้นๆ ใน Terminal เพื่อเติมเงินตั้งต้นให้บัญชี `id: 1` (`alice` มี `1,000 USD`) และ `id: 2` (`bob` มี `500 USD`):",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "เติมยอดเงินตั้งต้นให้บัญชีที่ 1 (1,000 USD) และบัญชีที่ 2 (500 USD)",
+          "code": "docker exec -it postgres16 psql -U root -d simple_bank -c \"UPDATE accounts SET balance = 1000 WHERE id = 1; UPDATE accounts SET balance = 500 WHERE id = 2;\"",
+          "out": "UPDATE 1\nUPDATE 1",
+        },
+        {
+          "t": "p",
+          "c": "จากนั้นกลับไปที่ **Postman** แล้วกดปุ่ม **Send** ซ้ำที่คำขอ `POST http://localhost:8080/transfers` เดิมอีกครั้ง คราวนี้จะได้ผลลัพธ์ **`200 OK`** พร้อมรายละเอียดธุรกรรมครบทั้ง 5 ส่วน (`transfer`, `from_account`, `to_account`, `from_entry`, `to_entry`) ทันที!",
+        },
+        {
+          "t": "codeout",
+          "lang": "http",
+          "label": "Postman: POST http://localhost:8080/transfers (โอนเงิน 100 USD สำเร็จ ได้ 200 OK)",
+          "code": "POST /transfers HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"from_account_id\": 1,\n  \"to_account_id\": 2,\n  \"amount\": 100,\n  \"currency\": \"USD\"\n}",
+          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"transfer\": {\n    \"id\": 1,\n    \"from_account_id\": 1,\n    \"to_account_id\": 2,\n    \"amount\": 100,\n    \"created_at\": \"2026-10-30T14:35:00Z\"\n  },\n  \"from_account\": {\n    \"id\": 1,\n    \"owner\": \"alice\",\n    \"balance\": 900,\n    \"currency\": \"USD\",\n    \"created_at\": \"2026-10-30T14:30:00Z\"\n  },\n  \"to_account\": {\n    \"id\": 2,\n    \"owner\": \"bob\",\n    \"balance\": 600,\n    \"currency\": \"USD\",\n    \"created_at\": \"2026-10-30T14:30:05Z\"\n  },\n  \"from_entry\": {\n    \"id\": 1,\n    \"account_id\": 1,\n    \"amount\": -100,\n    \"created_at\": \"2026-10-30T14:35:00Z\"\n  },\n  \"to_entry\": {\n    \"id\": 2,\n    \"account_id\": 2,\n    \"amount\": 100,\n    \"created_at\": \"2026-10-30T14:35:00Z\"\n  }\n}",
         },
         {
           "t": "h2",

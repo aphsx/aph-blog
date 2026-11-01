@@ -388,6 +388,41 @@ export const securityProdPages: Record<string, Page> = {
           "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/jackc/pgx/v5/pgconn\"\n\tdb \"simplebank/db\"\n\t\"simplebank/token\"\n)\n\ntype transferRequest struct {\n\tFromAccountID int64  `json:\"from_account_id\" binding:\"required,min=1\"`\n\tToAccountID   int64  `json:\"to_account_id\" binding:\"required,min=1,nefield=FromAccountID\"`\n\tAmount        int64  `json:\"amount\" binding:\"required,gt=0\"`\n\tCurrency      string `json:\"currency\" binding:\"required,currency\"`\n}\n\nfunc (server *Server) createTransfer(ctx *gin.Context) {\n\tvar req transferRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\tfromAccount, ok := server.validAccount(ctx, req.FromAccountID, req.Currency)\n\tif !ok {\n\t\treturn\n\t}\n\n\tauthPayload := ctx.MustGet(authPayloadKey).(*token.Payload)\n\tif fromAccount.Owner != authPayload.Username {\n\t\terr := errors.New(\"from account doesn't belong to the authenticated user\")\n\t\tctx.JSON(http.StatusUnauthorized, errorResponse(err))\n\t\treturn\n\t}\n\n\tif _, ok := server.validAccount(ctx, req.ToAccountID, req.Currency); !ok {\n\t\treturn\n\t}\n\n\tresult, err := server.store.TransferTx(ctx, db.TransferTxParams{\n\t\tFromAccountID: req.FromAccountID,\n\t\tToAccountID:   req.ToAccountID,\n\t\tAmount:        req.Amount,\n\t})\n\tif err != nil {\n\t\tvar pgErr *pgconn.PgError\n\t\tif errors.As(err, &pgErr) && pgErr.Code == \"23514\" {\n\t\t\tctx.JSON(http.StatusBadRequest, errorResponse(errors.New(\"เงินในบัญชีไม่พอสำหรับการโอน\")))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, result)\n}\n\nfunc (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {\n\taccount, err := server.store.GetAccount(ctx, accountID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf(\"ไม่พบบัญชีหมายเลข %d\", accountID)))\n\t\t\treturn account, false\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn account, false\n\t}\n\n\tif account.Currency != currency {\n\t\terr := fmt.Errorf(\"สกุลเงินของบัญชี [%d] ไม่ตรงกัน: %s vs %s\", account.ID, account.Currency, currency)\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn account, false\n\t}\n\treturn account, true\n}",
         },
         {
+          "t": "p",
+          "c": "สุดท้าย เนื่องจากฟังก์ชัน `api.NewServer` รับพารามิเตอร์เพิ่ม (`symmetricKey` และ `tokenDuration`) ให้อัปเดตไฟล์ `simplebank/main.go` เพื่อให้คอมไพล์และทดสอบระบบล็อกอินได้ทันที (ก่อนที่เราจะย้ายค่าคงที่เหล่านี้ไปไว้ในไฟล์ `.env` ในบทที่ 7.3):",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/main.go (อัปเดตส่งคีย์ PASETO เข้า NewServer)",
+          "c": "package main\n\nimport (\n\t\"log\"\n\t\"time\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n)\n\nconst (\n\tdbSource            = \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\"\n\tserverAddress       = \"0.0.0.0:8080\"\n\ttokenSymmetricKey   = \"12345678901234567890123456789012\" // 32 bytes\n\taccessTokenDuration = 15 * time.Minute\n)\n\nfunc main() {\n\tconn, err := db.Open(dbSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n\tserver, err := api.NewServer(tokenSymmetricKey, accessTokenDuration, store)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot create server:\", err)\n\t}\n\n\tif err := server.Start(serverAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ทดสอบด้วย Postman (สมัครสมาชิก → ล็อกอินรับ Token → เปิดบัญชีด้วย Token):**\nรีสตาร์ตเซิร์ฟเวอร์ (`Ctrl + C` แล้ว `make server`) จากนั้นเปิด **Postman** แล้วยิง API ตามลำดับนี้ครับ:",
+        },
+        {
+          "t": "codeout",
+          "lang": "http",
+          "label": "Postman 1: POST http://localhost:8080/users (สมัครสมาชิก alice)",
+          "code": "POST /users HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"username\": \"alice\",\n  \"password\": \"secret123\",\n  \"full_name\": \"Alice Wonderland\",\n  \"email\": \"alice@example.com\"\n}",
+          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"username\": \"alice\",\n  \"full_name\": \"Alice Wonderland\",\n  \"email\": \"alice@example.com\",\n  \"created_at\": \"2026-10-30T15:00:00Z\"\n}",
+        },
+        {
+          "t": "codeout",
+          "lang": "http",
+          "label": "Postman 2: POST http://localhost:8080/users/login (ล็อกอินเพื่อรับ access_token)",
+          "code": "POST /users/login HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"username\": \"alice\",\n  \"password\": \"secret123\"\n}",
+          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"access_token\": \"v4.local.xxx...\",\n  \"user\": {\n    \"username\": \"alice\",\n    \"full_name\": \"Alice Wonderland\",\n    \"email\": \"alice@example.com\",\n    \"created_at\": \"2026-10-30T15:00:00Z\"\n  }\n}",
+        },
+        {
+          "t": "codeout",
+          "lang": "http",
+          "label": "Postman 3: POST http://localhost:8080/accounts (ใส่ Bearer Token ในแท็บ Authorization หรือ Headers)",
+          "code": "POST /accounts HTTP/1.1\nHost: localhost:8080\nAuthorization: Bearer v4.local.xxx...\nContent-Type: application/json\n\n{\n  \"currency\": \"USD\"\n}",
+          "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"id\": 1,\n  \"owner\": \"alice\",\n  \"balance\": 0,\n  \"currency\": \"USD\",\n  \"created_at\": \"2026-10-30T15:01:00Z\"\n}",
+        },
+        {
           "t": "h2",
           "c": "5. เช็กความเข้าใจ (Quick Quiz)",
         },
