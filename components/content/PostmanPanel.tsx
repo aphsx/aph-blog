@@ -14,6 +14,11 @@ export default function PostmanPanel({ label, cases, locale = "th" }: PostmanPan
   const [activeCaseIdx, setActiveCaseIdx] = useState(0);
   const currentCase = cases[activeCaseIdx] || cases[0];
 
+  const authHeader = currentCase?.reqHeaders.find(
+    (h) => h.key.toLowerCase() === "authorization"
+  );
+  const bearerToken = authHeader?.value.replace(/^Bearer\s+/i, "").trim() || "";
+
   // Request sub-tab: default to "body" if request has a body payload, else "params" if query params exist, else "headers"
   const defaultReqTab = currentCase?.hasBody
     ? "body"
@@ -239,13 +244,19 @@ export default function PostmanPanel({ label, cases, locale = "th" }: PostmanPan
           <button
             type="button"
             onClick={() => setReqTab("auth")}
-            className={`py-2 font-medium transition-colors relative ${
+            className={`py-2 font-medium transition-colors flex items-center gap-1.5 relative ${
               reqTab === "auth"
                 ? "text-[#097BED] border-b-2 border-b-[#097BED]"
                 : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            Authorization
+            <span>Authorization</span>
+            {authHeader && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.2 text-[10px] font-semibold text-amber-700 border border-amber-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#0CBB52]" />
+                Bearer
+              </span>
+            )}
           </button>
 
           <button
@@ -284,6 +295,23 @@ export default function PostmanPanel({ label, cases, locale = "th" }: PostmanPan
         {/* Tab Content Area */}
         {reqTab === "body" && (
           <div>
+            {authHeader && (
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200 bg-amber-50/80 px-4 py-2 text-xs text-amber-900">
+                <div className="flex items-center gap-2">
+                  <span>🔑</span>
+                  <span>
+                    <strong>สำคัญ:</strong> Request นี้ต้องแนบ <strong>Bearer Token</strong> ด้วย (ก๊อปปี้ <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-[11px]">access_token</code> จากขั้น Login มาใส่ในแท็บ Authorization ก่อนกด Send)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReqTab("auth")}
+                  className="shrink-0 rounded-md border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-2xs hover:bg-amber-100 transition cursor-pointer"
+                >
+                  ดูวิธีใส่ในแท็บ Authorization →
+                </button>
+              </div>
+            )}
             {/* Sub-bar under Body: raw, JSON */}
             <div className="flex items-center justify-between border-b border-[#f1f5f9] bg-[#f8fafc] px-4 py-1.5 text-[11px] text-slate-600">
               <div className="flex items-center gap-4">
@@ -396,15 +424,47 @@ export default function PostmanPanel({ label, cases, locale = "th" }: PostmanPan
 
         {reqTab === "auth" && (
           <div className="p-4 bg-white text-xs text-slate-600">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">Type:</span>
-              <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-slate-600">
-                Inherit auth from parent / No Auth
-              </span>
-            </div>
-            <p className="mt-2 text-slate-400 text-[11px]">
-              This endpoint is public and does not require an Authorization Bearer token.
-            </p>
+            {authHeader ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="w-24 font-semibold text-slate-700">Auth Type:</span>
+                  <span className="inline-flex items-center gap-2 rounded-md border border-[#097BED]/40 bg-blue-50/50 px-3 py-1.5 font-semibold text-[#097BED]">
+                    Bearer Token
+                    <span className="text-[10px] text-slate-400">▾</span>
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="w-24 font-semibold text-slate-700">Token:</span>
+                  <div className="flex-1 min-w-[240px] rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 font-mono text-xs text-slate-800">
+                    {bearerToken}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-blue-100 bg-blue-50/60 p-3 text-[11.5px] leading-relaxed text-slate-700">
+                  💡 <strong>วิธีใส่ในโปรแกรม Postman จริง:</strong> ไปที่แท็บ{" "}
+                  <strong>Authorization</strong> → ช่อง <strong>Auth Type</strong> เลือกเป็น{" "}
+                  <strong>Bearer Token</strong> → แล้วนำค่า{" "}
+                  <code className="rounded bg-white px-1 py-0.5 font-mono text-blue-700 border border-blue-200">
+                    access_token
+                  </code>{" "}
+                  ยาวๆ ที่ก๊อปปี้มาจากผลลัพธ์ของ <code className="font-mono">POST /users/login</code>{" "}
+                  มาวางในช่อง <strong>Token</strong> ด้านขวา (วางเฉพาะตัวรหัส{" "}
+                  <code className="font-mono">v4.local...</code> ไม่ต้องพิมพ์คำว่า{" "}
+                  <code className="font-mono">Bearer</code> ซ้ำ เพราะ Postman จะเติมให้เองอัตโนมัติ)
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-slate-700">Type:</span>
+                  <span className="rounded border border-slate-200 bg-slate-50 px-2 py-1 text-slate-600">
+                    Inherit auth from parent / No Auth
+                  </span>
+                </div>
+                <p className="mt-2 text-slate-400 text-[11px]">
+                  This endpoint is public and does not require an Authorization Bearer token.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>

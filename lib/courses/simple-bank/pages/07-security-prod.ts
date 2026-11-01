@@ -396,8 +396,27 @@ export const securityProdPages: Record<string, Page> = {
           "c": "package main\n\nimport (\n\t\"log\"\n+\t\"time\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n)\n\nconst (\n-\tdbSource      = \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\"\n-\tserverAddress = \"0.0.0.0:8080\"\n+\tdbSource            = \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\"\n+\tserverAddress       = \"0.0.0.0:8080\"\n+\ttokenSymmetricKey   = \"12345678901234567890123456789012\" // 32 bytes\n+\taccessTokenDuration = 15 * time.Minute\n)\n\nfunc main() {\n\tconn, err := db.Open(dbSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n-\tserver := api.NewServer(store)\n+\tserver, err := api.NewServer(tokenSymmetricKey, accessTokenDuration, store)\n+\tif err != nil {\n+\t\tlog.Fatal(\"cannot create server:\", err)\n+\t}\n\n\tif err := server.Start(serverAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
         },
         {
+          "t": "h2",
+          "c": "5. ทดสอบระบบจริงด้วย Postman ทีละขั้นตอน (สมัคร → ล็อกอิน → เปิดบัญชี)",
+        },
+        {
           "t": "p",
-          "c": "**ทดสอบด้วย Postman (สมัครสมาชิก → ล็อกอินรับ Token → เปิดบัญชีด้วย Token):**\n*(หมายเหตุ: หากคุณสั่งรัน `make test` ในบทที่ 7.1 ไปแล้ว ให้รัน `docker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts, users RESTART IDENTITY CASCADE;\"` เพื่อล้างข้อมูลเทสต์และรีเซ็ตเลข `id` ให้เริ่มที่ `1` ก่อน)*\n\nหยุดเซิร์ฟเวอร์ตัวเก่า (`Ctrl + C`) แล้วรัน `go mod tidy` ตามด้วย `make server` เพื่อเปิดเซิร์ฟเวอร์ตัวใหม่ จากนั้นเปิด **Postman** แล้วยิง API ตามลำดับนี้ครับ (สังเกตว่าใน **Postman 3** ตอนเปิดบัญชี เราส่งแค่ `{\"currency\": \"USD\"}` โดยไม่ต้องส่ง `owner` แล้ว เพราะระบบจะดึงชื่อเจ้าของบัญชีจาก PASETO Token ของคนที่ล็อกอินให้อัตโนมัติ):",
+          "c": "มาทดสอบระบบความปลอดภัยที่เราเพิ่งสร้างขึ้นด้วย **Postman** กันครับ เพื่อให้การทดสอบราบรื่นและเลข `id` บัญชีเริ่มต้นที่ `1` สวยงาม ให้ทำเรียงตาม **4 ขั้นตอน** ด้านล่างนี้ทีละขั้นครับ:",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 1: ล้างข้อมูลเก่าในฐานข้อมูล และรีสตาร์ต API Server**\nหากก่อนหน้านี้คุณเคยรัน Unit Test (`make test`) หรือมีข้อมูลเก่าค้างอยู่ ให้เปิด Terminal รันคำสั่งล้างตารางทั้งหมด **ก่อนเริ่มทำขั้นอื่นๆ** จากนั้นกด `Ctrl + C` หยุดเซิร์ฟเวอร์ตัวเก่า แล้วสั่ง `go mod tidy` ตามด้วย `make server` เพื่อรันโค้ดชุดใหม่ล่าสุด:",
+        },
+        {
+          "t": "codeout",
+          "lang": "bash",
+          "label": "ล้างตารางทั้งหมดให้สะอาด แล้วรันเซิร์ฟเวอร์ใหม่",
+          "code": "docker exec -it postgres16 psql -U root -d simple_bank -c \"TRUNCATE TABLE entries, transfers, accounts, users RESTART IDENTITY CASCADE;\"\ngo mod tidy\nmake server",
+          "out": "TRUNCATE TABLE\ngo run main.go\n[GIN-debug] POST   /users                    --> simplebank/api.(*Server).createUser-fm (3 handlers)\n[GIN-debug] POST   /users/login              --> simplebank/api.(*Server).loginUser-fm (3 handlers)\n[GIN-debug] POST   /accounts                 --> simplebank/api.(*Server).createAccount-fm (4 handlers)\n[GIN-debug] Listening and serving HTTP on 0.0.0.0:8080",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 2 (Postman 1): สมัครสมาชิกผู้ใช้ `alice` (`POST /users`)**\nเปิดโปรแกรม **Postman** เลือก Method เป็น **`POST`** ใส่ URL `http://localhost:8080/users` ไปที่แท็บ **Body** → เลือก **raw** → เปลี่ยนชนิดเป็น **JSON** แล้ววางข้อมูลด้านล่างเพื่อสร้างผู้ใช้ชื่อ `alice` ลงในตาราง `users` (เส้นทางนี้เป็น Public Route จึงยังไม่ต้องใส่ Token):",
         },
         {
           "t": "codeout",
@@ -407,11 +426,19 @@ export const securityProdPages: Record<string, Page> = {
           "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"username\": \"alice\",\n  \"full_name\": \"Alice Wonderland\",\n  \"email\": \"alice@example.com\",\n  \"created_at\": \"2026-10-30T15:00:00Z\"\n}",
         },
         {
+          "t": "p",
+          "c": "**ขั้นที่ 3 (Postman 2): ล็อกอินเพื่อขอรับบัตรผ่าน (`POST /users/login`)**\nเปลี่ยน URL เป็น `http://localhost:8080/users/login` แล้วส่ง `username` กับ `password` ของ `alice` เข้าไปในแท็บ **Body (raw → JSON)** แล้วกด **Send**\n\n👉 **จุดสำคัญที่สุด**: เมื่อได้ผลลัพธ์ `200 OK` กลับมาในช่อง Response ด้านล่าง ให้ **คัดลอก (Copy) ข้อความรหัสยาวๆ ที่อยู่หลัง `\"access_token\":`** (ที่ขึ้นต้นด้วย `v4.local...` เฉพาะข้อความข้างในเครื่องหมายคำพูด) เก็บไว้สำหรับใช้ในขั้นถัดไป!",
+        },
+        {
           "t": "codeout",
           "lang": "http",
           "label": "Postman 2: POST http://localhost:8080/users/login (ล็อกอินเพื่อรับ access_token)",
           "code": "POST /users/login HTTP/1.1\nHost: localhost:8080\nContent-Type: application/json\n\n{\n  \"username\": \"alice\",\n  \"password\": \"secret123\"\n}",
           "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"access_token\": \"v4.local.xxx...\",\n  \"user\": {\n    \"username\": \"alice\",\n    \"full_name\": \"Alice Wonderland\",\n    \"email\": \"alice@example.com\",\n    \"created_at\": \"2026-10-30T15:00:00Z\"\n  }\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ขั้นที่ 4 (Postman 3): เปิดบัญชีธนาคารโดยแนบ Bearer Token (`POST /accounts`)**\nเนื่องจาก `POST /accounts` ถูกย้ายเข้าไปอยู่ในกลุ่ม Protected Routes ที่มี `authMiddleware` เฝ้าหน้าประตูแล้ว ในขั้นนี้เราจึงต้องตั้งค่าใน Postman **2 จุด** ก่อนกด Send ดังนี้ครับ:\n\n1. **จุดที่ 1 — แนบบัตรผ่านในแท็บ `Authorization`**:\n   • คลิกที่แท็บ **Authorization** (แถบเมนูใต้ช่อง URL ข้างๆ Params)\n   • ในช่อง **Auth Type** ให้เลือกเป็น **`Bearer Token`**\n   • ในช่อง **Token** ด้านขวา ให้วางรหัส `v4.local...` ที่ก๊อปปี้มาจากขั้นที่ 3 ลงไป *(วางเฉพาะตัวรหัส `v4.local...` ไม่ต้องพิมพ์คำว่า `Bearer` นำหน้า เพราะ Postman เติมให้เอง)*\n2. **จุดที่ 2 — ระบุสกุลเงินในแท็บ `Body`**:\n   • คลิกกลับมาที่แท็บ **Body** → เลือก **raw** → **JSON**\n   • พิมพ์แค่ `{\"currency\": \"USD\"}` เท่านั้น **(ไม่ต้องใส่ฟิลด์ `\"owner\"` เหมือนในบทที่ 6 แล้ว)** เพราะโค้ด `createAccount` ใหม่ของเราจะแกะชื่อ `\"alice\"` ออกมาจาก Bearer Token ในจุดที่ 1 มาตั้งเป็นเจ้าของบัญชีให้อัตโนมัติ!\n\n*(คุณสามารถกดสลับดูแท็บ **Authorization** และ **Body** ในกล่องจำลอง Postman ด้านล่างเพื่อดูตัวอย่างการตั้งค่าทั้ง 2 แท็บได้เลยครับ)*",
         },
         {
           "t": "codeout",
@@ -421,8 +448,14 @@ export const securityProdPages: Record<string, Page> = {
           "out": "HTTP/1.1 200 OK\nContent-Type: application/json; charset=utf-8\n\n{\n  \"id\": 1,\n  \"owner\": \"alice\",\n  \"balance\": 0,\n  \"currency\": \"USD\",\n  \"created_at\": \"2026-10-30T15:01:00Z\"\n}",
         },
         {
+          "t": "callout",
+          "title": "🛠️ เจอ Error 500 หรือ 401 ตอนยิง Postman 3 (POST /accounts) แก้ยังไง?",
+          "c": "หากคุณกด Send ใน **Postman 3 (`POST /accounts`)** แล้วไม่ได้ `200 OK` ให้ดูที่ข้อความในช่อง **Response Body** (`{\"error\": \"...\"}`) ด้านล่างของ Postman เพื่อเช็กสาเหตุและวิธีแก้ดังนี้ครับ:\n\n**กรณีที่ 1: ได้ `Status: 500 Internal Server Error` พร้อมข้อความ `duplicate key value violates unique constraint \"owner_currency_key\"`**\n• **สาเหตุ**: ในบทที่ 7.1 เราเพิ่มกฎเหล็กในฐานข้อมูลว่า **ผู้ใช้ 1 คน เปิดบัญชีสกุลเงินเดียวกันได้แค่ 1 บัญชีเท่านั้น** (`UNIQUE (owner, currency)`) แปลว่า `alice` มีบัญชีสกุลเงิน `USD` ถูกสร้างสำเร็จไปแล้วก่อนหน้านี้ (เช่น เผลอกดปุ่ม Send ซ้ำเป็นครั้งที่ 2)\n• **วิธีแก้**: บัญชี `USD` ของ `alice` ถูกสร้างเรียบร้อยแล้ว! หากอยากทดลองกดสร้างบัญชีเพิ่มอีกใบ ให้เปลี่ยนค่าใน Body เป็นสกุลเงินอื่น เช่น `{\"currency\": \"THB\"}` หรือ `{\"currency\": \"EUR\"}` แทน\n\n**กรณีที่ 2: ได้ `Status: 500 Internal Server Error` พร้อมข้อความ `violates foreign key constraint \"accounts_owner_fkey\"`**\n• **สาเหตุ**: ชื่อเจ้าของบัญชี (`alice`) ไม่มีตัวตนอยู่ในตาราง `users`! มักเกิดจาก **2 จุด** นี้:\n  1. คุณเผลอไปรันคำสั่ง `TRUNCATE TABLE ... users` **หลังจาก** ที่กดล็อกอินรับ Token มาแล้ว ทำให้ข้อมูล `alice` ในตาราง `users` ถูกลบทิ้งไป แต่ตัว Token ในมือยังไม่หมดอายุ พอยิงสร้างบัญชีฐานข้อมูลจึงหาชื่อ `alice` ไม่เจอ → **วิธีแก้**: กลับไปกด Send ที่ **Postman 1 (`POST /users`)** เพื่อสมัคร `alice` ใหม่ แล้วค่อยมายิง Postman 3 อีกครั้ง\n  2. ในไฟล์ `simplebank/api/account.go` ฟังก์ชัน `createAccount` ลืมแก้บรรทัด `Owner: req.Owner` ให้เป็น **`Owner: authPayload.Username`** (หรือแก้ไขไฟล์แล้วแต่ลืมกด `Ctrl + C` แล้วรัน `make server` ใหม่) ทำให้ส่งชื่อว่าง `\"\"` เข้าไปในฐานข้อมูล\n\n**กรณีที่ 3: ได้ `Status: 401 Unauthorized`**\n• **สาเหตุ**: ลืมใส่ Token ในแท็บ **Authorization** (เลือก `Bearer Token`), เผลอวางรหัสผิด (เช่น เอา `v4.local.xxx...` จากหน้าเว็บไปวางแทนที่จะก๊อปปี้ของจริงจาก Postman 2), หรือ Token หมดอายุเกิน 15 นาทีแล้ว (ให้กลับไปกด Send ใน Postman 2 เพื่อรับ `access_token` ตัวใหม่)",
+          "warn": true,
+        },
+        {
           "t": "h2",
-          "c": "5. เช็กความเข้าใจ (Quick Quiz)",
+          "c": "6. เช็กความเข้าใจ (Quick Quiz)",
         },
         {
           "t": "quiz",
