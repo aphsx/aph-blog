@@ -93,11 +93,11 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. สร้าง CRUD และ Endpoint สมัครสมาชิก (POST /users)",
+          "c": "4. สร้างชั้นฐานข้อมูล (db/user.go) และเปิด API สมัครสมาชิก (api/user.go)",
         },
         {
           "t": "p",
-          "c": "เพิ่ม Struct `User` ลงใน `simplebank/db/models.go` โดยมีจุดที่ต้องระวังคือ **ห้ามส่ง Hashed Password กลับไปใน JSON Response เด็ดขาด** (ใช้แท็ก `json:\"-\"`):",
+          "c": "เมื่อมีตาราง `users` ในฐานข้อมูลแล้ว เราจะไล่สร้างโค้ดตามโครงสร้าง 3 เลเยอร์เดิม คือเริ่มจากนิยาม Struct ใน `db/models.go` → เขียนคำสั่ง SQL ใน `db/user.go` → แล้วสร้าง HTTP Handler ใน `api/user.go` เพื่อรับคำขอสมัครสมาชิกแล้วเรียกใช้ฟังก์ชันจากชั้น `db/`\n\nเริ่มจากเพิ่ม Struct `User` ลงในไฟล์ `simplebank/db/models.go` โดยมีจุดสำคัญด้านความปลอดภัยคือ **ห้ามส่ง Hashed Password ออกไปใน JSON Response เด็ดขาด** (ใช้แท็ก `json:\"-\"`):",
         },
         {
           "t": "code",
@@ -107,7 +107,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "จากนั้นสร้างไฟล์ `simplebank/db/user.go` สำหรับบันทึกและดึงข้อมูลผู้ใช้งาน:",
+          "c": "ขั้นต่อมา สร้างไฟล์ `simplebank/db/user.go` เพื่อผูกฟังก์ชัน SQL `CreateUser` และ `GetUser` เข้ากับ `*Queries` (ซึ่งจะทำให้ `server.store` เรียกใช้ทั้งสองฟังก์ชันนี้ได้ทันทีผ่าน Struct Embedding ใน `Store`):",
         },
         {
           "t": "code",
@@ -117,7 +117,7 @@ export const securityProdPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "และสร้าง HTTP Handler สำหรับสมัครสมาชิกใน `simplebank/api/user.go`:",
+          "c": "สุดท้าย สร้างไฟล์ `simplebank/api/user.go` เพื่อเป็นด่านหน้ารับ JSON จากผู้สมัคร นำรหัสผ่านไปแฮชด้วย `util.HashPassword` แล้วเรียก `server.store.CreateUser` จาก `db/user.go` ให้บันทึกลงฐานข้อมูล:",
         },
         {
           "t": "code",

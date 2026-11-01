@@ -27,18 +27,30 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "1. ทำไมเราถึงเลือก Gin Web Framework?",
+          "c": "1. บทบาทของแพ็กเกจ api และทำไมถึงเลือกใช้ Gin Framework?",
         },
         {
           "t": "p",
-          "c": "ในระบบนิเวศของภาษา Go มีเฟรมเวิร์กยอดนิยมหลายตัว เช่น Fiber, Echo, Chi แต่ **Gin** คือตัวเลือกอันดับ 1 สำหรับระบบ Production ขนาดใหญ่ด้วยจุดเด่นเหล่านี้:",
+          "c": "ตลอดโมดูลที่ 3–5 ที่ผ่านมา เราได้สร้างหัวใจหลักของธนาคารไว้ในโฟลเดอร์ `simplebank/db/` จนครบถ้วน ทั้งฟังก์ชันจัดการบัญชีใน `db/account.go` (`CreateAccount`, `GetAccount`, `ListAccounts`) และฟังก์ชันโอนเงิน 5 ขั้นตอนใน `db/tx_transfer.go` (`TransferTx`)\n\nแต่ฟังก์ชันเหล่านั้นเป็นโค้ดภาษา Go ที่รับส่งค่าเป็น Go Struct และคุยภาษา SQL กับฐานข้อมูลโดยตรง แอปมือถือ เว็บเบราว์เซอร์ หรือโปรแกรมภายนอกยังไม่สามารถสั่งงานฟังก์ชันเหล่านี้ผ่านอินเทอร์เน็ตได้ เราจึงต้องสร้างโฟลเดอร์ใหม่ชื่อ **`simplebank/api/` (`package api`)** ขึ้นมาทำหน้าที่เป็น **ชั้นรับส่งข้อมูลผ่านเว็บ (HTTP Transport Layer)** โดยมีลำดับการทำงานดังนี้:",
+        },
+        {
+          "t": "ol",
+          "c": [
+            "**รับคำขอและตรวจสอบข้อมูลหน้าด่าน (`api/`)**: เปิดพอร์ต HTTP รอรับข้อมูล JSON หรือพารามิเตอร์จาก URL ที่ลูกค้าส่งเข้ามา แล้วตรวจเช็กว่าข้อมูลครบถ้วนตามกฎหรือไม่",
+            "**เรียกใช้ฟังก์ชันฐานข้อมูลเดิม (`db/`)**: เมื่อข้อมูลถูกต้อง ตัว Handler ใน `api/` จะไม่เขียนคำสั่ง SQL เองใหม่ แต่จะ **เรียกใช้เมธอดใน `server.store`** (ซึ่งก็คือฟังก์ชันใน `db/account.go` และ `db/tx_transfer.go` ที่เราเขียนไว้แล้ว) ให้ไปจัดการข้อมูลใน PostgreSQL",
+            "**แปลผลลัพธ์กลับเป็น HTTP Response**: นำข้อมูลที่ได้จาก `db/` (หรือ Error ที่เกิดขึ้น) มาแปลงเป็น JSON พร้อมรหัสสถานะมาตรฐาน เช่น `200 OK`, `400 Bad Request`, `404 Not Found` หรือ `500 Internal Server Error` ส่งกลับไปให้ผู้เรียก",
+          ],
+        },
+        {
+          "t": "p",
+          "c": "ในการสร้างชั้น `api/` นี้ เราเลือกใช้ **Gin Web Framework** ซึ่งเป็นเฟรมเวิร์กอันดับ 1 สำหรับสร้าง REST API ในภาษา Go ด้วยจุดเด่นสำคัญ 3 ข้อ:",
         },
         {
           "t": "ul",
           "c": [
-            "**Fast Routing**: ใช้ Radix Tree ในการจับคู่ URL Path ทำให้ Route แมทช์ได้รวดเร็วและใช้หน่วยความจำน้อยมาก",
-            "**Powerful JSON Binding**: แปลง JSON Request เป็น Go Struct พร้อมตรวจสอบเงื่อนไข (Validation) อัตโนมัติด้วยแท็ก `binding:\"required\"`",
-            "**Zero Reflection at Runtime**: ประสิทธิภาพสูงมาก สามารถรองรับ Request หลักหมื่นต่อวินาทีได้อย่างสบายๆ",
+            "**Fast Routing**: ใช้โครงสร้างข้อมูล Radix Tree ในการจับคู่ URL Path ทำให้ค้นหาเส้นทาง API ได้รวดเร็วและใช้หน่วยความจำน้อยมาก",
+            "**Powerful JSON Binding & Validation**: แปลงข้อมูลจาก HTTP Request (ทั้ง JSON Body, URL Path, และ Query String) ให้กลายเป็น Go Struct พร้อมตรวจสอบเงื่อนไขความถูกต้องอัตโนมัติด้วยแท็ก `binding:\"...\"`",
+            "**High Throughput**: ประสิทธิภาพสูง รองรับคำขอระดับหลายหมื่น Request ต่อวินาทีได้อย่างสบาย",
           ],
         },
         {
@@ -50,15 +62,15 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "2. ออกแบบ Server Struct ด้วย Dependency Injection",
+          "c": "2. ออกแบบ Server Struct และผูกเส้นทาง API (api/server.go)",
         },
         {
           "t": "p",
-          "c": "คำว่า **Dependency Injection (DI)** ฟังดูเหมือนศัพท์วิชาการยากๆ แต่ความหมายจริงๆ เรียบง่ายมากครับ:\n• **ถ้าไม่ใช้ DI**: ฟังก์ชันสร้าง Server แอบไปเปิดต่อ Database เองข้างในแบบตายตัว ทำให้เวลาเขียน Unit Test เราไม่สามารถสลับฐานข้อมูลจำลองเข้าไปทดสอบได้เลย\n• **การใช้ DI**: คือการ **'ส่งของที่ต้องใช้ (`store *db.Store`) เข้ามาทางพารามิเตอร์ตอนสร้าง `NewServer(store)`'** แทนการประกาศตัวแปร Global DB ลอยๆ",
+          "c": "เพื่อให้ชั้น `api/` สามารถเรียกใช้งานฟังก์ชันฐานข้อมูลใน `db/` ได้ เราจะออกแบบ `Server` struct ในไฟล์ `simplebank/api/server.go` โดยใช้หลักการ **Dependency Injection (DI)**:\n• **ถ้าไม่ใช้ DI**: ฟังก์ชันสร้าง Server แอบไปเปิดต่อ Database เองข้างในแบบตายตัว ทำให้เวลาเขียน Unit Test เราไม่สามารถสลับฐานข้อมูลจำลองเข้าไปทดสอบได้เลย\n• **การใช้ DI**: คือการ **รับตัวจัดการฐานข้อมูล (`store *db.Store` จาก `db/store.go`) เข้ามาทางพารามิเตอร์ตอนสร้าง `NewServer(store)`** แล้วเก็บไว้ในฟิลด์ `server.store` เพื่อให้ทุกฟังก์ชันของ Server เรียกใช้คำสั่งฐานข้อมูลได้ทันที",
         },
         {
           "t": "p",
-          "c": "เรารวมทรัพยากรที่ API ต้องใช้ไว้ใน `Server` struct เดียวในไฟล์ `simplebank/api/server.go` ดังนี้:",
+          "c": "สร้างไฟล์ `simplebank/api/server.go` เพื่อนิยาม `Server` struct และผูกเส้นทาง URL (Routing) ดังนี้:",
         },
         {
           "t": "code",
@@ -69,24 +81,20 @@ export const apiPages: Record<string, Page> = {
         {
           "t": "ul",
           "c": [
-            "**`gin.Default()`**: คำสั่งของ Gin สำหรับสร้างตัวจัดการเส้นทาง (`*gin.Engine`) ที่แถมระบบพื้นฐานมาให้ครบมือ ทั้งตัวพิมพ์ Log ทุกครั้งที่มีคนยิง API และตัวป้องกันเซิร์ฟเวอร์ดับเมื่อเกิด Panic (Recovery)",
-            "**`router.POST(...)` / `router.GET(...)`**: ผูกเส้นทาง URL เข้ากับฟังก์ชัน Handler ของเรา โดยเครื่องหมาย `:` เช่น `/accounts/:id` คือการบอก Gin ว่าตำแหน่งนี้เป็นตัวแปรบน URL",
+            "**`store *db.Store` ใน `Server`**: เก็บตัวแปร `Store` ที่เรานำเข้ามาจากแพ็กเกจ `simplebank/db` ซึ่งข้างในบรรจุคำสั่ง SQL ทั้งหมดที่เราสร้างไว้ในโมดูลที่ 3 และ 4",
+            "**`gin.Default()`**: คำสั่งของ Gin สำหรับสร้างตัวจัดการเส้นทาง (`*gin.Engine`) ที่ติดตั้ง Middleware พื้นฐานมาให้พร้อมสรรพ ทั้งตัวพิมพ์ Log ทุกครั้งที่มีคนยิง API และตัวป้องกันเซิร์ฟเวอร์ดับเมื่อเกิด Panic (Recovery)",
+            "**`router.POST(...)` / `router.GET(...)`**: ผูกเส้นทาง URL และ HTTP Method เข้ากับฟังก์ชัน Handler ของเรา (ซึ่งเราจะไปเขียนในไฟล์ `api/account.go` ถัดไป) โดยเครื่องหมาย `:` เช่น `/accounts/:id` คือการบอก Gin ว่าตำแหน่งนี้เป็นพารามิเตอร์บน URL",
             "**`server.router.Run(address)`**: สั่งเปิด HTTP Server เพื่อรอรับคำขอตามพอร์ตที่ระบุ (เช่น `0.0.0.0:8080`)",
-            "**`gin.H` ใน `errorResponse`**: `gin.H` คือชนิดข้อมูลทางลัดของ Gin (ย่อมาจาก `map[string]any`) ช่วยให้เราสร้างก้อนข้อมูล JSON ตอบกลับแบบสั้นๆ เช่น `{\"error\": \"...\"}` ได้โดยไม่ต้องประกาศ Struct ใหม่",
+            "**`gin.H` ใน `errorResponse`**: `gin.H` คือชนิดข้อมูลทางลัดของ Gin (ย่อมาจาก `map[string]any`) ช่วยให้เราสร้างก้อนข้อมูล JSON สำหรับแจ้งข้อผิดพลาด เช่น `{\"error\": \"...\"}` ได้โดยไม่ต้องประกาศ Struct ใหม่",
           ],
         },
         {
           "t": "h2",
-          "c": "3. เขียน Handlers สำหรับ Accounts (account.go): 3 ช่องทางรับข้อมูลของ Gin",
-        },
-        {
-          "t": "callout",
-          "title": "🔗 คลายข้อสงสัย: สร้าง api/account.go แล้ว โค้ดเดิมใน db/account.go ยังใช้อยู่ไหม?",
-          "c": "**ยังใช้เหมือนเดิม 100% ครับ! ไม่ได้เขียนทับและไม่ได้ทิ้งของเก่า** แต่เป็นการแบ่งหน้าที่ตามสถาปัตยกรรม Clean Architecture:\n• **`simplebank/db/account.go` (พนักงานห้องนิรภัยหลังบ้าน)**: รู้วิธีคุยกับ PostgreSQL ด้วยภาษา SQL (`INSERT`, `SELECT`, `UPDATE`) แต่พูดภาษาเว็บ (HTTP/JSON) ไม่เป็น\n• **`simplebank/api/account.go` (พนักงานต้อนรับหน้าเคาน์เตอร์)**: ทำหน้าที่รับ JSON จากลูกค้า ตรวจเอกสารเบื้องต้น (`binding`) แล้ว **ส่งงานต่อให้โค้ดในโฟลเดอร์ `db/` ทำงานจริง** ผ่านคำสั่ง `server.store.CreateAccount(...)`, `server.store.GetAccount(...)` และ `server.store.ListAccounts(...)` ครับ",
+          "c": "3. สร้าง HTTP Handlers สำหรับจัดการบัญชี (api/account.go)",
         },
         {
           "t": "p",
-          "c": "เวลาที่ Client ส่ง HTTP Request เข้ามา ข้อมูลจะถูกส่งมาใน 3 ช่องทาง ซึ่งในไฟล์ `simplebank/api/account.go` เราจะใช้ฟังก์ชัน **Binder** ของ Gin แยกตามช่องทางดังนี้ครับ",
+          "c": "ตอนนี้เราจะสร้างไฟล์ `simplebank/api/account.go` เพื่อเขียนฟังก์ชัน Handler ทั้ง 3 ตัว (`createAccount`, `getAccount`, `listAccounts`) ที่เราลงทะเบียนไว้กับ Router ในหัวข้อที่แล้ว โดยแต่ละฟังก์ชันจะทำหน้าที่รับข้อมูลจาก HTTP Request ใน 3 ช่องทางที่ต่างกัน ตรวจสอบความถูกต้อง แล้วส่งต่อไปเรียกฟังก์ชันใน `simplebank/db/account.go` ครับ",
         },
         {
           "t": "p",
@@ -101,16 +109,16 @@ export const apiPages: Record<string, Page> = {
         {
           "t": "ul",
           "c": [
-            "**`createAccountRequest` และแท็ก `binding:\"...\"`**: พิมพ์เขียวกรองข้อมูลขาเข้า โดย `binding:\"required\"` บังคับว่าห้ามส่งค่าว่าง ส่วน `oneof=USD EUR THB` (คั่นด้วยช่องว่าง) บังคับว่าค่าที่ส่งมาต้องตรงกับสกุลเงินใดสกุลเงินหนึ่งใน 3 ตัวนี้เท่านั้น และสังเกตว่า **เราไม่เปิดรับฟิลด์ `Balance` จาก JSON ขาเข้า แต่บังคับใส่ `Balance: 0` ในโค้ดเสมอ** เพื่อป้องกันไม่ให้ลูกค้าเสกยอดเงินเริ่มต้นเองตอนเปิดบัญชี",
-            "**`ctx *gin.Context`**: ตัวแปรพระเอกของ Gin ที่รวมทั้งข้อมูลคำขอขาเข้า (Request) และคำสั่งตอบกลับขาออกไว้ในตัวเดียว (และเนื่องจาก `*gin.Context` มีคุณสมบัติเป็น `context.Context` ของ Go ในตัว เราจึงส่ง `ctx` ตัวนี้เข้าไปใน `server.store.CreateAccount(ctx, ...)` ได้โดยตรง)",
-            "**`ctx.ShouldBindJSON(&req)`**: คำสั่งของ Gin ที่อ่าน JSON Body ขาเข้าแล้วแปลงใส่ตัวแปร `req` (ต้องส่งเป็น Pointer `&req` เพื่อให้แก้ไขค่าข้างในได้) พร้อมตรวจเช็กกฎในแท็ก `binding` ให้เสร็จสรรพ",
-            "**ทำไม `if err != nil` จุดแรกคืน `400` แต่จุดที่สองคืน `500`?**:\n  • ด่านแรก (`http.StatusBadRequest` = **400**): ข้อมูลจากลูกค้าไม่ครบหรือผิดกติกา (ความผิดฝั่งผู้เรียก)\n  • ด่านที่สอง (`http.StatusInternalServerError` = **500**): ข้อมูลผ่านด่านตรวจมาถูกต้องแล้ว แต่ตอนเรียก `server.store.CreateAccount` (ซึ่งวิ่งไปรัน SQL ใน `db/account.go`) เกิดปัญหาจากระบบฐานข้อมูลของเราเอง",
-            "**`ctx.JSON(http.StatusOK, account)`**: แปลง Struct `account` ที่ได้จากชั้น `db` ให้เป็น JSON แล้วส่งกลับไปหาผู้เรียกพร้อมรหัส `200 OK`",
+            "**`createAccountRequest` และแท็ก `binding:\"...\"`**: โครงสร้างสำหรับกรอง JSON ขาเข้า โดย `binding:\"required\"` บังคับว่าห้ามส่งค่าว่าง ส่วน `oneof=USD EUR THB` (คั่นด้วยช่องว่าง) บังคับว่าสกุลเงินที่ส่งมาต้องตรงกับ 1 ใน 3 ค่านี้เท่านั้น และสังเกตว่า **เราไม่เปิดรับฟิลด์ `Balance` จาก JSON ขาเข้า** เพราะการเปิดบัญชีใหม่ต้องเริ่มต้นที่ยอดเงิน `0` เสมอเพื่อไม่ให้ผู้ใช้นำตัวเลขยอดเงินมาตั้งเอง",
+            "**`ctx *gin.Context`**: ตัวแปรหลักของ Gin ที่บรรจุทั้งข้อมูลคำขอขาเข้า (Request) และเมธอดสำหรับส่งคำตอบขาออก (Response) ไว้ในตัวเดียว และเนื่องจาก `*gin.Context` อิมพลีเมนต์ `context.Context` มาตรฐานของ Go ในตัว เราจึงส่ง `ctx` ตัวนี้ต่อไปยังฟังก์ชันฐานข้อมูลได้เลย",
+            "**`ctx.ShouldBindJSON(&req)`**: อ่าน JSON Body ขาเข้าแล้วแปลงใส่ตัวแปร `req` (ส่งเป็น Pointer `&req` เพื่อให้เขียนค่าลงในตัวแปรได้) พร้อมตรวจเช็กกฎในแท็ก `binding` ทั้งหมด หากข้อมูลผิดกฎจะคืนค่า `err` และตอบกลับด้วยรหัส `http.StatusBadRequest` (**400 Bad Request** — ข้อมูลจากผู้เรียกไม่ถูกต้อง) แล้ว `return` หยุดทำงานทันที",
+            "**`server.store.CreateAccount(ctx, db.CreateAccountParams{...})`**: เมื่อข้อมูลผ่านการตรวจสอบแล้ว Handler จะนำ `req.Owner` และ `req.Currency` (พร้อมกำหนด `Balance: 0`) ส่งต่อไปเรียกฟังก์ชัน `CreateAccount` ที่เราเขียนไว้ในไฟล์ `simplebank/db/account.go` เพื่อรันคำสั่ง `INSERT INTO accounts` ลงฐานข้อมูลจริง หากขั้นตอนนี้เกิด Error (เช่น ฐานข้อมูลล่ม) จะตอบกลับด้วย `http.StatusInternalServerError` (**500 Internal Server Error**)",
+            "**`ctx.JSON(http.StatusOK, account)`**: นำข้อมูล `account` ที่ฐานข้อมูลสร้างเสร็จ (ซึ่งมีเลข `id` และเวลา `created_at` ติดกลับมาด้วย) แปลงเป็น JSON ตอบกลับไปพร้อมรหัส `http.StatusOK` (**200 OK**)",
           ],
         },
         {
           "t": "p",
-          "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` (พร้อมเพิ่ม `\"database/sql\"` และ `\"errors\"` ใน `import` ด้านบนของไฟล์) สำหรับดูข้อมูลบัญชีรายตัว (`GET /accounts/:id`) และดึงรายการบัญชีแบบแบ่งหน้า (`GET /accounts?page_id=1&page_size=5`):",
+          "c": "**ช่องทางที่ 3.2: รับข้อมูลจาก URL Path (`ShouldBindUri` + แท็ก `` `uri:\"...\"` ``) และ Query String (`ShouldBindQuery` + แท็ก `` `form:\"...\"` ``)**\nเขียนต่อท้ายลงในไฟล์ `simplebank/api/account.go` (พร้อมเพิ่ม `\"database/sql\"` และ `\"errors\"` ใน `import` ด้านบนของไฟล์) เพื่อเชื่อมต่อไปยังฟังก์ชัน `GetAccount` และ `ListAccounts` ของ `db/account.go`:",
         },
         {
           "t": "code",
@@ -138,17 +146,25 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "4. เชื่อมต่อ API Server ใน main.go และทดสอบยิง API",
+          "c": "4. ประกอบร่างทุกเลเยอร์ใน main.go และทดสอบยิง API",
         },
         {
           "t": "p",
-          "c": "อัปเดตไฟล์ `simplebank/main.go` เพื่อเชื่อมต่อฐานข้อมูล สร้าง Store และสั่งรัน HTTP Server บนพอร์ต 8080:",
+          "c": "ขั้นตอนสุดท้ายคือการนำแพ็กเกจ `db` และแพ็กเกจ `api` มาเชื่อมต่อเข้าด้วยกันที่จุดเริ่มต้นของโปรแกรมในไฟล์ `simplebank/main.go`:",
         },
         {
           "t": "code",
           "lang": "go",
           "label": "simplebank/main.go",
           "c": "package main\n\nimport (\n\t\"log\"\n\n\t\"simplebank/api\"\n\t\"simplebank/db\"\n)\n\nconst (\n\tdbSource      = \"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable\"\n\tserverAddress = \"0.0.0.0:8080\"\n)\n\nfunc main() {\n\tconn, err := db.Open(dbSource)\n\tif err != nil {\n\t\tlog.Fatal(\"cannot connect to db:\", err)\n\t}\n\tdefer conn.Close()\n\n\tstore := db.NewStore(conn)\n\tserver := api.NewServer(store)\n\n\tif err := server.Start(serverAddress); err != nil {\n\t\tlog.Fatal(\"cannot start server:\", err)\n\t}\n}",
+        },
+        {
+          "t": "ul",
+          "c": [
+            "**`conn, err := db.Open(dbSource)`**: เรียกฟังก์ชันใน `db/db.go` เพื่อเปิดสระสายเชื่อมต่อ (Connection Pool) ไปยัง PostgreSQL",
+            "**`store := db.NewStore(conn)`**: สร้างตัวจัดการฐานข้อมูลจาก `db/store.go` ที่รวบรวมคำสั่ง CRUD (`db/account.go`) และระบบโอนเงิน (`db/tx_transfer.go`) ไว้ข้างใน",
+            "**`server := api.NewServer(store)` และ `server.Start(...)`**: ส่ง `store` เข้าไปให้ `api/server.go` ถือไว้ใช้งาน แล้วสั่งเปิด HTTP Server รอรับคำขอที่พอร์ต `8080`",
+          ],
         },
         {
           "t": "p",
