@@ -326,13 +326,13 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "p",
-          "c": "จากนั้นในฟังก์ชัน `NewServer` ใน `simplebank/api/server.go` ให้ดึงตัว Validator Engine ของ Gin ออกมาลงทะเบียนกฎชื่อ `\"currency\"` และเพิ่ม Route `POST /transfers`:",
+          "c": "จากนั้นในฟังก์ชัน `NewServer` ในไฟล์ `simplebank/api/server.go` ให้ดึงตัว Validator Engine ของ Gin ออกมาลงทะเบียนกฎชื่อ `\"currency\"`:",
         },
         {
           "t": "code",
           "lang": "go",
-          "label": "simplebank/api/server.go (ฉบับสมบูรณ์: ลงทะเบียน Validator และ Route โอนเงิน)",
-          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\ntype Server struct {\n\tstore  *db.Store\n\trouter *gin.Engine\n}\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
+          "label": "simplebank/api/server.go (ลงทะเบียน Custom Validator ชื่อ currency)",
+          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\n\tserver.router = router\n\treturn server\n}",
         },
         {
           "t": "ul",
@@ -356,7 +356,7 @@ export const apiPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "3. สร้าง Endpoint โอนเงิน (transfer.go)",
+          "c": "3. สร้าง Endpoint โอนเงิน (transfer.go) และผูก Route ใน server.go",
         },
         {
           "t": "p",
@@ -379,6 +379,16 @@ export const apiPages: Record<string, Page> = {
           "lang": "go",
           "label": "simplebank/api/transfer.go",
           "c": "package api\n\nimport (\n\t\"database/sql\"\n\t\"errors\"\n\t\"fmt\"\n\t\"net/http\"\n\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/jackc/pgx/v5/pgconn\"\n\tdb \"simplebank/db\"\n)\n\ntype transferRequest struct {\n\tFromAccountID int64  `json:\"from_account_id\" binding:\"required,min=1\"`\n\tToAccountID   int64  `json:\"to_account_id\" binding:\"required,min=1,nefield=FromAccountID\"`\n\tAmount        int64  `json:\"amount\" binding:\"required,gt=0\"`\n\tCurrency      string `json:\"currency\" binding:\"required,currency\"`\n}\n\nfunc (server *Server) createTransfer(ctx *gin.Context) {\n\tvar req transferRequest\n\tif err := ctx.ShouldBindJSON(&req); err != nil {\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn\n\t}\n\n\t// 1. Validate sender account and currency\n\tif _, ok := server.validAccount(ctx, req.FromAccountID, req.Currency); !ok {\n\t\treturn\n\t}\n\n\t// 2. Validate receiver account and currency\n\tif _, ok := server.validAccount(ctx, req.ToAccountID, req.Currency); !ok {\n\t\treturn\n\t}\n\n\tresult, err := server.store.TransferTx(ctx, db.TransferTxParams{\n\t\tFromAccountID: req.FromAccountID,\n\t\tToAccountID:   req.ToAccountID,\n\t\tAmount:        req.Amount,\n\t})\n\tif err != nil {\n\t\tvar pgErr *pgconn.PgError\n\t\tif errors.As(err, &pgErr) && pgErr.Code == \"23514\" { // check_violation: insufficient funds\n\t\t\tctx.JSON(http.StatusBadRequest, errorResponse(errors.New(\"เงินในบัญชีไม่พอสำหรับการโอน\")))\n\t\t\treturn\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn\n\t}\n\n\tctx.JSON(http.StatusOK, result)\n}\n\nfunc (server *Server) validAccount(ctx *gin.Context, accountID int64, currency string) (db.Account, bool) {\n\taccount, err := server.store.GetAccount(ctx, accountID)\n\tif err != nil {\n\t\tif errors.Is(err, sql.ErrNoRows) {\n\t\t\tctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf(\"ไม่พบบัญชีหมายเลข %d\", accountID)))\n\t\t\treturn account, false\n\t\t}\n\t\tctx.JSON(http.StatusInternalServerError, errorResponse(err))\n\t\treturn account, false\n\t}\n\n\tif account.Currency != currency {\n\t\terr := fmt.Errorf(\"สกุลเงินของบัญชี [%d] ไม่ตรงกัน: %s vs %s\", account.ID, account.Currency, currency)\n\t\tctx.JSON(http.StatusBadRequest, errorResponse(err))\n\t\treturn account, false\n\t}\n\treturn account, true\n}",
+        },
+        {
+          "t": "p",
+          "c": "**ผูกเส้นทาง `POST /transfers` เข้ากับ Router ใน `simplebank/api/server.go`:**\nเมื่อสร้างฟังก์ชัน `server.createTransfer` ใน `api/transfer.go` เสร็จแล้ว ขั้นตอนสำคัญก่อนนำไปทดสอบคือเปิดไฟล์ `simplebank/api/server.go` แล้วเพิ่มบรรทัด **`router.POST(\"/transfers\", server.createTransfer)`** ลงไป (หากลืมบรรทัดนี้ เวลากดยิง Postman จะได้ `404 page not found` ทันที):",
+        },
+        {
+          "t": "code",
+          "lang": "go",
+          "label": "simplebank/api/server.go (ฉบับสมบูรณ์: เพิ่ม router.POST(\"/transfers\", server.createTransfer))",
+          "c": "package api\n\nimport (\n\t\"github.com/gin-gonic/gin\"\n\t\"github.com/gin-gonic/gin/binding\"\n\t\"github.com/go-playground/validator/v10\"\n\tdb \"simplebank/db\"\n)\n\ntype Server struct {\n\tstore  *db.Store\n\trouter *gin.Engine\n}\n\nfunc NewServer(store *db.Store) *Server {\n\tserver := &Server{store: store}\n\trouter := gin.Default()\n\n\tif v, ok := binding.Validator.Engine().(*validator.Validate); ok {\n\t\tv.RegisterValidation(\"currency\", validCurrency)\n\t}\n\n\trouter.POST(\"/accounts\", server.createAccount)\n\trouter.GET(\"/accounts/:id\", server.getAccount)\n\trouter.GET(\"/accounts\", server.listAccounts)\n\trouter.POST(\"/transfers\", server.createTransfer)\n\n\tserver.router = router\n\treturn server\n}\n\nfunc (server *Server) Start(address string) error {\n\treturn server.router.Run(address)\n}\n\nfunc errorResponse(err error) gin.H {\n\treturn gin.H{\"error\": err.Error()}\n}",
         },
         {
           "t": "h2",
