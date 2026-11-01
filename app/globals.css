@@ -46,13 +46,21 @@ html {
  */
 .shiki {
   margin: 0;
-  padding: 0.875rem 1rem;
+  padding: 0.875rem 0;
   overflow-x: auto;
   font-family: var(--font-mono);
   font-size: 0.875em;
   line-height: 1.65;
   background-color: #1e1e1e !important;
   color: #d4d4d4;
+}
+
+.shiki .line {
+  display: inline-block;
+  min-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
 }
 
 /*
@@ -84,28 +92,27 @@ html {
 .shiki .line.diff-add,
 .shiki .line.diff-hunk {
   display: inline-block;
-  min-width: calc(100% + 2rem);
-  margin-left: -1rem;
-  margin-right: -1rem;
-  padding-left: 0.85rem;
-  padding-right: 1rem;
+  min-width: 100%;
   box-sizing: border-box;
 }
 
 .shiki .line.diff-remove {
   background-color: rgba(241, 76, 76, 0.18);
   border-left: 4px solid #f14c4c;
+  padding-left: calc(1rem - 4px);
 }
 
 .shiki .line.diff-add {
   background-color: rgba(46, 160, 67, 0.2);
   border-left: 4px solid #2ea043;
+  padding-left: calc(1rem - 4px);
 }
 
 .shiki .line.diff-hunk {
   background-color: rgba(0, 122, 204, 0.15);
   border-left: 4px solid #007acc;
   color: #4fc1ff;
+  padding-left: calc(1rem - 4px);
 }
 
 @layer utilities {

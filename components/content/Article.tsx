@@ -300,7 +300,18 @@ function CodeChrome({
 }) {
   const parsed = parseFileLabel(label, lang);
   const showLang = lang && lang !== "text";
-  const isDiff = lang === "diff" || parsed.note.toLowerCase().includes("diff");
+  const isDiff =
+    lang === "diff" ||
+    lang?.startsWith("diff-") ||
+    /^[+\-@]/m.test(code) ||
+    parsed.note.toLowerCase().includes("diff");
+  const copyableCode = isDiff
+    ? code
+        .split("\n")
+        .filter((line) => !line.startsWith("-") && !line.startsWith("@@"))
+        .map((line) => (line.startsWith("+") ? line.slice(1) : line))
+        .join("\n")
+    : code;
 
   return (
     <div className="border-b border-[#2d2d2d] bg-[#1f1f20]">
@@ -319,11 +330,6 @@ function CodeChrome({
           <span className="font-mono text-[#e0e0e0] font-medium tracking-tight">
             {parsed.fileName}
           </span>
-          {isDiff && (
-            <span className="rounded bg-[#a371f7]/20 px-1 py-0.2 text-[0.7em] font-bold text-[#d2a8ff]">
-              M
-            </span>
-          )}
         </div>
 
         {/* Note / Context description (Clean & Subtle, non-intrusive) */}
@@ -342,7 +348,7 @@ function CodeChrome({
               {lang}
             </span>
           )}
-          <CopyButton code={code} locale={locale} />
+          <CopyButton code={copyableCode} locale={locale} />
         </div>
       </div>
 
@@ -384,8 +390,7 @@ async function CodePanel({
   locale?: Locale;
 }) {
   const html = await highlightCode(code, lang, label);
-  const isDiff = lang === "diff" || lang?.startsWith("diff-") || /^[+\-@]/m.test(code);
-  const numbered = Boolean(lang && lang !== "text" && !isDiff);
+  const numbered = Boolean(lang && lang !== "text");
   return (
     <div
       className={`overflow-hidden border border-[#2d2d2d] bg-[#1e1e1e] shadow-lg shadow-black/30 ${
