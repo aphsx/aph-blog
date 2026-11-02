@@ -27,7 +27,110 @@ export const wrapupPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "1. Top 10 คำถามสัมภาษณ์ยอดฮิต & แนวทางการตอบ",
+          "c": "1. ภาพรวมโปรเจกต์ & หัวใจของ Business Logic (Project Pitch)",
+        },
+        {
+          "t": "p",
+          "c": "เมื่อผู้สัมภาษณ์ถามคำถามเปิดตัวยอดฮิตว่า: **'ช่วยเล่าเกี่ยวกับโปรเจกต์ Simple Bank ให้ฟังหน่อย ว่าระบบนี้แก้ปัญหาอะไร มีสถาปัตยกรรมอย่างไร และคุณจัดการ Business Logic สำคัญๆ อย่างไร?'** นี่คือแนวทางการสื่อสารระดับมืออาชีพที่กระชับ ตรงประเด็น และแสดงความเป็นวิศวกรซอฟต์แวร์ระดับ Mid-Senior:",
+        },
+        {
+          "t": "callout",
+          "title": "🗣️ Elevator Pitch (บทพูดสรุปโปรเจกต์ใน 60 วินาที)",
+          "c": "“ระบบ Simple Bank เป็น Core Banking API ที่ออกแบบตามหลัก Clean Architecture เพื่อแก้ปัญหาด้าน Data Consistency และ Concurrency ในระบบการเงินครับ\n\nหัวใจสำคัญที่สุดอยู่ที่ **Business Logic ในชั้น Data Store** ครับ โดยเรามีการเขียน **`execTx`** เพื่อจัดการ Database Transaction แบบรวมศูนย์ผ่าน Go Closure Callback ซึ่งการันตีคุณสมบัติ ACID และ Auto-Rollback 100% เมื่อเกิดข้อผิดพลาด\n\nและเราเขียนฟังก์ชัน **`TransferTx`** เพื่อควบคุมลอจิกการโอนเงินครบ 5 ขั้นตอน (สร้างประวัติการโอน, บันทึกสมุดบัญชีคู่แบบ Double-Entry Ledger, และปรับยอดเงินคงเหลือ) พร้อมทั้งออกแบบกลไก **Lock Ordering (Resource Ordering)** โดยจัดลำดับการอัปเดตบัญชีตาม ID น้อยกว่าก่อนเสมอ เพื่อทำลายเงื่อนไข Circular Wait ป้องกันปัญหา Deadlock จากการโอนเงินสวนทางกันได้อย่างถาวรครับ”",
+        },
+        {
+          "t": "h3",
+          "c": "เจาะลึก 3 กลไกหลักของ Business Logic",
+        },
+        {
+          "t": "table",
+          "head": ["กลไกหลัก", "หน้าที่และความรับผิดชอบ", "ปัญหาที่แก้ไข & เทคนิคที่ใช้"],
+          "rows": [
+            [
+              "execTx (Transaction Manager)",
+              "เปิดกล่อง Transaction (*sql.Tx), รันชุดคำสั่ง SQL ย่อยผ่าน Closure callback, และจัดการ Begin / Commit / Rollback อัตโนมัติ",
+              "แก้ปัญหา Partial Failure (เงินหายกลางอากาศ) โดยการันตี Atomicity และผูก *Queries เข้ากับ Tx ป้องกันคำสั่งหลุดออกจาก Transaction",
+            ],
+            [
+              "TransferTx (Money Transfer Logic)",
+              "ผู้ควบคุม (Orchestrator) ลอจิกการโอนเงินครบ 5 ขั้นตอน: 1 Transfer, 2 Entries (Append-only), และ 2 Balance Updates",
+              "รวมธุรกรรมเป็นเนื้อเดียว และคืนผลลัพธ์ TransferTxResult ครบถ้วนในครั้งเดียว ช่วยให้ API ตอบ Client ได้ทันทีโดยไม่ต้อง Query ซ้ำ",
+            ],
+            [
+              "Lock Ordering (Resource Ordering)",
+              "ตรวจสอบ FromAccountID และ ToAccountID เพื่อกำหนดให้อัปเดตและล็อกบัญชีที่มี ID น้อยกว่าก่อนเสมอใน addMoney",
+              "แก้ปัญหา Deadlock (การแย่งล็อกค้าง) จากการโอนเงินสวนทางกัน ทำลายเงื่อนไข Circular Wait ตามทฤษฎี Coffman Conditions 100%",
+            ],
+          ],
+        },
+        {
+          "t": "h3",
+          "c": "สรุปหน้าที่ของชิ้นส่วนอื่น ๆ ทั้งหมดในระบบ (System Component Matrix)",
+        },
+        {
+          "t": "table",
+          "head": ["หมวดหมู่ / เลเยอร์", "ชิ้นส่วนในระบบ", "หน้าที่และความรับผิดชอบ"],
+          "rows": [
+            [
+              "1. Database & Ledger",
+              "Double-Entry Ledger (ตาราง entries)",
+              "เก็บบันทึกประวัติเงินเข้า-ออกเป็น Append-Only ห้ามแก้ไขหรือลบ เพื่อใช้ตรวจสอบย้อนหลัง (Reconciliation)",
+            ],
+            [
+              "1. Database & Ledger",
+              "Integer Cents / Satang (int64)",
+              "เก็บเงินเป็นหน่วยย่อยที่สุด เพื่อตัดปัญหาความคลาดเคลื่อนสะสมของ Floating-Point (IEEE 754)",
+            ],
+            [
+              "1. Database & Ledger",
+              "Database Constraints & Migration",
+              "CHECK (balance >= 0) ป้องกันเงินติดลบ, Foreign Keys ป้องกันข้อมูลกำพร้า, และจัดการเวอร์ชันด้วย golang-migrate",
+            ],
+            [
+              "2. Data Access Layer",
+              "DBTX Interface Abstraction",
+              "Interface กลางที่ทำให้คำสั่ง CRUD รับได้ทั้ง *sql.DB ปกติ และ *sql.Tx ในโหมด Transaction โดยไม่ต้องเขียนโค้ดซ้ำ",
+            ],
+            [
+              "2. Data Access Layer",
+              "Atomic SQL Balance Update",
+              "คำสั่ง UPDATE accounts SET balance = balance + $2 จัดการบวกลบและใส่ Row-Level Lock ในระดับ DB ป้องกัน Stale Read",
+            ],
+            [
+              "3. Concurrency Control",
+              "Goroutines & Channels Test Suite",
+              "จำลองคำสั่งโอนเงินพร้อมกันหลายรายการจริงเพื่อตรวจสอบ Race Condition และ Deadlock ก่อนขึ้น Production",
+            ],
+            [
+              "4. Transport & API",
+              "Gin Server & Handlers",
+              "เปิด REST API รองรับ Accounts, Transfers และ Users พร้อมการผูกข้อมูล (Binding) และจัดการ HTTP Status Codes",
+            ],
+            [
+              "4. Transport & API",
+              "Custom Currency Validator",
+              "ตรวจสอบความถูกต้องของสกุลเงินที่รองรับ และตรวจสอบว่าบัญชีต้นทางและปลายทางใช้สกุลเงินเดียวกันก่อนโอน",
+            ],
+            [
+              "5. Security & Auth",
+              "Bcrypt Password Hashing",
+              "แฮชรหัสผ่านผู้ใช้งานด้วย Salt และ Cost Factor ที่ปลอดภัย ป้องกันการเจาะข้อมูลแบบ Brute-force",
+            ],
+            [
+              "5. Security & Auth",
+              "PASETO v2 Token & Middleware",
+              "ใช้ PASETO Local Token (เข้ารหัสแบบ ChaCha20-Poly1305) แทน JWT เพื่อป้องกัน Algorithm Confusion และคุมสิทธิ์ด้วย Middleware",
+            ],
+            [
+              "6. DevOps & Production",
+              "Viper & Multi-stage Dockerfile",
+              "จัดการ Config แบบ 12-Factor App และคอมไพล์ Go เป็น Static Binary บน Alpine จนได้ Docker Image เล็กเพียง ~20MB",
+            ],
+          ],
+        },
+        {
+          "t": "h2",
+          "c": "2. Top 10 คำถามสัมภาษณ์เจาะลึก & แนวทางการตอบ (Deep-Dive Questions)",
         },
         {
           "t": "details",
@@ -131,7 +234,7 @@ export const wrapupPages: Record<string, Page> = {
         },
         {
           "t": "h2",
-          "c": "2. ภาพรวมสถาปัตยกรรมระดับ Production (High-Level Architecture)",
+          "c": "3. ภาพรวมสถาปัตยกรรมระดับ Production (High-Level Architecture)",
         },
         {
           "t": "p",
@@ -230,6 +333,92 @@ export const wrapupPages: Record<string, Page> = {
           "lang": "text",
           "label": "โครงสร้างไดเรกทอรีโปรเจกต์ Simple Bank",
           "c": "simplebank/\n├── api/\n│   ├── account.go      # Handlers: createAccount, getAccount, listAccounts\n│   ├── middleware.go   # authMiddleware: verify PASETO tokens\n│   ├── server.go       # Server struct & Gin router setup\n│   ├── transfer.go     # Handler: createTransfer with currency validation\n│   ├── user.go         # Handlers: createUser, loginUser\n│   └── validator.go    # Custom currency validator\n├── db/\n│   ├── migration/      # Database migrations (000001_init, 000002_add_users)\n│   ├── account.go      # Account CRUD operations (Create, Get, List, AddBalance, Delete)\n│   ├── account_test.go # Unit tests for Account CRUD\n│   ├── db.go           # Connection pool initialization & DBTX interface\n│   ├── entry.go        # Entry CRUD (ledger records)\n│   ├── main_test.go    # TestMain setup: global db connection for test suite\n│   ├── models.go       # Data models: Account, Entry, Transfer, User\n│   ├── store.go        # Store struct & execTx transaction manager\n│   ├── store_test.go   # Concurrency & deadlock test suite (Goroutines & Channels)\n│   ├── transfer.go     # Transfer CRUD\n│   ├── tx_transfer.go  # TransferTx: 5-step money transfer logic with deadlock prevention\n│   └── user.go         # User CRUD\n├── token/\n│   └── paseto_maker.go # PasetoMaker: CreateToken, VerifyToken\n├── util/\n│   ├── config.go       # LoadConfig: configuration management with Viper\n│   ├── currency.go     # Supported currency constants: USD, EUR, THB\n│   ├── password.go     # HashPassword & CheckPassword using Bcrypt\n│   └── random.go       # Random data generators for testing\n├── app.env             # Local environment configuration\n├── docker-compose.yml  # Multi-service stack: Postgres + Migrate + API\n├── Dockerfile          # Multi-stage production Dockerfile (~20MB)\n├── go.mod\n├── go.sum\n├── Makefile            # Project command shortcuts\n└── main.go             # Application entry point",
+        },
+        {
+          "t": "h3",
+          "c": "คำอธิบายหน้าที่และความรับผิดชอบของแต่ละไฟล์ (File Responsibilities Breakdown)",
+        },
+        {
+          "t": "table",
+          "head": ["ไฟล์ / ไดเรกทอรี", "บทบาทหน้าที่และความรับผิดชอบ"],
+          "rows": [
+            [
+              "`api/account.go`",
+              "HTTP Handlers สำหรับสร้างบัญชี (`POST /accounts`), ดึงข้อมูลบัญชีตาม ID (`GET /accounts/:id`), และแบ่งหน้าดูรายการบัญชี (`GET /accounts` Pagination)",
+            ],
+            [
+              "`api/transfer.go`",
+              "HTTP Handler รับคำขอโอนเงิน (`POST /transfers`), ตรวจสอบความถูกต้องของบัญชีและเช็กสกุลเงินให้ตรงกัน ก่อนส่งต่อให้ `TransferTx`",
+            ],
+            [
+              "`api/user.go`",
+              "HTTP Handlers สำหรับลงทะเบียนผู้ใช้ใหม่ (`POST /users`) และเข้าสู่ระบบเพื่อรับ Token ยืนยันตัวตน (`POST /users/login`)",
+            ],
+            [
+              "`api/middleware.go`",
+              "Gin Middleware ดักจับ Header `Authorization: Bearer <token>`, ตรวจสอบ PASETO Token และคุมสิทธิ์ไม่ให้ผู้ใช้แอบเข้าถึงบัญชีของคนอื่น",
+            ],
+            [
+              "`api/validator.go`",
+              "Custom Validation Tag (`currency`) ลงทะเบียนกับ Gin เพื่อตรวจสอบว่ารหัสสกุลเงินตรงกับที่ระบบรองรับ (USD, EUR, THB)",
+            ],
+            [
+              "`api/server.go`",
+              "กำหนดโครงสร้าง `Server` struct, ตั้งค่า Gin Router, ผูก Middleware, และเชื่อมโยง HTTP Endpoints เข้ากับ Handlers ตามหลัก Dependency Injection",
+            ],
+            [
+              "`db/store.go`",
+              "นิยาม `Store` struct (Embed `*Queries` + `*sql.DB`) และฟังก์ชัน `execTx` เพื่อจัดการ Database Transaction ด้วย Go Closure Callback (Begin, Auto-Rollback, Commit)",
+            ],
+            [
+              "`db/tx_transfer.go`",
+              "ฟังก์ชัน `TransferTx` มัดรวมลอจิกโอนเงิน 5 ขั้นตอน (Transfer, 2 Entries, 2 Balance Updates) พร้อมฟังก์ชัน `addMoney` จัดลำดับ Lock Ordering ตาม ID ป้องกัน Deadlock",
+            ],
+            [
+              "`db/account.go`",
+              "คำสั่ง Raw SQL CRUD ของตาราง `accounts` รวมถึงคำสั่ง `AddAccountBalance` ที่ทำการบวกลบแบบ Atomic Update ระดับ Database เพื่อป้องกัน Stale Read",
+            ],
+            [
+              "`db/entry.go`",
+              "คำสั่ง Raw SQL สำหรับเพิ่มรายการเดินบัญชีลงตาราง `entries` แบบ Append-Only Ledger เพื่อใช้ตรวจสอบย้อนหลัง (Audit Trail & Reconciliation)",
+            ],
+            [
+              "`db/transfer.go`",
+              "คำสั่ง Raw SQL บันทึกสลิปประวัติการโอนเงินระหว่างสองบัญชีลงตาราง `transfers`",
+            ],
+            [
+              "`db/user.go`",
+              "คำสั่ง Raw SQL สำหรับบันทึกข้อมูลผู้ใช้ใหม่ลงตาราง `users` และดึงข้อมูลผู้ใช้จาก `username`",
+            ],
+            [
+              "`db/db.go`",
+              "นิยาม `DBTX` Interface ทำให้คำสั่ง SQL สามารถรันได้ทั้งบน Connection ปกติ (`*sql.DB`) และ Transaction (`*sql.Tx`)",
+            ],
+            [
+              "`db/store_test.go`",
+              "ชุดทดสอบ Concurrency และ Deadlock ด้วย Goroutines & Channels เพื่อพิสูจน์ความถูกต้องของ `TransferTx` ขณะมีคำสั่งยิงเข้ามาพร้อมกัน",
+            ],
+            [
+              "`token/paseto_maker.go`",
+              "สร้างและตรวจสอบ PASETO v2 Local Token ด้วยการเข้ารหัส ChaCha20-Poly1305 ปลอดภัยกว่า JWT",
+            ],
+            [
+              "`util/password.go`",
+              "ฟังก์ชันแฮชและตรวจสอบรหัสผ่านอย่างปลอดภัยด้วย Bcrypt ป้องกันการขโมยรหัสผ่าน",
+            ],
+            [
+              "`util/config.go`",
+              "โหลดการตั้งค่าของระบบจาก Environment Variables และไฟล์ `app.env` ด้วยไลบรารี Viper",
+            ],
+            [
+              "`Dockerfile`",
+              "Multi-stage Dockerfile: คอมไพล์ Go Static Binary บน Alpine จนได้ Production Container Image ขนาดเล็กเพียง ~20MB",
+            ],
+            [
+              "`docker-compose.yml`",
+              "มัดรวมและสตาร์ต 3 Services: PostgreSQL Database, Migration Runner, และ Simple Bank API ให้พร้อมทำงานในคำสั่งเดียว",
+            ],
+          ],
         },
         {
           "t": "h2",
